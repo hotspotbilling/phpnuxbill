@@ -32,8 +32,9 @@ foreach ($d as $ds){
 	if($ds['type'] == 'Hotspot'){
 		$date_now = strtotime(date("Y-m-d H:i:s"));
 		$expiration = strtotime($ds['expiration'].' '.$ds['time']);
-
+		echo $ds['expiration']." : ".$ds['username'];
 		if ($date_now >= $expiration){
+			echo " : EXPIRED \r\n";
 			$u = ORM::for_table('tbl_user_recharges')->where('id',$ds['id'])->find_one();
 			$c = ORM::for_table('tbl_customers')->where('id',$ds['customer_id'])->find_one();
 			$m = ORM::for_table('tbl_routers')->where('name',$ds['routers'])->find_one();
@@ -66,12 +67,14 @@ foreach ($d as $ds){
 			//update database user dengan status off
 			$u->status = 'off';
 			$u->save();
-		}
+		}else
+			echo " : ACTIVE \r\n";
 	}else{
 		$date_now = strtotime(date("Y-m-d H:i:s"));
 		$expiration = strtotime($ds['expiration'].' '.$ds['time']);
-
+		echo $ds['expiration']." : ".$ds['username'];
 		if ($date_now >= $expiration){
+			echo " : EXPIRED \r\n";
 			$u = ORM::for_table('tbl_user_recharges')->where('id',$ds['id'])->find_one();
 			$c = ORM::for_table('tbl_customers')->where('id',$ds['customer_id'])->find_one();
 			$m = ORM::for_table('tbl_routers')->where('name',$ds['routers'])->find_one();
@@ -102,7 +105,8 @@ foreach ($d as $ds){
 			
 			$u->status = 'off';
 			$u->save();
-		}
+		}else
+			echo " : ACTIVE \r\n";
 	}
 }
 

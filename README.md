@@ -1,12 +1,29 @@
 # PHP Mikrotik Billing 
 ----
 
-[![N|phpmixbill](http://4.bp.blogspot.com/-3OWL5OI7pqU/VjocUDdzMDI/AAAAAAAAAiA/s_XJN0_mDlk/s640/Screenshot_8.png)
+@ibnux notes:
+----
+> The project maybe has been abandoned
+> maybe the dev busy
+> and nobody donate to him
+> i will try to update as far as i can
+> any Modification will be update in here
+
+### iBNuX Todos
+
+ - Self registration, user must have voucher before registration
+ - SMS Notification for expired account
+ - PUSH Notification using onesignal
+ - embedable for mikrotik login template
+----
+
+![N|phpmixbill](http://4.bp.blogspot.com/-3OWL5OI7pqU/VjocUDdzMDI/AAAAAAAAAiA/s_XJN0_mDlk/s640/Screenshot_8.png)
+
 www.phpmixbill.com
 by Ismail Marzuqi
 
 New Features:
-===================================================
+----
 - New Coding (ORM & Smarty)
 - New Design (responsive)
 - NEW API Mikrotik (PEAR2_Net_RouterOS)
@@ -17,7 +34,7 @@ New Features:
 and many more...
 
 STEPS: Installation
-===================================================
+----
 Auto Installer:
 1. Unzip the contents of the zip file to a folder on your computer.
 2. Upload the Entire phpmixbill_v5.0 folder to your website / server
@@ -37,8 +54,17 @@ To install manually, follow this steps-
 5. Import database. Database file is located here- system/install/phpmixbill.sql
 6. For security, Delete the install directory inside sysfrm folder.
 
+CRON JOBS
+----
+Run Every 4 Hours
+```sh
+crontab -e
+0 0,4,8,12,16,20 * * * /usr/bin/php -f /path/to/phpmixbill/system/cron.php
+```
+Every system have different configuration for crontab
+
 System Requirements
-====================================================
+----
 Most current web servers with PHP & MySQL installed will be capable of running PHPMixBill v5.0.
 
 Minimum Requirements
@@ -55,5 +81,19 @@ copyright
 License
 ----
 
-GNU General Public License version 2 or later; see LICENSE.txt
-@donate		PayPal: iesien22@yahoo.com / Bank Mandiri: 130.00.1024957.4
+GNU General Public License version 2 or later
+see LICENSE file
+
+Donate to first Developer
+----
+
+PayPal: iesien22@yahoo.com 
+Bank Mandiri: 130.00.1024957.4
+
+Donate to ibnux
+----
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6RBNGRJMZVV7C)
+BCA: 5410454825
+Mandiri: 163-000-1855-793
+a.n Ibnu Maksum
