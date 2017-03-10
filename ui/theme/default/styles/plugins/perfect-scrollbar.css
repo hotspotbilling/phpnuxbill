@@ -1,0 +1,70 @@
+.ps-container.ps-active-x > .ps-scrollbar-x-rail,
+.ps-container.ps-active-y > .ps-scrollbar-y-rail {
+  display: block;
+}
+.ps-container > .ps-scrollbar-x-rail,
+.ps-container > .ps-scrollbar-y-rail {
+  display: none;
+  /* please don't change 'position' */
+  position: absolute;
+  border-radius: 1px;
+  opacity: 0;
+  -webkit-transition: background-color 0.2s linear, opacity 0.2s linear;
+  transition: background-color 0.2s linear, opacity 0.2s linear;
+}
+.ps-container > .ps-scrollbar-x-rail.in-scrolling,
+.ps-container > .ps-scrollbar-y-rail.in-scrolling {
+  background-color: transparent;
+  opacity: .9;
+  display: block;
+}
+.ps-container > .ps-scrollbar-x-rail > .ps-scrollbar-x,
+.ps-container > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+  position: absolute;
+  background-color: #aaa;
+  border-radius: 1px;
+  -webkit-transition: background-color 0.2s linear, width 0.2s linear;
+  transition: background-color 0.2s linear, width 0.2s linear;
+}
+.ps-container > .ps-scrollbar-x-rail {
+  /* there must be 'bottom' for ps-scrollbar-x-rail */
+  bottom: 3px;
+  height: 8px;
+}
+.ps-container > .ps-scrollbar-x-rail.in-scrolling {
+  height: 4px;
+}
+.ps-container > .ps-scrollbar-x-rail:hover > .ps-scrollbar-y {
+  height: 4px;
+}
+.ps-container > .ps-scrollbar-x-rail > .ps-scrollbar-x {
+  bottom: 0;
+  height: 4px;
+}
+.ps-container > .ps-scrollbar-y-rail {
+  right: 0px;
+  width: 14px;
+}
+.ps-container > .ps-scrollbar-y-rail.in-scrolling {
+  width: 4px;
+}
+.ps-container > .ps-scrollbar-y-rail:hover > .ps-scrollbar-y {
+  width: 4px;
+}
+.ps-container > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+  right: 0;
+  width: 4px;
+}
+.ps-container:hover > .ps-scrollbar-x-rail,
+.ps-container:hover > .ps-scrollbar-y-rail {
+  opacity: .4;
+}
+.ps-container:hover > .ps-scrollbar-x-rail:hover,
+.ps-container:hover > .ps-scrollbar-y-rail:hover {
+  opacity: .7;
+  display: block;
+}
+.ps-container:hover > .ps-scrollbar-x-rail > .ps-scrollbar-x,
+.ps-container:hover > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+  background-color: #888;
+}
