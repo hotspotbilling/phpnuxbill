@@ -15,6 +15,7 @@
  - SMS Notification for expired account
  - PUSH Notification using onesignal
  - embedable for mikrotik login template
+
 ----
 
 ![N|phpmixbill](http://4.bp.blogspot.com/-3OWL5OI7pqU/VjocUDdzMDI/AAAAAAAAAiA/s_XJN0_mDlk/s640/Screenshot_8.png)
@@ -82,18 +83,23 @@ License
 ----
 
 GNU General Public License version 2 or later
+
 see LICENSE file
 
 Donate to first Developer
 ----
 
 PayPal: iesien22@yahoo.com 
+
 Bank Mandiri: 130.00.1024957.4
 
 Donate to ibnux
 ----
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6RBNGRJMZVV7C)
+
 BCA: 5410454825
+
 Mandiri: 163-000-1855-793
+
 a.n Ibnu Maksum
