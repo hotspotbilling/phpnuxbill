@@ -5,15 +5,25 @@ Language Name: English
 Contributor: Ismail Marzuqi
 Web: www.phpmixbill.com
 Email: iesien22@yahoo.com
+
+2017
+Contributor: Ibnu Maksum (@ibnux)
+
 ------------------------------------
 */
 
-$_L['Login'] = 'Login';
-$_L['Sign_In_Member'] = 'Sign In to Member Panel';
-$_L['Sign_In_Admin'] = 'Sign In to Admin Panel';
+$_L['Login'] = 'Log-in';
+$_L['Register'] = 'Register';
+$_L['Register_Voucher_Failed'] = 'Voucher not found, please buy voucher befor register';
+$_L['Register_Success'] = 'Register Success! You can login now';
+$_L['Sign_In_Member'] = 'Log in to Member Panel';
+$_L['Register_Member'] = 'Register as Member';
+$_L['Sign_In_Admin'] = 'Masuk ke Admin Panel';
 $_L['Logo'] = 'PHPMixBill';
 $_L['Username'] = 'Username';
 $_L['Password'] = 'Password';
+$_L['PasswordsNotMatch'] = 'Passwords does not match';
+$_L['account_already_exist'] = 'Account already axist';
 $_L['Manage'] = 'Manage';
 $_L['Submit'] = 'Submit';
 $_L['Save'] = 'Save Changes';

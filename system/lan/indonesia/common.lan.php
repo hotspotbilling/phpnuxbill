@@ -5,15 +5,25 @@ Language Name: Indonesia
 Contributor: Ismail Marzuqi
 Web: www.phpmixbill.com
 Email: iesien22@yahoo.com
+
+2017
+Contributor: Ibnu Maksum (@ibnux)
+
 ------------------------------------
 */
 
 $_L['Login'] = 'Masuk';
+$_L['Register'] = 'Daftar';
+$_L['Register_Voucher_Failed'] = 'Voucher tidak ditemukan, mohon beli dulu Voucher sebelum mendaftar';
+$_L['Register_Success'] = 'Pendaftaran sukses!<br>silahkan masuk';
 $_L['Sign_In_Member'] = 'Masuk ke Member Panel';
+$_L['Register_Member'] = 'Mendaftar sebagai pelanggan<br>pastikan anda sudah membeli voucher';
 $_L['Sign_In_Admin'] = 'Masuk ke Admin Panel';
 $_L['Logo'] = 'PHPMixBill';
 $_L['Username'] = 'Username';
 $_L['Password'] = 'Password';
+$_L['PasswordsNotMatch'] = 'Sandi tidak sama';
+$_L['account_already_exist'] = 'Username sudah ada yang menggunakan';
 $_L['Manage'] = 'Proses';
 $_L['Submit'] = 'Kirim';
 $_L['Save'] = 'Simpan Perubahan';

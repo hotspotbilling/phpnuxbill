@@ -113,11 +113,19 @@ switch ($action) {
 							$removeRequest->setArgument('numbers', $id);
 							$client->sendSync($removeRequest);
 						}
-						$d->delete();
-						$c->delete();
+						try{
+							$d->delete();
+						}catch(Exception $e){}
+						try{
+							$c->delete();
+						}catch(Exception $e){}
 					}else{
-						$d->delete();
-						$c->delete();
+						try{
+							$d->delete();
+						}catch(Exception $e){}
+						try{
+							$c->delete();
+						}catch(Exception $e){}
 					}
            
             r2(U . 'customers/list', 's', $_L['User_Delete_Ok']);

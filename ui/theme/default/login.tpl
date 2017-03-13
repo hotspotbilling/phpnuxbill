@@ -29,7 +29,7 @@
 			<div class="page page-auth">
 				<div class="auth-container">
 					<div class="form-head mb20">
-						<h1 class="site-logo h2 mb5 mt5 text-center text-uppercase text-bold"><a href="./">{$_L['Logo']}</a></h1>
+						<h1 class="site-logo h2 mb5 mt5 text-center text-uppercase text-bold"><a href="./">{$_c['CompanyName']}</a></h1>
 						<h5 class="text-normal h5 text-center">{$_L['Sign_In_Member']}</h5>
 					</div>
 				{if isset($notify)}
@@ -38,7 +38,7 @@
 					<div class="form-container">
 						<form class="form-horizontal" action="{$_url}login/post" method="post">
 							<div class="md-input-container md-float-label">
-								<input type="text" name="username" class="md-input">
+								<input type="text" name="username" placeholder="{$_L['Phone_Number']}" class="md-input">
 								<label>{$_L['Username']}</label>
 							</div>
 
@@ -57,12 +57,14 @@
 							</div>
 							<div class="btn-group btn-group-justified mb15">
 								<div class="btn-group">
-									<button type="submit" class="btn btn-success">{$_L['Login']}</button>
+									<button type="submit" class="btn btn-primary">{$_L['Login']}</button>
+								</div>
+								<div class="btn-group">
+                                    <a href="{$_url}register" class="btn btn-success">{$_L['Register']}</a>
 								</div>
 							</div> 
 						</form>
 					</div>
-
 				</div>
 			</div>
 		</div> 

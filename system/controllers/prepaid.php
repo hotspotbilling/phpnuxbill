@@ -95,6 +95,7 @@ switch ($action) {
 					} catch (Exception $e) {
 						die('Unable to connect to the router.');
 					}
+
 					$printRequest = new RouterOS\Request(
 						'/ip hotspot user print .proplist=name',
 						RouterOS\Query::where('name', $c['username'])

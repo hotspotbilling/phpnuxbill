@@ -3,11 +3,11 @@
 
 @ibnux notes:
 ----
-> The project maybe has been abandoned
-> maybe the dev busy
-> and nobody donate to him
-> i will try to update as far as i can
-> any Modification will be update in here
+> The project maybe has been abandoned,
+> maybe the dev busy,
+> and nobody donate to him,
+> i will try to update as far as i can,
+> any Modification will be update in here.
 
 ### iBNuX Todos
 

@@ -32,12 +32,11 @@ if ($cn == '1') {
 	$db_password	= \'' . $db_password . '\';
 	$db_name	    = \'' . $db_name . '\';
 	define(\'APP_URL\', \'' . $appurl . '\');
-	$_app_stage = \'Live\';
-	';
+	$_app_stage = \'Live\';';
     $wConfig = "../config.php";
     $fh = fopen($wConfig, 'w') or die("Can't create config file, your server does not support 'fopen' function,
 	please create a file named - config.php with following contents- <br/>$input");
-	
+
     fwrite($fh, $input);
     fclose($fh);
 

@@ -44,6 +44,7 @@ foreach ($d as $ds){
 			} catch (Exception $e) {
 				die('Unable to connect to the router.');
 			}
+			
 			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
 			$printRequest->setArgument('.proplist', '.id');
 			$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
