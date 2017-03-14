@@ -23,7 +23,7 @@
 											<a href="{$_url}settings/users-add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['Add_New_Administrator']}</a>
 										</div>&nbsp;
 									</div>
-									
+									<div class="table-responsive">
 									<table class="table table-bordered table-striped">
 										<thead>
 											<tr>
@@ -51,6 +51,7 @@
 										{/foreach}
 										</tbody>
 									</table>
+									</div>
 									{$paginator['contents']}
 								</div>
 							</div>

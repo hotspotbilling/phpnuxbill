@@ -24,7 +24,7 @@
 											<a href="{$_url}routers/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Router']}</a>
 										</div>&nbsp;
 									</div>
-									
+						<div class="table-responsive">
 						<table class="table table-striped table-bordered">
 							<thead>
 								<tr>
@@ -52,6 +52,7 @@
 							{/foreach}
 							</tbody>
 						</table>
+						</div>
 						{$paginator['contents']}
 								</div>
 							</div>

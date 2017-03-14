@@ -392,11 +392,20 @@ switch ($action) {
 		
 		$code = _post('code');
 		if ($code != ''){
+			$ui->assign('code',$code);
 			$paginator = Paginator::bootstrap('tbl_voucher','code','%'.$code.'%');
-			$d = ORM::for_table('tbl_plans')->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))->where_like('tbl_plans.code','%'.$code.'%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+			$d = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where_like('tbl_plans.code','%'.$code.'%')
+				->offset($paginator['startpoint'])
+				->limit($paginator['limit'])
+				->find_many();
 		}else{
 			$paginator = Paginator::bootstrap('tbl_voucher');
-			$d = ORM::for_table('tbl_plans')->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+			$d = ORM::for_table('tbl_plans')
+			->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+			->offset($paginator['startpoint'])
+			->limit($paginator['limit'])->find_many();
 		}
 		
         $ui->assign('d',$d);
@@ -416,6 +425,32 @@ switch ($action) {
         $ui->display('voucher-add.tpl');
         break;
 		
+	case 'print-voucher':
+		$from_id = _post('from_id')*1;
+		$pagebreak = _post('pagebreak');
+		if ($from_id != ''){
+			$v = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->where_gt('tbl_voucher.id',$from_id)
+				->find_many();
+		}else{
+			$v = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->find_many();
+		}
+		
+		$ui->assign('_title', $_L['Voucher_Hotspot'].' - '. $config['CompanyName']);
+		$ui->assign('from_id',$from_id); 
+		if($pagebreak<1) $pagebreak = 6; 
+		$ui->assign('pagebreak',$pagebreak);
+		
+		$ui->assign('v',$v);
+		//for counting pagebreak
+		$ui->assign('jml',0);
+		$ui->display('print-voucher.tpl');
+        break;
     case 'voucher-post':
         $type = _post('type');
 		$plan = _post('plan');

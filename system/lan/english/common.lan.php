@@ -175,10 +175,12 @@ $_L['Number_of_Vouchers'] = 'Number of Vouchers';
 $_L['Length_Code'] = 'Length Code';
 $_L['Code_Voucher'] = 'Code Voucher';
 $_L['Voucher'] = 'Voucher';
+$_L['Voucher_Hotspot'] = 'Hotspot Voucher';
 $_L['Status_Voucher'] = 'Status Voucher';
 $_L['Add_Voucher'] = 'Add Vouchers';
 $_L['Voucher_Successfully'] = 'Create Vouchers Successfully';
 $_L['Generate'] = 'Generate';
+$_L['Print_Info'] = 'Print side by side, it will easy to cut';
 
 $_L['From_Date'] = 'From Date';
 $_L['To_Date'] = 'To Date';

@@ -56,4 +56,25 @@ $ui->assign('dlog',$dlog);
 $log = ORM::for_table('tbl_logs')->count();
 $ui->assign('log',$log);
 
+// Count stock
+$tmp = $v = ORM::for_table('tbl_plans')->select('id')->select('name_plan')->find_many();
+$plans = array();
+$stocks = array("used"=>0,"unused"=>0);
+$n = 0;
+foreach($tmp as $plan){
+    $plans[$n]['name_plan'] = $plan['name_plan'];
+    $plans[$n]['unused'] = ORM::for_table('tbl_voucher')
+                        ->where('id_plan',$plan['id'])
+                        ->where('status',0)->count();;
+    $stocks["unused"] += $plans[$n]['unused'];
+    $plans[$n]['used'] = ORM::for_table('tbl_voucher')
+                        ->where('id_plan',$plan['id'])
+                        ->where('status',1)->count();;
+    $stocks["used"] += $plans[$n]['used'];
+    $n++;
+}
+
+$ui->assign('stocks',$stocks);
+$ui->assign('plans',$plans);
+
 $ui->display('dashboard.tpl');

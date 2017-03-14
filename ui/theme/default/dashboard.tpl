@@ -1,12 +1,12 @@
 {include file="sections/header.tpl"}
 
 {if ($_admin['user_type']) eq 'Admin' || ($_admin['user_type']) eq 'Sales'}
-					<div class="row">
+					<div class="row hidden">
 						<div class="col-md-12">
 							<div class="dash-head clearfix mt15 mb20">
 								<div class="left">
-									<h4 class="mb5 text-light">Welcome to PHPMixBill v5.0</h4>
-									<p class="small">{$_L['Welcome_Text_Admin']}</p>
+									<h4 class="mb5 text-light">Dashboard</h4>
+									<p class="small"></p>
 								</div>
 							</div>
 						</div>
@@ -83,8 +83,36 @@
 					<div class="row">
 						<div class="col-md-7">
 							<div class="panel panel-default mb20 panel-hovered project-stats table-responsive">
-								<div class="panel-heading">{$_L['User_Expired_Today']}</div>
+								<div class="panel-heading">Vouchers Stock</div>
 								<div class="panel-body">	
+									<table class="table">
+										<thead>
+											<tr>
+												<th>{$_L['Plan_Name']}</th>
+												<th>unused</th>
+												<th>used</th>
+											</tr>
+										</thead>
+										<tbody>
+										{foreach $plans as $stok}
+											<tr>
+												<td>{$stok['name_plan']}</td>
+												<td>{$stok['unused']}</td>
+												<td>{$stok['used']}</td>
+											</tr>
+										</tbody>
+										{/foreach}
+											<tr>
+												<td>Total</td>
+												<td>{$stocks['unused']}</td>
+												<td>{$stocks['used']}</td>
+											</tr>
+									</table>
+								</div>
+							</div>
+							<div class="panel panel-default mb20 panel-hovered project-stats table-responsive">
+								<div class="panel-heading">{$_L['User_Expired_Today']}</div>
+								<div class="panel-body">
 									<table class="table">
 										<thead>
 											<tr>
@@ -123,6 +151,12 @@
 										</li>
 									{/foreach}
 									</ul>
+								</div>
+							</div>
+							<div class="panel panel-default panel-hovered mb20 activities">
+								<div class="panel-heading">PHPMIXBILL</div>
+								<div class="panel-body">
+									{$_L['Welcome_Text_Admin']}
 								</div>
 							</div>
 						</div>

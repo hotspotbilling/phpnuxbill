@@ -20,13 +20,21 @@
 											</form>
 										</div>
 										<div class="col-md-4">
-											<a href="{$_url}prepaid/add-voucher" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['Add_Voucher']}</a>
+											<div class="btn-group btn-group-justified" role="group">
+												<div class="btn-group" role="group">
+												<a href="{$_url}prepaid/add-voucher" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['Add_Voucher']}</a>
+												</div>
+												<div class="btn-group" role="group">
+												<a href="{$_url}prepaid/print-voucher" target="print_voucher" class="btn btn-info"><i class="ion ion-android-print"> </i> Print</a>
+												</div>
+											</div>
 										</div>&nbsp;
 									</div>
-
+						<div class="table-responsive">
 						<table id="datatable" class="table table-striped table-bordered">
 							<thead>
-								<tr>
+								<tr> 
+									<th>ID</th>
 									<th>{$_L['Type']}</th>
 									<th>{$_L['Routers']}</th>
 									<th>{$_L['Plan_Name']}</th>
@@ -39,6 +47,7 @@
 							<tbody>
 							{foreach $d as $ds}
 								<tr>
+									<td>{$ds['id']}</td> 
 									<td>{$ds['type']}</td>
 									<td>{$ds['routers']}</td>
 									<td>{$ds['name_plan']}</td>
@@ -52,6 +61,7 @@
 							{/foreach}
 							</tbody>
 						</table>
+						</div>
 						{$paginator['contents']}
 								</div>
 							</div>

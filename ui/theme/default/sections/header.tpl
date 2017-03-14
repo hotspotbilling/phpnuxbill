@@ -60,8 +60,8 @@
 			<li class="fullscreen hidden-xs">
 				<a href="#"><i class="ion ion-qr-scanner"></i></a>
 			</li>
-
-			<li class="notify-drop hidden-xs dropdown">
+			<!-- Notification on progress, hide it  -->
+			<li class="notify-drop hidden-xs dropdown hidden">
 				<a href="#" data-toggle="dropdown">
 					<i class="ion ion-chatboxes"></i>
 					<span class="badge badge-danger badge-xs circle">3</span>
@@ -135,7 +135,8 @@
 							<span class="text">{$_L['Dashboard']}</span>
 						</a>
 					</li>
-					<li {if $_system_menu eq 'message'}class="open"{/if}>
+					<!-- Message on progress, hide it  -->
+					<li class="hidden" {if $_system_menu eq 'message'}class="open"{/if}>
 						<a href="#">
 							<i class="ion ion-email"></i>
 							<span class="text">{$_L['Private_Message']}</span>

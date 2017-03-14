@@ -174,10 +174,12 @@ $_L['Number_of_Vouchers'] = 'Jumlah Voucher';
 $_L['Length_Code'] = 'Panjang Kode';
 $_L['Code_Voucher'] = 'Kode Voucher';
 $_L['Voucher'] = 'Voucher';
+$_L['Voucher_Hotspot'] = 'Voucher Hotspot';
 $_L['Status_Voucher'] = 'Status Voucher';
-$_L['Add_Voucher'] = 'Tambah Voucher';
+$_L['Add_Voucher'] = 'Tambah';
 $_L['Voucher_Successfully'] = 'Berhasil membuat Voucher baru';
 $_L['Generate'] = 'Generate';
+$_L['Print_Info'] = 'Print bolak balik, biar mudah dipotong dan hemat kertas';
 
 $_L['From_Date'] = 'Dari Tanggal';
 $_L['To_Date'] = 'Hingga Tanggal';
