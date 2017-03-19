@@ -35,6 +35,11 @@ $_L['Created_Successfully'] = 'Data Created Successfully';
 $_L['Updated_Successfully'] = 'Data Updated Successfully';
 $_L['Delete_Successfully'] = 'Data Deleted Successfully';
 
+$_L['Static_Pages'] = "Static Pages";
+$_L['Failed_Save_Page'] = "Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>";
+$_L['Success_Save_Page'] = "Saving page success";
+$_L['Info_Page'] = "Sometimes you need to refresh 3 times until content change";
+
 $_L['Dashboard'] = 'Dashboard';
 $_L['Search_Contact'] = 'Search Customers...';
 $_L['My_Account'] = 'My Account';
@@ -209,7 +214,7 @@ $_L['Title'] = 'Title';
 $_L['Message'] = 'Message';
 $_L['Account_Information'] = 'Your Account Information';
 $_L['Welcome_Text_User'] = 'Welcome to the Panel Members page, on this page you can:';
-$_L['Welcome_Text_Admin'] = '<b>PHPMixBill</b> adalah sebuah aplikasi billing Hotspot dan PPPOE untuk Mikrotik dengan menggunakan bahasa pemograman PHP dan menggunakan API Mikrotik sebagai komunikasi dengan router. Jika aplikasi ini sangat berguna bagi bisnis Anda silahkan Anda donasi berapapun.';
+$_L['Welcome_Text_Admin'] = '<b>PHPMixBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate with router. If you get more profit with this application, please donate us.<br>Watch project <a href="https://github.com/ibnux/phpmixbill" target="_blank">in here</a>';
 
 //update
 $_L['Invalid_Username_or_Password'] = 'Invalid Username or Password';

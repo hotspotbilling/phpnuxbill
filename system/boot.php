@@ -80,6 +80,7 @@ $ui->assign('app_url', APP_URL);
 define('U', APP_URL.'/index.php?_route=');
 $ui->assign('_url', APP_URL.'/index.php?_route=');
 $ui->assign('_theme', $_theme);
+$ui->assign('_path', __DIR__);
 $ui->assign('_c', $config);
 $ui->assign('_L', $_L);
 $ui->assign('_system_menu', 'dashboard');

@@ -52,7 +52,7 @@
 				<a href="#"><i class="ion ion-qr-scanner"></i></a>
 			</li>
 
-			<li class="notify-drop hidden-xs dropdown">
+			<li class="notify-drop hidden hidden-xs dropdown">
 				<a href="#" data-toggle="dropdown">
 					<i class="ion ion-chatboxes"></i>
 					<span class="badge badge-danger badge-xs circle">3</span>
@@ -87,9 +87,8 @@
 			<nav class="site-nav clearfix" role="navigation">
 				<div class="profile clearfix mb15">
 					<img src="system/uploads/user.jpg" alt="admin">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 					<div class="group">
-						<div class="dropdown">{$_user['fullname']}<span class="caret"></span>
+						<div class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{$_user['fullname']}<span class="caret"></span></a>
 							<ul class="dropdown-menu">
 								<li><a href="{$_url}accounts/profile"><i class="ion ion-person"></i> {$_L['My_Account']}<div class="ripple-wrapper"></div></a></li>
 								<li><a href="{$_url}accounts/change-password"><i class="ion ion-settings"></i> {$_L['Change_Password']}</a></li>
@@ -98,7 +97,6 @@
 						</div>
 						<small class="desig">{$_L['Member']}</small>
 					</div>
-					</a>
 				</div>
 				
 				<ul class="list-unstyled clearfix nav-list mb15">
@@ -108,8 +106,8 @@
 							<span class="text">{$_L['Dashboard']}</span>
 						</a>
 					</li>
-					<li {if $_system_menu eq 'pm'}class="open"{/if}>
-						<a href="#">
+					<li  class="hidden {if $_system_menu eq 'pm'}open{/if}">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-email"></i>
 							<span class="text">{$_L['Private_Message']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -122,7 +120,7 @@
 					</li>
 				
 					<li {if $_system_menu eq 'voucher'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-card"></i>
 							<span class="text">{$_L['Voucher']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -133,13 +131,13 @@
 						</ul>
 					</li>
 					<li {if $_system_menu eq 'order'}class="active"{/if}>
-						<a href="{$_url}order">
+						<a href="{$_url}page/Order_Voucher">
 							<i class="ion ion-ios-cart"></i>
 							<span class="text">{$_L['Order_Voucher']}</span>
 						</a>
 					</li>
 					<li {if $_system_menu eq 'accounts'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-gear-a"></i>
 							<span class="text">{$_L['My_Account']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -159,7 +157,18 @@
 				<p>{date('Y')} &copy; <span>{$_c['CompanyName']}</span></p>
 			</footer>
 		</aside>
-
+		<script>
+			// i find bug that dropdown menu in mobile browser doesnt active, so i force to show all
+			var mobile = false;
+			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+				mobile = true;
+			}
+			function toggleDropdownMobile(node){
+				if(mobile){
+					$(node).parent('li').addClass('open');
+				}
+			}
+		</script> 
 		<div class="content-container" id="content">
 			<div class="page {if $_system_menu eq 'dashboard'}page-dashboard{/if}">
 

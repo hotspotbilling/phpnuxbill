@@ -427,28 +427,79 @@ switch ($action) {
 		
 	case 'print-voucher':
 		$from_id = _post('from_id')*1;
-		$pagebreak = _post('pagebreak');
-		if ($from_id != ''){
+		$planid = _post('planid')*1;
+		$pagebreak = _post('pagebreak')*1;
+		$limit = _post('limit')*1;
+		
+		if($pagebreak<1) $pagebreak = 6; 
+		
+		if($limit<1) $limit = $pagebreak *2;
+
+		if ($from_id >0 && $planid >0){
+			$v = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->where('tbl_plans.id',$planid)
+				->where_gt('tbl_voucher.id',$from_id)
+				->limit($limit)
+				->find_many();
+			$vc = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->where('tbl_plans.id',$planid)
+				->where_gt('tbl_voucher.id',$from_id)
+				->count();
+		}else if ($from_id == 0 && $planid > 0){
+			$v = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->where('tbl_plans.id',$planid)
+				->limit($limit)
+				->find_many();
+			$vc = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->where('tbl_plans.id',$planid)
+				->count();
+		}else if ($from_id > 0 && $planid == 0){
 			$v = ORM::for_table('tbl_plans')
 				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
 				->where('tbl_voucher.status','0')
 				->where_gt('tbl_voucher.id',$from_id)
+				->limit($limit)
 				->find_many();
+			$vc = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->where_gt('tbl_voucher.id',$from_id)
+				->count();
 		}else{
 			$v = ORM::for_table('tbl_plans')
 				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
 				->where('tbl_voucher.status','0')
+				->limit($limit)
 				->find_many();
+			$vc = ORM::for_table('tbl_plans')
+				->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+				->where('tbl_voucher.status','0')
+				->count();
 		}
 		
 		$ui->assign('_title', $_L['Voucher_Hotspot'].' - '. $config['CompanyName']);
 		$ui->assign('from_id',$from_id); 
-		if($pagebreak<1) $pagebreak = 6; 
 		$ui->assign('pagebreak',$pagebreak);
+
+		$plans = ORM::for_table('tbl_plans')->find_many();
+		$ui->assign('plans',$plans);
+		$ui->assign('limit',$limit);
+		$ui->assign('planid',$planid);
 		
 		$ui->assign('v',$v);
+		$ui->assign('vc',$vc);
+		
 		//for counting pagebreak
 		$ui->assign('jml',0);
+
 		$ui->display('print-voucher.tpl');
         break;
     case 'voucher-post':

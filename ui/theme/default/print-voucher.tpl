@@ -27,17 +27,19 @@
 	}
 	@media print {
         body {
-        margin: 0;
-        box-shadow: 0;
+            size: auto;
+            margin: 0;
+            box-shadow: 0;
         }
         page[size="A4"] {
-        margin: 0;
-        box-shadow: 0;
+            margin: 0;
+            size: auto;
+            box-shadow: 0;
         }
         .page-break	{ display: block; page-break-before: always; }
         .no-print, .no-print *
         {
-        display: none !important;
+            display: none !important;
         }
     }
     </style>
@@ -48,13 +50,22 @@
         <form method="post" action="{$_url}prepaid/print-voucher/" class="no-print">
         <table width="100%" border="0" cellspacing="0" cellpadding="1" class="btn btn-default btn-sm">
             <tr>
-                <td>ID more than <input type="text" name="from_id" width="4" value="{$from_id}"></td>
-                <td>PageBreak after  <input type="text" name="pagebreak" width="2" value="{$pagebreak}"> vouchers</td>
+                <td>ID &gt; <input type="text" name="from_id" style="width:40px" value="{$from_id}"> limit <input type="text" name="limit" style="width:40px" value="{$limit}"></td>
+                <td>PageBreak after  <input type="text" style="width:40px" name="pagebreak" value="{$pagebreak}"> vouchers</td>
+                <td>Plans <select id="plan_id" name="planid" style="width:150px">
+                <option value="0">--all--</option>
+                {foreach $plans as $plan}
+                    <option value="{$plan['id']}" {if $plan['id']==$planid}selected{/if}>{$plan['name_plan']}</option>
+                {/foreach}
+                </select></td>
                 <td><button type="submit">submit</button></td>
             </tr>
         </table><hr>
         <center><button type="button" id="actprint" class="btn btn-default btn-sm no-print">{$_L['Click_Here_to_Print']}</button><br>
-        {$_L['Print_Info']}</center>
+        {$_L['Print_Info']}<br>
+        show {$v|@count} vouchers from {$vc} vouchers<br>
+        from ID {$v[0]['id']} limit {$limit} vouchers
+        </center>
         </form>
         <div id="printable">
             <hr>
@@ -87,36 +98,7 @@
                             </table>
                             </td>
                             <td valign="top" style="padding-left:10px">
-                                <center><strong style="font-size:38px">{$_c['CompanyName']}</strong></center>
-                                <table width="100%" border="1" cellspacing="0" cellpadding="4" bordercolor="#757575">
-                                <tbody>
-                                <tr>
-                                    <td valign="top" align="left">Pendaftaran dan Informasi Billing buka <b>billing.ibnux.net</b></td>
-                                </tr>
-                                <tr>
-                                    <td valign="top" align="left">Wireless Hotspot:
-                                        <table width="100%" border="0" cellspacing="0" cellpadding="2">
-                                            <tr>
-                                                <td>iBNuXnet</td>
-                                                <td>iBNuXnet-P</td>
-                                                <td>iBNuXnet-Q</td>
-                                            </tr>
-                                            <tr>
-                                                <td>CitraGadingBlokP 3/4</td>
-                                                <td>CitraGadingBlokQ 2/3/4/5/6</td>
-                                                <td>iBNuXnet 5Ghz</td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td valign="top" align="left">Voucher yang sudah dibeli tidak dapat dikembalikan</td>
-                                </tr>
-                                <tr>
-                                    <td valign="top" align="center"><b>hotspot.ibnux.net</b></td>
-                                </tr>
-                                </tbody>
-                            </table>
+                                {include file="$_path/../pages/Voucher.html"}
                             </td>
                         </tr>
                         </table>    

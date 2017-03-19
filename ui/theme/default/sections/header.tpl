@@ -96,10 +96,9 @@
 			<nav class="site-nav clearfix" role="navigation">
 			{if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'Sales'}
 				<div class="profile clearfix mb15">
-					<img src="system/uploads/admin.png" alt="admin">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+					<img src="system/uploads/admin.png" alt="admin"> 
 					<div class="group">
-						<div class="dropdown">{$_admin['fullname']}<span class="caret"></span>
+						<div class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{$_admin['fullname']}<span class="caret"></a></span>
 							<ul class="dropdown-menu">
 								<li><a href="{$_url}settings/users-edit/{$_admin['id']}"><i class="ion ion-person"></i> {$_L['My_Account']}<div class="ripple-wrapper"></div></a></li>
 								<li><a href="{$_url}settings/change-password"><i class="ion ion-settings"></i> {$_L['Change_Password']}</a></li>
@@ -108,14 +107,12 @@
 						</div>
 						<small class="desig">{if $_admin['user_type'] eq 'Admin'} {$_L['Administrator']} {else} {$_L['Sales']} {/if}</small>
 					</div>
-					</a>
 				</div>
 			{else}
 				<div class="profile clearfix mb15">
 					<img src="system/uploads/user.jpg" alt="admin">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 					<div class="group">
-						<div class="dropdown">{$_user['fullname']}<span class="caret"></span>
+						<div class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{$_user['fullname']}<span class="caret"></span></a>
 							<ul class="dropdown-menu">
 								<li><a href="{$_url}accounts/profile"><i class="ion ion-person"></i> {$_L['My_Account']}<div class="ripple-wrapper"></div></a></li>
 								<li><a href="{$_url}accounts/change-password"><i class="ion ion-settings"></i> {$_L['Change_Password']}</a></li>
@@ -124,11 +121,10 @@
 						</div>
 						<small class="desig">{$_L['Member']}</small>
 					</div>
-					</a>
 				</div>
 			{/if}
 				
-				<ul class="list-unstyled clearfix nav-list mb15">
+				<ul id="leftMenu" class="list-unstyled clearfix nav-list mb15">
 					<li {if $_system_menu eq 'dashboard'}class="active"{/if}>
 						<a href="{$_url}dashboard">
 							<i class="ion ion-monitor"></i>
@@ -136,8 +132,8 @@
 						</a>
 					</li>
 					<!-- Message on progress, hide it  -->
-					<li class="hidden" {if $_system_menu eq 'message'}class="open"{/if}>
-						<a href="#">
+					<li class="hidden {if $_system_menu eq 'message'}open{/if}">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-email"></i>
 							<span class="text">{$_L['Private_Message']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -150,7 +146,7 @@
 					</li>
 				{if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'Sales'}
 					<li {if $_system_menu eq 'customers'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-android-contacts"></i>
 							<span class="text">{$_L['Customers']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -161,7 +157,7 @@
 						</ul>
 					</li>
 					<li {if $_system_menu eq 'prepaid'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-card"></i>
 							<span class="text">{$_L['Prepaid']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -174,7 +170,7 @@
 						</ul>
 					</li>
 					<li {if $_system_menu eq 'services'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-cube"></i>
 							<span class="text">{$_L['Services']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -186,7 +182,7 @@
 						</ul>
 					</li>
 					<li {if $_system_menu eq 'reports'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-clipboard"></i>
 							<span class="text">{$_L['Reports']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -198,7 +194,7 @@
 					</li>
 				{else}
 					<li {if $_system_menu eq 'voucher'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-card"></i>
 							<span class="text">{$_L['Voucher']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -215,7 +211,7 @@
 						</a>
 					</li>
 					<li {if $_system_menu eq 'accounts'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-gear-a"></i>
 							<span class="text">{$_L['My_Account']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -229,7 +225,7 @@
 				{/if}
 				{if $_admin['user_type'] eq 'Admin'}
 					<li {if $_system_menu eq 'network'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-network"></i>
 							<span class="text">{$_L['Network']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -240,7 +236,7 @@
 						</ul>
 					</li>
 					<li {if $_system_menu eq 'settings'}class="open"{/if}>
-						<a href="#">
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-gear-a"></i>
 							<span class="text">{$_L['Settings']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -253,6 +249,23 @@
 							<li>&nbsp;</li>
 						</ul>
 					</li>
+					<li {if $_system_menu eq 'pages'}class="open"{/if}>
+						<a href="#" onClick="toggleDropdownMobile(this)">
+							<i class="ion ion-document"></i>
+							<span class="text">{$_L['Static_Pages']}</span>
+							<i class="arrow ion-chevron-left"></i>
+						</a>
+						<ul class="inner-drop list-unstyled">
+							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Order_Voucher">{$_L['Order_Voucher']}</a></li>
+							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Voucher">{$_L['Voucher']} Template</a></li>
+						</ul>
+					</li>
+					<li {if $_system_menu eq 'disquss'}class="active"{/if}>
+						<a href="{$_url}disquss">
+							<i class="ion ion-chatbubbles"></i>
+							<span class="text">Disquss</span>
+						</a>
+					</li>
 				{/if}
 				</ul>
 				
@@ -262,7 +275,18 @@
 				<p>{date('Y')} &copy; <span>{$_c['CompanyName']}</span></p>
 			</footer>
 		</aside>
-
+		<script>
+		// i find bug that dropdown menu in mobile browser doesnt active, so i force to show all
+		var mobile = false;
+		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+			mobile = true;
+		}
+		function toggleDropdownMobile(node){
+			if(mobile){
+				$(node).parent('li').addClass('open');
+			}
+		}
+		</script> 
 		<div class="content-container" id="content">
 			<div class="page {if $_system_menu eq 'dashboard'}page-dashboard{/if}{if $_system_menu eq 'reports'}page-invoice{/if}">
 
