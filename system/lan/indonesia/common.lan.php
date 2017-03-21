@@ -126,6 +126,7 @@ $_L['Select_Account'] = 'Pilih Akun';
 $_L['Service_Plan'] = 'Paket';
 $_L['Recharge'] = 'Isi Ulang Akun';
 $_L['Method'] = 'Metode';
+$_L['account_created_successfully'] = 'Account Created Successfully';
 
 $_L['Database_Status'] = 'Status Database';
 $_L['Total_Database_Size'] = 'Ukuran Database';

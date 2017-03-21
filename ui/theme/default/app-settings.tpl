@@ -27,12 +27,11 @@
 							<input type="text" class="form-control" id="phone" name="phone" value="{$_c['phone']}">
 						</div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group hidden">
 						<label class="col-md-2 control-label">Theme</label>
 						<div class="col-md-6">
 							<select name="theme" id="theme" class="form-control">
 								<option value="default" {if $_c['theme'] eq 'default'}selected="selected" {/if}>Default</option>
-								<option value="blue" {if $_c['theme'] eq 'blue'}selected="selected" {/if}>Blue</option>
 							</select>
 						</div>
                     </div>

@@ -126,6 +126,7 @@ $_L['Select_Account'] = 'Select Account';
 $_L['Service_Plan'] = 'Service Plan';
 $_L['Recharge'] = 'Recharge';
 $_L['Method'] = 'Method';
+$_L['account_created_successfully'] = 'Account Created Successfully';
 
 $_L['Database_Status'] = 'Database Status';
 $_L['Total_Database_Size'] = 'Total Database Size';

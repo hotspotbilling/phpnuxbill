@@ -1,3 +1,4 @@
 /system/config.php
 .DS_Store
 .vscode/
+ui/compiled/*.tpl.php
