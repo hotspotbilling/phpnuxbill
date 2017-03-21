@@ -8,7 +8,7 @@
 									<div id="disqus_thread"></div>
 										<script>
 											var disqus_config = function () {
-											this.page.url = "https://github.com/ibnux/phpmixbill";  // Replace PAGE_URL with your page's canonical URL variable
+											this.page.url = "https://ibnux.github.io/phpmixbill/diskusi.html";  // Replace PAGE_URL with your page's canonical URL variable
 											this.page.identifier = "phpmixbill"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
 											};
 											(function() { // DON'T EDIT BELOW THIS LINE
