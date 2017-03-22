@@ -24,19 +24,35 @@
 
 </head>
 <body id="app" class="app off-canvas body-full">
-	<div class="main-container clearfix">
-		<div class="content-container" id="content">
-			<div class="page page-auth" style="margin-top:180px">
-				<div class="auth-container">
-					<div class="form-head mb20">
-						<h1 class="site-logo h2 mb5 mt5 text-center text-uppercase text-bold"><a href="./">{$_c['CompanyName']}</a></h1>
-						<h5 class="text-normal h5 text-center">{$_L['Register_Member']}</h5>
-					</div> 
-					{if isset($notify)}
-						{$notify}
-					{/if}
-					<div class="form-container">
-						<form class="form-horizontal" action="{$_url}register/post" method="post">
+
+	<div class="container">
+		<div class="hidden-xs" style="height:150px"></div>
+		<div class="form-head mb20">
+			<h1 class="site-logo h2 mb5 mt5 text-center text-uppercase text-bold" style="text-shadow: 2px 2px 4px #757575;">{$_c['CompanyName']}</h1>
+			<hr>
+		</div>
+		{if isset($notify)}
+			<div class="row">
+				<div class="col-md-6 col-md-offset-3">
+					{$notify}
+				</div>
+			</div>
+		{/if}
+		<div class="row">
+			<div class="col-md-4">
+				<div class="panel panel-default">
+				<div class="panel-heading">{$_L['Registration_Info']}</div>
+				<div class="panel-body" style="height:375px;max-height:375px;overflow:scroll;">
+					{include file="$_path/../pages/Registration_Info.html"}
+				</div>
+				</div>
+			</div>
+			<form class="form-horizontal" action="{$_url}register/post" method="post">
+			<div class="col-md-4">
+				<div class="panel panel-default">
+					<div class="panel-heading">1. {$_L['Register_Member']}</div>
+					<div class="panel-body">
+						<div class="form-container">
 							<div class="md-input-container md-float-label">
 								<input type="text" required class="md-input" id="username" value="{$username}" placeholder="{$_L['Phone_Number']}" name="username">
 								<label>{$_L['Username']}</label>
@@ -46,14 +62,6 @@
 								<label>{$_L['Full_Name']}</label>
 							</div>
 							<div class="md-input-container md-float-label">
-								<input type="password" required class="md-input" id="password" name="password">
-								<label>{$_L['Password']}</label>
-							</div>
-							<div class="md-input-container md-float-label">
-								<input type="password" required class="md-input" id="cpassword" name="cpassword">
-								<label>{$_L['Confirm_Password']}</label>
-							</div>
-							<div class="md-input-container md-float-label">
 								<input type="text" name="address" id="address" value="{$address}" class="md-input">
 								<label>{$_L['Address']}</label>
 							</div>
@@ -61,6 +69,24 @@
 								<input type="text" required class="md-input" value="{$phonenumber}" id="phonenumber" name="phonenumber">
 								<label>{$_L['Phone_Number']}</label>
 							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="panel panel-default">
+					<div class="panel-heading">2. {$_L['Register_Member']}</div>
+					<div class="panel-body">
+						<div class="form-container">
+							<div class="md-input-container md-float-label">
+								<input type="password" required class="md-input" id="password" name="password">
+								<label>{$_L['Password']}</label>
+							</div>
+							<div class="md-input-container md-float-label">
+								<input type="password" required class="md-input" id="cpassword" name="cpassword">
+								<label>{$_L['Confirm_Password']}</label>
+							</div>
+							<hr>
 							<div class="md-input-container md-float-label">
 								<input type="text" required class="md-input" id="kodevoucher" name="kodevoucher">
 								<label>{$_L['Code_Voucher']}</label>
@@ -73,12 +99,12 @@
 									<a href="{$_url}login" class="btn btn-success">{$_L['Cancel']}</a>
 								</div>
 							</div> 
-							
-						</form>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div> 
+			</form>
+		</div>
 	</div>
 	<script src="scripts/vendors.js"></script>
 </body>

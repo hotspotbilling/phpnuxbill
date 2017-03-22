@@ -235,6 +235,19 @@
 							<li {if $_system_menu eq 'network'}class="active"{/if}><a href="{$_url}pool/list">{$_L['Pool']}</a></li>
 						</ul>
 					</li>
+					<li {if $_system_menu eq 'pages'}class="open"{/if}>
+						<a href="#" onClick="toggleDropdownMobile(this)">
+							<i class="ion ion-document"></i>
+							<span class="text">{$_L['Static_Pages']}</span>
+							<i class="arrow ion-chevron-left"></i>
+						</a>
+						<ul class="inner-drop list-unstyled">
+							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Order_Voucher">{$_L['Order_Voucher']}</a></li>
+							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Voucher">{$_L['Voucher']} Template</a></li>
+							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Announcement">{$_L['Announcement']} Editor</a></li>
+							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Registration_Info">{$_L['Registration_Info']} Editor</a></li>
+						</ul>
+					</li>
 					<li {if $_system_menu eq 'settings'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-gear-a"></i>
@@ -247,17 +260,6 @@
 							<li {if $_system_menu eq 'settings'}class="active"{/if}><a href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
 							<li {if $_system_menu eq 'settings'}class="active"{/if}><a href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li>
 							<li>&nbsp;</li>
-						</ul>
-					</li>
-					<li {if $_system_menu eq 'pages'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
-							<i class="ion ion-document"></i>
-							<span class="text">{$_L['Static_Pages']}</span>
-							<i class="arrow ion-chevron-left"></i>
-						</a>
-						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Order_Voucher">{$_L['Order_Voucher']}</a></li>
-							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Voucher">{$_L['Voucher']} Template</a></li>
 						</ul>
 					</li>
 					<li {if $_system_menu eq 'disquss'}class="active"{/if}>

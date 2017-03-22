@@ -111,12 +111,25 @@ if (isset($_SESSION['notify'])) {
     unset($_SESSION['ntype']);
 }
 
+// on some server, it getting error because of slash is backwards
 function _autoloader($class) {
     if (strpos($class, '_') !== false) {
         $class = str_replace('_','/',$class);
-        include 'autoload/' . $class . '.php';
+        if(file_exists('autoload/' . $class . '.php')){
+            include 'autoload/' . $class . '.php';
+        }else{
+            $class = str_replace("\\","/",$class);
+            if(file_exists(__DIR__.'/autoload/' . $class . '.php'))
+                include __DIR__.'/autoload/' . $class . '.php';
+        }
     } else{
-        include 'autoload/' . $class . '.php';
+        if(file_exists('autoload/' . $class . '.php')){
+            include 'autoload/' . $class . '.php';
+        }else{
+            $class = str_replace("\\","/",$class);
+            if(file_exists(__DIR__.'/autoload/' . $class . '.php'))
+                include __DIR__.'/autoload/' . $class . '.php';
+        }
     }
 }
 

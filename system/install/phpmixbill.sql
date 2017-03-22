@@ -19,18 +19,18 @@ CREATE TABLE `tbl_appconfig` (
 -- Dump Data for `tbl_appconfig`
 --
 
-INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("1","CompanyName","PHPMixBill v5.0");
+INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("1","CompanyName","PHPMixBill");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("2","theme","default");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("3","currency_code","Rp.");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("4","language","english");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("5","show-logo","1");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("6","nstyle","blue");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("7","timezone","Asia/Jakarta");
-INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("8","dec_point",".");
-INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("9","thousands_sep",",");
+INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("8","dec_point",",");
+INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("9","thousands_sep",".");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("10","rtl","0");
-INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("11","address","Jl. Kubangsari VII No. 31 RT.03/RW.06 Bandung");
-INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("12","phone","081322225141");
+INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("11","address","");
+INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("12","phone","");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("13","date_format","d M Y");
 INSERT INTO tbl_appconfig (`id`,`setting`,`value`) VALUES ("14","note","Thank you...");
 
@@ -221,7 +221,7 @@ CREATE TABLE `tbl_users` (
 -- Dump Data for `tbl_users`
 --
 
-INSERT INTO tbl_users (`id`,`username`,`fullname`,`password`,`user_type`,`status`,`last_login`,`creationdate`) VALUES ("1","admin","Ismail Marzuqi","$1$W44.ns/.$MUnR0NeBH9xAcXm0Oku2h1","Admin","Active","2015-10-30 18:27:02","2014-06-23 01:43:07");
+INSERT INTO tbl_users (`id`,`username`,`fullname`,`password`,`user_type`,`status`,`last_login`,`creationdate`) VALUES ("1","admin","Administrator","$1$W44.ns/.$MUnR0NeBH9xAcXm0Oku2h1","Admin","Active","2015-10-30 18:27:02","2014-06-23 01:43:07");
 
 -- --------------------------------------------------------
 -- Structure for 'tbl_voucher'

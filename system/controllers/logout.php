@@ -7,6 +7,6 @@
 * @license		GNU General Public License version 2 or later; see LICENSE.txt
 * @donate		PayPal: iesien22@yahoo.com / Bank Mandiri: 130.00.1024957.4
 **/
-session_start();
+if (session_status() == PHP_SESSION_NONE) session_start();
 session_destroy();
 header('location: index.php');

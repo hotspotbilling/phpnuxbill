@@ -12,8 +12,10 @@ Contributor: Ibnu Maksum (@ibnux)
 ------------------------------------
 */
 
-$_L['Login'] = 'Masuk';
+$_L['Login'] = 'Masuk'; 
 $_L['Register'] = 'Daftar';
+$_L['Announcement'] = 'Pengumuman';
+$_L['Registration_Info'] = 'Info Pendaftaran';
 $_L['Register_Voucher_Failed'] = 'Voucher tidak ditemukan, mohon beli dulu Voucher sebelum mendaftar';
 $_L['Register_Success'] = 'Pendaftaran sukses!<br>silahkan masuk';
 $_L['Sign_In_Member'] = 'Masuk ke Member Panel';

@@ -224,11 +224,11 @@ switch($do){
 		
         break;
 
-    case 'register-display':
-        $ui->display('register.tpl');
-        break;
-
     default:
+		$ui->assign('username', "");
+		$ui->assign('fullname', "");
+		$ui->assign('address', "");
+		$ui->assign('phonenumber', "");
         $ui->display('register.tpl');
         break;
 }

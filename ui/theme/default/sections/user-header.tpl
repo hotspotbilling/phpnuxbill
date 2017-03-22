@@ -86,7 +86,7 @@
 
 			<nav class="site-nav clearfix" role="navigation">
 				<div class="profile clearfix mb15">
-					<img src="system/uploads/user.jpg" alt="admin">
+					<img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1" alt="admin">
 					<div class="group">
 						<div class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{$_user['fullname']}<span class="caret"></span></a>
 							<ul class="dropdown-menu">
