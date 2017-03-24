@@ -684,12 +684,58 @@ switch ($action) {
 					$client($removeRequest
 						->setArgument('numbers', $userName)
 					);
+					/* iBNuX Added:
+					* 	Time limit to Mikrotik
+					*	'Time_Limit', 'Data_Limit', 'Both_Limit'
+					*/
 					$addRequest = new RouterOS\Request('/ip/hotspot/user/add');
-					$client->sendSync($addRequest
-						->setArgument('name', $c['username'])
-						->setArgument('profile', $p['name_plan'])
-						->setArgument('password', $c['password'])
-					);
+					if($p['typebp']=="Limited"){
+						if($p['limit_type']=="Time_Limit"){
+							if($p['time_unit']=='Hrs')
+								$timelimit = $p['time_limit'].":00:00";
+							else
+								$timelimit = "00:".$p['time_limit'].":00";
+							$client->sendSync($addRequest
+								->setArgument('name', $c['username'])
+								->setArgument('profile', $p['name_plan'])
+								->setArgument('password', $c['password'])
+								->setArgument('limit-uptime', $timelimit)
+							);
+						}else if($p['limit_type']=="Data_Limit"){
+							if($p['data_unit']=='GB')
+								$datalimit = $p['data_limit']."000000000";
+							else
+								$datalimit = $p['data_limit']."000000";
+							$client->sendSync($addRequest
+								->setArgument('name', $c['username'])
+								->setArgument('profile', $p['name_plan'])
+								->setArgument('password', $c['password'])
+								->setArgument('limit-bytes-total', $datalimit)
+							);
+						}else if($p['limit_type']=="Both_Limit"){
+							if($p['time_unit']=='Hrs')
+								$timelimit = $p['time_limit'].":00:00";
+							else
+								$timelimit = "00:".$p['time_limit'].":00";
+							if($p['data_unit']=='GB')
+								$datalimit = $p['data_limit']."000000000";
+							else
+								$datalimit = $p['data_limit']."000000";
+							$client->sendSync($addRequest
+								->setArgument('name', $c['username'])
+								->setArgument('profile', $p['name_plan'])
+								->setArgument('password', $c['password'])
+								->setArgument('limit-uptime', $timelimit)
+								->setArgument('limit-bytes-total', $datalimit)
+							);
+						}
+					}else{
+						$client->sendSync($addRequest
+							->setArgument('name', $c['username'])
+							->setArgument('profile', $p['name_plan'])
+							->setArgument('password', $c['password'])
+						);
+					}
 					
 					$b->customer_id = $user;
 					$b->username = $c['username'];
@@ -724,12 +770,58 @@ switch ($action) {
 					} catch (Exception $e) {
 						die('Unable to connect to the router.');
 					}
+					/* iBNuX Added:
+					* 	Time limit to Mikrotik
+					*	'Time_Limit', 'Data_Limit', 'Both_Limit'
+					*/
 					$addRequest = new RouterOS\Request('/ip/hotspot/user/add');
-					$client->sendSync($addRequest
-						->setArgument('name', $c['username'])
-						->setArgument('profile', $p['name_plan'])
-						->setArgument('password', $c['password'])
-					);
+					if($p['typebp']=="Limited"){
+						if($p['limit_type']=="Time_Limit"){
+							if($p['time_unit']=='Hrs')
+								$timelimit = $p['time_limit'].":00:00";
+							else
+								$timelimit = "00:".$p['time_limit'].":00";
+							$client->sendSync($addRequest
+								->setArgument('name', $c['username'])
+								->setArgument('profile', $p['name_plan'])
+								->setArgument('password', $c['password'])
+								->setArgument('limit-uptime', $timelimit)
+							);
+						}else if($p['limit_type']=="Data_Limit"){
+							if($p['data_unit']=='GB')
+								$datalimit = $p['data_limit']."000000000";
+							else
+								$datalimit = $p['data_limit']."000000";
+							$client->sendSync($addRequest
+								->setArgument('name', $c['username'])
+								->setArgument('profile', $p['name_plan'])
+								->setArgument('password', $c['password'])
+								->setArgument('limit-bytes-total', $datalimit)
+							);
+						}else if($p['limit_type']=="Both_Limit"){
+							if($p['time_unit']=='Hrs')
+								$timelimit = $p['time_limit'].":00:00";
+							else
+								$timelimit = "00:".$p['time_limit'].":00";
+							if($p['data_unit']=='GB')
+								$datalimit = $p['data_limit']."000000000";
+							else
+								$datalimit = $p['data_limit']."000000";
+							$client->sendSync($addRequest
+								->setArgument('name', $c['username'])
+								->setArgument('profile', $p['name_plan'])
+								->setArgument('password', $c['password'])
+								->setArgument('limit-uptime', $timelimit)
+								->setArgument('limit-bytes-total', $datalimit)
+							);
+						}
+					}else{
+						$client->sendSync($addRequest
+							->setArgument('name', $c['username'])
+							->setArgument('profile', $p['name_plan'])
+							->setArgument('password', $c['password'])
+						);
+					}
 					
 					$d = ORM::for_table('tbl_user_recharges')->create();
 					$d->customer_id = $user;
