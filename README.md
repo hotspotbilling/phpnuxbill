@@ -11,7 +11,7 @@ Aplikasi ini dikelola oleh [@ibnux](https://twitter.com/ibnux)
 
 ---- 
 
-Download [Mikrotik Togin Template](https://github.com/ibnux/phpmixbill)
+Download [Mikrotik Login Template](https://github.com/ibnux/phpmixbill-mikrotik-login-template)
 
 
 
