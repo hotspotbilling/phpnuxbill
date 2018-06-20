@@ -82,6 +82,7 @@ CREATE TABLE `tbl_language` (
 
 INSERT INTO tbl_language (`id`,`name`,`folder`,`author`) VALUES ("1","Indonesia","indonesia","Ismail Marzuqi");
 INSERT INTO tbl_language (`id`,`name`,`folder`,`author`) VALUES ("2","English","english","Ismail Marzuqi");
+INSERT INTO tbl_language (`id`,`name`,`folder`,`author`) VALUES ("4","Türkçe","turkish","Goktug Bogac Ogel");
 
 -- --------------------------------------------------------
 -- Structure for 'tbl_logs'
