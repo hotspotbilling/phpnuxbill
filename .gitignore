@@ -3,3 +3,4 @@
 .vscode/
 ui/compiled/*.php
 ui/cache/*.php
+/test.php
