@@ -135,6 +135,11 @@ class Client
         $crypto = N::CRYPTO_OFF,
         $context = null
     ) {
+        if(strpos($host,":")>-1){
+            $part = explode(":",$host);
+            $host = $part[0];
+            $port = $part[1];
+        }
         $this->com = new Communicator(
             $host,
             $port,
@@ -151,7 +156,7 @@ class Client
         if ((!$persist
             || !($old = $this->com->getTransmitter()->lock(S::DIRECTION_ALL)))
             && $this->com->getTransmitter()->isFresh()
-        ) {
+        ) { 
             if (!static::login($this->com, $username, $password, $timeout)) {
                 $this->com->close();
                 throw new DataFlowException(
