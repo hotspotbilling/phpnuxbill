@@ -53,7 +53,7 @@ if ($cn == '1') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>PHPMixBill v5.0 Installer</title>
+    <title>PHPMixBill  Installer</title>
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -74,7 +74,7 @@ if ($cn == '1') {
 		</div>
 
 		<div class="span12">
-			<h4> PHPMixBill v5.0 Installer </h4>
+			<h4> PHPMixBill  Installer </h4>
 			<?php
 			if ($cn == '1') {
 			?>
@@ -101,7 +101,7 @@ if ($cn == '1') {
 		</div>
 	</div>
 
-	<div class="footer">Copyright &copy; 2015 PHPMixBill. All Rights Reserved<br/><br/></div>
+	<div class="footer">Copyright &copy; 2021 PHPMixBill. All Rights Reserved<br/><br/></div>
 </body>
 </html>
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>PHPMixBill v5.0 Installer</title>
+    <title>PHPMixBill  Installer</title>
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -22,16 +22,16 @@
 		</div>
 		
 		<div class="span12">
-			<h4> PHPMixBill v5.0 Installer </h4>
+			<h4> PHPMixBill  Installer </h4>
 			<?php
 			$passed = '';
 			$ltext = '';
 			if (version_compare(PHP_VERSION, '5.2.0') >= 0) {
-				$ltext .= 'To Run PHPMixBill v5.0 You need at least PHP version 5.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---PASSED---</strong><br/>";
+				$ltext .= 'To Run PHPMixBill  You need at least PHP version 5.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---PASSED---</strong><br/>";
 				$passed .= '1';
 
 			} else {
-				$ltext .= 'To Run PHPMixBill v5.0 You need at least PHP version 5.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---FAILED---</strong><br/>";
+				$ltext .= 'To Run PHPMixBill  You need at least PHP version 5.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---FAILED---</strong><br/>";
 				$passed .= '0';
 
 			}
@@ -57,7 +57,7 @@
 				<br><br>
 				<a href=\"step3.php\" class=\"btn btn-primary\">Continue</a>");
 			} else {
-				echo("<br/> $ltext <br/> Sorry. The requirements of PHPMixBill v5.0 is not available on your server.
+				echo("<br/> $ltext <br/> Sorry. The requirements of PHPMixBill  is not available on your server.
 				Please contact with us- iesien22@yahoo.com with this code- $passed Or contact with your server administrator
 				<br><br>
 				<a href=\"#\" class=\"btn btn-primary disabled\">Correct The Problem To Continue</a>");
@@ -65,7 +65,7 @@
 			?>
 		</div>
 	</div>
-	<div class="footer">Copyright &copy; 2015 PHPMixBill. All Rights Reserved<br/><br/></div>
+	<div class="footer">Copyright &copy; 2021 PHPMixBill. All Rights Reserved<br/><br/></div>
 </body>
 </html>
 
