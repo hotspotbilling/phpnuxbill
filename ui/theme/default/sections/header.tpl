@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<title>{$_title}</title>
 	<link rel="shortcut icon" href="{$_theme}/images/logo.png" type="image/x-icon" />
-	
+
 	<!-- Icons -->
 	<link rel="stylesheet" href="{$_theme}/fonts/ionicons/css/ionicons.min.css">
 	<link rel="stylesheet" href="{$_theme}/fonts/font-awesome/css/font-awesome.min.css">
@@ -22,18 +22,18 @@
 	<!-- Css/Less Stylesheets -->
 	<link rel="stylesheet" href="{$_theme}/styles/bootstrap.min.css">
 	<link rel="stylesheet" href="{$_theme}/styles/main.min.css">
-	
+
 	<link href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,300' rel='stylesheet' type='text/css'>
-	
+
 	<!-- Match Media polyfill for IE9 -->
-	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]--> 
+	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]-->
 {if isset($xheader)}
 	{$xheader}
 {/if}
 
 </head>
 
-<body id="app" class="app off-canvas">
+<body id="app" class="app off-canvas nav-expand">
 
 	<header class="site-head" id="site-head">
 		<ul class="list-unstyled left-elems">
@@ -68,7 +68,7 @@
 				</a>
 				<div class="panel panel-default dropdown-menu">
 					<div class="panel-heading">
-						You have 3 new message 
+						You have 3 new message
 						<a href="#" class="right btn btn-xs btn-pink mt-3">Show All</a>
 					</div>
 					<div class="panel-body">
@@ -85,7 +85,7 @@
 	</header>
 
 	<div class="main-container clearfix">
-		<aside class="nav-wrap" id="site-nav" data-perfect-scrollbar>
+		<aside class="nav-wrap nav-expand" id="site-nav" data-perfect-scrollbar>
 			<div class="nav-head">
 				<a href="{$_url}dashboard" class="site-logo text-uppercase">
 					<i class="ion ion-wifi"></i>
@@ -96,7 +96,7 @@
 			<nav class="site-nav clearfix" role="navigation">
 			{if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'Sales'}
 				<div class="profile clearfix mb15">
-					<img src="system/uploads/admin.png" alt="admin"> 
+					<img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1" alt="admin">
 					<div class="group">
 						<div class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{$_admin['fullname']}<span class="caret"></a></span>
 							<ul class="dropdown-menu">
@@ -110,7 +110,7 @@
 				</div>
 			{else}
 				<div class="profile clearfix mb15">
-					<img src="system/uploads/user.jpg" alt="admin">
+					<img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1" alt="admin">
 					<div class="group">
 						<div class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{$_user['fullname']}<span class="caret"></span></a>
 							<ul class="dropdown-menu">
@@ -123,7 +123,7 @@
 					</div>
 				</div>
 			{/if}
-				
+
 				<ul id="leftMenu" class="list-unstyled clearfix nav-list mb15">
 					<li {if $_system_menu eq 'dashboard'}class="active"{/if}>
 						<a href="{$_url}dashboard">
@@ -270,7 +270,7 @@
 					</li>
 				{/if}
 				</ul>
-				
+
 			</nav>
 
 			<footer class="nav-foot">
@@ -288,7 +288,7 @@
 				$(node).parent('li').addClass('open');
 			}
 		}
-		</script> 
+		</script>
 		<div class="content-container" id="content">
 			<div class="page {if $_system_menu eq 'dashboard'}page-dashboard{/if}{if $_system_menu eq 'reports'}page-invoice{/if}">
 
