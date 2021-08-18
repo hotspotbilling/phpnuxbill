@@ -131,10 +131,15 @@ class Client
         $password = '',
         $port = 8728,
         $persist = false,
-        $timeout = null,
+        $timeout = 10,
         $crypto = N::CRYPTO_OFF,
         $context = null
     ) {
+        if(strpos($host,":")>-1){
+            $part = explode(":",$host);
+            $host = $part[0];
+            $port = $part[1];
+        }
         $this->com = new Communicator(
             $host,
             $port,
@@ -151,7 +156,7 @@ class Client
         if ((!$persist
             || !($old = $this->com->getTransmitter()->lock(S::DIRECTION_ALL)))
             && $this->com->getTransmitter()->isFresh()
-        ) {
+        ) { 
             if (!static::login($this->com, $username, $password, $timeout)) {
                 $this->com->close();
                 throw new DataFlowException(
@@ -269,8 +274,8 @@ class Client
         $timeout = null
     ) {
         $request = new Request('/login');
-        $request->send($com);
-        $response = new Response($com, false, $timeout);
+        // Update Mikrotik Versi terbaru
+        // sayangnya ini ngga aman, bagusnya di setup ke port SSL
         $request->setArgument('name', $username);
         $request->setArgument('password', $password);
         $request->send($com);
