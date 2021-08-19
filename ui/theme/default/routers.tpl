@@ -7,7 +7,7 @@
 								<div class="panel-body">
 									<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
 										<div class="col-md-8">
-										
+
 											<form id="site-search" method="post" action="{$_url}routers/list/">
 											<div class="input-group">
 												<div class="input-group-addon">
@@ -31,7 +31,6 @@
 									<th>{$_L['Router_Name']}</th>
 									<th>{$_L['IP_Address']}</th>
 									<th>{$_L['Username']}</th>
-									<th>{$_L['Router_Secret']}</th>
 									<th>{$_L['Description']}</th>
 									<th>{$_L['Manage']}</th>
 								</tr>
@@ -42,7 +41,6 @@
 									<td>{$ds['name']}</td>
 									<td>{$ds['ip_address']}</td>
 									<td>{$ds['username']}</td>
-									<td>{$ds['password']}</td>
 									<td>{$ds['description']}</td>
 									<td>
 										<a href="{$_url}routers/edit/{$ds['id']}" class="btn btn-warning btn-sm">{$_L['Edit']}</a>

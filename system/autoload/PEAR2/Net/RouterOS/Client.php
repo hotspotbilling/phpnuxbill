@@ -2,11 +2,11 @@
 
 /**
  * RouterOS API client implementation.
- * 
+ *
  * RouterOS is the flag product of the company MikroTik and is a powerful router software. One of its many abilities is to allow control over it via an API. This package provides a client for that API, in turn allowing you to use PHP to control RouterOS hosts.
- * 
+ *
  * PHP version 5
- * 
+ *
  * @category  Net
  * @package   PEAR2_Net_RouterOS
  * @author    Vasil Rangelov <boen.robot@gmail.com>
@@ -37,9 +37,9 @@ use Exception as E;
 
 /**
  * A RouterOS client.
- * 
+ *
  * Provides functionality for easily communicating with a RouterOS host.
- * 
+ *
  * @category Net
  * @package  PEAR2_Net_RouterOS
  * @author   Vasil Rangelov <boen.robot@gmail.com>
@@ -85,7 +85,7 @@ class Client
      *     Key is the tag of the request, and the value is the callback for it.
      */
     protected $callbacks = array();
-    
+
     /**
      * @var Registry A registry for the operations. Particularly helpful at
      *     persistent connections.
@@ -99,10 +99,10 @@ class Client
 
     /**
      * Creates a new instance of a RouterOS API client.
-     * 
+     *
      * Creates a new instance of a RouterOS API client with the specified
      * settings.
-     * 
+     *
      * @param string   $host     Hostname (IP or domain) of the RouterOS server.
      * @param string   $username The RouterOS username.
      * @param string   $password The RouterOS password.
@@ -121,7 +121,7 @@ class Client
      *     context and your default context uses the value "DEFAULT" for
      *     ciphers, "ADH" will be automatically added to the list of ciphers.
      * @param resource $context  A context for the socket.
-     * 
+     *
      * @see sendSync()
      * @see sendAsync()
      */
@@ -156,7 +156,7 @@ class Client
         if ((!$persist
             || !($old = $this->com->getTransmitter()->lock(S::DIRECTION_ALL)))
             && $this->com->getTransmitter()->isFresh()
-        ) { 
+        ) {
             if (!static::login($this->com, $username, $password, $timeout)) {
                 $this->com->close();
                 throw new DataFlowException(
@@ -165,29 +165,29 @@ class Client
                 );
             }
         }
-        
+
         if (isset($old)) {
             $this->com->getTransmitter()->lock($old, true);
         }
-        
+
         if ($persist) {
             $this->registry = new Registry("{$host}:{$port}/{$username}");
         }
     }
-    
+
     /**
      * A shorthand gateway.
-     * 
+     *
      * This is a magic PHP method that allows you to call the object as a
      * function. Depending on the argument given, one of the other functions in
      * the class is invoked and its returned value is returned by this function.
-     * 
+     *
      * @param mixed $arg Value can be either a {@link Request} to send, which
      *     would be sent asynchoniously if it has a tag, and synchroniously if
      *     not, a number to loop with or NULL to complete all pending requests.
      *     Any other value is converted to string and treated as the tag of a
      *     request to complete.
-     * 
+     *
      * @return mixed Whatever the long form function would have returned.
      */
     public function __invoke($arg = null)
@@ -205,13 +205,13 @@ class Client
 
     /**
      * Login to a RouterOS connection.
-     * 
+     *
      * @param Communicator $com      The communicator to attempt to login to.
      * @param string       $username The RouterOS username.
      * @param string       $password The RouterOS password.
      * @param int|null     $timeout  The time to wait for each response. NULL
      *     waits indefinetly.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public static function login(
@@ -254,17 +254,17 @@ class Client
 
     /**
      * Login to a RouterOS connection.
-     * 
+     *
      * This is the actual login procedure, applied regardless of persistence and
      * charset settings.
-     * 
+     *
      * @param Communicator $com      The communicator to attempt to login to.
      * @param string       $username The RouterOS username.
      * @param string       $password The RouterOS password. Potentially parsed
      *     already by iconv.
      * @param int|null     $timeout  The time to wait for each response. NULL
      *     waits indefinetly.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     private static function _login(
@@ -280,13 +280,13 @@ class Client
         $request->setArgument('password', $password);
         $request->send($com);
         $response = new Response($com, false, $timeout);
-       return $response->getType() === Response::TYPE_FINAL
+       return $response->getType() === Response::TYPE_FINAL;
        null === $response->getProperty('ret');
  }
-    
+
     /**
      * Sets the charset(s) for this connection.
-     * 
+     *
      * Sets the charset(s) for this connection. The specified charset(s) will be
      * used for all future requests and responses. When sending,
      * {@link Communicator::CHARSET_LOCAL} is converted to
@@ -295,7 +295,7 @@ class Client
      * {@link Communicator::CHARSET_LOCAL}. Setting NULL to either charset will
      * disable charset convertion, and data will be both sent and received "as
      * is".
-     * 
+     *
      * @param mixed $charset     The charset to set. If $charsetType is
      *     {@link Communicator::CHARSET_ALL}, you can supply either a string to
      *     use for all charsets, or an array with the charset types as keys, and
@@ -303,7 +303,7 @@ class Client
      * @param int   $charsetType Which charset to set. Valid values are the
      *     Communicator::CHARSET_* constants. Any other value is treated as
      *     {@link Communicator::CHARSET_ALL}.
-     * 
+     *
      * @return string|array The old charset. If $charsetType is
      *     {@link Communicator::CHARSET_ALL}, the old values will be returned as
      *     an array with the types as keys, and charsets as values.
@@ -315,14 +315,14 @@ class Client
     ) {
         return $this->com->setCharset($charset, $charsetType);
     }
-    
+
     /**
      * Gets the charset(s) for this connection.
-     * 
+     *
      * @param int $charsetType Which charset to get. Valid values are the
      *     Communicator::CHARSET_* constants. Any other value is treated as
      *     {@link Communicator::CHARSET_ALL}.
-     * 
+     *
      * @return string|array The current charset. If $charsetType is
      *     {@link Communicator::CHARSET_ALL}, the current values will be
      *     returned as an array with the types as keys, and charsets as values.
@@ -335,7 +335,7 @@ class Client
 
     /**
      * Sends a request and waits for responses.
-     * 
+     *
      * @param Request  $request  The request to send.
      * @param callback $callback Optional. A function that is to be executed
      *     when new responses for this request are available. The callback takes
@@ -344,7 +344,7 @@ class Client
      *     TRUE, the request is canceled. Note that the callback may be executed
      *     one last time after that with a response that notifies about the
      *     canceling.
-     * 
+     *
      * @return $this The client object.
      * @see completeRequest()
      * @see loop()
@@ -372,7 +372,7 @@ class Client
                 UnexpectedValueException::CODE_CALLBACK_INVALID
             );
         }
-        
+
         $this->send($request);
 
         if (null === $callback) {
@@ -387,14 +387,14 @@ class Client
 
     /**
      * Checks if a request is active.
-     * 
+     *
      * Checks if a request is active. A request is considered active if it's a
      * pending request and/or has responses that are not yet extracted.
-     * 
+     *
      * @param string $tag    The tag of the request to look for.
      * @param int    $filter One of the FILTER_* consntants. Limits the search
      *     to the specified places.
-     * 
+     *
      * @return bool TRUE if the request is active, FALSE otherwise.
      * @see getPendingRequestsCount()
      * @see completeRequest()
@@ -413,9 +413,9 @@ class Client
 
     /**
      * Sends a request and gets the full response.
-     * 
+     *
      * @param Request $request The request to send.
-     * 
+     *
      * @return ResponseCollection The received responses as a collection.
      * @see sendAsync()
      * @see close()
@@ -433,13 +433,13 @@ class Client
 
     /**
      * Completes a specified request.
-     * 
+     *
      * Starts an event loop for the RouterOS callbacks and finishes when a
      * specified request is completed.
-     * 
+     *
      * @param string $tag The tag of the request to complete. Setting NULL
      *     completes all requests.
-     * 
+     *
      * @return ResponseCollection A collection of {@link Response} objects that
      *     haven't been passed to a callback function or previously extracted
      *     with {@link static::extractNewResponses()}. Returns an empty
@@ -477,13 +477,13 @@ class Client
 
     /**
      * Extracts responses for a request.
-     * 
+     *
      * Gets all new responses for a request that haven't been passed to a
      * callback and clears the buffer from them.
-     * 
+     *
      * @param string $tag The tag of the request to extract new responses for.
      *     Specifying NULL with extract new responses for all requests.
-     * 
+     *
      * @return ResponseCollection A collection of {@link Response} objects for
      *     the specified request.
      * @see loop()
@@ -521,15 +521,15 @@ class Client
 
     /**
      * Starts an event loop for the RouterOS callbacks.
-     * 
+     *
      * Starts an event loop for the RouterOS callbacks and finishes when there
      * are no more pending requests or when a specified timeout has passed
      * (whichever comes first).
-     * 
+     *
      * @param int $sTimeout  Timeout for the loop. If NULL, there is no time
      *     limit.
      * @param int $usTimeout Microseconds to add to the time limit.
-     * 
+     *
      * @return bool TRUE when there are any more pending requests, FALSE
      *     otherwise.
      * @see extractNewResponses()
@@ -579,7 +579,7 @@ class Client
 
     /**
      * Gets the number of pending requests.
-     * 
+     *
      * @return int The number of pending requests.
      * @see isRequestActive()
      */
@@ -590,16 +590,16 @@ class Client
 
     /**
      * Cancels a request.
-     * 
+     *
      * Cancels an active request. Using this function in favor of a plain call
      * to the "/cancel" command is highly reccomended, as it also updates the
      * counter of pending requests properly. Note that canceling a request also
      * removes any responses for it that were not previously extracted with
      * {@link static::extractNewResponses()}.
-     * 
+     *
      * @param string $tag Tag of the request to cancel. Setting NULL will cancel
      *     all requests.
-     * 
+     *
      * @return $this The client object.
      * @see sendAsync()
      * @see close()
@@ -662,14 +662,14 @@ class Client
 
     /**
      * Sets response streaming setting.
-     * 
+     *
      * Sets whether future responses are streamed. If responses are streamed,
      * the argument values are returned as streams instead of strings. This is
      * particularly useful if you expect a response that may contain one or more
      * very large words.
-     * 
+     *
      * @param bool $streamingResponses Whether to stream future responses.
-     * 
+     *
      * @return bool The previous value of the setting.
      * @see isStreamingResponses()
      */
@@ -682,9 +682,9 @@ class Client
 
     /**
      * Gets response streaming setting.
-     * 
+     *
      * Gets whether future responses are streamed.
-     * 
+     *
      * @return bool The value of the setting.
      * @see setStreamingResponses()
      */
@@ -695,11 +695,11 @@ class Client
 
     /**
      * Closes the opened connection, even if it is a persistent one.
-     * 
+     *
      * Closes the opened connection, even if it is a persistent one. Note that
      * {@link static::extractNewResponses()} can still be used to extract
      * responses collected prior to the closing.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function close()
@@ -709,7 +709,7 @@ class Client
          * The check below is done because for some unknown reason
          * (either a PHP or a RouterOS bug) calling "/quit" on an encrypted
          * connection makes one end hang.
-         * 
+         *
          * Since encrypted connections only appeared in RouterOS 6.1, and
          * the "/quit" call is needed for all <6.0 versions, problems due
          * to its absence should be limited to some earlier 6.* versions
@@ -737,7 +737,7 @@ class Client
         $this->pendingRequestsCount = 0;
         return $result;
     }
-    
+
     /**
      * Closes the connection, unless it's a persistent one.
      */
@@ -754,9 +754,9 @@ class Client
 
     /**
      * Sends a request to RouterOS.
-     * 
+     *
      * @param Request $request The request to send.
-     * 
+     *
      * @return $this The client object.
      * @see sendSync()
      * @see sendAsync()
@@ -770,14 +770,14 @@ class Client
 
     /**
      * Dispatches the next response in queue.
-     * 
+     *
      * Dispatches the next response in queue, i.e. it executes the associated
      * callback if there is one, or places the response in the response buffer.
-     * 
+     *
      * @param int $sTimeout  If a response is not immediatly available, wait
      *     this many seconds. If NULL, wait indefinetly.
      * @param int $usTimeout Microseconds to add to the waiting time.
-     * 
+     *
      * @throws SocketException When there's no response within the time limit.
      * @return Response The dispatched response.
      */
