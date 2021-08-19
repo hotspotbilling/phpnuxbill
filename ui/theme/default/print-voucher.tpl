@@ -8,7 +8,7 @@
 	.ukuran {
 		size:A4;
 	}
-	
+
 	body,td,th {
 		font-size: 12px;
 		font-family: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
@@ -80,8 +80,11 @@
                         <tr>
                             <td width="50%" valign="middle" style="padding-right:10px">
                             <center><strong style="font-size:38px">{$_L['Voucher_Hotspot']}</strong><span class="no-print">  ID {$vs['id']}</span></center>
-                            <table width="100%" border="1" cellspacing="0" cellpadding="4" bordercolor="#757575">
+                            <table width="100%" border="1" cellspacing="0" cellpadding="1" bordercolor="#757575">
                                 <tbody>
+                                <tr>
+                                    <td rowspan="5" width="1"><img src="qrcode/?data={$vs['code']}"></td>
+                                </tr>
                                 <tr>
                                     <td valign="middle" align="center" style="font-size:25px">{$_c['currency_code']} {number_format($vs['price'],2,$_c['dec_point'],$_c['thousands_sep'])}</td>
                                 </tr>
@@ -101,7 +104,7 @@
                                 {include file="$_path/../pages/Voucher.html"}
                             </td>
                         </tr>
-                        </table>    
+                        </table>
                     </td>
                     </tr>
                 </tbody>
