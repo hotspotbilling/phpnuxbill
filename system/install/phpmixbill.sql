@@ -205,7 +205,7 @@ VALUES
     1,
     'admin',
     'Administrator',
-    'YWRtaW46ODNlNDA2MGUtNzhlMS00ZmU1LTk5NzctYWVlY2NkNDZhMmI4',
+    '7c4a8d09ca3762af61e59520943dc26494f8941b',
     'Admin',
     'Active',
     '2015-10-30 18:27:02',
