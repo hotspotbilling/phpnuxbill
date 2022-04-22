@@ -38,13 +38,13 @@ foreach ($d as $ds){
 			$u = ORM::for_table('tbl_user_recharges')->where('id',$ds['id'])->find_one();
 			$c = ORM::for_table('tbl_customers')->where('id',$ds['customer_id'])->find_one();
 			$m = ORM::for_table('tbl_routers')->where('name',$ds['routers'])->find_one();
-			
+
 			try {
 				$client = new RouterOS\Client($m['ip_address'], $m['username'], $m['password']);
 			} catch (Exception $e) {
 				die('Unable to connect to the router.');
 			}
-			
+
 			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
 			$printRequest->setArgument('.proplist', '.id');
 			$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
@@ -64,7 +64,7 @@ foreach ($d as $ds){
 			$removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
 			$removeRequest->setArgument('numbers', $id);
 			$client->sendSync($removeRequest);
-			
+
 			//update database user dengan status off
 			$u->status = 'off';
 			$u->save();
@@ -95,7 +95,7 @@ foreach ($d as $ds){
 			$client->sendSync($setRequest);
 
 			//remove hotspot active
-			$onlineRequest = new RouterOS\Request('/ppp/secret/print');
+			$onlineRequest = new RouterOS\Request('/ppp/active/print');
 			$onlineRequest->setArgument('.proplist', '.id');
 			$onlineRequest->setQuery(RouterOS\Query::where('name', $c['username']));
 			$id = $client->sendSync($onlineRequest)->getProperty('.id');
@@ -103,12 +103,10 @@ foreach ($d as $ds){
 			$removeRequest = new RouterOS\Request('/ppp/active/remove');
 			$removeRequest->setArgument('numbers', $id);
 			$client->sendSync($removeRequest);
-			
+
 			$u->status = 'off';
 			$u->save();
 		}else
 			echo " : ACTIVE \r\n";
 	}
 }
-
-?>
