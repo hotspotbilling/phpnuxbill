@@ -1,6 +1,6 @@
-/system/config.php
+system/config.php
 .DS_Store
 .vscode/
 ui/compiled/*.php
 ui/cache/*.php
-/test.php
+test.php
