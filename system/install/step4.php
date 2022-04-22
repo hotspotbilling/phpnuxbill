@@ -89,7 +89,7 @@ if ($cn == '1') {
 			} elseif ($cn == '2') {
 			?>
 				<p> MySQL Connection was successfull. An error occured while adding data on MySQL. Unsuccessfull
-					Installation. Please refer manual installation in the website phpmixbill.com or Contact iesien22@yahoo.com for
+					Installation. Please refer manual installation in the website github.com/ibnux/phpmixbill or Contact phpmixbill@ibnux.com for
 					helping on installation</p>
 			<?php
 			} else {
