@@ -33,7 +33,7 @@ switch ($action) {
 			$paginator = Paginator::bootstrap('tbl_customers');
 			$d = ORM::for_table('tbl_customers')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
 		}
-		
+
         $ui->assign('d',$d);
 		$ui->assign('paginator',$paginator);
         $ui->display('customers.tpl');
@@ -64,19 +64,20 @@ switch ($action) {
 						$mikrotik = Router::_info($c['routers']);
 						if($c['type'] == 'Hotspot'){
 							try {
-								$client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                                $iport = explode(":",$mikrotik['ip_address']);
+								$client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
 							} catch (Exception $e) {
-								die('Unable to connect to the router.');
+								die("Unable to connect to the router.<br>".$e->getMessage());
 							}
 							$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
 							$printRequest->setArgument('.proplist', '.id');
 							$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
 							$id = $client->sendSync($printRequest)->getProperty('.id');
-							
+
 							$setRequest = new RouterOS\Request('/ip/hotspot/user/remove');
 							$setRequest->setArgument('numbers', $id);
 							$client->sendSync($setRequest);
-							
+
 							//remove hotspot active
 							$onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
 							$onlineRequest->setArgument('.proplist', '.id');
@@ -86,23 +87,24 @@ switch ($action) {
 							$removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
 							$removeRequest->setArgument('numbers', $id);
 							$client->sendSync($removeRequest);
-							
+
 						}else{
-							
+
 							try {
-								$client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                                $iport = explode(":",$mikrotik['ip_address']);
+								$client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
 							} catch (Exception $e) {
-								die('Unable to connect to the router.');
+								die("Unable to connect to the router.<br>".$e->getMessage());
 							}
 							$printRequest = new RouterOS\Request('/ppp/secret/print');
 							$printRequest->setArgument('.proplist', '.id');
 							$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
 							$id = $client->sendSync($printRequest)->getProperty('.id');
-							
+
 							$setRequest = new RouterOS\Request('/ppp/secret/remove');
 							$setRequest->setArgument('numbers', $id);
 							$client->sendSync($setRequest);
-							
+
 							//remove pppoe active
 							$onlineRequest = new RouterOS\Request('/ppp/active/print');
 							$onlineRequest->setArgument('.proplist', '.id');
@@ -127,7 +129,7 @@ switch ($action) {
 							$c->delete();
 						}catch(Exception $e){}
 					}
-           
+
             r2(U . 'customers/list', 's', $_L['User_Delete_Ok']);
         }
         break;
@@ -139,7 +141,7 @@ switch ($action) {
         $cpassword = _post('cpassword');
         $address = _post('address');
 		$phonenumber = _post('phonenumber');
-		
+
         $msg = '';
         if(Validator::Length($username,35,2) == false){
             $msg .= 'Username should be between 3 to 55 characters'. '<br>';
@@ -220,20 +222,21 @@ switch ($action) {
 						$mikrotik = Router::_info($c['routers']);
 						if($c['type'] == 'Hotspot'){
 							try {
-								$client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                                $iport = explode(":",$mikrotik['ip_address']);
+								$client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
 							} catch (Exception $e) {
-								die('Unable to connect to the router.');
+								die("Unable to connect to the router.<br>".$e->getMessage());
 							}
 							$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
 							$printRequest->setArgument('.proplist', '.id');
 							$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
 							$id = $client->sendSync($printRequest)->getProperty('.id');
-							
+
 							$setRequest = new RouterOS\Request('/ip/hotspot/user/set');
 							$setRequest->setArgument('numbers', $id);
 							$setRequest->setArgument('password', $password);
 							$client->sendSync($setRequest);
-							
+
 							//remove hotspot active
 							$onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
 							$onlineRequest->setArgument('.proplist', '.id');
@@ -243,26 +246,27 @@ switch ($action) {
 							$removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
 							$removeRequest->setArgument('numbers', $id);
 							$client->sendSync($removeRequest);
-							
+
 							$d->password = $password;
 							$d->save();
-							
+
 						}else{
 							try {
-								$client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                                $iport = explode(":",$mikrotik['ip_address']);
+								$client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
 							} catch (Exception $e) {
-								die('Unable to connect to the router.');
+								die("Unable to connect to the router.<br>".$e->getMessage());
 							}
 							$printRequest = new RouterOS\Request('/ppp/secret/print');
 							$printRequest->setArgument('.proplist', '.id');
 							$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
 							$id = $client->sendSync($printRequest)->getProperty('.id');
-							
+
 							$setRequest = new RouterOS\Request('/ppp/secret/set');
 							$setRequest->setArgument('numbers', $id);
 							$setRequest->setArgument('password', $password);
 							$client->sendSync($setRequest);
-							
+
 							//remove pppoe active
 							$onlineRequest = new RouterOS\Request('/ppp/active/print');
 							$onlineRequest->setArgument('.proplist', '.id');
@@ -272,7 +276,7 @@ switch ($action) {
 							$removeRequest = new RouterOS\Request('/ppp/active/remove');
 							$removeRequest->setArgument('numbers', $id);
 							$client->sendSync($removeRequest);
-							
+
 							$d->password = $password;
 							$d->save();
 						}

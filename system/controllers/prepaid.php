@@ -91,9 +91,10 @@ switch ($action) {
             if ($type == 'Hotspot') {
                 if ($b) {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
 
                     $printRequest = new RouterOS\Request(
@@ -191,9 +192,10 @@ switch ($action) {
                     $t->save();
                 } else {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
 
                     /* iBNuX Added:
@@ -285,9 +287,10 @@ switch ($action) {
 
                 if ($b) {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
                     $printRequest = new RouterOS\Request(
                         '/ppp secret print .proplist=name',
@@ -338,9 +341,10 @@ switch ($action) {
                     $t->save();
                 } else {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
                     $addRequest = new RouterOS\Request('/ppp/secret/add');
                     $client->sendSync(
@@ -424,9 +428,10 @@ switch ($action) {
         if ($d) {
             if ($d['type'] == 'Hotspot') {
                 try {
-                    $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                 } catch (Exception $e) {
-                    die('Unable to connect to the router.');
+                    die("Unable to connect to the router.<br>".$e->getMessage());
                 }
                 $printRequest = new RouterOS\Request(
                     '/ip hotspot user print .proplist=name',
@@ -442,9 +447,10 @@ switch ($action) {
                 $d->delete();
             } else {
                 try {
-                    $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                 } catch (Exception $e) {
-                    die('Unable to connect to the router.');
+                    die("Unable to connect to the router.<br>".$e->getMessage());
                 }
                 $printRequest = new RouterOS\Request(
                     '/ppp secret print .proplist=name',
@@ -682,9 +688,10 @@ switch ($action) {
             if ($v1['type'] == 'Hotspot') {
                 if ($b) {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
                     $printRequest = new RouterOS\Request(
                         '/ip hotspot user print .proplist=name',
@@ -781,9 +788,10 @@ switch ($action) {
                     $t->save();
                 } else {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
                     /* iBNuX Added:
 					* 	Time limit to Mikrotik
@@ -877,9 +885,10 @@ switch ($action) {
             } else {
                 if ($b) {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
                     $printRequest = new RouterOS\Request(
                         '/ppp secret print .proplist=name',
@@ -930,9 +939,10 @@ switch ($action) {
                     $t->save();
                 } else {
                     try {
-                        $client = new RouterOS\Client($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        $iport = explode(":", $mikrotik['ip_address']);
+                        $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
                     } catch (Exception $e) {
-                        die('Unable to connect to the router.');
+                        die("Unable to connect to the router.<br>".$e->getMessage());
                     }
                     $addRequest = new RouterOS\Request('/ppp/secret/add');
                     $client->sendSync(

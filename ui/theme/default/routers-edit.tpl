@@ -6,8 +6,8 @@
 					<div class="panel-heading">{$_L['Edit_Router']}</div>
 						<div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}routers/edit-post" > 
-				<input type="hidden" name="id" value="{$d['id']}">				
+                <form class="form-horizontal" method="post" role="form" action="{$_url}routers/edit-post" >
+				<input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Router_Name']}</label>
 						<div class="col-md-6">
@@ -17,7 +17,7 @@
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['IP_Address']}</label>
 						<div class="col-md-6">
-							<input type="text" class="form-control" id="ip_address" name="ip_address" value="{$d['ip_address']}">
+							<input type="text" placeholder="192.168.88.1:8728" class="form-control" id="ip_address" name="ip_address" value="{$d['ip_address']}">
 						</div>
                     </div>
                     <div class="form-group">
@@ -38,7 +38,7 @@
 							<textarea class="form-control" id="description" name="description">{$d['description']}</textarea>
 						</div>
                     </div>
-					
+
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-primary waves-effect waves-light" type="submit">{$_L['Save']}</button>
@@ -46,7 +46,7 @@
 						</div>
 					</div>
                 </form>
-				
+
 					</div>
 				</div>
 			</div>

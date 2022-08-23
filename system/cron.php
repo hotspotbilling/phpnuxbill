@@ -40,9 +40,10 @@ foreach ($d as $ds){
 			$m = ORM::for_table('tbl_routers')->where('name',$ds['routers'])->find_one();
 
 			try {
-				$client = new RouterOS\Client($m['ip_address'], $m['username'], $m['password']);
+                $iport = explode(":",$m['ip_address']);
+				$client = new RouterOS\Client($iport[0], $m['username'], $m['password'],($iport[1])?$iport[1]:null);
 			} catch (Exception $e) {
-				die('Unable to connect to the router.');
+				die("Unable to connect to the router.<br>".$e->getMessage());
 			}
 
 			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
@@ -81,9 +82,10 @@ foreach ($d as $ds){
 			$m = ORM::for_table('tbl_routers')->where('name',$ds['routers'])->find_one();
 
 			try {
-				$client = new RouterOS\Client($m['ip_address'], $m['username'], $m['password']);
+                $iport = explode(":",$m['ip_address']);
+				$client = new RouterOS\Client($iport[0], $m['username'], $m['password'],($iport[1])?$iport[1]:null);
 			} catch (Exception $e) {
-				die('Unable to connect to the router.');
+				die("Unable to connect to the router.<br>".$e->getMessage());
 			}
 			$printRequest = new RouterOS\Request('/ppp/secret/print');
 			$printRequest->setArgument('.proplist', '.id');

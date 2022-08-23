@@ -5,8 +5,8 @@
 				<div class="panel panel-default panel-hovered panel-stacked mb30">
 					<div class="panel-heading">{$_L['Add_Router']}</div>
 						<div class="panel-body">
-						
-                <form class="form-horizontal" method="post" role="form" action="{$_url}routers/add-post" >            
+
+                <form class="form-horizontal" method="post" role="form" action="{$_url}routers/add-post" >
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Router_Name']}</label>
 						<div class="col-md-6">
@@ -16,7 +16,7 @@
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['IP_Address']}</label>
 						<div class="col-md-6">
-							<input type="text" class="form-control" id="ip_address" name="ip_address">
+							<input type="text" placeholder="192.168.88.1:8728" class="form-control" id="ip_address" name="ip_address">
 						</div>
                     </div>
                     <div class="form-group">
@@ -37,7 +37,7 @@
 							<textarea class="form-control" id="description" name="description"></textarea>
 						</div>
                     </div>
-					
+
 
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
@@ -46,7 +46,7 @@
 						</div>
 					</div>
                 </form>
-				
+
 					</div>
 				</div>
 			</div>
