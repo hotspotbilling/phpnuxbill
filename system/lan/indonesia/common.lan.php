@@ -12,7 +12,7 @@ Contributor: Ibnu Maksum (@ibnux)
 ------------------------------------
 */
 
-$_L['Login'] = 'Masuk'; 
+$_L['Login'] = 'Masuk';
 $_L['Register'] = 'Daftar';
 $_L['Announcement'] = 'Pengumuman';
 $_L['Registration_Info'] = 'Info Pendaftaran';

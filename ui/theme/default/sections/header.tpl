@@ -263,9 +263,9 @@
 						</ul>
 					</li>
 					<li {if $_system_menu eq 'disquss'}class="active"{/if}>
-						<a href="{$_url}disquss">
+						<a href="https://github.com/ibnux/phpmixbill/discussions" target="_blank">
 							<i class="ion ion-chatbubbles"></i>
-							<span class="text">Disquss</span>
+							<span class="text">Discussions</span>
 						</a>
 					</li>
 				{/if}

@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<title>{$_title} - {$_L['Register']}</title>
 	<link rel="shortcut icon" href="{$_theme}/images/logo.png" type="image/x-icon" />
-	
+
 	<!-- Icons -->
 	<link rel="stylesheet" href="{$_theme}/fonts/ionicons/css/ionicons.min.css">
 	<link rel="stylesheet" href="{$_theme}/fonts/font-awesome/css/font-awesome.min.css">
@@ -13,14 +13,14 @@
 	<!-- Plugins -->
 	<link rel="stylesheet" href="{$_theme}/styles/plugins/waves.css">
 	<link rel="stylesheet" href="{$_theme}/styles/plugins/perfect-scrollbar.css">
-	
+
 	<!-- Css/Less Stylesheets -->
 	<link rel="stylesheet" href="{$_theme}/styles/bootstrap.min.css">
 	<link rel="stylesheet" href="{$_theme}/styles/main.min.css">
 
  	<!-- <link href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,300' rel='stylesheet' type='text/css'> -->
 	<!-- Match Media polyfill for IE9 -->
-	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]--> 
+	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]-->
 
 </head>
 <body id="app" class="app off-canvas body-full">
@@ -65,10 +65,6 @@
 								<input type="text" name="address" id="address" value="{$address}" class="md-input">
 								<label>{$_L['Address']}</label>
 							</div>
-							<div class="md-input-container md-float-label">
-								<input type="text" required class="md-input" value="{$phonenumber}" id="phonenumber" name="phonenumber">
-								<label>{$_L['Phone_Number']}</label>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -86,11 +82,6 @@
 								<input type="password" required class="md-input" id="cpassword" name="cpassword">
 								<label>{$_L['Confirm_Password']}</label>
 							</div>
-							<hr>
-							<div class="md-input-container md-float-label">
-								<input type="text" required class="md-input" id="kodevoucher" name="kodevoucher">
-								<label>{$_L['Code_Voucher']}</label>
-							</div>
 							<div class="btn-group btn-group-justified mb15">
 								<div class="btn-group">
 									<button class="btn btn-primary waves-effect waves-light" type="submit">{$_L['Register']}</button>
@@ -98,7 +89,7 @@
 								<div class="btn-group">
 									<a href="{$_url}login" class="btn btn-success">{$_L['Cancel']}</a>
 								</div>
-							</div> 
+							</div>
 						</div>
 					</div>
 				</div>

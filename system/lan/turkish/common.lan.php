@@ -3,7 +3,7 @@
 -----------------------------------
 Language Name: Turkish
 Contributor: Goktug Bogac OGEL
-Web: 
+Web:
 Email: goktugogel@gmail.com
 ------------------------------------
 */

@@ -219,7 +219,7 @@ $_L['Account_Information'] = 'Your Account Information';
 $_L['Welcome_Text_User'] = 'Welcome to the Panel Members page, on this page you can:';
 $_L['Welcome_Text_Admin'] = '<b>PHPMixBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate with router. If you get more profit with this application, please donate us.<br>Watch project <a href="https://github.com/ibnux/phpmixbill" target="_blank">in here</a>';
 
-//update 
+//update
 $_L['Invalid_Username_or_Password'] = 'Invalid Username or Password';
 $_L['Do_Not_Access'] = 'You do not have permission to access this page';
 $_L['Incorrect_Current_Password'] = 'Incorrect Current Password';

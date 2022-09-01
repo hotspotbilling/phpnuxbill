@@ -4,3 +4,4 @@ system/config.php
 ui/compiled/*.php
 ui/cache/*.php
 test.php
+pages/
