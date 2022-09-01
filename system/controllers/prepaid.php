@@ -190,6 +190,9 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "Hotspot";
                     $t->save();
+                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -282,6 +285,9 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "Hotspot";
                     $t->save();
+                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 }
             } else {
 
@@ -339,6 +345,9 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "PPPOE";
                     $t->save();
+                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -382,6 +391,9 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "PPPOE";
                     $t->save();
+                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 }
             }
             $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();

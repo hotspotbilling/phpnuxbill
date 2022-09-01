@@ -5,7 +5,7 @@
 				<div class="panel panel-default panel-hovered panel-stacked mb30">
 					<div class="panel-heading">{$_L['Recharge_Account']}</div>
 					<div class="panel-body">
-						<form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/recharge-post" >            
+						<form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/recharge-post" >
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Select_Account']}</label>
 								<div class="col-md-6">
@@ -20,8 +20,8 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Type']}</label>
 								<div class="col-md-6">
-									<input type="radio" id="Hot" name="type" value="Hotspot"> {$_L['Hotspot_Plans']} 
-									<input type="radio" id="POE" name="type" value="PPPOE"> {$_L['PPPOE_Plans']} 
+									<input type="radio" id="Hot" name="type" value="Hotspot"> {$_L['Hotspot_Plans']}
+									<input type="radio" id="POE" name="type" value="PPPOE"> {$_L['PPPOE_Plans']}
 								</div>
 							</div>
 							<div class="form-group">
@@ -32,7 +32,7 @@
 									</select>
 								</div>
 							</div>
-							
+
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Service_Plan']}</label>
 								<div class="col-md-6">
@@ -44,7 +44,7 @@
 
 							<div class="form-group">
 								<div class="col-lg-offset-2 col-lg-10">
-									<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Recharge']}</button> 
+									<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Recharge']}</button>
 									Or <a href="{$_url}customers/list">{$_L['Cancel']}</a>
 								</div>
 							</div>

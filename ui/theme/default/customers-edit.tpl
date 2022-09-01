@@ -5,13 +5,13 @@
 				<div class="panel panel-default panel-hovered panel-stacked mb30">
 					<div class="panel-heading">{$_L['Edit_Contact']}</div>
 						<div class="panel-body">
-						
-							<form class="form-horizontal" method="post" role="form" action="{$_url}customers/edit-post" >         
+
+							<form class="form-horizontal" method="post" role="form" action="{$_url}customers/edit-post" >
 							<input type="hidden" name="id" value="{$d['id']}">
 								<div class="form-group">
 									<label class="col-md-2 control-label">{$_L['Username']}</label>
 									<div class="col-md-6">
-										<input type="text" class="form-control" id="username" name="username" value="{$d['username']}">
+										<input type="text" class="form-control" id="username" name="username" value="{$d['username']}" placeholder="Phone Number" required>
 									</div>
 								</div>
 								<div class="form-group">

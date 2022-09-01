@@ -179,6 +179,27 @@ function _log($description, $type = '', $userid = '0')
     $d->save();
 }
 
+
+function sendTelegram($txt)
+{
+    global $_c;
+    if(!empty($_c['telegram_bot']) && !empty($_c['telegram_target_id'])){
+        file_get_contents('https://api.telegram.org/bot'.$_c['telegram_bot'].'/sendMessage?chat_id='.$_c['telegram_target_id'].'&text=' . urlencode($txt));
+    }
+}
+
+
+function sendSMS($phone, $txt)
+{
+    global $_c;
+    if(!empty($_c['sms_url'])){
+        $smsurl = str_replace('[number]',urlencode($phone),$_c['sms_url']);
+        $smsurl = str_replace('[text]',urlencode($txt),$smsurl);
+        file_get_contents($smsurl);
+    }
+}
+
+
 function time_elapsed_string($datetime, $full = false)
 {
     $now = new DateTime;

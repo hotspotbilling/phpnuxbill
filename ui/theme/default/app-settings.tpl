@@ -26,7 +26,7 @@
                             <input type="text" class="form-control" id="phone" name="phone" value="{$_c['phone']}">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group hidden">
                         <label class="col-md-2 control-label">Theme</label>
                         <div class="col-md-6">
                             <select name="theme" id="theme" class="form-control">
@@ -40,13 +40,13 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Telegram Bot Token</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="telegram_bot" name="telegram_bot" value="{$_c['telegram_bot']}">
+                            <input type="text" class="form-control" id="telegram_bot" name="telegram_bot" value="{$_c['telegram_bot']}" placeholder="123456:asdasgdkuasghddlashdashldhalskdklasd">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">Telegram Target ID</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="telegram_target_id" name="telegram_target_id" value="{$_c['telegram_target_id']}">
+                            <input type="text" class="form-control" id="telegram_target_id" name="telegram_target_id" value="{$_c['telegram_target_id']}" placeholder="12345678">
                         </div>
                     </div>
                 </div>

@@ -143,6 +143,10 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "Hotspot";
                     $t->save();
+                    // Telegram to Admin
+                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -234,6 +238,10 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "Hotspot";
                     $t->save();
+                    // Telegram to Admin
+                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 }
 
                 $v1->status = "1";
@@ -291,6 +299,10 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "PPPOE";
                     $t->save();
+                    // Telegram to Admin
+                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -334,6 +346,9 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "PPPOE";
                     $t->save();
+                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
+                    "\nRouter: ".$v1['routers'].
+                    "\nPrice: ".$p['price']);
                 }
 
                 $v1->status = "1";
