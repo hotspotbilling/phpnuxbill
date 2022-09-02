@@ -50,7 +50,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">SMS/Whatsapp Notification</div>
+                <div class="panel-heading">Whatsapp Notification</div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">Server URL</label>

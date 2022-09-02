@@ -190,9 +190,6 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "Hotspot";
                     $t->save();
-                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -285,10 +282,10 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "Hotspot";
                     $t->save();
-                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 }
+                sendTelegram( "$admin[fullname] Recharge Voucher Hotspot for $c[username]\n".$p['name_plan'].
+                "\nRouter: ".$server.
+                "\nPrice: ".$p['price']);
             } else {
 
                 if ($b) {
@@ -345,9 +342,6 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "PPPOE";
                     $t->save();
-                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -391,13 +385,33 @@ switch ($action) {
                     $t->routers = $server;
                     $t->type = "PPPOE";
                     $t->save();
-                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 }
+                sendTelegram( "$admin[fullname] Recharge Voucher PPPOE for $c[username]\n".$p['name_plan'].
+                "\nRouter: ".$server.
+                "\nPrice: ".$p['price']);
             }
+
             $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
             $ui->assign('in', $in);
+
+            sendSMS($c['username'], "*$_c[CompanyName]*\n".
+					"$_c[address]\n".
+					"$_c[phone]\n".
+					"\n\n".
+					"INVOICE: *$in[invoice]*\n".
+                    "$_L[Date] : $date_now\n".
+					"$_L[Sales] : $admin[fullname]\n".
+					"\n\n".
+					"$_L[Type] : *$in[type]*\n".
+					"$_L[Plan_Name] : *$in[plan_name]*\n".
+					"$_L[Plan_Price] : *$_c[currency_code] ".number_format($in['price'],2,$_c['dec_point'],$_c['thousands_sep'])."*\n\n".
+					"$_L[Username] : *$in[username]*\n".
+					"$_L[Password] : **********\n\n".
+					"$_L[Created_On] :\n*".date($_c['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
+					"$_L[Expires_On] :\n*".date($_c['date_format'], strtotime($in['expiration']))." $in[time]*\n".
+					"\n\n".
+					"$_c[note]");
+
 
             $ui->assign('date', $date_now);
             $ui->display('invoice.tpl');
@@ -894,6 +908,10 @@ switch ($action) {
                 $v1->status = "1";
                 $v1->user = $c['username'];
                 $v1->save();
+
+                sendTelegram( "$admin[fullname] Refill Voucher Hotspot for $c[username]\n".$p['name_plan'].
+                "\nRouter: ".$v1['routers'].
+                "\nPrice: ".$p['price']);
             } else {
                 if ($b) {
                     try {
@@ -997,9 +1015,33 @@ switch ($action) {
                 $v1->status = "1";
                 $v1->user = $c['username'];
                 $v1->save();
+
+
+                sendTelegram( "$admin[fullname] Refill Voucher PPPOE for $c[username]\n".$p['name_plan'].
+                "\nRouter: ".$v1['routers'].
+                "\nPrice: ".$p['price']);
             }
             $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
             $ui->assign('in', $in);
+
+
+            sendSMS($c['username'], "*$_c[CompanyName]*\n".
+					"$_c[address]\n".
+					"$_c[phone]\n".
+					"\n\n".
+					"INVOICE: *$in[invoice]*\n".
+                    "$_L[Date] : $date_now\n".
+					"$_L[Sales] : $admin[fullname]\n".
+					"\n\n".
+					"$_L[Type] : *$in[type]*\n".
+					"$_L[Plan_Name] : *$in[plan_name]*\n".
+					"$_L[Plan_Price] : *$_c[currency_code] ".number_format($in['price'],2,$_c['dec_point'],$_c['thousands_sep'])."*\n\n".
+					"$_L[Username] : *$in[username]*\n".
+					"$_L[Password] : **********\n\n".
+					"$_L[Created_On] :\n*".date($_c['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
+					"$_L[Expires_On] :\n*".date($_c['date_format'], strtotime($in['expiration']))." $in[time]*\n".
+					"\n\n".
+					"$_c[note]");
 
             $ui->assign('date', $date_now);
             $ui->display('invoice.tpl');
