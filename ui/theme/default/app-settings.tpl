@@ -34,6 +34,17 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="form-group hidden">
+                        <label class="col-md-2 control-label">Payment Gateway</label>
+                        <div class="col-md-6">
+                            <select name="theme" id="theme" class="form-control">
+                                <option value="none">None</option>
+                                <option value="xendit" {if $_c['payment_gateway'] eq 'xendit'}selected="selected" {/if}>Xendit</option>
+                                <option value="midtrans" {if $_c['payment_gateway'] eq 'midtrans'}selected="selected" {/if}>Midtrans</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="panel-heading">Telegram Notification</div>
                 <div class="panel-body">

@@ -262,6 +262,18 @@
 							<li>&nbsp;</li>
 						</ul>
 					</li>
+					<li {if $_system_menu eq 'paymentgateway'}class="open"{/if}>
+						<a href="#" onClick="toggleDropdownMobile(this)">
+							<i class="ion ion-cash"></i>
+							<span class="text">Payment Gateway</span>
+							<i class="arrow ion-chevron-left"></i>
+						</a>
+						<ul class="inner-drop list-unstyled">
+							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/xendit">Xendit</a></li>
+							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/midtrans">Midtrans</a></li>
+							<li>&nbsp;</li>
+						</ul>
+					</li>
 					<li {if $_system_menu eq 'disquss'}class="active"{/if}>
 						<a href="https://github.com/ibnux/phpmixbill/discussions" target="_blank">
 							<i class="ion ion-chatbubbles"></i>

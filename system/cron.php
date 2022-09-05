@@ -1,11 +1,6 @@
 <?php
 /**
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
-
-
-* @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
-* @license		GNU General Public License version 2 or later; see LICENSE.txt
-
 **/
 
 require('config.php');
@@ -108,7 +103,6 @@ foreach ($d as $ds){
 
 			$u->status = 'off';
 			$u->save();
-		}else
-			echo " : ACTIVE \r\n";
+		}else echo " : ACTIVE \r\n";
 	}
 }
