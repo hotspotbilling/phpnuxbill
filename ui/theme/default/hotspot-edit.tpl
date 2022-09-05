@@ -17,17 +17,17 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Plan_Type']}</label>
 								<div class="col-md-10">
-									<input type="radio" id="Unlimited" name="typebp" value="Unlimited" {if $d['typebp'] eq 'Unlimited'} checked {/if}> {$_L['Unlimited']} 
-									<input type="radio" id="Limited" name="typebp" value="Limited" {if $d['typebp'] eq 'Limited'} checked {/if}> {$_L['Limited']} 
+									<input type="radio" id="Unlimited" name="typebp" value="Unlimited" {if $d['typebp'] eq 'Unlimited'} checked {/if}> {$_L['Unlimited']}
+									<input type="radio" id="Limited" name="typebp" value="Limited" {if $d['typebp'] eq 'Limited'} checked {/if}> {$_L['Limited']}
 								</div>
 							</div>
 							<div {if $d['typebp'] eq 'Unlimited'} style="display:none;" {/if} id="Type">
 								<div class="form-group">
 									<label class="col-md-2 control-label">{$_L['Limit_Type']}</label>
 									<div class="col-md-10">
-										<input type="radio" id="Time_Limit" name="limit_type" value="Time_Limit" {if $d['limit_type'] eq 'Time_Limit'} checked {/if}> {$_L['Time_Limit']} 
-										<input type="radio" id="Data_Limit" name="limit_type" value="Data_Limit" {if $d['limit_type'] eq 'Data_Limit'} checked {/if}> {$_L['Data_Limit']} 
-										<input type="radio" id="Both_Limit" name="limit_type" value="Both_Limit" {if $d['limit_type'] eq 'Both_Limit'} checked {/if}> {$_L['Both_Limit']} 
+										<input type="radio" id="Time_Limit" name="limit_type" value="Time_Limit" {if $d['limit_type'] eq 'Time_Limit'} checked {/if}> {$_L['Time_Limit']}
+										<input type="radio" id="Data_Limit" name="limit_type" value="Data_Limit" {if $d['limit_type'] eq 'Data_Limit'} checked {/if}> {$_L['Data_Limit']}
+										<input type="radio" id="Both_Limit" name="limit_type" value="Both_Limit" {if $d['limit_type'] eq 'Both_Limit'} checked {/if}> {$_L['Both_Limit']}
 									</div>
 								</div>
 							</div>
@@ -88,6 +88,8 @@
 								</div>
 								<div class="col-md-2">
 									<select class="form-control" id="validity_unit" name="validity_unit">
+										<option value="Mins" {if $d['validity_unit'] eq 'Mins'} selected {/if}>{$_L['Mins']}</option>
+										<option value="Hrs" {if $d['validity_unit'] eq 'Hrs'} selected {/if}>{$_L['Hrs']}</option>
 										<option value="Days" {if $d['validity_unit'] eq 'Days'} selected {/if}>{$_L['Days']}</option>
 										<option value="Months" {if $d['validity_unit'] eq 'Months'} selected {/if}>{$_L['Months']}</option>
 									</select>
@@ -99,7 +101,7 @@
 									<input type="text" class="form-control" id="routers" name="routers" value="{$d['routers']}" readonly>
 								</div>
 							</div>
-							
+
 							<div class="form-group">
 								<div class="col-lg-offset-2 col-lg-10">
 									<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Save']}</button>
@@ -107,7 +109,7 @@
 								</div>
 							</div>
 						</form>
-				
+
 					</div>
 				</div>
 			</div>

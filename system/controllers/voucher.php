@@ -3,10 +3,6 @@
 /**
  * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
 
-
- * @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
-
  **/
 _auth();
 $ui->assign('_title', $_L['Voucher'] . '- ' . $config['CompanyName']);
@@ -40,8 +36,19 @@ switch ($action) {
         $time = date("H:i:s");
 
         $mikrotik = Router::_info($v1['routers']);
-        $date_exp = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d") + $p['validity'], date("Y")));
-
+        if($p['validity_unit']=='Months'){
+            $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' month'));
+        }else if($p['validity_unit']=='Days'){
+            $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' day'));
+        }else if($p['validity_unit']=='Hrs'){
+            $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' hour')));
+            $date_exp = $datetime[0];
+            $time = $datetime[1];
+        }else if($p['validity_unit']=='Mins'){
+            $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' minute')));
+            $date_exp = $datetime[0];
+            $time = $datetime[1];
+        }
         if ($v1) {
             if ($v1['type'] == 'Hotspot') {
                 if ($b) {
@@ -143,10 +150,6 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "Hotspot";
                     $t->save();
-                    // Telegram to Admin
-                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -238,15 +241,15 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "Hotspot";
                     $t->save();
-                    // Telegram to Admin
-                    sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 }
 
                 $v1->status = "1";
                 $v1->user = $c['username'];
                 $v1->save();
+                // Telegram to Admin
+                sendTelegram( $c['username']." Activate Voucher Hotspot\n".$p['name_plan'].
+                "\nRouter: ".$v1['routers'].
+                "\nPrice: ".$p['price']);
             } else {
                 if ($b) {
                     try {
@@ -299,10 +302,6 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "PPPOE";
                     $t->save();
-                    // Telegram to Admin
-                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 } else {
                     try {
                         $iport = explode(":", $mikrotik['ip_address']);
@@ -346,14 +345,15 @@ switch ($action) {
                     $t->routers = $v1['routers'];
                     $t->type = "PPPOE";
                     $t->save();
-                    sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
-                    "\nRouter: ".$v1['routers'].
-                    "\nPrice: ".$p['price']);
                 }
 
                 $v1->status = "1";
                 $v1->user = $c['username'];
                 $v1->save();
+                // Telegram to Admin
+                sendTelegram( $c['username']." Activate Voucher PPPOE\n".$p['name_plan'].
+                "\nRouter: ".$v1['routers'].
+                "\nPrice: ".$p['price']);
             }
 
             r2(U . "voucher/list-activated", 's', $_L['Activation_Vouchers_Successfully']);

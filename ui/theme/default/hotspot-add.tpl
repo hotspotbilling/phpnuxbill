@@ -6,7 +6,7 @@
 					<div class="panel-heading">{$_L['Add_Plan']}</div>
 						<div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}services/add-post" >            
+                <form class="form-horizontal" method="post" role="form" action="{$_url}services/add-post" >
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Plan_Name']}</label>
 						<div class="col-md-6">
@@ -16,17 +16,17 @@
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Plan_Type']}</label>
 						<div class="col-md-10">
-							<input type="radio" id="Unlimited" name="typebp" value="Unlimited" checked> {$_L['Unlimited']} 
-							<input type="radio" id="Limited" name="typebp" value="Limited"> {$_L['Limited']} 
+							<input type="radio" id="Unlimited" name="typebp" value="Unlimited" checked> {$_L['Unlimited']}
+							<input type="radio" id="Limited" name="typebp" value="Limited"> {$_L['Limited']}
 						</div>
                     </div>
 					<div style="display:none;" id="Type">
 						<div class="form-group">
 							<label class="col-md-2 control-label">{$_L['Limit_Type']}</label>
 							<div class="col-md-10">
-								<input type="radio" id="Time_Limit" name="limit_type" value="Time_Limit" checked> {$_L['Time_Limit']} 
-								<input type="radio" id="Data_Limit" name="limit_type" value="Data_Limit"> {$_L['Data_Limit']} 
-								<input type="radio" id="Both_Limit" name="limit_type" value="Both_Limit"> {$_L['Both_Limit']} 
+								<input type="radio" id="Time_Limit" name="limit_type" value="Time_Limit" checked> {$_L['Time_Limit']}
+								<input type="radio" id="Data_Limit" name="limit_type" value="Data_Limit"> {$_L['Data_Limit']}
+								<input type="radio" id="Both_Limit" name="limit_type" value="Both_Limit"> {$_L['Both_Limit']}
 							</div>
 						</div>
 					</div>
@@ -88,8 +88,10 @@
 						</div>
 						<div class="col-md-2">
 							<select class="form-control" id="validity_unit" name="validity_unit">
-								<option value="Days">{$_L['Days']}</option>
-								<option value="Months">{$_L['Months']}</option>
+                                <option value="Mins" {if $d['validity_unit'] eq 'Mins'} selected {/if}>{$_L['Mins']}</option>
+                                <option value="Hrs" {if $d['validity_unit'] eq 'Hrs'} selected {/if}>{$_L['Hrs']}</option>
+                                <option value="Days" {if $d['validity_unit'] eq 'Days'} selected {/if}>{$_L['Days']}</option>
+                                <option value="Months" {if $d['validity_unit'] eq 'Months'} selected {/if}>{$_L['Months']}</option>
 							</select>
 						</div>
                     </div>
@@ -103,7 +105,7 @@
                             </select>
 						</div>
                     </div>
-					
+
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Save']}</button>
@@ -111,7 +113,7 @@
 						</div>
 					</div>
                 </form>
-				
+
 					</div>
 				</div>
 			</div>
