@@ -204,6 +204,7 @@ switch ($action) {
         $telegram_target_id = _post('telegram_target_id');
         $sms_url = _post('sms_url');
         $address = _post('address');
+        $payment_gateway = _post('payment_gateway');
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
         } else {
@@ -244,12 +245,23 @@ switch ($action) {
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'sms_url')->find_one();
             if($d){
-                $d->setting = $sms_url;
+                $d->value = $sms_url;
                 $d->save();
             }else{
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'sms_url';
                 $d->value = $sms_url;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'payment_gateway')->find_one();
+            if($d){
+                $d->value = $payment_gateway;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'payment_gateway';
+                $d->value = $payment_gateway;
                 $d->save();
             }
 
