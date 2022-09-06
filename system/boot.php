@@ -71,11 +71,11 @@ function _notify($msg, $type = 'e')
 }
 
 require_once('system/vendors/smarty/libs/Smarty.class.php');
-$_theme = APP_URL . '/ui/theme/' . $config['theme'];
+$_theme = APP_URL . '/ui/ui';
 $lan_file = 'system/lan/' . $config['language'] . '/common.lan.php';
 require($lan_file);
 $ui = new Smarty();
-$ui->setTemplateDir('ui/theme/' . $config['theme'] . '/');
+$ui->setTemplateDir('ui/ui/');
 $ui->setCompileDir('ui/compiled/');
 $ui->setConfigDir('ui/conf/');
 $ui->setCacheDir('ui/cache/');
