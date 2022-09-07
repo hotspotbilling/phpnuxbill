@@ -68,24 +68,26 @@ switch ($action) {
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
-            $mikrotik = Router::_info($d['routers']);
-            try {
-                $iport = explode(":", $mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                die("Unable to connect to the router.<br>".$e->getMessage());
-            }
-            $printRequest = new RouterOS\Request(
-                '/ip hotspot user profile print .proplist=name',
-                RouterOS\Query::where('name', $d['name_plan'])
-            );
-            $profileName = $client->sendSync($printRequest)->getProperty('name');
+            if(!$_c['radius_mode']){
+                $mikrotik = Router::_info($d['routers']);
+                try {
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $printRequest = new RouterOS\Request(
+                    '/ip hotspot user profile print .proplist=name',
+                    RouterOS\Query::where('name', $d['name_plan'])
+                );
+                $profileName = $client->sendSync($printRequest)->getProperty('name');
 
-            $removeRequest = new RouterOS\Request('/ip/hotspot/user/profile/remove');
-            $client(
-                $removeRequest
-                    ->setArgument('numbers', $profileName)
-            );
+                $removeRequest = new RouterOS\Request('/ip/hotspot/user/profile/remove');
+                $client(
+                    $removeRequest
+                        ->setArgument('numbers', $profileName)
+                );
+            }
 
             $d->delete();
 
@@ -138,20 +140,22 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            $mikrotik = Router::_info($routers);
-            try {
-                $iport = explode(":", $mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                die("Unable to connect to the router.<br>".$e->getMessage());
+            if(!$_c['radius_mode']){
+                $mikrotik = Router::_info($routers);
+                try {
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
+                $client->sendSync(
+                    $addRequest
+                        ->setArgument('name', $name)
+                        ->setArgument('shared-users', $sharedusers)
+                        ->setArgument('rate-limit', $rate)
+                );
             }
-            $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
-            $client->sendSync(
-                $addRequest
-                    ->setArgument('name', $name)
-                    ->setArgument('shared-users', $sharedusers)
-                    ->setArgument('rate-limit', $rate)
-            );
 
             $d = ORM::for_table('tbl_plans')->create();
             $d->name_plan = $name;
@@ -224,26 +228,28 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            $mikrotik = Router::_info($routers);
-            try {
-                $iport = explode(":", $mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                die("Unable to connect to the router.<br>".$e->getMessage());
-            }
-            $printRequest = new RouterOS\Request(
-                '/ip hotspot user profile print .proplist=name',
-                RouterOS\Query::where('name', $name)
-            );
-            $profileName = $client->sendSync($printRequest)->getProperty('name');
+            if(!$_c['radius_mode']){
+                $mikrotik = Router::_info($routers);
+                try {
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $printRequest = new RouterOS\Request(
+                    '/ip hotspot user profile print .proplist=name',
+                    RouterOS\Query::where('name', $name)
+                );
+                $profileName = $client->sendSync($printRequest)->getProperty('name');
 
-            $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-            $client(
-                $setRequest
-                    ->setArgument('numbers', $profileName)
-                    ->setArgument('shared-users', $sharedusers)
-                    ->setArgument('rate-limit', $rate)
-            );
+                $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
+                $client(
+                    $setRequest
+                        ->setArgument('numbers', $profileName)
+                        ->setArgument('shared-users', $sharedusers)
+                        ->setArgument('rate-limit', $rate)
+                );
+            }
 
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
@@ -317,25 +323,26 @@ switch ($action) {
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
-            $mikrotik = Router::_info($d['routers']);
-            try {
-                $iport = explode(":", $mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                die("Unable to connect to the router.<br>".$e->getMessage());
+            if(!$_c['radius_mode']){
+                $mikrotik = Router::_info($d['routers']);
+                try {
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $printRequest = new RouterOS\Request(
+                    '/ppp profile print .proplist=name',
+                    RouterOS\Query::where('name', $d['name_plan'])
+                );
+                $profileName = $client->sendSync($printRequest)->getProperty('name');
+
+                $removeRequest = new RouterOS\Request('/ppp/profile/remove');
+                $client(
+                    $removeRequest
+                        ->setArgument('numbers', $profileName)
+                );
             }
-            $printRequest = new RouterOS\Request(
-                '/ppp profile print .proplist=name',
-                RouterOS\Query::where('name', $d['name_plan'])
-            );
-            $profileName = $client->sendSync($printRequest)->getProperty('name');
-
-            $removeRequest = new RouterOS\Request('/ppp/profile/remove');
-            $client(
-                $removeRequest
-                    ->setArgument('numbers', $profileName)
-            );
-
             $d->delete();
 
             r2(U . 'services/pppoe', 's', $_L['Delete_Successfully']);
@@ -381,21 +388,23 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            $mikrotik = Router::_info($routers);
-            try {
-                $iport = explode(":", $mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                die("Unable to connect to the router.<br>".$e->getMessage());
+            if(!$_c['radius_mode']){
+                $mikrotik = Router::_info($routers);
+                try {
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $addRequest = new RouterOS\Request('/ppp/profile/add');
+                $client->sendSync(
+                    $addRequest
+                        ->setArgument('name', $name)
+                        ->setArgument('local-address', $pool)
+                        ->setArgument('remote-address', $pool)
+                        ->setArgument('rate-limit', $rate)
+                );
             }
-            $addRequest = new RouterOS\Request('/ppp/profile/add');
-            $client->sendSync(
-                $addRequest
-                    ->setArgument('name', $name)
-                    ->setArgument('local-address', $pool)
-                    ->setArgument('remote-address', $pool)
-                    ->setArgument('rate-limit', $rate)
-            );
 
             $d = ORM::for_table('tbl_plans')->create();
             $d->type = 'PPPOE';
@@ -455,27 +464,29 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            $mikrotik = Router::_info($routers);
-            try {
-                $iport = explode(":", $mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                die("Unable to connect to the router.<br>".$e->getMessage());
-            }
-            $printRequest = new RouterOS\Request(
-                '/ppp profile print .proplist=name',
-                RouterOS\Query::where('name', $name)
-            );
-            $profileName = $client->sendSync($printRequest)->getProperty('name');
+            if(!$_c['radius_mode']){
+                $mikrotik = Router::_info($routers);
+                try {
+                    $iport = explode(":", $mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $printRequest = new RouterOS\Request(
+                    '/ppp profile print .proplist=name',
+                    RouterOS\Query::where('name', $name)
+                );
+                $profileName = $client->sendSync($printRequest)->getProperty('name');
 
-            $setRequest = new RouterOS\Request('/ppp/profile/set');
-            $client(
-                $setRequest
-                    ->setArgument('numbers', $profileName)
-                    ->setArgument('local-address', $pool)
-                    ->setArgument('remote-address', $pool)
-                    ->setArgument('rate-limit', $rate)
-            );
+                $setRequest = new RouterOS\Request('/ppp/profile/set');
+                $client(
+                    $setRequest
+                        ->setArgument('numbers', $profileName)
+                        ->setArgument('local-address', $pool)
+                        ->setArgument('remote-address', $pool)
+                        ->setArgument('rate-limit', $rate)
+                );
+            }
 
             $d->name_plan = $name;
             $d->id_bw = $id_bw;

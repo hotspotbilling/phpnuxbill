@@ -206,6 +206,7 @@ switch ($action) {
         $wa_url = _post('wa_url');
         $address = _post('address');
         $tawkto = _post('tawkto');
+        $radius_mode = _post('radius_mode')*1;
         $payment_gateway = _post('payment_gateway');
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
@@ -286,6 +287,17 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'tawkto';
                 $d->value = $tawkto;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_mode')->find_one();
+            if($d){
+                $d->value = $radius_mode;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'radius_mode';
+                $d->value = $radius_mode;
                 $d->save();
             }
 

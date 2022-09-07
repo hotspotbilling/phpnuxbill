@@ -83,11 +83,13 @@ switch ($action) {
             $msg .= $_L['Router_already_exist']. '<br>';
         }
 
-        try {
-            $iport = explode(":", $ip_address);
-            $client = new RouterOS\Client($iport[0], $username, $password, ($iport[1]) ? $iport[1] : null);
-        } catch (Exception $e) {
-            $msg .= "Unable to connect to the router.<br>".$e->getMessage().'<br>';
+        if(!$_c['radius_mode']){
+            try {
+                $iport = explode(":", $ip_address);
+                $client = new RouterOS\Client($iport[0], $username, $password, ($iport[1]) ? $iport[1] : null);
+            } catch (Exception $e) {
+                $msg .= "Unable to connect to the router.<br>".$e->getMessage().'<br>';
+            }
         }
 
         if($msg == ''){
@@ -145,11 +147,13 @@ switch ($action) {
         }
 
 
-        try {
-            $iport = explode(":", $ip_address);
-            $client = new RouterOS\Client($iport[0], $username, $password, ($iport[1]) ? $iport[1] : null);
-        } catch (Exception $e) {
-            $msg .= "Unable to connect to the router.<br>".$e->getMessage().'<br>';
+        if(!$_c['radius_mode']){
+            try {
+                $iport = explode(":", $ip_address);
+                $client = new RouterOS\Client($iport[0], $username, $password, ($iport[1]) ? $iport[1] : null);
+            } catch (Exception $e) {
+                $msg .= "Unable to connect to the router.<br>".$e->getMessage().'<br>';
+            }
         }
 
 

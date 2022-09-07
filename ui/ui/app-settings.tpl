@@ -33,7 +33,22 @@
                                 <option value="none">None</option>
                                 <option value="xendit" {if $_c['payment_gateway'] eq 'xendit'}selected="selected" {/if}>Xendit</option>
                                 <option value="midtrans" {if $_c['payment_gateway'] eq 'midtrans'}selected="selected" {/if}>Midtrans</option>
+                                <option value="tripay" {if $_c['payment_gateway'] eq 'tripay'}selected="selected" {/if}>Tripay</option>
                             </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Radius Mode?</label>
+                        <div class="col-md-6">
+                            <select name="radius_mode" id="radius_mode" class="form-control">
+                                <option value="0">No</option>
+                                <option value="1" {if $_c['radius_mode']}selected="selected" {/if}>Yes</option>
+                            </select>
+                            <p class="help-block">Still on Testing.</p>
+                            <p class="help-block">Changing from Radius will not add existing user to Mikrotik Hotspot.</p>
+                            <p class="help-block">With Radius user can use Hotspot or PPOE.</p>
                         </div>
                     </div>
                 </div>
