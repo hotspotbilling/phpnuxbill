@@ -80,7 +80,8 @@
                             <input type="text" class="form-control" id="tawkto" name="tawkto" value="{$_c['tawkto']}" placeholder="62f1ca7037898912e961f5/1ga07df">
                             <p class="help-block">From Direct Chat Link.</p>
                             <pre>/ip hotspot walled-garden
-add dst-host=:^tawk.to</pre>
+add dst-host=tawk.to
+add dst-host=*.tawk.to</pre>
                         </div>
                     </div>
                 </div>

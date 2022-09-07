@@ -45,7 +45,8 @@
                         </div>
                     </div>
                         <pre>/ip hotspot walled-garden
-add dst-host=:^tripay.co.id</pre>
+add dst-host=tripay.co.id
+add dst-host=*.tripay.co.id</pre>
                 </div>
             </div>
 

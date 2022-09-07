@@ -56,7 +56,8 @@
                         </div>
                     </div>
                         <pre>/ip hotspot walled-garden
-add dst-host=:^midtrans.com</pre>
+add dst-host=midtrans.com
+add dst-host=*.midtrans.com</pre>
                 </div>
             </div>
 

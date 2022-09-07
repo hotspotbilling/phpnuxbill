@@ -42,7 +42,8 @@
                         </div>
                     </div>
                         <pre>/ip hotspot walled-garden
-add dst-host=:^xendit.co</pre>
+add dst-host=xendit.co
+add dst-host=*.xendit.co</pre>
                 </div>
             </div>
 
