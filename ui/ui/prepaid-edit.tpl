@@ -24,7 +24,7 @@
                             </select>
 						</div>
                     </div>
-					
+
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Created_On']}</label>
 						<div class="col-md-6">
@@ -43,10 +43,10 @@
 							</div>
 						</div>
                     </div>
-					
+
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Edit']}</button> 
+							<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Edit']}</button>
 							Or <a href="{$_url}prepaid/list">{$_L['Cancel']}</a>
 						</div>
 					</div>

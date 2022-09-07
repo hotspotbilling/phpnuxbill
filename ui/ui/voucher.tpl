@@ -33,7 +33,7 @@
 						<div class="table-responsive">
 						<table id="datatable" class="table table-striped table-bordered">
 							<thead>
-								<tr> 
+								<tr>
 									<th>ID</th>
 									<th>{$_L['Type']}</th>
 									<th>{$_L['Routers']}</th>
@@ -47,7 +47,7 @@
 							<tbody>
 							{foreach $d as $ds}
 								<tr>
-									<td>{$ds['id']}</td> 
+									<td>{$ds['id']}</td>
 									<td>{$ds['type']}</td>
 									<td>{$ds['routers']}</td>
 									<td>{$ds['name_plan']}</td>

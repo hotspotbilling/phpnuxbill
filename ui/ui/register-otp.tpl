@@ -54,8 +54,12 @@
 					<div class="panel-body">
 						<div class="form-container">
 							<div class="md-input-container md-float-label">
-								<input type="text" required class="md-input" id="username" value="{$username}" placeholder="{$_L['Phone_Number']}" name="username">
+								<input type="text" required class="md-input" readonly id="username" value="{$username}" placeholder="{$_L['Phone_Number']}" name="username">
 								<label>{$_L['Phone_Number']}</label>
+							</div>
+                            <div class="md-input-container md-float-label">
+								<input type="text" required class="md-input" id="otp_code" value="" placeholder="'{Lang::T('Verification Code')}'" name="otp_code">
+								<label>{Lang::T('SMS Verification Code')}</label>
 							</div>
 							<div class="md-input-container md-float-label">
 								<input type="text" required class="md-input" id="fullname" value="{$fullname}" name="fullname">
@@ -87,7 +91,7 @@
 									<button class="btn btn-primary waves-effect waves-light" type="submit">{$_L['Register']}</button>
 								</div>
 								<div class="btn-group">
-									<a href="{$_url}login" class="btn btn-success">{$_L['Cancel']}</a>
+									<a href="{$_url}register" class="btn btn-success">{$_L['Cancel']}</a>
 								</div>
 							</div>
 						</div>

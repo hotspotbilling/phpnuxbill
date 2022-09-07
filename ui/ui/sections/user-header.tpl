@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<title>{$_title}</title>
 	<link rel="shortcut icon" href="{$_theme}/images/logo.png" type="image/x-icon" />
-	
+
 	<!-- Icons -->
 	<link rel="stylesheet" href="{$_theme}/fonts/ionicons/css/ionicons.min.css">
 	<link rel="stylesheet" href="{$_theme}/fonts/font-awesome/css/font-awesome.min.css">
@@ -22,11 +22,10 @@
 	<!-- Css/Less Stylesheets -->
 	<link rel="stylesheet" href="{$_theme}/styles/bootstrap.min.css">
 	<link rel="stylesheet" href="{$_theme}/styles/main.min.css">
-	
-	<link href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,300' rel='stylesheet' type='text/css'>
-	
+
+
 	<!-- Match Media polyfill for IE9 -->
-	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]--> 
+	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]-->
 {if isset($xheader)}
 	{$xheader}
 {/if}
@@ -40,7 +39,7 @@
 			<li>
 				<a href="#" class="nav-trigger ion ion-drag"></a>
 			</li>
-			
+
 			<li>
 				<div class="site-logo visible-xs">
 					<a href="{$_url}home" class="text-uppercase h3">
@@ -59,7 +58,7 @@
 				</a>
 				<div class="panel panel-default dropdown-menu">
 					<div class="panel-heading">
-						You have 3 new message 
+						You have 3 new message
 						<a href="#" class="right btn btn-xs btn-pink mt-3">Show All</a>
 					</div>
 					<div class="panel-body">
@@ -98,7 +97,7 @@
 						<small class="desig">{$_L['Member']}</small>
 					</div>
 				</div>
-				
+
 				<ul class="list-unstyled clearfix nav-list mb15">
 					<li {if $_system_menu eq 'home'}class="active"{/if}>
 						<a href="{$_url}home">
@@ -118,9 +117,9 @@
 							<li {if $_system_menu eq 'pm'}class="active"{/if}><a href="{$_url}pm/compose">{$_L['Compose']}</a></li>
 						</ul>
 					</li>
-				
+
 					<li {if $_system_menu eq 'voucher'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-card"></i>
 							<span class="text">{$_L['Voucher']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -130,11 +129,19 @@
 							<li {if $_system_menu eq 'voucher'}class="active"{/if}><a href="{$_url}voucher/list-activated">{$_L['List_Activated_Voucher']}</a></li>
 						</ul>
 					</li>
-					<li {if $_system_menu eq 'order'}class="active"{/if}>
-						<a href="{$_url}page/Order_Voucher">
+					<li {if $_system_menu eq 'order'}class="open"{/if}>
+						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-ios-cart"></i>
-							<span class="text">{$_L['Order_Voucher']}</span>
+							<span class="text">ORDER</span>
+							<i class="arrow ion-chevron-left"></i>
 						</a>
+						<ul class="inner-drop list-unstyled">
+							<li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/voucher">Voucher</a></li>
+                            {if $_c['payment_gateway'] != 'none'}
+                                <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/hotspot">Hotspot</a></li>
+                                <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/ppoe">PPOE</a></li>
+                            {/if}
+						</ul>
 					</li>
 					<li {if $_system_menu eq 'accounts'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
@@ -148,9 +155,9 @@
 							<li>&nbsp;</li>
 						</ul>
 					</li>
-				
+
 				</ul>
-				
+
 			</nav>
 
 			<footer class="nav-foot">
@@ -168,7 +175,7 @@
 					$(node).parent('li').addClass('open');
 				}
 			}
-		</script> 
+		</script>
 		<div class="content-container" id="content">
 			<div class="page {if $_system_menu eq 'dashboard'}page-dashboard{/if}">
 

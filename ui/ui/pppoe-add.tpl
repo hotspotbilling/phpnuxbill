@@ -5,7 +5,7 @@
 				<div class="panel panel-default panel-hovered panel-stacked mb30">
 					<div class="panel-heading">{$_L['Add_Plan']}</div>
 						<div class="panel-body">
-						<form class="form-horizontal" method="post" role="form" action="{$_url}services/pppoe-add-post" >            
+						<form class="form-horizontal" method="post" role="form" action="{$_url}services/pppoe-add-post" >
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Plan_Name']}</label>
 								<div class="col-md-6">
@@ -36,6 +36,8 @@
 								</div>
 								<div class="col-md-2">
 									<select class="form-control" id="validity_unit" name="validity_unit">
+										<option value="Mins">{$_L['Mins']}</option>
+										<option value="Hrs">{$_L['Hrs']}</option>
 										<option value="Days">{$_L['Days']}</option>
 										<option value="Months">{$_L['Months']}</option>
 									</select>
@@ -60,7 +62,7 @@
 									</select>
 								</div>
 							</div>
-							
+
 							<div class="form-group">
 								<div class="col-lg-offset-2 col-lg-10">
 									<button class="btn btn-primary waves-effect waves-light" type="submit">{$_L['Save']}</button>

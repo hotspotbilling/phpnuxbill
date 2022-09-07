@@ -36,6 +36,8 @@
 								</div>
 								<div class="col-md-2">
 									<select class="form-control" id="validity_unit" name="validity_unit">
+										<option value="Mins" {if $d['validity_unit'] eq 'Mins'} selected {/if}>{$_L['Mins']}</option>
+										<option value="Hrs" {if $d['validity_unit'] eq 'Hrs'} selected {/if}>{$_L['Hrs']}</option>
 										<option value="Days" {if $d['validity_unit'] eq 'Days'} selected {/if}>{$_L['Days']}</option>
 										<option value="Months" {if $d['validity_unit'] eq 'Months'} selected {/if}>{$_L['Months']}</option>
 									</select>

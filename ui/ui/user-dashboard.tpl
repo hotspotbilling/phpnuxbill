@@ -42,6 +42,9 @@
 										</div>
 									</form>
 								</div>
+                                <div class="panel-footer">
+                                    <a class="btn btn-info btn-block btn-sm waves-effect waves-light" href="{$_url}order/voucher"><i class="ion ion-ios-cart"></i> {$_L['Order_Voucher']}</a>
+                                </div>
 							</div>
 						</div>
 						<div class="col-md-6">
