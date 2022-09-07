@@ -55,6 +55,8 @@
                             <button class="btn btn-primary waves-effect waves-light" type="submit">{$_L['Save']}</button>
                         </div>
                     </div>
+                        <pre>/ip hotspot walled-garden
+add dst-host=:^midtrans.com</pre>
                 </div>
             </div>
 

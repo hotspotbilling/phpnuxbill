@@ -72,6 +72,18 @@
                         </div>
                     </div>
                 </div>
+                <div class="panel-heading">Tawk.to Chat Widget</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">https://tawk.to/chat/</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="tawkto" name="tawkto" value="{$_c['tawkto']}" placeholder="62f1ca7037898912e961f5/1ga07df">
+                            <p class="help-block">From Direct Chat Link.</p>
+                            <pre>/ip hotspot walled-garden
+add dst-host=:^tawk.to</pre>
+                        </div>
+                    </div>
+                </div>
                 <div class="panel-heading">Invoice</div>
                 <div class="panel-body">
                     <div class="form-group">

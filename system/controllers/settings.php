@@ -205,6 +205,7 @@ switch ($action) {
         $sms_url = _post('sms_url');
         $wa_url = _post('wa_url');
         $address = _post('address');
+        $tawkto = _post('tawkto');
         $payment_gateway = _post('payment_gateway');
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
@@ -274,6 +275,17 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'payment_gateway';
                 $d->value = $payment_gateway;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'tawkto')->find_one();
+            if($d){
+                $d->value = $tawkto;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'tawkto';
+                $d->value = $tawkto;
                 $d->save();
             }
 

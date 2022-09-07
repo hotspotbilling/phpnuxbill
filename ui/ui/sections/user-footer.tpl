@@ -11,8 +11,8 @@
 						<div class="left small">Fixed Header</div>
 						<div class="md-switch right">
 							<label>
-								<input type="checkbox" id="fixedHeader"> 
-								<span>&nbsp;</span> 
+								<input type="checkbox" id="fixedHeader">
+								<span>&nbsp;</span>
 							</label>
 						</div>
 					</li>
@@ -20,8 +20,8 @@
 						<div class="left small">Nav Full</div>
 						<div class="md-switch right">
 							<label>
-								<input type="checkbox" id="navFull"> 
-								<span>&nbsp;</span> 
+								<input type="checkbox" id="navFull">
+								<span>&nbsp;</span>
 							</label>
 						</div>
 					</li>
@@ -55,10 +55,26 @@
 	<script src="{$_theme}/scripts/form-elements.init.js"></script>
 
 	<script src="ui/lib/js/bootbox.min.js"></script>
-	
+
 {if isset($xfooter)}
 	{$xfooter}
 {/if}
-		
+
+{if $_c['tawkto'] != ''}
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/{$_c['tawkto']}';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+{/if}
+
 </body>
 </html>

@@ -44,6 +44,8 @@
                             <a class="btn btn-info waves-effect waves-light" href="https://tripay.co.id/?ref=TP19304" target="_blank">Daftar Tripay</a>
                         </div>
                     </div>
+                        <pre>/ip hotspot walled-garden
+add dst-host=:^tripay.co.id</pre>
                 </div>
             </div>
 

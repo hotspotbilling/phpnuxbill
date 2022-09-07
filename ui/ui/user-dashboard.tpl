@@ -57,5 +57,4 @@
 							</div>
 						</div>
 					</div>
-
 {include file="sections/user-footer.tpl"}
