@@ -47,6 +47,13 @@ function _get($param, $defvalue = '')
     }
 }
 
+class Lang {
+    public static function T($var) {
+        return Lang($var);
+    }
+}
+
+
 require('system/orm.php');
 
 ORM::configure("mysql:host=$db_host;dbname=$db_name");
@@ -175,6 +182,29 @@ function _log($description, $type = '', $userid = '0')
     $d->save();
 }
 
+function Lang($key){
+    global $_L,$lan_file;
+    if(!empty($_L[$key])){
+        return $_L[$key];
+    }
+    $val = $key;
+    $key = alphanumeric($key," ");
+    if(!empty($_L[$key])){
+        return $_L[$key];
+    }else if(!empty($_L[str_replace(' ','_',$key)])){
+        return $_L[str_replace(' ','_',$key)];
+    }else{
+        $key = str_replace(' ','_',$key);
+        file_put_contents($lan_file, "$"."_L['$key'] = '".addslashes($val)."';\n", FILE_APPEND);
+        return $val;
+    }
+}
+
+function alphanumeric($str, $tambahan = "")
+{
+    return preg_replace("/[^a-zA-Z0-9" . $tambahan . "]+/", "", $str);
+}
+
 
 function sendTelegram($txt)
 {
@@ -192,6 +222,16 @@ function sendSMS($phone, $txt)
         $smsurl = str_replace('[number]',urlencode($phone),$_c['sms_url']);
         $smsurl = str_replace('[text]',urlencode($txt),$smsurl);
         file_get_contents($smsurl);
+    }
+}
+
+function sendWhatsapp($phone, $txt)
+{
+    global $_c;
+    if(!empty($_c['wa_url'])){
+        $waurl = str_replace('[number]',urlencode($phone),$_c['wa_url']);
+        $waurl = str_replace('[text]',urlencode($txt),$waurl);
+        file_get_contents($waurl);
     }
 }
 

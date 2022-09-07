@@ -18,9 +18,11 @@ use PEAR2\Net\RouterOS;
 
 require_once 'system/autoload/PEAR2/Autoload.php';
 
+$otpPath = 'system/uploads/sms/';
+
 switch ($do) {
     case 'post':
-
+        $otp_code = _post('otp_code');
         $username = _post('username');
         $fullname = _post('fullname');
         $password = _post('password');
@@ -41,6 +43,32 @@ switch ($do) {
             $msg .= $_L['PasswordsNotMatch'] . '<br>';
         }
 
+        if(!empty($_c['sms_url'])){
+            $otpPath .= sha1($username.$db_password).".txt";
+            if(file_exists($otpPath) && time()-filemtime($otpPath)>300){
+                unlink($otpPath);
+                r2(U . 'register', 's', 'Verification code expired');
+            }else if(file_exists($otpPath)){
+                $code = file_get_contents($otpPath);
+                if($code!=$otp_code){
+                    $ui->assign('username', $username);
+                    $ui->assign('fullname', $fullname);
+                    $ui->assign('address', $address);
+                    $ui->assign('phonenumber', $phonenumber);
+                    $ui->assign('notify', '<div class="alert alert-success">
+                    <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">×</span>
+                    </button>
+                    <div>Verification code is Wrong</div></div>');
+                    $ui->display('register-otp.tpl');
+                    exit();
+                }else{
+                    unlink($otpPath);
+                }
+            }else{
+                r2(U . 'register', 's', 'No Verification code');
+            }
+        }
         $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         if ($d) {
             $msg .= $_L['account_already_exist'] . '<br>';
@@ -65,9 +93,8 @@ switch ($do) {
                 <span aria-hidden="true">×</span>
                 </button>
                 <div>Failed to register</div></div>');
-                $ui->display('register.tpl');
+                r2(U . 'register', 's', 'Failed to register');
             }
-            //r2(U . 'register', 's', $_L['account_created_successfully']);
         } else {
             $ui->assign('username', $username);
             $ui->assign('fullname', $fullname);
@@ -83,10 +110,47 @@ switch ($do) {
         break;
 
     default:
-        $ui->assign('username', "");
-        $ui->assign('fullname', "");
-        $ui->assign('address', "");
-        $ui->assign('phonenumber', "");
-        $ui->display('register.tpl');
+        if(!empty($_c['sms_url'])){
+            $username = _post('username');
+            if(!empty($username)){
+                $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+                if ($d) {
+                    r2(U . 'register', 's', $_L['account_already_exist']);
+                }
+                if(!file_exists($otpPath)){
+                    mkdir($otpPath);
+                    touch($otpPath.'index.html');
+                }
+                $otpPath .= sha1($username.$db_password).".txt";
+                if(file_exists($otpPath) && time()-filemtime($otpPath)<120){
+                    $ui->assign('username', $username);
+                    $ui->assign('notify', '<div class="alert alert-success">
+                    <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">×</span>
+                    </button>
+                    <div>Please wait '.(120-(time()-filemtime($otpPath))).' seconds before sending another SMS</div></div>');
+                    $ui->display('register-otp.tpl');
+                }else{
+                    $otp = rand(100000,999999);
+                    file_put_contents($otpPath, $otp);
+                    sendSMS($username,$_c['CompanyName']."\nYour Verification code are: $otp");
+                    $ui->assign('username', $username);
+                    $ui->assign('notify', '<div class="alert alert-success">
+                    <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">×</span>
+                    </button>
+                    <div>Verification code has been sent to your phone</div></div>');
+                    $ui->display('register-otp.tpl');
+                }
+            }else{
+                $ui->display('register-rotp.tpl');
+            }
+        }else{
+            $ui->assign('username', "");
+            $ui->assign('fullname', "");
+            $ui->assign('address', "");
+            $ui->assign('otp', false);
+            $ui->display('register.tpl');
+        }
         break;
 }

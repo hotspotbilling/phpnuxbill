@@ -130,9 +130,17 @@ switch ($action) {
         }
 
         if($d['name'] != $name){
-            $c = ORM::for_table('tbl_routers')->where('ip_address',$ip_address)->find_one();
+            $c = ORM::for_table('tbl_routers')->where('name',$name)->where_not_equal('id',$id)->find_one();
             if($c){
-                $msg .= $_L['Router_already_exist']. '<br>';
+                $msg .= 'Name Already Exists<br>';
+            }
+        }
+        $oldname = $d['name'];
+
+        if($d['ip_address'] != $ip_address){
+            $c = ORM::for_table('tbl_routers')->where('ip_address',$ip_address)->where_not_equal('id',$id)->find_one();
+            if($c){
+                $msg .= 'IP Already Exists<br>';
             }
         }
 
@@ -152,6 +160,24 @@ switch ($action) {
             $d->password = $password;
 			$d->description = $description;
             $d->save();
+            $p = ORM::for_table('tbl_plans')->where('routers',$oldname)->find_result_set();
+            $p->set('routers',$name);
+            $p->save();
+            $p = ORM::for_table('tbl_payment_gateway')->where('routers',$oldname)->find_result_set();
+            $p->set('routers',$name);
+            $p->save();
+            $p = ORM::for_table('tbl_pool')->where('routers',$oldname)->find_result_set();
+            $p->set('routers',$name);
+            $p->save();
+            $p = ORM::for_table('tbl_transactions')->where('routers',$oldname)->find_result_set();
+            $p->set('routers',$name);
+            $p->save();
+            $p = ORM::for_table('tbl_user_recharges')->where('routers',$oldname)->find_result_set();
+            $p->set('routers',$name);
+            $p->save();
+            $p = ORM::for_table('tbl_voucher')->where('routers',$oldname)->find_result_set();
+            $p->set('routers',$name);
+            $p->save();
             r2(U . 'routers/list', 's', $_L['Updated_Successfully']);
         }else{
             r2(U . 'routers/edit/'.$id, 'e', $msg);

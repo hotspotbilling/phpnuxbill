@@ -244,3 +244,13 @@ $_L['Name_Lang'] = 'Nama Bahasa';
 $_L['Folder_Lang'] = 'Nama Folder';
 $_L['Translator'] = 'Translator';
 $_L['Lang_already_exist'] = 'Nama bahasa sudah ada';
+$_L['Payment_Gateway'] = 'Payment Gateway';
+$_L['Community'] = 'Community';
+$_L['Cannot_be_change_after_saved'] = 'Cannot be change after saved';
+$_L['1_user_can_be_used_for_many_devices'] = '1 user can be used for many devices?';
+$_L['Cannot_be_change_after_saved'] = 'Cannot be change after saved';
+
+$_L['Explain_Coverage_of_router'] = 'Jelaskan Cakupan wilayah hotspot';
+$_L['Name_of_Area_that_router_operated'] = 'Nama Lokasi/Wilayah Router beroperasi';
+$_L['Payment_Notification_URL_Recurring_Notification_URL_Pay_Account_Notification_URL'] = 'Payment Notification URL, Recurring Notification URL, Pay Account Notification URL';
+$_L['Finish_Redirect_URL_Unfinish_Redirect_URL_Error_Redirect_URL'] = 'Finish Redirect URL, Unfinish Redirect URL, Error Redirect URL';

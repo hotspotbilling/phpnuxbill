@@ -203,6 +203,7 @@ switch ($action) {
         $telegram_bot = _post('telegram_bot');
         $telegram_target_id = _post('telegram_target_id');
         $sms_url = _post('sms_url');
+        $wa_url = _post('wa_url');
         $address = _post('address');
         $payment_gateway = _post('payment_gateway');
         if ($company == '') {
@@ -251,6 +252,17 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'sms_url';
                 $d->value = $sms_url;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'wa_url')->find_one();
+            if($d){
+                $d->value = $wa_url;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'wa_url';
+                $d->value = $wa_url;
                 $d->save();
             }
 

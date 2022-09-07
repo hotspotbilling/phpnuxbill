@@ -28,8 +28,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Payment Notification URL</label>
                         <div class="col-md-6">
-                            <input type="text" readonly class="form-control" value="{$_url}callback/midtrans">
-                            <p class="help-block">Payment Notification URL, Recurring Notification URL, Pay Account Notification URL</p>
+                            <input type="text" readonly class="form-control" onclick="this.select()" value="{$_url}callback/midtrans">
+                            <p class="help-block">{Lang::T('Payment Notification URL, Recurring Notification URL, Pay Account Notification URL')}</p>
                             <a href="https://dashboard.midtrans.com/settings/vtweb_configuration" target="_blank" class="help-block">https://dashboard.midtrans.com/settings/vtweb_configuration</a>
                         </div>
                     </div>
@@ -37,9 +37,17 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Finish Redirect URL</label>
                         <div class="col-md-6">
-                            <input type="text" readonly class="form-control" value="{$_url}accounts/transaction">
-                            <p class="help-block">Finish Redirect URL, Unfinish Redirect URL, Error Redirect URL</p>
+                            <input type="text" readonly class="form-control" onclick="this.select()" value="{$_url}accounts/transaction">
+                            <p class="help-block">{Lang::T('Finish Redirect URL, Unfinish Redirect URL, Error Redirect URL')}</p>
                             <a href="https://dashboard.midtrans.com/settings/vtweb_configuration" target="_blank" class="help-block">https://dashboard.midtrans.com/settings/vtweb_configuration</a>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Channels</label>
+                        <div class="col-md-6">
+                            {foreach $channels as $channel}
+                                <label class="checkbox-inline"><input type="checkbox" {if strpos($_c['midtrans_channel'], $channel['id']) !== false}checked="true"{/if} id="midtrans_channel" name="midtrans_channel[]" value="{$channel['id']}"> {$channel['name']}</label>
+                            {/foreach}
                         </div>
                     </div>
                     <div class="form-group">

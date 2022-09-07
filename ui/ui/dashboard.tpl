@@ -84,7 +84,7 @@
 						<div class="col-md-7">
 							<div class="panel panel-default mb20 panel-hovered project-stats table-responsive">
 								<div class="panel-heading">Vouchers Stock</div>
-								<div class="panel-body">	
+								<div class="panel-body">
 									<table class="table">
 										<thead>
 											<tr>
@@ -137,7 +137,7 @@
 								</div>
 							</div>
 						</div>
-						
+
 						<div class="col-md-5">
 							<div class="panel panel-default panel-hovered mb20 activities">
 								<div class="panel-heading">{$_L['Activity_Log']}</div>
@@ -153,14 +153,8 @@
 									</ul>
 								</div>
 							</div>
-							<div class="panel panel-default panel-hovered mb20 activities">
-								<div class="panel-heading">PHPMIXBILL</div>
-								<div class="panel-body">
-									{$_L['Welcome_Text_Admin']}
-								</div>
-							</div>
 						</div>
-						
+
 					</div>
 {else}
 					<div class="row">
@@ -204,7 +198,7 @@
 					               			<p class="small mb15">{date($_c['date_format'], strtotime($_bill['expiration']))} {$_bill['time']}</p>
 					                	</div>
 									</div>
-									
+
 								</div>
 							</div>
 						</div>

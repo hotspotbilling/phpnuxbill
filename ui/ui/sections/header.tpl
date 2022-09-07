@@ -23,7 +23,6 @@
 	<link rel="stylesheet" href="{$_theme}/styles/bootstrap.min.css">
 	<link rel="stylesheet" href="{$_theme}/styles/main.min.css">
 
-	<link href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,300' rel='stylesheet' type='text/css'>
 
 	<!-- Match Media polyfill for IE9 -->
 	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]-->
@@ -53,7 +52,7 @@
 			<li>
 				<div class="site-logo visible-xs">
 					<a href="{$_url}dashboard" class="text-uppercase h3">
-						<span class="text">{$_L['Logo']}</span>
+						<span class="text">{Lang::T('Logo')}</span>
 					</a>
 				</div>
 			</li>
@@ -265,19 +264,20 @@
 					<li {if $_system_menu eq 'paymentgateway'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-cash"></i>
-							<span class="text">Payment Gateway</span>
+							<span class="text">{Lang::T('Payment Gateway')}</span>
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
 							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/xendit">Xendit</a></li>
 							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/midtrans">Midtrans</a></li>
+							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/tripay">Tripay</a></li>
 							<li>&nbsp;</li>
 						</ul>
 					</li>
-					<li {if $_system_menu eq 'disquss'}class="active"{/if}>
-						<a href="https://github.com/ibnux/phpmixbill/discussions" target="_blank">
-							<i class="ion ion-chatbubbles"></i>
-							<span class="text">Discussions</span>
+					<li {if $_system_menu eq 'community'}class="active"{/if}>
+						<a href="{$_url}community">
+							<i class="ion ion-chatboxes"></i>
+							<span class="text">{Lang::T('Community')}</span>
 						</a>
 					</li>
 				{/if}

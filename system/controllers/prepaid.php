@@ -406,7 +406,7 @@ switch ($action) {
             $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
             $ui->assign('in', $in);
 
-            sendSMS($c['username'], "*$_c[CompanyName]*\n".
+            sendWhatsapp($c['username'], "*$_c[CompanyName]*\n".
 					"$_c[address]\n".
 					"$_c[phone]\n".
 					"\n\n".
@@ -1050,7 +1050,7 @@ switch ($action) {
             $ui->assign('in', $in);
 
 
-            sendSMS($c['username'], "*$_c[CompanyName]*\n".
+            sendWhatsapp($c['username'], "*$_c[CompanyName]*\n".
 					"$_c[address]\n".
 					"$_c[phone]\n".
 					"\n\n".

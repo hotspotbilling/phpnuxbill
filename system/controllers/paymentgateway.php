@@ -12,6 +12,7 @@ $ui->assign('_admin', $admin);
 switch ($action) {
     case 'xendit':
         $ui->assign('_title', 'Xendit - Payment Gateway - '. $config['CompanyName']);
+        $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_xendit.json'), true));
         $ui->display('app-xendit.tpl');
         break;
     case 'xendit-post':
@@ -37,6 +38,16 @@ switch ($action) {
             $d->value = $xendit_verification_token;
             $d->save();
         }
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'xendit_channel')->find_one();
+        if($d){
+            $d->value = implode(',',$_POST['xendit_channel']);
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'xendit_channel';
+            $d->value = implode(',',$_POST['xendit_channel']);
+            $d->save();
+        }
 
         _log('[' . $admin['username'] . ']: Xendit ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
 
@@ -44,7 +55,7 @@ switch ($action) {
         break;
     case 'midtrans':
         $ui->assign('_title', 'Midtrans - Payment Gateway - '. $config['CompanyName']);
-
+        $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_midtrans.json'), true));
         $ui->display('app-midtrans.tpl');
         break;
     case 'midtrans-post':
@@ -81,9 +92,73 @@ switch ($action) {
             $d->value = $midtrans_server_key;
             $d->save();
         }
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'midtrans_channel')->find_one();
+        if($d){
+            $d->value = implode(',',$_POST['midtrans_channel']);
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'midtrans_channel';
+            $d->value = implode(',',$_POST['midtrans_channel']);
+            $d->save();
+        }
 
         _log('[' . $admin['username'] . ']: Midtrans ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
 
         r2(U . 'paymentgateway/midtrans', 's', $_L['Settings_Saved_Successfully']);
+        break;
+    case 'tripay':
+        $ui->assign('_title', 'Tripay - Payment Gateway - '. $config['CompanyName']);
+        $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_tripay.json'), true));
+        $ui->display('app-tripay.tpl');
+        break;
+    case 'tripay-post':
+        $tripay_merchant = _post('tripay_merchant');
+        $tripay_api_key = _post('tripay_api_key');
+        $tripay_secret_key = _post('tripay_secret_key');
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'tripay_merchant')->find_one();
+        if($d){
+            $d->value = $tripay_merchant;
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'tripay_merchant';
+            $d->value = $tripay_merchant;
+            $d->save();
+        }
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'tripay_api_key')->find_one();
+        if($d){
+            $d->value = $tripay_api_key;
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'tripay_api_key';
+            $d->value = $tripay_api_key;
+            $d->save();
+        }
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'tripay_secret_key')->find_one();
+        if($d){
+            $d->value = $tripay_secret_key;
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'tripay_secret_key';
+            $d->value = $tripay_secret_key;
+            $d->save();
+        }
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'tripay_channel')->find_one();
+        if($d){
+            $d->value = implode(',',$_POST['tripay_channel']);
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'tripay_channel';
+            $d->value = implode(',',$_POST['tripay_channel']);
+            $d->save();
+        }
+
+        _log('[' . $admin['username'] . ']: Tripay ' . $_L['Settings_Saved_Successfully'].json_encode($_POST['tripay_channel']), 'Admin', $admin['id']);
+
+        r2(U . 'paymentgateway/tripay', 's', $_L['Settings_Saved_Successfully']);
         break;
 }

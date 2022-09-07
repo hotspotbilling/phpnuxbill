@@ -52,12 +52,22 @@
                         </div>
                     </div>
                 </div>
+                <div class="panel-heading">SMS OTP Registration</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">SMS Server URL</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="sms_url" name="sms_url" value="{$_c['sms_url']}" placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
+                            <p class="help-block">Must include <b>[text]</b> &amp; <b>[number]</b>, it will be replaced.</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="panel-heading">Whatsapp Notification</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Server URL</label>
+                        <label class="col-md-2 control-label">Whatsapp Server URL</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="sms_url" name="sms_url" value="{$_c['sms_url']}" placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
+                            <input type="text" class="form-control" id="wa_url" name="wa_url" value="{$_c['wa_url']}" placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
                             <p class="help-block">Must include <b>[text]</b> &amp; <b>[number]</b>, it will be replaced.</p>
                         </div>
                     </div>

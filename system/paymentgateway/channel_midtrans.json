@@ -1,0 +1,82 @@
+[
+	{
+		"id": "credit_card",
+		"name": "Credit Card",
+		"min": 10000
+	},
+	{
+		"id": "bca_va",
+		"name": "BCA",
+		"min": 10000
+	},
+	{
+		"id": "permata_va",
+		"name": "Permata",
+		"min": 10000
+	},
+	{
+		"id": "bni_va",
+		"name": "BNI",
+		"min": 10000
+	},
+	{
+		"id": "bri_va",
+		"name": "BRI",
+		"min": 10000
+	},
+	{
+		"id": "echannel",
+		"name": "Mandiri Bill",
+		"min": 10000
+	},
+	{
+		"id": "gopay",
+		"name": "Gopay",
+		"min": 1000
+	},
+	{
+		"id": "bca_klikbca",
+		"name": "KLIKBCA",
+		"min": 10000
+	},
+	{
+		"id": "bca_klikpay",
+		"name": "BCA KLIKPAY",
+		"min": 10000
+	},
+	{
+		"id": "cimb_clicks",
+		"name": "CIMB Clicks",
+		"min": 10000
+	},
+	{
+		"id": "danamon_online",
+		"name": "Danamon",
+		"min": 5000
+	},
+	{
+		"id": "bri_epay",
+		"name": "BRImo",
+		"min": 10000
+	},
+	{
+		"id": "indomaret",
+		"name": "Indomaret",
+		"min": 5000
+	},
+	{
+		"id": "alfamart",
+		"name": "Alfamart",
+		"min": 5000
+	},
+	{
+		"id": "ShopeePay",
+		"name": "ShopeePay",
+		"min": 1000
+	},
+	{
+		"id": "uob_ezpay",
+		"name": "UOB EZ Pay",
+		"min": 1000
+	}
+]
