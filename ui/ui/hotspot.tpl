@@ -23,42 +23,42 @@
 											<a href="{$_url}services/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Plan']}</a>
 										</div>&nbsp;
 									</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>{$_L['Plan_Name']}</th>
+                                                    <th>{$_L['Plan_Type']}</th>
+                                                    <th>{$_L['Bandwidth_Plans']}</th>
+                                                    <th>{$_L['Plan_Price']}</th>
+                                                    <th>{$_L['Time_Limit']}</th>
+                                                    <th>{$_L['Data_Limit']}</th>
+                                                    <th>{$_L['Plan_Validity']}</th>
+                                                    <th>{$_L['Routers']}</th>
+                                                    <th>{$_L['Manage']}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {foreach $d as $ds}
+                                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
+                                                    <td>{$ds['name_plan']}</td>
+                                                    <td>{$ds['typebp']}</td>
+                                                    <td>{$ds['name_bw']}</td>
+                                                    <td>{$ds['price']}</td>
+                                                    <td>{$ds['time_limit']} {$ds['time_unit']}</td>
+                                                    <td>{$ds['data_limit']} {$ds['data_unit']}</td>
+                                                    <td>{$ds['validity']} {$ds['validity_unit']}</td>
+                                                    <td>{$ds['routers']}</td>
+                                                    <td>
+                                                        <a href="{$_url}services/edit/{$ds['id']}" class="btn btn-info btn-sm btn-block">{$_L['Edit']}</a>
+                                                    </td>
+                                                </tr>
+                                            {/foreach}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {$paginator['contents']}
 
-						<table class="table table-striped table-bordered">
-							<thead>
-								<tr>
-									<th>{$_L['Plan_Name']}</th>
-									<th>{$_L['Plan_Type']}</th>
-									<th>{$_L['Bandwidth_Plans']}</th>
-									<th>{$_L['Plan_Price']}</th>
-									<th>{$_L['Time_Limit']}</th>
-									<th>{$_L['Data_Limit']}</th>
-									<th>{$_L['Plan_Validity']}</th>
-									<th>{$_L['Routers']}</th>
-									<th>{$_L['Manage']}</th>
-								</tr>
-							</thead>
-							<tbody>
-							{foreach $d as $ds}
-								<tr>
-									<td>{$ds['name_plan']}</td>
-									<td>{$ds['typebp']}</td>
-									<td>{$ds['name_bw']}</td>
-									<td>{$ds['price']}</td>
-									<td>{$ds['time_limit']} {$ds['time_unit']}</td>
-									<td>{$ds['data_limit']} {$ds['data_unit']}</td>
-									<td>{$ds['validity']} {$ds['validity_unit']}</td>
-									<td>{$ds['routers']}</td>
-									<td>
-										<a href="{$_url}services/edit/{$ds['id']}" class="btn btn-warning btn-sm">{$_L['Edit']}</a>
-										<a href="{$_url}services/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm cdelete">{$_L['Delete']}</a>
-									</td>
-								</tr>
-							{/foreach}
-							</tbody>
-						</table>
-						{$paginator['contents']}
-								
 								</div>
 							</div>
 						</div>

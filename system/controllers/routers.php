@@ -69,6 +69,7 @@ switch ($action) {
         $username = _post('username');
         $password = _post('password');
         $description = _post('description');
+        $enabled = _post('enabled')*1;
 
         $msg = '';
         if(Validator::Length($name,30,4) == false){
@@ -99,6 +100,7 @@ switch ($action) {
             $d->username = $username;
             $d->password = $password;
 			$d->description = $description;
+			$d->enabled = $enabled;
             $d->save();
 
             r2(U . 'routers/list', 's', $_L['Created_Successfully']);
@@ -114,7 +116,7 @@ switch ($action) {
         $username = _post('username');
         $password = _post('password');
         $description = _post('description');
-
+        $enabled = $_POST['enabled']*1;
         $msg = '';
         if(Validator::Length($name,30,4) == false){
             $msg .= 'Name should be between 5 to 30 characters'. '<br>';
@@ -163,25 +165,28 @@ switch ($action) {
             $d->username = $username;
             $d->password = $password;
 			$d->description = $description;
+			$d->enabled = $enabled;
             $d->save();
-            $p = ORM::for_table('tbl_plans')->where('routers',$oldname)->find_result_set();
-            $p->set('routers',$name);
-            $p->save();
-            $p = ORM::for_table('tbl_payment_gateway')->where('routers',$oldname)->find_result_set();
-            $p->set('routers',$name);
-            $p->save();
-            $p = ORM::for_table('tbl_pool')->where('routers',$oldname)->find_result_set();
-            $p->set('routers',$name);
-            $p->save();
-            $p = ORM::for_table('tbl_transactions')->where('routers',$oldname)->find_result_set();
-            $p->set('routers',$name);
-            $p->save();
-            $p = ORM::for_table('tbl_user_recharges')->where('routers',$oldname)->find_result_set();
-            $p->set('routers',$name);
-            $p->save();
-            $p = ORM::for_table('tbl_voucher')->where('routers',$oldname)->find_result_set();
-            $p->set('routers',$name);
-            $p->save();
+            if($name!=$oldname){
+                $p = ORM::for_table('tbl_plans')->where('routers',$oldname)->find_result_set();
+                $p->set('routers',$name);
+                $p->save();
+                $p = ORM::for_table('tbl_payment_gateway')->where('routers',$oldname)->find_result_set();
+                $p->set('routers',$name);
+                $p->save();
+                $p = ORM::for_table('tbl_pool')->where('routers',$oldname)->find_result_set();
+                $p->set('routers',$name);
+                $p->save();
+                $p = ORM::for_table('tbl_transactions')->where('routers',$oldname)->find_result_set();
+                $p->set('routers',$name);
+                $p->save();
+                $p = ORM::for_table('tbl_user_recharges')->where('routers',$oldname)->find_result_set();
+                $p->set('routers',$name);
+                $p->save();
+                $p = ORM::for_table('tbl_voucher')->where('routers',$oldname)->find_result_set();
+                $p->set('routers',$name);
+                $p->save();
+            }
             r2(U . 'routers/list', 's', $_L['Updated_Successfully']);
         }else{
             r2(U . 'routers/edit/'.$id, 'e', $msg);

@@ -8,6 +8,17 @@
                     <form class="form-horizontal" method="post" role="form" action="{$_url}routers/edit-post" >
                         <input type="hidden" name="id" value="{$d['id']}">
                         <div class="form-group">
+                            <label class="col-md-2 control-label">{Lang::T('Status')}</label>
+                            <div class="col-md-10">
+                                <label class="radio-inline warning">
+                                    <input type="radio" {if $d['enabled'] == 1}checked{/if} name="enabled" value="1"> Enable
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" {if $d['enabled'] == 0}checked{/if} name="enabled" value="0"> Disable
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-md-2 control-label">{$_L['Router_Name']}</label>
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="name" name="name" value="{$d['name']}">
@@ -39,7 +50,6 @@
                                 <p class="help-block">{Lang::T('Explain Coverage of router')}</p>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="col-lg-offset-2 col-lg-10">
                                 <button class="btn btn-primary waves-effect waves-light" type="submit">{$_L['Save']}</button>

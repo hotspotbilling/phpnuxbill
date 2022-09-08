@@ -254,3 +254,5 @@ $_L['Explain_Coverage_of_router'] = 'Jelaskan Cakupan wilayah hotspot';
 $_L['Name_of_Area_that_router_operated'] = 'Nama Lokasi/Wilayah Router beroperasi';
 $_L['Payment_Notification_URL_Recurring_Notification_URL_Pay_Account_Notification_URL'] = 'Payment Notification URL, Recurring Notification URL, Pay Account Notification URL';
 $_L['Finish_Redirect_URL_Unfinish_Redirect_URL_Error_Redirect_URL'] = 'Finish Redirect URL, Unfinish Redirect URL, Error Redirect URL';
+$_L['Status'] = 'Status';
+$_L['Status'] = 'Status';

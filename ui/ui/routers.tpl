@@ -32,19 +32,20 @@
 									<th>{$_L['IP_Address']}</th>
 									<th>{$_L['Username']}</th>
 									<th>{$_L['Description']}</th>
+									<th>{Lang::T('Status')}</th>
 									<th>{$_L['Manage']}</th>
 								</tr>
 							</thead>
 							<tbody>
 							{foreach $d as $ds}
-								<tr>
+								<tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
 									<td>{$ds['name']}</td>
 									<td>{$ds['ip_address']}</td>
 									<td>{$ds['username']}</td>
 									<td>{$ds['description']}</td>
+									<td>{if $ds['enabled'] == 1}Enabled{else}Disabled{/if}</td>
 									<td>
-										<a href="{$_url}routers/edit/{$ds['id']}" class="btn btn-warning btn-sm">{$_L['Edit']}</a>
-										<a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm cdelete">{$_L['Delete']}</a>
+										<a href="{$_url}routers/edit/{$ds['id']}" class="btn btn-info btn-sm btn-block">{$_L['Edit']}</a>
 									</td>
 								</tr>
 							{/foreach}

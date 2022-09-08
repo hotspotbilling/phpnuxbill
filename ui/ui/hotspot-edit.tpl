@@ -5,9 +5,19 @@
 				<div class="panel panel-default panel-hovered panel-stacked mb30">
 					<div class="panel-heading">{$_L['Edit_Plan']}</div>
 						<div class="panel-body">
-
 						<form class="form-horizontal" method="post" role="form" action="{$_url}services/edit-post">
 							<input type="hidden" name="id" value="{$d['id']}">
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">{Lang::T('Status')}</label>
+                                <div class="col-md-10">
+                                    <label class="radio-inline warning">
+                                        <input type="radio" {if $d['enabled'] == 1}checked{/if} name="enabled" value="1"> Enable
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" {if $d['enabled'] == 0}checked{/if} name="enabled" value="0"> Disable
+                                    </label>
+                                </div>
+                            </div>
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Plan_Name']}</label>
 								<div class="col-md-6">

@@ -109,6 +109,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
+        $enabled = _post('enabled')*1;
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -172,6 +173,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
             $d->routers = $routers;
+            $d->enabled = $enabled;
             $d->save();
 
             r2(U . 'services/hotspot', 's', $_L['Created_Successfully']);
@@ -196,6 +198,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
+        $enabled = _post('enabled')*1;
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -264,6 +267,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
             $d->routers = $routers;
+            $d->enabled = $enabled;
             $d->save();
 
             r2(U . 'services/hotspot', 's', $_L['Updated_Successfully']);
@@ -357,6 +361,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool = _post('pool_name');
+        $enabled = _post('enabled')*1;
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -415,6 +420,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->routers = $routers;
             $d->pool = $pool;
+            $d->enabled = $enabled;
             $d->save();
 
             r2(U . 'services/pppoe', 's', $_L['Created_Successfully']);
@@ -432,6 +438,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool = _post('pool_name');
+        $enabled = _post('enabled')*1;
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -495,6 +502,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->routers = $routers;
             $d->pool = $pool;
+            $d->enabled = $enabled;
             $d->save();
 
             r2(U . 'services/pppoe', 's', $_L['Updated_Successfully']);
