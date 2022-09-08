@@ -359,7 +359,7 @@ function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel){
             "\n\n".
             "INVOICE: *$in[invoice]*\n".
             "$_L[Date] : $date_now\n".
-            "$_L[Sales] : $gateway $channel\n".
+            "$gateway $channel\n".
             "\n\n".
             "$_L[Type] : *$in[type]*\n".
             "$_L[Plan_Name] : *$in[plan_name]*\n".
