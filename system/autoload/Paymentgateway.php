@@ -8,15 +8,15 @@
 if($_app_stage = 'Live'){
     $xendit_server = 'https://api.xendit.co/v2/';
     $midtrans_server = 'https://api.midtrans.com';
-    $moota_server = 'https://api.xendit.co/v2/';
+    $tripay_server = 'https://tripay.co.id/api/transaction/create';
 }else{
     $xendit_server = 'https://api.xendit.co/v2/';
     $midtrans_server = 'https://api.sandbox.midtrans.com';
-    $moota_server = 'https://api.xendit.co/v2/';
+    $tripay_server = 'https://tripay.co.id/api-sandbox/transaction/create';
 }
 
 
-function create_invoice_xendit($trxID, $amount, $phone, $description){
+function xendit_create_invoice($trxID, $amount, $phone, $description){
     global $xendit_server,$_c;
     $json = [
         'external_id' => $trxID,
@@ -31,12 +31,12 @@ function create_invoice_xendit($trxID, $amount, $phone, $description){
             'invoice_paid' => ['whatsapp','sms'],
             'invoice_expired' => ['whatsapp','sms']
         ],
-        'success_redirect_url' => APP_URL,
-        'failure_redirect_url' => APP_URL
+        'payment_methods ' => explode(',',$_c['xendit_channel']),
+        'success_redirect_url' => U.'order/view/'.$trxID,
+        'failure_redirect_url' => U.'order/view/'.$trxID
     ];
-    return json_decode(postJsonData($xendit_server, $json, [
-        'Authorization: Basic '.$_c['xendit_secret']
-    ]),true);
+
+    return json_decode(postJsonData($xendit_server.'invoices', $json, ['Authorization: Basic '.base64_encode($_c['xendit_secret_key'].':')]),true);
     /*
     {
         "id": "631597513897510bace2459d", #gateway_trx_id
@@ -55,10 +55,10 @@ function create_invoice_xendit($trxID, $amount, $phone, $description){
     */
 }
 
-function get_invoice_xendit($xendittrxID){
+function xendit_get_invoice($xendittrxID){
     global $xendit_server,$_c;
     return json_decode(getData($xendit_server.'invoices/'.$xendittrxID, [
-        'Authorization: Basic '.$_c['xendit_secret']
+        'Authorization: Basic '.base64_encode($_c['xendit_secret_key'].':')
     ]),true);
     /*
     {

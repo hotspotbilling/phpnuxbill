@@ -34,7 +34,7 @@
                                         </table>
                                     </div>
                                     <div class="panel-footer">
-                                        <a href="{$_url}order/hotspot-buy/{$router['id']}/{$plan['id']}" class="btn btn-sm btn-block btn-primary">Buy</a>
+                                        <a href="{$_url}order/hotspot-buy/{$router['id']}/{$plan['id']}" onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')" class="btn btn-sm btn-block btn-primary">Buy</a>
                                     </div>
                                 </div>
                             </div>

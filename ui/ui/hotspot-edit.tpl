@@ -21,7 +21,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Plan_Name']}</label>
 								<div class="col-md-6">
-									<input type="text" class="form-control" id="name" name="name" value="{$d['name_plan']}" readonly>
+									<input type="text" class="form-control" id="name" name="name" maxlength="40" value="{$d['name_plan']}" readonly>
 								</div>
 							</div>
 							<div class="form-group">

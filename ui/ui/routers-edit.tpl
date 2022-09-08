@@ -21,7 +21,7 @@
                         <div class="form-group">
                             <label class="col-md-2 control-label">{$_L['Router_Name']}</label>
                             <div class="col-md-6">
-                                <input type="text" class="form-control" id="name" name="name" value="{$d['name']}">
+                                <input type="text" class="form-control" id="name" name="name" maxlength="32" value="{$d['name']}">
                                 <p class="help-block">{Lang::T('Name of Area that router operated')}</p>
                             </div>
                         </div>
