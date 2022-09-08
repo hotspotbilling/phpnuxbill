@@ -20,7 +20,7 @@ switch ($action) {
         break;
     case 'ppoe':
         $ui->assign('_title', 'Order PPOE Internet- '. $config['CompanyName']);$routers = ORM::for_table('tbl_routers')->find_many();
-        $plans = ORM::for_table('tbl_plans')->where('type', 'PPPOE')->find_many();
+        $plans = ORM::for_table('tbl_plans')->where('type', 'PPPOE')->where('enabled', '1')->find_many();
         $ui->assign('routers',$routers);
         $ui->assign('plans', $plans);
         $ui->display('user-orderPPOE.tpl');
@@ -28,7 +28,7 @@ switch ($action) {
     case 'hotspot':
         $ui->assign('_title', 'Order Hotspot Internet- '. $config['CompanyName']);
         $routers = ORM::for_table('tbl_routers')->find_many();
-        $plans = ORM::for_table('tbl_plans')->where('type', 'Hotspot')->find_many();
+        $plans = ORM::for_table('tbl_plans')->where('type', 'Hotspot')->where('enabled', '1')->find_many();
         $ui->assign('routers',$routers);
         $ui->assign('plans', $plans);
         $ui->display('user-orderHotspot.tpl');

@@ -87,6 +87,7 @@ $ui->setCompileDir('ui/compiled/');
 $ui->setConfigDir('ui/conf/');
 $ui->setCacheDir('ui/cache/');
 $ui->assign('app_url', APP_URL);
+$ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL,PHP_URL_HOST)));
 define('U', APP_URL . '/index.php?_route=');
 $ui->assign('_url', APP_URL . '/index.php?_route=');
 $ui->assign('_theme', $_theme);

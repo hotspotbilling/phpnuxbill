@@ -20,7 +20,7 @@ switch ($action) {
         break;
 
     case 'server':
-		$d = ORM::for_table('tbl_routers')->find_many();
+		$d = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
 		$ui->assign('d',$d);
 
         $ui->display('autoload-server.tpl');
@@ -29,7 +29,7 @@ switch ($action) {
     case 'plan':
 		$server = _post('server');
 		$jenis = _post('jenis');
-		$d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->find_many();
+		$d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->where('enabled', '1')->find_many();
 		$ui->assign('d',$d);
 
         $ui->display('autoload.tpl');

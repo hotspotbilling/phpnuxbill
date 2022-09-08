@@ -43,9 +43,9 @@ switch ($action) {
     case 'recharge':
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);
-        $p = ORM::for_table('tbl_plans')->find_many();
+        $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
         $ui->assign('p', $p);
-        $r = ORM::for_table('tbl_routers')->find_many();
+        $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
 
         $ui->display('recharge.tpl');
@@ -57,9 +57,9 @@ switch ($action) {
 
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);
-        $p = ORM::for_table('tbl_plans')->find_many();
+        $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
         $ui->assign('p', $p);
-        $r = ORM::for_table('tbl_routers')->find_many();
+        $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
 
         $ui->display('recharge-user.tpl');
@@ -82,7 +82,7 @@ switch ($action) {
 
         if ($msg == '') {
             $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
-            $p = ORM::for_table('tbl_plans')->where('id', $plan)->find_one();
+            $p = ORM::for_table('tbl_plans')->where('id', $plan)->where('enabled', '1')->find_one();
             $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
 
             $mikrotik = Router::_info($server);
@@ -457,7 +457,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
-            $p = ORM::for_table('tbl_plans')->find_many();
+            $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
             $ui->assign('p', $p);
 
             $ui->display('prepaid-edit.tpl');
@@ -552,7 +552,7 @@ switch ($action) {
         if ($code != '') {
             $ui->assign('code', $code);
             $paginator = Paginator::bootstrap('tbl_voucher', 'code', '%' . $code . '%');
-            $d = ORM::for_table('tbl_plans')
+            $d = ORM::for_table('tbl_plans')->where('enabled', '1')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where_like('tbl_plans.code', '%' . $code . '%')
                 ->offset($paginator['startpoint'])
@@ -560,7 +560,7 @@ switch ($action) {
                 ->find_many();
         } else {
             $paginator = Paginator::bootstrap('tbl_voucher');
-            $d = ORM::for_table('tbl_plans')
+            $d = ORM::for_table('tbl_plans')->where('enabled', '1')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->offset($paginator['startpoint'])
                 ->limit($paginator['limit'])->find_many();
@@ -575,9 +575,9 @@ switch ($action) {
 
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);
-        $p = ORM::for_table('tbl_plans')->find_many();
+        $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
         $ui->assign('p', $p);
-        $r = ORM::for_table('tbl_routers')->find_many();
+        $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
 
         $ui->display('voucher-add.tpl');

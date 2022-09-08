@@ -37,8 +37,6 @@
                             </select>
                         </div>
                     </div>
-                </div>
-                <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">Radius Mode?</label>
                         <div class="col-md-6">
@@ -49,6 +47,13 @@
                             <p class="help-block">Still on Testing.</p>
                             <p class="help-block">Changing from Radius will not add existing user to Mikrotik Hotspot.</p>
                             <p class="help-block">With Radius user can use Hotspot or PPOE.</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">APP URL</label>
+                        <div class="col-md-6">
+                            <input type="text" readonly class="form-control" value="{$app_url}">
+                            <p class="help-block">system/config.php</p>
                         </div>
                     </div>
                 </div>
@@ -115,8 +120,10 @@ add dst-host=*.tawk.to</pre>
                         </div>
                     </div>
                 </div>
+                            <pre>/ip hotspot walled-garden
+add dst-host={$_domain}
+add dst-host=*.{$_domain}</pre>
             </div>
-
         </div>
     </div>
 </form>
