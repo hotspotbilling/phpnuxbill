@@ -21,6 +21,7 @@
 								<label class="col-md-2 control-label">{$_L['Plan_Name']}</label>
 								<div class="col-md-6">
 									<input type="text" class="form-control" id="name_plan" maxlength="40" name="name_plan">
+                                    <p class="help-block">{Lang::T('Cannot be change after saved')}</p>
 								</div>
 							</div>
 							<div class="form-group">
@@ -63,6 +64,7 @@
 											<option value="{$rs['name']}">{$rs['name']}</option>
 										{/foreach}
 									</select>
+                                    <p class="help-block">{Lang::T('Cannot be change after saved')}</p>
 								</div>
 							</div>
 							<div class="form-group">

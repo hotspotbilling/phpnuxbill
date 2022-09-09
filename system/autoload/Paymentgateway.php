@@ -78,6 +78,66 @@ function xendit_get_invoice($xendittrxID){
     */
 }
 
+/**    MIDTRANS */
+
+
+function midtrans_create_payment($trxID, $amount){
+    global $midtrans_server,$_c;
+    $json = [
+        'transaction_details ' => [
+            'order_id' => $trxID,
+            'gross_amount' => $amount,
+            "payment_link_id" => alphanumeric(ucwords($_c['CompanyName']))."_".crc32($_c['CompanyName'])."_".$trxID
+        ],
+        'enabled_payments' => explode(',',$_c['midtrans_channel']),
+        "usage_limit"=>  1,
+        "expiry" => [
+            "duration" => 24,
+            "unit" => "hour"
+        ]
+    ];
+    $json = json_decode(postJsonData($midtrans_server.'v1/payment-links', $json, ['Authorization: Basic '.base64_encode($_c['midtrans_server_key'].':')]),true);
+    if(!empty($json['error_messages'])){
+        sendTelegram(json_encode("Midtrans create Payment error:\n".alphanumeric($_c['CompanyName'])."_".crc32($_c['CompanyName'])."_".$trxID."\n".$json['error_messages']));
+    }
+    return $json;
+    /*
+    {
+        "order_id": "concert-ticket-05", //traxid
+        "payment_url": "https://app.sandbox.midtrans.com/payment-links/amazing-ticket-payment-123"
+	}
+    */
+}
+
+function midtrans_check_payment($midtranstrxID){
+    global $midtrans_server,$_c;
+    return json_decode(getData($midtrans_server.'v2/'.$midtranstrxID.'/status', [
+        'Authorization: Basic '.base64_encode($_c['midtrans_server_key'].':')
+    ]),true);
+    /*
+    {
+        "masked_card": "41111111-1111",
+        "approval_code": "1599493766402",
+        "bank": "bni",
+        "channel_response_code": "00",
+        "channel_response_message": "Approved",
+        "transaction_time": "2020-09-07 22:49:26",
+        "gross_amount": "10000.00",
+        "currency": "IDR",
+        "order_id": "SANDBOX-G710367688-806",
+        "payment_type": "credit_card",
+        "signature_key": "4d4abc70f5a88b09f48f3ab5cb91245feb0b3d89181117a677767b42f8cbe477f5a0d38af078487071311f97da646c1eb9542c1bbf0b19fa9f12e64605ac405e",
+        "status_code": "200",
+        "transaction_id": "3853c491-ca9b-4bcc-ac20-3512ff72a5d0",
+        "transaction_status": "cancel",
+        "fraud_status": "challenge",
+        "status_message": "Success, transaction is found",
+        "merchant_id": "G710367688",
+        "card_type": "credit"
+    }
+    */
+}
+
 function getData($url, $headers)
 {
     $ch = curl_init();

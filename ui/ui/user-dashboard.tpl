@@ -45,6 +45,14 @@
                                 <div class="panel-footer">
                                     <a class="btn btn-info btn-block btn-sm waves-effect waves-light" href="{$_url}order/voucher"><i class="ion ion-ios-cart"></i> {$_L['Order_Voucher']}</a>
                                 </div>
+                                {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
+                                    <div class="panel-footer">
+                                        <div class="btn-group btn-group-justified">
+                                            <a href="{$_url}order/hotspot" class="btn btn-primary"><i class="ion ion-ios-cart"></i> {Lang::T('Buy Hotspot Plan')}</a>
+                                            <a href="{$_url}order/ppoe" class="btn btn-success"><i class="ion ion-ios-cart"></i> {Lang::T('Buy PPOE Plan')}</a>
+                                        </div>
+                                    </div>
+                                {/if}
 							</div>
 						</div>
 						<div class="col-md-6">

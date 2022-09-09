@@ -91,43 +91,51 @@ switch ($action) {
         $ui->assign('_title', 'TRX #' . $trxid . ' - ' . $config['CompanyName']);
         $ui->display('user-orderView.tpl');
         break;
+    case 'ppoe-buy':
     case 'hotspot-buy':
-        if (empty($_c['xendit_secret_key'])) {
-            r2(U . "order/hotspot", 'e', Lang::T("Admin has not yet setup Xendit payment gateway, please tell admin"));
-        }
+        $back = "order/".str_replace('-buy','',$action);
         $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2'] * 1);
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3'] * 1);
         if (empty($router) || empty($plan)) {
-            r2(U . "order/hotspot", 'e', Lang::T("Plan Not found"));
+            r2(U . $back, 'e', Lang::T("Plan Not found"));
+        }
+        $d = ORM::for_table('tbl_payment_gateway')
+            ->where('username', $user['username'])
+            ->where('status', 1)
+            ->find_one();
+        if ($d['pg_url_payment']) {
+            r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
+        }else{
+            if($_c['payment_gateway']==$d['gateway']){
+                $id = $d['id'];
+            }else{
+                $d->status = 4;
+                $d->save();
+            }
+        }
+        if(empty($id)){
+            $d = ORM::for_table('tbl_payment_gateway')->create();
+            $d->username = $user['username'];
+            $d->gateway = $_c['payment_gateway'];
+            $d->plan_id = $plan['id'];
+            $d->plan_name = $plan['name_plan'];
+            $d->routers_id = $router['id'];
+            $d->routers = $router['name'];
+            $d->price = $plan['price'];
+            $d->created_date = date('Y-m-d H:i:s');
+            $d->status = 1;
+            $d->save();
+            $id = $d->id();
         }
         if ($_c['payment_gateway'] == 'xendit') {
-            $d = ORM::for_table('tbl_payment_gateway')
-                ->where('username', $user['username'])
-                ->where('status', 1)
-                ->find_one();
-            if ($d) {
-                if ($d['pg_url_payment']) {
-                    r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
-                }
-                $id = $d['id'];
-            } else {
-                $d = ORM::for_table('tbl_payment_gateway')->create();
-                $d->username = $user['username'];
-                $d->gateway = 'xendit';
-                $d->plan_id = $plan['id'];
-                $d->plan_name = $plan['name_plan'];
-                $d->routers_id = $router['id'];
-                $d->routers = $router['name'];
-                $d->price = $plan['price'];
-                $d->created_date = date('Y-m-d H:i:s');
-                $d->status = 1;
-                $d->save();
-                $id = $d->id();
+            if (empty($_c['xendit_secret_key'])) {
+                sendTelegram("Xendit payment gateway not configured");
+                r2(U . $back, 'e', Lang::T("Admin has not yet setup Xendit payment gateway, please tell admin"));
             }
             if ($id) {
                 $result = xendit_create_invoice($id, $plan['price'], $user['username'], $plan['name_plan']);
                 if (!$result['id']) {
-                    r2(U . "order/hotspot", 'e', Lang::T("Failed to create transaction."));
+                    r2(U . $back, 'e', Lang::T("Failed to create transaction."));
                 }
                 $d = ORM::for_table('tbl_payment_gateway')
                     ->where('username', $user['username'])
@@ -144,7 +152,34 @@ switch ($action) {
                 r2(U . "order/view/" . $d['id'], 'w', Lang::T("Failed to create Transaction.."));
             }
         } else if ($_c['payment_gateway'] == 'midtrans') {
+            if (empty($_c['midtrans_server_key'])) {
+                sendTelegram("Midtrans payment gateway not configured");
+                r2(U . $back, 'e', Lang::T("Admin has not yet setup Midtrans payment gateway, please tell admin"));
+            }
+            if ($id) {
+                $result = midtrans_create_payment($id, $plan['price']);
+                if (!$result['payment_url']) {
+                    r2(U . $back, 'e', Lang::T("Failed to create transaction."));
+                }
+                $d = ORM::for_table('tbl_payment_gateway')
+                    ->where('username', $user['username'])
+                    ->where('status', 1)
+                    ->find_one();
+                $d->gateway_trx_id = $result['order_id'];
+                $d->pg_url_payment = $result['payment_url'];
+                $d->pg_request = json_encode($result);
+                $d->expired_date = date('Y-m-d H:i:s', strtotime("+1 days"));
+                $d->save();
+                r2(U . "order/view/" . $id, 'w', Lang::T("Create Transaction Success"));
+                exit();
+            } else {
+                r2(U . "order/view/" . $d['id'], 'w', Lang::T("Failed to create Transaction.."));
+            }
         } else if ($_c['payment_gateway'] == 'tripay') {
+            if (empty($_c['tripay_secret_key'])) {
+                sendTelegram("Tripay payment gateway not configured");
+                r2(U . $back, 'e', Lang::T("Admin has not yet setup Tripay payment gateway, please tell admin"));
+            }
         }
         break;
     default:

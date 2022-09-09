@@ -30,6 +30,7 @@
                         <div class="col-md-6">
                             <input type="text" readonly class="form-control" onclick="this.select()" value="{$_url}callback/midtrans">
                             <p class="help-block">{Lang::T('Payment Notification URL, Recurring Notification URL, Pay Account Notification URL')}</p>
+                            <p class="help-block">Midtrans wajib pake URL Notification</p>
                             <a href="https://dashboard.midtrans.com/settings/vtweb_configuration" target="_blank" class="help-block">https://dashboard.midtrans.com/settings/vtweb_configuration</a>
                         </div>
                     </div>

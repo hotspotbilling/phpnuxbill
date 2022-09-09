@@ -272,3 +272,5 @@ $_L['Transaction_still_unpaid'] = 'Transaction still unpaid.';
 $_L['Paid_Date'] = 'Paid Date';
 $_L['Transaction_has_been_paid'] = 'Transaction has been paid.';
 $_L['PAID'] = 'PAID';
+$_L['Buy_Hotspot_Plan'] = 'Buy Hotspot Plan';
+$_L['Buy_PPOE_Plan'] = 'Buy PPOE Plan';
