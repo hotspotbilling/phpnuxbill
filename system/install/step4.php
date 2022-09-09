@@ -14,21 +14,21 @@ try{
         "$db_user",
         "$db_password",
         array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
-   $cn = '1';
+    $cn = '1';
 }
 catch(PDOException $ex){
-   $cn = '0';
+    $cn = '0';
 }
 
 if ($cn == '1') {
     $input = '<?php
-	$db_host	    = \'' . $db_host . '\';
-	$db_user        = \'' . $db_user . '\';
-	$db_password	= \'' . $db_password . '\';
-	$db_name	    = \'' . $db_name . '\';
-	define(\'APP_URL\', \'' . $appurl . '\');
-	$_app_stage = \'Live\';';
-    $wConfig = "../config.php";
+$db_host	    = \'' . $db_host . '\';
+$db_user        = \'' . $db_user . '\';
+$db_password	= \'' . $db_password . '\';
+$db_name	    = \'' . $db_name . '\';
+define(\'APP_URL\', \'' . $appurl . '\');
+$_app_stage = \'Live\';';
+$wConfig = "../config.php";
     $fh = fopen($wConfig, 'w') or die("Can't create config file, your server does not support 'fopen' function,
 	please create a file named - config.php with following contents- <br/>$input");
 
