@@ -9,10 +9,6 @@ $action = $routes['1'];
 $user = User::_info();
 $ui->assign('_user', $user);
 
-
-require('system/autoload/Paymentgateway.php');
-require('system/autoload/Recharge.php');
-
 switch ($action) {
     case 'voucher':
         $ui->assign('_title', $_L['Order_Voucher'] . ' - ' . $config['CompanyName']);
@@ -51,12 +47,12 @@ switch ($action) {
         }
         if ($routes['3'] == 'check') {
             if ($trx['gateway'] == 'xendit') {
-                $result = xendit_get_invoice($trx['gateway_trx_id']);
+                $pg = new PGXendit($trx,$user);
+                $result = $pg->getInvoice($trx['gateway_trx_id']);
                 if ($result['status'] == 'PENDING') {
                     r2(U . "order/view/" . $trxid, 'w', Lang::T("Transaction still unpaid."));
                 } else if (in_array($result['status'],['PAID','SETTLED']) && $trx['status'] != 2) {
-
-                    if (!rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], 'xendit',  $result['payment_method'] . ' ' . $result['payment_channel'])) {
+                    if (!Package::rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], $trx['gateway'],  $result['payment_method'] . ' ' . $result['payment_channel'])) {
                         r2(U . "order/view/" . $trxid, 'd', Lang::T("Failed to activate your Package, try again later."));
                     }
 
@@ -76,13 +72,40 @@ switch ($action) {
                 }else if($trx['status'] == 2){
                     r2(U . "order/view/" . $trxid, 'd', Lang::T("Transaction has been paid.."));
                 }
-                print_r($result);
-                die();
                 r2(U . "order/view/" . $trxid, 'd', Lang::T("Unknown Command."));
-            } else if ($trx['gateway'] == 'midtrans') {
-                $result = midtrans_check_payment($trx['gateway_trx_id']);
-                print_r($result);
             } else if ($trx['gateway'] == 'tripay') {
+                $pg = new PGTripay($trx,$user);
+                $result = $pg->getStatus($trx['gateway_trx_id']);
+                if ($result['success']!=1) {
+                    print_r($result);
+                    die();
+                    sendTelegram("Tripay payment status failed\n\n".json_encode($result, JSON_PRETTY_PRINT));
+                    r2(U . "order/view/" . $trxid, 'w', Lang::T("Payment check failed."));
+                }
+                $result =  $result['data'];
+                if ($result['status'] == 'UNPAID') {
+                    r2(U . "order/view/" . $trxid, 'w', Lang::T("Transaction still unpaid."));
+                } else if (in_array($result['status'],['PAID','SETTLED']) && $trx['status'] != 2) {
+                    if (!Package::rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], $trx['gateway'],  $result['payment_method'] . ' ' . $result['payment_channel'])) {
+                        r2(U . "order/view/" . $trxid, 'd', Lang::T("Failed to activate your Package, try again later."));
+                    }
+
+                    $trx->pg_paid_response = json_encode($result);
+                    $trx->payment_method = $result['payment_method'];
+                    $trx->payment_channel = $result['payment_name'];
+                    $trx->paid_date = date('Y-m-d H:i:s', $result['paid_at']);
+                    $trx->status = 2;
+                    $trx->save();
+
+                    r2(U . "order/view/" . $trxid, 's', Lang::T("Transaction has been paid."));
+                } else if (in_array($result['status'],['EXPIRED','FAILED','REFUND'])) {
+                    $trx->pg_paid_response = json_encode($result);
+                    $trx->status = 3;
+                    $trx->save();
+                    r2(U . "order/view/" . $trxid, 'd', Lang::T("Transaction expired."));
+                }else if($trx['status'] == 2){
+                    r2(U . "order/view/" . $trxid, 'd', Lang::T("Transaction has been paid.."));
+                }
             }
         } else if ($routes['3'] == 'cancel') {
             $trx->pg_paid_response = '{}';
@@ -110,6 +133,9 @@ switch ($action) {
         $ui->display('user-orderView.tpl');
         break;
     case 'buy':
+        if ($_c['payment_gateway'] == 'none') {
+            r2(U . 'home', 'e', Lang::T("No Payment Gateway Available"));
+        }
         $back = "order/package";
         $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2'] * 1);
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3'] * 1);
@@ -152,7 +178,8 @@ switch ($action) {
                 r2(U . $back, 'e', Lang::T("Admin has not yet setup Xendit payment gateway, please tell admin"));
             }
             if ($id) {
-                $result = xendit_create_invoice($id, $plan['price'], $user['username'], $plan['name_plan']);
+                $pg = new PGXendit($d,$user);
+                $result = $pg->createInvoice($id, $plan['price'], $user['username'], $plan['name_plan']);
                 if (!$result['id']) {
                     r2(U . $back, 'e', Lang::T("Failed to create transaction."));
                 }
@@ -170,36 +197,39 @@ switch ($action) {
             } else {
                 r2(U . "order/view/" . $d['id'], 'w', Lang::T("Failed to create Transaction.."));
             }
-        } else if ($_c['payment_gateway'] == 'midtrans') {
-            if (empty($_c['midtrans_server_key'])) {
-                sendTelegram("Midtrans payment gateway not configured");
-                r2(U . $back, 'e', Lang::T("Admin has not yet setup Midtrans payment gateway, please tell admin"));
+        } else if ($_c['payment_gateway'] == 'tripay') {
+            if (empty($_c['tripay_secret_key'])) {
+                sendTelegram("Tripay payment gateway not configured");
+                r2(U . $back, 'e', Lang::T("Admin has not yet setup Tripay payment gateway, please tell admin"));
+            }
+            if(!in_array($routes['4'],explode(",",$_c['tripay_channel']))){
+                $ui->assign('_title', 'Tripay Channel - ' . $config['CompanyName']);
+                $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_tripay.json'), true));
+                $ui->assign('tripay_channels', explode(",",$_c['tripay_channel']));
+                $ui->assign('path', $routes['2'].'/'.$routes['3']);
+                $ui->display('tripay_channel.tpl');
+                break;
             }
             if ($id) {
-                $invoiceID = alphanumeric(strtolower($_c['CompanyName'])) . "-" . crc32($_c['CompanyName'] . $id) . "-" . $id;
-                $result = midtrans_create_payment($id, $invoiceID, $plan['price'],$plan['name_plan']);
-                if (!$result['payment_url']) {
-                    sendTelegram("Midtrans payment failed\n\n".json_encode($result, JSON_PRETTY_PRINT));
+                $pg = new PGTripay($d,$user);
+                $result = $pg->createTransaction($routes['4']);
+                if ($result['success']!=1) {
+                    sendTelegram("Tripay payment failed\n\n".json_encode($result, JSON_PRETTY_PRINT));
                     r2(U . $back, 'e', Lang::T("Failed to create transaction."));
                 }
                 $d = ORM::for_table('tbl_payment_gateway')
                     ->where('username', $user['username'])
                     ->where('status', 1)
                     ->find_one();
-                $d->gateway_trx_id = $invoiceID;
-                $d->pg_url_payment = $result['payment_url'];
+                $d->gateway_trx_id = $result['data']['reference'];
+                $d->pg_url_payment = $result['data']['checkout_url'];
                 $d->pg_request = json_encode($result);
-                $d->expired_date = date('Y-m-d H:i:s', strtotime("+1 days"));
+                $d->expired_date = date('Y-m-d H:i:s', $result['data']['expired_time']);
                 $d->save();
                 r2(U . "order/view/" . $id, 'w', Lang::T("Create Transaction Success"));
                 exit();
             } else {
                 r2(U . "order/view/" . $d['id'], 'w', Lang::T("Failed to create Transaction.."));
-            }
-        } else if ($_c['payment_gateway'] == 'tripay') {
-            if (empty($_c['tripay_secret_key'])) {
-                sendTelegram("Tripay payment gateway not configured");
-                r2(U . $back, 'e', Lang::T("Admin has not yet setup Tripay payment gateway, please tell admin"));
             }
         }
         break;

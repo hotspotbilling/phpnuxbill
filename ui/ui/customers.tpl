@@ -23,34 +23,35 @@
 											<a href="{$_url}customers/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['Add_Contact']}</a>
 										</div>&nbsp;
 									</div>
-	
-									<table class="table table-bordered table-striped">
-										<thead>
-											<tr>
-												<th>{$_L['Username']}</th>
-												<th>{$_L['Full_Name']}</th>
-												<th>{$_L['Phone_Number']}</th>
-												<th>{$_L['Created_On']}</th>
-												<th>{$_L['Recharge']}</th>
-												<th>{$_L['Manage']}</th>
-											</tr>
-										</thead>
-										<tbody>
-										{foreach $d as $ds}
-											<tr>
-												<td>{$ds['username']}</td>
-												<td>{$ds['fullname']}</td>
-												<td>{$ds['phonenumber']}</td>
-												<td>{$ds['created_at']}</td>
-												<td align="center"><a href="{$_url}prepaid/recharge-user/{$ds['id']}" id="{$ds['id']}" class="btn btn-primary btn-sm">{$_L['Recharge']}</a></td>
-												<td align="center">
-													<a href="{$_url}customers/edit/{$ds['id']}" class="btn btn-warning btn-sm">{$_L['Edit']}</a>
-													<a href="{$_url}customers/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm cdelete">{$_L['Delete']}</a>
-												</td>
-											</tr>
-										{/foreach}
-										</tbody>
-									</table>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{$_L['Username']}</th>
+                                                    <th>{$_L['Full_Name']}</th>
+                                                    <th>{$_L['Phone_Number']}</th>
+                                                    <th>{$_L['Created_On']}</th>
+                                                    <th>{$_L['Recharge']}</th>
+                                                    <th>{$_L['Manage']}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {foreach $d as $ds}
+                                                <tr>
+                                                    <td>{$ds['username']}</td>
+                                                    <td>{$ds['fullname']}</td>
+                                                    <td>{$ds['phonenumber']}</td>
+                                                    <td>{$ds['created_at']}</td>
+                                                    <td align="center"><a href="{$_url}prepaid/recharge-user/{$ds['id']}" id="{$ds['id']}" class="btn btn-primary btn-sm">{$_L['Recharge']}</a></td>
+                                                    <td align="center">
+                                                        <a href="{$_url}customers/edit/{$ds['id']}" class="btn btn-warning btn-sm">{$_L['Edit']}</a>
+                                                        <a href="{$_url}customers/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm cdelete">{$_L['Delete']}</a>
+                                                    </td>
+                                                </tr>
+                                            {/foreach}
+                                            </tbody>
+                                        </table>
+                                    </div>
 									{$paginator['contents']}
 								</div>
 							</div>

@@ -25,7 +25,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Callback URL</label>
+                        <label class="col-md-2 control-label">Notification URL</label>
                         <div class="col-md-6">
                             <input type="text" readonly class="form-control" onclick="this.select()" value="{$_url}callback/tripay">
                         </div>

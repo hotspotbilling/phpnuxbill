@@ -21,7 +21,7 @@ switch ($action) {
         echo "done";
         break;
     case 'tripay':
-        echo "done";
+        echo '{"success": true}';
         break;
     default:
         echo "not found";

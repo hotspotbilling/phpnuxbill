@@ -282,3 +282,6 @@ $_L['Checking_payment'] = 'Checking payment';
 $_L['Create_Transaction_Success'] = 'Create Transaction Success';
 $_L['You_have_unpaid_transaction'] = 'You have unpaid transaction';
 $_L['CANCELED'] = 'CANCELED';
+$_L['TripayPayment_Channel'] = 'TripayPayment Channel';
+$_L['Payment_Channel'] = 'Payment Channel';
+$_L['Payment_check_failed'] = 'Payment check failed.';

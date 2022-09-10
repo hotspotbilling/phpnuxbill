@@ -24,35 +24,35 @@
 											<a href="{$_url}routers/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Router']}</a>
 										</div>&nbsp;
 									</div>
-						<div class="table-responsive">
-						<table class="table table-striped table-bordered">
-							<thead>
-								<tr>
-									<th>{$_L['Router_Name']}</th>
-									<th>{$_L['IP_Address']}</th>
-									<th>{$_L['Username']}</th>
-									<th>{$_L['Description']}</th>
-									<th>{Lang::T('Status')}</th>
-									<th>{$_L['Manage']}</th>
-								</tr>
-							</thead>
-							<tbody>
-							{foreach $d as $ds}
-								<tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
-									<td>{$ds['name']}</td>
-									<td>{$ds['ip_address']}</td>
-									<td>{$ds['username']}</td>
-									<td>{$ds['description']}</td>
-									<td>{if $ds['enabled'] == 1}Enabled{else}Disabled{/if}</td>
-									<td>
-										<a href="{$_url}routers/edit/{$ds['id']}" class="btn btn-info btn-sm btn-block">{$_L['Edit']}</a>
-									</td>
-								</tr>
-							{/foreach}
-							</tbody>
-						</table>
-						</div>
-						{$paginator['contents']}
+                                    <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>{$_L['Router_Name']}</th>
+                                                <th>{$_L['IP_Address']}</th>
+                                                <th>{$_L['Username']}</th>
+                                                <th>{$_L['Description']}</th>
+                                                <th>{Lang::T('Status')}</th>
+                                                <th>{$_L['Manage']}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {foreach $d as $ds}
+                                            <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
+                                                <td>{$ds['name']}</td>
+                                                <td>{$ds['ip_address']}</td>
+                                                <td>{$ds['username']}</td>
+                                                <td>{$ds['description']}</td>
+                                                <td>{if $ds['enabled'] == 1}Enabled{else}Disabled{/if}</td>
+                                                <td>
+                                                    <a href="{$_url}routers/edit/{$ds['id']}" class="btn btn-info btn-sm btn-block">{$_L['Edit']}</a>
+                                                </td>
+                                            </tr>
+                                        {/foreach}
+                                        </tbody>
+                                    </table>
+                                    </div>
+                                    {$paginator['contents']}
 								</div>
 							</div>
 						</div>
