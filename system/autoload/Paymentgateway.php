@@ -1,23 +1,25 @@
 <?php
+
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
-**/
+ * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ **/
 
 
 // Payment Gateway Server
-if($_app_stage = 'Live'){
+if ($_app_stage == 'Live') {
     $xendit_server = 'https://api.xendit.co/v2/';
-    $midtrans_server = 'https://api.midtrans.com';
-    $tripay_server = 'https://tripay.co.id/api/transaction/create';
-}else{
+    $midtrans_server = 'https://api.midtrans.com/';
+    $tripay_server = 'https://tripay.co.id/api/';
+} else {
     $xendit_server = 'https://api.xendit.co/v2/';
-    $midtrans_server = 'https://api.sandbox.midtrans.com';
-    $tripay_server = 'https://tripay.co.id/api-sandbox/transaction/create';
+    $midtrans_server = 'https://api.sandbox.midtrans.com/';
+    $tripay_server = 'https://tripay.co.id/api-sandbox/';
 }
 
 
-function xendit_create_invoice($trxID, $amount, $phone, $description){
-    global $xendit_server,$_c;
+function xendit_create_invoice($trxID, $amount, $phone, $description)
+{
+    global $xendit_server, $_c;
     $json = [
         'external_id' => $trxID,
         'amount' => $amount,
@@ -25,18 +27,18 @@ function xendit_create_invoice($trxID, $amount, $phone, $description){
         'customer' => [
             'mobile_number' => $phone,
         ],
-        'customer_notification_preference'=>[
-            'invoice_created' => ['whatsapp','sms'],
-            'invoice_reminder' => ['whatsapp','sms'],
-            'invoice_paid' => ['whatsapp','sms'],
-            'invoice_expired' => ['whatsapp','sms']
+        'customer_notification_preference' => [
+            'invoice_created' => ['whatsapp', 'sms'],
+            'invoice_reminder' => ['whatsapp', 'sms'],
+            'invoice_paid' => ['whatsapp', 'sms'],
+            'invoice_expired' => ['whatsapp', 'sms']
         ],
-        'payment_methods ' => explode(',',$_c['xendit_channel']),
-        'success_redirect_url' => U.'order/view/'.$trxID,
-        'failure_redirect_url' => U.'order/view/'.$trxID
+        'payment_methods ' => explode(',', $_c['xendit_channel']),
+        'success_redirect_url' => U . 'order/view/' . $trxID . '/check',
+        'failure_redirect_url' => U . 'order/view/' . $trxID . '/check'
     ];
 
-    return json_decode(postJsonData($xendit_server.'invoices', $json, ['Authorization: Basic '.base64_encode($_c['xendit_secret_key'].':')]),true);
+    return json_decode(postJsonData($xendit_server . 'invoices', $json, ['Authorization: Basic ' . base64_encode($_c['xendit_secret_key'] . ':')]), true);
     /*
     {
         "id": "631597513897510bace2459d", #gateway_trx_id
@@ -55,11 +57,12 @@ function xendit_create_invoice($trxID, $amount, $phone, $description){
     */
 }
 
-function xendit_get_invoice($xendittrxID){
-    global $xendit_server,$_c;
-    return json_decode(getData($xendit_server.'invoices/'.$xendittrxID, [
-        'Authorization: Basic '.base64_encode($_c['xendit_secret_key'].':')
-    ]),true);
+function xendit_get_invoice($xendittrxID)
+{
+    global $xendit_server, $_c;
+    return json_decode(getData($xendit_server . 'invoices/' . $xendittrxID, [
+        'Authorization: Basic ' . base64_encode($_c['xendit_secret_key'] . ':')
+    ]), true);
     /*
     {
         "id": "631597513897510bace2459d", #gateway_trx_id
@@ -81,24 +84,33 @@ function xendit_get_invoice($xendittrxID){
 /**    MIDTRANS */
 
 
-function midtrans_create_payment($trxID, $amount){
-    global $midtrans_server,$_c;
+function midtrans_create_payment($trxID, $invoiceID, $amount, $description)
+{
+    global $midtrans_server, $_c;
     $json = [
-        'transaction_details ' => [
+        'transaction_details' => [
             'order_id' => $trxID,
-            'gross_amount' => $amount,
-            "payment_link_id" => alphanumeric(ucwords($_c['CompanyName']))."_".crc32($_c['CompanyName'])."_".$trxID
+            'gross_amount' => intval($amount),
+            "payment_link_id" => $invoiceID
         ],
-        'enabled_payments' => explode(',',$_c['midtrans_channel']),
-        "usage_limit"=>  1,
+        "item_details" => [
+            [
+                "name" => $description,
+                "price" => intval($amount),
+                "quantity" => 1
+            ]
+        ],
+        'enabled_payments' => explode(',', $_c['midtrans_channel']),
+        "usage_limit" =>  4,
         "expiry" => [
             "duration" => 24,
-            "unit" => "hour"
+            "unit" => "hours"
         ]
     ];
-    $json = json_decode(postJsonData($midtrans_server.'v1/payment-links', $json, ['Authorization: Basic '.base64_encode($_c['midtrans_server_key'].':')]),true);
-    if(!empty($json['error_messages'])){
-        sendTelegram(json_encode("Midtrans create Payment error:\n".alphanumeric($_c['CompanyName'])."_".crc32($_c['CompanyName'])."_".$trxID."\n".$json['error_messages']));
+    $data = postJsonData($midtrans_server . 'v1/payment-links', $json, ['Authorization: Basic ' . base64_encode($_c['midtrans_server_key'] . ':')]);
+    $json = json_decode($data, true);
+    if (!empty($json['error_messages'])) {
+        sendTelegram(json_encode("Midtrans create Payment error:\n" . alphanumeric($_c['CompanyName']) . "_" . crc32($_c['CompanyName']) . "_" . $trxID . "\n" . $json['error_messages']));
     }
     return $json;
     /*
@@ -109,11 +121,13 @@ function midtrans_create_payment($trxID, $amount){
     */
 }
 
-function midtrans_check_payment($midtranstrxID){
-    global $midtrans_server,$_c;
-    return json_decode(getData($midtrans_server.'v2/'.$midtranstrxID.'/status', [
-        'Authorization: Basic '.base64_encode($_c['midtrans_server_key'].':')
-    ]),true);
+function midtrans_check_payment($midtranstrxID)
+{
+    global $midtrans_server, $_c;
+    echo $midtrans_server . 'v2/' . $midtranstrxID . '/status';
+    return json_decode(getData($midtrans_server . 'v2/' . $midtranstrxID . '/status', [
+        'Authorization: Basic ' . base64_encode($_c['midtrans_server_key'] . ':')
+    ]), true);
     /*
     {
         "masked_card": "41111111-1111",

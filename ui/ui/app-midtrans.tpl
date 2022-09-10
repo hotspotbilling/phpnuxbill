@@ -38,7 +38,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Finish Redirect URL</label>
                         <div class="col-md-6">
-                            <input type="text" readonly class="form-control" onclick="this.select()" value="{$_url}accounts/transaction">
+                            <input type="text" readonly class="form-control" onclick="this.select()" value="{$_url}order/unpaid">
                             <p class="help-block">{Lang::T('Finish Redirect URL, Unfinish Redirect URL, Error Redirect URL')}</p>
                             <a href="https://dashboard.midtrans.com/settings/vtweb_configuration" target="_blank" class="help-block">https://dashboard.midtrans.com/settings/vtweb_configuration</a>
                         </div>

@@ -75,7 +75,10 @@
             {if $trx['status']==1}
                 <div class="panel-footer ">
                     <div class="btn-group btn-group-justified">
-                        <a href="{$trx['pg_url_payment']}" target="_blank" class="btn btn-primary">{Lang::T('PAY NOW')}</a>
+                        <a href="{$trx['pg_url_payment']}"
+                        {if $trx['gateway']=='midtrans'}
+                            target="_blank"
+                        {/if} class="btn btn-primary">{Lang::T('PAY NOW')}</a>
                         <a href="{$_url}order/view/{$trx['id']}/check" class="btn btn-info">{Lang::T('Check for Payment')}</a>
                     </div>
                 </div>

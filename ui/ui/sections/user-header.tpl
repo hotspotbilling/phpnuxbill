@@ -138,8 +138,7 @@
 						<ul class="inner-drop list-unstyled">
 							<li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/voucher">Voucher</a></li>
                             {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
-                                <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/hotspot">Hotspot</a></li>
-                                <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/ppoe">PPOE</a></li>
+                                <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/package">{Lang::T('Package')}</a></li>
                             {/if}
 						</ul>
 					</li>

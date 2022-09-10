@@ -2,7 +2,7 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-default panel-hovered">
-            <div class="panel-heading">Order Hotspot</div>
+            <div class="panel-heading">{Lang::T('Order Internet Package')}</div>
         </div>
         {foreach $routers as $router}
             <div class="panel mb20 panel-info panel-hovered">
@@ -23,6 +23,10 @@
                                         <table class="table table-bordered table-striped">
                                             <tbody>
                                                 <tr>
+                                                    <td>{Lang::T('Type')}</td>
+                                                    <td>{$plan['type']}</td>
+                                                </tr>
+                                                <tr>
                                                     <td>Price</td>
                                                     <td>{$plan['price']}</td>
                                                 </tr>
@@ -34,7 +38,7 @@
                                         </table>
                                     </div>
                                     <div class="panel-footer">
-                                        <a href="{$_url}order/hotspot-buy/{$router['id']}/{$plan['id']}" onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')" class="btn btn-sm btn-block btn-primary">Buy</a>
+                                        <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}" onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')" class="btn btn-sm btn-block btn-primary">Buy</a>
                                     </div>
                                 </div>
                             </div>
