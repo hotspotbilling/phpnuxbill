@@ -281,3 +281,4 @@ $_L['Unknown_Command'] = 'Unknown Command.';
 $_L['Checking_payment'] = 'Checking payment';
 $_L['Create_Transaction_Success'] = 'Create Transaction Success';
 $_L['You_have_unpaid_transaction'] = 'You have unpaid transaction';
+$_L['CANCELED'] = 'CANCELED';

@@ -269,7 +269,7 @@
 						</a>
 						<ul class="inner-drop list-unstyled">
 							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/xendit">Xendit</a></li>
-							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/midtrans">Midtrans</a></li>
+							{* <li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/midtrans">Midtrans</a></li> *}
 							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/tripay">Tripay</a></li>
 							<li>&nbsp;</li>
 						</ul>
