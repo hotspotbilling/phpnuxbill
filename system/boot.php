@@ -47,12 +47,6 @@ function _get($param, $defvalue = '')
     }
 }
 
-class Lang {
-    public static function T($var) {
-        return Lang($var);
-    }
-}
-
 
 require('system/orm.php');
 
