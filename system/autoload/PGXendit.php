@@ -7,7 +7,7 @@
  * Payment Gateway Xendit
  **/
 
-class PGTripay {
+class PGXendit {
     protected $user;
     protected $trx;
     protected $channel;
