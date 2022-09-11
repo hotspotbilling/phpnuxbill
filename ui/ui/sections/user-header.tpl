@@ -118,17 +118,6 @@
 						</ul>
 					</li>
 
-					<li {if $_system_menu eq 'voucher'}class="open"{/if}>
-						<a href="#">
-							<i class="ion ion-card"></i>
-							<span class="text">{$_L['Voucher']}</span>
-							<i class="arrow ion-chevron-left"></i>
-						</a>
-						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'voucher'}class="active"{/if}><a href="{$_url}voucher/activation">{$_L['Voucher_Activation']}</a></li>
-							<li {if $_system_menu eq 'voucher'}class="active"{/if}><a href="{$_url}voucher/list-activated">{$_L['List_Activated_Voucher']}</a></li>
-						</ul>
-					</li>
 					<li {if $_system_menu eq 'order'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-ios-cart"></i>
@@ -139,8 +128,15 @@
 							<li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/voucher">Voucher</a></li>
                             {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
                                 <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/package">{Lang::T('Package')}</a></li>
+                                <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/history">{Lang::T('History')}</a></li>
                             {/if}
 						</ul>
+					</li>
+					<li {if $_system_menu eq 'voucher'}class="active"{/if}>
+						<a href="{$_url}voucher/list-activated">
+							<i class="ion ion-card"></i>
+							<span class="text">{Lang::T('History')}</span>
+						</a>
 					</li>
 					<li {if $_system_menu eq 'accounts'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
