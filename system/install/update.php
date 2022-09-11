@@ -92,6 +92,10 @@
                     echo "ALTER TABLE `tbl_routers` CHANGE `description` `description` VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;";
                     $dbh->exec("ALTER TABLE `tbl_routers` CHANGE `description` `description` VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;");
 
+                    echo "ALTER TABLE `tbl_user_recharges` CHANGE `method` `method` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';\n\n";
+                    $dbh->exec("ALTER TABLE `tbl_user_recharges` CHANGE `method` `method` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';");
+                    echo "ALTER TABLE `tbl_transactions` CHANGE `method` `method` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;\n\n";
+                    $dbh->exec("ALTER TABLE `tbl_transactions` CHANGE `method` `method` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;");
                     echo "Success update database for new system <a href='/admin/'>Back To Home</a>";
             }catch(PDOException $ex){
                 echo "Error Failed to connect to database: ".$ex->getMessage()."\n";

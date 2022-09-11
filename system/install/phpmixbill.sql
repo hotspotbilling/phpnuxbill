@@ -227,7 +227,7 @@ CREATE TABLE
         `recharged_on` date NOT NULL,
         `expiration` date NOT NULL,
         `time` time NOT NULL,
-        `method` enum('voucher', 'admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+        `method` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `type` enum('Hotspot', 'PPPOE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
@@ -271,7 +271,7 @@ CREATE TABLE
         `expiration` date NOT NULL,
         `time` time NOT NULL,
         `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-        `method` enum('voucher', 'admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+        `method` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `type` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
