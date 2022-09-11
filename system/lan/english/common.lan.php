@@ -286,4 +286,11 @@ $_L['TripayPayment_Channel'] = 'TripayPayment Channel';
 $_L['Payment_Channel'] = 'Payment Channel';
 $_L['Payment_check_failed'] = 'Payment check failed.';
 $_L['Order_Package'] = 'Order Package';
+$_L['Transactions'] = 'Transactions';
+$_L['Payments'] = 'Payments';
+$_L['History'] = 'History';
+$_L['Order_History'] = 'Order History';
+$_L['Gateway'] = 'Gateway';
+$_L['Date_Done'] = 'Date Done';
+$_L['Unpaid_Order'] = 'Unpaid Order';
 
