@@ -14,6 +14,16 @@ switch ($action) {
         $ui->assign('_title', $_L['Order_Voucher'] . ' - ' . $config['CompanyName']);
         $ui->display('user-order.tpl');
         break;
+    case 'history':
+        $d = ORM::for_table('tbl_payment_gateway')
+            ->where('username', $user['username'])
+            ->find_many();
+        $paginator = Paginator::bootstrap('tbl_payment_gateway','username',$user['username']);
+		$ui->assign('paginator',$paginator);
+        $ui->assign('d', $d);
+        $ui->assign('_title', Lang::T('Order History') . ' - ' . $config['CompanyName']);
+        $ui->display('user-orderHistory.tpl');
+        break;
     case 'package':
         $ui->assign('_title', 'Order PPOE Internet - ' . $config['CompanyName']);
         $routers = ORM::for_table('tbl_routers')->find_many();
@@ -49,6 +59,7 @@ switch ($action) {
             if ($trx['gateway'] == 'xendit') {
                 $pg = new PGXendit($trx,$user);
                 $result = $pg->getInvoice($trx['gateway_trx_id']);
+
                 if ($result['status'] == 'PENDING') {
                     r2(U . "order/view/" . $trxid, 'w', Lang::T("Transaction still unpaid."));
                 } else if (in_array($result['status'],['PAID','SETTLED']) && $trx['status'] != 2) {

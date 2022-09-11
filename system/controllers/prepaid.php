@@ -299,7 +299,7 @@ switch ($action) {
                     $t->type = "Hotspot";
                     $t->save();
                 }
-                sendTelegram( "$admin[fullname] #Recharge Voucher #Hotspot for #$c[username]\n".$p['name_plan'].
+                sendTelegram( "$admin[fullname] #Recharge Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
                 "\nRouter: ".$server.
                 "\nPrice: ".$p['price']);
             } else {
@@ -406,7 +406,7 @@ switch ($action) {
                     $t->type = "PPPOE";
                     $t->save();
                 }
-                sendTelegram( "$admin[fullname] #Recharge Voucher #PPPOE for #$c[username]\n".$p['name_plan'].
+                sendTelegram( "$admin[fullname] #Recharge Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
                 "\nRouter: ".$server.
                 "\nPrice: ".$p['price']);
             }
@@ -950,7 +950,7 @@ switch ($action) {
                 $v1->user = $c['username'];
                 $v1->save();
 
-                sendTelegram( "$admin[fullname] #Refill #Voucher #Hotspot for #$c[username]\n".$p['name_plan'].
+                sendTelegram( "$admin[fullname] #Refill #Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
                 "\nCode: ".$code.
                 "\nRouter: ".$v1['routers'].
                 "\nPrice: ".$p['price']);
@@ -1063,7 +1063,7 @@ switch ($action) {
                 $v1->save();
 
 
-                sendTelegram( "$admin[fullname] Refill #Voucher #PPPOE for #$c[username]\n".$p['name_plan'].
+                sendTelegram( "$admin[fullname] Refill #Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
                 "\nCode: ".$code.
                 "\nRouter: ".$v1['routers'].
                 "\nPrice: ".$p['price']);
