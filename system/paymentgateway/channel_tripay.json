@@ -1,92 +1,74 @@
 [
 	{
 		"id": "PERMATAVA",
-		"name": "Permata Bank",
-		"min": 10000
+		"name": "Permata Bank"
 	},
 	{
 		"id": "MYBVA",
-		"name": "Maybank",
-		"min": 10000
+		"name": "Maybank"
 	},
 	{
 		"id": "BNIVA",
-		"name": "BNI",
-		"min": 10000
+		"name": "BNI"
 	},
 	{
 		"id": "BRIVA",
-		"name": "BRI",
-		"min": 10000
+		"name": "BRI"
 	},
 	{
 		"id": "MANDIRIVA",
-		"name": "Mandiri",
-		"min": 10000
+		"name": "Mandiri"
 	},
 	{
 		"id": "BCAVA",
-		"name": "BCA",
-		"min": 10000
+		"name": "BCA"
 	},
 	{
 		"id": "SMSVA",
-		"name": "Sinarmas",
-		"min": 10000
+		"name": "Sinarmas"
 	},
 	{
 		"id": "MUAMALATVA",
-		"name": "Muamalat",
-		"min": 10000
+		"name": "Muamalat"
 	},
 	{
 		"id": "SAMPOERNAVA",
-		"name": "Sahabat Sampoerna",
-		"min": 10000
+		"name": "Sahabat Sampoerna"
 	},
 	{
 		"id": "BSIVA",
-		"name": "BSI",
-		"min": 10000
+		"name": "BSI"
 	},
 	{
 		"id": "ALFAMART",
-		"name": "Alfamart ",
-		"min": 5000
+		"name": "Alfamart "
 	},
 	{
 		"id": "INDOMARET",
-		"name": "Indomaret ",
-		"min": 10000
+		"name": "Indomaret "
 	},
 	{
 		"id": "ALFAMIDI",
-		"name": "Alfamidi ",
-		"min": 5000
+		"name": "Alfamidi "
 	},
 	{
 		"id": "OVO",
-		"name": "OVO",
-		"min": 1000
+		"name": "OVO"
 	},
 	{
 		"id": "QRIS",
-		"name": "QRIS by ShopeePay",
-		"min": 1000
+		"name": "QRIS by ShopeePay"
 	},
 	{
 		"id": "QRISC",
-		"name": "QRIS (Customizable)",
-		"min": 1000
+		"name": "QRIS (Customizable)"
 	},
 	{
 		"id": "QRIS2",
-		"name": "QRIS",
-		"min": 1000
+		"name": "QRIS"
 	},
 	{
 		"id": "SHOPEEPAY",
-		"name": "ShopeePay ",
-		"min": 1000
+		"name": "ShopeePay "
 	}
 ]

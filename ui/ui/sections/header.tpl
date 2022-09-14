@@ -271,6 +271,7 @@
 							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/xendit">Xendit</a></li>
 							{* <li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/midtrans">Midtrans</a></li> *}
 							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/tripay">Tripay</a></li>
+							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/duitku">Duitku</a></li>
 							<li>&nbsp;</li>
 						</ul>
 					</li>

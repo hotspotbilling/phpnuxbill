@@ -13,7 +13,7 @@ switch ($action) {
     case 'xendit':
         $ui->assign('_title', 'Xendit - Payment Gateway - '. $config['CompanyName']);
         $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_xendit.json'), true));
-        $ui->display('app-xendit.tpl');
+        $ui->display('pg-xendit.tpl');
         break;
     case 'xendit-post':
         $xendit_secret_key = _post('xendit_secret_key');
@@ -56,7 +56,7 @@ switch ($action) {
     case 'midtrans':
         $ui->assign('_title', 'Midtrans - Payment Gateway - '. $config['CompanyName']);
         $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_midtrans.json'), true));
-        $ui->display('app-midtrans.tpl');
+        $ui->display('pg-midtrans.tpl');
         break;
     case 'midtrans-post':
         $midtrans_merchant_id = _post('midtrans_merchant_id');
@@ -110,7 +110,7 @@ switch ($action) {
     case 'tripay':
         $ui->assign('_title', 'Tripay - Payment Gateway - '. $config['CompanyName']);
         $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_tripay.json'), true));
-        $ui->display('app-tripay.tpl');
+        $ui->display('pg-tripay.tpl');
         break;
     case 'tripay-post':
         $tripay_merchant = _post('tripay_merchant');
@@ -161,4 +161,50 @@ switch ($action) {
 
         r2(U . 'paymentgateway/tripay', 's', $_L['Settings_Saved_Successfully']);
         break;
+    case 'duitku':
+        $ui->assign('_title', 'Duitku - Payment Gateway - '. $config['CompanyName']);
+        $ui->assign('channels', json_decode(file_get_contents('system/paymentgateway/channel_duitku.json'), true));
+        $ui->display('pg-duitku.tpl');
+        break;
+    case 'duitku-post':
+        $duitku_merchant_id = _post('duitku_merchant_id');
+        $duitku_merchant_key = _post('duitku_merchant_key');
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'duitku_merchant_id')->find_one();
+        if($d){
+            $d->value = $duitku_merchant_id;
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'duitku_merchant_id';
+            $d->value = $duitku_merchant_id;
+            $d->save();
+        }
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'duitku_merchant_key')->find_one();
+        if($d){
+            $d->value = $duitku_merchant_key;
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'duitku_merchant_key';
+            $d->value = $duitku_merchant_key;
+            $d->save();
+        }
+
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'duitku_channel')->find_one();
+        if($d){
+            $d->value = implode(',',$_POST['duitku_channel']);
+            $d->save();
+        }else{
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'duitku_channel';
+            $d->value = implode(',',$_POST['duitku_channel']);
+            $d->save();
+        }
+
+        _log('[' . $admin['username'] . ']: Duitku ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
+
+        r2(U . 'paymentgateway/duitku', 's', $_L['Settings_Saved_Successfully']);
+        break;
+    default:
+        $ui->display('a404.tpl');
 }

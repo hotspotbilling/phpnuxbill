@@ -1,82 +1,66 @@
 [
 	{
 		"id": "credit_card",
-		"name": "Credit Card",
-		"min": 10000
+		"name": "Credit Card"
 	},
 	{
 		"id": "bca_va",
-		"name": "BCA",
-		"min": 10000
+		"name": "BCA"
 	},
 	{
 		"id": "permata_va",
-		"name": "Permata",
-		"min": 10000
+		"name": "Permata"
 	},
 	{
 		"id": "bni_va",
-		"name": "BNI",
-		"min": 10000
+		"name": "BNI"
 	},
 	{
 		"id": "bri_va",
-		"name": "BRI",
-		"min": 10000
+		"name": "BRI"
 	},
 	{
 		"id": "echannel",
-		"name": "Mandiri Bill",
-		"min": 10000
+		"name": "Mandiri Bill"
 	},
 	{
 		"id": "gopay",
-		"name": "Gopay",
-		"min": 1000
+		"name": "Gopay"
 	},
 	{
 		"id": "bca_klikbca",
-		"name": "KLIKBCA",
-		"min": 10000
+		"name": "KLIKBCA"
 	},
 	{
 		"id": "bca_klikpay",
-		"name": "BCA KLIKPAY",
-		"min": 10000
+		"name": "BCA KLIKPAY"
 	},
 	{
 		"id": "cimb_clicks",
-		"name": "CIMB Clicks",
-		"min": 10000
+		"name": "CIMB Clicks"
 	},
 	{
 		"id": "danamon_online",
-		"name": "Danamon",
-		"min": 5000
+		"name": "Danamon"
 	},
 	{
 		"id": "bri_epay",
-		"name": "BRImo",
-		"min": 10000
+		"name": "BRImo"
 	},
 	{
 		"id": "indomaret",
-		"name": "Indomaret",
-		"min": 5000
+		"name": "Indomaret"
 	},
 	{
 		"id": "alfamart",
-		"name": "Alfamart",
-		"min": 5000
+		"name": "Alfamart"
 	},
 	{
 		"id": "ShopeePay",
-		"name": "ShopeePay",
-		"min": 1000
+		"name": "ShopeePay"
 	},
 	{
 		"id": "uob_ezpay",
-		"name": "UOB EZ Pay",
-		"min": 1000
+		"name": "UOB EZ Pay"
 	}
 ]

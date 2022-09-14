@@ -1,82 +1,66 @@
 [
 	{
 		"id": "CREDIT_CARD",
-		"name": "CREDIT CARD",
-		"min": 10000
+		"name": "CREDIT CARD"
 	},
 	{
 		"id": "PERMATA",
-		"name": "Permata Bank",
-		"min": 10000
+		"name": "Permata Bank"
 	},
 	{
 		"id": "BNI",
-		"name": "BNI",
-		"min": 10000
+		"name": "BNI"
 	},
 	{
 		"id": "BRI",
-		"name": "BRI",
-		"min": 10000
+		"name": "BRI"
 	},
 	{
 		"id": "MANDIRI",
-		"name": "Mandiri",
-		"min": 10000
+		"name": "Mandiri"
 	},
 	{
 		"id": "BCA",
-		"name": "BCA",
-		"min": 10000
+		"name": "BCA"
 	},
 	{
 		"id": "BSI",
-		"name": "BSI",
-		"min": 10000
+		"name": "BSI"
 	},
 	{
 		"id": "DD_BRI",
-		"name": "Direct Debit BRI",
-		"min": 10000
+		"name": "Direct Debit BRI"
 	},
 	{
 		"id": "DD_BCA_KLIKPAY",
-		"name": "Direct Debit BCA KLIKPAY",
-		"min": 10000
+		"name": "Direct Debit BCA KLIKPAY"
 	},
 	{
 		"id": "ALFAMART",
-		"name": "Alfamart ",
-		"min": 5000
+		"name": "Alfamart "
 	},
 	{
 		"id": "INDOMARET",
-		"name": "Indomaret ",
-		"min": 10000
+		"name": "Indomaret "
 	},
 	{
 		"id": "OVO",
-		"name": "OVO",
-		"min": 1000
+		"name": "OVO"
 	},
 	{
 		"id": "DANA",
-		"name": "DANA",
-		"min": 1000
+		"name": "DANA"
 	},
 	{
 		"id": "LINKAJA",
-		"name": "LinkAja",
-		"min": 1000
+		"name": "LinkAja"
 	},
 	{
 		"id": "SHOPEEPAY",
-		"name": "ShopeePay ",
-		"min": 1000
+		"name": "ShopeePay "
 	},
 	{
 		"id": "QRIS",
-		"name": "QRIS",
-		"min": 1000
+		"name": "QRIS"
 	}
 ]

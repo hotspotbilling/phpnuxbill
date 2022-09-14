@@ -24,7 +24,7 @@ class PGTripay
         return hash_hmac('sha256', $_c['tripay_merchant'] . $this->trx['id'] . $this->trx['price'], $_c['tripay_secret_key']);
     }
 
-    function createTransaction($channel) //$trxID, $channel, $amount, $user, $description)
+    function createTransaction($channel)
     {
         global $_c;
         $json = [

@@ -34,10 +34,11 @@
                                 <option value="xendit" {if $_c['payment_gateway'] eq 'xendit'}selected="selected" {/if}>Xendit - Indonesia &amp; Philippines</option>
                                 {* <option value="midtrans" {if $_c['payment_gateway'] eq 'midtrans'}selected="selected" {/if}>Midtrans</option> *}
                                 <option value="tripay" {if $_c['payment_gateway'] eq 'tripay'}selected="selected" {/if}>Tripay - Indonesia</option>
+                                <option value="duitku" {if $_c['payment_gateway'] eq 'duitku'}selected="selected" {/if}>Duitku - Indonesia</option>
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group hidden">
                         <label class="col-md-2 control-label">Radius Mode?</label>
                         <div class="col-md-6">
                             <select name="radius_mode" id="radius_mode" class="form-control">
