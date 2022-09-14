@@ -88,8 +88,6 @@ switch ($action) {
                 $pg = new PGTripay($trx,$user);
                 $result = $pg->getStatus($trx['gateway_trx_id']);
                 if ($result['success']!=1) {
-                    print_r($result);
-                    die();
                     sendTelegram("Tripay payment status failed\n\n".json_encode($result, JSON_PRETTY_PRINT));
                     r2(U . "order/view/" . $trxid, 'w', Lang::T("Payment check failed."));
                 }
@@ -114,6 +112,34 @@ switch ($action) {
                     $trx->status = 3;
                     $trx->save();
                     r2(U . "order/view/" . $trxid, 'd', Lang::T("Transaction expired."));
+                }else if($trx['status'] == 2){
+                    r2(U . "order/view/" . $trxid, 'd', Lang::T("Transaction has been paid.."));
+                }
+            } else if ($trx['gateway'] == 'duitku') {
+                $pg = new PGDuitku($trx,$user);
+                $result = $pg->getStatus($trx['id']);
+                if ($result['reference']!=$trx['gateway_trx_id']) {
+                    sendTelegram("Duitku payment status failed\n\n".json_encode($result, JSON_PRETTY_PRINT));
+                    r2(U . "order/view/" . $trxid, 'w', Lang::T("Payment check failed."));
+                }
+                if ($result['statusCode'] == '01') {
+                    r2(U . "order/view/" . $trxid, 'w', Lang::T("Transaction still unpaid."));
+                } else if ($result['statusCode']=='00' && $trx['status'] != 2) {
+                    if (!Package::rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], $trx['gateway'],  $result['payment_method'] . ' ' . $result['payment_channel'])) {
+                        r2(U . "order/view/" . $trxid, 'd', Lang::T("Failed to activate your Package, try again later."));
+                    }
+
+                    $trx->pg_paid_response = json_encode($result);
+                    $trx->paid_date = date('Y-m-d H:i:s');
+                    $trx->status = 2;
+                    $trx->save();
+
+                    r2(U . "order/view/" . $trxid, 's', Lang::T("Transaction has been paid."));
+                } else if ($result['statusCode']=='02') {
+                    $trx->pg_paid_response = json_encode($result);
+                    $trx->status = 3;
+                    $trx->save();
+                    r2(U . "order/view/" . $trxid, 'd', Lang::T("Transaction expired or Failed."));
                 }else if($trx['status'] == 2){
                     r2(U . "order/view/" . $trxid, 'd', Lang::T("Transaction has been paid.."));
                 }
@@ -182,6 +208,17 @@ switch ($action) {
             $d->status = 1;
             $d->save();
             $id = $d->id();
+        }else{
+            $d->username = $user['username'];
+            $d->gateway = $_c['payment_gateway'];
+            $d->plan_id = $plan['id'];
+            $d->plan_name = $plan['name_plan'];
+            $d->routers_id = $router['id'];
+            $d->routers = $router['name'];
+            $d->price = $plan['price'];
+            $d->created_date = date('Y-m-d H:i:s');
+            $d->status = 1;
+            $d->save();
         }
         if ($_c['payment_gateway'] == 'xendit') {
             if (empty($_c['xendit_secret_key'])) {
@@ -236,6 +273,48 @@ switch ($action) {
                 $d->pg_url_payment = $result['data']['checkout_url'];
                 $d->pg_request = json_encode($result);
                 $d->expired_date = date('Y-m-d H:i:s', $result['data']['expired_time']);
+                $d->save();
+                r2(U . "order/view/" . $id, 'w', Lang::T("Create Transaction Success"));
+                exit();
+            } else {
+                r2(U . "order/view/" . $d['id'], 'w', Lang::T("Failed to create Transaction.."));
+            }
+        } else if ($_c['payment_gateway'] == 'duitku') {
+            if (empty($_c['duitku_merchant_key'])) {
+                sendTelegram("Duitku payment gateway not configured");
+                r2(U . $back, 'e', Lang::T("Admin has not yet setup Duitku payment gateway, please tell admin"));
+            }
+            $channels = json_decode(file_get_contents('system/paymentgateway/channel_duitku.json'), true);
+            if(!in_array($routes['4'],explode(",",$_c['duitku_channel']))){
+                $ui->assign('_title', 'Duitku Channel - ' . $config['CompanyName']);
+                $ui->assign('channels', $channels);
+                $ui->assign('duitku_channels', explode(",",$_c['duitku_channel']));
+                $ui->assign('path', $routes['2'].'/'.$routes['3']);
+                $ui->display('duitku_channel.tpl');
+                break;
+            }
+            if ($id) {
+                $pg = new PGDuitku($d,$user);
+                $result = $pg->createTransaction($routes['4']);
+                if (empty($result['paymentUrl'])) {
+                    sendTelegram("Duitku payment failed\n\n".json_encode($result, JSON_PRETTY_PRINT));
+                    r2(U . $back, 'e', Lang::T("Failed to create transaction."));
+                }
+                $d = ORM::for_table('tbl_payment_gateway')
+                    ->where('username', $user['username'])
+                    ->where('status', 1)
+                    ->find_one();
+                $d->gateway_trx_id = $result['reference'];
+                $d->pg_url_payment = $result['paymentUrl'];
+                $d->payment_method = $routes['4'];
+                foreach($channels as $channel){
+                    if($channel['id']==$routes['4']){
+                        $d->payment_channel = $channel['name'];
+                        break;
+                    }
+                }
+                $d->pg_request = json_encode($result);
+                $d->expired_date = date('Y-m-d H:i:s', strtotime("+1 day"));
                 $d->save();
                 r2(U . "order/view/" . $id, 'w', Lang::T("Create Transaction Success"));
                 exit();

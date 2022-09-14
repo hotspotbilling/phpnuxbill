@@ -16,10 +16,6 @@
 		"name": "BNI"
 	},
 	{
-		"id": "MANDIRIVA",
-		"name": "Mandiri"
-	},
-	{
 		"id": "B1",
 		"name": "CIMB Niaga"
 	},
@@ -34,10 +30,6 @@
 	{
 		"id": "AG",
 		"name": "Artha Graha"
-	},
-	{
-		"id": "NC",
-		"name": "Bank Neo Commerce/BNC"
 	},
 	{
 		"id": "BR",
