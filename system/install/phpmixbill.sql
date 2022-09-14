@@ -78,6 +78,7 @@ INSERT INTO
 VALUES
   (1, 'Indonesia', 'indonesia', 'Ismail Marzuqi'),
   (2, 'English', 'english', 'Ismail Marzuqi'),
+  (2, 'Spanish', 'spanish', 'Luis Hernandez'),
   (4, 'Türkçe', 'turkish', 'Goktug Bogac Ogel');
 -- --------------------------------------------------------
   --
