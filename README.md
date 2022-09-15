@@ -14,9 +14,14 @@
 - Whatsapp Notification to Consumer
 - Telegram Notification for Admin
 
+## Payment Gateway
+
+- Tripay.com | Indonesia
+- Xendit.com | Indonesia and Philippine ( Philippine not tested )
+- Duitku.com | Indonesia
 ## Installation
 
-- Rename **pages_template** to **pages
+- Rename **pages_template** to **pages**
 - make writeable **system** folder or create file **system/config.php** and make it writeable
 - make writeable folder **ui/cache/** and **ui/compiled**
 - Open webs and run installation
@@ -35,9 +40,10 @@ Most current web servers with PHP & MySQL installed will be capable of running P
 Minimum Requirements
 
 - Linux or Windows OS
-- PHP Version 5.3+
+- PHP Version 7.0+
 - Both PDO & MySQLi Support
 - GD2 Image Library
+- CURL support
 - MySQL Version 4.1.x and above
 
 can be Installed in Raspberry Pi Device.
