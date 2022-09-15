@@ -607,6 +607,11 @@ VALUES (
         'english',
         'Ismail Marzuqi'
     ), (
+        3,
+        'Spanish',
+        'spanish',
+        'Luis Hernandez'
+    ), (
         4,
         'Türkçe',
         'turkish',
