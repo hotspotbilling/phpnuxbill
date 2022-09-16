@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}paymentgateway/tripay-post" >
+<form class="form-horizontal" method="post" role="form" action="{$_url}paymentgateway/tripay" >
     <div class="row">
         <div class="col-sm-12 col-md-12">
             <div class="panel panel-default panel-hovered panel-stacked mb30">

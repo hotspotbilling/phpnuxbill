@@ -207,7 +207,6 @@ switch ($action) {
         $address = _post('address');
         $tawkto = _post('tawkto');
         $radius_mode = _post('radius_mode')*1;
-        $payment_gateway = _post('payment_gateway');
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
         } else {
@@ -268,16 +267,6 @@ switch ($action) {
                 $d->save();
             }
 
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'payment_gateway')->find_one();
-            if($d){
-                $d->value = $payment_gateway;
-                $d->save();
-            }else{
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'payment_gateway';
-                $d->value = $payment_gateway;
-                $d->save();
-            }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'tawkto')->find_one();
             if($d){

@@ -261,19 +261,11 @@
 							<li>&nbsp;</li>
 						</ul>
 					</li>
-					<li {if $_system_menu eq 'paymentgateway'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+                    <li {if $_system_menu eq 'paymentgateway'}class="active"{/if}>
+						<a href="{$_url}paymentgateway">
 							<i class="ion ion-cash"></i>
 							<span class="text">{Lang::T('Payment Gateway')}</span>
-							<i class="arrow ion-chevron-left"></i>
 						</a>
-						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/xendit">Xendit</a></li>
-							{* <li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/midtrans">Midtrans</a></li> *}
-							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/tripay">Tripay</a></li>
-							<li {if $_system_menu eq 'paymentgateway'}class="active"{/if}><a href="{$_url}paymentgateway/duitku">Duitku</a></li>
-							<li>&nbsp;</li>
-						</ul>
 					</li>
 					<li {if $_system_menu eq 'community'}class="active"{/if}>
 						<a href="{$_url}community">

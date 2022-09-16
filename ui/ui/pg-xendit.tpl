@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}paymentgateway/xendit-post" >
+<form class="form-horizontal" method="post" role="form" action="{$_url}paymentgateway/xendit" >
     <div class="row">
         <div class="col-sm-12 col-md-12">
             <div class="panel panel-default panel-hovered panel-stacked mb30">
@@ -13,7 +13,6 @@
                             <a href="https://dashboard.xendit.co/settings/developers#api-keys" target="_blank" class="help-block">https://dashboard.xendit.co/settings/developers#api-keys</a>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="col-md-2 control-label">Verification Token</label>
                         <div class="col-md-6">
