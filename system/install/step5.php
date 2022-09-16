@@ -29,14 +29,14 @@
 				To Login Admin Portal:<br>
 				Use this link -
 				<?php
-				$cururl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				$cururl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')|| $_SERVER['SERVER_PORT'] == 443)?'https':'http').'://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 				$appurl = str_replace('/install/step5.php', '', $cururl);
 				$appurl = str_replace('/system', '', $appurl);
 				echo '<a href="' . $appurl . '/admin">' . $appurl . '/admin</a>';
 				?>
 				<br>
 				Username: admin<br>
-				Password: 123456<br>
+				Password: admin<br>
 				For security, Delete the <b>install</b> directory inside system folder.
 			</p>
 		</div>
