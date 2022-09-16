@@ -78,7 +78,7 @@ function tripay_save_config()
 }
 
 
-function tripay_create_transaction($channel, $trx, $user)
+function tripay_create_transaction($trx, $user)
 {
     global $config, $routes, $ui;
     $channels = json_decode(file_get_contents('system/paymentgateway/channel_tripay.json'), true);
@@ -91,7 +91,7 @@ function tripay_create_transaction($channel, $trx, $user)
         die();
     }
     $json = [
-        'method' => $channel,
+        'method' => $routes[4],
         'amount' => $trx['price'],
         'merchant_ref' => $trx['id'],
         'customer_name' =>  $user['fullname'],
@@ -128,7 +128,7 @@ function tripay_create_transaction($channel, $trx, $user)
 function tripay_get_status($trx, $user)
 {
     global $config;
-    $result = json_decode(Http::getData(tripay_get_server() . 'transaction/detail?' . http_build_query(['reference' => $trx['id']]), [
+    $result = json_decode(Http::getData(tripay_get_server() . 'transaction/detail?' . http_build_query(['reference' => $trx['gateway_trx_id']]), [
         'Authorization: Bearer ' . $config['tripay_api_key']
     ]), true);
     if ($result['success'] != 1) {

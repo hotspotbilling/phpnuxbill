@@ -131,8 +131,8 @@ CREATE TABLE
         `routers` varchar(32) COLLATE utf8mb4_general_ci NOT NULL,
         `price` varchar(40) COLLATE utf8mb4_general_ci NOT NULL,
         `pg_url_payment` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-        `payment_method` varchar(32) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-        `payment_channel` varchar(32) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+        `payment_method` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+        `payment_channel` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
         `pg_request` text COLLATE utf8mb4_general_ci,
         `pg_paid_response` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
         `expired_date` datetime DEFAULT NULL,
@@ -227,7 +227,7 @@ CREATE TABLE
         `recharged_on` date NOT NULL,
         `expiration` date NOT NULL,
         `time` time NOT NULL,
-        `method` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+        `method` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `type` enum('Hotspot', 'PPPOE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
@@ -271,7 +271,7 @@ CREATE TABLE
         `expiration` date NOT NULL,
         `time` time NOT NULL,
         `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-        `method` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+        `method` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `type` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;

@@ -8,6 +8,14 @@
  * Payment Gateway xendit.com
  **/
 
+function xendit_validate_config()
+{
+    global $config;
+    if (empty($config['xendit_secret_key']) || empty($config['xendit_verification_token'])) {
+        sendTelegram("Xendit payment gateway not configured");
+        r2(U . 'order/package', 'w', Lang::T("Admin has not yet setup Xendit payment gateway, please tell admin"));
+    }
+}
 
 function xendit_show_config()
 {
@@ -100,7 +108,7 @@ function xendit_create_transaction($trx, $user)
 function xendit_get_status($trx, $user)
 {
     global $config;
-    $result = json_decode(Http::getData(xendit_get_server() . 'invoices/' . $trx['id'], [
+    $result = json_decode(Http::getData(xendit_get_server() . 'invoices/' . $trx['gateway_trx_id'], [
         'Authorization: Basic ' . base64_encode($config['xendit_secret_key'] . ':')
     ]), true);
 
@@ -125,8 +133,10 @@ function xendit_get_status($trx, $user)
         r2(U . "order/view/" . $trx['id'], 'd', Lang::T("Transaction expired."));
     } else if ($trx['status'] == 2) {
         r2(U . "order/view/" . $trx['id'], 'd', Lang::T("Transaction has been paid.."));
+    }else{
+        sendTelegram("xendit_get_status: unknown result\n\n".json_encode($result, JSON_PRETTY_PRINT));
+        r2(U . "order/view/" . $trx['id'], 'd', Lang::T("Unknown Command."));
     }
-    r2(U . "order/view/" . $trx['id'], 'd', Lang::T("Unknown Command."));
 }
 
 function xendit_get_server()
