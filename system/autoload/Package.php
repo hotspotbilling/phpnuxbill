@@ -9,6 +9,14 @@ use PEAR2\Net\RouterOS;
 
 class Package
 {
+    /**
+     * @param int   $id_customer String user identifier
+     * @param string $router_name router name for this package
+     * @param int   $plan_id plan id for this package
+     * @param string $gateway payment gateway name
+     * @param string $channel channel payment gateway
+     * @return boolean
+     */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
     {
         global $_c, $_L;

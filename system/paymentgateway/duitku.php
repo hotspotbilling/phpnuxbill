@@ -139,7 +139,7 @@ function duitku_get_status($trx, $user)
     if ($result['statusCode'] == '01') {
         r2(U . "order/view/" . $trx['id'], 'w', Lang::T("Transaction still unpaid."));
     } else if ($result['statusCode'] == '00' && $trx['status'] != 2) {
-        if (!Package::rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], $trx['gateway'],  $result['payment_method'] . ' ' . $result['payment_channel'])) {
+        if (!Package::rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], $trx['gateway'],  $trx['payment_channel'])) {
             r2(U . "order/view/" . $trx['id'], 'd', Lang::T("Failed to activate your Package, try again later."));
         }
 

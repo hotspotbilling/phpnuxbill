@@ -107,7 +107,7 @@ function xendit_get_status($trx, $user)
     if ($result['status'] == 'PENDING') {
         r2(U . "order/view/" . $trx['id'], 'w', Lang::T("Transaction still unpaid."));
     } else if (in_array($result['status'], ['PAID', 'SETTLED']) && $trx['status'] != 2) {
-        if (!Package::rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], $trx['gateway'],  $result['payment_method'] . ' ' . $result['payment_channel'])) {
+        if (!Package::rechargeUser($user['id'], $trx['routers'], $trx['plan_id'], $trx['gateway'], $result['payment_channel'])) {
             r2(U . "order/view/" . $trx['id'], 'd', Lang::T("Failed to activate your Package, try again later."));
         }
         $trx->pg_paid_response = json_encode($result);
