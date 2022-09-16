@@ -1,0 +1,67 @@
+{include file="sections/header.tpl"}
+
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="panel panel-hovered mb20 panel-default">
+								<div class="panel-heading">{$_L['Hotspot_Plans']}</div>
+								<div class="panel-body">
+									<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
+										<div class="col-md-8">
+											<form id="site-search" method="post" action="{$_url}services/hotspot/">
+											<div class="input-group">
+												<div class="input-group-addon">
+													<span class="fa fa-search"></span>
+												</div>
+												<input type="text" name="name" class="form-control" placeholder="{$_L['Search_by_Name']}...">
+												<div class="input-group-btn">
+													<button class="btn btn-success">{$_L['Search']}</button>
+												</div>
+											</div>
+											</form>
+										</div>
+										<div class="col-md-4">
+											<a href="{$_url}services/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Plan']}</a>
+										</div>&nbsp;
+									</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>{$_L['Plan_Name']}</th>
+                                                    <th>{$_L['Plan_Type']}</th>
+                                                    <th>{$_L['Bandwidth_Plans']}</th>
+                                                    <th>{$_L['Plan_Price']}</th>
+                                                    <th>{$_L['Time_Limit']}</th>
+                                                    <th>{$_L['Data_Limit']}</th>
+                                                    <th>{$_L['Plan_Validity']}</th>
+                                                    <th>{$_L['Routers']}</th>
+                                                    <th>{$_L['Manage']}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {foreach $d as $ds}
+                                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
+                                                    <td>{$ds['name_plan']}</td>
+                                                    <td>{$ds['typebp']}</td>
+                                                    <td>{$ds['name_bw']}</td>
+                                                    <td>{$ds['price']}</td>
+                                                    <td>{$ds['time_limit']} {$ds['time_unit']}</td>
+                                                    <td>{$ds['data_limit']} {$ds['data_unit']}</td>
+                                                    <td>{$ds['validity']} {$ds['validity_unit']}</td>
+                                                    <td>{$ds['routers']}</td>
+                                                    <td>
+                                                        <a href="{$_url}services/edit/{$ds['id']}" class="btn btn-info btn-sm btn-block">{$_L['Edit']}</a>
+                                                    </td>
+                                                </tr>
+                                            {/foreach}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {$paginator['contents']}
+
+								</div>
+							</div>
+						</div>
+					</div>
+
+{include file="sections/footer.tpl"}

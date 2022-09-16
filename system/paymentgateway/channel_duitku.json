@@ -1,0 +1,90 @@
+[
+	{
+		"id": "BC",
+		"name": "BCA"
+	},
+	{
+		"id": "M2",
+		"name": "Mandiri"
+	},
+	{
+		"id": "VA",
+		"name": "Maybank"
+	},
+	{
+		"id": "I1",
+		"name": "BNI"
+	},
+	{
+		"id": "B1",
+		"name": "CIMB Niaga"
+	},
+	{
+		"id": "BT",
+		"name": "Permata Bank"
+	},
+	{
+		"id": "A1",
+		"name": "ATM Bersama"
+	},
+	{
+		"id": "AG",
+		"name": "Artha Graha"
+	},
+	{
+		"id": "BR",
+		"name": "BRIVA"
+	},
+	{
+		"id": "S1",
+		"name": "Bank Sahabat Sampoerna"
+	},
+	{
+		"id": "OV",
+		"name": "OVO"
+	},
+	{
+		"id": "SA",
+		"name": "Shopee Pay"
+	},
+	{
+		"id": "LF",
+		"name": "LinkAja Apps (Fixed Fee)"
+	},
+	{
+		"id": "LA",
+		"name": "LinkAja Apps (Percentage Fee)"
+	},
+	{
+		"id": "DA",
+		"name": "DANA"
+	},
+	{
+		"id": "SP",
+		"name": "QRIS Shopee Pay"
+	},
+	{
+		"id": "LQ",
+		"name": "QRIS LinkAja"
+	},
+	{
+		"id": "NQ",
+		"name": "QRIS Nobu"
+	},
+	{
+		"id": "FT",
+		"name": "Pegadaian/ALFA/Pos"
+	},
+	{
+		"id": "A2",
+		"name": "POS Indonesia"
+	},
+	{
+		"id": "IR",
+		"name": "Indomaret"
+	},
+	{
+		"id": "VC",
+		"name": "Credit Card (Visa / Master Card / JCB)"
+	}
+]

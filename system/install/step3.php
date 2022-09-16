@@ -26,7 +26,7 @@
 			<?php
 			if (isset($_GET['_error']) && ($_GET['_error']) == '1') {
 				echo '<h4 style="color: red;"> Unable to Connect Database, Please make sure database info is correct and try again ! </h4>';
-			}
+			}//
 
 			$cururl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 			$appurl = str_replace('/install/step3.php', '', $cururl);

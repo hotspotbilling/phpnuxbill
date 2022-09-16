@@ -3,10 +3,6 @@
 /**
  * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
 
-
- * @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
-
  **/
 session_start();
 function r2($to, $ntype = 'e', $msg = '')
@@ -51,6 +47,7 @@ function _get($param, $defvalue = '')
     }
 }
 
+
 require('system/orm.php');
 
 ORM::configure("mysql:host=$db_host;dbname=$db_name");
@@ -75,15 +72,16 @@ function _notify($msg, $type = 'e')
 }
 
 require_once('system/vendors/smarty/libs/Smarty.class.php');
-$_theme = APP_URL . '/ui/theme/' . $config['theme'];
+$_theme = APP_URL . '/ui/ui';
 $lan_file = 'system/lan/' . $config['language'] . '/common.lan.php';
 require($lan_file);
 $ui = new Smarty();
-$ui->setTemplateDir('ui/theme/' . $config['theme'] . '/');
+$ui->setTemplateDir('ui/ui/');
 $ui->setCompileDir('ui/compiled/');
 $ui->setConfigDir('ui/conf/');
 $ui->setCacheDir('ui/cache/');
 $ui->assign('app_url', APP_URL);
+$ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL,PHP_URL_HOST)));
 define('U', APP_URL . '/index.php?_route=');
 $ui->assign('_url', APP_URL . '/index.php?_route=');
 $ui->assign('_theme', $_theme);
@@ -179,6 +177,60 @@ function _log($description, $type = '', $userid = '0')
     $d->save();
 }
 
+function Lang($key){
+    global $_L,$lan_file;
+    if(!empty($_L[$key])){
+        return $_L[$key];
+    }
+    $val = $key;
+    $key = alphanumeric($key," ");
+    if(!empty($_L[$key])){
+        return $_L[$key];
+    }else if(!empty($_L[str_replace(' ','_',$key)])){
+        return $_L[str_replace(' ','_',$key)];
+    }else{
+        $key = str_replace(' ','_',$key);
+        file_put_contents($lan_file, "$"."_L['$key'] = '".addslashes($val)."';\n", FILE_APPEND);
+        return $val;
+    }
+}
+
+function alphanumeric($str, $tambahan = "")
+{
+    return preg_replace("/[^a-zA-Z0-9" . $tambahan . "]+/", "", $str);
+}
+
+
+function sendTelegram($txt)
+{
+    global $_c;
+    if(!empty($_c['telegram_bot']) && !empty($_c['telegram_target_id'])){
+        file_get_contents('https://api.telegram.org/bot'.$_c['telegram_bot'].'/sendMessage?chat_id='.$_c['telegram_target_id'].'&text=' . urlencode($txt));
+    }
+}
+
+
+function sendSMS($phone, $txt)
+{
+    global $_c;
+    if(!empty($_c['sms_url'])){
+        $smsurl = str_replace('[number]',urlencode($phone),$_c['sms_url']);
+        $smsurl = str_replace('[text]',urlencode($txt),$smsurl);
+        file_get_contents($smsurl);
+    }
+}
+
+function sendWhatsapp($phone, $txt)
+{
+    global $_c;
+    if(!empty($_c['wa_url'])){
+        $waurl = str_replace('[number]',urlencode($phone),$_c['wa_url']);
+        $waurl = str_replace('[text]',urlencode($txt),$waurl);
+        file_get_contents($waurl);
+    }
+}
+
+
 function time_elapsed_string($datetime, $full = false)
 {
     $now = new DateTime;
@@ -220,5 +272,26 @@ $sys_render = 'system/controllers/' . $handler . '.php';
 if (file_exists($sys_render)) {
     include($sys_render);
 } else {
-    exit("$sys_render");
+    header("HTTP/1.0 404 Not Found");
+    exit("<pre>
+
+    ___ ___ ___
+   | | |   | | |
+   |_  | | |_  |
+     |_|___| |_|
+
+
+    _____     _      _____               _
+   |   | |___| |_   |   __|___ _ _ ___ _| |
+   | | | | . |  _|  |   __| . | | |   | . |
+   |_|___|___|_|    |__|  |___|___|_|_|___|
+
+   _   ______   ____  _____          ____  ____
+   (_) |_   _ \ |_   \|_   _|        |_  _||_  _|
+   __    | |_) |  |   \ | |  __   _    \ \  / /
+  [  |   |  __'.  | |\ \| | [  | | |    > `' <
+   | |  _| |__) |_| |_\   |_ | \_/ |, _/ /'`\ \_
+  [___]|_______/|_____|\____|'.__.'_/|____||____|
+
+</pre>");
 }

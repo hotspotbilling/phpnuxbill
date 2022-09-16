@@ -1,11 +1,6 @@
 <?php
 /**
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
-
-
-* @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
-* @license		GNU General Public License version 2 or later; see LICENSE.txt
-
 **/
 
 require('config.php');
@@ -39,38 +34,39 @@ foreach ($d as $ds){
 			$c = ORM::for_table('tbl_customers')->where('id',$ds['customer_id'])->find_one();
 			$m = ORM::for_table('tbl_routers')->where('name',$ds['routers'])->find_one();
 
-			try {
-                $iport = explode(":",$m['ip_address']);
-				$client = new RouterOS\Client($iport[0], $m['username'], $m['password'],($iport[1])?$iport[1]:null);
-			} catch (Exception $e) {
-				die("Unable to connect to the router.<br>".$e->getMessage());
-			}
+            if(!$_c['radius_mode']){
+                try {
+                    $iport = explode(":",$m['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $m['username'], $m['password'],($iport[1])?$iport[1]:null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
 
-			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-			$printRequest->setArgument('.proplist', '.id');
-			$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-			$id = $client->sendSync($printRequest)->getProperty('.id');
+                $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
+                $printRequest->setArgument('.proplist', '.id');
+                $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
+                $id = $client->sendSync($printRequest)->getProperty('.id');
 
-			$setRequest = new RouterOS\Request('/ip/hotspot/user/set');
-			$setRequest->setArgument('numbers', $id);
-			$setRequest->setArgument('limit-uptime', '00:00:05');
-			$client->sendSync($setRequest);
+                $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
+                $setRequest->setArgument('numbers', $id);
+                $setRequest->setArgument('limit-uptime', '00:00:05');
+                $client->sendSync($setRequest);
 
-			//remove hotspot active
-			$onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
-			$onlineRequest->setArgument('.proplist', '.id');
-			$onlineRequest->setQuery(RouterOS\Query::where('user', $c['username']));
-			$id = $client->sendSync($onlineRequest)->getProperty('.id');
+                //remove hotspot active
+                $onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
+                $onlineRequest->setArgument('.proplist', '.id');
+                $onlineRequest->setQuery(RouterOS\Query::where('user', $c['username']));
+                $id = $client->sendSync($onlineRequest)->getProperty('.id');
 
-			$removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
-			$removeRequest->setArgument('numbers', $id);
-			$client->sendSync($removeRequest);
+                $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
+                $removeRequest->setArgument('numbers', $id);
+                $client->sendSync($removeRequest);
+            }
 
 			//update database user dengan status off
 			$u->status = 'off';
 			$u->save();
-		}else
-			echo " : ACTIVE \r\n";
+		}else echo " : ACTIVE \r\n";
 	}else{
 		$date_now = strtotime(date("Y-m-d H:i:s"));
 		$expiration = strtotime($ds['expiration'].' '.$ds['time']);
@@ -81,34 +77,35 @@ foreach ($d as $ds){
 			$c = ORM::for_table('tbl_customers')->where('id',$ds['customer_id'])->find_one();
 			$m = ORM::for_table('tbl_routers')->where('name',$ds['routers'])->find_one();
 
-			try {
-                $iport = explode(":",$m['ip_address']);
-				$client = new RouterOS\Client($iport[0], $m['username'], $m['password'],($iport[1])?$iport[1]:null);
-			} catch (Exception $e) {
-				die("Unable to connect to the router.<br>".$e->getMessage());
-			}
-			$printRequest = new RouterOS\Request('/ppp/secret/print');
-			$printRequest->setArgument('.proplist', '.id');
-			$printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-			$id = $client->sendSync($printRequest)->getProperty('.id');
+            if(!$_c['radius_mode']){
+                try {
+                    $iport = explode(":",$m['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $m['username'], $m['password'],($iport[1])?$iport[1]:null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $printRequest = new RouterOS\Request('/ppp/secret/print');
+                $printRequest->setArgument('.proplist', '.id');
+                $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
+                $id = $client->sendSync($printRequest)->getProperty('.id');
 
-			$setRequest = new RouterOS\Request('/ppp/secret/disable');
-			$setRequest->setArgument('numbers', $id);
-			$client->sendSync($setRequest);
+                $setRequest = new RouterOS\Request('/ppp/secret/disable');
+                $setRequest->setArgument('numbers', $id);
+                $client->sendSync($setRequest);
 
-			//remove hotspot active
-			$onlineRequest = new RouterOS\Request('/ppp/active/print');
-			$onlineRequest->setArgument('.proplist', '.id');
-			$onlineRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-			$id = $client->sendSync($onlineRequest)->getProperty('.id');
+                //remove hotspot active
+                $onlineRequest = new RouterOS\Request('/ppp/active/print');
+                $onlineRequest->setArgument('.proplist', '.id');
+                $onlineRequest->setQuery(RouterOS\Query::where('name', $c['username']));
+                $id = $client->sendSync($onlineRequest)->getProperty('.id');
 
-			$removeRequest = new RouterOS\Request('/ppp/active/remove');
-			$removeRequest->setArgument('numbers', $id);
-			$client->sendSync($removeRequest);
+                $removeRequest = new RouterOS\Request('/ppp/active/remove');
+                $removeRequest->setArgument('numbers', $id);
+                $client->sendSync($removeRequest);
+            }
 
 			$u->status = 'off';
 			$u->save();
-		}else
-			echo " : ACTIVE \r\n";
+		}else echo " : ACTIVE \r\n";
 	}
 }

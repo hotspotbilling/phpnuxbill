@@ -1,11 +1,6 @@
 <?php
 /**
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
-
-
-* @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
-* @license		GNU General Public License version 2 or later; see LICENSE.txt
-
 **/
 _admin();
 $ui->assign('_title', $_L['Network'].' - '. $config['CompanyName']);
@@ -64,22 +59,24 @@ switch ($action) {
         $d = ORM::for_table('tbl_pool')->find_one($id);
 		$mikrotik = Router::_info($d['routers']);
         if($d){
-			try {
-                $iport = explode(":",$mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
-			} catch (Exception $e) {
-				die("Unable to connect to the router.<br>".$e->getMessage());
-			}
-			$printRequest = new RouterOS\Request(
-				'/ip pool print .proplist=name',
-				RouterOS\Query::where('name', $d['pool_name'])
-			);
-			$poolName = $client->sendSync($printRequest)->getProperty('name');
+            if(!$_c['radius_mode']){
+                try {
+                    $iport = explode(":",$mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $printRequest = new RouterOS\Request(
+                    '/ip pool print .proplist=name',
+                    RouterOS\Query::where('name', $d['pool_name'])
+                );
+                $poolName = $client->sendSync($printRequest)->getProperty('name');
 
-			$removeRequest = new RouterOS\Request('/ip/pool/remove');
-			$client($removeRequest
-                ->setArgument('numbers', $poolName)
-            );
+                $removeRequest = new RouterOS\Request('/ip/pool/remove');
+                $client($removeRequest
+                    ->setArgument('numbers', $poolName)
+                );
+            }
 
             $d->delete();
 
@@ -106,17 +103,19 @@ switch ($action) {
         }
 		$mikrotik = Router::_info($routers);
         if($msg == ''){
-			try {
-                $iport = explode(":",$mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
-			} catch (Exception $e) {
-				die("Unable to connect to the router.<br>".$e->getMessage());
-			}
-			$addRequest = new RouterOS\Request('/ip/pool/add');
-			$client->sendSync($addRequest
-                ->setArgument('name', $name)
-                ->setArgument('ranges', $ip_address)
-            );
+            if(!$_c['radius_mode']){
+                try {
+                    $iport = explode(":",$mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $addRequest = new RouterOS\Request('/ip/pool/add');
+                $client->sendSync($addRequest
+                    ->setArgument('name', $name)
+                    ->setArgument('ranges', $ip_address)
+                );
+            }
 
             $b = ORM::for_table('tbl_pool')->create();
             $b->pool_name = $name;
@@ -154,23 +153,25 @@ switch ($action) {
 
 		$mikrotik = Router::_info($routers);
         if($msg == ''){
-			try {
-                $iport = explode(":",$mikrotik['ip_address']);
-                $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
-			} catch (Exception $e) {
-				die("Unable to connect to the router.<br>".$e->getMessage());
-			}
-			$printRequest = new RouterOS\Request(
-				'/ip pool print .proplist=name',
-				RouterOS\Query::where('name', $name)
-			);
-			$poolName = $client->sendSync($printRequest)->getProperty('name');
+            if(!$_c['radius_mode']){
+                try {
+                    $iport = explode(":",$mikrotik['ip_address']);
+                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'],($iport[1])?$iport[1]:null);
+                } catch (Exception $e) {
+                    die("Unable to connect to the router.<br>".$e->getMessage());
+                }
+                $printRequest = new RouterOS\Request(
+                    '/ip pool print .proplist=name',
+                    RouterOS\Query::where('name', $name)
+                );
+                $poolName = $client->sendSync($printRequest)->getProperty('name');
 
-			$setRequest = new RouterOS\Request('/ip/pool/set');
-			$client($setRequest
-                ->setArgument('numbers', $poolName)
-                ->setArgument('ranges', $ip_address)
-            );
+                $setRequest = new RouterOS\Request('/ip/pool/set');
+                $client($setRequest
+                    ->setArgument('numbers', $poolName)
+                    ->setArgument('ranges', $ip_address)
+                );
+            }
 
             $d->pool_name = $name;
             $d->range_ip = $ip_address;

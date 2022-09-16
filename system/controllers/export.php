@@ -1,11 +1,6 @@
 <?php
 /**
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
-
-
-* @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
-* @license		GNU General Public License version 2 or later; see LICENSE.txt
-
 **/
 _admin();
 $ui->assign('_title', $_L['Reports'].'- '. $config['CompanyName']);
@@ -35,12 +30,12 @@ switch ($action) {
         $d->where('recharged_on', $mdate);
         $d->order_by_desc('id');
         $x =  $d->find_many();
-		
+
         $dr = ORM::for_table('tbl_transactions');
         $dr->where('recharged_on', $mdate);
         $dr->order_by_desc('id');
         $xy =  $dr->sum('price');
-		
+
         $ui->assign('d',$x);
 		$ui->assign('dr',$xy);
         $ui->assign('mdate',$mdate);
@@ -48,20 +43,20 @@ switch ($action) {
 
         $ui->display('print-by-date.tpl');
         break;
-		
+
     case 'pdf-by-date':
 		$mdate = date('Y-m-d');
-		
+
         $d = ORM::for_table('tbl_transactions');
         $d->where('recharged_on', $mdate);
         $d->order_by_desc('id');
         $x =  $d->find_many();
-		
+
 		$dr = ORM::for_table('tbl_transactions');
         $dr->where('recharged_on', $mdate);
         $dr->order_by_desc('id');
         $xy =  $dr->sum('price');
-		
+
         $title = ' Reports ['.$mdate.']';
         $title = str_replace('-',' ',$title);
 
@@ -89,7 +84,7 @@ switch ($action) {
 				</tr>';
             $c = true;
             foreach ($x as $value) {
-                
+
                 $username = $value['username'];
                 $plan_name = $value['plan_name'];
                 $type = $value['type'];
@@ -135,7 +130,7 @@ switch ($action) {
 
 			#address { width: 300px; float: left; }
 			#logo { text-align: right; float: right; position: relative; margin-top: 15px; border: 5px solid #fff; overflow: hidden; }
-			
+
 			#customers
 			{
 			font-family: Helvetica, sans-serif;
@@ -176,31 +171,31 @@ EOF;
         }
 
         break;
-		
+
     case 'print-by-period':
 		$fdate = _post('fdate');
         $tdate = _post('tdate');
         $stype = _post('stype');
-		
+
         $d = ORM::for_table('tbl_transactions');
 		if ($stype != ''){
 				$d->where('type', $stype);
 		}
-        
+
         $d->where_gte('recharged_on', $fdate);
         $d->where_lte('recharged_on', $tdate);
         $d->order_by_desc('id');
         $x =  $d->find_many();
-		
+
 		$dr = ORM::for_table('tbl_transactions');
 		if ($stype != ''){
 				$dr->where('type', $stype);
 		}
-        
+
         $dr->where_gte('recharged_on', $fdate);
         $dr->where_lte('recharged_on', $tdate);
 		$xy = $dr->sum('price');
-        
+
 		$ui->assign('d',$x);
 		$ui->assign('dr',$xy);
         $ui->assign('fdate',$fdate);
@@ -209,28 +204,28 @@ EOF;
 
         $ui->display('print-by-period.tpl');
         break;
-		
-		
+
+
     case 'pdf-by-period':
 		$fdate = _post('fdate');
         $tdate = _post('tdate');
         $stype = _post('stype');
-		
+
         $d = ORM::for_table('tbl_transactions');
 		if ($stype != ''){
 				$d->where('type', $stype);
 		}
-        
+
         $d->where_gte('recharged_on', $fdate);
         $d->where_lte('recharged_on', $tdate);
         $d->order_by_desc('id');
         $x =  $d->find_many();
-		
+
 		$dr = ORM::for_table('tbl_transactions');
 		if ($stype != ''){
 				$dr->where('type', $stype);
 		}
-        
+
         $dr->where_gte('recharged_on', $fdate);
         $dr->where_lte('recharged_on', $tdate);
 		$xy = $dr->sum('price');
@@ -262,7 +257,7 @@ EOF;
 				</tr>';
             $c = true;
             foreach ($x as $value) {
-                
+
                 $username = $value['username'];
                 $plan_name = $value['plan_name'];
                 $type = $value['type'];
@@ -308,7 +303,7 @@ EOF;
 
 			#address { width: 300px; float: left; }
 			#logo { text-align: right; float: right; position: relative; margin-top: 15px; border: 5px solid #fff; overflow: hidden; }
-			
+
 			#customers
 			{
 			font-family: Helvetica, sans-serif;
@@ -349,7 +344,7 @@ EOF;
         }
 
         break;
-		
+
     default:
         echo 'action not defined';
 }

@@ -1,0 +1,74 @@
+[
+	{
+		"id": "PERMATAVA",
+		"name": "Permata Bank"
+	},
+	{
+		"id": "MYBVA",
+		"name": "Maybank"
+	},
+	{
+		"id": "BNIVA",
+		"name": "BNI"
+	},
+	{
+		"id": "BRIVA",
+		"name": "BRI"
+	},
+	{
+		"id": "MANDIRIVA",
+		"name": "Mandiri"
+	},
+	{
+		"id": "BCAVA",
+		"name": "BCA"
+	},
+	{
+		"id": "SMSVA",
+		"name": "Sinarmas"
+	},
+	{
+		"id": "MUAMALATVA",
+		"name": "Muamalat"
+	},
+	{
+		"id": "SAMPOERNAVA",
+		"name": "Sahabat Sampoerna"
+	},
+	{
+		"id": "BSIVA",
+		"name": "BSI"
+	},
+	{
+		"id": "ALFAMART",
+		"name": "Alfamart "
+	},
+	{
+		"id": "INDOMARET",
+		"name": "Indomaret "
+	},
+	{
+		"id": "ALFAMIDI",
+		"name": "Alfamidi "
+	},
+	{
+		"id": "OVO",
+		"name": "OVO"
+	},
+	{
+		"id": "QRIS",
+		"name": "QRIS by ShopeePay"
+	},
+	{
+		"id": "QRISC",
+		"name": "QRIS (Customizable)"
+	},
+	{
+		"id": "QRIS2",
+		"name": "QRIS"
+	},
+	{
+		"id": "SHOPEEPAY",
+		"name": "ShopeePay "
+	}
+]

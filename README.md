@@ -1,83 +1,72 @@
 # PHP Mikrotik Billing
-----
 
-![N|phpmixbill](http://4.bp.blogspot.com/-3OWL5OI7pqU/VjocUDdzMDI/AAAAAAAAAiA/s_XJN0_mDlk/s640/Screenshot_8.png)
+## Feature
 
-----
-
-This project maintained by [@ibnux](https://twitter.com/ibnux)
-
-Aplikasi ini dikelola oleh [@ibnux](https://twitter.com/ibnux)
-
-----
-
-Download [Mikrotik Login Template](https://github.com/ibnux/phpmixbill-mikrotik-login-template)
-
-
-
-Features:
-----
 - Voucher Generator and Print
 - Self registration, user must have voucher before registration
 - Multi Router Mikrotik
 - Hotspot & PPPOE
 - Easy Installation
 - Multi Language
+- RADIUS
+- Payment Gateway Midtrans, Xendit and Tripay
+- SMS validation for login
+- Whatsapp Notification to Consumer
+- Telegram Notification for Admin
 
-TODOS:
-----
+## Payment Gateway
 
-- SMS Notification to user
-- send receipt via SMS or EMAIL
-- Social Media Login
+- Tripay.com | Indonesia
+- Xendit.com | Indonesia and Philippine ( Philippine not tested )
+- Duitku.com | Indonesia
+## Installation
 
-Installation
-----
+- Rename **pages_template** to **pages**
+- make writeable **system** folder or create file **system/config.php** and make it writeable
+- make writeable folder **ui/cache/** and **ui/compiled**
+- Open webs and run installation
+- set cronjobs or scheduller for **system/cron.php**
+
+Radius system need to set radius to use **system/radius.php** you can ask me for paid support.
+
 See [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
 
 baca [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
 
-System Requirements
-----
+## System Requirements
+
 Most current web servers with PHP & MySQL installed will be capable of running PHPMixBill
 
 Minimum Requirements
+
 - Linux or Windows OS
-- PHP Version 5.3+
+- PHP Version 7.0+
 - Both PDO & MySQLi Support
 - GD2 Image Library
+- CURL support
 - MySQL Version 4.1.x and above
 
 can be Installed in Raspberry Pi Device.
 
 The problem with windows is hard to set cronjob, better Linux
-JASA
-----
 
-Terima jasa instalasi PHPMIXBILL beserta mikrotiknya.
+## Paid Support
 
-Via Team Viewer maupun Barang dibeli dari saya dan tinggal pakai.
+Start from Rp 500.000 or $50
 
-1. Unit Mikrotik Router
-2. Raspberry Pi Server (RasPi + Casing + Memory 4GB + Adaptor)
+[Telegram](https://t.me/ibnux)
 
-Jasa kurang lebih Rp. 500.000, belum termasuk ongkir dan harga perangkat, Gratis Tanya Jawab via Messenger (Jika lagi senggang).
+[Website](https://ibnux.net/layanan)
 
-hubungi ibnux di [Twitter](https://twitter.com/ibnux) atau di [facebook](https://facebook.com/ibnumaksum)
-
-
-License
-----
+## License
 
 GNU General Public License version 2 or later
 
 see LICENSE file
 
+## Donate to ibnux
 
-Donate to ibnux
-----
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6RBNGRJMZVV7C)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/ibnux)
 
 BCA: 5410454825
 
