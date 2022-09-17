@@ -81,7 +81,7 @@ $ui->setCompileDir('ui/compiled/');
 $ui->setConfigDir('ui/conf/');
 $ui->setCacheDir('ui/cache/');
 $ui->assign('app_url', APP_URL);
-$ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL,PHP_URL_HOST)));
+$ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL, PHP_URL_HOST)));
 define('U', APP_URL . '/index.php?_route=');
 $ui->assign('_url', APP_URL . '/index.php?_route=');
 $ui->assign('_theme', $_theme);
@@ -121,21 +121,21 @@ if (isset($_SESSION['notify'])) {
 function _autoloader($class)
 {
     if (strpos($class, '_') !== false) {
-        $class = str_replace('_', '/', $class);
-        if (file_exists('autoload/' . $class . '.php')) {
-            include 'autoload/' . $class . '.php';
+        $class = str_replace('_', DIRECTORY_SEPARATOR, $class);
+        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         } else {
-            $class = str_replace("\\", "/", $class);
-            if (file_exists(__DIR__ . '/autoload/' . $class . '.php'))
-                include __DIR__ . '/autoload/' . $class . '.php';
+            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
+                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         }
     } else {
-        if (file_exists('autoload/' . $class . '.php')) {
-            include 'autoload/' . $class . '.php';
+        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         } else {
-            $class = str_replace("\\", "/", $class);
-            if (file_exists(__DIR__ . '/autoload/' . $class . '.php'))
-                include __DIR__ . '/autoload/' . $class . '.php';
+            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
+                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         }
     }
 }
@@ -177,20 +177,21 @@ function _log($description, $type = '', $userid = '0')
     $d->save();
 }
 
-function Lang($key){
-    global $_L,$lan_file;
-    if(!empty($_L[$key])){
+function Lang($key)
+{
+    global $_L, $lan_file;
+    if (!empty($_L[$key])) {
         return $_L[$key];
     }
     $val = $key;
-    $key = alphanumeric($key," ");
-    if(!empty($_L[$key])){
+    $key = alphanumeric($key, " ");
+    if (!empty($_L[$key])) {
         return $_L[$key];
-    }else if(!empty($_L[str_replace(' ','_',$key)])){
-        return $_L[str_replace(' ','_',$key)];
-    }else{
-        $key = str_replace(' ','_',$key);
-        file_put_contents($lan_file, "$"."_L['$key'] = '".addslashes($val)."';\n", FILE_APPEND);
+    } else if (!empty($_L[str_replace(' ', '_', $key)])) {
+        return $_L[str_replace(' ', '_', $key)];
+    } else {
+        $key = str_replace(' ', '_', $key);
+        file_put_contents($lan_file, "$" . "_L['$key'] = '" . addslashes($val) . "';\n", FILE_APPEND);
         return $val;
     }
 }
@@ -204,8 +205,8 @@ function alphanumeric($str, $tambahan = "")
 function sendTelegram($txt)
 {
     global $_c;
-    if(!empty($_c['telegram_bot']) && !empty($_c['telegram_target_id'])){
-        file_get_contents('https://api.telegram.org/bot'.$_c['telegram_bot'].'/sendMessage?chat_id='.$_c['telegram_target_id'].'&text=' . urlencode($txt));
+    if (!empty($_c['telegram_bot']) && !empty($_c['telegram_target_id'])) {
+        file_get_contents('https://api.telegram.org/bot' . $_c['telegram_bot'] . '/sendMessage?chat_id=' . $_c['telegram_target_id'] . '&text=' . urlencode($txt));
     }
 }
 
@@ -213,9 +214,9 @@ function sendTelegram($txt)
 function sendSMS($phone, $txt)
 {
     global $_c;
-    if(!empty($_c['sms_url'])){
-        $smsurl = str_replace('[number]',urlencode($phone),$_c['sms_url']);
-        $smsurl = str_replace('[text]',urlencode($txt),$smsurl);
+    if (!empty($_c['sms_url'])) {
+        $smsurl = str_replace('[number]', urlencode($phone), $_c['sms_url']);
+        $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         file_get_contents($smsurl);
     }
 }
@@ -223,9 +224,9 @@ function sendSMS($phone, $txt)
 function sendWhatsapp($phone, $txt)
 {
     global $_c;
-    if(!empty($_c['wa_url'])){
-        $waurl = str_replace('[number]',urlencode($phone),$_c['wa_url']);
-        $waurl = str_replace('[text]',urlencode($txt),$waurl);
+    if (!empty($_c['wa_url'])) {
+        $waurl = str_replace('[number]', urlencode($phone), $_c['wa_url']);
+        $waurl = str_replace('[text]', urlencode($txt), $waurl);
         file_get_contents($waurl);
     }
 }
