@@ -35,17 +35,17 @@ switch ($action) {
         $date_only = date("Y-m-d");
         $time = date("H:i:s");
 
-        $mikrotik = Router::_info($v1['routers']);
-        if($p['validity_unit']=='Months'){
-            $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' month'));
-        }else if($p['validity_unit']=='Days'){
-            $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' day'));
-        }else if($p['validity_unit']=='Hrs'){
-            $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' hour')));
+        $mikrotik = Mikrotik::info($v1['routers']);
+        if ($p['validity_unit'] == 'Months') {
+            $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
+        } else if ($p['validity_unit'] == 'Days') {
+            $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' day'));
+        } else if ($p['validity_unit'] == 'Hrs') {
+            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' hour')));
             $date_exp = $datetime[0];
             $time = $datetime[1];
-        }else if($p['validity_unit']=='Mins'){
-            $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' minute')));
+        } else if ($p['validity_unit'] == 'Mins') {
+            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' minute')));
             $date_exp = $datetime[0];
             $time = $datetime[1];
         }
@@ -53,78 +53,10 @@ switch ($action) {
         if ($v1) {
             if ($v1['type'] == 'Hotspot') {
                 if ($b) {
-                    if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>".$e->getMessage());
-                        }
-                        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-                        $printRequest->setArgument('.proplist', '.id');
-                        $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-                        $setRequest = new RouterOS\Request('/ip/hotspot/user/remove');
-                        $setRequest->setArgument('numbers', $id);
-                        $client->sendSync($setRequest);
-
-                        /* iBNuX Added:
-                        * 	Time limit to Mikrotik
-                        *	'Time_Limit', 'Data_Limit', 'Both_Limit'
-                        */
-                        $addRequest = new RouterOS\Request('/ip/hotspot/user/add');
-                        if ($p['typebp'] == "Limited") {
-                            if ($p['limit_type'] == "Time_Limit") {
-                                if ($p['time_unit'] == 'Hrs')
-                                    $timelimit = $p['time_limit'] . ":00:00";
-                                else
-                                    $timelimit = "00:" . $p['time_limit'] . ":00";
-                                $client->sendSync(
-                                    $addRequest
-                                        ->setArgument('name', $c['username'])
-                                        ->setArgument('profile', $p['name_plan'])
-                                        ->setArgument('password', $c['password'])
-                                        ->setArgument('limit-uptime', $timelimit)
-                                );
-                            } else if ($p['limit_type'] == "Data_Limit") {
-                                if ($p['data_unit'] == 'GB')
-                                    $datalimit = $p['data_limit'] . "000000000";
-                                else
-                                    $datalimit = $p['data_limit'] . "000000";
-                                $client->sendSync(
-                                    $addRequest
-                                        ->setArgument('name', $c['username'])
-                                        ->setArgument('profile', $p['name_plan'])
-                                        ->setArgument('password', $c['password'])
-                                        ->setArgument('limit-bytes-total', $datalimit)
-                                );
-                            } else if ($p['limit_type'] == "Both_Limit") {
-                                if ($p['time_unit'] == 'Hrs')
-                                    $timelimit = $p['time_limit'] . ":00:00";
-                                else
-                                    $timelimit = "00:" . $p['time_limit'] . ":00";
-                                if ($p['data_unit'] == 'GB')
-                                    $datalimit = $p['data_limit'] . "000000000";
-                                else
-                                    $datalimit = $p['data_limit'] . "000000";
-                                $client->sendSync(
-                                    $addRequest
-                                        ->setArgument('name', $c['username'])
-                                        ->setArgument('profile', $p['name_plan'])
-                                        ->setArgument('password', $c['password'])
-                                        ->setArgument('limit-uptime', $timelimit)
-                                        ->setArgument('limit-bytes-total', $datalimit)
-                                );
-                            }
-                        } else {
-                            $client->sendSync(
-                                $addRequest
-                                    ->setArgument('name', $c['username'])
-                                    ->setArgument('profile', $p['name_plan'])
-                                    ->setArgument('password', $c['password'])
-                            );
-                        }
+                    if (!$_c['radius_mode']) {
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::removeHotspotUser($client, $c['username']);
+                        Mikrotik::addHotspotUser($client, $p, $c);
                     }
                     $b->customer_id = $user['id'];
                     $b->username = $c['username'];
@@ -153,69 +85,9 @@ switch ($action) {
                     $t->type = "Hotspot";
                     $t->save();
                 } else {
-                    if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>".$e->getMessage());
-                        }
-                        /* iBNuX Added:
-                        * 	Time limit to Mikrotik
-                        *	'Time_Limit', 'Data_Limit', 'Both_Limit'
-                        */
-                        $addRequest = new RouterOS\Request('/ip/hotspot/user/add');
-                        if ($p['typebp'] == "Limited") {
-                            if ($p['limit_type'] == "Time_Limit") {
-                                if ($p['time_unit'] == 'Hrs')
-                                    $timelimit = $p['time_limit'] . ":00:00";
-                                else
-                                    $timelimit = "00:" . $p['time_limit'] . ":00";
-                                $client->sendSync(
-                                    $addRequest
-                                        ->setArgument('name', $c['username'])
-                                        ->setArgument('profile', $p['name_plan'])
-                                        ->setArgument('password', $c['password'])
-                                        ->setArgument('limit-uptime', $timelimit)
-                                );
-                            } else if ($p['limit_type'] == "Data_Limit") {
-                                if ($p['data_unit'] == 'GB')
-                                    $datalimit = $p['data_limit'] . "000000000";
-                                else
-                                    $datalimit = $p['data_limit'] . "000000";
-                                $client->sendSync(
-                                    $addRequest
-                                        ->setArgument('name', $c['username'])
-                                        ->setArgument('profile', $p['name_plan'])
-                                        ->setArgument('password', $c['password'])
-                                        ->setArgument('limit-bytes-total', $datalimit)
-                                );
-                            } else if ($p['limit_type'] == "Both_Limit") {
-                                if ($p['time_unit'] == 'Hrs')
-                                    $timelimit = $p['time_limit'] . ":00:00";
-                                else
-                                    $timelimit = "00:" . $p['time_limit'] . ":00";
-                                if ($p['data_unit'] == 'GB')
-                                    $datalimit = $p['data_limit'] . "000000000";
-                                else
-                                    $datalimit = $p['data_limit'] . "000000";
-                                $client->sendSync(
-                                    $addRequest
-                                        ->setArgument('name', $c['username'])
-                                        ->setArgument('profile', $p['name_plan'])
-                                        ->setArgument('password', $c['password'])
-                                        ->setArgument('limit-uptime', $timelimit)
-                                        ->setArgument('limit-bytes-total', $datalimit)
-                                );
-                            }
-                        } else {
-                            $client->sendSync(
-                                $addRequest
-                                    ->setArgument('name', $c['username'])
-                                    ->setArgument('profile', $p['name_plan'])
-                                    ->setArgument('password', $c['password'])
-                            );
-                        }
+                    if (!$_c['radius_mode']) {
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::addHotspotUser($client, $p, $c);
                     }
 
                     $d = ORM::for_table('tbl_user_recharges')->create();
@@ -251,36 +123,16 @@ switch ($action) {
                 $v1->user = $c['username'];
                 $v1->save();
                 // Telegram to Admin
-                sendTelegram( '#u'.$c['username']." Activate #Voucher #Hotspot\n".$p['name_plan'].
-                "\nCode: ".$code.
-                "\nRouter: ".$v1['routers'].
-                "\nPrice: ".$p['price']);
+                sendTelegram('#u' . $c['username'] . " Activate #Voucher #Hotspot\n" . $p['name_plan'] .
+                    "\nCode: " . $code .
+                    "\nRouter: " . $v1['routers'] .
+                    "\nPrice: " . $p['price']);
             } else {
                 if ($b) {
-                    if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>".$e->getMessage());
-                        }
-                        $printRequest = new RouterOS\Request('/ppp/secret/print');
-                        $printRequest->setArgument('.proplist', '.id');
-                        $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-                        $setRequest = new RouterOS\Request('/ppp/secret/remove');
-                        $setRequest->setArgument('numbers', $id);
-                        $client->sendSync($setRequest);
-
-                        $addRequest = new RouterOS\Request('/ppp/secret/add');
-                        $client->sendSync(
-                            $addRequest
-                                ->setArgument('name', $c['username'])
-                                ->setArgument('service', 'pppoe')
-                                ->setArgument('profile', $p['name_plan'])
-                                ->setArgument('password', $c['password'])
-                        );
+                    if (!$_c['radius_mode']) {
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::removePpoeUser($client, $c['username']);
+                        Mikrotik::addPpoeUser($client, $p, $c);
                     }
 
                     $b->customer_id = $user['id'];
@@ -310,21 +162,9 @@ switch ($action) {
                     $t->type = "PPPOE";
                     $t->save();
                 } else {
-                    if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>".$e->getMessage());
-                        }
-                        $addRequest = new RouterOS\Request('/ppp/secret/add');
-                        $client->sendSync(
-                            $addRequest
-                                ->setArgument('name', $c['username'])
-                                ->setArgument('service', 'pppoe')
-                                ->setArgument('profile', $p['name_plan'])
-                                ->setArgument('password', $c['password'])
-                        );
+                    if (!$_c['radius_mode']) {
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::addPpoeUser($client, $p, $c);
                     }
 
                     $d = ORM::for_table('tbl_user_recharges')->create();
@@ -360,10 +200,10 @@ switch ($action) {
                 $v1->user = $c['username'];
                 $v1->save();
                 // Telegram to Admin
-                sendTelegram( '#u'.$c['username']." Activate #Voucher #PPPOE\n".$p['name_plan'].
-                "\nCode: ".$code.
-                "\nRouter: ".$v1['routers'].
-                "\nPrice: ".$p['price']);
+                sendTelegram('#u' . $c['username'] . " Activate #Voucher #PPPOE\n" . $p['name_plan'] .
+                    "\nCode: " . $code .
+                    "\nRouter: " . $v1['routers'] .
+                    "\nPrice: " . $p['price']);
             }
 
             r2(U . "voucher/list-activated", 's', $_L['Activation_Vouchers_Successfully']);

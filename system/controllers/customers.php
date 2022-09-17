@@ -62,60 +62,18 @@ switch ($action) {
         if ($d) {
             $c = ORM::for_table('tbl_user_recharges')->where('username', $d['username'])->find_one();
             if ($c) {
-                $mikrotik = Router::_info($c['routers']);
+                $mikrotik = Mikrotik::info($c['routers']);
                 if ($c['type'] == 'Hotspot') {
                     if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>" . $e->getMessage());
-                        }
-                        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-                        $printRequest->setArgument('.proplist', '.id');
-                        $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-                        $setRequest = new RouterOS\Request('/ip/hotspot/user/remove');
-                        $setRequest->setArgument('numbers', $id);
-                        $client->sendSync($setRequest);
-
-                        //remove hotspot active
-                        $onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
-                        $onlineRequest->setArgument('.proplist', '.id');
-                        $onlineRequest->setQuery(RouterOS\Query::where('user', $c['username']));
-                        $id = $client->sendSync($onlineRequest)->getProperty('.id');
-
-                        $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
-                        $removeRequest->setArgument('numbers', $id);
-                        $client->sendSync($removeRequest);
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::removeHotspotUser($client,$c['username']);
+                        Mikrotik::removeHotspotActiveUser($client,$user['username']);
                     }
                 } else {
                     if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>" . $e->getMessage());
-                        }
-                        $printRequest = new RouterOS\Request('/ppp/secret/print');
-                        $printRequest->setArgument('.proplist', '.id');
-                        $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-                        $setRequest = new RouterOS\Request('/ppp/secret/remove');
-                        $setRequest->setArgument('numbers', $id);
-                        $client->sendSync($setRequest);
-
-                        //remove pppoe active
-                        $onlineRequest = new RouterOS\Request('/ppp/active/print');
-                        $onlineRequest->setArgument('.proplist', '.id');
-                        $onlineRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($onlineRequest)->getProperty('.id');
-
-                        $removeRequest = new RouterOS\Request('/ppp/active/remove');
-                        $removeRequest->setArgument('numbers', $id);
-                        $client->sendSync($removeRequest);
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::removePpoeUser($client,$c['username']);
+                        Mikrotik::removePpoeActive($client,$user['username']);
                     }
                 }
                 try {
@@ -222,65 +180,21 @@ switch ($action) {
         if ($msg == '') {
             $c = ORM::for_table('tbl_user_recharges')->where('username', $username)->find_one();
             if ($c) {
-                $mikrotik = Router::_info($c['routers']);
+                $mikrotik = Mikrotik::info($c['routers']);
                 if ($c['type'] == 'Hotspot') {
                     if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>" . $e->getMessage());
-                        }
-                        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-                        $printRequest->setArgument('.proplist', '.id');
-                        $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-                        $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
-                        $setRequest->setArgument('numbers', $id);
-                        $setRequest->setArgument('password', $password);
-                        $client->sendSync($setRequest);
-
-                        //remove hotspot active
-                        $onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
-                        $onlineRequest->setArgument('.proplist', '.id');
-                        $onlineRequest->setQuery(RouterOS\Query::where('user', $c['username']));
-                        $id = $client->sendSync($onlineRequest)->getProperty('.id');
-
-                        $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
-                        $removeRequest->setArgument('numbers', $id);
-                        $client->sendSync($removeRequest);
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::setHotspotUser($client,$c['username'],$password);
+                        Mikrotik::removeHotspotActiveUser($client,$user['username']);
                     }
 
                     $d->password = $password;
                     $d->save();
                 } else {
                     if(!$_c['radius_mode']){
-                        try {
-                            $iport = explode(":", $mikrotik['ip_address']);
-                            $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                        } catch (Exception $e) {
-                            die("Unable to connect to the router.<br>" . $e->getMessage());
-                        }
-                        $printRequest = new RouterOS\Request('/ppp/secret/print');
-                        $printRequest->setArgument('.proplist', '.id');
-                        $printRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-                        $setRequest = new RouterOS\Request('/ppp/secret/set');
-                        $setRequest->setArgument('numbers', $id);
-                        $setRequest->setArgument('password', $password);
-                        $client->sendSync($setRequest);
-
-                        //remove pppoe active
-                        $onlineRequest = new RouterOS\Request('/ppp/active/print');
-                        $onlineRequest->setArgument('.proplist', '.id');
-                        $onlineRequest->setQuery(RouterOS\Query::where('name', $c['username']));
-                        $id = $client->sendSync($onlineRequest)->getProperty('.id');
-
-                        $removeRequest = new RouterOS\Request('/ppp/active/remove');
-                        $removeRequest->setArgument('numbers', $id);
-                        $client->sendSync($removeRequest);
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        Mikrotik::setPpoeUser($client,$c['username'],$password);
+                        Mikrotik::removePpoeActive($client,$user['username']);
                     }
 
                     $d->password = $password;

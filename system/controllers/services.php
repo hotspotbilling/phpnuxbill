@@ -71,24 +71,9 @@ switch ($action) {
         if ($d) {
             run_hook('delete_plan'); #HOOK
             if(!$_c['radius_mode']){
-                $mikrotik = Router::_info($d['routers']);
-                try {
-                    $iport = explode(":", $mikrotik['ip_address']);
-                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                } catch (Exception $e) {
-                    die("Unable to connect to the router.<br>".$e->getMessage());
-                }
-                $printRequest = new RouterOS\Request(
-                    '/ip hotspot user profile print .proplist=name',
-                    RouterOS\Query::where('name', $d['name_plan'])
-                );
-                $profileName = $client->sendSync($printRequest)->getProperty('name');
-
-                $removeRequest = new RouterOS\Request('/ip/hotspot/user/profile/remove');
-                $client(
-                    $removeRequest
-                        ->setArgument('numbers', $profileName)
-                );
+                $mikrotik = Mikrotik::info($d['routers']);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                Mikrotik::removeHotspotPlan($client,$d['name_plan']);
             }
 
             $d->delete();
@@ -146,20 +131,9 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
             if(!$_c['radius_mode']){
-                $mikrotik = Router::_info($routers);
-                try {
-                    $iport = explode(":", $mikrotik['ip_address']);
-                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                } catch (Exception $e) {
-                    die("Unable to connect to the router.<br>".$e->getMessage());
-                }
-                $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
-                $client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $name)
-                        ->setArgument('shared-users', $sharedusers)
-                        ->setArgument('rate-limit', $rate)
-                );
+                $mikrotik = Mikrotik::info($routers);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
             }
 
             $d = ORM::for_table('tbl_plans')->create();
@@ -236,26 +210,9 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
             if(!$_c['radius_mode']){
-                $mikrotik = Router::_info($routers);
-                try {
-                    $iport = explode(":", $mikrotik['ip_address']);
-                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                } catch (Exception $e) {
-                    die("Unable to connect to the router.<br>".$e->getMessage());
-                }
-                $printRequest = new RouterOS\Request(
-                    '/ip hotspot user profile print .proplist=name',
-                    RouterOS\Query::where('name', $name)
-                );
-                $profileName = $client->sendSync($printRequest)->getProperty('name');
-
-                $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-                $client(
-                    $setRequest
-                        ->setArgument('numbers', $profileName)
-                        ->setArgument('shared-users', $sharedusers)
-                        ->setArgument('rate-limit', $rate)
-                );
+                $mikrotik = Mikrotik::info($routers);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
             }
 
             $d->name_plan = $name;
@@ -334,24 +291,9 @@ switch ($action) {
         if ($d) {
             run_hook('delete_ppoe'); #HOOK
             if(!$_c['radius_mode']){
-                $mikrotik = Router::_info($d['routers']);
-                try {
-                    $iport = explode(":", $mikrotik['ip_address']);
-                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                } catch (Exception $e) {
-                    die("Unable to connect to the router.<br>".$e->getMessage());
-                }
-                $printRequest = new RouterOS\Request(
-                    '/ppp profile print .proplist=name',
-                    RouterOS\Query::where('name', $d['name_plan'])
-                );
-                $profileName = $client->sendSync($printRequest)->getProperty('name');
-
-                $removeRequest = new RouterOS\Request('/ppp/profile/remove');
-                $client(
-                    $removeRequest
-                        ->setArgument('numbers', $profileName)
-                );
+                $mikrotik = Mikrotik::info($d['routers']);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                Mikrotik::removePpoePlan($client, $d['name_plan']);
             }
             $d->delete();
 
@@ -400,21 +342,9 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
             if(!$_c['radius_mode']){
-                $mikrotik = Router::_info($routers);
-                try {
-                    $iport = explode(":", $mikrotik['ip_address']);
-                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                } catch (Exception $e) {
-                    die("Unable to connect to the router.<br>".$e->getMessage());
-                }
-                $addRequest = new RouterOS\Request('/ppp/profile/add');
-                $client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $name)
-                        ->setArgument('local-address', $pool)
-                        ->setArgument('remote-address', $pool)
-                        ->setArgument('rate-limit', $rate)
-                );
+                $mikrotik = Mikrotik::info($routers);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                Mikrotik::addPpoePlan($client, $name, $pool, $rate);
             }
 
             $d = ORM::for_table('tbl_plans')->create();
@@ -478,27 +408,9 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
             if(!$_c['radius_mode']){
-                $mikrotik = Router::_info($routers);
-                try {
-                    $iport = explode(":", $mikrotik['ip_address']);
-                    $client = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
-                } catch (Exception $e) {
-                    die("Unable to connect to the router.<br>".$e->getMessage());
-                }
-                $printRequest = new RouterOS\Request(
-                    '/ppp profile print .proplist=name',
-                    RouterOS\Query::where('name', $name)
-                );
-                $profileName = $client->sendSync($printRequest)->getProperty('name');
-
-                $setRequest = new RouterOS\Request('/ppp/profile/set');
-                $client(
-                    $setRequest
-                        ->setArgument('numbers', $profileName)
-                        ->setArgument('local-address', $pool)
-                        ->setArgument('remote-address', $pool)
-                        ->setArgument('rate-limit', $rate)
-                );
+                $mikrotik = Mikrotik::info($routers);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                Mikrotik::setPpoePlan($client, $name, $pool, $rate);
             }
 
             $d->name_plan = $name;

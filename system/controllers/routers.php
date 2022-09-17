@@ -86,12 +86,7 @@ switch ($action) {
         }
 
         if(!$_c['radius_mode']){
-            try {
-                $iport = explode(":", $ip_address);
-                $client = new RouterOS\Client($iport[0], $username, $password, ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                $msg .= "Unable to connect to the router.<br>".$e->getMessage().'<br>';
-            }
+            Mikrotik::getClient($ip_address,$username,$password);
         }
 
         if($msg == ''){
@@ -152,12 +147,7 @@ switch ($action) {
 
 
         if(!$_c['radius_mode']){
-            try {
-                $iport = explode(":", $ip_address);
-                $client = new RouterOS\Client($iport[0], $username, $password, ($iport[1]) ? $iport[1] : null);
-            } catch (Exception $e) {
-                $msg .= "Unable to connect to the router.<br>".$e->getMessage().'<br>';
-            }
+            Mikrotik::getClient($ip_address,$username,$password);
         }
 
 
