@@ -130,19 +130,7 @@
 							<span class="text">{$_L['Dashboard']}</span>
 						</a>
 					</li>
-					<!-- Message on progress, hide it  -->
-					<li class="hidden {if $_system_menu eq 'message'}open{/if}">
-						<a href="#" onClick="toggleDropdownMobile(this)">
-							<i class="ion ion-email"></i>
-							<span class="text">{$_L['Private_Message']}</span>
-							<i class="arrow ion-chevron-left"></i>
-						</a>
-						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'message'}class="active"{/if}><a href="{$_url}message/inbox">{$_L['Inbox']}</a></li>
-							<li {if $_system_menu eq 'message'}class="active"{/if}><a href="{$_url}message/outbox">{$_L['Outbox']}</a></li>
-							<li {if $_system_menu eq 'message'}class="active"{/if}><a href="{$_url}message/compose">{$_L['Compose']}</a></li>
-						</ul>
-					</li>
+                    {$_MENU_AFTER_DASHBOARD}
 				{if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'Sales'}
 					<li {if $_system_menu eq 'customers'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
@@ -151,10 +139,12 @@
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'customers'}class="active"{/if}><a href="{$_url}customers/add">{$_L['Add_Contact']}</a></li>
-							<li {if $_system_menu eq 'customers'}class="active"{/if}><a href="{$_url}customers/list">{$_L['List_Contact']}</a></li>
+							<li {if $_routes[1] eq 'add'}class="active"{/if}><a href="{$_url}customers/add">{$_L['Add_Contact']}</a></li>
+							<li {if $_routes[1] eq 'list'}class="active"{/if}><a href="{$_url}customers/list">{$_L['List_Contact']}</a></li>
+                            {$_MENU_CUSTOMERS}
 						</ul>
 					</li>
+                    {$_MENU_AFTER_CUSTOMERS}
 					<li {if $_system_menu eq 'prepaid'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-card"></i>
@@ -162,12 +152,14 @@
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'prepaid'}class="active"{/if}><a href="{$_url}prepaid/list">{$_L['Prepaid_User']}</a></li>
-							<li {if $_system_menu eq 'prepaid'}class="active"{/if}><a href="{$_url}prepaid/voucher">{$_L['Prepaid_Vouchers']}</a></li>
-							<li {if $_system_menu eq 'prepaid'}class="active"{/if}><a href="{$_url}prepaid/refill">{$_L['Refill_Account']}</a></li>
-							<li {if $_system_menu eq 'prepaid'}class="active"{/if}><a href="{$_url}prepaid/recharge">{$_L['Recharge_Account']}</a></li>
+							<li {if $_routes[1] eq 'list'}class="active"{/if}><a href="{$_url}prepaid/list">{$_L['Prepaid_User']}</a></li>
+							<li {if $_routes[1] eq 'voucher'}class="active"{/if}><a href="{$_url}prepaid/voucher">{$_L['Prepaid_Vouchers']}</a></li>
+							<li {if $_routes[1] eq 'refill'}class="active"{/if}><a href="{$_url}prepaid/refill">{$_L['Refill_Account']}</a></li>
+							<li {if $_routes[1] eq 'recharge'}class="active"{/if}><a href="{$_url}prepaid/recharge">{$_L['Recharge_Account']}</a></li>
+                            {$_MENU_PREPAID}
 						</ul>
 					</li>
+                    {$_MENU_AFTER_PREPAID}
 					<li {if $_system_menu eq 'services'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-cube"></i>
@@ -175,11 +167,13 @@
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'services'}class="active"{/if}><a href="{$_url}services/hotspot">{$_L['Hotspot_Plans']}</a></li>
-							<li {if $_system_menu eq 'services'}class="active"{/if}><a href="{$_url}services/pppoe">{$_L['PPPOE_Plans']}</a></li>
-							<li {if $_system_menu eq 'services'}class="active"{/if}><a href="{$_url}bandwidth/list">{$_L['Bandwidth_Plans']}</a></li>
+							<li {if $_routes[1] eq 'hotspot'}class="active"{/if}><a href="{$_url}services/hotspot">{$_L['Hotspot_Plans']}</a></li>
+							<li {if $_routes[1] eq 'pppoe'}class="active"{/if}><a href="{$_url}services/pppoe">{$_L['PPPOE_Plans']}</a></li>
+							<li {if $_routes[1] eq 'list'}class="active"{/if}><a href="{$_url}bandwidth/list">{$_L['Bandwidth_Plans']}</a></li>
+                            {$_MENU_SERVICES}
 						</ul>
 					</li>
+                    {$_MENU_AFTER_SERVICES}
 					<li {if $_system_menu eq 'reports'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-clipboard"></i>
@@ -187,40 +181,12 @@
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'reports'}class="active"{/if}><a href="{$_url}reports/daily-report">{$_L['Daily_Report']}</a></li>
-							<li {if $_system_menu eq 'reports'}class="active"{/if}><a href="{$_url}reports/by-period">{$_L['Period_Reports']}</a></li>
+							<li {if $_routes[1] eq 'daily-report'}class="active"{/if}><a href="{$_url}reports/daily-report">{$_L['Daily_Report']}</a></li>
+							<li {if $_routes[1] eq 'by-period'}class="active"{/if}><a href="{$_url}reports/by-period">{$_L['Period_Reports']}</a></li>
+                            {$_MENU_REPORTS}
 						</ul>
 					</li>
-				{else}
-					<li {if $_system_menu eq 'voucher'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
-							<i class="ion ion-card"></i>
-							<span class="text">{$_L['Voucher']}</span>
-							<i class="arrow ion-chevron-left"></i>
-						</a>
-						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'voucher'}class="active"{/if}><a href="{$_url}voucher/activation">{$_L['Voucher_Activation']}</a></li>
-							<li {if $_system_menu eq 'voucher'}class="active"{/if}><a href="{$_url}voucher/list-activated">{$_L['List_Activated_Voucher']}</a></li>
-						</ul>
-					</li>
-					<li {if $_system_menu eq 'order'}class="active"{/if}>
-						<a href="{$_url}order">
-							<i class="ion ion-ios-cart"></i>
-							<span class="text">{$_L['Order_Voucher']}</span>
-						</a>
-					</li>
-					<li {if $_system_menu eq 'accounts'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
-							<i class="ion ion-gear-a"></i>
-							<span class="text">{$_L['My_Account']}</span>
-							<i class="arrow ion-chevron-left"></i>
-						</a>
-						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'accounts'}class="active"{/if}><a href="{$_url}accounts/profile">{$_L['My_Profile']}</a></li>
-							<li {if $_system_menu eq 'accounts'}class="active"{/if}><a href="{$_url}accounts/change-password">{$_L['Change_Password']}</a></li>
-							<li>&nbsp;</li>
-						</ul>
-					</li>
+                    {$_MENU_AFTER_REPORTS}
 				{/if}
 				{if $_admin['user_type'] eq 'Admin'}
 					<li {if $_system_menu eq 'network'}class="open"{/if}>
@@ -230,10 +196,12 @@
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'network'}class="active"{/if}><a href="{$_url}routers/list">{$_L['Routers']}</a></li>
-							<li {if $_system_menu eq 'network'}class="active"{/if}><a href="{$_url}pool/list">{$_L['Pool']}</a></li>
+							<li {if $_routes[0] eq 'routers' and $_routes[1] eq 'list'}class="active"{/if}><a href="{$_url}routers/list">{$_L['Routers']}</a></li>
+							<li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list'}class="active"{/if}><a href="{$_url}pool/list">{$_L['Pool']}</a></li>
+                            {$_MENU_NETWORK}
 						</ul>
 					</li>
+                    {$_MENU_AFTER_NETWORKS}
 					<li {if $_system_menu eq 'pages'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-document"></i>
@@ -241,12 +209,14 @@
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Order_Voucher">{$_L['Order_Voucher']}</a></li>
-							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Voucher">{$_L['Voucher']} Template</a></li>
-							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Announcement">{$_L['Announcement']} Editor</a></li>
-							<li {if $_system_menu eq 'pages'}class="active"{/if}><a href="{$_url}pages/Registration_Info">{$_L['Registration_Info']} Editor</a></li>
+							<li {if $_routes[1] eq 'Order_Voucher'}class="active"{/if}><a href="{$_url}pages/Order_Voucher">{$_L['Order_Voucher']}</a></li>
+							<li {if $_routes[1] eq 'Voucher'}class="active"{/if}><a href="{$_url}pages/Voucher">{$_L['Voucher']} Template</a></li>
+							<li {if $_routes[1] eq 'Announcement'}class="active"{/if}><a href="{$_url}pages/Announcement">{$_L['Announcement']} Editor</a></li>
+							<li {if $_routes[1] eq 'Registration_Info'}class="active"{/if}><a href="{$_url}pages/Registration_Info">{$_L['Registration_Info']} Editor</a></li>
+                            {$_MENU_PAGES}
 						</ul>
 					</li>
+                    {$_MENU_AFTER_PAGES}
 					<li {if $_system_menu eq 'settings'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-gear-a"></i>
@@ -254,19 +224,21 @@
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'settings'}class="active"{/if}><a href="{$_url}settings/app">{$_L['General_Settings']}</a></li>
-							<li {if $_system_menu eq 'settings'}class="active"{/if}><a href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
-							<li {if $_system_menu eq 'settings'}class="active"{/if}><a href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
-							<li {if $_system_menu eq 'settings'}class="active"{/if}><a href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li>
-							<li>&nbsp;</li>
+							<li {if $_routes[1] eq 'app'}class="active"{/if}><a href="{$_url}settings/app">{$_L['General_Settings']}</a></li>
+							<li {if $_routes[1] eq 'localisation'}class="active"{/if}><a href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
+							<li {if $_routes[1] eq 'users'}class="active"{/if}><a href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
+							<li {if $_routes[1] eq 'dbstatus'}class="active"{/if}><a href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li>
+							{$_MENU_SETTINGS}
 						</ul>
 					</li>
+                    {$_MENU_AFTER_SETTINGS}
                     <li {if $_system_menu eq 'paymentgateway'}class="active"{/if}>
 						<a href="{$_url}paymentgateway">
 							<i class="ion ion-cash"></i>
 							<span class="text">{Lang::T('Payment Gateway')}</span>
 						</a>
 					</li>
+                    {$_MENU_AFTER_PAYMENTGATEWAY}
 					<li {if $_system_menu eq 'community'}class="active"{/if}>
 						<a href="{$_url}community">
 							<i class="ion ion-chatboxes"></i>

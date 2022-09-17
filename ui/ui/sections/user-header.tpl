@@ -105,23 +105,11 @@
 							<span class="text">{$_L['Dashboard']}</span>
 						</a>
 					</li>
-					<li  class="hidden {if $_system_menu eq 'pm'}open{/if}">
-						<a href="#" onClick="toggleDropdownMobile(this)">
-							<i class="ion ion-email"></i>
-							<span class="text">{$_L['Private_Message']}</span>
-							<i class="arrow ion-chevron-left"></i>
-						</a>
-						<ul class="inner-drop list-unstyled">
-							<li {if $_system_menu eq 'pm'}class="active"{/if}><a href="{$_url}pm/inbox">{$_L['Inbox']}</a></li>
-							<li {if $_system_menu eq 'pm'}class="active"{/if}><a href="{$_url}pm/outbox">{$_L['Outbox']}</a></li>
-							<li {if $_system_menu eq 'pm'}class="active"{/if}><a href="{$_url}pm/compose">{$_L['Compose']}</a></li>
-						</ul>
-					</li>
-
+                    {$_MENU_AFTER_DASHBOARD}
 					<li {if $_system_menu eq 'order'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-ios-cart"></i>
-							<span class="text">ORDER</span>
+							<span class="text">{Lang::T('ORDER')}</span>
 							<i class="arrow ion-chevron-left"></i>
 						</a>
 						<ul class="inner-drop list-unstyled">
@@ -130,14 +118,17 @@
                                 <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/package">{Lang::T('Package')}</a></li>
                                 <li {if $_system_menu eq 'order'}class="active"{/if}><a href="{$_url}order/history">{Lang::T('History')}</a></li>
                             {/if}
+                            {$_MENU_ORDER}
 						</ul>
 					</li>
+                    {$_MENU_AFTER_ORDER}
 					<li {if $_system_menu eq 'voucher'}class="active"{/if}>
 						<a href="{$_url}voucher/list-activated">
 							<i class="ion ion-card"></i>
 							<span class="text">{Lang::T('History')}</span>
 						</a>
 					</li>
+                    {$_MENU_AFTER_HISTORY}
 					<li {if $_system_menu eq 'accounts'}class="open"{/if}>
 						<a href="#" onClick="toggleDropdownMobile(this)">
 							<i class="ion ion-gear-a"></i>
@@ -147,10 +138,10 @@
 						<ul class="inner-drop list-unstyled">
 							<li {if $_system_menu eq 'accounts'}class="active"{/if}><a href="{$_url}accounts/profile">{$_L['My_Profile']}</a></li>
 							<li {if $_system_menu eq 'accounts'}class="active"{/if}><a href="{$_url}accounts/change-password">{$_L['Change_Password']}</a></li>
-							<li>&nbsp;</li>
+							{$_MENU_ACCOUNTS}
 						</ul>
 					</li>
-
+                    {$_MENU_AFTER_ACCOUNTS}
 				</ul>
 
 			</nav>

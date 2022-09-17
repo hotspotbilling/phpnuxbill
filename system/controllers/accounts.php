@@ -21,6 +21,7 @@ switch ($action) {
 
     case 'change-password-post':
         $password = _post('password');
+        run_hook('customer_change_password'); #HOOK
         if($password != ''){
             $d = ORM::for_table('tbl_customers')->where('username',$user['username'])->find_one();
             if($d){
@@ -148,7 +149,7 @@ switch ($action) {
         $fullname = _post('fullname');
         $address = _post('address');
         $phonenumber = _post('phonenumber');
-
+        run_hook('customer_edit_profile'); #HOOK
         $msg = '';
         if(Validator::Length($fullname,31,2) == false){
             $msg .= 'Full Name should be between 3 to 30 characters'. '<br>';

@@ -23,6 +23,7 @@ if (file_exists('system/config.php')) {
     r2('system/install');
 }
 
+
 function safedata($value)
 {
     $value = trim($value);
@@ -35,6 +36,50 @@ function _post($param, $defvalue = '')
         return $defvalue;
     } else {
         return safedata($_POST[$param]);
+    }
+}
+
+$menu_registered = array();
+
+/**
+ * Register for global menu
+ * @param string name Name of the menu
+ * @param bool admin true if for admin and false for customer
+ * @param string function function to run after menu clicks
+ * @param string position position of menu, use AFTER_ for root menu |
+ * Admin/Sales menu: AFTER_DASHBOARD, CUSTOMERS, PREPAID, SERVICES, REPORTS, VOUCHER, AFTER_ORDER, NETWORK, SETTINGS, AFTER_PAYMENTGATEWAY
+ * | Customer menu: AFTER_DASHBOARD, ORDER, HISTORY, ACCOUNTS
+ * @param string icon from ion icon, ion-person, only for AFTER_
+ */
+function register_menu($name, $admin, $function, $position, $icon = '')
+{
+    global $menu_registered;
+    $menu_registered[] = [
+        "name" => $name,
+        "admin" => $admin,
+        "position" => $position,
+        "icon" => $icon,
+        "function" => $function
+    ];
+}
+
+$hook_registered = array();
+
+function register_hook($action, $function){
+    $hook_registered[] = [
+        'action' => $action,
+        'function' => $function
+    ];
+}
+
+function run_hook($action){
+    global $hook_registered;
+    foreach($hook_registered as $hook){
+        if($hook['action'] == $action){
+            if(function_exists($hook['function'])){
+                call_user_func($hook['function']);
+            }
+        }
     }
 }
 
@@ -115,6 +160,13 @@ if (isset($_SESSION['notify'])) {
     unset($_SESSION['ntype']);
 }
 
+
+//register all plugin
+foreach (glob("system/plugin/*.php") as $filename)
+{
+    include $filename;
+}
+
 // on some server, it getting error because of slash is backwards
 function _autoloader($class)
 {
@@ -140,21 +192,29 @@ function _autoloader($class)
 
 spl_autoload_register('_autoloader');
 
-function _auth()
+function _auth($login = true)
 {
     if (isset($_SESSION['uid'])) {
         return true;
     } else {
-        r2(U . 'login');
+        if ($login) {
+            r2(U . 'login');
+        } else {
+            return false;
+        }
     }
 }
 
-function _admin()
+function _admin($login = true)
 {
     if (isset($_SESSION['aid'])) {
         return true;
     } else {
-        r2(U . 'login');
+        if ($login) {
+            r2(U . 'login');
+        } else {
+            return false;
+        }
     }
 }
 
@@ -263,34 +323,43 @@ function time_elapsed_string($datetime, $full = false)
 // Routing Engine
 $req = _get('_route');
 $routes = explode('/', $req);
-$handler = $routes['0'];
+$ui->assign('_routes', $routes);
+$handler = $routes[0];
 if ($handler == '') {
     $handler = 'default';
 }
 $sys_render = 'system/controllers/' . $handler . '.php';
 if (file_exists($sys_render)) {
+    $menus = array();
+    // "name" => $name,
+    // "admin" => $admin,
+    // "position" => $position,
+    // "function" => $function
+    $ui->assign('_system_menu', $routes[0]);
+    foreach ($menu_registered as $menu) {
+        if($menu['admin'] && _admin(false)) {
+            if(strpos($menu['position'],'AFTER_')===false) {
+                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.$menu['name'].'</a></li>';
+            }else{
+                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.
+                    '<i class="ion '.$menu['function'].'"></i>'.
+                    '<span class="text">'.$menu['name'].'</span></a></li>';
+            }
+        }else if(!$menu['admin'] && _auth(false)) {
+            if(strpos($menu['position'],'AFTER_')===false) {
+                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.$menu['name'].'</a></li>';
+            }else{
+                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.
+                    '<i class="ion '.$menu['function'].'"></i>'.
+                    '<span class="text">'.$menu['name'].'</span></a></li>';
+            }
+        }
+    }
+    foreach ($menus as $k => $v) {
+        $ui->assign('_MENU_'.$k, $v);
+    }
+    unset($menus, $menu_registered);
     include($sys_render);
 } else {
-    header("HTTP/1.0 404 Not Found");
-    exit("<pre>
-
-    ___ ___ ___
-   | | |   | | |
-   |_  | | |_  |
-     |_|___| |_|
-
-
-    _____     _      _____               _
-   |   | |___| |_   |   __|___ _ _ ___ _| |
-   | | | | . |  _|  |   __| . | | |   | . |
-   |_|___|___|_|    |__|  |___|___|_|_|___|
-
-   _   ______   ____  _____          ____  ____
-   (_) |_   _ \ |_   \|_   _|        |_  _||_  _|
-   __    | |_) |  |   \ | |  __   _    \ \  / /
-  [  |   |  __'.  | |\ \| | [  | | |    > `' <
-   | |  _| |__) |_| |_\   |_ | \_/ |, _/ /'`\ \_
-  [___]|_______/|_____|\____|'.__.'_/|____||____|
-
-</pre>");
+    r2(U.'dashboard', 'e', 'not found');
 }
