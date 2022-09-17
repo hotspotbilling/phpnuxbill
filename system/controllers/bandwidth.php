@@ -17,7 +17,7 @@ if($admin['user_type'] != 'Admin' AND $admin['user_type'] != 'Sales'){
 switch ($action) {
     case 'list':
 		$ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/bandwidth.js"></script>');
-
+        run_hook('view_list_bandwidth'); #HOOK
 		$name = _post('name');
 		if ($name != ''){
 			$paginator = Paginator::bootstrap('tbl_bandwidth','name_bw','%'.$name.'%');
@@ -33,11 +33,13 @@ switch ($action) {
         break;
 
     case 'add':
+        run_hook('view_add_bandwidth'); #HOOK
         $ui->display('bandwidth-add.tpl');
         break;
 
     case 'edit':
         $id  = $routes['2'];
+        run_hook('view_edit_bandwith'); #HOOK
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
         if($d){
             $ui->assign('d',$d);
@@ -49,6 +51,7 @@ switch ($action) {
 
     case 'delete':
         $id  = $routes['2'];
+        run_hook('delete_bandwidth'); #HOOK
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
         if($d){
             $d->delete();
@@ -62,7 +65,7 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
 		$rate_up = _post('rate_up');
 		$rate_up_unit = _post('rate_up_unit');
-
+        run_hook('add_bandwidth'); #HOOK
         $msg = '';
         if(Validator::Length($name,16,4) == false){
             $msg .= 'Name should be between 5 to 15 characters'. '<br>';
@@ -97,7 +100,7 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
 		$rate_up = _post('rate_up');
 		$rate_up_unit = _post('rate_up_unit');
-
+        run_hook('edit_bandwidth'); #HOOK
         $msg = '';
         if(Validator::Length($name,16,4) == false){
             $msg .= 'Name should be between 5 to 15 characters'. '<br>';

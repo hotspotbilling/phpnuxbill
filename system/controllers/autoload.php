@@ -1,7 +1,9 @@
 <?php
 /**
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* used for ajax
 **/
+
 _admin();
 $ui->assign('_title', $_L['Network'].' - '. $config['CompanyName']);
 $ui->assign('_system_menu', 'network');
@@ -15,7 +17,6 @@ switch ($action) {
 		$routers = _get('routers');
 		$d = ORM::for_table('tbl_pool')->where('routers', $routers)->find_many();
 		$ui->assign('d',$d);
-
         $ui->display('autoload-pool.tpl');
         break;
 

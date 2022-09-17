@@ -15,6 +15,7 @@ switch ($do) {
     case 'post':
         $username = _post('username');
         $password = _post('password');
+        run_hook('customer_login'); #HOOK
         if ($username != '' and $password != '') {
             $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if ($d) {
@@ -41,11 +42,8 @@ switch ($do) {
 
         break;
 
-    case 'login-display':
-        $ui->display('login.tpl');
-        break;
-
     default:
+        run_hook('customer_view_login'); #HOOK
         $ui->display('login.tpl');
         break;
 }

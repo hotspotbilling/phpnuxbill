@@ -24,6 +24,7 @@ switch ($action) {
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/customers.js"></script>');
         $username = _post('username');
+        run_hook('list_customers'); #HOOK
         if ($username != '') {
             $paginator = Paginator::bootstrap('tbl_customers', 'username', '%' . $username . '%');
             $d = ORM::for_table('tbl_customers')->where_like('username', '%' . $username . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
@@ -38,11 +39,13 @@ switch ($action) {
         break;
 
     case 'add':
+        run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');
         break;
 
     case 'edit':
         $id  = $routes['2'];
+        run_hook('edit_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
@@ -54,7 +57,7 @@ switch ($action) {
 
     case 'delete':
         $id  = $routes['2'];
-
+        run_hook('delete_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
         if ($d) {
             $c = ORM::for_table('tbl_user_recharges')->where('username', $d['username'])->find_one();
@@ -145,7 +148,7 @@ switch ($action) {
         $cpassword = _post('cpassword');
         $address = _post('address');
         $phonenumber = _post('phonenumber');
-
+        run_hook('add_customer'); #HOOK
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
             $msg .= 'Username should be between 3 to 55 characters' . '<br>';
@@ -186,7 +189,7 @@ switch ($action) {
         $cpassword = _post('cpassword');
         $address = _post('address');
         $phonenumber = _post('phonenumber');
-
+        run_hook('edit_customer'); #HOOK
         $msg = '';
         if (Validator::Length($username, 16, 2) == false) {
             $msg .= 'Username should be between 3 to 15 characters' . '<br>';
@@ -308,5 +311,5 @@ switch ($action) {
         break;
 
     default:
-        echo 'action not defined';
+    r2(U . 'customers/list', 'e', 'action not defined');
 }

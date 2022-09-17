@@ -33,12 +33,12 @@ switch ($action) {
 
 		$ui->assign('d',$d);
 		$ui->assign('paginator',$paginator);
+        run_hook('view_list_routers'); #HOOK
         $ui->display('routers.tpl');
         break;
 
     case 'add':
-		$d = ORM::for_table('tbl_routers')->find_many();
-		$ui->assign('d',$d);
+        run_hook('view_add_routers'); #HOOK
         $ui->display('routers-add.tpl');
         break;
 
@@ -47,6 +47,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_routers')->find_one($id);
         if($d){
             $ui->assign('d',$d);
+            run_hook('view_router_edit'); #HOOK
             $ui->display('routers-edit.tpl');
         }else{
             r2(U . 'routers/list', 'e', $_L['Account_Not_Found']);
@@ -55,7 +56,7 @@ switch ($action) {
 
     case 'delete':
         $id  = $routes['2'];
-
+        run_hook('router_delete'); #HOOK
         $d = ORM::for_table('tbl_routers')->find_one($id);
         if($d){
             $d->delete();
@@ -94,6 +95,7 @@ switch ($action) {
         }
 
         if($msg == ''){
+            run_hook('add_router'); #HOOK
             $d = ORM::for_table('tbl_routers')->create();
             $d->name = $name;
             $d->ip_address = $ip_address;
@@ -160,6 +162,7 @@ switch ($action) {
 
 
         if($msg == ''){
+            run_hook('router_edit'); #HOOK
             $d->name = $name;
             $d->ip_address = $ip_address;
             $d->username = $username;

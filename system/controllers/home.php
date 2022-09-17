@@ -18,5 +18,5 @@ $ui->assign('unpaid', ORM::for_table('tbl_payment_gateway')
     ->where('username', $user['username'])
     ->where('status', 1)
     ->find_one());
-
+run_hook('view_customer_dashboard'); #HOOK
 $ui->display('user-dashboard.tpl');

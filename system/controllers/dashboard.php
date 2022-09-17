@@ -72,4 +72,5 @@ foreach($tmp as $plan){
 $ui->assign('stocks',$stocks);
 $ui->assign('plans',$plans);
 
+run_hook('view_dashboard'); #HOOK
 $ui->display('dashboard.tpl');

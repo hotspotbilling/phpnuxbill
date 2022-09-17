@@ -14,11 +14,7 @@ if (isset($routes['1'])) {
     $do = 'register-display';
 }
 
-use PEAR2\Net\RouterOS;
-
-require_once 'system/autoload/PEAR2/Autoload.php';
-
-$otpPath = 'system/uploads/sms/';
+$otpPath = 'system/cache/sms/';
 
 switch ($do) {
     case 'post':
@@ -45,6 +41,7 @@ switch ($do) {
 
         if(!empty($_c['sms_url'])){
             $otpPath .= sha1($username.$db_password).".txt";
+            run_hook('validate_otp'); #HOOK
             if(file_exists($otpPath) && time()-filemtime($otpPath)>300){
                 unlink($otpPath);
                 r2(U . 'register', 's', 'Verification code expired');
@@ -74,6 +71,7 @@ switch ($do) {
             $msg .= $_L['account_already_exist'] . '<br>';
         }
         if ($msg == '') {
+            run_hook('register_user'); #HOOK
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = $username;
             $d->password = $password;
@@ -93,7 +91,8 @@ switch ($do) {
                 <span aria-hidden="true">×</span>
                 </button>
                 <div>Failed to register</div></div>');
-                r2(U . 'register', 's', 'Failed to register');
+                run_hook('view_otp_register'); #HOOK
+                $ui->display('register-rotp.tpl');
             }
         } else {
             $ui->assign('username', $username);
@@ -143,6 +142,7 @@ switch ($do) {
                     $ui->display('register-otp.tpl');
                 }
             }else{
+                run_hook('view_otp_register'); #HOOK
                 $ui->display('register-rotp.tpl');
             }
         }else{
@@ -150,6 +150,7 @@ switch ($do) {
             $ui->assign('fullname', "");
             $ui->assign('address', "");
             $ui->assign('otp', false);
+            run_hook('view_register'); #HOOK
             $ui->display('register.tpl');
         }
         break;

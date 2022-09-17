@@ -10,6 +10,7 @@ $action = $routes['1'];
 if(file_exists('system/paymentgateway/'.$action.'.php')){
     include 'system/paymentgateway/'.$action.'.php';
     if(function_exists($action.'_payment_notification')){
+        run_hook('callback_payment_notification'); #HOOK
         call_user_func($action.'_payment_notification');
         die();
     }

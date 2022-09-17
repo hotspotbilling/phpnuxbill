@@ -40,7 +40,7 @@ switch ($action) {
 		$ui->assign('dr',$xy);
         $ui->assign('mdate',$mdate);
         $ui->assign('recharged_on',$mdate);
-
+        run_hook('print_by_date'); #HOOK
         $ui->display('print-by-date.tpl');
         break;
 
@@ -109,7 +109,7 @@ switch ($action) {
             $html .= '</table>
 			<h4 class="text-uppercase text-bold">'.$_L['Total_Income'].':</h4>
 			<h3 class="sum">'.$_c['currency_code'].' '.number_format($xy,2,$_c['dec_point'],$_c['thousands_sep']).'</h3>';
-
+            run_hook('print_pdf_by_date'); #HOOK
             define('_MPDF_PATH','system/vendors/mpdf/');
 
             require('system/vendors/mpdf/mpdf.php');
@@ -201,7 +201,7 @@ EOF;
         $ui->assign('fdate',$fdate);
         $ui->assign('tdate',$tdate);
         $ui->assign('stype',$stype);
-
+        run_hook('print_by_period'); #HOOK
         $ui->display('print-by-period.tpl');
         break;
 
@@ -283,6 +283,7 @@ EOF;
 			<h4 class="text-uppercase text-bold">'.$_L['Total_Income'].':</h4>
 			<h3 class="sum">'.$_c['currency_code'].' '.number_format($xy,2,$_c['dec_point'],$_c['thousands_sep']).'</h3>';
 
+            run_hook('pdf_by_period'); #HOOK
             define('_MPDF_PATH','system/vendors/mpdf/');
 
             require('system/vendors/mpdf/mpdf.php');

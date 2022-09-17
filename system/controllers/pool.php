@@ -32,13 +32,14 @@ switch ($action) {
 
         $ui->assign('d',$d);
 		$ui->assign('paginator',$paginator);
+        run_hook('view_pool'); #HOOK
         $ui->display('pool.tpl');
         break;
 
     case 'add':
 		$r = ORM::for_table('tbl_routers')->find_many();
 		$ui->assign('r',$r);
-
+        run_hook('view_add_pool'); #HOOK
 		$ui->display('pool-add.tpl');
         break;
 
@@ -47,6 +48,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_pool')->find_one($id);
         if($d){
             $ui->assign('d',$d);
+            run_hook('view_edit_pool'); #HOOK
             $ui->display('pool-edit.tpl');
         }else{
             r2(U . 'pool/list', 'e', $_L['Account_Not_Found']);
@@ -55,7 +57,7 @@ switch ($action) {
 
     case 'delete':
         $id  = $routes['2'];
-
+        run_hook('delete_pool'); #HOOK
         $d = ORM::for_table('tbl_pool')->find_one($id);
 		$mikrotik = Router::_info($d['routers']);
         if($d){
@@ -88,7 +90,7 @@ switch ($action) {
         $name = _post('name');
         $ip_address = _post('ip_address');
 		$routers = _post('routers');
-
+        run_hook('add_pool'); #HOOK
         $msg = '';
         if(Validator::Length($name,30,2) == false){
             $msg .= 'Name should be between 3 to 30 characters'. '<br>';
@@ -134,7 +136,7 @@ switch ($action) {
         $name = _post('name');
         $ip_address = _post('ip_address');
         $routers = _post('routers');
-
+        run_hook('edit_pool'); #HOOK
         $msg = '';
         if(Validator::Length($name,30,2) == false){
             $msg .= 'Name should be between 3 to 30 characters'. '<br>';

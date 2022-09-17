@@ -35,6 +35,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
+        run_hook('view_list_plans'); #HOOK
         $ui->display('hotspot.tpl');
         break;
 
@@ -43,7 +44,7 @@ switch ($action) {
         $ui->assign('d', $d);
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
-
+        run_hook('view_add_plan'); #HOOK
         $ui->display('hotspot-add.tpl');
         break;
 
@@ -56,7 +57,7 @@ switch ($action) {
             $ui->assign('b', $b);
             $r = ORM::for_table('tbl_routers')->find_many();
             $ui->assign('r', $r);
-
+            run_hook('view_edit_plan'); #HOOK
             $ui->display('hotspot-edit.tpl');
         } else {
             r2(U . 'services/hotspot', 'e', $_L['Account_Not_Found']);
@@ -68,6 +69,7 @@ switch ($action) {
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
+            run_hook('delete_plan'); #HOOK
             if(!$_c['radius_mode']){
                 $mikrotik = Router::_info($d['routers']);
                 try {
@@ -126,6 +128,8 @@ switch ($action) {
         if ($d) {
             $msg .= $_L['Plan_already_exist'] . '<br>';
         }
+
+        run_hook('add_plan'); #HOOK
 
         if ($msg == '') {
             $b = ORM::for_table('tbl_bandwidth')->where('id', $id_bw)->find_one();
@@ -216,7 +220,7 @@ switch ($action) {
         } else {
             $msg .= $_L['Data_Not_Found'] . '<br>';
         }
-
+        run_hook('edit_plan'); #HOOK
         if ($msg == '') {
             $b = ORM::for_table('tbl_bandwidth')->where('id', $id_bw)->find_one();
             if ($b['rate_down_unit'] == 'Kbps') {
@@ -290,6 +294,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
+        run_hook('view_list_ppoe'); #HOOK
         $ui->display('pppoe.tpl');
         break;
 
@@ -300,7 +305,7 @@ switch ($action) {
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
-
+        run_hook('view_add_ppoe'); #HOOK
         $ui->display('pppoe-add.tpl');
         break;
 
@@ -315,7 +320,7 @@ switch ($action) {
             $ui->assign('p', $p);
             $r = ORM::for_table('tbl_routers')->find_many();
             $ui->assign('r', $r);
-
+            run_hook('view_edit_ppoe'); #HOOK
             $ui->display('pppoe-edit.tpl');
         } else {
             r2(U . 'services/pppoe', 'e', $_L['Account_Not_Found']);
@@ -327,6 +332,7 @@ switch ($action) {
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
+            run_hook('delete_ppoe'); #HOOK
             if(!$_c['radius_mode']){
                 $mikrotik = Router::_info($d['routers']);
                 try {
@@ -378,7 +384,7 @@ switch ($action) {
         if ($d) {
             $msg .= $_L['Plan_already_exist'] . '<br>';
         }
-
+        run_hook('add_ppoe'); #HOOK
         if ($msg == '') {
             $b = ORM::for_table('tbl_bandwidth')->where('id', $id_bw)->find_one();
             if ($b['rate_down_unit'] == 'Kbps') {
@@ -456,7 +462,7 @@ switch ($action) {
         } else {
             $msg .= $_L['Data_Not_Found'] . '<br>';
         }
-
+        run_hook('edit_ppoe'); #HOOK
         if ($msg == '') {
             $b = ORM::for_table('tbl_bandwidth')->where('id', $id_bw)->find_one();
             if ($b['rate_down_unit'] == 'Kbps') {

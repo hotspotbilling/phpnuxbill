@@ -17,7 +17,7 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
-
+        run_hook('view_app_settings'); #HOOK
         $ui->display('app-settings.tpl');
         break;
 
@@ -31,6 +31,7 @@ switch ($action) {
         $timezonelist = Timezone::timezoneList();
         $ui->assign('tlist', $timezonelist);
         $ui->assign('xjq', ' $("#tzone").select2(); ');
+        run_hook('view_localisation'); #HOOK
         $ui->display('app-localisation.tpl');
         break;
 
@@ -52,6 +53,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
+        run_hook('view_list_admin'); #HOOK
         $ui->display('users.tpl');
         break;
 
@@ -59,7 +61,7 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
-
+        run_hook('view_add_admin'); #HOOK
         $ui->display('users-add.tpl');
         break;
 
@@ -72,6 +74,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_users')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
+            run_hook('view_edit_admin'); #HOOK
             $ui->display('users-edit.tpl');
         } else {
             r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
@@ -89,6 +92,7 @@ switch ($action) {
         }
         $d = ORM::for_table('tbl_users')->find_one($id);
         if ($d) {
+            run_hook('delete_admin'); #HOOK
             $d->delete();
             r2(U . 'settings/users', 's', $_L['User_Delete_Ok']);
         } else {
@@ -121,6 +125,7 @@ switch ($action) {
             $msg .= $_L['account_already_exist'] . '<br>';
         }
         $date_now = date("Y-m-d H:i:s");
+        run_hook('add_admin'); #HOOK
         if ($msg == '') {
             $password = Password::_crypt($password);
             $d = ORM::for_table('tbl_users')->create();
@@ -175,7 +180,7 @@ switch ($action) {
                 $msg .= $_L['account_already_exist'] . '<br>';
             }
         }
-
+        run_hook('edit_admin'); #HOOK
         if ($msg == '') {
             $d->username = $username;
             if ($password != '') {
@@ -207,6 +212,7 @@ switch ($action) {
         $address = _post('address');
         $tawkto = _post('tawkto');
         $radius_mode = _post('radius_mode')*1;
+        run_hook('save_settings'); #HOOK
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
         } else {
@@ -305,6 +311,7 @@ switch ($action) {
         $tzone = _post('tzone');
         $date_format = _post('date_format');
         $lan = _post('lan');
+        run_hook('save_localisation'); #HOOK
         if ($tzone == '' or $date_format == '' or $lan == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
         } else {
@@ -348,7 +355,7 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
-
+        run_hook('view_change_password'); #HOOK
         $ui->display('change-password.tpl');
         break;
 
@@ -356,6 +363,7 @@ switch ($action) {
         $password = _post('password');
         if ($password != '') {
             $d = ORM::for_table('tbl_users')->where('username', $admin['username'])->find_one();
+            run_hook('change_password'); #HOOK
             if ($d) {
                 $d_pass = $d['password'];
                 if (Password::_verify($password, $d_pass) == true) {
@@ -409,6 +417,7 @@ switch ($action) {
 
             $ui->assign('tables', $tables);
             $ui->assign('dbsize', $mbytes);
+            run_hook('view_database'); #HOOK
             $ui->display('dbstatus.tpl');
         }
         break;
@@ -419,6 +428,7 @@ switch ($action) {
         }
 
         try {
+            run_hook('backup_database'); #HOOK
             $mysqli = new mysqli($db_host, $db_user, $db_password, $db_name);
             if ($mysqli->connect_errno) {
                 throw new Exception("Failed to connect to MySQL: " . $mysqli->connect_error);
@@ -506,7 +516,7 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
-
+        run_hook('view_add_language'); #HOOK
         $ui->display('language-add.tpl');
         break;
 
@@ -523,6 +533,7 @@ switch ($action) {
         if ($d) {
             $msg .= $_L['Lang_already_exist'] . '<br>';
         }
+        run_hook('save_language'); #HOOK
         if ($msg == '') {
             $b = ORM::for_table('tbl_language')->create();
             $b->name = $name;

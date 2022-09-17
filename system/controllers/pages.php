@@ -13,6 +13,7 @@ $ui->assign('_admin', $admin);
 if(strpos($action,"-post")===false){
     $path = __DIR__."/../../pages/".str_replace(".","",$action).".html";
     //echo $path;
+    run_hook('view_edit_pages'); #HOOK
     if(file_exists($path)){
         $html = file_get_contents($path);
         $ui->assign("htmls",str_replace(["<div","</div>"],"",$html));
@@ -27,6 +28,7 @@ if(strpos($action,"-post")===false){
     $path = __DIR__."/../../pages/".str_replace(".","",$action).".html";
     if(file_exists($path)){
         $html = _post("html");
+        run_hook('save_pages'); #HOOK
         if(file_put_contents($path, str_replace(["<div","</div>"],"",$html))){
             r2(U . 'pages/'.$action, 's', $_L['Success_Save_Page']);
         }else{

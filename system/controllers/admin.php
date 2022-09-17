@@ -39,12 +39,8 @@ switch ($do) {
         }
 
         break;
-
-    case 'login-display':
-        $ui->display('admin.tpl');
-        break;
-
     default:
+        run_hook('view_login'); #HOOK
         $ui->display('admin.tpl');
         break;
 }

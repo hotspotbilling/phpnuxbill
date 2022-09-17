@@ -19,12 +19,12 @@ require_once 'system/autoload/PEAR2/Autoload.php';
 switch ($action) {
 
     case 'activation':
+        run_hook('view_activate_voucher'); #HOOK
         $ui->display('user-activation.tpl');
         break;
 
     case 'activation-post':
         $code = _post('code');
-
         $v1 = ORM::for_table('tbl_voucher')->where('code', $code)->where('status', 0)->find_one();
 
         $c = ORM::for_table('tbl_customers')->find_one($user['id']);
@@ -49,6 +49,7 @@ switch ($action) {
             $date_exp = $datetime[0];
             $time = $datetime[1];
         }
+        run_hook('customer_activate_voucher'); #HOOK
         if ($v1) {
             if ($v1['type'] == 'Hotspot') {
                 if ($b) {
@@ -377,6 +378,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
+        run_hook('customer_view_activation_list'); #HOOK
         $ui->display('user-activation-list.tpl');
 
         break;

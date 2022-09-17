@@ -16,6 +16,7 @@ require_once 'system/autoload/PEAR2/Autoload.php';
 switch ($action) {
 
     case 'change-password':
+        run_hook('customer_view_change_password'); #HOOK
         $ui->display('user-change-password.tpl');
         break;
 
@@ -138,6 +139,7 @@ switch ($action) {
         $id  = $_SESSION['uid'];
         $d = ORM::for_table('tbl_customers')->find_one($id);
         if($d){
+            run_hook('customer_view_edit_profile'); #HOOK
             $ui->assign('d',$d);
             $ui->display('user-profile.tpl');
         }else{

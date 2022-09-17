@@ -37,6 +37,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
+        run_hook('view_list_billing'); #HOOK
         $ui->display('prepaid.tpl');
         break;
 
@@ -47,7 +48,7 @@ switch ($action) {
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
-
+        run_hook('view_recharge'); #HOOK
         $ui->display('recharge.tpl');
         break;
 
@@ -61,7 +62,7 @@ switch ($action) {
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
-
+        run_hook('view_recharge_customer'); #HOOK
         $ui->display('recharge-user.tpl');
         break;
 
@@ -99,7 +100,7 @@ switch ($action) {
                 $date_exp = $datetime[0];
                 $time = $datetime[1];
             }
-
+            run_hook('recharge_customer'); #HOOK
             if ($type == 'Hotspot') {
                 if ($b) {
                     if(!$_c['radius_mode']){
@@ -448,8 +449,8 @@ switch ($action) {
         $ui->assign('d', $d);
 
         $ui->assign('date', $date_now);
+        run_hook('print_invoice'); #HOOK
         $ui->display('invoice-print.tpl');
-        break;
         break;
 
     case 'edit':
@@ -459,7 +460,7 @@ switch ($action) {
             $ui->assign('d', $d);
             $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
             $ui->assign('p', $p);
-
+            run_hook('view_edit_customer_plan'); #HOOK
             $ui->display('prepaid-edit.tpl');
         } else {
             r2(U . 'services/list', 'e', $_L['Account_Not_Found']);
@@ -472,6 +473,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         $mikrotik = Router::_info($d['routers']);
         if ($d) {
+            run_hook('delete_customer_active_plan'); #HOOK
             if ($d['type'] == 'Hotspot') {
                 if(!$_c['radius_mode']){
                     try {
@@ -533,12 +535,13 @@ switch ($action) {
         }
 
         if ($msg == '') {
+            run_hook('edit_customer_plan'); #HOOK
             $d->username = $username;
             $d->plan_id = $id_plan;
             $d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->save();
-
+            //TODO set mikrotik for editedd plan
             r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
         } else {
             r2(U . 'prepaid/edit/' . $id, 'e', $msg);
@@ -568,6 +571,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
+        run_hook('view_list_voucher'); #HOOK
         $ui->display('voucher.tpl');
         break;
 
@@ -579,7 +583,7 @@ switch ($action) {
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
-
+        run_hook('view_add_voucher'); #HOOK
         $ui->display('voucher-add.tpl');
         break;
 
@@ -657,7 +661,7 @@ switch ($action) {
 
         //for counting pagebreak
         $ui->assign('jml', 0);
-
+        run_hook('view_print_voucher'); #HOOK
         $ui->display('print-voucher.tpl');
         break;
     case 'voucher-post':
@@ -678,9 +682,10 @@ switch ($action) {
             $msg .= 'The Length Code must be a number' . '<br>';
         }
         if ($msg == '') {
+            run_hook('create_voucher'); #HOOK
             for ($i = 0; $i < $numbervoucher; $i++) {
                 $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
-
+                //TODO: IMPLEMENT Voucher Generator
                 $d = ORM::for_table('tbl_voucher')->create();
                 $d->type = $type;
                 $d->routers = $server;
@@ -699,7 +704,7 @@ switch ($action) {
 
     case 'voucher-delete':
         $id  = $routes['2'];
-
+        run_hook('delete_voucher'); #HOOK
         $d = ORM::for_table('tbl_voucher')->find_one($id);
         if ($d) {
             $d->delete();
@@ -712,7 +717,7 @@ switch ($action) {
 
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);
-
+        run_hook('view_refill'); #HOOK
         $ui->display('refill.tpl');
 
         break;
@@ -746,7 +751,7 @@ switch ($action) {
             $date_exp = $datetime[0];
             $time = $datetime[1];
         }
-
+        run_hook('refill_customer'); #HOOK
         if ($v1) {
             if ($v1['type'] == 'Hotspot') {
                 if ($b) {
