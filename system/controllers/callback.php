@@ -3,26 +3,17 @@
 /**
  * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
  **/
-_auth();
-$ui->assign('_system_menu', 'order');
+
 $action = $routes['1'];
-$user = User::_info();
-$ui->assign('_user', $user);
 
 
-require('system/autoload/Paymentgateway.php');
-require('system/autoload/Recharge.php');
-
-switch ($action) {
-    case 'xendit':
-        echo "done";
-        break;
-    case 'midtrans':
-        echo "done";
-        break;
-    case 'tripay':
-        echo '{"success": true}';
-        break;
-    default:
-        echo "not found";
+if(file_exists('system/paymentgateway/'.$action.'.php')){
+    include 'system/paymentgateway/'.$action.'.php';
+    if(function_exists($action.'_payment_notification')){
+        call_user_func($action.'_payment_notification');
+        die();
+    }
 }
+
+header('HTTP/1.1 404 Not Found');
+echo 'Not Found';

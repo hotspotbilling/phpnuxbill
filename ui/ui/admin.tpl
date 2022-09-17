@@ -4,22 +4,22 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<title>{$_title} - {$_L['Login']}</title>
-	<link rel="shortcut icon" href="{$_theme}/images/logo.png" type="image/x-icon" />
+	<link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
 	<!-- Icons -->
-	<link rel="stylesheet" href="{$_theme}/fonts/ionicons/css/ionicons.min.css">
-	<link rel="stylesheet" href="{$_theme}/fonts/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
+	<link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
 
 	<!-- Plugins -->
-	<link rel="stylesheet" href="{$_theme}/styles/plugins/waves.css">
-	<link rel="stylesheet" href="{$_theme}/styles/plugins/perfect-scrollbar.css">
+	<link rel="stylesheet" href="ui/ui/styles/plugins/waves.css">
+	<link rel="stylesheet" href="ui/ui/styles/plugins/perfect-scrollbar.css">
 
 	<!-- Css/Less Stylesheets -->
-	<link rel="stylesheet" href="{$_theme}/styles/bootstrap.min.css">
-	<link rel="stylesheet" href="{$_theme}/styles/main.min.css">
+	<link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
+	<link rel="stylesheet" href="ui/ui/styles/main.min.css">
 
 	<!-- Match Media polyfill for IE9 -->
-	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]-->
+	<!--[if IE 9]> <script src="ui/ui/scripts/ie/matchMedia.js"></script>  <![endif]-->
 
 </head>
 <body id="app" class="app off-canvas body-full">

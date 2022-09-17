@@ -11,8 +11,8 @@
 						<div class="left small">Fixed Header</div>
 						<div class="md-switch right">
 							<label>
-								<input type="checkbox" id="fixedHeader"> 
-								<span>&nbsp;</span> 
+								<input type="checkbox" id="fixedHeader">
+								<span>&nbsp;</span>
 							</label>
 						</div>
 					</li>
@@ -20,8 +20,8 @@
 						<div class="left small">Nav Full</div>
 						<div class="md-switch right">
 							<label>
-								<input type="checkbox" id="navFull"> 
-								<span>&nbsp;</span> 
+								<input type="checkbox" id="navFull">
+								<span>&nbsp;</span>
 							</label>
 						</div>
 					</li>
@@ -41,23 +41,23 @@
 		</div>
 	</div>
 
-	<script src="{$_theme}/scripts/vendors.js"></script>
-	<script src="{$_theme}/scripts/plugins/screenfull.js"></script>
-	<script src="{$_theme}/scripts/plugins/perfect-scrollbar.min.js"></script>
-	<script src="{$_theme}/scripts/plugins/waves.min.js"></script>
-	<script src="{$_theme}/scripts/plugins/select2.min.js"></script>
-	<script src="{$_theme}/scripts/plugins/bootstrap-colorpicker.min.js"></script>
-	<script src="{$_theme}/scripts/plugins/bootstrap-slider.min.js"></script>
-	<script src="{$_theme}/scripts/plugins/summernote.min.js"></script>
-	<script src="{$_theme}/scripts/plugins/bootstrap-datepicker.min.js"></script>
+	<script src="ui/ui/scripts/vendors.js"></script>
+	<script src="ui/ui/scripts/plugins/screenfull.js"></script>
+	<script src="ui/ui/scripts/plugins/perfect-scrollbar.min.js"></script>
+	<script src="ui/ui/scripts/plugins/waves.min.js"></script>
+	<script src="ui/ui/scripts/plugins/select2.min.js"></script>
+	<script src="ui/ui/scripts/plugins/bootstrap-colorpicker.min.js"></script>
+	<script src="ui/ui/scripts/plugins/bootstrap-slider.min.js"></script>
+	<script src="ui/ui/scripts/plugins/summernote.min.js"></script>
+	<script src="ui/ui/scripts/plugins/bootstrap-datepicker.min.js"></script>
 	<script src="ui/lib/js/bootbox.min.js"></script>
-	<script src="{$_theme}/scripts/app.js"></script>
-	<script src="{$_theme}/scripts/custom.js"></script>
-	<script src="{$_theme}/scripts/form-elements.init.js"></script>
+	<script src="ui/ui/scripts/app.js"></script>
+	<script src="ui/ui/scripts/custom.js"></script>
+	<script src="ui/ui/scripts/form-elements.init.js"></script>
 
 {if isset($xfooter)}
 	{$xfooter}
 {/if}
-		
+
 </body>
 </html>

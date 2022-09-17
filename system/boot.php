@@ -72,7 +72,6 @@ function _notify($msg, $type = 'e')
 }
 
 require_once('system/vendors/smarty/libs/Smarty.class.php');
-$_theme = APP_URL . '/ui/ui';
 $lan_file = 'system/lan/' . $config['language'] . '/common.lan.php';
 require($lan_file);
 $ui = new Smarty();
@@ -84,7 +83,6 @@ $ui->assign('app_url', APP_URL);
 $ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL, PHP_URL_HOST)));
 define('U', APP_URL . '/index.php?_route=');
 $ui->assign('_url', APP_URL . '/index.php?_route=');
-$ui->assign('_theme', $_theme);
 $ui->assign('_path', __DIR__);
 $ui->assign('_c', $config);
 $ui->assign('_L', $_L);

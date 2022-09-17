@@ -708,7 +708,7 @@ switch ($action) {
         break;
 
     case 'refill':
-        $ui->assign('xfooter', '<script type="text/javascript" src="' . $_theme . '/scripts/form-elements.init.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="ui/ui/scripts/form-elements.init.js"></script>');
 
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);

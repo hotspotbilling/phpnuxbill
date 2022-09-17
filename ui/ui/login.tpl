@@ -4,15 +4,14 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<title>{$_title} - {$_L['Login']}</title>
-	<link rel="shortcut icon" href="{$_theme}/images/logo.png" type="image/x-icon" />
+	<link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
 	<!-- Css/Less Stylesheets -->
-	<link rel="stylesheet" href="{$_theme}/styles/bootstrap.min.css">
-	<link rel="stylesheet" href="{$_theme}/styles/main.min.css">
+	<link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
+	<link rel="stylesheet" href="ui/ui/styles/main.min.css">
 
- 	<!-- <link href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,300' rel='stylesheet' type='text/css'> -->
 	<!-- Match Media polyfill for IE9 -->
-	<!--[if IE 9]> <script src="{$_theme}/scripts/ie/matchMedia.js"></script>  <![endif]-->
+	<!--[if IE 9]> <script src="ui/ui/scripts/ie/matchMedia.js"></script>  <![endif]-->
 
 </head>
 <body>

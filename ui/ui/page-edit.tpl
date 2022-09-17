@@ -23,7 +23,7 @@
 <form id="formpages" class="hidden" method="post" role="form" action="{$_url}pages/{$pageHeader}-post" >
     <textarea name="html" id="html"></textarea>
 </form>
-<script src="{$_theme}/scripts/nicEdit.js"></script>
+<script src="ui/ui/scripts/nicEdit.js"></script>
 <script type="text/javascript">
     var myNicEditor
     bkLib.onDomLoaded(function() {

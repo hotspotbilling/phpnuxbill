@@ -3,7 +3,7 @@
 <head>
     <title>{$_title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" type="image/x-icon" href="{$_theme}/images/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="ui/ui/images/favicon.ico">
     <style>
 	.ukuran {
 		size:A4;
@@ -118,7 +118,7 @@
                 {/foreach}
         </div>
 </page>
-<script src="{$_theme}/scripts/jquery-1.10.2.js"></script>
+<script src="ui/ui/scripts/jquery-1.10.2.js"></script>
 {if isset($xfooter)}
     {$xfooter}
 {/if}
