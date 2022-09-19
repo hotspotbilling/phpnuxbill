@@ -17,10 +17,10 @@ function r2($to, $ntype = 'e', $msg = '')
     exit;
 }
 
-if (file_exists('system/config.php')) {
-    require('system/config.php');
+if (file_exists('config.php')) {
+    require('config.php');
 } else {
-    r2('system/install');
+    r2('install');
 }
 
 
@@ -220,8 +220,7 @@ function _admin($login = true)
 
 function _raid($l)
 {
-    $r =  substr(str_shuffle(str_repeat('0123456789', $l)), 0, $l);
-    return $r;
+    return substr(str_shuffle(str_repeat('0123456789', $l)), 0, $l);
 }
 
 function _log($description, $type = '', $userid = '0')
@@ -263,6 +262,7 @@ function alphanumeric($str, $tambahan = "")
 function sendTelegram($txt)
 {
     global $_c;
+    run_hook('send_telegram'); #HOOK
     if (!empty($_c['telegram_bot']) && !empty($_c['telegram_target_id'])) {
         file_get_contents('https://api.telegram.org/bot' . $_c['telegram_bot'] . '/sendMessage?chat_id=' . $_c['telegram_target_id'] . '&text=' . urlencode($txt));
     }
@@ -272,6 +272,7 @@ function sendTelegram($txt)
 function sendSMS($phone, $txt)
 {
     global $_c;
+    run_hook('send_sms'); #HOOK
     if (!empty($_c['sms_url'])) {
         $smsurl = str_replace('[number]', urlencode($phone), $_c['sms_url']);
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
@@ -282,6 +283,7 @@ function sendSMS($phone, $txt)
 function sendWhatsapp($phone, $txt)
 {
     global $_c;
+    run_hook('send_whatsapp'); #HOOK
     if (!empty($_c['wa_url'])) {
         $waurl = str_replace('[number]', urlencode($phone), $_c['wa_url']);
         $waurl = str_replace('[text]', urlencode($txt), $waurl);

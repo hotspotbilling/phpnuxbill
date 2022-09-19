@@ -7,7 +7,7 @@ if(php_sapi_name() !== 'cli'){
     die("RUN ON COMMAND LINE ONLY BY RADIUS ENGINE");
 }
 
-require(__DIR__.'/config.php');
+require(__DIR__.'/../config.php');
 require(__DIR__.'/orm.php');
 
 use PEAR2\Net\RouterOS;

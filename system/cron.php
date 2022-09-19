@@ -3,7 +3,7 @@
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
 **/
 
-require('config.php');
+require('../config.php');
 require('orm.php');
 
 use PEAR2\Net\RouterOS;
