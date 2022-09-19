@@ -121,6 +121,8 @@ $lan_file = 'system/lan/' . $config['language'] . '/common.lan.php';
 require($lan_file);
 $ui = new Smarty();
 $ui->setTemplateDir('ui/ui/');
+$ui->addTemplateDir('system/paymentgateway/ui/', 'pg');
+$ui->addTemplateDir('system/plugin/ui/', 'plugin');
 $ui->setCompileDir('ui/compiled/');
 $ui->setConfigDir('ui/conf/');
 $ui->setCacheDir('ui/cache/');

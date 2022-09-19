@@ -16,9 +16,9 @@
 
 ## Payment Gateway
 
-- Tripay.com | Indonesia
-- Xendit.com | Indonesia and Philippine ( Philippine not tested )
-- Duitku.com | Indonesia
+- [Tripay.com](https://github.com/hotspotbilling/phpmixbill-tripay) | Indonesia
+- [Xendit.com](https://github.com/hotspotbilling/phpmixbill-xendit) | Indonesia and Philippine ( Philippine not tested )
+- [Duitku.com](https://github.com/hotspotbilling/phpmixbill-duitku) | Indonesia
 ## Installation
 
 - Rename **pages_template** to **pages**

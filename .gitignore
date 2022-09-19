@@ -6,10 +6,14 @@ ui/cache/*.php
 test.php
 pages/
 system/cache/**
-system/plugin/**
+system/plugin/*
 !system/cache/index.html
 !system/plugin/index.html
 system/paymentgateway/ui/**
 system/paymentgateway/**
+!system/paymentgateway/ui/
 !system/paymentgateway/ui/index.html
 !system/paymentgateway/index.html
+!system/plugin/ui/
+system/plugin/ui/*
+!system/plugin/ui/index.html
