@@ -63,7 +63,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_pool')->find_one($id);
         $mikrotik = Mikrotik::info($d['routers']);
         if ($d) {
-            if (!$_c['radius_mode']) {
+            if (!$config['radius_mode']) {
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removePool($client, $d['pool_name']);
             }
@@ -92,7 +92,7 @@ switch ($action) {
         }
         $mikrotik = Mikrotik::info($routers);
         if ($msg == '') {
-            if (!$_c['radius_mode']) {
+            if (!$config['radius_mode']) {
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removePool($client, $name, $ip_address);
             }
@@ -132,7 +132,7 @@ switch ($action) {
 
         $mikrotik = Mikrotik::info($routers);
         if ($msg == '') {
-            if (!$_c['radius_mode']) {
+            if (!$config['radius_mode']) {
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPool($client, $name,$poolName, $ip_address);
             }

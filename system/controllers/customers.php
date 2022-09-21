@@ -64,13 +64,13 @@ switch ($action) {
             if ($c) {
                 $mikrotik = Mikrotik::info($c['routers']);
                 if ($c['type'] == 'Hotspot') {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removeHotspotUser($client,$c['username']);
                         Mikrotik::removeHotspotActiveUser($client,$user['username']);
                     }
                 } else {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removePpoeUser($client,$c['username']);
                         Mikrotik::removePpoeActive($client,$user['username']);
@@ -182,7 +182,7 @@ switch ($action) {
             if ($c) {
                 $mikrotik = Mikrotik::info($c['routers']);
                 if ($c['type'] == 'Hotspot') {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::setHotspotUser($client,$c['username'],$password);
                         Mikrotik::removeHotspotActiveUser($client,$user['username']);
@@ -191,7 +191,7 @@ switch ($action) {
                     $d->password = $password;
                     $d->save();
                 } else {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::setPpoeUser($client,$c['username'],$password);
                         Mikrotik::removePpoeActive($client,$user['username']);

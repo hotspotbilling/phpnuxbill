@@ -70,7 +70,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_plan'); #HOOK
-            if(!$_c['radius_mode']){
+            if(!$config['radius_mode']){
                 $mikrotik = Mikrotik::info($d['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removeHotspotPlan($client,$d['name_plan']);
@@ -130,7 +130,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$_c['radius_mode']){
+            if(!$config['radius_mode']){
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
@@ -209,7 +209,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$_c['radius_mode']){
+            if(!$config['radius_mode']){
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
@@ -290,7 +290,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_ppoe'); #HOOK
-            if(!$_c['radius_mode']){
+            if(!$config['radius_mode']){
                 $mikrotik = Mikrotik::info($d['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removePpoePlan($client, $d['name_plan']);
@@ -341,7 +341,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$_c['radius_mode']){
+            if(!$config['radius_mode']){
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addPpoePlan($client, $name, $pool, $rate);
@@ -407,7 +407,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$_c['radius_mode']){
+            if(!$config['radius_mode']){
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPpoePlan($client, $name, $pool, $rate);

@@ -70,7 +70,7 @@ switch ($action) {
 				</div>
 				<div id="logo"><img id="image" src="system/uploads/logo.png" alt="logo" /></div>
 			</div>
-			<div id="header">'.$_L['All_Transactions_at_Date'].': '. date($_c['date_format'], strtotime($mdate)).'</div>
+			<div id="header">'.$_L['All_Transactions_at_Date'].': '. date($config['date_format'], strtotime($mdate)).'</div>
 			<table id="customers">
 				<tr>
 				<th>'.$_L['Username'].'</th>
@@ -88,7 +88,7 @@ switch ($action) {
                 $username = $value['username'];
                 $plan_name = $value['plan_name'];
                 $type = $value['type'];
-                $price = $_c['currency_code'].' '. number_format($value['price'],0,$_c['dec_point'],$_c['thousands_sep']);
+                $price = $config['currency_code'].' '. number_format($value['price'],0,$config['dec_point'],$config['thousands_sep']);
 				$recharged_on = date( $config['date_format'], strtotime($value['recharged_on']));
 				$expiration = date( $config['date_format'], strtotime($value['expiration']));
 				$time = $value['time'];
@@ -108,7 +108,7 @@ switch ($action) {
             }
             $html .= '</table>
 			<h4 class="text-uppercase text-bold">'.$_L['Total_Income'].':</h4>
-			<h3 class="sum">'.$_c['currency_code'].' '.number_format($xy,2,$_c['dec_point'],$_c['thousands_sep']).'</h3>';
+			<h3 class="sum">'.$config['currency_code'].' '.number_format($xy,2,$config['dec_point'],$config['thousands_sep']).'</h3>';
             run_hook('print_pdf_by_date'); #HOOK
             define('_MPDF_PATH','system/vendors/mpdf/');
 
@@ -243,7 +243,7 @@ EOF;
 				</div>
 				<div id="logo"><img id="image" src="system/uploads/logo.png" alt="logo" /></div>
 			</div>
-			<div id="header">'.$_L['All_Transactions_at_Date'].': '.date( $_c['date_format'], strtotime($fdate)).' - ' .date( $_c['date_format'], strtotime($tdate)).'</div>
+			<div id="header">'.$_L['All_Transactions_at_Date'].': '.date( $config['date_format'], strtotime($fdate)).' - ' .date( $config['date_format'], strtotime($tdate)).'</div>
 			<table id="customers">
 				<tr>
 				<th>'.$_L['Username'].'</th>
@@ -261,7 +261,7 @@ EOF;
                 $username = $value['username'];
                 $plan_name = $value['plan_name'];
                 $type = $value['type'];
-                $price = $_c['currency_code'].' '. number_format($value['price'],0,$_c['dec_point'],$_c['thousands_sep']);
+                $price = $config['currency_code'].' '. number_format($value['price'],0,$config['dec_point'],$config['thousands_sep']);
 				$recharged_on = date( $config['date_format'], strtotime($value['recharged_on']));
 				$expiration = date( $config['date_format'], strtotime($value['expiration']));
 				$time = $value['time'];
@@ -281,7 +281,7 @@ EOF;
             }
             $html .= '</table>
 			<h4 class="text-uppercase text-bold">'.$_L['Total_Income'].':</h4>
-			<h3 class="sum">'.$_c['currency_code'].' '.number_format($xy,2,$_c['dec_point'],$_c['thousands_sep']).'</h3>';
+			<h3 class="sum">'.$config['currency_code'].' '.number_format($xy,2,$config['dec_point'],$config['thousands_sep']).'</h3>';
 
             run_hook('pdf_by_period'); #HOOK
             define('_MPDF_PATH','system/vendors/mpdf/');

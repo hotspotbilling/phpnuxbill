@@ -53,7 +53,7 @@ switch ($action) {
         if ($v1) {
             if ($v1['type'] == 'Hotspot') {
                 if ($b) {
-                    if (!$_c['radius_mode']) {
+                    if (!$config['radius_mode']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removeHotspotUser($client, $c['username']);
                         Mikrotik::addHotspotUser($client, $p, $c);
@@ -85,7 +85,7 @@ switch ($action) {
                     $t->type = "Hotspot";
                     $t->save();
                 } else {
-                    if (!$_c['radius_mode']) {
+                    if (!$config['radius_mode']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::addHotspotUser($client, $p, $c);
                     }
@@ -129,7 +129,7 @@ switch ($action) {
                     "\nPrice: " . $p['price']);
             } else {
                 if ($b) {
-                    if (!$_c['radius_mode']) {
+                    if (!$config['radius_mode']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removePpoeUser($client, $c['username']);
                         Mikrotik::addPpoeUser($client, $p, $c);
@@ -162,7 +162,7 @@ switch ($action) {
                     $t->type = "PPPOE";
                     $t->save();
                 } else {
-                    if (!$_c['radius_mode']) {
+                    if (!$config['radius_mode']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::addPpoeUser($client, $p, $c);
                     }

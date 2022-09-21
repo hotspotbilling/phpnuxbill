@@ -71,7 +71,7 @@ switch ($action) {
             run_hook('customer_check_payment_status'); #HOOK
             include 'system/paymentgateway/' . $trx['gateway'] . '.php';
             call_user_func($trx['gateway'] . '_validate_config');
-            call_user_func($_c['payment_gateway'] . '_get_status', $trx, $user);
+            call_user_func($config['payment_gateway'] . '_get_status', $trx, $user);
 
         } else if ($routes['3'] == 'cancel') {
             run_hook('customer_cancel_payment'); #HOOK
@@ -100,15 +100,15 @@ switch ($action) {
         $ui->display('user-orderView.tpl');
         break;
     case 'buy':
-        if ($_c['payment_gateway'] == 'none') {
+        if ($config['payment_gateway'] == 'none') {
             r2(U . 'home', 'e', Lang::T("No Payment Gateway Available"));
         }
-        if (!file_exists('system/paymentgateway/' . $_c['payment_gateway'] . '.php')) {
+        if (!file_exists('system/paymentgateway/' . $config['payment_gateway'] . '.php')) {
             r2(U . 'home', 'e', Lang::T("No Payment Gateway Available"));
         }
         run_hook('customer_buy_plan'); #HOOK
-        include 'system/paymentgateway/' . $_c['payment_gateway'] . '.php';
-        call_user_func($_c['payment_gateway'] . '_validate_config');
+        include 'system/paymentgateway/' . $config['payment_gateway'] . '.php';
+        call_user_func($config['payment_gateway'] . '_validate_config');
 
         $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2'] * 1);
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3'] * 1);
@@ -123,7 +123,7 @@ switch ($action) {
             if ($d['pg_url_payment']) {
                 r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
             } else {
-                if ($_c['payment_gateway'] == $d['gateway']) {
+                if ($config['payment_gateway'] == $d['gateway']) {
                     $id = $d['id'];
                 } else {
                     $d->status = 4;
@@ -134,7 +134,7 @@ switch ($action) {
         if (empty($id)) {
             $d = ORM::for_table('tbl_payment_gateway')->create();
             $d->username = $user['username'];
-            $d->gateway = $_c['payment_gateway'];
+            $d->gateway = $config['payment_gateway'];
             $d->plan_id = $plan['id'];
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
@@ -146,7 +146,7 @@ switch ($action) {
             $id = $d->id();
         } else {
             $d->username = $user['username'];
-            $d->gateway = $_c['payment_gateway'];
+            $d->gateway = $config['payment_gateway'];
             $d->plan_id = $plan['id'];
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
@@ -159,7 +159,7 @@ switch ($action) {
         if (!$id) {
             r2(U . "order/package/" . $d['id'], 'e', Lang::T("Failed to create Transaction.."));
         } else {
-            call_user_func($_c['payment_gateway'] . '_create_transaction', $d, $user);
+            call_user_func($config['payment_gateway'] . '_create_transaction', $d, $user);
         }
         break;
     default:

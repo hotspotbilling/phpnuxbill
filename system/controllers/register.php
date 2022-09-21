@@ -39,7 +39,7 @@ switch ($do) {
             $msg .= $_L['PasswordsNotMatch'] . '<br>';
         }
 
-        if(!empty($_c['sms_url'])){
+        if(!empty($config['sms_url'])){
             $otpPath .= sha1($username.$db_password).".txt";
             run_hook('validate_otp'); #HOOK
             if(file_exists($otpPath) && time()-filemtime($otpPath)>300){
@@ -109,7 +109,7 @@ switch ($do) {
         break;
 
     default:
-        if(!empty($_c['sms_url'])){
+        if(!empty($config['sms_url'])){
             $username = _post('username');
             if(!empty($username)){
                 $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
@@ -132,7 +132,7 @@ switch ($do) {
                 }else{
                     $otp = rand(100000,999999);
                     file_put_contents($otpPath, $otp);
-                    sendSMS($username,$_c['CompanyName']."\nYour Verification code are: $otp");
+                    sendSMS($username,$config['CompanyName']."\nYour Verification code are: $otp");
                     $ui->assign('username', $username);
                     $ui->assign('notify', '<div class="alert alert-success">
                     <button type="button" class="close" data-dismiss="alert">

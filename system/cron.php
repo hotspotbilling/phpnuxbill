@@ -6,7 +6,6 @@
 require('../config.php');
 require('orm.php');
 
-use PEAR2\Net\RouterOS;
 require_once 'autoload/PEAR2/Autoload.php';
 
 ORM::configure("mysql:host=$db_host;dbname=$db_name");
@@ -15,6 +14,41 @@ ORM::configure('password', $db_password);
 ORM::configure('return_result_sets', true);
 ORM::configure('logging', true);
 
+
+include "autoload/Hookers.php";
+
+
+//register all plugin
+foreach (glob("system/plugin/*.php") as $filename)
+{
+    include $filename;
+}
+
+// on some server, it getting error because of slash is backwards
+function _autoloader($class)
+{
+    if (strpos($class, '_') !== false) {
+        $class = str_replace('_', DIRECTORY_SEPARATOR, $class);
+        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        } else {
+            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
+                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        }
+    } else {
+        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        } else {
+            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
+                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        }
+    }
+}
+
+spl_autoload_register('_autoloader');
+
 $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach($result as $value){
     $config[$value['setting']]=$value['value'];
@@ -22,6 +56,8 @@ foreach($result as $value){
 date_default_timezone_set($config['timezone']);
 
 $d = ORM::for_table('tbl_user_recharges')->where('status','on')->find_many();
+
+run_hook('cronjob'); #HOOK
 
 foreach ($d as $ds){
 	if($ds['type'] == 'Hotspot'){

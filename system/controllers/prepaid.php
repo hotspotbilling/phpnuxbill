@@ -103,7 +103,7 @@ switch ($action) {
             run_hook('recharge_customer'); #HOOK
             if ($type == 'Hotspot') {
                 if ($b) {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removeHotspotUser($client,$c['username']);
                         Mikrotik::addHotspotUser($client,$p,$c);
@@ -136,7 +136,7 @@ switch ($action) {
                     $t->type = "Hotspot";
                     $t->save();
                 } else {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::addHotspotUser($client,$p,$c);
                     }
@@ -175,7 +175,7 @@ switch ($action) {
             } else {
 
                 if ($b) {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removePpoeUser($client,$c['username']);
                         Mikrotik::addPpoeUser($client,$p,$c);
@@ -208,7 +208,7 @@ switch ($action) {
                     $t->type = "PPPOE";
                     $t->save();
                 } else {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::addPpoeUser($client,$p,$c);
                     }
@@ -249,9 +249,9 @@ switch ($action) {
             $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
             $ui->assign('in', $in);
 
-            sendWhatsapp($c['username'], "*$_c[CompanyName]*\n".
-					"$_c[address]\n".
-					"$_c[phone]\n".
+            sendWhatsapp($c['username'], "*$config[CompanyName]*\n".
+					"$config[address]\n".
+					"$config[phone]\n".
 					"\n\n".
 					"INVOICE: *$in[invoice]*\n".
                     "$_L[Date] : $date_now\n".
@@ -259,13 +259,13 @@ switch ($action) {
 					"\n\n".
 					"$_L[Type] : *$in[type]*\n".
 					"$_L[Plan_Name] : *$in[plan_name]*\n".
-					"$_L[Plan_Price] : *$_c[currency_code] ".number_format($in['price'],2,$_c['dec_point'],$_c['thousands_sep'])."*\n\n".
+					"$_L[Plan_Price] : *$config[currency_code] ".number_format($in['price'],2,$config['dec_point'],$config['thousands_sep'])."*\n\n".
 					"$_L[Username] : *$in[username]*\n".
 					"$_L[Password] : **********\n\n".
-					"$_L[Created_On] :\n*".date($_c['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
-					"$_L[Expires_On] :\n*".date($_c['date_format'], strtotime($in['expiration']))." $in[time]*\n".
+					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
+					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
 					"\n\n".
-					"$_c[note]");
+					"$config[note]");
 
 
             $ui->assign('date', $date_now);
@@ -309,14 +309,14 @@ switch ($action) {
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
             if ($d['type'] == 'Hotspot') {
-                if(!$_c['radius_mode']){
+                if(!$config['radius_mode']){
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client,$c['username']);
                 }
 
                 $d->delete();
             } else {
-                if(!$_c['radius_mode']){
+                if(!$config['radius_mode']){
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePpoeUser($client,$c['username']);
                 }
@@ -560,7 +560,7 @@ switch ($action) {
         if ($v1) {
             if ($v1['type'] == 'Hotspot') {
                 if ($b) {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removeHotspotUser($client,$c['username']);
                         Mikrotik::addHotspotUser($client,$p,$c);
@@ -593,7 +593,7 @@ switch ($action) {
                     $t->type = "Hotspot";
                     $t->save();
                 } else {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::addHotspotUser($client,$p,$c);
                     }
@@ -637,7 +637,7 @@ switch ($action) {
                 "\nPrice: ".$p['price']);
             } else {
                 if ($b) {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removePpoeUser($client,$c['username']);
                         Mikrotik::addPpoeUser($client,$p,$c);
@@ -670,7 +670,7 @@ switch ($action) {
                     $t->type = "PPPOE";
                     $t->save();
                 } else {
-                    if(!$_c['radius_mode']){
+                    if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::addPpoeUser($client,$p,$c);
                     }
@@ -718,9 +718,9 @@ switch ($action) {
             $ui->assign('in', $in);
 
 
-            sendWhatsapp($c['username'], "*$_c[CompanyName]*\n".
-					"$_c[address]\n".
-					"$_c[phone]\n".
+            sendWhatsapp($c['username'], "*$config[CompanyName]*\n".
+					"$config[address]\n".
+					"$config[phone]\n".
 					"\n\n".
 					"INVOICE: *$in[invoice]*\n".
                     "$_L[Date] : $date_now\n".
@@ -728,13 +728,13 @@ switch ($action) {
 					"\n\n".
 					"$_L[Type] : *$in[type]*\n".
 					"$_L[Plan_Name] : *$in[plan_name]*\n".
-					"$_L[Plan_Price] : *$_c[currency_code] ".number_format($in['price'],2,$_c['dec_point'],$_c['thousands_sep'])."*\n\n".
+					"$_L[Plan_Price] : *$config[currency_code] ".number_format($in['price'],2,$config['dec_point'],$config['thousands_sep'])."*\n\n".
 					"$_L[Username] : *$in[username]*\n".
 					"$_L[Password] : **********\n\n".
-					"$_L[Created_On] :\n*".date($_c['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
-					"$_L[Expires_On] :\n*".date($_c['date_format'], strtotime($in['expiration']))." $in[time]*\n".
+					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
+					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
 					"\n\n".
-					"$_c[note]");
+					"$config[note]");
 
             $ui->assign('date', $date_now);
             $ui->display('invoice.tpl');
