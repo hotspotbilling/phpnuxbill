@@ -244,25 +244,29 @@ class Mikrotik
 
     public static function addPool($client, $name, $ip_address){
         $addRequest = new RouterOS\Request('/ip/pool/add');
-                $client->sendSync($addRequest
-                    ->setArgument('name', $name)
-                    ->setArgument('ranges', $ip_address)
-                );
+        $client->sendSync($addRequest
+            ->setArgument('name', $name)
+            ->setArgument('ranges', $ip_address)
+        );
     }
 
-    public static function setPool($client, $oldName, $name, $ip_address){
+    public static function setPool($client, $name, $ip_address){
         $printRequest = new RouterOS\Request(
             '/ip pool print .proplist=name',
-            RouterOS\Query::where('name', $oldName)
+            RouterOS\Query::where('name', $name)
         );
         $poolName = $client->sendSync($printRequest)->getProperty('name');
 
-        $setRequest = new RouterOS\Request('/ip/pool/set');
-        $client(
-            $setRequest
-                ->setArgument('numbers', $name)
-                ->setArgument('ranges', $ip_address)
-        );
+        if(empty($poolName)){
+            self::addPool($client, $name, $ip_address);
+        }else{
+            $setRequest = new RouterOS\Request('/ip/pool/set');
+            $client(
+                $setRequest
+                    ->setArgument('numbers', $poolName)
+                    ->setArgument('ranges', $ip_address)
+            );
+        }
     }
 
 
@@ -283,15 +287,18 @@ class Mikrotik
             RouterOS\Query::where('name', $name)
         );
         $profileName = $client->sendSync($printRequest)->getProperty('name');
-
-        $setRequest = new RouterOS\Request('/ppp/profile/set');
-        $client(
-            $setRequest
-                ->setArgument('numbers', $profileName)
-                ->setArgument('local-address', $pool)
-                ->setArgument('remote-address', $pool)
-                ->setArgument('rate-limit', $rate)
-        );
+        if(empty($profileName)){
+            self::addPpoePlan($client, $name, $pool, $rate);
+        }else{
+            $setRequest = new RouterOS\Request('/ppp/profile/set');
+            $client(
+                $setRequest
+                    ->setArgument('numbers', $profileName)
+                    ->setArgument('local-address', $pool)
+                    ->setArgument('remote-address', $pool)
+                    ->setArgument('rate-limit', $rate)
+            );
+        }
     }
 
     public static function removePpoePlan($client, $name){

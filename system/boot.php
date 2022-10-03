@@ -39,50 +39,6 @@ function _post($param, $defvalue = '')
     }
 }
 
-$menu_registered = array();
-
-/**
- * Register for global menu
- * @param string name Name of the menu
- * @param bool admin true if for admin and false for customer
- * @param string function function to run after menu clicks
- * @param string position position of menu, use AFTER_ for root menu |
- * Admin/Sales menu: AFTER_DASHBOARD, CUSTOMERS, PREPAID, SERVICES, REPORTS, VOUCHER, AFTER_ORDER, NETWORK, SETTINGS, AFTER_PAYMENTGATEWAY
- * | Customer menu: AFTER_DASHBOARD, ORDER, HISTORY, ACCOUNTS
- * @param string icon from ion icon, ion-person, only for AFTER_
- */
-function register_menu($name, $admin, $function, $position, $icon = '')
-{
-    global $menu_registered;
-    $menu_registered[] = [
-        "name" => $name,
-        "admin" => $admin,
-        "position" => $position,
-        "icon" => $icon,
-        "function" => $function
-    ];
-}
-
-$hook_registered = array();
-
-function register_hook($action, $function){
-    $hook_registered[] = [
-        'action' => $action,
-        'function' => $function
-    ];
-}
-
-function run_hook($action){
-    global $hook_registered;
-    foreach($hook_registered as $hook){
-        if($hook['action'] == $action){
-            if(function_exists($hook['function'])){
-                call_user_func($hook['function']);
-            }
-        }
-    }
-}
-
 function _get($param, $defvalue = '')
 {
     if (!isset($_GET[$param])) {
@@ -100,7 +56,9 @@ ORM::configure('username', $db_user);
 ORM::configure('password', $db_password);
 ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 ORM::configure('return_result_sets', true);
-ORM::configure('logging', true);
+if($_app_stage != 'Live'){
+    ORM::configure('logging', true);
+}
 
 $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
@@ -109,6 +67,14 @@ foreach ($result as $value) {
 
 date_default_timezone_set($config['timezone']);
 $_c = $config;
+
+if($config['radius_mode']){
+    ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
+    ORM::configure('username', $radius_user, 'radius');
+    ORM::configure('password', $radius_password, 'radius');
+    ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
+    ORM::configure('return_result_sets', true, 'radius');
+}
 
 function _notify($msg, $type = 'e')
 {
@@ -161,6 +127,8 @@ if (isset($_SESSION['notify'])) {
     unset($_SESSION['notify']);
     unset($_SESSION['ntype']);
 }
+
+include "autoload/Hookers.php";
 
 
 //register all plugin
@@ -263,20 +231,20 @@ function alphanumeric($str, $tambahan = "")
 
 function sendTelegram($txt)
 {
-    global $_c;
+    global $config;
     run_hook('send_telegram'); #HOOK
-    if (!empty($_c['telegram_bot']) && !empty($_c['telegram_target_id'])) {
-        file_get_contents('https://api.telegram.org/bot' . $_c['telegram_bot'] . '/sendMessage?chat_id=' . $_c['telegram_target_id'] . '&text=' . urlencode($txt));
+    if (!empty($config['telegram_bot']) && !empty($config['telegram_target_id'])) {
+        file_get_contents('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $config['telegram_target_id'] . '&text=' . urlencode($txt));
     }
 }
 
 
 function sendSMS($phone, $txt)
 {
-    global $_c;
+    global $config;
     run_hook('send_sms'); #HOOK
-    if (!empty($_c['sms_url'])) {
-        $smsurl = str_replace('[number]', urlencode($phone), $_c['sms_url']);
+    if (!empty($config['sms_url'])) {
+        $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         file_get_contents($smsurl);
     }
@@ -284,10 +252,10 @@ function sendSMS($phone, $txt)
 
 function sendWhatsapp($phone, $txt)
 {
-    global $_c;
+    global $config;
     run_hook('send_whatsapp'); #HOOK
-    if (!empty($_c['wa_url'])) {
-        $waurl = str_replace('[number]', urlencode($phone), $_c['wa_url']);
+    if (!empty($config['wa_url'])) {
+        $waurl = str_replace('[number]', urlencode($phone), $config['wa_url']);
         $waurl = str_replace('[text]', urlencode($txt), $waurl);
         file_get_contents($waurl);
     }

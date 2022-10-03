@@ -94,7 +94,7 @@ switch ($action) {
         if ($msg == '') {
             if (!$config['radius_mode']) {
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::removePool($client, $name, $ip_address);
+                Mikrotik::addPool($client, $name, $ip_address);
             }
 
             $b = ORM::for_table('tbl_pool')->create();
@@ -111,14 +111,11 @@ switch ($action) {
 
 
     case 'edit-post':
-        $name = _post('name');
         $ip_address = _post('ip_address');
         $routers = _post('routers');
         run_hook('edit_pool'); #HOOK
         $msg = '';
-        if (Validator::Length($name, 30, 2) == false) {
-            $msg .= 'Name should be between 3 to 30 characters' . '<br>';
-        }
+
         if ($ip_address == '' or $routers == '') {
             $msg .= $_L['All_field_is_required'] . '<br>';
         }
@@ -134,10 +131,9 @@ switch ($action) {
         if ($msg == '') {
             if (!$config['radius_mode']) {
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::setPool($client, $name,$poolName, $ip_address);
+                Mikrotik::setPool($client, $d['pool_name'], $ip_address);
             }
 
-            $d->pool_name = $name;
             $d->range_ip = $ip_address;
             $d->routers = $routers;
             $d->save();
