@@ -3,12 +3,11 @@
 ## Feature
 
 - Voucher Generator and Print
-- Self registration, user must have voucher before registration
+- Self registration
 - Multi Router Mikrotik
 - Hotspot & PPPOE
 - Easy Installation
 - Multi Language
-- RADIUS
 - Payment Gateway Midtrans, Xendit and Tripay
 - SMS validation for login
 - Whatsapp Notification to Consumer
@@ -19,19 +18,10 @@
 - [Tripay.com](https://github.com/hotspotbilling/phpmixbill-tripay) | Indonesia
 - [Xendit.com](https://github.com/hotspotbilling/phpmixbill-xendit) | Indonesia and Philippine ( Philippine not tested )
 - [Duitku.com](https://github.com/hotspotbilling/phpmixbill-duitku) | Indonesia
-## Installation
 
-- Rename **pages_template** to **pages**
-- make writeable **system** folder or create file **system/config.php** and make it writeable
-- make writeable folder **ui/cache/** and **ui/compiled**
-- Open webs and run installation
-- set cronjobs or scheduller for **system/cron.php**
+Click link to download
 
-Radius system need to set radius to use **system/radius.php** you can ask me for paid support.
-
-See [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
-
-baca [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
+Goto Discussionif you want another Payment Gateway
 
 ## System Requirements
 
@@ -50,6 +40,29 @@ can be Installed in Raspberry Pi Device.
 
 The problem with windows is hard to set cronjob, better Linux
 
+## Installation
+
+- Rename **pages_template** to **pages**
+- Rename **config.sample.php** to **config.php** and make it writeable (chmod 777)
+- make writeable folder **ui/cache/** and **ui/compiled**
+- Open web and run installation
+- set cronjobs or scheduller for **system/cron.php**
+- make **config.php** unwriteable (chmod 644)
+
+
+See [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
+
+baca [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
+
+## UPDGRADE
+
+for old version, below Version 6, backup **system/config.php**, delete all file except folder **pages**, upload all new files, put **config.php** in root folder (not in system folder), got to folder **/install** and run Update.
+
+for version 6 above, just replace all files, using filezilla can choose overwrite if different file size or time.
+
+## RADIUS system
+
+Still on development
 ## Paid Support
 
 Start from Rp 500.000 or $50
