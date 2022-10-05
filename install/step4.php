@@ -23,12 +23,20 @@ catch(PDOException $ex){
 if ($cn == '1') {
     $input = '<?php
 
+define(\'APP_URL\', \'' . $appurl . '\');
+$_app_stage = \'Live\';
+
+// Database PHPNuxBill
 $db_host	    = \'' . $db_host . '\';
 $db_user        = \'' . $db_user . '\';
 $db_password	= \'' . $db_password . '\';
 $db_name	    = \'' . $db_name . '\';
-define(\'APP_URL\', \'' . $appurl . '\');
-$_app_stage = \'Live\';
+
+// Database Radius
+$radius_host	    = \'' . $db_host . '\';
+$radius_user        = \'' . $db_user . '\';
+$radius_pass    	= \'' . $db_password . '\';
+$radius_name	    = \'' . $db_name . '\';
 
 if($_app_stage!=\'Live\'){
     error_reporting(E_ERROR);
