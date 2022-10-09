@@ -107,7 +107,7 @@
 					</li>
                     {$_MENU_AFTER_DASHBOARD}
 					<li {if $_system_menu eq 'order'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#" >
 							<i class="ion ion-ios-cart"></i>
 							<span class="text">{Lang::T('ORDER')}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -130,7 +130,7 @@
 					</li>
                     {$_MENU_AFTER_HISTORY}
 					<li {if $_system_menu eq 'accounts'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#" >
 							<i class="ion ion-gear-a"></i>
 							<span class="text">{$_L['My_Account']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -150,18 +150,6 @@
 				<p>{date('Y')} &copy; <span>{$_c['CompanyName']}</span></p>
 			</footer>
 		</aside>
-		<script>
-			// i find bug that dropdown menu in mobile browser doesnt active, so i force to show all
-			var mobile = false;
-			if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-				mobile = true;
-			}
-			function toggleDropdownMobile(node){
-				if(mobile){
-					$(node).parent('li').addClass('open');
-				}
-			}
-		</script>
 		<div class="content-container" id="content">
 			<div class="page {if $_system_menu eq 'dashboard'}page-dashboard{/if}">
 

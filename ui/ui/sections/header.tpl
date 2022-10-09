@@ -133,7 +133,7 @@
                     {$_MENU_AFTER_DASHBOARD}
 				{if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'Sales'}
 					<li {if $_system_menu eq 'customers'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-android-contacts"></i>
 							<span class="text">{$_L['Customers']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -146,7 +146,7 @@
 					</li>
                     {$_MENU_AFTER_CUSTOMERS}
 					<li {if $_system_menu eq 'prepaid'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-card"></i>
 							<span class="text">{$_L['Prepaid']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -161,7 +161,7 @@
 					</li>
                     {$_MENU_AFTER_PREPAID}
 					<li {if $_system_menu eq 'services'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-cube"></i>
 							<span class="text">{$_L['Services']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -175,7 +175,7 @@
 					</li>
                     {$_MENU_AFTER_SERVICES}
 					<li {if $_system_menu eq 'reports'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-clipboard"></i>
 							<span class="text">{$_L['Reports']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -190,7 +190,7 @@
 				{/if}
 				{if $_admin['user_type'] eq 'Admin'}
 					<li {if $_system_menu eq 'network'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-network"></i>
 							<span class="text">{$_L['Network']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -203,7 +203,7 @@
 					</li>
                     {$_MENU_AFTER_NETWORKS}
 					<li {if $_system_menu eq 'pages'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-document"></i>
 							<span class="text">{$_L['Static_Pages']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -218,7 +218,7 @@
 					</li>
                     {$_MENU_AFTER_PAGES}
 					<li {if $_system_menu eq 'settings'}class="open"{/if}>
-						<a href="#" onClick="toggleDropdownMobile(this)">
+						<a href="#">
 							<i class="ion ion-gear-a"></i>
 							<span class="text">{$_L['Settings']}</span>
 							<i class="arrow ion-chevron-left"></i>
@@ -254,18 +254,6 @@
 				<p>{date('Y')} &copy; <span>{$_c['CompanyName']}</span></p>
 			</footer>
 		</aside>
-		<script>
-		// i find bug that dropdown menu in mobile browser doesnt active, so i force to show all
-		var mobile = false;
-		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-			mobile = true;
-		}
-		function toggleDropdownMobile(node){
-			if(mobile){
-				$(node).parent('li').addClass('open');
-			}
-		}
-		</script>
 		<div class="content-container" id="content">
 			<div class="page {if $_system_menu eq 'dashboard'}page-dashboard{/if}{if $_system_menu eq 'reports'}page-invoice{/if}">
 
