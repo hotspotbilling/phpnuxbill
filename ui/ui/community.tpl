@@ -122,10 +122,10 @@
 </div>
 <script>
     window.addEventListener('DOMContentLoaded', function() {
-        $.getJSON( "./version.json", function( data ) {
+        $.getJSON( "./version.json?"+Math.random(), function( data ) {
             $('#currentVersion').html('Current Version: '+data.version);
         });
-        $.getJSON( "https://raw.githubusercontent.com/ibnux/phpmixbill/master/version.json", function( data ) {
+        $.getJSON( "https://raw.githubusercontent.com/ibnux/phpmixbill/master/version.json?"+Math.random(), function( data ) {
             $('#latestVersion').html('Latest Version: '+data.version);
         });
     });

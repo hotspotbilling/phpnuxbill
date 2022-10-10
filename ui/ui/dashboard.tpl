@@ -226,7 +226,7 @@
         $.getJSON( "./version.json?"+Math.random(), function( data ) {
             var localVersion = data.version;
             $('#version').html('Version: '+localVersion);
-            $.getJSON( "https://raw.githubusercontent.com/ibnux/phpmixbill/master/version.json", function( data ) {
+            $.getJSON( "https://raw.githubusercontent.com/ibnux/phpmixbill/master/version.json?"+Math.random(), function( data ) {
                 var latestVersion = data.version;
                 if(localVersion !== latestVersion){
                     $('#version').html('Latest Version: '+latestVersion);
