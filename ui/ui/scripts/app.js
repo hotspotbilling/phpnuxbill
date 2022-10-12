@@ -211,19 +211,11 @@ jQuery(function () {
 				e.stopPropagation(), e.stopImmediatePropagation();
 			}),
 				aul.on("touchend", function (e) {
-					if (!that.navHorizontal) {
-						var parent = aRest.parent("li");
-						lists.not(parent).removeClass("open");
-					}
 					that.isMobile && that.navWrap.toggleClass("nav-offcanvas"),
 						e.stopPropagation(),
 						e.stopImmediatePropagation();
 				}),
 				aRest.on("touchend", function () {
-					if (!that.navHorizontal) {
-						var parent = aRest.parent("li");
-						lists.not(parent).removeClass("open");
-					}
 					that.isMobile && that.navWrap.toggleClass("nav-offcanvas");
 				}),
 				aRest.on("click", function (e) {
