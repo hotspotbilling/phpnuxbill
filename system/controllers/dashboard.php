@@ -3,7 +3,7 @@
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
 **/
 _admin();
-$ui->assign('_title', $_L['Dashboard'].' - '. $config['CompanyName']);
+$ui->assign('_title', $_L['Dashboard']);
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 

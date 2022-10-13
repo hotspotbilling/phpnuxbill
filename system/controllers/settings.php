@@ -5,7 +5,7 @@
 
  **/
 _admin();
-$ui->assign('_title', $_L['Settings'] . '- ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Settings']);
 $ui->assign('_system_menu', 'settings');
 
 $action = $routes['1'];

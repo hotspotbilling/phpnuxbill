@@ -3,7 +3,7 @@
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
 **/
 _auth();
-$ui->assign('_title', $_L['My_Account'].'- '. $config['CompanyName']);
+$ui->assign('_title', $_L['My_Account']);
 $ui->assign('_system_menu', 'accounts');
 
 $action = $routes['1'];

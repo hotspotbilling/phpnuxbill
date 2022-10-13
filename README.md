@@ -1,4 +1,4 @@
-# PHP Mikrotik Billing
+# PHPNuxBill - Mikrotik Billing
 
 ## Feature
 

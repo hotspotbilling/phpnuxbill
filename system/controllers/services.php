@@ -5,7 +5,7 @@
 
  **/
 _admin();
-$ui->assign('_title', $_L['Hotspot_Plans'] . ' - ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Hotspot_Plans']);
 $ui->assign('_system_menu', 'services');
 
 $action = $routes['1'];

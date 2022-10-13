@@ -5,7 +5,7 @@
 
  **/
 _auth();
-$ui->assign('_title', $_L['Voucher'] . '- ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Voucher']);
 $ui->assign('_system_menu', 'voucher');
 
 $action = $routes['1'];

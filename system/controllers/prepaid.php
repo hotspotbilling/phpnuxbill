@@ -7,7 +7,7 @@
 
  **/
 _admin();
-$ui->assign('_title', $_L['Recharge_Account'] . ' - ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Recharge_Account']);
 $ui->assign('_system_menu', 'prepaid');
 
 $action = $routes['1'];
@@ -452,7 +452,7 @@ switch ($action) {
                 ->count();
         }
 
-        $ui->assign('_title', $_L['Voucher_Hotspot'] . ' - ' . $config['CompanyName']);
+        $ui->assign('_title', $_L['Voucher_Hotspot']);
         $ui->assign('from_id', $from_id);
         $ui->assign('pagebreak', $pagebreak);
 

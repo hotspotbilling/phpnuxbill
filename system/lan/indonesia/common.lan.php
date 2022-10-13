@@ -294,3 +294,5 @@ $_L['Unpaid_Order'] = 'Unpaid Order';
 $_L['Payment_Gateway_Not_Found'] = 'Payment Gateway Not Found';
 $_L['Payment_Gateway_saved_successfully'] = 'Payment Gateway saved successfully';
 $_L['ORDER'] = 'ORDER';
+$_L['Package_History'] = 'Package History';
+$_L['Buy_History'] = 'Buy History';

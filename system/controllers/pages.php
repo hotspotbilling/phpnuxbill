@@ -3,7 +3,7 @@
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
 **/
 _admin();
-$ui->assign('_title', 'Pages - '. $config['CompanyName']);
+$ui->assign('_title', 'Pages');
 $ui->assign('_system_menu', 'pages');
 
 $action = $routes['1'];

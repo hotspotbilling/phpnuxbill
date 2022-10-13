@@ -48,7 +48,7 @@ if(file_exists('system/paymentgateway/'.$action.'.php')){
             }
             r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway saved successfully'));
         }
-        $ui->assign('_title', 'Payment Gateway Settings - '. $config['CompanyName']);
+        $ui->assign('_title', 'Payment Gateway Settings');
         $ui->assign('pgs', $pgs);
         $ui->display('paymentgateway.tpl');
     }

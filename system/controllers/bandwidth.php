@@ -3,7 +3,7 @@
 * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
 **/
 _admin();
-$ui->assign('_title', $_L['Bandwidth_Plans'].' - '. $config['CompanyName']);
+$ui->assign('_title', $_L['Bandwidth_Plans']);
 $ui->assign('_system_menu', 'services');
 
 $action = $routes['1'];
