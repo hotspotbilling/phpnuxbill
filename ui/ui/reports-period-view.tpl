@@ -28,8 +28,8 @@
 										</form>
 									</div>
 								</div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered invoice-table mb10">
+                                <div class="table-container">
+                                    <table class="is is-bordered is-fullwidth invoice-table mb10">
                                         <thead>
                                             <tr>
                                                 <th>{$_L['Username']}</th>

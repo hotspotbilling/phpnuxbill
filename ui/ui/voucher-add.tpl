@@ -6,12 +6,12 @@
 					<div class="panel-heading">{$_L['Add_Voucher']}</div>
 						<div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/voucher-post" >            
+                <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/voucher-post" >
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Type']}</label>
 						<div class="col-md-6">
-							<input type="radio" id="Hot" name="type" value="Hotspot"> {$_L['Hotspot_Plans']} 
-							<input type="radio" id="POE" name="type" value="PPPOE"> {$_L['PPPOE_Plans']} 
+							<input type="radio" id="Hot" name="type" value="Hotspot"> {$_L['Hotspot_Plans']}
+							<input type="radio" id="POE" name="type" value="PPPOE"> {$_L['PPPOE_Plans']}
 						</div>
                     </div>
 					<div class="form-group">
@@ -30,28 +30,28 @@
                             </select>
 						</div>
                     </div>
-					
+
 					<div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Number_of_Vouchers']}</label>
 						<div class="col-md-6">
 							<input type="text" class="form-control" name="numbervoucher" value="1">
 						</div>
                     </div>
-					
+
 					<div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Length_Code']}</label>
 						<div class="col-md-6">
 							<input type="text" class="form-control" name="lengthcode" value="12">
 						</div>
                     </div>
-					
+
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Generate']}</button> 
+							<button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Generate']}</button>
 						</div>
 					</div>
                 </form>
-				
+
 					</div>
 				</div>
 			</div>

@@ -89,7 +89,7 @@
             <div class="panel panel-default mb20 panel-hovered project-stats table-responsive">
                 <div class="panel-heading">Vouchers Stock</div>
                 <div class="panel-body">
-                    <div class="table-responsive">
+                    <div class="table-container">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -119,7 +119,7 @@
             <div class="panel panel-default mb20 panel-hovered project-stats table-responsive">
                 <div class="panel-heading">{$_L['User_Expired_Today']}</div>
                 <div class="panel-body">
-                    <div class="table-responsive">
+                    <div class="table-container">
                         <table class="table">
                             <thead>
                                 <tr>

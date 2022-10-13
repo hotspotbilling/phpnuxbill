@@ -109,7 +109,7 @@
                     {$_MENU_AFTER_ORDER}
                     <li>
                         <a href="{$_url}voucher/list-activated"
-                            class="has-icon {if $_system_menu eq 'voucher'}active{/if}">
+                            {if $_system_menu eq 'list-activated'}class="is-active router-link-active"{/if}>
                             <span class="icon"><i class="ion ion-card"></i></span>
                             <span class="text">{Lang::T('Buy History')}</span>
                         </a>

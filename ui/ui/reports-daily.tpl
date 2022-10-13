@@ -18,8 +18,8 @@
 										<a href="{$_url}export/pdf-by-date" class="btn btn-default"><i class="fa fa-file-pdf-o"></i>{$_L['Export_to_PDF']}</a>
 									</div>
 								</div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered invoice-table mb10">
+                                <div class="table-container">
+                                    <table class="table is-narrow is-bordered is-fullwidth invoice-table mb10">
                                         <thead>
                                             <tr>
                                                 <th>{$_L['Username']}</th>

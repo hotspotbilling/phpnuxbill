@@ -48,7 +48,6 @@
 	<script src="ui/ui/scripts/plugins/select2.min.js"></script>
 	<script src="ui/ui/scripts/plugins/bootstrap-colorpicker.min.js"></script>
 	<script src="ui/ui/scripts/plugins/bootstrap-slider.min.js"></script>
-	<script src="ui/ui/scripts/plugins/summernote.min.js"></script>
 	<script src="ui/ui/scripts/plugins/bootstrap-datepicker.min.js"></script>
 	<script src="ui/lib/js/bootbox.min.js"></script>
 	<script src="ui/ui/scripts/app.js"></script>

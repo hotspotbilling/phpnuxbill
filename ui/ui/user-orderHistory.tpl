@@ -5,8 +5,8 @@
 							<div class="panel mb20 panel-hovered panel-default">
 								<div class="panel-heading">{$_L['Order_History']}</div>
 								<div class="panel-body">
-                                    <div class="table-responsive">
-                                        <table id="datatable" class="table table-striped table-bordered">
+                                    <div class="table-container">
+                                        <table id="datatable" class="table is-narrow is-bordered is-striped is-fullwidth">
                                             <thead>
                                                 <tr>
                                                     <th>{$_L['Plan_Name']}</th>

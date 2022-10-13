@@ -23,8 +23,8 @@
 											<a href="{$_url}pool/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Pool']}</a>
 										</div>&nbsp;
 									</div>
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-bordered">
+                                    <div class="table-container">
+                                        <table class="table is-narrow is-bordered is-striped is-fullwidth">
                                             <thead>
                                                 <tr>
                                                     <th>#</th>

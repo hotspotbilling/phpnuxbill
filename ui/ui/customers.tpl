@@ -23,8 +23,8 @@
 											<a href="{$_url}customers/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['Add_Contact']}</a>
 										</div>&nbsp;
 									</div>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
+                                    <div class="table-container">
+                                        <table class="table is-narrow is-bordered is-striped is-fullwidth">
                                             <thead>
                                                 <tr>
                                                     <th>{$_L['Username']}</th>

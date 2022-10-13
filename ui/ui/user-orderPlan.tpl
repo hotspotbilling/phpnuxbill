@@ -8,19 +8,19 @@
             <div class="panel mb20 panel-info panel-hovered">
                 <div class="panel-heading">{$router['name']}</div>
                 {if $router['description'] != ''}
-                    <div class="panel-body">
+                    <div class="panel-block">
                         {$router['description']}
                     </div>
                 {/if}
 
-                <div class="panel-body row">
+                <div class="columns is-multiline p-2">
                     {foreach $plans as $plan}
                         {if $router['name'] eq $plan['routers']}
-                            <div class="col-sm-3">
-                                <div class="panel mb10 panel-default panel-hovered">
+                            <div class="column is-4">
+                                <div class="panel mb10 is-default panel-hovered">
                                     <div class="panel-heading"> {$plan['name_plan']}</div>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
+                                    <div class="table-container">
+                                        <table class="table is-narrow is-bordered is-striped is-fullwidth">
                                             <tbody>
                                                 <tr>
                                                     <td>{Lang::T('Type')}</td>
@@ -37,8 +37,10 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div class="panel-footer">
-                                        <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}" onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')" class="btn btn-sm btn-block btn-primary">Buy</a>
+                                    <div class="panel-block">
+                                        <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
+                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                            class="btn btn-sm btn-block btn-primary">Buy</a>
                                     </div>
                                 </div>
                             </div>

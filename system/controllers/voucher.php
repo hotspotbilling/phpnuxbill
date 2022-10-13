@@ -213,6 +213,7 @@ switch ($action) {
         break;
 
     case 'list-activated':
+        $ui->assign('_system_menu', 'list-activated');
         $paginator = Paginator::bootstrap('tbl_transactions', 'username', $user['username']);
         $d = ORM::for_table('tbl_transactions')->where('username', $user['username'])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
 

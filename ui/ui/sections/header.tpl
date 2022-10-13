@@ -10,14 +10,6 @@
 	<link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
 	<link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
 
-	<!-- Plugins -->
-	<link rel="stylesheet" href="ui/ui/styles/plugins/waves.css">
-	<link rel="stylesheet" href="ui/ui/styles/plugins/perfect-scrollbar.css">
-	<link rel="stylesheet" href="ui/ui/styles/plugins/select2.css">
-	<link rel="stylesheet" href="ui/ui/styles/plugins/bootstrap-colorpicker.css">
-	<link rel="stylesheet" href="ui/ui/styles/plugins/bootstrap-slider.css">
-	<link rel="stylesheet" href="ui/ui/styles/plugins/bootstrap-datepicker.css">
-	<link rel="stylesheet" href="ui/ui/styles/plugins/summernote.css">
 
 	<!-- Css/Less Stylesheets -->
 	<link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">

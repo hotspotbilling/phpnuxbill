@@ -23,8 +23,8 @@
 											<a href="{$_url}prepaid/recharge" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['Recharge_Account']}</a>
 										</div>&nbsp;
 									</div>
-                                    <div class="table-responsive">
-                                        <table id="datatable" class="table table-striped table-bordered">
+                                    <div class="table-container">
+                                        <table id="datatable" class="table is-narrow is-bordered is-striped is-fullwidth">
                                             <thead>
                                                 <tr>
                                                     <th>{$_L['Username']}</th>

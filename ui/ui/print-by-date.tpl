@@ -23,8 +23,8 @@
     <div class="col-md-12">
         <div id="printable">
             <h4>{$_L['All_Transactions_at_Date']}: {date($_c['date_format'], strtotime($mdate))}</h4>
-            <div class="table-responsive">
-                <table class="table table-condensed table-bordered" style="background: #ffffff">
+            <div class="table-container">
+                <table class="table is-narrow is-condensed is-bordered is-fullwidth" style="background: #ffffff">
                     <th class="text-center">{$_L['Username']}</th>
                     <th class="text-center">{$_L['Plan_Name']}</th>
                     <th class="text-center">{$_L['Type']}</th>

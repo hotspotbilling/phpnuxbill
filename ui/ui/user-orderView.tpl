@@ -12,8 +12,8 @@
                     </div>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped">
+            <div class="table-container">
+                <table class="table is-narrow is-bordered is-striped is-narrow is-fullwidth">
                     <tbody>
                         <tr>
                             <td>{Lang::T('Status')}</td>

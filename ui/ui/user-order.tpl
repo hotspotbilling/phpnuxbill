@@ -3,7 +3,7 @@
     <div class="col-sm-12">
         <div class="panel mb20 panel-primary panel-hovered">
             <div class="panel-heading">{$_L['Order_Voucher']}</div>
-            <div class="panel-body">
+            <div class="panel-block">
                 {include file="$_path/../pages/Order_Voucher.html"}
             </div>
         </div>

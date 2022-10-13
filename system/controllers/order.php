@@ -4,18 +4,19 @@
  * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
  **/
 _auth();
-$ui->assign('_system_menu', 'order');
 $action = $routes['1'];
 $user = User::_info();
 $ui->assign('_user', $user);
 
 switch ($action) {
     case 'voucher':
+        $ui->assign('_system_menu', 'voucher');
         $ui->assign('_title', $_L['Order_Voucher']);
         run_hook('customer_view_order'); #HOOK
         $ui->display('user-order.tpl');
         break;
     case 'history':
+        $ui->assign('_system_menu', 'history');
         $d = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
             ->find_many();
@@ -28,6 +29,7 @@ switch ($action) {
         break;
     case 'package':
         $ui->assign('_title', 'Order Plan');
+        $ui->assign('_system_menu', 'package');
         $routers = ORM::for_table('tbl_routers')->find_many();
         $plans = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
         $ui->assign('routers', $routers);
