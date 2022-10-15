@@ -1,26 +1,27 @@
 {include file="sections/user-header.tpl"}
+<!-- user-orderPlan -->
 <div class="row">
     <div class="col-sm-12">
-        <div class="panel mb20 panel-default panel-hovered">
-            <div class="panel-heading">{Lang::T('Order Internet Package')}</div>
+        <div class="box box-solid box-default">
+            <div class="box-header">{Lang::T('Order Internet Package')}</div>
         </div>
         {foreach $routers as $router}
-            <div class="panel mb20 panel-info panel-hovered">
-                <div class="panel-heading">{$router['name']}</div>
+            <div class="box box-solid box-info">
+                <div class="box-header">{$router['name']}</div>
                 {if $router['description'] != ''}
-                    <div class="panel-block">
+                    <div class="box-body">
                         {$router['description']}
                     </div>
                 {/if}
 
-                <div class="columns is-multiline p-2">
+                <div class="box-body row">
                     {foreach $plans as $plan}
                         {if $router['name'] eq $plan['routers']}
-                            <div class="column is-4">
-                                <div class="panel mb10 is-default panel-hovered">
-                                    <div class="panel-heading"> {$plan['name_plan']}</div>
+                            <div class="col col-md-4">
+                                <div class="box box-solid box-default">
+                                    <div class="box-header">{$plan['name_plan']}</div>
                                     <div class="table-container">
-                                        <table class="table is-narrow is-bordered is-striped is-fullwidth">
+                                        <table class="table table-bordered table-bordered table-striped">
                                             <tbody>
                                                 <tr>
                                                     <td>{Lang::T('Type')}</td>
@@ -37,7 +38,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div class="panel-block">
+                                    <div class="box-body">
                                         <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
                                             onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
                                             class="btn btn-sm btn-block btn-primary">Buy</a>

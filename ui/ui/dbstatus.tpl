@@ -13,7 +13,7 @@
 							<a href="{$_url}settings/dbbackup/" class="btn btn-primary btn-xs"><i class="fa fa-download"></i> {$_L['Download_Database_Backup']}</a>
 						</div>&nbsp;
 						<div class="table-container">
-							<table class="table is-narrow is-bordered is-fullwidth">
+							<table class="table table-bordered table-bordered">
 								<thead>
 									<tr>
 										<th width="50%">{$_L['Table_Name']}</th>

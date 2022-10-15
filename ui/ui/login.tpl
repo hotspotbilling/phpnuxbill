@@ -8,7 +8,7 @@
 
 	<!-- Css/Less Stylesheets -->
 	<link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-	<link rel="stylesheet" href="ui/ui/styles/main.min.css">
+	<link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
 
 	<!-- Match Media polyfill for IE9 -->
 	<!--[if IE 9]> <script src="ui/ui/scripts/ie/matchMedia.js"></script>  <![endif]-->

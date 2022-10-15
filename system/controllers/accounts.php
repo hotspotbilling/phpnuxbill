@@ -106,6 +106,7 @@ switch ($action) {
     case 'edit-profile-post':
         $fullname = _post('fullname');
         $address = _post('address');
+        $email = _post('email');
         $phonenumber = _post('phonenumber');
         run_hook('customer_edit_profile'); #HOOK
         $msg = '';
@@ -126,6 +127,7 @@ switch ($action) {
         if($msg == ''){
             $d->fullname = $fullname;
 			$d->address = $address;
+			$d->email = $email;
 			$d->phonenumber = $phonenumber;
             $d->save();
 

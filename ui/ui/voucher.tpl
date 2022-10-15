@@ -1,5 +1,5 @@
 {include file="sections/header.tpl"}
-
+<!-- voucher -->
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-default">
@@ -34,7 +34,7 @@
                     </div>&nbsp;
                 </div>
                 <div class="table-container">
-                    <table id="datatable" class="table is-narrow is-bordered is-striped is-fullwidth">
+                    <table id="datatable" class="table table-bordered table-bordered table-striped">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -57,7 +57,7 @@
                                     <td>{$ds['code']}</td>
                                     <td align="center">{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success">Not
                                             Use</label> {else} <label class="btn-tag btn-tag-danger">Used</label>
-                                            {/if}</td>
+                                        {/if}</td>
                                     <td align="center">{if $ds['user'] eq '0'} - {else} {$ds['user']} {/if}</td>
                                     <td>
                                         <a href="{$_url}prepaid/voucher-delete/{$ds['id']}" id="{$ds['id']}"

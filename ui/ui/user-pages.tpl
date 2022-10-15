@@ -1,4 +1,5 @@
 {include file="sections/user-header.tpl"}
+<!-- user-pages -->
 
 					<div class="row">
 						<div class="col-sm-12">

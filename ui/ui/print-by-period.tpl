@@ -24,7 +24,7 @@
         <div id="printable">
             <h4>{$_L['All_Transactions_at_Date']}: {date( $_c['date_format'], strtotime($fdate))} - {date( $_c['date_format'], strtotime($tdate))}</h4>
             <div class="table-container">
-                <table class="table is-narrow is-condensed is-bordered is-fullwidth" style="background: #ffffff">
+                <table class="table table-bordered is-condensed table-bordered" style="background: #ffffff">
                     <th class="text-center">{$_L['Username']}</th>
                     <th class="text-center">{$_L['Plan_Name']}</th>
                     <th class="text-center">{$_L['Type']}</th>

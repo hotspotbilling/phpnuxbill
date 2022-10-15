@@ -1,10 +1,57 @@
 {include file="sections/user-header.tpl"}
+<!-- user-dashboard -->
 
-<div class="columns">
-    <div class="column">
-        <div class="panel is-info">
-            <div class="panel-heading">{$_L['Account_Information']}</div>
-            <table class="table is-narrow is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+<div class="row">
+    <div class="col col-md-6 col-md-push-6">
+        {if $unpaid }
+            <div class="box box-danger box-solid">
+                <div class="box-header">
+                    <h3 class="box-title">{Lang::T('Unpaid Order')}</h3>
+                </div>
+                <table class="table table-condensed table-bordered table-striped table-hover">
+                    <tbody>
+                        <tr>
+                            <td>{Lang::T('expired')}</td>
+                            <td>{date({$_c['date_format']}, strtotime($unpaid['expired_date']))}
+                                {date('H:i', strtotime($unpaid['expired_date']))} </td>
+                        </tr>
+                        <tr>
+                            <td>{$_L['Plan_Name']}</td>
+                            <td>{$unpaid['plan_name']}</td>
+                        </tr>
+                        <tr>
+                            <td>{$_L['Plan_Price']}</td>
+                            <td>{$unpaid['price']}</td>
+                        </tr>
+                        <tr>
+                            <td>{Lang::T('Routers')}</td>
+                            <td>{$unpaid['routers']}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="box-footer p-2">
+                    <a class="btn btn-danger btn-block btn-sm" href="{$_url}order/view/{$unpaid['id']}">
+                        <span class="icon"><i class="ion ion-card"></i></span>
+                        <span>{Lang::T('PAY NOW')}</span>
+                    </a>
+                </div>
+            </div>
+        {/if}
+        <div class="box box-info box-solid">
+            <div class="box-header">
+                <h3 class="box-title">{$_L['Announcement']}</h3>
+            </div>
+            <div class="box-body" style="max-height:296px;overflow:scroll;">
+                {include file="$_path/../pages/Announcement.html"}
+            </div>
+        </div>
+    </div>
+    <div class="col col-md-6 col-md-pull-6">
+        <div class="box box-primary box-solid">
+            <div class="box-header">
+                <h3 class="box-title">{$_L['Account_Information']}</h3>
+            </div>
+            <table class="table table-bordered table-bordered table-striped table-bordered table-hover">
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Username']}</td>
                     <td class="small mb15">{$_bill['username']}</td>
@@ -28,81 +75,37 @@
             </table>
         </div>
         <br>
-        <div class="panel is-info is-hovered is-stacked mb30">
-            <div class="panel-heading">{$_L['Voucher_Activation']}</div>
-            <div class="p-3">
-                <form method="post" role="form" action="{$_url}voucher/activation-post">
-                    <div class="field has-addons is-expanded" align="center">
-                        <p class="control">
-                            <a class="button is-static is-fullwidth">
-                                {$_L['Code_Voucher']}
-                            </a>
-                        </p>
-                        <p class="control is-expanded">
-                            <input class="input" type="text" id="code" name="code"
+        <div class="box box-primary  box-solid mb30">
+            <div class="box-header">
+                <h3 class="box-title">{$_L['Voucher_Activation']}</h3>
+            </div>
+            <div class="box-body">
+                <form method="post" role="form" class="form-horizontal" action="{$_url}voucher/activation-post">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label text-center">{$_L['Code_Voucher']}</label>
+                        <div class="col-sm-7">
+                            <input type="text" id="code" name="code" class="form-control"
                                 placeholder="{$_L['Enter_Voucher_Code']}">
-                        </p>
+                        </div>
                     </div>
                     <div class="form-group" align="center">
-                            <button class="button is-success is-small" type="submit">{$_L['Recharge']}</button>
+                        <button class="btn btn-success" type="submit">{$_L['Recharge']}</button>
                     </div>
                 </form>
             </div>
-            <div class="panel-block columns">
-                <div class="column">
-                    <a class="button is-info is-fullwidth is-small" href="{$_url}order/voucher">
-                        <span class="icon is-small"><i class="ion ion-ios-cart"></i></span>
-                        <span>{$_L['Order_Voucher']} </span>
+            <div class="box-body">
+                <div class="btn-group btn-group-justified" role="group">
+                    <a class="btn btn-warning" href="{$_url}order/voucher">
+                        <i class="ion ion-ios-cart"></i>
+                        {$_L['Order_Voucher']}
                     </a>
-                </div>
-                {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
-                    <div class="column">
-                        <a href="{$_url}order/package" class="button is-link is-fullwidth is-small">
-                            <span class="icon is-small"><i class="ion ion-ios-cart"></i></span>
-                            <span>{Lang::T('Order Package')} </span>
+                    {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
+                        <a href="{$_url}order/package" class="btn btn-primary">
+                            <i class="ion ion-ios-cart"></i>
+                            {Lang::T('Order Package')}
                         </a>
-                    </div>
-                {/if}
-            </div>
-        </div>
-    </div>
-    <div class="column">
-        {if $unpaid }
-            <div class="panel is-danger">
-                <div class="panel-heading">{Lang::T('Unpaid Order')}</div>
-                <table class="table is-narrow is-bordered is-striped is-narrow is-hoverable is-fullwidth">
-                    <tbody>
-                        <tr>
-                            <td>{Lang::T('expired')}</td>
-                            <td>{date({$_c['date_format']}, strtotime($unpaid['expired_date']))}
-                                {date('H:i', strtotime($unpaid['expired_date']))} </td>
-                        </tr>
-                        <tr>
-                            <td>{$_L['Plan_Name']}</td>
-                            <td>{$unpaid['plan_name']}</td>
-                        </tr>
-                        <tr>
-                            <td>{$_L['Plan_Price']}</td>
-                            <td>{$unpaid['price']}</td>
-                        </tr>
-                        <tr>
-                            <td>{Lang::T('Routers')}</td>
-                            <td>{$unpaid['routers']}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="panel-footer p-2">
-                    <a class="button is-danger is-fullwidth is-small" href="{$_url}order/view/{$unpaid['id']}">
-                        <span class="icon is-small"><i class="ion ion-card"></i></span>
-                        <span>{Lang::T('PAY NOW')}</span>
-                    </a>
+                    {/if}
                 </div>
-            </div>
-        {/if}
-        <div class="panel is-info">
-            <div class="panel-heading">{$_L['Announcement']}</div>
-            <div class="panel-block" style="max-height:296px;overflow:scroll;">
-                {include file="$_path/../pages/Announcement.html"}
             </div>
         </div>
     </div>

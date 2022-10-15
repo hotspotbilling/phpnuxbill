@@ -1,4 +1,5 @@
 {include file="sections/user-header.tpl"}
+<!-- user-change-password -->
 
 <div class="row">
     <div class="col-sm-12 col-md-12">

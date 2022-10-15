@@ -296,3 +296,6 @@ $_L['Payment_Gateway_saved_successfully'] = 'Payment Gateway saved successfully'
 $_L['ORDER'] = 'ORDER';
 $_L['Package_History'] = 'Package History';
 $_L['Buy_History'] = 'Buy History';
+$_L['Activation_History'] = 'Activation History';
+$_L['Buy_Package'] = 'Buy Package';
+$_L['Email'] = 'Email';

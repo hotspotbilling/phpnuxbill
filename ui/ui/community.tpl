@@ -32,7 +32,7 @@
             <div class="panel-body">Untuk pengembangan lebih baik, donasi ke iBNuX, donasi akan membantu terus
                 pengembangan aplikasi</div>
             <div class="table-container">
-                <table class="table is-narrow is-bordered is-striped is-fullwidth">
+                <table class="table table-bordered table-bordered table-striped">
                     <tbody>
                         <tr>
                             <td>BCA</td>
@@ -64,7 +64,7 @@
                 Donations will help to continue phpmixbill development
             </div>
             <div class="table-container">
-                <table class="table is-narrow is-bordered is-striped is-fullwidth">
+                <table class="table table-bordered table-bordered table-striped">
                     <tbody>
                         <tr>
                             <td>Bank Central Asia</td>

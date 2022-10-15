@@ -1,4 +1,5 @@
 {include file="sections/user-header.tpl"}
+<!-- user-orderView -->
 <div class="row">
     <div class="col-md-3"></div>
     <div class="col-md-6">
@@ -13,7 +14,7 @@
                 </div>
             </div>
             <div class="table-container">
-                <table class="table is-narrow is-bordered is-striped is-narrow is-fullwidth">
+                <table class="table table-bordered table-bordered table-striped table-bordered">
                     <tbody>
                         <tr>
                             <td>{Lang::T('Status')}</td>

@@ -24,7 +24,7 @@
 										</div>&nbsp;
 									</div>
                                     <div class="table-container">
-                                        <table id="datatable" class="table is-narrow is-bordered is-striped is-fullwidth">
+                                        <table id="datatable" class="table table-bordered table-bordered table-striped">
                                             <thead>
                                                 <tr>
                                                     <th>{$_L['Username']}</th>
