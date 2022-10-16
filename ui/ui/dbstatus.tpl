@@ -12,7 +12,7 @@
 						<div class="col-md-3 text-right">
 							<a href="{$_url}settings/dbbackup/" class="btn btn-primary btn-xs"><i class="fa fa-download"></i> {$_L['Download_Database_Backup']}</a>
 						</div>&nbsp;
-						<div class="table-container">
+						<div class="table-responsive">
 							<table class="table table-bordered table-bordered">
 								<thead>
 									<tr>

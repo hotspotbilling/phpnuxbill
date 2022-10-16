@@ -1,6 +1,6 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://ibnux.github.io/phpnuxbill/)
 **/
 _admin();
 $ui->assign('_title', $_L['Reports']);

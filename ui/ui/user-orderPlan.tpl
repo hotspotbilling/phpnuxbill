@@ -20,7 +20,7 @@
                             <div class="col col-md-4">
                                 <div class="box box-solid box-default">
                                     <div class="box-header">{$plan['name_plan']}</div>
-                                    <div class="table-container">
+                                    <div class="table-responsive">
                                         <table class="table table-bordered table-bordered table-striped">
                                             <tbody>
                                                 <tr>

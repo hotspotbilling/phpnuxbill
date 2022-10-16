@@ -1,6 +1,6 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://ibnux.github.io/phpnuxbill/)
 **/
 _auth();
 $ui->assign('_title', $_L['My_Account']);

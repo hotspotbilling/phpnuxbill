@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>PHPMixBill  Installer</title>
+    <title>PHPNuxBill  Installer</title>
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -22,7 +22,7 @@
 		</div>
 
 		<div class="span12">
-			<h4> PHPMixBill  Installer </h4>
+			<h4> PHPNuxBill  Installer </h4>
 			<?php
 			if (isset($_GET['_error']) && ($_GET['_error']) == '1') {
 				echo '<h4 style="color: red;"> Unable to Connect Database, Please make sure database info is correct and try again ! </h4>';
@@ -66,7 +66,7 @@
 			</form>
 		</div>
 	</div>
-	<div class="footer">Copyright &copy; 2021 PHPMixBill. All Rights Reserved<br/><br/></div>
+	<div class="footer">Copyright &copy; 2021 PHPNuxBill. All Rights Reserved<br/><br/></div>
 </body>
 </html>
 

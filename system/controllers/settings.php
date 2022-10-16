@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://ibnux.github.io/phpnuxbill/)
 
  **/
 _admin();
@@ -205,6 +205,7 @@ switch ($action) {
 
     case 'app-post':
         $company = _post('company');
+        $footer = _post('footer');
         $telegram_bot = _post('telegram_bot');
         $telegram_target_id = _post('telegram_target_id');
         $sms_url = _post('sms_url');
@@ -228,6 +229,18 @@ switch ($action) {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'phone')->find_one();
             $d->value = $phone;
             $d->save();
+
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'CompanyFooter')->find_one();
+            if($d){
+                $d->value = $footer;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'CompanyFooter';
+                $d->value = $footer;
+                $d->save();
+            }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'telegram_bot')->find_one();
             if($d){

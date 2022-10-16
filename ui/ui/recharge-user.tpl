@@ -9,7 +9,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Select_Account']}</label>
 								<div class="col-md-6">
-									<select id="personSelect" name="id_customer" style="width: 100%" data-placeholder="Select a customer...">
+									<select id="personSelect" class="form-control" name="id_customer" style="width: 100%" data-placeholder="Select a customer...">
 									<option></option>
 										{foreach $c as $cs}
 											{if $id eq $cs['id']}

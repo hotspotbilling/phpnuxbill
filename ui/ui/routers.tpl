@@ -27,7 +27,7 @@
                                 class="ion ion-android-add"> </i> {$_L['New_Router']}</a>
                     </div>&nbsp;
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                     <table class="table table-bordered table-bordered table-striped">
                         <thead>
                             <tr>

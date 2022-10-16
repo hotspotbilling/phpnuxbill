@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://ibnux.github.io/phpnuxbill/)
 
  **/
 session_start();
@@ -310,21 +310,17 @@ if (file_exists($sys_render)) {
     $ui->assign('_system_menu', $routes[0]);
     foreach ($menu_registered as $menu) {
         if($menu['admin'] && _admin(false)) {
-            if(strpos($menu['position'],'AFTER_')===false) {
-                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.$menu['name'].'</a></li>';
-            }else{
-                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.
-                    '<i class="ion '.$menu['function'].'"></i>'.
-                    '<span class="text">'.$menu['name'].'</span></a></li>';
+            $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">';
+            if(!empty($menu['icon'])){
+                $menus[$menu['position']] .= '<i class="'.$menu['icon'].'"></i>';
             }
+            $menus[$menu['position']] .= '<span class="text">'.$menu['name'].'</span></a></li>';
         }else if(!$menu['admin'] && _auth(false)) {
-            if(strpos($menu['position'],'AFTER_')===false) {
-                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.$menu['name'].'</a></li>';
-            }else{
-                $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">'.
-                    '<i class="ion '.$menu['function'].'"></i>'.
-                    '<span class="text">'.$menu['name'].'</span></a></li>';
+            $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">';
+            if(!empty($menu['icon'])){
+                $menus[$menu['position']] .= '<i class="'.$menu['icon'].'"></i>';
             }
+            $menus[$menu['position']] .= '<span class="text">'.$menu['name'].'</span></a></li>';
         }
     }
     foreach ($menus as $k => $v) {

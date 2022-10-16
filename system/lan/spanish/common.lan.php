@@ -3,7 +3,7 @@
 -----------------------------------
 Language Name: Spanish
 Contributor: Ing.Luis E. Hernandez
-Web: www.phpmixbill.com
+Web: www.phpnuxbill.com
 Email: contacto.webland@gmail.com
 
 2022
@@ -217,7 +217,7 @@ $_L['Title'] = 'Título';
 $_L['Message'] = 'Mensaje';
 $_L['Account_Information'] = 'Información de su cuenta';
 $_L['Welcome_Text_User'] = 'Bienvenido a la página de Miembros del Panel, en esta página puede:';
-$_L['Welcome_Text_Admin'] = '<b>MIKRO-RED</b> es un punto de acceso de facturación y PPPOE para Mikrotik que utiliza PHP y la API de Mikrotik para comunicarse con el enrutador. Si obtiene más ganancias con esta aplicación, por favor dónenos.<br>Ver proyecto <a href="https://github.com/ibnux/phpmixbill" target="_blank">aqui</a>';
+$_L['Welcome_Text_Admin'] = '<b>MIKRO-RED</b> es un punto de acceso de facturación y PPPOE para Mikrotik que utiliza PHP y la API de Mikrotik para comunicarse con el enrutador. Si obtiene más ganancias con esta aplicación, por favor dónenos.<br>Ver proyecto <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">aqui</a>';
 
 //update
 $_L['Invalid_Username_or_Password'] = 'Usuario o contraseña invalido';

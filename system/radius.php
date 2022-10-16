@@ -1,6 +1,6 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://ibnux.github.io/phpnuxbill/)
 **/
 
 if(php_sapi_name() !== 'cli'){

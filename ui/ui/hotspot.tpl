@@ -23,7 +23,7 @@
 											<a href="{$_url}services/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Plan']}</a>
 										</div>&nbsp;
 									</div>
-                                    <div class="table-container">
+                                    <div class="table-responsive">
                                         <table class="table table-bordered table-bordered table-striped">
                                             <thead>
                                                 <tr>

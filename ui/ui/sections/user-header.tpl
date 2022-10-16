@@ -9,7 +9,6 @@
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
 
-    <!-- Icons -->
     <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
@@ -18,8 +17,6 @@
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
 
 
-    <!-- Match Media polyfill for IE9 -->
-    <!--[if IE 9]> <script src="ui/ui/scripts/ie/matchMedia.js"></script>  <![endif]-->
     {if isset($xheader)}
         {$xheader}
     {/if}
@@ -71,7 +68,7 @@
                                 </li>
                                 <li class="user-footer">
                                     <div class="pull-right">
-                                        <a href="{$_url}logout" class="btn btn-default btn-flat">{$_L['Logout']}</a>
+                                        <a href="{$_url}logout" class="btn btn-default btn-flat"><i class="ion ion-power"></i> {$_L['Logout']}</a>
                                     </div>
                                 </li>
                             </ul>

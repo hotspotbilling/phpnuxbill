@@ -21,7 +21,7 @@
                             class="fa fa-file-pdf-o"></i>{$_L['Export_to_PDF']}</a>
                 </div>
             </div>
-            <div class="table-container">
+            <div class="table-responsive">
                 <table class="table table-bordered table-bordered invoice-table mb10">
                     <thead>
                         <tr>

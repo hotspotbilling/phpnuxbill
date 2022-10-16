@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>PHPMixBill Installer</title>
+    <title>PHPNuxBill Installer</title>
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -23,15 +23,15 @@
         </div>
 
         <div class="span12">
-            <h4> PHPMixBill Installer </h4>
+            <h4> PHPNuxBill Installer </h4>
             <?php
             $passed = '';
             $ltext = '';
             if (version_compare(PHP_VERSION, '7.2.0') >= 0) {
-                $ltext .= 'To Run PHPMixBill  You need at least PHP version 7.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---PASSED---</strong><br/>";
+                $ltext .= 'To Run PHPNuxBill  You need at least PHP version 7.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---PASSED---</strong><br/>";
                 $passed .= '1';
             } else {
-                $ltext .= 'To Run PHPMixBill  You need at least PHP version 7.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---FAILED---</strong><br/>";
+                $ltext .= 'To Run PHPNuxBill  You need at least PHP version 7.2.0, Your PHP Version is: ' . PHP_VERSION . " Tested <strong>---FAILED---</strong><br/>";
                 $passed .= '0';
             }
 
@@ -52,11 +52,11 @@
             }
 
             if ($passed == '111') {
-                echo ("<br/> $ltext <br/> Great! System Test Completed. You can run PHPMixBill on your server. Click Continue For Next Step.
+                echo ("<br/> $ltext <br/> Great! System Test Completed. You can run PHPNuxBill on your server. Click Continue For Next Step.
 				<br><br>
 				<a href=\"step3.php\" class=\"btn btn-primary\">Continue</a><br><br><a href=\"update.php\" class=\"btn btn-primary\">Update System</a>");
             } else {
-                echo ("<br/> $ltext <br/> Sorry. The requirements of PHPMixBill  is not available on your server.
+                echo ("<br/> $ltext <br/> Sorry. The requirements of PHPNuxBill  is not available on your server.
 				Please contact with us- iesien22@yahoo.com with this code- $passed Or contact with your server administrator
 				<br><br>
 				<a href=\"#\" class=\"btn btn-primary disabled\">Correct The Problem To Continue</a>");
@@ -64,7 +64,7 @@
             ?>
         </div>
     </div>
-    <div class="footer">Copyright &copy; 2021 PHPMixBill. All Rights Reserved<br /><br /></div>
+    <div class="footer">Copyright &copy; 2021 PHPNuxBill. All Rights Reserved<br /><br /></div>
 </body>
 
 </html>

@@ -1,8 +1,8 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://ibnux.github.io/phpnuxbill/)
 **/
-_auth();
+_admin();
 $ui->assign('_title', 'Community');
 $ui->assign('_system_menu', 'community');
 

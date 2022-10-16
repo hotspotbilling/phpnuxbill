@@ -32,7 +32,7 @@
                     </form>
                 </div>
             </div>
-            <div class="table-container">
+            <div class="table-responsive">
                 <table class="is table-bordered invoice-table mb10">
                     <thead>
                         <tr>

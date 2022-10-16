@@ -33,7 +33,7 @@
                         </div>
                     </div>&nbsp;
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                     <table id="datatable" class="table table-bordered table-bordered table-striped">
                         <thead>
                             <tr>
