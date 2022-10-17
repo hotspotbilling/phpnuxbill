@@ -51,7 +51,7 @@
             <div class="box-header">
                 <h3 class="box-title">{$_L['Account_Information']}</h3>
             </div>
-            <table class="table table-bordered table-bordered table-striped table-bordered table-hover">
+            <table class="table table-bordered table-striped table-bordered table-hover">
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Username']}</td>
                     <td class="small mb15">{$_bill['username']}</td>

@@ -3,11 +3,11 @@
 
 <div class="row">
     <div class="col-sm-12">
-        <div class="panel mb20 panel-hovered panel-default">
+        <div class="panel mb20 panel-hovered panel-primary">
             <div class="panel-heading">{$_L['List_Activated_Voucher']}</div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-bordered table-bordered table-striped">
+                    <table id="datatable" class="table table-bordered table-striped">
                         <thead>
                             <tr>
                                 <th>{$_L['Username']}</th>

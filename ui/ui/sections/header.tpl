@@ -240,7 +240,7 @@
         <div class="content-wrapper">
             <section class="content-header">
                 <h1>
-                    Dashboard
+                {$_title}
                 </h1>
             </section>
 

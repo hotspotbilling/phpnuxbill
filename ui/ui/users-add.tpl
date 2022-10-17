@@ -3,7 +3,7 @@
 
 <div class="row">
     <div class="col-sm-12 col-md-12">
-        <div class="panel panel-default panel-hovered panel-stacked mb30">
+        <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{$_L['Add_New_Administrator']}</div>
             <div class="panel-body">
 

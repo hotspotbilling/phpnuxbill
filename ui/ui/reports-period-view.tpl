@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="is table-bordered invoice-table mb10">
+                <table class="table table-bordered table-striped table-condensed">
                     <thead>
                         <tr>
                             <th>{$_L['Username']}</th>

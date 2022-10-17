@@ -44,32 +44,30 @@
             <div class="col-md-2">
             </div>
             <div class="col-md-4">
-                <div class="panel panel-default">
+                <div class="panel panel-primary">
                     <div class="panel-heading">{$_L['Registration_Info']}</div>
                     <div class="panel-body" style="height:375px;max-height:375px;overflow:scroll;">
                         {include file="$_path/../pages/Registration_Info.html"}
                     </div>
                 </div>
             </div>
-            <form class="form-horizontal" action="{$_url}register" method="post">
+            <form  action="{$_url}register" method="post">
                 <div class="col-md-4">
-                    <div class="panel panel-default">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">1. {$_L['Register_Member']}</div>
                         <div class="panel-body">
-                            <div class="form-container">
-                                <div class="md-input-container md-float-label">
-                                    <input type="text" required class="md-input" id="username"
-                                        placeholder="{$_L['Phone_Number']}" name="username">
-                                    <label>{$_L['Phone_Number']}</label>
+                            <div class="form-group">
+                                <label>{$_L['Phone_Number']}</label>
+                                <input type="text" class="form-control" name="username"
+                                    placeholder="{$_L['Phone_Number']}">
+                            </div>
+                            <div class="btn-group btn-group-justified mb15">
+                                <div class="btn-group">
+                                    <button class="btn btn-primary waves-effect waves-light"
+                                        type="submit">{Lang::T('Request OTP')}</button>
                                 </div>
-                                <div class="btn-group btn-group-justified mb15">
-                                    <div class="btn-group">
-                                        <button class="btn btn-primary waves-effect waves-light"
-                                            type="submit">{Lang::T('Request OTP')}</button>
-                                    </div>
-                                    <div class="btn-group">
-                                        <a href="{$_url}login" class="btn btn-success">{$_L['Cancel']}</a>
-                                    </div>
+                                <div class="btn-group">
+                                    <a href="{$_url}login" class="btn btn-success">{$_L['Cancel']}</a>
                                 </div>
                             </div>
                         </div>

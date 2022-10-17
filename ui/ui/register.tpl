@@ -7,20 +7,8 @@
     <title>{$_title} - {$_L['Register']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-
-    <!-- Plugins -->
-    <link rel="stylesheet" href="ui/ui/styles/plugins/waves.css">
-    <link rel="stylesheet" href="ui/ui/styles/plugins/perfect-scrollbar.css">
-
-    <!-- Css/Less Stylesheets -->
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/main.min.css">
-
-    <!-- Match Media polyfill for IE9 -->
-    <!--[if IE 9]> <script src="ui/ui/scripts/ie/matchMedia.js"></script>  <![endif]-->
+    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
 
 </head>
 
@@ -42,7 +30,7 @@
         {/if}
         <div class="row">
             <div class="col-md-4">
-                <div class="panel panel-default">
+                <div class="panel panel-primary">
                     <div class="panel-heading">{$_L['Registration_Info']}</div>
                     <div class="panel-body" style="height:375px;max-height:375px;overflow:scroll;">
                         {include file="$_path/../pages/Registration_Info.html"}
@@ -51,7 +39,7 @@
             </div>
             <form class="form-horizontal" action="{$_url}register/post" method="post">
                 <div class="col-md-4">
-                    <div class="panel panel-default">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">1. {$_L['Register_Member']}</div>
                         <div class="panel-body">
                             <div class="form-container">
@@ -74,7 +62,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="panel panel-default">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">2. {$_L['Password']}</div>
                         <div class="panel-body">
                             <div class="form-container">

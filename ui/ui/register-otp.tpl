@@ -7,20 +7,8 @@
     <title>{$_title} - {$_L['Register']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-
-    <!-- Plugins -->
-    <link rel="stylesheet" href="ui/ui/styles/plugins/waves.css">
-    <link rel="stylesheet" href="ui/ui/styles/plugins/perfect-scrollbar.css">
-
-    <!-- Css/Less Stylesheets -->
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/main.min.css">
-
-    <!-- Match Media polyfill for IE9 -->
-    <!--[if IE 9]> <script src="ui/ui/scripts/ie/matchMedia.js"></script>  <![endif]-->
+    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
 
 </head>
 
@@ -42,54 +30,54 @@
         {/if}
         <div class="row">
             <div class="col-md-4">
-                <div class="panel panel-default">
+                <div class="panel panel-info">
                     <div class="panel-heading">{$_L['Registration_Info']}</div>
-                    <div class="panel-body" style="height:375px;max-height:375px;overflow:scroll;">
+                    <div class="panel-body" style="max-height:375px;overflow:scroll;">
                         {include file="$_path/../pages/Registration_Info.html"}
                     </div>
                 </div>
             </div>
-            <form class="form-horizontal" action="{$_url}register/post" method="post">
+            <form action="{$_url}register/post" method="post">
                 <div class="col-md-4">
-                    <div class="panel panel-default">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">1. {$_L['Register_Member']}</div>
                         <div class="panel-body">
                             <div class="form-container">
-                                <div class="md-input-container md-float-label">
-                                    <input type="text" required class="md-input" readonly id="username"
+                                <div class="form-group">
+                                <label>{$_L['Phone_Number']}</label>
+                                    <input type="text" required class="form-control" readonly id="username"
                                         value="{$username}" placeholder="{$_L['Phone_Number']}" name="username">
-                                    <label>{$_L['Phone_Number']}</label>
                                 </div>
-                                <div class="md-input-container md-float-label">
-                                    <input type="text" required class="md-input" id="otp_code" value=""
-                                        placeholder="'{Lang::T('Verification Code')}'" name="otp_code">
-                                    <label>{Lang::T('SMS Verification Code')}</label>
+                                <div class="form-group">
+                                <label>{Lang::T('SMS Verification Code')}</label>
+                                    <input type="text" required class="form-control" id="otp_code" value=""
+                                        placeholder="{Lang::T('Verification Code')}" name="otp_code">
                                 </div>
-                                <div class="md-input-container md-float-label">
-                                    <input type="text" required class="md-input" id="fullname" value="{$fullname}"
+                                <div class="form-group">
+                                <label>{$_L['Full_Name']}</label>
+                                    <input type="text" required class="form-control" id="fullname" value="{$fullname}"
                                         name="fullname">
-                                    <label>{$_L['Full_Name']}</label>
                                 </div>
-                                <div class="md-input-container md-float-label">
-                                    <input type="text" name="address" id="address" value="{$address}" class="md-input">
-                                    <label>{$_L['Address']}</label>
+                                <div class="form-group">
+                                <label>{$_L['Address']}</label>
+                                    <input type="text" name="address" id="address" value="{$address}" class="form-control">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="panel panel-default">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">2. {$_L['Password']}</div>
                         <div class="panel-body">
                             <div class="form-container">
-                                <div class="md-input-container md-float-label">
-                                    <input type="password" required class="md-input" id="password" name="password">
-                                    <label>{$_L['Password']}</label>
+                                <div class="form-group">
+                                <label>{$_L['Password']}</label>
+                                    <input type="password" required class="form-control" id="password" name="password">
                                 </div>
-                                <div class="md-input-container md-float-label">
-                                    <input type="password" required class="md-input" id="cpassword" name="cpassword">
-                                    <label>{$_L['Confirm_Password']}</label>
+                                <div class="form-group">
+                                <label>{$_L['Confirm_Password']}</label>
+                                    <input type="password" required class="form-control" id="cpassword" name="cpassword">
                                 </div>
                                 <div class="btn-group btn-group-justified mb15">
                                     <div class="btn-group">

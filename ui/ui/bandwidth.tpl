@@ -2,7 +2,7 @@
 
 					<div class="row">
 						<div class="col-sm-12">
-							<div class="panel panel-hovered mb20 panel-default">
+							<div class="panel panel-hovered mb20 panel-primary">
 								<div class="panel-heading">{$_L['Bandwidth_Plans']}</div>
 								<div class="panel-body">
 									<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
@@ -24,7 +24,7 @@
 										</div>&nbsp;
 									</div>
 									<div class="table-responsive">
-                                        <table class="table table-bordered table-bordered table-striped">
+                                        <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
                                                     <th>{$_L['BW_Name']}</th>

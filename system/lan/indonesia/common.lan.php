@@ -301,3 +301,6 @@ $_L['Buy_Package'] = 'Buy Package';
 $_L['Email'] = 'Email';
 $_L['Company_Footer'] = 'Company Footer';
 $_L['Will_show_below_user_pages'] = 'Will show below user pages';
+$_L['Request_OTP'] = 'Request OTP';
+$_L['Verification_Code'] = 'Verification Code';
+$_L['SMS_Verification_Code'] = 'SMS Verification Code';
