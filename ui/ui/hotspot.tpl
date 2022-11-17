@@ -24,7 +24,7 @@
 										</div>&nbsp;
 									</div>
                                     <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-striped table-condensed">
                                             <thead>
                                                 <tr>
                                                     <th>{$_L['Plan_Name']}</th>

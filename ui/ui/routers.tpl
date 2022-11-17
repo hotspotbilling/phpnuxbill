@@ -28,7 +28,7 @@
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
                                 <th>{$_L['Router_Name']}</th>
@@ -49,7 +49,7 @@
                                     <td>{if $ds['enabled'] == 1}Enabled{else}Disabled{/if}</td>
                                     <td>
                                         <a href="{$_url}routers/edit/{$ds['id']}"
-                                            class="btn btn-info btn-sm btn-block">{$_L['Edit']}</a>
+                                            class="btn btn-info btn-xs btn-block">{$_L['Edit']}</a>
                                     </td>
                                 </tr>
                             {/foreach}
