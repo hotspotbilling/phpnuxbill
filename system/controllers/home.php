@@ -1,10 +1,10 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  **/
 _auth();
-$ui->assign('_title', $_L['Dashboard'] . ' - ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Dashboard']);
 
 $user = User::_info();
 $ui->assign('_user', $user);

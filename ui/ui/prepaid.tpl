@@ -2,7 +2,7 @@
 
 					<div class="row">
 						<div class="col-sm-12">
-							<div class="panel panel-hovered mb20 panel-default">
+							<div class="panel panel-hovered mb20 panel-primary">
 								<div class="panel-heading">{$_L['Prepaid_User']}</div>
 								<div class="panel-body">
 									<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
@@ -24,7 +24,7 @@
 										</div>&nbsp;
 									</div>
                                     <div class="table-responsive">
-                                        <table id="datatable" class="table table-striped table-bordered">
+                                        <table id="datatable" class="table table-bordered table-striped table-condensed">
                                             <thead>
                                                 <tr>
                                                     <th>{$_L['Username']}</th>
@@ -48,8 +48,8 @@
                                                     <td>{$ds['method']}</td>
                                                     <td>{$ds['routers']}</td>
                                                     <td>
-                                                        <a href="{$_url}prepaid/edit/{$ds['id']}" class="btn btn-warning btn-sm">{$_L['Edit']}</a>
-                                                        <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm cdelete">{$_L['Delete']}</a>
+                                                        <a href="{$_url}prepaid/edit/{$ds['id']}" class="btn btn-warning btn-xs">{$_L['Edit']}</a>
+                                                        {* <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a> *}
                                                     </td>
                                                 </tr>
                                             {/foreach}

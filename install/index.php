@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>PHPMixBill Installer</title>
+    <title>PHPNuxBill Installer</title>
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -24,12 +24,12 @@
         <!--  contents area start  -->
         <div class="row">
             <div class="col-md-12">
-                <h4> PHPMixBill Installer </h4>
+                <h4> PHPNuxBill Installer </h4>
                 <h5>Please Read Before Continue</h5>
                 <p><strong>Informasi Aplikasi</strong><br>
-                    Application Name: PHPMixBill <br>
+                    Application Name: PHPNuxBill <br>
                     Release Date: 30/10/2015<br>
-                    By: PHPMixBill [ <a href="https://github.com/ibnux/phpmixbill" target="_blank">https://github.com/ibnux/phpmixbill</a> ]<br>
+                    By: PHPNuxBill [ <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">https://github.com/hotspotbilling/phpnuxbill</a> ]<br>
                     Donasi Paypal: <b>me@ibnux.et</b><br>
                     <br>
                     <strong>Syarat Penggunaan:</strong><br>
@@ -54,7 +54,7 @@
         </div>
         <!--  contents area end  -->
     </div>
-    <div class="footer">Copyright &copy; 2021 PHPMixBill. All Rights Reserved<br /><br /></div>
+    <div class="footer">Copyright &copy; 2021 PHPNuxBill. All Rights Reserved<br /><br /></div>
 </body>
 
 </html>

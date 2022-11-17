@@ -2,10 +2,10 @@
 
 <div class="row">
 	<div class="col-sm-12">
-		<div class="panel mb20 panel-default">
+		<div class="panel mb20 panel-primary">
 			<div class="panel-heading">{$_L['Database_Status']}</div>
 			<div class="panel-body">
-			
+
                 <div class="row">
                     <div class="col-md-12 col-sm-12 col-xs-12">
 						<div class="col-md-9">{$_L['Total_Database_Size']}: {$dbsize}  MB </div>
@@ -34,7 +34,7 @@
 						</div>
                     </div>
                 </div>
-				
+
             </div>
         </div>
     </div>

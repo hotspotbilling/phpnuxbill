@@ -2,14 +2,14 @@
 
 		<div class="row">
 			<div class="col-sm-12 col-md-12">
-				<div class="panel panel-default panel-hovered panel-stacked mb30">
+				<div class="panel panel-primary panel-hovered panel-stacked mb30">
 					<div class="panel-heading">{$_L['Recharge_Account']}</div>
 					<div class="panel-body">
 						<form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/recharge-post" >
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Select_Account']}</label>
 								<div class="col-md-6">
-									<select id="personSelect" name="id_customer" style="width: 100%" data-placeholder="{$_L['Select_Customer']}...">
+									<select id="personSelect" class="form-control" name="id_customer" style="width: 100%" data-placeholder="{$_L['Select_Customer']}...">
 									<option></option>
 										{foreach $c as $cs}
 											<option value="{$cs['id']}">{$cs['username']}</option>

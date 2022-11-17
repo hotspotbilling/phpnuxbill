@@ -1,9 +1,9 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 **/
-_auth();
-$ui->assign('_title', 'Community - '. $config['CompanyName']);
+_admin();
+$ui->assign('_title', 'Community');
 $ui->assign('_system_menu', 'community');
 
 $action = $routes['1'];

@@ -1,11 +1,11 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 
  **/
 _auth();
-$ui->assign('_title', $_L['Voucher'] . '- ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Voucher']);
 $ui->assign('_system_menu', 'voucher');
 
 $action = $routes['1'];
@@ -213,6 +213,7 @@ switch ($action) {
         break;
 
     case 'list-activated':
+        $ui->assign('_system_menu', 'list-activated');
         $paginator = Paginator::bootstrap('tbl_transactions', 'username', $user['username']);
         $d = ORM::for_table('tbl_transactions')->where('username', $user['username'])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
 

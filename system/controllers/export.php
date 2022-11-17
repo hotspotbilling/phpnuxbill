@@ -1,9 +1,9 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 **/
 _admin();
-$ui->assign('_title', $_L['Reports'].'- '. $config['CompanyName']);
+$ui->assign('_title', $_L['Reports']);
 $ui->assign('_sysfrm_menu', 'reports');
 
 $action = $routes['1'];

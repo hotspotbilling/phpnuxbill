@@ -3,7 +3,7 @@
 -----------------------------------
 Language Name: Indonesia
 Contributor: Ismail Marzuqi
-Web: www.phpmixbill.com
+Web: www.phpnuxbill.com
 Email: iesien22@yahoo.com
 
 2017
@@ -21,7 +21,7 @@ $_L['Register_Success'] = 'Pendaftaran sukses!<br>silahkan masuk';
 $_L['Sign_In_Member'] = 'Masuk ke Member Panel';
 $_L['Register_Member'] = 'Mendaftar sebagai pelanggan<br>pastikan anda sudah membeli voucher';
 $_L['Sign_In_Admin'] = 'Masuk ke Admin Panel';
-$_L['Logo'] = 'PHPMixBill';
+$_L['Logo'] = 'PHPNuxBill';
 $_L['Username'] = 'Username';
 $_L['Password'] = 'Password';
 $_L['PasswordsNotMatch'] = 'Sandi tidak sama';
@@ -216,7 +216,7 @@ $_L['Title'] = 'Title';
 $_L['Message'] = 'Message';
 $_L['Account_Information'] = 'Informasi Akun Anda';
 $_L['Welcome_Text_User'] = 'Selamat datang di Member Panel, disini Anda dapat mengetahui:';
-$_L['Welcome_Text_Admin'] = '<b>PHPMixBill</b> adalah sebuah aplikasi billing Hotspot dan PPPOE untuk Mikrotik dengan menggunakan bahasa pemograman PHP dan menggunakan API Mikrotik sebagai komunikasi dengan router. Jika aplikasi ini sangat berguna bagi bisnis Anda silahkan Anda donasi berapapun.<br>Pantau proyek <a href="https://github.com/ibnux/phpmixbill" target="_blank">disini</a>';
+$_L['Welcome_Text_Admin'] = '<b>PHPNuxBill</b> adalah sebuah aplikasi billing Hotspot dan PPPOE untuk Mikrotik dengan menggunakan bahasa pemograman PHP dan menggunakan API Mikrotik sebagai komunikasi dengan router. Jika aplikasi ini sangat berguna bagi bisnis Anda silahkan Anda donasi berapapun.<br>Pantau proyek <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">disini</a>';
 
 //update
 $_L['Invalid_Username_or_Password'] = 'Username atau Password Salah';
@@ -294,3 +294,13 @@ $_L['Unpaid_Order'] = 'Unpaid Order';
 $_L['Payment_Gateway_Not_Found'] = 'Payment Gateway Not Found';
 $_L['Payment_Gateway_saved_successfully'] = 'Payment Gateway saved successfully';
 $_L['ORDER'] = 'ORDER';
+$_L['Package_History'] = 'Package History';
+$_L['Buy_History'] = 'Buy History';
+$_L['Activation_History'] = 'Activation History';
+$_L['Buy_Package'] = 'Buy Package';
+$_L['Email'] = 'Email';
+$_L['Company_Footer'] = 'Company Footer';
+$_L['Will_show_below_user_pages'] = 'Will show below user pages';
+$_L['Request_OTP'] = 'Request OTP';
+$_L['Verification_Code'] = 'Verification Code';
+$_L['SMS_Verification_Code'] = 'SMS Verification Code';

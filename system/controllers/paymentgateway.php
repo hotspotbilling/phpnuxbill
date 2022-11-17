@@ -1,6 +1,6 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 **/
 _admin();
 $ui->assign('_system_menu', 'paymentgateway');
@@ -48,7 +48,7 @@ if(file_exists('system/paymentgateway/'.$action.'.php')){
             }
             r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway saved successfully'));
         }
-        $ui->assign('_title', 'Payment Gateway Settings - '. $config['CompanyName']);
+        $ui->assign('_title', 'Payment Gateway Settings');
         $ui->assign('pgs', $pgs);
         $ui->display('paymentgateway.tpl');
     }

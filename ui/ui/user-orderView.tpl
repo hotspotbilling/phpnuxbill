@@ -1,11 +1,12 @@
 {include file="sections/user-header.tpl"}
+<!-- user-orderView -->
 <div class="row">
     <div class="col-md-3"></div>
     <div class="col-md-6">
-        <div class="panel mb20 {if $trx['status']==1}panel-warning{elseif $trx['status']==2}panel-success{elseif $trx['status']==3}panel-danger{elseif $trx['status']==4}panel-danger{else}panel-default{/if} panel-hovered">
+        <div class="panel mb20 {if $trx['status']==1}panel-warning{elseif $trx['status']==2}panel-success{elseif $trx['status']==3}panel-danger{elseif $trx['status']==4}panel-danger{else}panel-primary{/if} panel-hovered">
             <div class="panel-footer">Transaction #{$trx['id']}</div>
             <div class="panel-body">
-                <div class="panel panel-default panel-hovered">
+                <div class="panel panel-primary panel-hovered">
                     <div class="panel-heading">{$router['name']}</div>
                     <div class="panel-body">
                         {$router['description']}
@@ -13,7 +14,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped table-bordered">
                     <tbody>
                         <tr>
                             <td>{Lang::T('Status')}</td>

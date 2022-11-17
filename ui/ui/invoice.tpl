@@ -2,7 +2,7 @@
 
 <div class="row">
 	<div class="col-md-6 col-sm-12">
-		<div class="panel panel-hovered panel-default panel-stacked mb30">
+		<div class="panel panel-hovered panel-primary panel-stacked mb30">
 			<div class="panel-heading">PRINT INVOICE</div>
 			<div class="panel-body">
 				<div class="well">

@@ -1,4 +1,4 @@
-# PHP Mikrotik Billing
+# PHPNuxBill - Mikrotik Billing
 
 ## Feature
 
@@ -15,9 +15,9 @@
 
 ## Payment Gateway
 
-- [Tripay.com](https://github.com/hotspotbilling/phpmixbill-tripay) | Indonesia
-- [Xendit.com](https://github.com/hotspotbilling/phpmixbill-xendit) | Indonesia and Philippine ( Philippine not tested )
-- [Duitku.com](https://github.com/hotspotbilling/phpmixbill-duitku) | Indonesia
+- [Tripay.com](https://github.com/hotspotbilling/phpnuxbill-tripay) | Indonesia
+- [Xendit.com](https://github.com/hotspotbilling/phpnuxbill-xendit) | Indonesia and Philippine ( Philippine not tested )
+- [Duitku.com](https://github.com/hotspotbilling/phpnuxbill-duitku) | Indonesia
 
 Click link to download
 
@@ -25,7 +25,7 @@ Goto Discussionif you want another Payment Gateway
 
 ## System Requirements
 
-Most current web servers with PHP & MySQL installed will be capable of running PHPMixBill
+Most current web servers with PHP & MySQL installed will be capable of running PHPNuxBill
 
 Minimum Requirements
 
@@ -50,9 +50,9 @@ The problem with windows is hard to set cronjob, better Linux
 - make **config.php** unwriteable (chmod 644)
 
 
-See [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
+See [WIKI](https://github.com/hotspotbilling/phpnuxbill/wiki/Instalation)
 
-baca [WIKI](https://github.com/ibnux/phpmixbill/wiki/Instalation)
+baca [WIKI](https://github.com/hotspotbilling/phpnuxbill/wiki/Instalation)
 
 ## UPDGRADE
 

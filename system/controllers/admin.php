@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  **/
 if (isset($routes['1'])) {
     $do = $routes['1'];
@@ -41,6 +41,6 @@ switch ($do) {
         break;
     default:
         run_hook('view_login'); #HOOK
-        $ui->display('admin.tpl');
+        $ui->display('admin-login.tpl');
         break;
 }

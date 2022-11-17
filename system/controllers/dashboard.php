@@ -1,13 +1,12 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 **/
 _admin();
-$ui->assign('_title', $_L['Dashboard'].' - '. $config['CompanyName']);
+$ui->assign('_title', $_L['Dashboard']);
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
-
-if($admin['user_type'] != 'Admin' AND $admin['user_type'] != 'Sales'){
+if(!in_array($admin['user_type'],['Admin','Sales'])){
 	r2(U."home",'e',$_L['Do_Not_Access']);
 }
 

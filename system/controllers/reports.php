@@ -1,9 +1,9 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 **/
 _admin();
-$ui->assign('_title', $_L['Reports'].' - '. $config['CompanyName']);
+$ui->assign('_title', $_L['Reports']);
 $ui->assign('_system_menu', 'reports');
 
 $action = $routes['1'];
@@ -23,6 +23,7 @@ $before_30_days = date('Y-m-d', strtotime('today - 30 days'));
 $month_n = date('n');
 
 switch ($action) {
+    case 'by-date':
     case 'daily-report':
 		$paginator = Paginator::bootstrap('tbl_transactions','recharged_on',$mdate);
         $d = ORM::for_table('tbl_transactions')->where('recharged_on',$mdate)->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();

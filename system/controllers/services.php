@@ -1,11 +1,11 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 
  **/
 _admin();
-$ui->assign('_title', $_L['Hotspot_Plans'] . ' - ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Hotspot_Plans']);
 $ui->assign('_system_menu', 'services');
 
 $action = $routes['1'];

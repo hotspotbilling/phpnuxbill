@@ -1,13 +1,13 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  * @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
 
  **/
 _admin();
-$ui->assign('_title', $_L['Recharge_Account'] . ' - ' . $config['CompanyName']);
+$ui->assign('_title', $_L['Recharge_Account']);
 $ui->assign('_system_menu', 'prepaid');
 
 $action = $routes['1'];
@@ -452,7 +452,7 @@ switch ($action) {
                 ->count();
         }
 
-        $ui->assign('_title', $_L['Voucher_Hotspot'] . ' - ' . $config['CompanyName']);
+        $ui->assign('_title', $_L['Voucher_Hotspot']);
         $ui->assign('from_id', $from_id);
         $ui->assign('pagebreak', $pagebreak);
 

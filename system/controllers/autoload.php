@@ -1,11 +1,11 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 * used for ajax
 **/
 
 _admin();
-$ui->assign('_title', $_L['Network'].' - '. $config['CompanyName']);
+$ui->assign('_title', $_L['Network']);
 $ui->assign('_system_menu', 'network');
 
 $action = $routes['1'];

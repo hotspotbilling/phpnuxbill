@@ -1,33 +1,35 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  **/
 _auth();
-$ui->assign('_system_menu', 'order');
 $action = $routes['1'];
 $user = User::_info();
 $ui->assign('_user', $user);
 
 switch ($action) {
     case 'voucher':
-        $ui->assign('_title', $_L['Order_Voucher'] . ' - ' . $config['CompanyName']);
+        $ui->assign('_system_menu', 'voucher');
+        $ui->assign('_title', $_L['Order_Voucher']);
         run_hook('customer_view_order'); #HOOK
         $ui->display('user-order.tpl');
         break;
     case 'history':
+        $ui->assign('_system_menu', 'history');
         $d = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
             ->find_many();
         $paginator = Paginator::bootstrap('tbl_payment_gateway', 'username', $user['username']);
         $ui->assign('paginator', $paginator);
         $ui->assign('d', $d);
-        $ui->assign('_title', Lang::T('Order History') . ' - ' . $config['CompanyName']);
+        $ui->assign('_title', Lang::T('Order History'));
         run_hook('customer_view_order_history'); #HOOK
         $ui->display('user-orderHistory.tpl');
         break;
     case 'package':
-        $ui->assign('_title', 'Order Plan - ' . $config['CompanyName']);
+        $ui->assign('_title', 'Order Plan');
+        $ui->assign('_system_menu', 'package');
         $routers = ORM::for_table('tbl_routers')->find_many();
         $plans = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
         $ui->assign('routers', $routers);
@@ -96,7 +98,7 @@ switch ($action) {
         $ui->assign('router', $router);
         $ui->assign('plan', $plan);
         $ui->assign('bandw', $bandw);
-        $ui->assign('_title', 'TRX #' . $trxid . ' - ' . $config['CompanyName']);
+        $ui->assign('_title', 'TRX #' . $trxid);
         $ui->display('user-orderView.tpl');
         break;
     case 'buy':

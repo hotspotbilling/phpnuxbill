@@ -2,23 +2,23 @@
 
 <div class="row">
     <div class="col-sm-6">
-        <div class="panel panel-hovered mb20 panel-default">
-            <div class="panel-heading">Discussions</div>
-            <div class="panel-body">Get help from community</div>
-            <div class="panel-footer">
-                <a href="https://github.com/ibnux/phpmixbill/discussions" target="_blank"
+        <div class="box box-hovered mb20 box-primary">
+            <div class="box-header"><h3 class="box-title">Discussions</h3></div>
+            <div class="box-body">Get help from community</div>
+            <div class="box-footer">
+                <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
                     class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Chat Now</a>
             </div>
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-hovered mb20 panel-default">
-            <div class="panel-heading">Feedback</div>
-            <div class="panel-body">
+        <div class="box box-hovered mb20 box-primary">
+            <div class="box-header"><h3 class="box-title">Feedback</h3></div>
+            <div class="box-body">
                 Feedback and Bug Report
             </div>
-            <div class="panel-footer">
-                <a href="https://github.com/ibnux/phpmixbill/issues" target="_blank"
+            <div class="box-footer">
+                <a href="https://github.com/hotspotbilling/phpnuxbill/issues" target="_blank"
                     class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Give Feedback</a>
             </div>
         </div>
@@ -27,9 +27,9 @@
 
 <div class="row">
     <div class="col-sm-6">
-        <div class="panel panel-hovered mb20 panel-default">
-            <div class="panel-heading">Donasi</div>
-            <div class="panel-body">Untuk pengembangan lebih baik, donasi ke iBNuX, donasi akan membantu terus
+        <div class="box box-hovered mb20 box-primary">
+            <div class="box-header"><h3 class="box-title">Donasi</h3></div>
+            <div class="box-body">Untuk pengembangan lebih baik, donasi ke iBNuX, donasi akan membantu terus
                 pengembangan aplikasi</div>
             <div class="table-responsive">
                 <table class="table table-bordered table-striped">
@@ -49,7 +49,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="panel-footer">
+            <div class="box-footer">
                 <a href="https://trakteer.id/ibnux" target="_blank"
                     class="btn btn-primary btn-lg btn-block">Trakteer</a>
                 <a href="https://karyakarsa.com/ibnux/support" target="_blank"
@@ -58,10 +58,10 @@
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-hovered mb20 panel-default">
-            <div class="panel-heading">Donations</div>
-            <div class="panel-body">
-                Donations will help to continue phpmixbill development
+        <div class="box box-hovered mb20 box-primary">
+            <div class="box-header"><h3 class="box-title">Donations</h3></div>
+            <div class="box-body">
+                Donations will help to continue phpnuxbill development
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-striped">
@@ -85,7 +85,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="panel-footer">
+            <div class="box-footer">
                 <a href="https://paypal.me/ibnux" target="_blank" class="btn btn-primary btn-lg btn-block">Paypal</a>
             </div>
         </div>
@@ -93,12 +93,12 @@
 </div>
 <div class="row">
     <div class="col-sm-6">
-        <div class="panel panel-hovered mb20 panel-default">
-            <div class="panel-heading">Chat with me</div>
-            <div class="panel-body">Paid Support?<br>donation confirmation?<br>Or ask any Donation Alternative</div>
-            <div class="panel-footer">
+        <div class="box box-hovered mb20 box-primary">
+            <div class="box-header"><h3 class="box-title">Chat with me</h3></div>
+            <div class="box-body">Paid Support?<br>donation confirmation?<br>Or ask any Donation Alternative</div>
+            <div class="box-footer">
                 <a href="https://t.me/ibnux" target="_blank" class="btn btn-primary btn-lg btn-block">Telegram</a>
-                <a href="https://twitter.com/messages/compose?recipient_id=20653807&text=Hello+i+am+phpmixbill+user"
+                <a href="https://twitter.com/messages/compose?recipient_id=20653807&text=Hello+i+am+phpnuxbill+user"
                     target="_blank" class="btn btn-primary btn-lg btn-block">Twitter</a>
                 <a href="https://m.me/ibnumaksum" target="_blank" class="btn btn-primary btn-lg btn-block">Facebook
                     Messenger</a>
@@ -107,15 +107,15 @@
         </div>
     </div>
     <div class="col-sm-6">
-        <div class="panel panel-default panel-hovered mb20 activities">
-            <div class="panel-heading">PHPMIXBILL</div>
-            <div class="panel-body">
+        <div class="box box-primary box-hovered mb20 activities">
+            <div class="box-header"><h3 class="box-title">PHPNUXBILL</h3></div>
+            <div class="box-body">
                 {$_L['Welcome_Text_Admin']}
             </div>
-            <div class="panel-footer" id="currentVersion">ver</div>
-            <div class="panel-footer" id="latestVersion">ver</div>
-            <div class="panel-footer">
-                <a href="https://github.com/ibnux/phpmixbill/releases" target="_blank" class="btn btn-primary btn-lg btn-block">Get Latest Version</a>
+            <div class="box-footer" id="currentVersion">ver</div>
+            <div class="box-footer" id="latestVersion">ver</div>
+            <div class="box-footer">
+                <a href="https://github.com/hotspotbilling/phpnuxbill/releases" target="_blank" class="btn btn-primary btn-lg btn-block">Get Latest Version</a>
             </div>
         </div>
     </div>
@@ -125,7 +125,7 @@
         $.getJSON( "./version.json?"+Math.random(), function( data ) {
             $('#currentVersion').html('Current Version: '+data.version);
         });
-        $.getJSON( "https://raw.githubusercontent.com/ibnux/phpmixbill/master/version.json?"+Math.random(), function( data ) {
+        $.getJSON( "https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?"+Math.random(), function( data ) {
             $('#latestVersion').html('Latest Version: '+data.version);
         });
     });

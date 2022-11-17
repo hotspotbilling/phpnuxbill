@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>PHPMixBill  Installer</title>
+    <title>PHPNuxBill  Installer</title>
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -22,10 +22,10 @@
 		</div>
 
 		<div class="span12">
-			<h4> PHPMixBill  Installer </h4>
+			<h4> PHPNuxBill  Installer </h4>
 			<p>
 				<strong>Congratulations!</strong><br>
-				You have just install PHPMixBill !<br>
+				You have just install PHPNuxBill !<br>
 				To Login Admin Portal:<br>
 				Use this link -
 				<?php
@@ -41,6 +41,6 @@
 			</p>
 		</div>
 	</div>
-	<div class="footer">Copyright &copy; 2021 PHPMixBill. All Rights Reserved<br/><br/></div>
+	<div class="footer">Copyright &copy; 2021 PHPNuxBill. All Rights Reserved<br/><br/></div>
 </body>
 </html>

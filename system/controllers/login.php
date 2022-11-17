@@ -1,7 +1,7 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://ibnux.github.io/phpmixbill/)
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 
  **/
 
@@ -44,6 +44,6 @@ switch ($do) {
 
     default:
         run_hook('customer_view_login'); #HOOK
-        $ui->display('login.tpl');
+        $ui->display('user-login.tpl');
         break;
 }

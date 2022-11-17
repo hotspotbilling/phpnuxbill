@@ -3,7 +3,7 @@
 -----------------------------------
 Language Name: English
 Contributor: Ismail Marzuqi
-Web: www.phpmixbill.com
+Web: www.phpnuxbill.com
 Email: iesien22@yahoo.com
 
 2017
@@ -21,7 +21,7 @@ $_L['Register_Success'] = 'Register Success! You can login now';
 $_L['Sign_In_Member'] = 'Log in to Member Panel';
 $_L['Register_Member'] = 'Register as Member';
 $_L['Sign_In_Admin'] = 'Masuk ke Admin Panel';
-$_L['Logo'] = 'PHPMixBill';
+$_L['Logo'] = 'PHPNuxBill';
 $_L['Username'] = 'Username';
 $_L['Password'] = 'Password';
 $_L['PasswordsNotMatch'] = 'Passwords does not match';
@@ -217,7 +217,7 @@ $_L['Title'] = 'Title';
 $_L['Message'] = 'Message';
 $_L['Account_Information'] = 'Your Account Information';
 $_L['Welcome_Text_User'] = 'Welcome to the Panel Members page, on this page you can:';
-$_L['Welcome_Text_Admin'] = '<b>PHPMixBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate with router. If you get more profit with this application, please donate us.<br>Watch project <a href="https://github.com/ibnux/phpmixbill" target="_blank">in here</a>';
+$_L['Welcome_Text_Admin'] = '<b>PHPNuxBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate with router. If you get more profit with this application, please donate us.<br>Watch project <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">in here</a>';
 
 //update
 $_L['Invalid_Username_or_Password'] = 'Invalid Username or Password';
