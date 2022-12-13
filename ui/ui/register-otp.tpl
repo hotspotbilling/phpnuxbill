@@ -32,7 +32,7 @@
             <div class="col-md-4">
                 <div class="panel panel-info">
                     <div class="panel-heading">{$_L['Registration_Info']}</div>
-                    <div class="panel-body" style="max-height:375px;overflow:scroll;">
+                    <div class="panel-body">
                         {include file="$_path/../pages/Registration_Info.html"}
                     </div>
                 </div>
