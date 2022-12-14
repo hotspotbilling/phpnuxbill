@@ -23,6 +23,8 @@ Click link to download
 
 Goto Discussionif you want another Payment Gateway
 
+Some documentation
+
 ## System Requirements
 
 Most current web servers with PHP & MySQL installed will be capable of running PHPNuxBill
@@ -30,7 +32,7 @@ Most current web servers with PHP & MySQL installed will be capable of running P
 Minimum Requirements
 
 - Linux or Windows OS
-- PHP Version 7.0+
+- PHP Version 7.2+
 - Both PDO & MySQLi Support
 - GD2 Image Library
 - CURL support
@@ -42,17 +44,14 @@ The problem with windows is hard to set cronjob, better Linux
 
 ## Installation
 
-- Rename **pages_template** to **pages**
-- Rename **config.sample.php** to **config.php** and make it writeable (chmod 777)
-- make writeable folder **ui/cache/** and **ui/compiled**
-- Open web and run installation
-- set cronjobs or scheduller for **system/cron.php**
-- make **config.php** unwriteable (chmod 644)
+clone this repository or download zip or release
 
-
-See [WIKI](https://github.com/hotspotbilling/phpnuxbill/wiki/Instalation)
-
-baca [WIKI](https://github.com/hotspotbilling/phpnuxbill/wiki/Instalation)
+1. Rename **pages_template** to **pages**
+2. Rename **config.sample.php** to **config.php** and make it writeable (chmod 777)
+3. make writeable folder **ui/cache/** and **ui/compiled**
+4. Open web and run installation
+5. set [cronjob](https://github.com/hotspotbilling/phpnuxbill/wiki/Cron-Jobs) or scheduller for **system/cron.php**
+6. make **config.php** unwriteable (chmod 644)
 
 ## UPDGRADE
 
@@ -60,9 +59,12 @@ for old version, below Version 6, backup **system/config.php**, delete all file 
 
 for version 6 above, just replace all files, using filezilla can choose overwrite if different file size or time.
 
+or git pull if you use git clone
+
 ## RADIUS system
 
 Still on development
+
 ## Paid Support
 
 Start from Rp 500.000 or $50
