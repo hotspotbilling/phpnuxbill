@@ -89,4 +89,5 @@ a.n Ibnu Maksum
 
 ## SPONSORS
 
-none :(
+- [mlink.id](https://mlink.id)
+- [https://github.com/sonyinside](https://github.com/sonyinside)

@@ -31,7 +31,7 @@
             <div class="col-md-4 col-md-offset-2">
                 <div class="panel panel-info">
                     <div class="panel-heading">{$_L['Announcement']}</div>
-                    <div class="panel-body" style="max-height:296px;overflow:scroll;">
+                    <div class="panel-body">
                         {include file="$_path/../pages/Announcement.html"}
                     </div>
                 </div>
