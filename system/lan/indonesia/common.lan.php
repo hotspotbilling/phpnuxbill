@@ -304,3 +304,5 @@ $_L['Will_show_below_user_pages'] = 'Will show below user pages';
 $_L['Request_OTP'] = 'Request OTP';
 $_L['Verification_Code'] = 'Verification Code';
 $_L['SMS_Verification_Code'] = 'SMS Verification Code';
+$_L['Please_enter_your_email_address'] = 'Please enter your email address';
+$_L['Failed_to_create_Paypal_transaction'] = 'Failed to create Paypal transaction.';

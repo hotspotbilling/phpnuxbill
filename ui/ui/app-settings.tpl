@@ -73,6 +73,7 @@
                                 value="{$_c['telegram_target_id']}" placeholder="12345678">
                         </div>
                     </div>
+                    <small id="emailHelp" class="form-text text-muted">You will get Payment and Error notification</small>
                 </div>
                 <div class="panel-heading">SMS OTP Registration</div>
                 <div class="panel-body">
@@ -85,6 +86,7 @@
                             </p>
                         </div>
                     </div>
+                    <small id="emailHelp" class="form-text text-muted">You can use WhatsApp in here too. <a href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
                 </div>
                 <div class="panel-heading">Whatsapp Notification</div>
                 <div class="panel-body">
