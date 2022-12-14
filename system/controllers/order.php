@@ -19,6 +19,7 @@ switch ($action) {
         $ui->assign('_system_menu', 'history');
         $d = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
+            ->order_by_desc('id')
             ->find_many();
         $paginator = Paginator::bootstrap('tbl_payment_gateway', 'username', $user['username']);
         $ui->assign('paginator', $paginator);
@@ -28,6 +29,9 @@ switch ($action) {
         $ui->display('user-orderHistory.tpl');
         break;
     case 'package':
+        if(empty($user['email'])){
+            r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
+        }
         $ui->assign('_title', 'Order Plan');
         $ui->assign('_system_menu', 'package');
         $routers = ORM::for_table('tbl_routers')->find_many();
@@ -102,6 +106,9 @@ switch ($action) {
         $ui->display('user-orderView.tpl');
         break;
     case 'buy':
+        if(empty($user['email'])){
+            r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
+        }
         if ($config['payment_gateway'] == 'none') {
             r2(U . 'home', 'e', Lang::T("No Payment Gateway Available"));
         }
