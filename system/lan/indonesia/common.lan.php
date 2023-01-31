@@ -306,3 +306,6 @@ $_L['Verification_Code'] = 'Verification Code';
 $_L['SMS_Verification_Code'] = 'SMS Verification Code';
 $_L['Please_enter_your_email_address'] = 'Please enter your email address';
 $_L['Failed_to_create_Paypal_transaction'] = 'Failed to create Paypal transaction.';
+$_L['Plugin'] = 'Plugin';
+$_L['Plugin_Manager'] = 'Plugin Manager';
+$_L['Plugin_Manager'] = 'Plugin Manager';
