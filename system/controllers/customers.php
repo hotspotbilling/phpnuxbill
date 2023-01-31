@@ -79,6 +79,7 @@ switch ($action) {
                 try {
                     $d->delete();
                 } catch (Exception $e) {
+                } catch(Throwable $e){
                 }
                 try {
                     $c->delete();
@@ -88,10 +89,12 @@ switch ($action) {
                 try {
                     $d->delete();
                 } catch (Exception $e) {
+                } catch(Throwable $e){
                 }
                 try {
                     $c->delete();
                 } catch (Exception $e) {
+                } catch(Throwable $e){
                 }
             }
 
