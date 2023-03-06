@@ -26,7 +26,7 @@
                         <label class="col-md-2 control-label">{$_L['Address']}</label>
                         <div class="col-md-6">
                             <textarea class="form-control" id="address" name="address"
-                                rows="3">{$_c['address']}</textarea>
+                                rows="3">{Lang::htmlspecialchars($_c['address'])}</textarea>
                             <span class="help-block">{$_L['You_can_use_html_tag']}</span>
                         </div>
                     </div>
@@ -100,6 +100,38 @@
                         </div>
                     </div>
                 </div>
+                <div class="panel-heading">{Lang::T('User Notification')}</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Expired Notification')}</label>
+                        <div class="col-md-6">
+                            <select name="user_notification_expired" id="user_notification_expired" class="form-control">
+                                <option value="none">None</option>
+                                <option value="wa" {if $_c['user_notification_expired'] == 'wa'}selected="selected" {/if}>Whatsapp</option>
+                                <option value="sms" {if $_c['user_notification_expired'] == 'sms'}selected="selected" {/if}>SMS</option>
+                            </select>
+                            <p class="help-block">{Lang::T('User will get notification when package expired')}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Expired Notification Message')}</label>
+                        <div class="col-md-6">
+                                <textarea class="form-control" id="user_notification_expired_text" name="user_notification_expired_text" placeholder="Hello [[name]], your internet package [[package]] has been expired" rows="3">{if $_c['user_notification_expired_text']!=''}{Lang::htmlspecialchars($_c['user_notification_expired_text'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
+                            <p class="help-block">{Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Payment Notification')}</label>
+                        <div class="col-md-6">
+                            <select name="user_notification_payment" id="user_notification_payment" class="form-control">
+                                <option value="none">None</option>
+                                <option value="wa" {if $_c['user_notification_payment'] == 'wa'}selected="selected" {/if}>Whatsapp</option>
+                                <option value="sms" {if $_c['user_notification_payment'] == 'sms'}selected="selected" {/if}>SMS</option>
+                            </select>
+                            <p class="help-block">{Lang::T('User will get notification when buy package or package refilled')}</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="panel-heading">Tawk.to Chat Widget</div>
                 <div class="panel-body">
                     <div class="form-group">
@@ -119,7 +151,7 @@ add dst-host=*.tawk.to</pre>
                     <div class="form-group">
                         <label class="col-md-2 control-label">Note Invoice</label>
                         <div class="col-md-6">
-                            <textarea class="form-control" id="note" name="note" rows="3">{$_c['note']}</textarea>
+                            <textarea class="form-control" id="note" name="note" rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
                             <span class="help-block">{$_L['You_can_use_html_tag']}</span>
                         </div>
                     </div>
