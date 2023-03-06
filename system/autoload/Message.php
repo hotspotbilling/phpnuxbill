@@ -45,8 +45,8 @@ class Message
             !empty($phone) && strlen($phone) > 5
             && !empty($textExpired) && in_array($via, ['sms', 'wa'])
         ) {
-            $msg = str_replace('[[name]]', $name, $textExpired);
-            $msg = str_replace('[[package]]', $package, $msg);
+            $msg = str_replace('[[name]]', "*$name*", $textExpired);
+            $msg = str_replace('[[package]]', "*$package*", $msg);
             if ($via == 'sms') {
                 Message::sendSMS($phone, $msg);
             } else if ($via == 'wa') {
