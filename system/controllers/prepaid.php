@@ -169,7 +169,7 @@ switch ($action) {
                     $t->type = "Hotspot";
                     $t->save();
                 }
-                sendTelegram( "$admin[fullname] #Recharge Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
+                Message::sendTelegram( "$admin[fullname] #Recharge Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
                 "\nRouter: ".$server.
                 "\nPrice: ".$p['price']);
             } else {
@@ -241,7 +241,7 @@ switch ($action) {
                     $t->type = "PPPOE";
                     $t->save();
                 }
-                sendTelegram( "$admin[fullname] #Recharge Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
+                Message::sendTelegram( "$admin[fullname] #Recharge Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
                 "\nRouter: ".$server.
                 "\nPrice: ".$p['price']);
             }
@@ -249,7 +249,7 @@ switch ($action) {
             $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
             $ui->assign('in', $in);
 
-            sendWhatsapp($c['username'], "*$config[CompanyName]*\n".
+            $msg = "*$config[CompanyName]*\n".
 					"$config[address]\n".
 					"$config[phone]\n".
 					"\n\n".
@@ -265,8 +265,13 @@ switch ($action) {
 					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
 					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
 					"\n\n".
-					"$config[note]");
+					"$config[note]";
 
+            if ($_c['user_notification_payment'] == 'sms') {
+                Message::sendSMS($c['phonenumber'], $msg);
+            } else if ($_c['user_notification_payment'] == 'wa') {
+                Message::sendWhatsapp($c['phonenumber'], $msg);
+            }
 
             $ui->assign('date', $date_now);
             $ui->display('invoice.tpl');
@@ -631,7 +636,7 @@ switch ($action) {
                 $v1->user = $c['username'];
                 $v1->save();
 
-                sendTelegram( "$admin[fullname] #Refill #Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
+                Message::sendTelegram( "$admin[fullname] #Refill #Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
                 "\nCode: ".$code.
                 "\nRouter: ".$v1['routers'].
                 "\nPrice: ".$p['price']);
@@ -709,7 +714,7 @@ switch ($action) {
                 $v1->save();
 
 
-                sendTelegram( "$admin[fullname] Refill #Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
+                Message::sendTelegram( "$admin[fullname] Refill #Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
                 "\nCode: ".$code.
                 "\nRouter: ".$v1['routers'].
                 "\nPrice: ".$p['price']);
@@ -718,7 +723,7 @@ switch ($action) {
             $ui->assign('in', $in);
 
 
-            sendWhatsapp($c['username'], "*$config[CompanyName]*\n".
+            $msg = "*$config[CompanyName]*\n".
 					"$config[address]\n".
 					"$config[phone]\n".
 					"\n\n".
@@ -734,8 +739,13 @@ switch ($action) {
 					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
 					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
 					"\n\n".
-					"$config[note]");
+					"$config[note]";
 
+            if ($_c['user_notification_payment'] == 'sms') {
+                Message::sendSMS($c['phonenumber'], $msg);
+            } else if ($_c['user_notification_payment'] == 'wa') {
+                Message::sendWhatsapp($c['phonenumber'], $msg);
+            }
             $ui->assign('date', $date_now);
             $ui->display('invoice.tpl');
         } else {
