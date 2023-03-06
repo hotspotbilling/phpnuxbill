@@ -128,7 +128,7 @@
                                 <option value="wa" {if $_c['user_notification_payment'] == 'wa'}selected="selected" {/if}>Whatsapp</option>
                                 <option value="sms" {if $_c['user_notification_payment'] == 'sms'}selected="selected" {/if}>SMS</option>
                             </select>
-                            <p class="help-block">{Lang::T('User will get notification when buy package or package refilled')}</p>
+                            <p class="help-block">{Lang::T('User will get invoice notification when buy package or package refilled')}</p>
                         </div>
                     </div>
                 </div>
