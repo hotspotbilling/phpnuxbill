@@ -17,7 +17,11 @@
                                         class="btn btn-primary"><i class="ion ion-chatboxes"></i> Website</a>
                                     <a href="{$plugin['github']}" target="_blank"
                                         class="btn btn-success"><i class="ion ion-chatboxes"></i> Github</a>
-                                    <a href="{$_url}pluginmanager/?install={$plugin['id']}"
+                                    <a {if $zipExt }
+                                            href="{$_url}pluginmanager/install/plugin/{$plugin['id']}" onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
+                                        {else}
+                                            href="#" onclick="alert('PHP ZIP extension is not available')"
+                                        {/if}
                                         class="btn btn-warning"><i class="ion ion-chatboxes"></i> Install</a>
                                 </div>
                             </div>
@@ -42,7 +46,11 @@
                                         class="btn btn-primary"><i class="ion ion-chatboxes"></i> Website</a>
                                     <a href="{$pg['github']}" target="_blank"
                                         class="btn btn-success"><i class="ion ion-chatboxes"></i> Github</a>
-                                    <a href="{$_url}pluginmanager/?install={$pg['id']}"
+                                        <a {if $zipExt }
+                                            href="{$_url}pluginmanager/install/payment/{$pg['id']}" onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
+                                        {else}
+                                            href="#" onclick="alert('PHP ZIP extension is not available')"
+                                        {/if}
                                         class="btn btn-warning"><i class="ion ion-chatboxes"></i> Install</a>
                                 </div>
                             </div>
