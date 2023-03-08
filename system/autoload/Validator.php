@@ -1,12 +1,14 @@
 <?php
+
 /**
-* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
-**/
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ **/
 
 /**
  * Validator class
  */
-class Validator{
+class Validator
+{
 
     /**
      * String text finder
@@ -16,14 +18,15 @@ class Validator{
      * @param array $hits
      * @return void
      */
-    private static function textHit($string, $exclude=""){
-        if(empty($exclude)) return false;
-        if(is_array($exclude)){
-            foreach($exclude as $text){
-                if(strstr($string, $text)) return true;
+    private static function textHit($string, $exclude = "")
+    {
+        if (empty($exclude)) return false;
+        if (is_array($exclude)) {
+            foreach ($exclude as $text) {
+                if (strstr($string, $text)) return true;
             }
-        }else{
-            if(strstr($string, $exclude)) return true;
+        } else {
+            if (strstr($string, $exclude)) return true;
         }
         return false;
     }
@@ -37,9 +40,10 @@ class Validator{
      * @param int $min
      * @return bool
      */
-    private static function numberBetween($integer, $max=null, $min=0){
-        if(is_numeric($min) && $integer <= $min) return false;
-        if(is_numeric($max) && $integer >= $max) return false;
+    private static function numberBetween($integer, $max = null, $min = 0)
+    {
+        if (is_numeric($min) && $integer <= $min) return false;
+        if (is_numeric($max) && $integer >= $max) return false;
         return true;
     }
 
@@ -51,8 +55,9 @@ class Validator{
      * @param array $exclude
      * @return bool
      */
-    public static function Email($string, $exclude=""){
-        if(self::textHit($string, $exclude)) return false;
+    public static function Email($string, $exclude = "")
+    {
+        if (self::textHit($string, $exclude)) return false;
         return (bool)preg_match("/^([a-z0-9])(([-a-z0-9._])*([a-z0-9]))*\@([a-z0-9])(([a-z0-9-])*([a-z0-9]))+(\.([a-z0-9])([-a-z0-9_-])?([a-z0-9])+)+$/i", $string);
     }
 
@@ -63,8 +68,9 @@ class Validator{
      * @param strin $string
      * @return bool
      */
-    public static function Url($string, $exclude=""){
-        if(self::textHit($string, $exclude)) return false;
+    public static function Url($string, $exclude = "")
+    {
+        if (self::textHit($string, $exclude)) return false;
         return (bool)preg_match("/^(http|https|ftp):\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i", $string);
     }
 
@@ -75,7 +81,8 @@ class Validator{
      * @param string $string
      * @return void
      */
-    public static function Ip($string){
+    public static function Ip($string)
+    {
         return (bool)preg_match("/^(1?\d{1,2}|2([0-4]\d|5[0-5]))(\.(1?\d{1,2}|2([0-4]\d|5[0-5]))){3}$/", $string);
     }
 
@@ -88,9 +95,10 @@ class Validator{
      * @param int $min
      * @return bool
      */
-    public static function Number($integer, $max=null, $min=0){
-        if(preg_match("/^\-?\+?[0-9e1-9]+$/",$integer)){
-            if(!self::numberBetween($integer, $max, $min)) return false;
+    public static function Number($integer, $max = null, $min = 0)
+    {
+        if (preg_match("/^\-?\+?[0-9e1-9]+$/", $integer)) {
+            if (!self::numberBetween($integer, $max, $min)) return false;
             return true;
         }
         return false;
@@ -103,8 +111,9 @@ class Validator{
      * @param int $integer
      * @return bool
      */
-    public static function UnsignedNumber($integer){
-        return (bool)preg_match("/^\+?[0-9]+$/",$integer);
+    public static function UnsignedNumber($integer)
+    {
+        return (bool)preg_match("/^\+?[0-9]+$/", $integer);
     }
 
     /**
@@ -114,8 +123,9 @@ class Validator{
      * @param string $string
      * @return bool
      */
-    public static function Float($string){
-        return (bool)($string==strval(floatval($string)))? true : false;
+    public static function Float($string)
+    {
+        return (bool)($string == strval(floatval($string))) ? true : false;
     }
 
     /**
@@ -125,7 +135,8 @@ class Validator{
      * @param string $string
      * @return void
      */
-    public static function Alpha($string){
+    public static function Alpha($string)
+    {
         return (bool)preg_match("/^[a-zA-Z]+$/", $string);
     }
 
@@ -136,7 +147,8 @@ class Validator{
      * @param string $string
      * @return void
      */
-    public static function AlphaNumeric($string){
+    public static function AlphaNumeric($string)
+    {
         return (bool)preg_match("/^[0-9a-zA-Z]+$/", $string);
     }
 
@@ -148,7 +160,8 @@ class Validator{
      * @param array $allowed
      * @return void
      */
-    public static function Chars($string, $allowed=array("a-z")){
+    public static function Chars($string, $allowed = array("a-z"))
+    {
         return (bool)preg_match("/^[" . implode("", $allowed) . "]+$/", $string);
     }
 
@@ -161,9 +174,10 @@ class Validator{
      * @param int $min
      * @return bool
      */
-    public static function Length($string, $max=null, $min=0){
+    public static function Length($string, $max = null, $min = 0)
+    {
         $length = strlen($string);
-        if(!self::numberBetween($length, $max, $min)) return false;
+        if (!self::numberBetween($length, $max, $min)) return false;
         return true;
     }
 
@@ -174,7 +188,8 @@ class Validator{
      * @param string $string
      * @return void
      */
-    public static function HexColor($string){
+    public static function HexColor($string)
+    {
         return (bool)preg_match("/^(#)?([0-9a-f]{1,2}){3}$/i", $string);
     }
 
@@ -191,7 +206,8 @@ class Validator{
      * @param string $string
      * @return bool
      */
-    public static function Date($string){
+    public static function Date($string)
+    {
         $date = date('Y', strtotime($string));
         return ($date == "1970" || $date == '') ? false : true;
     }
@@ -204,9 +220,10 @@ class Validator{
      * @param int $age
      * @return bool
      */
-    public static function OlderThan($string, $age){
+    public static function OlderThan($string, $age)
+    {
         $date = date('Y', strtotime($string));
-        if($date == "1970" || $date == '') return false;
+        if ($date == "1970" || $date == '') return false;
         return (date('Y') - $date) > $age ? true : false;
     }
 
@@ -217,7 +234,8 @@ class Validator{
      * @param string $string
      * @return bool
      */
-    public static function Xml($string){
+    public static function Xml($string)
+    {
         $Xml = @simplexml_load_string($string);
         return ($Xml === false) ? false : true;
     }
@@ -231,7 +249,8 @@ class Validator{
      * @param int $min
      * @return bool
      */
-    public static function FilesizeBetween($file, $max=null, $min=0){
+    public static function FilesizeBetween($file, $max = null, $min = 0)
+    {
         $filesize = filesize($file);
         return self::numberBetween($filesize, $max, $min);
     }
@@ -247,10 +266,11 @@ class Validator{
      * @param int $min_height
      * @return void
      */
-    public static function ImageSizeBetween($image, $max_width="", $min_width=0, $max_height="", $min_height=0){
+    public static function ImageSizeBetween($image, $max_width = "", $min_width = 0, $max_height = "", $min_height = 0)
+    {
         $size = getimagesize($image);
-        if(!self::numberBetween($size[0], $max_width, $min_width)) return false;
-        if(!self::numberBetween($size[1], $max_height, $min_height)) return false;
+        if (!self::numberBetween($size[0], $max_width, $min_width)) return false;
+        if (!self::numberBetween($size[1], $max_height, $min_height)) return false;
         return true;
     }
 
@@ -261,8 +281,10 @@ class Validator{
      * @param string $phone
      * @return bool
      */
-    public static function Phone($phone){
-        $formats = array(	'###-###-####',
+    public static function Phone($phone)
+    {
+        $formats = array(
+            '###-###-####',
             '####-###-###',
             '(###) ###-###',
             '####-####-####',
@@ -271,7 +293,8 @@ class Validator{
             '###-###-###',
             '#####-###-###',
             '##########',
-            '####-##-##-##');
+            '####-##-##-##'
+        );
         $format = trim(preg_replace("/[0-9]/", "#", $phone));
         return (bool)in_array($format, $formats);
     }

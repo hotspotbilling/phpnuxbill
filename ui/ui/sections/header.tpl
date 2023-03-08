@@ -163,7 +163,7 @@
                         {$_MENU_AFTER_REPORTS}
                     {/if}
                     {if $_admin['user_type'] eq 'Admin'}
-                        <li  class="{if $_system_menu eq 'network'}active{/if} treeview">
+                        <li class="{if $_system_menu eq 'network'}active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-network"></i> <span>{$_L['Network']}</span>
                                 <span class="pull-right-container">
@@ -215,6 +215,8 @@
                                         href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
                                 <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
                                         href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li>
+                                <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
+                                        href="{$_url}pluginmanager">{Lang::T('Plugin Manager')}</a></li>
                                 {$_MENU_SETTINGS}
                             </ul>
                         </li>
@@ -240,9 +242,9 @@
         <div class="content-wrapper">
             <section class="content-header">
                 <h1>
-                {$_title}
+                    {$_title}
                 </h1>
             </section>
 
             <section class="content">
-                {if isset($notify)}{$notify}{/if}
+{if isset($notify)}{$notify}{/if}

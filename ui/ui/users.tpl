@@ -49,7 +49,7 @@
                                             class="btn btn-warning btn-sm">{$_L['Edit']}</a>
                                         {if ($_admin['username']) neq ($ds['username'])}
                                             <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
-                                                class="btn btn-danger btn-sm cdelete">{$_L['Delete']}</a>
+                                                class="btn btn-danger btn-sm" onclick="confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
                                         {/if}
                                     </td>
                                 </tr>
