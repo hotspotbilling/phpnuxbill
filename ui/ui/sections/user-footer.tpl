@@ -1,15 +1,14 @@
-</section>
-
-</div>
-{if isset($_c['CompanyFooter'])}
-    <footer class="main-footer">
-        {$_c['CompanyFooter']}
-    </footer>
-{else}
-    <footer class="main-footer">
-        PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener" target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener" target="_blank">AdminLTE</a>
-    </footer>
-{/if}
+        </section>
+    </div>
+    {if isset($_c['CompanyFooter'])}
+        <footer class="main-footer">
+            {$_c['CompanyFooter']}
+        </footer>
+    {else}
+        <footer class="main-footer">
+            PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener" target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener" target="_blank">AdminLTE</a>
+        </footer>
+    {/if}
 </div>
 
 <script src="ui/ui/scripts/jquery.min.js"></script>

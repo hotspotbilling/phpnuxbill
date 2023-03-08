@@ -132,7 +132,7 @@ switch ($do) {
                 }else{
                     $otp = rand(100000,999999);
                     file_put_contents($otpPath, $otp);
-                    sendSMS($username,$config['CompanyName']."\nYour Verification code are: $otp");
+                    Message::sendSMS($username,$config['CompanyName']."\nYour Verification code are: $otp");
                     $ui->assign('username', $username);
                     $ui->assign('notify', '<div class="alert alert-success">
                     <button type="button" class="close" data-dismiss="alert">

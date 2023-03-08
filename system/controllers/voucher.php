@@ -123,7 +123,7 @@ switch ($action) {
                 $v1->user = $c['username'];
                 $v1->save();
                 // Telegram to Admin
-                sendTelegram('#u' . $c['username'] . " Activate #Voucher #Hotspot\n" . $p['name_plan'] .
+                Message::sendTelegram('#u' . $c['username'] . " Activate #Voucher #Hotspot\n" . $p['name_plan'] .
                     "\nCode: " . $code .
                     "\nRouter: " . $v1['routers'] .
                     "\nPrice: " . $p['price']);
@@ -200,7 +200,7 @@ switch ($action) {
                 $v1->user = $c['username'];
                 $v1->save();
                 // Telegram to Admin
-                sendTelegram('#u' . $c['username'] . " Activate #Voucher #PPPOE\n" . $p['name_plan'] .
+                Message::sendTelegram('#u' . $c['username'] . " Activate #Voucher #PPPOE\n" . $p['name_plan'] .
                     "\nCode: " . $code .
                     "\nRouter: " . $v1['routers'] .
                     "\nPrice: " . $p['price']);

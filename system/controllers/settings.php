@@ -210,6 +210,9 @@ switch ($action) {
         $telegram_target_id = _post('telegram_target_id');
         $sms_url = _post('sms_url');
         $wa_url = _post('wa_url');
+        $user_notification_expired = _post('user_notification_expired');
+        $user_notification_expired_text = _post('user_notification_expired_text');
+        $user_notification_payment = _post('user_notification_payment');
         $address = _post('address');
         $tawkto = _post('tawkto');
         $radius_mode = _post('radius_mode')*1;
@@ -286,6 +289,38 @@ switch ($action) {
                 $d->save();
             }
 
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_expired')->find_one();
+            if($d){
+                $d->value = $user_notification_expired;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'user_notification_expired';
+                $d->value = $user_notification_expired;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_expired_text')->find_one();
+            if($d){
+                $d->value = $user_notification_expired_text;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'user_notification_expired_text';
+                $d->value = $user_notification_expired_text;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_payment')->find_one();
+            if($d){
+                $d->value = $user_notification_payment;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'user_notification_payment';
+                $d->value = $user_notification_payment;
+                $d->save();
+            }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'tawkto')->find_one();
             if($d){

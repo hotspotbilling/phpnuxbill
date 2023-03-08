@@ -51,8 +51,8 @@ class Package
             if ($b) {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client,$c['username']);
-                    Mikrotik::addHotspotUser($client,$p,$c);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
                 $b->customer_id = $id_customer;
@@ -84,7 +84,7 @@ class Package
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::addHotspotUser($client,$p,$c);
+                    Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
                 $d = ORM::for_table('tbl_user_recharges')->create();
@@ -115,7 +115,7 @@ class Package
                 $t->type = "Hotspot";
                 $t->save();
             }
-            sendTelegram("#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+            Message::sendTelegram("#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
@@ -125,8 +125,8 @@ class Package
             if ($b) {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoeUser($client,$c['username']);
-                    Mikrotik::addPpoeUser($client,$p,$c);
+                    Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
                 $b->customer_id = $id_customer;
@@ -158,7 +158,7 @@ class Package
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::addPpoeUser($client,$p,$c);
+                    Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
                 $d = ORM::for_table('tbl_user_recharges')->create();
@@ -189,7 +189,7 @@ class Package
                 $t->type = "PPPOE";
                 $t->save();
             }
-            sendTelegram("#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
+            Message::sendTelegram("#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
@@ -198,7 +198,7 @@ class Package
 
         $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
 
-        sendWhatsapp($c['username'], "*$_c[CompanyName]*\n" .
+        $msg = "*$_c[CompanyName]*\n" .
             "$_c[address]\n" .
             "$_c[phone]\n" .
             "\n\n" .
@@ -214,7 +214,13 @@ class Package
             "$_L[Created_On] :\n*" . date($_c['date_format'], strtotime($in['recharged_on'])) . " $in[time]*\n" .
             "$_L[Expires_On] :\n*" . date($_c['date_format'], strtotime($in['expiration'])) . " $in[time]*\n" .
             "\n\n" .
-            "$_c[note]");
+            "$_c[note]";
+
+        if ($_c['user_notification_payment'] == 'sms') {
+            Message::sendSMS($c['phonenumber'], $msg);
+        } else if ($_c['user_notification_payment'] == 'wa') {
+            Message::sendWhatsapp($c['phonenumber'], $msg);
+        }
         return true;
     }
 }
