@@ -228,6 +228,23 @@ function alphanumeric($str, $tambahan = "")
     return preg_replace("/[^a-zA-Z0-9" . $tambahan . "]+/", "", $str);
 }
 
+
+function sendTelegram($txt)
+{
+    Message::sendTelegram($txt);
+}
+
+function sendSMS($phone, $txt)
+{
+    Message::sendSMS($phone, $txt);
+}
+
+function sendWhatsapp($phone, $txt)
+{
+    Message::sendWhatsapp($phone, $txt);
+}
+
+
 function time_elapsed_string($datetime, $full = false)
 {
     $now = new DateTime;
