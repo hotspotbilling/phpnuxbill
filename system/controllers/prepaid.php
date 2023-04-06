@@ -36,6 +36,7 @@ switch ($action) {
         }
 
         $ui->assign('d', $d);
+        $ui->assign('cari', $username);
         $ui->assign('paginator', $paginator);
         run_hook('view_list_billing'); #HOOK
         $ui->display('prepaid.tpl');
