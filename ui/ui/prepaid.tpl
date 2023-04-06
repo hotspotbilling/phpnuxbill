@@ -12,7 +12,7 @@
 												<div class="input-group-addon">
 													<span class="fa fa-search"></span>
 												</div>
-												<input type="text" name="username" class="form-control" placeholder="{$_L['Search_by_Username']}...">
+												<input type="text" name="username" class="form-control" placeholder="{$_L['Search_by_Username']}..." value="{$cari}">
 												<div class="input-group-btn">
 													<button class="btn btn-success">{$_L['Search']}</button>
 												</div>
@@ -49,7 +49,7 @@
                                                     <td>{$ds['routers']}</td>
                                                     <td>
                                                         <a href="{$_url}prepaid/edit/{$ds['id']}" class="btn btn-warning btn-xs">{$_L['Edit']}</a>
-                                                        {* <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a> *}
+                                                        <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                                     </td>
                                                 </tr>
                                             {/foreach}
