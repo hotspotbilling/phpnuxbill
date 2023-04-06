@@ -2,7 +2,7 @@
     "name": "hotspotbilling/phpnuxbill",
     "type": "template",
     "description": "PHPNuxBill a Hotspot Billing Software.",
-    "keywords": ["template"],
+    "keywords": ["template","PHPMixBill","PHPnuxBill","Mikrotik","Hotspot","Billing"],
     "homepage": "https://github.com/hotspotbilling/phpnuxbill",
     "license": "MIT",
     "authors": [
