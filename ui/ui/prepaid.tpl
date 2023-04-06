@@ -49,7 +49,7 @@
                                                     <td>{$ds['routers']}</td>
                                                     <td>
                                                         <a href="{$_url}prepaid/edit/{$ds['id']}" class="btn btn-warning btn-xs">{$_L['Edit']}</a>
-                                                        {* <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a> *}
+                                                        <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                                     </td>
                                                 </tr>
                                             {/foreach}

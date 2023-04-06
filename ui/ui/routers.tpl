@@ -49,7 +49,8 @@
                                     <td>{if $ds['enabled'] == 1}Enabled{else}Disabled{/if}</td>
                                     <td>
                                         <a href="{$_url}routers/edit/{$ds['id']}"
-                                            class="btn btn-info btn-xs btn-block">{$_L['Edit']}</a>
+                                            class="btn btn-info btn-xs">{$_L['Edit']}</a>
+                                        <a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                     </td>
                                 </tr>
                             {/foreach}

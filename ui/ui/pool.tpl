@@ -46,7 +46,7 @@
                                     <td>{$ds['routers']}</td>
                                     <td align="center">
                                         <a href="{$_url}pool/edit/{$ds['id']}"
-                                            class="btn btn-warning btn-xs">{$_L['Edit']}</a>
+                                            class="btn btn-info btn-xs">{$_L['Edit']}</a>
                                         <a href="{$_url}pool/delete/{$ds['id']}" id="{$ds['id']}"
                                             class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                     </td>
