@@ -36,6 +36,7 @@ switch ($action) {
         }
 
         $ui->assign('d', $d);
+        $ui->assign('cari', $username);
         $ui->assign('paginator', $paginator);
         run_hook('view_list_billing'); #HOOK
         $ui->display('prepaid.tpl');
@@ -367,7 +368,7 @@ switch ($action) {
             $paginator = Paginator::bootstrap('tbl_voucher', 'code', '%' . $code . '%');
             $d = ORM::for_table('tbl_plans')->where('enabled', '1')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where_like('tbl_plans.code', '%' . $code . '%')
+                ->where_like('tbl_voucher.code', '%' . $code . '%')
                 ->offset($paginator['startpoint'])
                 ->limit($paginator['limit'])
                 ->find_many();
@@ -380,6 +381,7 @@ switch ($action) {
         }
 
         $ui->assign('d', $d);
+        $ui->assign('_code', $code);
         $ui->assign('paginator', $paginator);
         run_hook('view_list_voucher'); #HOOK
         $ui->display('voucher.tpl');
