@@ -79,7 +79,7 @@ install on new directory
 composer create-project hotspotbilling/phpnuxbill phpnuxbill
 ```
 
-## Manual Installation
+### Manual Installation
 
 1. Download project from [Master Branch](https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip) or from [Release](https://github.com/hotspotbilling/phpnuxbill/releases)
 2. unzip and upload it to server
@@ -89,6 +89,10 @@ composer create-project hotspotbilling/phpnuxbill phpnuxbill
 6. Open web and run installation
 7. set [cronjob](https://github.com/hotspotbilling/phpnuxbill/wiki/Cron-Jobs) or scheduller for **system/cron.php**
 8. make **config.php** unwriteable (chmod 644)
+
+### Docker installation
+
+[see this repo](https://github.com/animegasan/phpnuxbill)
 
 ## UPDGRADE
 
