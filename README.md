@@ -102,9 +102,11 @@ or git pull if you use git clone
 
 Still on development
 
-## Paid Support
+## Technical Support
 
 Start from Rp 500.000 or $50
+
+If you chat me for any technical support, you need to pay, except for Donors, ask anything for free in the [discussion](/hotspotbilling/phpnuxbill/discussions) page
 
 [Telegram](https://t.me/ibnux)
 
