@@ -196,7 +196,7 @@ class Mikrotik
     public static function setPpoeUser($client, $user, $pass, $nuser= null){
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $user['username']));
+        $printRequest->setQuery(RouterOS\Query::where('name', $user));
         $id = $client->sendSync($printRequest)->getProperty('.id');
 
         $setRequest = new RouterOS\Request('/ppp/secret/set');
