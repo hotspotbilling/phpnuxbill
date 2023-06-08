@@ -24,7 +24,9 @@ switch ($do) {
         $password = _post('password');
         $cpassword = _post('cpassword');
         $address = _post('address');
-        $phonenumber = _post('username');
+        if(!empty($config['sms_url'])){
+            $phonenumber = _post('username');
+        }
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
             $msg .= 'Username should be between 3 to 55 characters' . '<br>';
