@@ -19,13 +19,13 @@ $otpPath = 'system/cache/sms/';
 switch ($do) {
     case 'post':
         $otp_code = _post('otp_code');
-        $username = _post('username');
+        $username = alphanumeric(_post('username'),"+_.");
         $fullname = _post('fullname');
         $password = _post('password');
         $cpassword = _post('cpassword');
         $address = _post('address');
         if(!empty($config['sms_url'])){
-            $phonenumber = _post('username');
+            $phonenumber = $username;
         }
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
@@ -75,7 +75,7 @@ switch ($do) {
         if ($msg == '') {
             run_hook('register_user'); #HOOK
             $d = ORM::for_table('tbl_customers')->create();
-            $d->username = $username;
+            $d->username = alphanumeric($username,"+_.");
             $d->password = $password;
             $d->fullname = $fullname;
             $d->address = $address;
