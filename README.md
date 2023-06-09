@@ -13,6 +13,8 @@
 - Whatsapp Notification to Consumer
 - Telegram Notification for Admin
 
+See [How it Works / Cara Kerja](https://github.com/hotspotbilling/phpnuxbill/wiki/How-It-Works---Cara-kerja)
+
 ## Payment Gateway
 
 - [Tripay.com](https://github.com/hotspotbilling/phpnuxbill-tripay) | Indonesia
