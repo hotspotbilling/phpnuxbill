@@ -1,0 +1,6 @@
+{
+    "require": {
+        "mpdf/mpdf": "^8.1",
+        "smarty/smarty": "^4.3"
+    }
+}
