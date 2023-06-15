@@ -58,7 +58,7 @@
                                             class="btn btn-warning btn-sm">{$_L['Edit']}</a>
                                         <a href="{$_url}customers/delete/{$ds['id']}" id="{$ds['id']}"
                                             class="btn btn-danger btn-sm"
-                                            onclick="confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
+                                            onclick="return confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
                                     </td>
                                 </tr>
                             {/foreach}

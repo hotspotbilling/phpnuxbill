@@ -61,7 +61,7 @@
                                     <td align="center">{if $ds['user'] eq '0'} - {else} {$ds['user']} {/if}</td>
                                     <td>
                                         <a href="{$_url}prepaid/voucher-delete/{$ds['id']}" id="{$ds['id']}"
-                                            class="btn btn-danger btn-sm" onclick="confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
+                                            class="btn btn-danger btn-sm" onclick="return confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
                                     </td>
                                 </tr>
                             {/foreach}
