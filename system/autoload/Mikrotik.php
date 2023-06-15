@@ -19,6 +19,38 @@ class Mikrotik
         }
     }
 
+    public static function isUserLogin($client, $username){
+        $printRequest = new RouterOS\Request(
+            '/ip hotspot active print',
+            RouterOS\Query::where('user', $username)
+        );
+        return $client->sendSync($printRequest)->getProperty('.id');
+    }
+
+    public static function logMeIn($client, $user, $pass, $ip, $mac){
+        $addRequest = new RouterOS\Request('/ip/hotspot/active/login');
+        $client->sendSync(
+            $addRequest
+                ->setArgument('user', $user)
+                ->setArgument('password', $pass)
+                ->setArgument('ip', $ip)
+                ->setArgument('mac-address', $mac)
+        );
+    }
+
+    public static function logMeOut($client, $user){
+        $printRequest = new RouterOS\Request(
+            '/ip hotspot active print',
+            RouterOS\Query::where('user', $user)
+        );
+        $id = $client->sendSync($printRequest)->getProperty('.id');
+        $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
+        $client(
+            $removeRequest
+                ->setArgument('numbers', $id)
+        );
+    }
+
     public static function addHotspotPlan($client, $name, $sharedusers, $rate){
         $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
         $client->sendSync(

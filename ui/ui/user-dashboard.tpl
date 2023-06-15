@@ -41,7 +41,7 @@
             <div class="box-header">
                 <h3 class="box-title">{$_L['Announcement']}</h3>
             </div>
-            <div class="box-body" style="max-height:296px;overflow:scroll;">
+            <div class="box-body" style="max-height:296px;overflow:auto;">
                 {include file="$_path/../pages/Announcement.html"}
             </div>
         </div>
@@ -55,6 +55,12 @@
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Username']}</td>
                     <td class="small mb15">{$_bill['username']}</td>
+                </tr>
+                <tr>
+                    <td class="small text-success text-uppercase text-normal">{$_L['Password']}</td>
+                    <td class="small mb15"><input type="text" value="{$_user['password']}"
+                            style="background-color: black; color:black; width:100%; border: 0px;"
+                            onclick="this.select()"></td>
                 </tr>
                 <tr>
                     <td class="small text-primary text-uppercase text-normal">{$_L['Plan_Name']}</td>
@@ -72,8 +78,41 @@
                         {if $_bill['time'] ne ''}{date($_c['date_format'], strtotime($_bill['expiration']))}
                         {$_bill['time']}{/if}&nbsp;</td>
                 </tr>
+                {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
+                    {if $nux_ip}
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
+                            <td class="small mb15">{$nux_ip}</td>
+                        </tr>
+                    {/if}
+                    {if $nux_mac}
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
+                            <td class="small mb15">{$nux_mac}</td>
+                        </tr>
+                    {/if}
+                    <tr>
+                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
+                        <td class="small mb15" id="login_status">
+                            Loading....
+                        </td>
+                    </tr>
+                {/if}
             </table>
         </div>
+        {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
+            <script>
+                setTimeout(() => {
+                    $.ajax({
+                        url: "index.php?_route=autoload_user/isLogin",
+                        cache: false,
+                        success: function(msg) {
+                            $("#login_status").html(msg);
+                        }
+                    });
+                }, 2000);
+            </script>
+        {/if}
         <br>
         <div class="box box-primary  box-solid mb30">
             <div class="box-header">
