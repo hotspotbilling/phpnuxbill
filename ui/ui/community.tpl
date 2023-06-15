@@ -8,8 +8,10 @@
             </div>
             <div class="box-body">Get help from community</div>
             <div class="box-footer">
-                <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
-                    class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Chat Now</a>
+            <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
+                class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Github Discussions</a>
+                <a href="https://t.me/phpnuxbill" target="_blank"
+                    class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Telegram Group</a>
             </div>
         </div>
     </div>

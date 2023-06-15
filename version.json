@@ -1,4 +1,4 @@
 {
     "version": "2023.6.8",
-    "changes" : "Fixing registration without OTP, Username will not go to phonenumber, fix bug ppoe"
+    "changes" : "Add login Internet from User account, Fixing registration without OTP, Username will not go to phonenumber, fix bug ppoe"
 }
