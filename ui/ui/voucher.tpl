@@ -15,7 +15,7 @@
                                 <input type="text" name="code" class="form-control"
                                     placeholder="{$_L['Search_by_Code']}..." value="{$_code}">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success">{$_L['Search']}</button>
+                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
                                 </div>
                             </div>
                         </form>

@@ -16,7 +16,7 @@
                                 <input type="text" name="username" class="form-control"
                                     placeholder="Search by Username...">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success">Search</button>
+                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
                                 </div>
                             </div>
                         </form>

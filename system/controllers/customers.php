@@ -23,16 +23,26 @@ if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
 switch ($action) {
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/customers.js"></script>');
-        $username = _post('username');
+        $search = _post('search');
+        $what = _post('what');
+        if(!in_array($what,['username','fullname','phonenumber','email'])){
+            $what = 'username';
+        }
         run_hook('list_customers'); #HOOK
-        if ($username != '') {
-            $paginator = Paginator::bootstrap('tbl_customers', 'username', '%' . $username . '%');
-            $d = ORM::for_table('tbl_customers')->where_like('username', '%' . $username . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+        if ($search != '') {
+            $paginator = Paginator::bootstrap('tbl_customers', 'username', '%' . $search . '%');
+            $d = ORM::for_table('tbl_customers')
+            ->where_like($what, '%' . $search . '%')
+            ->offset($paginator['startpoint'])
+            ->limit($paginator['limit'])
+            ->order_by_desc('id')->find_many();
         } else {
             $paginator = Paginator::bootstrap('tbl_customers');
             $d = ORM::for_table('tbl_customers')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 
+        $ui->assign('search', htmlspecialchars($search));
+        $ui->assign('what', $what);
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
         $ui->display('customers.tpl');

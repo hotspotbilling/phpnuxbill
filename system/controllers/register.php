@@ -79,6 +79,7 @@ switch ($do) {
             $d->password = $password;
             $d->fullname = $fullname;
             $d->address = $address;
+            $d->email = '';
             $d->phonenumber = $phonenumber;
             if ($d->save()) {
                 $user = $d->id();
