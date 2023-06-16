@@ -1,4 +1,4 @@
-![Logo](install/img/logo.png)
+![PHPNuxBill](install/img/logo.png)
 
 # CHANGELOG
 
@@ -10,6 +10,8 @@
 - Using Composer
 - Fix Search User
 - Fix user check, if not found will logout
+- User password show but hidden
+- Voucher code hidden
 
 ## 2023.6.8
 
