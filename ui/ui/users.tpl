@@ -16,7 +16,7 @@
                                 <input type="text" name="username" class="form-control"
                                     placeholder="Search by Username...">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success">Search</button>
+                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
                                 </div>
                             </div>
                         </form>
@@ -49,7 +49,7 @@
                                             class="btn btn-warning btn-sm">{$_L['Edit']}</a>
                                         {if ($_admin['username']) neq ($ds['username'])}
                                             <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
-                                                class="btn btn-danger btn-sm" onclick="confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
+                                                class="btn btn-danger btn-sm" onclick="return confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
                                         {/if}
                                     </td>
                                 </tr>

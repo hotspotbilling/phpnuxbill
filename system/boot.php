@@ -4,7 +4,6 @@
  * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 
  **/
-session_start();
 function r2($to, $ntype = 'e', $msg = '')
 {
     if ($msg == '') {
@@ -82,7 +81,6 @@ function _notify($msg, $type = 'e')
     $_SESSION['notify'] = $msg;
 }
 
-require_once('system/vendors/smarty/libs/Smarty.class.php');
 $lan_file = 'system/lan/' . $config['language'] . '/common.lan.php';
 require($lan_file);
 $ui = new Smarty();

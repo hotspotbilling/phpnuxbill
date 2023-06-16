@@ -29,7 +29,7 @@ switch ($action) {
         $ui->display('user-orderHistory.tpl');
         break;
     case 'package':
-        if(empty($user['email'])){
+        if (strpos($user['email'], '@') === false) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
         }
         $ui->assign('_title', 'Order Plan');
@@ -78,7 +78,6 @@ switch ($action) {
             include 'system/paymentgateway/' . $trx['gateway'] . '.php';
             call_user_func($trx['gateway'] . '_validate_config');
             call_user_func($config['payment_gateway'] . '_get_status', $trx, $user);
-
         } else if ($routes['3'] == 'cancel') {
             run_hook('customer_cancel_payment'); #HOOK
             $trx->pg_paid_response = '{}';
@@ -106,7 +105,7 @@ switch ($action) {
         $ui->display('user-orderView.tpl');
         break;
     case 'buy':
-        if(empty($user['email'])){
+        if (strpos($user['email'], '@') === false) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
         }
         if ($config['payment_gateway'] == 'none') {

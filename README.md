@@ -1,4 +1,6 @@
-# PHPNuxBill - Mikrotik Billing
+# PHPNuxBill - PHP Mikrotik Billing
+
+![PHPNuxBill](install/img/logo.png)
 
 ## Feature
 
@@ -13,17 +15,14 @@
 - Whatsapp Notification to Consumer
 - Telegram Notification for Admin
 
-## Payment Gateway
+See [How it Works / Cara Kerja](https://github.com/hotspotbilling/phpnuxbill/wiki/How-It-Works---Cara-kerja)
 
-- [Tripay.com](https://github.com/hotspotbilling/phpnuxbill-tripay) | Indonesia
-- [Xendit.com](https://github.com/hotspotbilling/phpnuxbill-xendit) | Indonesia and Philippine ( Philippine not tested )
-- [Duitku.com](https://github.com/hotspotbilling/phpnuxbill-duitku) | Indonesia
+## Payment Gateway And Plugin
 
-Click link to download
+- [Payment Gateway List](https://github.com/orgs/hotspotbilling/repositories?q=payment+gateway)
+- [Plugin List](https://github.com/orgs/hotspotbilling/repositories?q=plugin)
 
-Goto Discussionif you want another Payment Gateway
-
-Some documentation
+You can download payment gateway and Plugin from Plugin Manager
 
 ## System Requirements
 
@@ -121,6 +120,8 @@ If you chat me for any technical support, you need to pay, except for Donors, as
 GNU General Public License version 2 or later
 
 see LICENSE file
+
+## [CHANGELOG](CHANGELOG.md)
 
 ## Donate to ibnux
 

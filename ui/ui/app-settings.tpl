@@ -53,7 +53,7 @@
                         <label class="col-md-2 control-label">APP URL</label>
                         <div class="col-md-6">
                             <input type="text" readonly class="form-control" value="{$app_url}">
-                            <p class="help-block">system/config.php</p>
+                            <p class="help-block">edit at config.php</p>
                         </div>
                     </div>
                 </div>
