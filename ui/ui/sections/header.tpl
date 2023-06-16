@@ -16,6 +16,18 @@
     <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
 
+    <style>
+        ::-moz-selection {
+            /* Code for Firefox */
+            color: red;
+            background: yellow;
+        }
+
+        ::selection {
+            color: red;
+            background: yellow;
+        }
+    </style>
 
     {if isset($xheader)}
         {$xheader}
