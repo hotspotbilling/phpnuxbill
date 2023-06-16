@@ -14,7 +14,7 @@
 												</div>
 												<input type="text" name="name" class="form-control" placeholder="{$_L['Search_by_Name']}...">
 												<div class="input-group-btn">
-													<button class="btn btn-success">{$_L['Search']}</button>
+													<button class="btn btn-success" type="submit">{$_L['Search']}</button>
 												</div>
 											</div>
 											</form>
@@ -41,7 +41,7 @@
                                                     <td>{$ds['rate_up']} {$ds['rate_up_unit']}</td>
                                                     <td>
                                                         <a href="{$_url}bandwidth/edit/{$ds['id']}" class="btn btn-sm btn-warning">{$_L['Edit']}</a>
-                                                        <a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm" onclick="confirm('{$_L['Delete']}?')" >{$_L['Delete']}</a>
+                                                        <a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm" onclick="return confirm('{$_L['Delete']}?')" >{$_L['Delete']}</a>
                                                     </td>
                                                 </tr>
                                             {/foreach}

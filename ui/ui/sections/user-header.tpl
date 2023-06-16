@@ -16,6 +16,18 @@
     <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
 
+    <style>
+        ::-moz-selection {
+            /* Code for Firefox */
+            color: red;
+            background: yellow;
+        }
+
+        ::selection {
+            color: red;
+            background: yellow;
+        }
+    </style>
 
     {if isset($xheader)}
         {$xheader}
@@ -50,7 +62,7 @@
                                         class="img-circle" alt="User Image">
 
                                     <p>
-                                    {$_user['fullname']}
+                                        {$_user['fullname']}
                                         <small>Member since Nov. 2012</small>
                                     </p>
                                 </li>
@@ -68,7 +80,8 @@
                                 </li>
                                 <li class="user-footer">
                                     <div class="pull-right">
-                                        <a href="{$_url}logout" class="btn btn-default btn-flat"><i class="ion ion-power"></i> {$_L['Logout']}</a>
+                                        <a href="{$_url}logout" class="btn btn-default btn-flat"><i
+                                                class="ion ion-power"></i> {$_L['Logout']}</a>
                                     </div>
                                 </li>
                             </ul>
@@ -127,4 +140,4 @@
                 </h1>
             </section>
             <section class="content">
-            {if isset($notify)}{$notify}{/if}
+{if isset($notify)}{$notify}{/if}
