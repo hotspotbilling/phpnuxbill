@@ -129,7 +129,7 @@
             <div class="box-footer" id="currentVersion">ver</div>
             <div class="box-footer" id="latestVersion">ver</div>
             <div class="box-footer">
-                <a href="https://github.com/hotspotbilling/phpnuxbill/releases" target="_blank"
+                <a href="https://github.com/hotspotbilling/phpnuxbill/" target="_blank"
                     class="btn btn-primary btn-lg btn-block">Get Latest Version</a>
             </div>
         </div>
