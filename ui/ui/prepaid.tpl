@@ -43,7 +43,7 @@
                                                     <td>{$ds['username']}</td>
                                                     <td>{$ds['namebp']}</td>
                                                     <td>{$ds['type']}</td>
-                                                    <td>{$ds['recharged_on']} {$ds['time']}</td>
+                                                    <td>{$ds['recharged_on']}</td>
                                                     <td>{$ds['expiration']} {$ds['time']}</td>
                                                     <td>{$ds['method']}</td>
                                                     <td>{$ds['routers']}</td>

@@ -37,7 +37,7 @@
 					{$_L['Username']} : <b>{$d['username']}</b><br>
 					{$_L['Password']} : **********<br>
 					<br>
-					{$_L['Created_On']} : <b>{date($_c['date_format'], strtotime($d['recharged_on']))} {$d['time']}</b><br>
+					{$_L['Created_On']} : <b>{date($_c['date_format'], strtotime($d['recharged_on']))}</b><br>
 					{$_L['Expires_On']} : <b>{date($_c['date_format'], strtotime($d['expiration']))} {$d['time']}</b><br>
 					============================================<br>
 					<center>{$_c['note']}</center>

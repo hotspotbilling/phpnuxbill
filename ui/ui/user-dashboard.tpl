@@ -70,7 +70,7 @@
                     <td class="small text-info text-uppercase text-normal">{$_L['Created_On']}</td>
                     <td class="small mb15">
                         {if $_bill['time'] ne ''}{date($_c['date_format'], strtotime($_bill['recharged_on']))}
-                        {$_bill['time']}{/if}&nbsp;</td>
+                        {/if}&nbsp;</td>
                 </tr>
                 <tr>
                     <td class="small text-danger text-uppercase text-normal">{$_L['Expires_On']}</td>

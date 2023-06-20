@@ -43,67 +43,16 @@ The problem with windows is hard to set cronjob, better Linux
 
 ## Installation
 
-### Git Clone
-
-clone this repository or download zip or release
-
-1. Rename **pages_template** to **pages**
-2. Rename **config.sample.php** to **config.php** and make it writeable (chmod 777)
-3. make writeable folder **ui/cache/** and **ui/compiled**
-4. Open web and run installation
-5. set [cronjob](https://github.com/hotspotbilling/phpnuxbill/wiki/Cron-Jobs) or scheduller for **system/cron.php**
-6. make **config.php** unwriteable (chmod 644)
-
-### Composer install
-
-Go to directory you want to install
-Install Composer in your system
-
-```bash
-# Debian/Ubuntu
-sudo apt install composer
-# Centos/Redhat
-sudo yum install composer
-```
-
-install on curent directory
-
-```bash
-composer create-project hotspotbilling/phpnuxbill .
-```
-
-install on new directory
-
-```bash
-composer create-project hotspotbilling/phpnuxbill phpnuxbill
-```
-
-### Manual Installation
-
-1. Download project from [Master Branch](https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip) or from [Release](https://github.com/hotspotbilling/phpnuxbill/releases)
-2. unzip and upload it to server
-3. Rename **pages_template** to **pages**
-4. Rename **config.sample.php** to **config.php** and make it writeable (chmod 777)
-5. make writeable folder **ui/cache/** and **ui/compiled**
-6. Open web and run installation
-7. set [cronjob](https://github.com/hotspotbilling/phpnuxbill/wiki/Cron-Jobs) or scheduller for **system/cron.php**
-8. make **config.php** unwriteable (chmod 644)
-
-### Docker installation
-
-[see this repo](https://github.com/animegasan/phpnuxbill)
-
-## UPDGRADE
-
-for old version, below Version 6, backup **system/config.php**, delete all file except folder **pages**, upload all new files, put **config.php** in root folder (not in system folder), got to folder **/install** and run Update.
-
-for version 6 above, just replace all files, using filezilla can choose overwrite if different file size or time.
-
-or git pull if you use git clone
+[Installation instructions](https://github.com/hotspotbilling/phpnuxbill/wiki)
 
 ## RADIUS system
 
 Still on development
+
+## Community Support
+
+- [Github Discussion](https://github.com/hotspotbilling/phpnuxbill/discussions)
+- [Telegram Group](https://t.me/phpmixbill)
 
 ## Technical Support
 

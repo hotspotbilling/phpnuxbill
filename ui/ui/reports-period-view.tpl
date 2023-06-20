@@ -54,7 +54,7 @@
                                 <td>{$ds['plan_name']}</td>
                                 <td class="text-right">{$_c['currency_code']}
                                     {number_format($ds['price'],0,$_c['dec_point'],$_c['thousands_sep'])}</td>
-                                <td>{date($_c['date_format'], strtotime($ds['recharged_on']))} {$ds['time']}</td>
+                                <td>{date($_c['date_format'], strtotime($ds['recharged_on']))}</td>
                                 <td>{date($_c['date_format'], strtotime($ds['expiration']))} {$ds['time']}</td>
                                 <td>{$ds['method']}</td>
                                 <td>{$ds['routers']}</td>

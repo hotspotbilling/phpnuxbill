@@ -101,7 +101,7 @@ switch ($action) {
 				<td>$plan_name</td>
 				<td>$type</td>
 				<td align='right'>$price</td>
-				<td>$recharged_on $time </td>
+				<td>$recharged_on</td>
 				<td>$expiration $time </td>
 				<td>$method</td>
 				<td>$routers</td>
@@ -270,7 +270,7 @@ EOF;
 				<td>$plan_name</td>
 				<td>$type</td>
 				<td align='right'>$price</td>
-				<td>$recharged_on $time </td>
+				<td>$recharged_on </td>
 				<td>$expiration $time </td>
 				<td>$method</td>
 				<td>$routers</td>
