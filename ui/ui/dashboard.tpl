@@ -108,7 +108,7 @@
                             <tr>
                                 <td>{$no++}</td>
                                 <td>{$expired['username']}</td>
-                                <td>{date($_c['date_format'], strtotime($expired['recharged_on']))} {$expired['time']}
+                                <td>{date($_c['date_format'], strtotime($expired['recharged_on']))}
                                 </td>
                                 <td>{date($_c['date_format'], strtotime($expired['expiration']))} {$expired['time']}
                                 </td>
