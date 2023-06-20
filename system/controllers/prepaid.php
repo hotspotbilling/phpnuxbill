@@ -263,7 +263,7 @@ switch ($action) {
 					"$_L[Plan_Price] : *$config[currency_code] ".number_format($in['price'],2,$config['dec_point'],$config['thousands_sep'])."*\n\n".
 					"$_L[Username] : *$in[username]*\n".
 					"$_L[Password] : **********\n\n".
-					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
+					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))."*\n".
 					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
 					"\n\n".
 					"$config[note]";
@@ -738,7 +738,7 @@ switch ($action) {
 					"$_L[Plan_Price] : *$config[currency_code] ".number_format($in['price'],2,$config['dec_point'],$config['thousands_sep'])."*\n\n".
 					"$_L[Username] : *$in[username]*\n".
 					"$_L[Password] : **********\n\n".
-					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))." $in[time]*\n".
+					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))."*\n".
 					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
 					"\n\n".
 					"$config[note]";
