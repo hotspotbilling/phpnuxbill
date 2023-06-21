@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2023.6.20
+
+- Hide time for Created date.
+  Because the first time phpmixbill created, plan validity only for days and Months, many request ask for minutes and hours, i change it, but not the database.
 ## 2023.6.15
 
 - User can connect to internet from User Dashboard

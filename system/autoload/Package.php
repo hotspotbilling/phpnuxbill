@@ -211,7 +211,7 @@ class Package
             "$_L[Plan_Price] : *$_c[currency_code] " . number_format($in['price'], 2, $_c['dec_point'], $_c['thousands_sep']) . "*\n\n" .
             "$_L[Username] : *$in[username]*\n" .
             "$_L[Password] : **********\n\n" .
-            "$_L[Created_On] :\n*" . date($_c['date_format'], strtotime($in['recharged_on'])) . " $in[time]*\n" .
+            "$_L[Created_On] :\n*" . date($_c['date_format'], strtotime($in['recharged_on'])) . "*\n" .
             "$_L[Expires_On] :\n*" . date($_c['date_format'], strtotime($in['expiration'])) . " $in[time]*\n" .
             "\n\n" .
             "$_c[note]";

@@ -63,7 +63,8 @@
 
                                     <p>
                                         {$_user['fullname']}
-                                        <small>Member since Nov. 2012</small>
+                                        <small>{$_user['phonenumber']}</small><br>
+                                        <small>{$_user['email']}</small>
                                     </p>
                                 </li>
                                 <li class="user-body">
