@@ -41,6 +41,9 @@ can be Installed in Raspberry Pi Device.
 
 The problem with windows is hard to set cronjob, better Linux
 
+## Changelog
+
+[CHANGELOG.md](CHANGELOG.md)
 ## Installation
 
 [Installation instructions](https://github.com/hotspotbilling/phpnuxbill/wiki)
