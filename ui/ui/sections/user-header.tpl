@@ -102,12 +102,14 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
+                    {if $_c['disable_voucher'] != 'yes'}
                     <li {if $_system_menu eq 'voucher'}class="active" {/if}>
                         <a href="{$_url}voucher/activation">
                             <i class="fa fa-ticket"></i>
                             <span>{Lang::T('Voucher')}</span>
                         </a>
                     </li>
+                    {/if}
                     {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
                         <li {if $_system_menu eq 'package'}class="active" {/if}>
                             <a href="{$_url}order/package">

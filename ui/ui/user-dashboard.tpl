@@ -99,6 +99,16 @@
                     </tr>
                 {/if}
             </table>
+            {if $_c['disable_voucher'] == 'yes'}
+                <div class="box-footer">
+                    {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
+                        <a href="{$_url}order/package" class="btn btn-primary btn-block">
+                            <i class="ion ion-ios-cart"></i>
+                            {Lang::T('Order Package')}
+                        </a>
+                    {/if}
+                </div>
+            {/if}
         </div>
         {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
             <script>
@@ -114,7 +124,8 @@
             </script>
         {/if}
         <br>
-        <div class="box box-primary  box-solid mb30">
+        {if $_c['disable_voucher'] != 'yes'}
+        <div class="box box-primary box-solid mb30">
             <div class="box-header">
                 <h3 class="box-title">{$_L['Voucher_Activation']}</h3>
             </div>
@@ -147,6 +158,7 @@
                 </div>
             </div>
         </div>
+        {/if}
     </div>
 </div>
 {include file="sections/user-footer.tpl"}

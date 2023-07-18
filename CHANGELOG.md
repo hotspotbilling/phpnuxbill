@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2023
+
+- Fix link buy Voucher
+- Add email field to registration form
+- Change registration design Form
+- Add Setting to disable Voucher
 ## 2023.6.20
 
 - Hide time for Created date.

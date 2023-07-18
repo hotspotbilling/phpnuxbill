@@ -331,3 +331,4 @@ $_L['Your_account_not_connected_to_internet'] = 'Your account not connected to i
 
 $_L['Failed_to_create_transaction_'] = 'Failed to create transaction. ';
 $_L['Failed_to_check_status_transaction_'] = 'Failed to check status transaction. ';
+$_L['Disable_Voucher'] = 'Disable Voucher';
