@@ -134,7 +134,7 @@
             </div>
             <div class="box-body">
                 <div class="btn-group btn-group-justified" role="group">
-                    <a class="btn btn-warning" href="{$_url}order/voucher">
+                    <a class="btn btn-warning" href="{$_url}voucher/activation">
                         <i class="ion ion-ios-cart"></i>
                         {$_L['Order_Voucher']}
                     </a>
