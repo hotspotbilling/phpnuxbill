@@ -9,6 +9,7 @@
 - Change registration design Form
 - Add Setting to disable Voucher
 - Fix Title for PPPOE plans
+- Fix Plugin Cache
 ## 2023.6.20
 
 - Hide time for Created date.
