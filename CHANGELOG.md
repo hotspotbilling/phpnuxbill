@@ -2,7 +2,7 @@
 
 # CHANGELOG
 
-## 2023
+## 2023.7.28
 
 - Fix link buy Voucher
 - Add email field to registration form
