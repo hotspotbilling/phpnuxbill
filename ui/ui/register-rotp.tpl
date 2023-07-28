@@ -63,11 +63,11 @@
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">
-                                    <button class="btn btn-primary waves-effect waves-light"
-                                        type="submit">{Lang::T('Request OTP')}</button>
+                                    <a href="{$_url}login" class="btn btn-warning">{$_L['Cancel']}</a>
                                 </div>
                                 <div class="btn-group">
-                                    <a href="{$_url}login" class="btn btn-success">{$_L['Cancel']}</a>
+                                    <button class="btn btn-success waves-effect waves-light"
+                                        type="submit">{Lang::T('Request OTP')}</button>
                                 </div>
                             </div>
                         </div>

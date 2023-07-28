@@ -129,10 +129,12 @@
                             <ul class="treeview-menu">
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}prepaid/list">{$_L['Prepaid_User']}</a></li>
-                                <li {if $_routes[1] eq 'voucher'}class="active" {/if}><a
-                                        href="{$_url}prepaid/voucher">{$_L['Prepaid_Vouchers']}</a></li>
-                                <li {if $_routes[1] eq 'refill'}class="active" {/if}><a
-                                        href="{$_url}prepaid/refill">{$_L['Refill_Account']}</a></li>
+                                {if $_c['disable_voucher'] != 'yes'}
+                                    <li {if $_routes[1] eq 'voucher'}class="active" {/if}><a
+                                            href="{$_url}prepaid/voucher">{$_L['Prepaid_Vouchers']}</a></li>
+                                    <li {if $_routes[1] eq 'refill'}class="active" {/if}><a
+                                            href="{$_url}prepaid/refill">{$_L['Refill_Account']}</a></li>
+                                {/if}
                                 <li {if $_routes[1] eq 'recharge'}class="active" {/if}><a
                                         href="{$_url}prepaid/recharge">{$_L['Recharge_Account']}</a></li>
                                 {$_MENU_PREPAID}

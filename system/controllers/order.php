@@ -56,6 +56,7 @@ switch ($action) {
         } else {
             r2(U . "order/package/", 's', Lang::T("You have no unpaid transaction"));
         }
+        break;
     case 'view':
         $trxid = $routes['2'] * 1;
         $trx = ORM::for_table('tbl_payment_gateway')

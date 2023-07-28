@@ -329,3 +329,6 @@ $_L['You_are_Online_Logout'] = 'You are Online, Logout?';
 $_L['Connect_to_Internet'] = 'Connect to Internet?';
 $_L['Your_account_not_connected_to_internet'] = 'Your account not connected to internet';
 
+$_L['Failed_to_create_transaction_'] = 'Failed to create transaction. ';
+$_L['Failed_to_check_status_transaction_'] = 'Failed to check status transaction. ';
+$_L['Disable_Voucher'] = 'Disable Voucher';

@@ -238,6 +238,7 @@ switch ($action) {
         break;
 
     case 'pppoe':
+        $ui->assign('_title', $_L['PPPOE_Plans']);
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pppoe.js"></script>');
 
         $name = _post('name');
@@ -256,6 +257,7 @@ switch ($action) {
         break;
 
     case 'pppoe-add':
+        $ui->assign('_title', $_L['PPPOE_Plans']);
         $d = ORM::for_table('tbl_bandwidth')->find_many();
         $ui->assign('d', $d);
         $p = ORM::for_table('tbl_pool')->find_many();
@@ -267,6 +269,7 @@ switch ($action) {
         break;
 
     case 'pppoe-edit':
+        $ui->assign('_title', $_L['PPPOE_Plans']);
         $id  = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {

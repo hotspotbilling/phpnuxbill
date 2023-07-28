@@ -56,6 +56,16 @@
                             <p class="help-block">edit at config.php</p>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>
+                        <div class="col-md-6">
+                            <select name="disable_voucher" id="disable_voucher" class="form-control">
+                                <option value="no" {if $_c['disable_voucher'] == 'no'}selected="selected" {/if}>No</option>
+                                <option value="yes" {if $_c['disable_voucher'] == 'yes'}selected="selected" {/if}>Yes</option>
+                            </select>
+                            <p class="help-block">Voucher activation menu will be hidden</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="panel-heading">Telegram Notification</div>
                 <div class="panel-body">
@@ -155,17 +165,19 @@ add dst-host=*.tawk.to</pre>
                             <span class="help-block">{$_L['You_can_use_html_tag']}</span>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-primary waves-effect waves-light"
-                                type="submit">{$_L['Save']}</button>
-                        </div>
-                    </div>
                 </div>
-                <pre>/ip hotspot walled-garden
-add dst-host={$_domain}
-add dst-host=*.{$_domain}</pre>
             </div>
+
+            <div class="panel-body">
+                <div class="form-group">
+                    <button class="btn btn-success btn-block waves-effect waves-light"
+                        type="submit">{$_L['Save']}</button>
+                </div>
+        </div>
+
+            <pre>/ip hotspot walled-garden
+            add dst-host={$_domain}
+            add dst-host=*.{$_domain}</pre>
         </div>
     </div>
 </form>
