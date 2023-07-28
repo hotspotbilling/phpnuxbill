@@ -20,7 +20,7 @@ if ($admin['user_type'] != 'Admin') {
 }
 
 $cache = File::pathFixer('system/cache/plugin_repository.json');
-if (file_exists($cache) && time() - filemtime($cache) > (24 * 60 * 60)) {
+if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
     $json = json_decode(file_get_contents($cache), true);
 } else {
     $data = file_get_contents($plugin_repository);

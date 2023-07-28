@@ -206,6 +206,7 @@ switch ($action) {
     case 'app-post':
         $company = _post('company');
         $footer = _post('footer');
+        $disable_voucher = _post('disable_voucher');
         $telegram_bot = _post('telegram_bot');
         $telegram_target_id = _post('telegram_target_id');
         $sms_url = _post('sms_url');
@@ -242,6 +243,17 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'CompanyFooter';
                 $d->value = $footer;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'disable_voucher')->find_one();
+            if($d){
+                $d->value = $disable_voucher;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'disable_voucher';
+                $d->value = $disable_voucher;
                 $d->save();
             }
 

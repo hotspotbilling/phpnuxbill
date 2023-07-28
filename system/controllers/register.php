@@ -20,11 +20,14 @@ switch ($do) {
     case 'post':
         $otp_code = _post('otp_code');
         $username = alphanumeric(_post('username'),"+_.");
+        $email = _post('email');
         $fullname = _post('fullname');
         $password = _post('password');
         $cpassword = _post('cpassword');
         $address = _post('address');
         if(!empty($config['sms_url'])){
+            $phonenumber = $username;
+        }else if(strlen($username)<21){
             $phonenumber = $username;
         }
         $msg = '';
@@ -36,6 +39,9 @@ switch ($do) {
         }
         if (!Validator::Length($password, 35, 2)) {
             $msg .= 'Password should be between 3 to 35 characters' . '<br>';
+        }
+        if (!Validator::Email($email)) {
+            $msg .= 'Email is not Valid<br>';
         }
         if ($password != $cpassword) {
             $msg .= $_L['PasswordsNotMatch'] . '<br>';
@@ -53,6 +59,7 @@ switch ($do) {
                     $ui->assign('username', $username);
                     $ui->assign('fullname', $fullname);
                     $ui->assign('address', $address);
+                    $ui->assign('email', $email);
                     $ui->assign('phonenumber', $phonenumber);
                     $ui->assign('notify', '<div class="alert alert-success">
                     <button type="button" class="close" data-dismiss="alert">
@@ -79,7 +86,7 @@ switch ($do) {
             $d->password = $password;
             $d->fullname = $fullname;
             $d->address = $address;
-            $d->email = '';
+            $d->email = $email;
             $d->phonenumber = $phonenumber;
             if ($d->save()) {
                 $user = $d->id();
@@ -88,6 +95,7 @@ switch ($do) {
                 $ui->assign('username', $username);
                 $ui->assign('fullname', $fullname);
                 $ui->assign('address', $address);
+                $ui->assign('email', $email);
                 $ui->assign('phonenumber', $phonenumber);
                 $ui->assign('notify', '<div class="alert alert-danger">
                 <button type="button" class="close" data-dismiss="alert">
@@ -101,6 +109,7 @@ switch ($do) {
             $ui->assign('username', $username);
             $ui->assign('fullname', $fullname);
             $ui->assign('address', $address);
+            $ui->assign('email', $email);
             $ui->assign('phonenumber', $phonenumber);
             $ui->assign('notify', '<div class="alert alert-danger">
             <button type="button" class="close" data-dismiss="alert">
@@ -152,6 +161,7 @@ switch ($do) {
             $ui->assign('username', "");
             $ui->assign('fullname', "");
             $ui->assign('address', "");
+            $ui->assign('email', "");
             $ui->assign('otp', false);
             run_hook('view_register'); #HOOK
             $ui->display('register.tpl');

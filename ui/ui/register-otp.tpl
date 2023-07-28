@@ -59,6 +59,11 @@
                                         name="fullname">
                                 </div>
                                 <div class="form-group">
+                                    <label>{$_L['Email']}</label>
+                                    <input type="text" required class="form-control" placeholder="xxxxxx@xxx.xx" id="email" value="{$email}"
+                                        name="email">
+                                </div>
+                                <div class="form-group">
                                 <label>{$_L['Address']}</label>
                                     <input type="text" name="address" id="address" value="{$address}" class="form-control">
                                 </div>
