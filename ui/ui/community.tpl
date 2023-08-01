@@ -8,10 +8,13 @@
             </div>
             <div class="box-body">Get help from community</div>
             <div class="box-footer">
-            <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
-                class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Github Discussions</a>
-                <a href="https://t.me/phpnuxbill" target="_blank"
-                    class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Telegram Group</a>
+                <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                    <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
+                        class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Github
+                        Discussions</a>
+                    <a href="https://t.me/phpnuxbill" target="_blank" class="btn btn-primary btn-lg btn-block"><i
+                            class="ion ion-chatboxes"></i> Telegram Group</a>
+                </div>
             </div>
         </div>
     </div>
@@ -58,10 +61,12 @@
                 </table>
             </div>
             <div class="box-footer">
-                <a href="https://trakteer.id/ibnux" target="_blank"
-                    class="btn btn-primary btn-lg btn-block">Trakteer</a>
-                <a href="https://karyakarsa.com/ibnux/support" target="_blank"
-                    class="btn btn-primary btn-lg btn-block">karyakarsa</a>
+                <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                    <a href="https://trakteer.id/ibnux" target="_blank"
+                        class="btn btn-primary btn-lg btn-block">Trakteer</a>
+                    <a href="https://karyakarsa.com/ibnux/support" target="_blank"
+                        class="btn btn-primary btn-lg btn-block">karyakarsa</a>
+                </div>
             </div>
         </div>
     </div>
@@ -107,14 +112,21 @@
             <div class="box-header">
                 <h3 class="box-title">Chat with me</h3>
             </div>
-            <div class="box-body">Paid Support?<br>donation confirmation?<br>Or ask any Donation Alternative</div>
+            <div class="box-body">$50 Paid Support<br>donation confirmation?<br>Or ask any Donation Alternative</div>
             <div class="box-footer">
                 <a href="https://t.me/ibnux" target="_blank" class="btn btn-primary btn-lg btn-block">Telegram</a>
-                <a href="https://twitter.com/messages/compose?recipient_id=20653807&text=Hello+i+am+phpnuxbill+user"
-                    target="_blank" class="btn btn-primary btn-lg btn-block">Twitter</a>
-                <a href="https://m.me/ibnumaksum" target="_blank" class="btn btn-primary btn-lg btn-block">Facebook
-                    Messenger</a>
-                <a href="https://keybase.io/ibnux" target="_blank" class="btn btn-primary btn-lg btn-block">Keybase</a>
+            </div>
+        </div>
+        <div class="box box-primary box-hovered mb20 activities">
+            <div class="box-header">
+                <h3 class="box-title">Free WhatsApp Gateway and Telegram Bot creater</h3>
+            </div>
+            <div class="box-body">
+                There is a Telegram bot wizard in here
+            </div>
+            <div class="box-footer">
+                <a href="https://wa.nux.my.id/login" target="_blank"
+                    class="btn btn-primary btn-lg btn-block">wa.nux.my.id</a>
             </div>
         </div>
     </div>
@@ -129,20 +141,12 @@
             <div class="box-footer" id="currentVersion">ver</div>
             <div class="box-footer" id="latestVersion">ver</div>
             <div class="box-footer">
-                <a href="https://github.com/hotspotbilling/phpnuxbill/" target="_blank"
-                    class="btn btn-primary btn-lg btn-block">Get Latest Version</a>
-            </div>
-        </div>
-        <div class="box box-primary box-hovered mb20 activities">
-            <div class="box-header">
-                <h3 class="box-title">Free WhatsApp Gateway and Telegram Bot creater</h3>
-            </div>
-            <div class="box-body">
-                There is a Telegram bot wizard in here
-            </div>
-            <div class="box-footer">
-                <a href="https://wa.nux.my.id/login" target="_blank"
-                    class="btn btn-primary btn-lg btn-block">wa.nux.my.id</a>
+                <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                    <a href="https://github.com/hotspotbilling/phpnuxbill/" target="_blank"
+                        class="btn btn-success btn-lg btn-block">Install Latest Version</a>
+                    <a href="https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip" target="_blank"
+                        class="btn btn-warning btn-lg btn-block">Download Latest Version</a>
+                </div>
             </div>
         </div>
     </div>
