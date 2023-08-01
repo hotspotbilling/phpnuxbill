@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2023.8.1
+
+- Add Update file script, one click updating PHPNuxBill
+- Add Custom UI folder, to custome your own template
+- Delete debug text
+- Fix Vendor JS
 ## 2023.7.28
 
 - Fix link buy Voucher
