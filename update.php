@@ -82,6 +82,9 @@ if(empty($step)){
         $msgType = "danger";
         $continue = false;
     }
+}else {
+    $version = json_decode(file_get_contents('version.json'), true)['version'];
+    $continue = false;
 }
 
 function pathFixer($path)
@@ -208,6 +211,14 @@ function deleteFolder($path)
                                 Please wait....
                             </div>
                         </div>
+                    <?php }else if($step==4) { ?>
+                        <div class="panel panel-primary">
+                            <div class="panel-success">Update Finished</div>
+                            <div class="panel-body">
+                                PHPNuxBill has been updated to Version <b><?=$version?></b>
+                            </div>
+                        </div>
+                        <meta http-equiv="refresh" content="5; ./index.php?_route=dashboard">
                     <?php } ?>
                 </div>
             </div>
