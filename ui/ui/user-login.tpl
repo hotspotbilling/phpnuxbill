@@ -74,7 +74,7 @@
             </div>
         </div>
     </div>
-    <script src="scripts/vendors.js"></script>
+    <script src="ui/ui/scripts/vendors.js"></script>
 </body>
 
 </html>

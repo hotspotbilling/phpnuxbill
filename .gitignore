@@ -17,3 +17,6 @@ system/paymentgateway/**
 !system/plugin/ui/
 system/plugin/ui/*
 !system/plugin/ui/index.html
+ui/ui_custom/**
+!ui/ui_custom/index.html
+!ui/ui_custom/README.md
