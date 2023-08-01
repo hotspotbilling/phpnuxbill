@@ -55,7 +55,7 @@ ORM::configure('username', $db_user);
 ORM::configure('password', $db_password);
 ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
 ORM::configure('return_result_sets', true);
-if($_app_stage != 'Live'){
+if ($_app_stage != 'Live') {
     ORM::configure('logging', true);
 }
 
@@ -67,7 +67,7 @@ foreach ($result as $value) {
 date_default_timezone_set($config['timezone']);
 $_c = $config;
 
-if($config['radius_mode']){
+if ($config['radius_mode']) {
     ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
     ORM::configure('username', $radius_user, 'radius');
     ORM::configure('password', $radius_password, 'radius');
@@ -84,7 +84,7 @@ function _notify($msg, $type = 'e')
 $lan_file = 'system/lan/' . $config['language'] . '/common.lan.php';
 require($lan_file);
 $ui = new Smarty();
-$ui->setTemplateDir('ui/ui/');
+$ui->setTemplateDir(['custom' => 'ui/ui_custom/', 'default' => 'ui/ui/']);
 $ui->addTemplateDir('system/paymentgateway/ui/', 'pg');
 $ui->addTemplateDir('system/plugin/ui/', 'plugin');
 $ui->setCompileDir('ui/compiled/');
@@ -130,8 +130,7 @@ include "autoload/Hookers.php";
 
 
 //register all plugin
-foreach (glob("system/plugin/*.php") as $filename)
-{
+foreach (glob("system/plugin/*.php") as $filename) {
     include $filename;
 }
 
@@ -290,25 +289,25 @@ if (file_exists($sys_render)) {
     // "function" => $function
     $ui->assign('_system_menu', $routes[0]);
     foreach ($menu_registered as $menu) {
-        if($menu['admin'] && _admin(false)) {
-            $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">';
-            if(!empty($menu['icon'])){
-                $menus[$menu['position']] .= '<i class="'.$menu['icon'].'"></i>';
+        if ($menu['admin'] && _admin(false)) {
+            $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+            if (!empty($menu['icon'])) {
+                $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
             }
-            $menus[$menu['position']] .= '<span class="text">'.$menu['name'].'</span></a></li>';
-        }else if(!$menu['admin'] && _auth(false)) {
-            $menus[$menu['position']] .= '<li'.(($routes[1]==$menu['function'])?' class="active"':'').'><a href="'.U.'plugin/'.$menu['function'].'">';
-            if(!empty($menu['icon'])){
-                $menus[$menu['position']] .= '<i class="'.$menu['icon'].'"></i>';
+            $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
+        } else if (!$menu['admin'] && _auth(false)) {
+            $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+            if (!empty($menu['icon'])) {
+                $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
             }
-            $menus[$menu['position']] .= '<span class="text">'.$menu['name'].'</span></a></li>';
+            $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
         }
     }
     foreach ($menus as $k => $v) {
-        $ui->assign('_MENU_'.$k, $v);
+        $ui->assign('_MENU_' . $k, $v);
     }
     unset($menus, $menu_registered);
     include($sys_render);
 } else {
-    r2(U.'dashboard', 'e', 'not found');
+    r2(U . 'dashboard', 'e', 'not found');
 }
