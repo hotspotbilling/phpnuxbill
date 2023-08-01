@@ -6,7 +6,6 @@ class File
     public static function copyFolder($from, $to, $exclude = [])
     {
         $files = scandir($from);
-        print_r($files);
         foreach ($files as $file) {
             if (is_file($from . $file) && !in_array($file, $exclude)) {
                 if (file_exists($to . $file)) unlink($to . $file);

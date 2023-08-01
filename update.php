@@ -33,9 +33,9 @@ if (!extension_loaded('zip')) {
 
 $file = pathFixer('system/cache/phpnuxbill.zip');
 $folder = pathFixer('system/cache/phpnuxbill-master');
-if(empty($step)){
+if (empty($step)) {
     $step++;
-}else if ($step == 1) {
+} else if ($step == 1) {
     if (file_exists($file)) unlink($file);
 
     // Download update
@@ -50,39 +50,39 @@ if(empty($step)){
     curl_exec($ch);
     curl_close($ch);
     fclose($fp);
-    if (file_exists($file)){
+    if (file_exists($file)) {
         $step++;
-    }else{
+    } else {
         $msg = "Failed to download Update file";
         $msgType = "danger";
         $continue = false;
     }
-}else if ($step == 2) {
+} else if ($step == 2) {
     $zip = new ZipArchive();
     $zip->open($file);
     $zip->extractTo(pathFixer('system/cache/'));
     $zip->close();
-    if (file_exists($folder)){
+    if (file_exists($folder)) {
         $step++;
-    }else{
+    } else {
         $msg = "Failed to extract update file";
         $msgType = "danger";
         $continue = false;
     }
     // remove downloaded zip
     if (file_exists($file)) unlink($file);
-}else if ($step == 3) {
+} else if ($step == 3) {
     copyFolder($folder, pathFixer('./'));
     deleteFolder('install/');
     deleteFolder($folder);
-    if (!file_exists($folder.pathFixer('/system/'))){
+    if (!file_exists($folder . pathFixer('/system/'))) {
         $step++;
-    }else{
+    } else {
         $msg = "Failed to install update file.";
         $msgType = "danger";
         $continue = false;
     }
-}else {
+} else {
     $version = json_decode(file_get_contents('version.json'), true)['version'];
     $continue = false;
 }
@@ -107,7 +107,6 @@ function r2($to, $ntype = 'e', $msg = '')
 function copyFolder($from, $to, $exclude = [])
 {
     $files = scandir($from);
-    print_r($files);
     foreach ($files as $file) {
         if (is_file($from . $file) && !in_array($file, $exclude)) {
             if (file_exists($to . $file)) unlink($to . $file);
@@ -127,7 +126,7 @@ function deleteFolder($path)
         if (is_file($path . $file)) {
             unlink($path . $file);
         } else if (is_dir($path . $file) && !in_array($file, ['.', '..'])) {
-            File::deleteFolder($path . $file . DIRECTORY_SEPARATOR);
+            deleteFolder($path . $file . DIRECTORY_SEPARATOR);
             rmdir($path . $file);
         }
     }
@@ -152,8 +151,8 @@ function deleteFolder($path)
 
     <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
-    <?php if($continue){ ?>
-        <meta http-equiv="refresh" content="1; ./update.php?step=<?=$step?>">
+    <?php if ($continue) { ?>
+        <meta http-equiv="refresh" content="1; ./update.php?step=<?= $step ?>">
     <?php } ?>
     <style>
         ::-moz-selection {
@@ -182,43 +181,45 @@ function deleteFolder($path)
             <div class="row">
                 <div class="col-md-4"></div>
                 <div class="col-md-4">
-                    <?php if(!empty($msgType) && !empty($msg)) { ?>
-                        <div class="alert alert-<?=$msgType?>" role="alert">
-                            <?=$msg?>
+                    <?php if (!empty($msgType) && !empty($msg)) { ?>
+                        <div class="alert alert-<?= $msgType ?>" role="alert">
+                            <?= $msg ?>
                         </div>
                     <?php } ?>
-                    <?php if($step==1) { ?>
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">Step 1</div>
-                            <div class="panel-body">
-                                Downloading update<br>
-                                Please wait....
+                    <?php if ($continue) { ?>
+                        <?php if ($step == 1) { ?>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">Step 1</div>
+                                <div class="panel-body">
+                                    Downloading update<br>
+                                    Please wait....
+                                </div>
                             </div>
-                        </div>
-                    <?php }else if($step==2) { ?>
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">Step 2</div>
-                            <div class="panel-body">
-                                extracting<br>
-                                Please wait....
+                        <?php } else if ($step == 2) { ?>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">Step 2</div>
+                                <div class="panel-body">
+                                    extracting<br>
+                                    Please wait....
+                                </div>
                             </div>
-                        </div>
-                    <?php }else if($step==3) { ?>
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">Step 3</div>
-                            <div class="panel-body">
-                                Installing<br>
-                                Please wait....
+                        <?php } else if ($step == 3) { ?>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">Step 3</div>
+                                <div class="panel-body">
+                                    Installing<br>
+                                    Please wait....
+                                </div>
                             </div>
-                        </div>
-                    <?php }else if($step==4) { ?>
-                        <div class="panel panel-primary">
-                            <div class="panel-success">Update Finished</div>
-                            <div class="panel-body">
-                                PHPNuxBill has been updated to Version <b><?=$version?></b>
+                        <?php } else if ($step == 4) { ?>
+                            <div class="panel panel-primary">
+                                <div class="panel-success">Update Finished</div>
+                                <div class="panel-body">
+                                    PHPNuxBill has been updated to Version <b><?= $version ?></b>
+                                </div>
                             </div>
-                        </div>
-                        <meta http-equiv="refresh" content="5; ./index.php?_route=dashboard">
+                            <meta http-equiv="refresh" content="5; ./index.php?_route=dashboard">
+                        <?php } ?>
                     <?php } ?>
                 </div>
             </div>
