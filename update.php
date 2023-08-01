@@ -32,7 +32,7 @@ if (!extension_loaded('zip')) {
 
 
 $file = pathFixer('system/cache/phpnuxbill.zip');
-$folder = pathFixer('system/cache/phpnuxbill-master');
+$folder = pathFixer('system/cache/phpnuxbill-master/');
 if (empty($step)) {
     $step++;
 } else if ($step == 1) {
