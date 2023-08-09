@@ -206,6 +206,8 @@ switch ($action) {
     case 'app-post':
         $company = _post('company');
         $footer = _post('footer');
+        $enable_balance = _post('enable_balance');
+        $allow_balance_transfer = _post('allow_balance_transfer');
         $disable_voucher = _post('disable_voucher');
         $telegram_bot = _post('telegram_bot');
         $telegram_target_id = _post('telegram_target_id');
@@ -254,6 +256,28 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'disable_voucher';
                 $d->value = $disable_voucher;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'enable_balance')->find_one();
+            if($d){
+                $d->value = $enable_balance;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'enable_balance';
+                $d->value = $enable_balance;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'allow_balance_transfer')->find_one();
+            if($d){
+                $d->value = $allow_balance_transfer;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'allow_balance_transfer';
+                $d->value = $allow_balance_transfer;
                 $d->save();
             }
 

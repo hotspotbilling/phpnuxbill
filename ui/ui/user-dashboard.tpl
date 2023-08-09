@@ -62,6 +62,12 @@
                             style="background-color: black; color:black; width:100%; border: 0px;"
                             onclick="this.select()"></td>
                 </tr>
+                {if $_c['enable_balance'] == 'yes'}
+                    <tr>
+                        <td class="small text-warning text-uppercase text-normal">{Lang::T('Balance')}</td>
+                        <td class="small mb15 text-bold">{Lang::moneyFormat($_user['balance'])}</td>
+                    </tr>
+                {/if}
                 <tr>
                     <td class="small text-primary text-uppercase text-normal">{$_L['Plan_Name']}</td>
                     <td class="small mb15">{$_bill['namebp']}</td>

@@ -4,7 +4,13 @@
     <div class="row">
         <div class="col-sm-12 col-md-12">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                <div class="panel-heading">{$_L['General_Settings']}</div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {$_L['General_Settings']}
+                </div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['App_Name']}</label>
@@ -19,7 +25,7 @@
                         <div class="col-md-6">
                             <input type="text" required class="form-control" id="footer" name="footer"
                                 value="{$_c['CompanyFooter']}">
-                                <span class="help-block">{Lang::T('Will show below user pages')}</span>
+                            <span class="help-block">{Lang::T('Will show below user pages')}</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -60,14 +66,55 @@
                         <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>
                         <div class="col-md-6">
                             <select name="disable_voucher" id="disable_voucher" class="form-control">
-                                <option value="no" {if $_c['disable_voucher'] == 'no'}selected="selected" {/if}>No</option>
-                                <option value="yes" {if $_c['disable_voucher'] == 'yes'}selected="selected" {/if}>Yes</option>
+                                <option value="no" {if $_c['disable_voucher'] == 'no'}selected="selected" {/if}>No
+                                </option>
+                                <option value="yes" {if $_c['disable_voucher'] == 'yes'}selected="selected" {/if}>Yes
+                                </option>
                             </select>
                             <p class="help-block">Voucher activation menu will be hidden</p>
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">Telegram Notification</div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Balance System')}
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Enable System')}</label>
+                        <div class="col-md-6">
+                            <select name="enable_balance" id="enable_balance" class="form-control">
+                                <option value="no" {if $_c['enable_balance'] == 'no'}selected="selected" {/if}>No
+                                </option>
+                                <option value="yes" {if $_c['enable_balance'] == 'yes'}selected="selected" {/if}>Yes
+                                </option>
+                            </select>
+                            <p class="help-block">Customer can deposit money to buy voucher</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Allow Transfer')}</label>
+                        <div class="col-md-6">
+                            <select name="allow_balance_transfer" id="allow_balance_transfer" class="form-control">
+                                <option value="no" {if $_c['allow_balance_transfer'] == 'no'}selected="selected" {/if}>
+                                    No</option>
+                                <option value="yes" {if $_c['allow_balance_transfer'] == 'yes'}selected="selected"
+                                    {/if}>Yes</option>
+                            </select>
+                            <p class="help-block">Allow balance transfer between customers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Telegram Notification')}
+                </div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">Telegram Bot Token</label>
@@ -83,9 +130,16 @@
                                 value="{$_c['telegram_target_id']}" placeholder="12345678">
                         </div>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">You will get Payment and Error notification</small>
+                    <small id="emailHelp" class="form-text text-muted">You will get Payment and Error
+                        notification</small>
                 </div>
-                <div class="panel-heading">SMS OTP Registration</div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('SMS OTP Registration')}
+                </div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">SMS Server URL</label>
@@ -96,9 +150,16 @@
                             </p>
                         </div>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">You can use WhatsApp in here too. <a href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
+                    <small id="emailHelp" class="form-text text-muted">You can use WhatsApp in here too. <a
+                            href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
                 </div>
-                <div class="panel-heading">Whatsapp Notification</div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Whatsapp Notification')}
+                </div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">Whatsapp Server URL</label>
@@ -110,15 +171,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">{Lang::T('User Notification')}</div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('User Notification')}
+                </div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Expired Notification')}</label>
                         <div class="col-md-6">
-                            <select name="user_notification_expired" id="user_notification_expired" class="form-control">
+                            <select name="user_notification_expired" id="user_notification_expired"
+                                class="form-control">
                                 <option value="none">None</option>
-                                <option value="wa" {if $_c['user_notification_expired'] == 'wa'}selected="selected" {/if}>Whatsapp</option>
-                                <option value="sms" {if $_c['user_notification_expired'] == 'sms'}selected="selected" {/if}>SMS</option>
+                                <option value="wa" {if $_c['user_notification_expired'] == 'wa'}selected="selected"
+                                    {/if}>Whatsapp</option>
+                                <option value="sms" {if $_c['user_notification_expired'] == 'sms'}selected="selected"
+                                    {/if}>SMS</option>
                             </select>
                             <p class="help-block">{Lang::T('User will get notification when package expired')}</p>
                         </div>
@@ -126,23 +196,38 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Expired Notification Message')}</label>
                         <div class="col-md-6">
-                                <textarea class="form-control" id="user_notification_expired_text" name="user_notification_expired_text" placeholder="Hello [[name]], your internet package [[package]] has been expired" rows="3">{if $_c['user_notification_expired_text']!=''}{Lang::htmlspecialchars($_c['user_notification_expired_text'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
-                            <p class="help-block">{Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}</p>
+                            <textarea class="form-control" id="user_notification_expired_text"
+                                name="user_notification_expired_text"
+                                placeholder="Hello [[name]], your internet package [[package]] has been expired"
+                                rows="3">{if $_c['user_notification_expired_text']!=''}{Lang::htmlspecialchars($_c['user_notification_expired_text'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
+                            <p class="help-block">
+                                {Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}
+                            </p>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Payment Notification')}</label>
                         <div class="col-md-6">
-                            <select name="user_notification_payment" id="user_notification_payment" class="form-control">
+                            <select name="user_notification_payment" id="user_notification_payment"
+                                class="form-control">
                                 <option value="none">None</option>
-                                <option value="wa" {if $_c['user_notification_payment'] == 'wa'}selected="selected" {/if}>Whatsapp</option>
-                                <option value="sms" {if $_c['user_notification_payment'] == 'sms'}selected="selected" {/if}>SMS</option>
+                                <option value="wa" {if $_c['user_notification_payment'] == 'wa'}selected="selected"
+                                    {/if}>Whatsapp</option>
+                                <option value="sms" {if $_c['user_notification_payment'] == 'sms'}selected="selected"
+                                    {/if}>SMS</option>
                             </select>
-                            <p class="help-block">{Lang::T('User will get invoice notification when buy package or package refilled')}</p>
+                            <p class="help-block">
+                                {Lang::T('User will get invoice notification when buy package or package refilled')}</p>
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">Tawk.to Chat Widget</div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Tawk.to Chat Widget')}
+                </div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">https://tawk.to/chat/</label>
@@ -156,12 +241,19 @@ add dst-host=*.tawk.to</pre>
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">Invoice</div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span class="glyphicon glyphicon-floppy-disk"
+                                aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Invoice')}
+                </div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">Note Invoice</label>
                         <div class="col-md-6">
-                            <textarea class="form-control" id="note" name="note" rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
+                            <textarea class="form-control" id="note" name="note"
+                                rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
                             <span class="help-block">{$_L['You_can_use_html_tag']}</span>
                         </div>
                     </div>
@@ -173,7 +265,7 @@ add dst-host=*.tawk.to</pre>
                     <button class="btn btn-success btn-block waves-effect waves-light"
                         type="submit">{$_L['Save']}</button>
                 </div>
-        </div>
+            </div>
 
             <pre>/ip hotspot walled-garden
             add dst-host={$_domain}
