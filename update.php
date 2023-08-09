@@ -82,6 +82,32 @@ if (empty($step)) {
         $msgType = "danger";
         $continue = false;
     }
+} else if ($step == 4) {
+    if (file_exists("system/updates.json")) {
+        require 'config.php';
+        $db = new pdo(
+            "mysql:host=$db_host;dbname=$db_name",
+            $db_user,
+            $db_password,
+            array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
+        );
+
+        $updates = json_decode(file_get_contents("system/updates.json"), true);
+        $dones = [];
+        if (file_exists("system/cache/updates.done.json")) {
+            $dones = json_decode(file_get_contents("system/cache/updates.done.json"), true);
+        }
+        foreach ($updates as $version => $queries) {
+            if (!in_array($version, $dones)) {
+                foreach ($queries as $q) {
+                    $dbh->exec($q);
+                }
+                $dones[] = $version;
+            }
+        }
+        file_put_contents("system/cache/updates.done.json", json_encode($dones));
+    }
+    $step++;
 } else {
     $version = json_decode(file_get_contents('version.json'), true)['version'];
     $continue = false;
@@ -152,7 +178,7 @@ function deleteFolder($path)
     <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
     <?php if ($continue) { ?>
-        <meta http-equiv="refresh" content="1; ./update.php?step=<?= $step ?>">
+        <meta http-equiv="refresh" content="3; ./update.php?step=<?= $step ?>">
     <?php } ?>
     <style>
         ::-moz-selection {
@@ -212,6 +238,13 @@ function deleteFolder($path)
                                 </div>
                             </div>
                         <?php } else if ($step == 4) { ?>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">Step 3</div>
+                                <div class="panel-body">
+                                    Updating database...
+                                </div>
+                            </div>
+                        <?php } else if ($step == 5) { ?>
                             <div class="panel panel-primary">
                                 <div class="panel-success">Update Finished</div>
                                 <div class="panel-body">
