@@ -40,35 +40,39 @@
                 <div class="panel panel-primary">
                     <div class="panel-heading">{$_L['Sign_In_Member']}</div>
                     <div class="panel-body">
-                            <form action="{$_url}login/post" method="post">
-                                <div class="form-group">
-                                    <label>{$_L['Phone_Number']}</label>
+                        <form action="{$_url}login/post" method="post">
+                            <div class="form-group">
+                                <label>{$_L['Phone_Number']}</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="basic-addon1">+</span>
                                     <input type="text" class="form-control" name="username"
-                                        placeholder="{$_L['Phone_Number']}">
-                                </div>
-                                <div class="form-group">
-                                    <label>{$_L['Password']}</label>
-                                    <input type="password" class="form-control" name="password"
-                                        placeholder="{$_L['Password']}">
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
                                 </div>
 
-                                <div class="clearfix hidden">
-                                    <div class="ui-checkbox ui-checkbox-primary right">
-                                        <label>
-                                            <input type="checkbox">
-                                            <span>Remember me</span>
-                                        </label>
-                                    </div>
+                            </div>
+                            <div class="form-group">
+                                <label>{$_L['Password']}</label>
+                                <input type="password" class="form-control" name="password"
+                                    placeholder="{$_L['Password']}">
+                            </div>
+
+                            <div class="clearfix hidden">
+                                <div class="ui-checkbox ui-checkbox-primary right">
+                                    <label>
+                                        <input type="checkbox">
+                                        <span>Remember me</span>
+                                    </label>
                                 </div>
-                                <div class="btn-group btn-group-justified mb15">
-                                    <div class="btn-group">
-                                        <button type="submit" class="btn btn-primary">{$_L['Login']}</button>
-                                    </div>
-                                    <div class="btn-group">
-                                        <a href="{$_url}register" class="btn btn-success">{$_L['Register']}</a>
-                                    </div>
+                            </div>
+                            <div class="btn-group btn-group-justified mb15">
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">{$_L['Login']}</button>
                                 </div>
-                            </form>
+                                <div class="btn-group">
+                                    <a href="{$_url}register" class="btn btn-success">{$_L['Register']}</a>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

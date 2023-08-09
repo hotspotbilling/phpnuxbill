@@ -394,6 +394,7 @@ switch ($action) {
     case 'localisation-post':
         $tzone = _post('tzone');
         $date_format = _post('date_format');
+        $country_code_phone = _post('country_code_phone');
         $lan = _post('lan');
         run_hook('save_localisation'); #HOOK
         if ($tzone == '' or $date_format == '' or $lan == '') {
@@ -418,6 +419,18 @@ switch ($action) {
             if (strlen($thousands_sep) == '1') {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', 'thousands_sep')->find_one();
                 $d->value = $thousands_sep;
+                $d->save();
+            }
+
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'country_code_phone')->find_one();
+            if($d){
+                $d->value = $country_code_phone;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'country_code_phone';
+                $d->value = $country_code_phone;
                 $d->save();
             }
 

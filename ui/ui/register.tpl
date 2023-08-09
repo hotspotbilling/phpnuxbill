@@ -45,8 +45,11 @@
                             <div class="form-container">
                                 <div class="md-input-container">
                                     <label>{$_L['Phone_Number']}</label>
-                                    <input type="text" required class="form-control" id="username" value="{$username}"
-                                        placeholder="{$_L['Phone_Number']}" name="username">
+                                    <div class="input-group">
+                                        <span class="input-group-addon" id="basic-addon1">+</span>
+                                        <input type="text" class="form-control" name="username"
+                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                    </div>
                                 </div>
                                 <div class="md-input-container md-float-label">
                                     <label>{$_L['Full_Name']}</label>

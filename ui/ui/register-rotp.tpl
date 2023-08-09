@@ -58,8 +58,11 @@
                         <div class="panel-body">
                             <div class="form-group">
                                 <label>{$_L['Phone_Number']}</label>
-                                <input type="text" class="form-control" name="username"
-                                    placeholder="{$_L['Phone_Number']}">
+                                <div class="input-group">
+                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <input type="text" class="form-control" name="username"
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                </div>
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">

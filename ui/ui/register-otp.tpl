@@ -45,8 +45,11 @@
                             <div class="form-container">
                                 <div class="form-group">
                                 <label>{$_L['Phone_Number']}</label>
-                                    <input type="text" required class="form-control" readonly id="username"
-                                        value="{$username}" placeholder="{$_L['Phone_Number']}" name="username">
+                                    <div class="input-group">
+                                        <span class="input-group-addon" id="basic-addon1">+</span>
+                                        <input type="text" class="form-control" name="username" value="{$username}"
+                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                 <label>{Lang::T('SMS Verification Code')}</label>

@@ -12,8 +12,12 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Username']}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="username" name="username"
-                                value="{$d['username']}" readonly>
+                            <div class="input-group">
+                                <span class="input-group-addon" id="basic-addon1">+</span>
+                                <input type="text" class="form-control" name="username" id="username"
+                                    value="{$d['username']}"
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -33,15 +37,18 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Phone_Number']}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="phonenumber" name="phonenumber"
-                                value="{$d['phonenumber']}">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="basic-addon1">+</span>
+                                <input type="text" class="form-control" name="phonenumber" id="phonenumber"
+                                    value="{$d['phonenumber']}"
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Email')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="email" name="email"
-                                value="{$d['email']}">
+                            <input type="text" class="form-control" id="email" name="email" value="{$d['email']}">
                         </div>
                     </div>
 
