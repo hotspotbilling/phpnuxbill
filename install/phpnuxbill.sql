@@ -54,6 +54,7 @@ CREATE TABLE
         `address` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
         `phonenumber` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0',
         `email` varchar(128) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1',
+        `balance` decimal(15,2) NOT NULL COMMENT 'For Money Deposit',
         `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `last_login` datetime DEFAULT NULL
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
@@ -294,6 +295,19 @@ CREATE TABLE
         `user` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `status` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
+
+--
+-- Struktur dari tabel `tbl_customers_meta`
+--
+
+CREATE TABLE `tbl_customers_meta` (
+    `id` int(11) NOT NULL,
+    `customer_id` int(11) NOT NULL,
+    `meta_key` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+    `meta_value` longtext COLLATE utf8mb4_general_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 --
 
@@ -543,6 +557,17 @@ ALTER TABLE
 ALTER TABLE
     `tbl_voucher` MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
+--
+-- Indeks untuk tabel `tbl_customers_meta`
+--
+ALTER TABLE `tbl_customers_meta`
+    ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT untuk tabel `tbl_customers_meta`
+--
+ALTER TABLE `tbl_customers_meta`
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 --
