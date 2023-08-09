@@ -26,7 +26,8 @@ switch ($do) {
         $cpassword = _post('cpassword');
         $address = _post('address');
         if(!empty($config['sms_url'])){
-            $phonenumber = $username;
+            $phonenumber = Lang::phoneFormat($username);
+            $username = $phonenumber;
         }else if(strlen($username)<21){
             $phonenumber = $username;
         }

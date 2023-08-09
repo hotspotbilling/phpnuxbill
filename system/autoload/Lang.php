@@ -21,4 +21,14 @@ class Lang
         global $config;
         return $config['currency_code'] . ' ' .number_format($var, 0, $config['dec_point'], $config['thousands_sep']);
     }
+
+    public static function phoneFormat($phone)
+    {
+        global $config;
+        if(Validator::UnsignedNumber($phone) && !empty($config['country_code_phone'])){
+            return preg_replace('/^0/',  $config['country_code_phone'], $phone);
+        }else{
+            return $phone;
+        }
+    }
 }

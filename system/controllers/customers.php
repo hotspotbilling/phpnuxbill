@@ -116,7 +116,7 @@ switch ($action) {
         $username = _post('username');
         $fullname = _post('fullname');
         $password = _post('password');
-        $cpassword = _post('cpassword');
+        $email = _post('email');
         $address = _post('address');
         $phonenumber = _post('phonenumber');
         run_hook('add_customer'); #HOOK
@@ -130,9 +130,6 @@ switch ($action) {
         if (!Validator::Length($password, 35, 2)) {
             $msg .= 'Password should be between 3 to 35 characters' . '<br>';
         }
-        if ($password != $cpassword) {
-            $msg .= 'Passwords does not match' . '<br>';
-        }
 
         $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         if ($d) {
@@ -141,11 +138,12 @@ switch ($action) {
 
         if ($msg == '') {
             $d = ORM::for_table('tbl_customers')->create();
-            $d->username = $username;
+            $d->username = Lang::phoneFormat($username);
             $d->password = $password;
+            $d->email = $email;
             $d->fullname = $fullname;
             $d->address = $address;
-            $d->phonenumber = $username;
+            $d->phonenumber = Lang::phoneFormat($phonenumber);
             $d->save();
             r2(U . 'customers/list', 's', $_L['account_created_successfully']);
         } else {
@@ -154,26 +152,23 @@ switch ($action) {
         break;
 
     case 'edit-post':
-        $username = _post('username');
+        $username = Lang::phoneFormat(_post('username'));
         $fullname = _post('fullname');
         $password = _post('password');
-        $cpassword = _post('cpassword');
+        $email = _post('email');
         $address = _post('address');
-        $phonenumber = _post('phonenumber');
+        $phonenumber = Lang::phoneFormat(_post('phonenumber'));
         run_hook('edit_customer'); #HOOK
         $msg = '';
         if (Validator::Length($username, 16, 2) == false) {
             $msg .= 'Username should be between 3 to 15 characters' . '<br>';
         }
-        if (Validator::Length($fullname, 26, 2) == false) {
-            $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
+        if (Validator::Length($fullname, 26, 1) == false) {
+            $msg .= 'Full Name should be between 2 to 25 characters' . '<br>';
         }
         if ($password != '') {
             if (!Validator::Length($password, 15, 2)) {
                 $msg .= 'Password should be between 3 to 15 characters' . '<br>';
-            }
-            if ($password != $cpassword) {
-                $msg .= 'Passwords does not match' . '<br>';
             }
         }
 
@@ -218,6 +213,7 @@ switch ($action) {
                     $d->password = $password;
                 }
                 $d->fullname = $fullname;
+                $d->email = $email;
                 $d->address = $address;
                 $d->phonenumber = $phonenumber;
                 $d->save();
@@ -227,6 +223,7 @@ switch ($action) {
                     $d->password = $password;
                 }
                 $d->fullname = $fullname;
+                $d->email = $email;
                 $d->address = $address;
                 $d->phonenumber = $phonenumber;
                 $d->save();

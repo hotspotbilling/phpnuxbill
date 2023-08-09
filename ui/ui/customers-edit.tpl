@@ -11,7 +11,11 @@
 								<div class="form-group">
 									<label class="col-md-2 control-label">{$_L['Username']}</label>
 									<div class="col-md-6">
-										<input type="text" class="form-control" id="username" name="username" value="{$d['username']}" placeholder="Phone Number" required>
+                                        <div class="input-group">
+                                            <span class="input-group-addon">+</span>
+                                            <input type="text" class="form-control" name="username" value="{$d['username']}" required
+                                                placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                        </div>
 									</div>
 								</div>
 								<div class="form-group">
@@ -20,6 +24,22 @@
 										<input type="text" class="form-control" id="fullname" name="fullname" value="{$d['fullname']}">
 									</div>
 								</div>
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label">{$_L['Email']}</label>
+                                    <div class="col-md-6">
+                                        <input type="email" class="form-control" id="email" name="email" value="{$d['email']}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-2 control-label">{$_L['Phone_Number']}</label>
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">+</span>
+                                            <input type="text" class="form-control" name="phonenumber" value="{$d['phonenumber']}"
+                                                placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                        </div>
+                                    </div>
+                                </div>
 								<div class="form-group">
 									<label class="col-md-2 control-label">{$_L['Password']}</label>
 									<div class="col-md-6">
@@ -28,21 +48,9 @@
 									</div>
 								</div>
 								<div class="form-group">
-									<label class="col-md-2 control-label">{$_L['Confirm_Password']}</label>
-									<div class="col-md-6">
-										<input type="password" class="form-control" id="cpassword" name="cpassword">
-									</div>
-								</div>
-								<div class="form-group">
 									<label class="col-md-2 control-label">{$_L['Address']}</label>
 									<div class="col-md-6">
 										<textarea name="address" id="address"  class="form-control">{$d['address']}</textarea>
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="col-md-2 control-label">{$_L['Phone_Number']}</label>
-									<div class="col-md-6">
-										<input type="text" class="form-control" id="phonenumber" name="phonenumber" value="{$d['phonenumber']}">
 									</div>
 								</div>
 

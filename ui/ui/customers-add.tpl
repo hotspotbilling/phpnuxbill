@@ -9,9 +9,13 @@
 						<form class="form-horizontal" method="post" role="form" action="{$_url}customers/add-post" >
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Username']}</label>
-								<div class="col-md-6">
-									<input type="text" class="form-control" id="username" name="username" required placeholder="Phone number">
-								</div>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">+</span>
+                                        <input type="text" class="form-control" name="username" required
+                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                    </div>
+                                </div>
 							</div>
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Full_Name']}</label>
@@ -20,15 +24,25 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-md-2 control-label">{$_L['Password']}</label>
+								<label class="col-md-2 control-label">{$_L['Email']}</label>
 								<div class="col-md-6">
-									<input type="password" class="form-control" required id="password" name="password">
+									<input type="email" class="form-control" id="email" name="email">
 								</div>
 							</div>
+                            <div class="form-group">
+								<label class="col-md-2 control-label">{$_L['Phone_Number']}</label>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">+</span>
+                                        <input type="text" class="form-control" name="phonenumber"
+                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                    </div>
+                                </div>
+							</div>
 							<div class="form-group">
-								<label class="col-md-2 control-label">{$_L['Confirm_Password']}</label>
+								<label class="col-md-2 control-label">{$_L['Password']}</label>
 								<div class="col-md-6">
-									<input type="password" class="form-control" required id="cpassword" name="cpassword">
+									<input type="text" class="form-control" autocomplete="off" required id="password" name="password">
 								</div>
 							</div>
 							<div class="form-group">
