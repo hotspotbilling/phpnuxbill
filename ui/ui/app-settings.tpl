@@ -71,7 +71,7 @@
                                 <option value="yes" {if $_c['disable_voucher'] == 'yes'}selected="selected" {/if}>Yes
                                 </option>
                             </select>
-                            <p class="help-block">Voucher activation menu will be hidden</p>
+                            <p class="help-block">{Lang::T('Voucher activation menu will be hidden')}</p>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@
                                 <option value="yes" {if $_c['enable_balance'] == 'yes'}selected="selected" {/if}>Yes
                                 </option>
                             </select>
-                            <p class="help-block">Customer can deposit money to buy voucher</p>
+                            <p class="help-block">{Lang::T('Customer can deposit money to buy voucher')}</p>
                         </div>
                     </div>
                     <div class="form-group">
@@ -104,7 +104,7 @@
                                 <option value="yes" {if $_c['allow_balance_transfer'] == 'yes'}selected="selected"
                                     {/if}>Yes</option>
                             </select>
-                            <p class="help-block">Allow balance transfer between customers</p>
+                            <p class="help-block">{Lang::T('Allow balance transfer between customers')}</p>
                         </div>
                     </div>
                 </div>
