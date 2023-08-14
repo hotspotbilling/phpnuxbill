@@ -157,6 +157,8 @@
                                         href="{$_url}services/pppoe">{$_L['PPPOE_Plans']}</a></li>
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}bandwidth/list">{$_L['Bandwidth_Plans']}</a></li>
+                                    <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
+                                            href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></li>
                                 {$_MENU_SERVICES}
                             </ul>
                         </li>

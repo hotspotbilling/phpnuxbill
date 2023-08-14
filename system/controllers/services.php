@@ -70,10 +70,10 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_plan'); #HOOK
-            if(!$config['radius_mode']){
+            if (!$config['radius_mode']) {
                 $mikrotik = Mikrotik::info($d['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::removeHotspotPlan($client,$d['name_plan']);
+                Mikrotik::removeHotspotPlan($client, $d['name_plan']);
             }
 
             $d->delete();
@@ -96,7 +96,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
-        $enabled = _post('enabled')*1;
+        $enabled = _post('enabled');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -130,7 +130,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$config['radius_mode']){
+            if (!$config['radius_mode']) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
@@ -176,7 +176,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
-        $enabled = _post('enabled')*1;
+        $enabled = _post('enabled');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -209,7 +209,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$config['radius_mode']){
+            if (!$config['radius_mode']) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
@@ -293,7 +293,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_ppoe'); #HOOK
-            if(!$config['radius_mode']){
+            if (!$config['radius_mode']) {
                 $mikrotik = Mikrotik::info($d['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removePpoePlan($client, $d['name_plan']);
@@ -312,7 +312,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool = _post('pool_name');
-        $enabled = _post('enabled')*1;
+        $enabled = _post('enabled');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -344,7 +344,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$config['radius_mode']){
+            if (!$config['radius_mode']) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addPpoePlan($client, $name, $pool, $rate);
@@ -377,7 +377,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool = _post('pool_name');
-        $enabled = _post('enabled')*1;
+        $enabled = _post('enabled');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -410,7 +410,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
 
-            if(!$config['radius_mode']){
+            if (!$config['radius_mode']) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPpoePlan($client, $name, $pool, $rate);
@@ -431,7 +431,112 @@ switch ($action) {
             r2(U . 'services/pppoe-edit/' . $id, 'e', $msg);
         }
         break;
+    case 'balance':
+        $ui->assign('_title', Lang::T('Balance Plans'));
+        $name = _post('name');
+        if ($name != '') {
+            $paginator = Paginator::bootstrap('tbl_plans', 'name_plan', '%' . $name . '%', 'type', 'Balance');
+            $d = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->where_like('tbl_plans.name_plan', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+        } else {
+            $paginator = Paginator::bootstrap('tbl_plans', 'type', 'Hotspot');
+            $d = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+        }
 
+        $ui->assign('d', $d);
+        $ui->assign('paginator', $paginator);
+        run_hook('view_list_balance'); #HOOK
+        $ui->display('balance.tpl');
+        break;
+    case 'balance-add':
+        $ui->assign('_title', Lang::T('Balance Plans'));
+        run_hook('view_add_balance'); #HOOK
+        $ui->display('balance-add.tpl');
+        break;
+    case 'balance-edit':
+        $ui->assign('_title', Lang::T('Balance Plans'));
+        $id  = $routes['2'];
+        $d = ORM::for_table('tbl_plans')->find_one($id);
+        $ui->assign('d', $d);
+        run_hook('view_edit_balance'); #HOOK
+        $ui->display('balance-edit.tpl');
+        break;
+    case 'balance-delete':
+        $id  = $routes['2'];
+
+        $d = ORM::for_table('tbl_plans')->find_one($id);
+        if ($d) {
+            run_hook('delete_balance'); #HOOK
+            $d->delete();
+            r2(U . 'services/balance', 's', $_L['Delete_Successfully']);
+        }
+        break;
+    case 'balance-edit-post':
+        $id = _post('id');
+        $name = _post('name');
+        $price = _post('price');
+        $enabled = _post('enabled');
+
+        $msg = '';
+        if (Validator::UnsignedNumber($price) == false) {
+            $msg .= 'The price must be a number' . '<br>';
+        }
+        if ($name == '') {
+            $msg .= $_L['All_field_is_required'] . '<br>';
+        }
+
+        $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        if ($d) {
+        } else {
+            $msg .= $_L['Data_Not_Found'] . '<br>';
+        }
+        run_hook('edit_ppoe'); #HOOK
+        if ($msg == '') {
+            $d->name_plan = $name;
+            $d->price = $price;
+            $d->enabled = $enabled;
+            $d->save();
+
+            r2(U . 'services/balance', 's', $_L['Updated_Successfully']);
+        } else {
+            r2(U . 'services/balance-edit/' . $id, 'e', $msg);
+        }
+        break;
+    case 'balance-add-post':
+        $name = _post('name');
+        $price = _post('price');
+        $enabled = _post('enabled');
+
+        $msg = '';
+        if (Validator::UnsignedNumber($price) == false) {
+            $msg .= 'The price must be a number' . '<br>';
+        }
+        if ($name == '') {
+            $msg .= $_L['All_field_is_required'] . '<br>';
+        }
+
+        $d = ORM::for_table('tbl_plans')->where('name_plan', $name)->find_one();
+        if ($d) {
+            $msg .= $_L['Plan_already_exist'] . '<br>';
+        }
+        run_hook('add_ppoe'); #HOOK
+        if ($msg == '') {
+            $d = ORM::for_table('tbl_plans')->create();
+            $d->type = 'Balance';
+            $d->name_plan = $name;
+            $d->id_bw = 0;
+            $d->price = $price;
+            $d->validity = 0;
+            $d->validity_unit = 'Months';
+            $d->routers = '';
+            $d->pool = '';
+            $d->enabled = $enabled;
+            $d->save();
+
+            r2(U . 'services/balance', 's', $_L['Created_Successfully']);
+        } else {
+            r2(U . 'services/balance-add', 'e', $msg);
+        }
+        break;
     default:
         echo 'action not defined';
 }
