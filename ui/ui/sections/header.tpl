@@ -72,12 +72,12 @@
                                 </li>
                                 <li class="user-body">
                                     <div class="row">
-                                        <div class="col-xs-6 text-center">
-                                            <a href="{$_url}settings/change-password"> {$_L['Change_Password']}</a>
+                                        <div class="col-xs-7 text-center text-sm">
+                                            <a href="{$_url}settings/change-password"><i class="ion ion-settings"></i> {$_L['Change_Password']}</a>
                                         </div>
-                                        <div class="col-xs-6 text-center">
+                                        <div class="col-xs-5 text-center text-sm">
                                             <a href="{$_url}settings/users-edit/{$_admin['id']}">
-                                                {$_L['My_Account']}</a>
+                                            <i class="ion ion-person"></i> {$_L['My_Account']}</a>
                                         </div>
                                     </div>
                                 </li>
