@@ -14,7 +14,7 @@
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-addon" id="basic-addon1">+</span>
-                                <input type="text" class="form-control" name="username" id="username"
+                                <input type="text" class="form-control" name="username" id="username" readonly
                                     value="{$d['username']}"
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
                             </div>
