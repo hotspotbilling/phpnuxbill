@@ -351,3 +351,5 @@ $_L['Reminder_Notification_Message'] = 'Reminder Notification Message';
 $_L['Reminder_7_days'] = 'Reminder 7 days';
 $_L['Reminder_3_days'] = 'Reminder 3 days';
 $_L['Reminder_1_day'] = 'Reminder 1 day';
+$_L['PPPOE_Password'] = 'PPPOE Password';
+$_L['User_Cannot_change_this_only_admin_if_it_Empty_it_will_use_user_password'] = 'User Cannot change this, only admin. if it Empty it will use user password';

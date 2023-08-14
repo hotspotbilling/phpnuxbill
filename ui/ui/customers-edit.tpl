@@ -43,8 +43,15 @@
 								<div class="form-group">
 									<label class="col-md-2 control-label">{$_L['Password']}</label>
 									<div class="col-md-6">
-										<input type="password" class="form-control" id="password" name="password">
+										<input type="password" autocomplete="off" class="form-control" id="password" name="password" onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'" value="{$d['password']}">
 										<span class="help-block">{$_L['password_change_help']}</span>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-md-2 control-label">{Lang::T('PPPOE Password')}</label>
+									<div class="col-md-6">
+										<input type="password" autocomplete="off" class="form-control" id="pppoe_password" name="pppoe_password" value="{$d['pppoe_password']}" onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
+										<span class="help-block">{Lang::T('User Cannot change this, only admin. if it Empty it will use user password')}</span>
 									</div>
 								</div>
 								<div class="form-group">

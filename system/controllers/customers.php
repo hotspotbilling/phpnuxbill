@@ -116,6 +116,7 @@ switch ($action) {
         $username = _post('username');
         $fullname = _post('fullname');
         $password = _post('password');
+        $pppoe_password = _post('pppoe_password');
         $email = _post('email');
         $address = _post('address');
         $phonenumber = _post('phonenumber');
@@ -140,6 +141,7 @@ switch ($action) {
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = Lang::phoneFormat($username);
             $d->password = $password;
+            $d->pppoe_password = $pppoe_password;
             $d->email = $email;
             $d->fullname = $fullname;
             $d->address = $address;
@@ -155,6 +157,7 @@ switch ($action) {
         $username = Lang::phoneFormat(_post('username'));
         $fullname = _post('fullname');
         $password = _post('password');
+        $pppoe_password = _post('pppoe_password');
         $email = _post('email');
         $address = _post('address');
         $phonenumber = Lang::phoneFormat(_post('phonenumber'));
@@ -201,7 +204,11 @@ switch ($action) {
                 } else {
                     if(!$config['radius_mode']){
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::setPpoeUser($client,$c['username'],$password);
+                        if(!empty($d['pppoe_password'])){
+                            Mikrotik::setPpoeUser($client, $c['username'], $d['pppoe_password']);
+                        }else{
+                            Mikrotik::setPpoeUser($client, $c['username'], $password);
+                        }
                         Mikrotik::removePpoeActive($client,$user['username']);
                     }
 
@@ -212,6 +219,7 @@ switch ($action) {
                 if ($password != '') {
                     $d->password = $password;
                 }
+                $d->pppoe_password = $pppoe_password;
                 $d->fullname = $fullname;
                 $d->email = $email;
                 $d->address = $address;
@@ -223,6 +231,7 @@ switch ($action) {
                     $d->password = $password;
                 }
                 $d->fullname = $fullname;
+                $d->pppoe_password = $pppoe_password;
                 $d->email = $email;
                 $d->address = $address;
                 $d->phonenumber = $phonenumber;

@@ -45,6 +45,13 @@
 									<input type="text" class="form-control" autocomplete="off" required id="password" name="password">
 								</div>
 							</div>
+                            <div class="form-group">
+                                <label class="col-md-2 control-label">{Lang::T('PPPOE Password')}</label>
+                                <div class="col-md-6">
+                                    <input type="password" class="form-control" id="pppoe_password" name="pppoe_password" value="{$d['pppoe_password']}">
+                                    <span class="help-block">{Lang::T('User Cannot change this, only admin. if it Empty it will use user password')}</span>
+                                </div>
+                            </div>
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Address']}</label>
 								<div class="col-md-6">

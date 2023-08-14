@@ -216,12 +216,17 @@ class Mikrotik
     public static function addPpoeUser($client, $plan, $customer)
     {
         $addRequest = new RouterOS\Request('/ppp/secret/add');
+        if(!empty($customer['pppoe_password'])){
+            $pass = $customer['pppoe_password'];
+        }else{
+            $pass = $customer['password'];
+        }
         $client->sendSync(
             $addRequest
                 ->setArgument('name', $customer['username'])
                 ->setArgument('service', 'pppoe')
                 ->setArgument('profile', $plan['name_plan'])
-                ->setArgument('password', $customer['password'])
+                ->setArgument('password', $pass)
         );
     }
 
