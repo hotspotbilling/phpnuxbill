@@ -63,14 +63,11 @@
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Invoice Notification Message')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Invoice Notification Payment')}</label>
                         <div class="col-md-6">
                             <textarea class="form-control" id="invoice_paid" name="invoice_paid"
                                 placeholder="Hello [[name]], your internet package [[package]] has been expired"
                                 rows="20">{Lang::htmlspecialchars($_json['invoice_paid'])}</textarea>
-                            <p class="help-block">
-                                {Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}
-                            </p>
                         </div>
                         <p class="col-md-4 help-block">
                             <b>[[company_name]]</b> Your Company Name at Settings.<br>
@@ -86,6 +83,31 @@
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
                             <b>[[expired_date]]</b> Expired datetime.
+                        </p>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Balance Notification Payment')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="invoice_paid" name="invoice_paid"
+                                placeholder="Hello [[name]], your internet package [[package]] has been expired"
+                                rows="20">{Lang::htmlspecialchars($_json['invoice_paid'])}</textarea>
+                        </div>
+                        <p class="col-md-4 help-block">
+                            <b>[[company_name]]</b> Your Company Name at Settings.<br>
+                            <b>[[address]]</b> Your Company Address at Settings.<br>
+                            <b>[[phone]]</b> Your Company Phone at Settings.<br>
+                            <b>[[invoice]]</b> invoice number.<br>
+                            <b>[[date]]</b> Date invoice created.<br>
+                            <b>[[payment_gateway]]</b> Payment gateway user paid from.<br>
+                            <b>[[payment_channel]]</b> Payment channel user paid from.<br>
+                            <b>[[type]]</b> is Hotspot/PPPOE.<br>
+                            <b>[[plan_name]]</b> Internet Package.<br>
+                            <b>[[plan_price]]</b> Internet Package Prices.<br>
+                            <b>[[user_name]]</b> Username internet.<br>
+                            <b>[[user_password]]</b> User password.<br>
+                            <b>[[trx_date]]</b> Transaction datetime.
                         </p>
                     </div>
                 </div>

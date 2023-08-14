@@ -2,12 +2,26 @@
 
 # CHANGELOG
 
+## 2023.8
+
+- Fix PPPOE Delete User
+- Fix Header Admin and User
+- Fix PDF Export by Period
+- Add pppoe_password for user, this pppoe_password only admin can change
+- Country Code Number Settings
+- User Meta Table for Custom Fields
+- Fix Add and Edit Customer Form for admin
+- add Notification Message Editor
+- cron reminder
+
+
 ## 2023.8.1
 
 - Add Update file script, one click updating PHPNuxBill
 - Add Custom UI folder, to custome your own template
 - Delete debug text
 - Fix Vendor JS
+
 ## 2023.7.28
 
 - Fix link buy Voucher
