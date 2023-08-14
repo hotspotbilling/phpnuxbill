@@ -53,12 +53,14 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"
+                                    onerror="this.src='system/uploads/admin.default.png'"
                                     class="user-image" alt="Avatar">
                                 <span class="hidden-xs">{$_admin['fullname']}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"
+                                        onerror="this.src='system/uploads/admin.default.png'"
                                         class="img-circle" alt="Avatar">
 
                                     <p>
