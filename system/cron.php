@@ -82,7 +82,7 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 Mikrotik::setHotspotLimitUptime($client, $c['username']);
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                Message::sendExpiredNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
+                Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
             //update database user dengan status off
             $u->status = 'off';
@@ -102,7 +102,7 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 Mikrotik::disablePpoeUser($client, $c['username']);
                 Mikrotik::removePpoeActive($client, $c['username']);
-                Message::sendExpiredNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
+                Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
 
             $u->status = 'off';
