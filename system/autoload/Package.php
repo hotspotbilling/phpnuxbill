@@ -19,7 +19,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
     {
-        global $_c, $_L;
+        global $_c, $_L, $_notifmsg;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time = date("H:i:s");
@@ -198,28 +198,26 @@ class Package
 
         $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
 
-        $msg = "*$_c[CompanyName]*\n" .
-            "$_c[address]\n" .
-            "$_c[phone]\n" .
-            "\n\n" .
-            "INVOICE: *$in[invoice]*\n" .
-            "$_L[Date] : $date_now\n" .
-            "$gateway $channel\n" .
-            "\n\n" .
-            "$_L[Type] : *$in[type]*\n" .
-            "$_L[Plan_Name] : *$in[plan_name]*\n" .
-            "$_L[Plan_Price] : *$_c[currency_code] " . number_format($in['price'], 2, $_c['dec_point'], $_c['thousands_sep']) . "*\n\n" .
-            "$_L[Username] : *$in[username]*\n" .
-            "$_L[Password] : **********\n\n" .
-            "$_L[Created_On] :\n*" . date($_c['date_format'], strtotime($in['recharged_on'])) . "*\n" .
-            "$_L[Expires_On] :\n*" . date($_c['date_format'], strtotime($in['expiration'])) . " $in[time]*\n" .
-            "\n\n" .
-            "$_c[note]";
+        $textInvoice = $_notifmsg['invoice_paid'];
+        $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
+        $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
+        $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
+        $textInvoice = str_replace('[[invoice]]', $_c['CompanyName'], $textInvoice);
+        $textInvoice = str_replace('[[invoice]]', $in['invoice'], $textInvoice);
+        $textInvoice = str_replace('[[date]]', $date_now, $textInvoice);
+        $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
+        $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
+        $textInvoice = str_replace('[[type]]', $in['type'], $textInvoice);
+        $textInvoice = str_replace('[[plan_name]]', $in['plan_name'], $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " ". number_format($in['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
+        $textInvoice = str_replace('[[user_name]]', $in['username'], $textInvoice);
+        $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
+        $textInvoice = str_replace('[[expired_date]]', date($_c['date_format'], strtotime($in['expiration'])) . " ".$in['time'], $textInvoice);
 
         if ($_c['user_notification_payment'] == 'sms') {
-            Message::sendSMS($c['phonenumber'], $msg);
+            Message::sendSMS($c['phonenumber'], $textInvoice);
         } else if ($_c['user_notification_payment'] == 'wa') {
-            Message::sendWhatsapp($c['phonenumber'], $msg);
+            Message::sendWhatsapp($c['phonenumber'], $textInvoice);
         }
         return true;
     }

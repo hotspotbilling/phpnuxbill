@@ -18,9 +18,15 @@ ORM::configure('logging', true);
 
 include "autoload/Hookers.php";
 
+// notification message
+if(file_exists("uploads/notifications.json")){
+    $_notifmsg =json_decode(file_get_contents('uploads/notifications.json'), true);
+}else{
+    $_notifmsg = json_decode(file_get_contents('uploads/notifications.default.json'), true);
+}
 
 //register all plugin
-foreach (glob("system/plugin/*.php") as $filename) {
+foreach (glob("plugin/*.php") as $filename) {
     include $filename;
 }
 
@@ -55,7 +61,7 @@ foreach ($result as $value) {
 }
 date_default_timezone_set($config['timezone']);
 
-$textExpired = $config['user_notification_expired_text'];
+$textExpired = $_notifmsg['expired'];
 
 $d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
 

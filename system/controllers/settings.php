@@ -214,7 +214,7 @@ switch ($action) {
         $sms_url = _post('sms_url');
         $wa_url = _post('wa_url');
         $user_notification_expired = _post('user_notification_expired');
-        $user_notification_expired_text = _post('user_notification_expired_text');
+        $user_notification_reminder = _post('user_notification_reminder');
         $user_notification_payment = _post('user_notification_payment');
         $address = _post('address');
         $tawkto = _post('tawkto');
@@ -336,14 +336,14 @@ switch ($action) {
                 $d->save();
             }
 
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_expired_text')->find_one();
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_reminder')->find_one();
             if($d){
-                $d->value = $user_notification_expired_text;
+                $d->value = $user_notification_reminder;
                 $d->save();
             }else{
                 $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_expired_text';
-                $d->value = $user_notification_expired_text;
+                $d->setting = 'user_notification_reminder';
+                $d->value = $user_notification_reminder;
                 $d->save();
             }
 
@@ -492,7 +492,22 @@ switch ($action) {
         }
         break;
 
-
+    case 'notifications':
+        if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
+            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        }
+        run_hook('view_notifications'); #HOOK
+        if(file_exists("system/uploads/notifications.json")){
+            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.json'), true));
+        }else{
+            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
+        }
+        $ui->display('app-notifications.tpl');
+        break;
+    case 'notifications-post':
+        file_put_contents("system/uploads/notifications.json", json_encode($_POST));
+        r2(U . 'settings/notifications', 's', $_L['Settings_Saved_Successfully']);
+        break;
     case 'dbstatus':
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);

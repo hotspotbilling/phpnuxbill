@@ -224,7 +224,9 @@
                                 <li {if $_routes[1] eq 'app'}class="active" {/if}><a
                                         href="{$_url}settings/app">{$_L['General_Settings']}</a></li>
                                 <li {if $_routes[1] eq 'localisation'}class="active" {/if}><a
-                                        href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
+                                    href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
+                                <li {if $_routes[1] eq 'notifications'}class="active" {/if}><a
+                                    href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
                                 <li {if $_routes[1] eq 'users'}class="active" {/if}><a
                                         href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
                                 <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
