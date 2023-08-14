@@ -356,3 +356,6 @@ $_L['Invoice_Balance_Message'] = 'Invoice Balance Message';
 $_L['Invoice_Notification_Payment'] = 'Invoice Notification Payment';
 $_L['Balance_Notification_Payment'] = 'Balance Notification Payment';
 $_L['Balance_Plans'] = 'Balance Plans';
+$_L['Buy_Balance'] = 'Buy Balance?';
+$_L['Price'] = 'Price';
+$_L['Validity'] = 'Validity';

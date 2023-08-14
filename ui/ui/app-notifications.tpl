@@ -90,9 +90,9 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Balance Notification Payment')}</label>
                         <div class="col-md-6">
-                            <textarea class="form-control" id="invoice_paid" name="invoice_paid"
+                            <textarea class="form-control" id="invoice_balance" name="invoice_balance"
                                 placeholder="Hello [[name]], your internet package [[package]] has been expired"
-                                rows="20">{Lang::htmlspecialchars($_json['invoice_paid'])}</textarea>
+                                rows="20">{Lang::htmlspecialchars($_json['invoice_balance'])}</textarea>
                         </div>
                         <p class="col-md-4 help-block">
                             <b>[[company_name]]</b> Your Company Name at Settings.<br>

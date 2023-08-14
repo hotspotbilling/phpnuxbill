@@ -30,6 +30,49 @@ class Package
 
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
+
+        if ($router_name == 'balance') {
+            // insert table transactions
+            $inv = "INV-" . _raid(5);
+            $t = ORM::for_table('tbl_transactions')->create();
+            $t->invoice = $inv;
+            $t->username = $c['username'];
+            $t->plan_name = $p['name_plan'];
+            $t->price = $p['price'];
+            $t->recharged_on = $date_only;
+            $t->expiration = $date_only;
+            $t->time = $time;
+            $t->method = "$gateway - $channel";
+            $t->routers = $router_name;
+            $t->type = "Balance";
+            $t->save();
+
+            Balance::plus($id_customer, $p['price']);
+
+            $textInvoice = $_notifmsg['invoice_balance'];
+            $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
+            $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
+            $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
+            $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
+            $textInvoice = str_replace('[[date]]', date($_c['date_format'], strtotime($date_only)) . " " . $time, $textInvoice);
+            $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
+            $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
+            $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
+            $textInvoice = str_replace('[[plan_name]]', $p['name_plan'], $textInvoice);
+            $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " " . number_format($p['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
+            $textInvoice = str_replace('[[user_name]]', $c['username'], $textInvoice);
+            $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
+
+            if ($_c['user_notification_payment'] == 'sms') {
+                Message::sendSMS($c['phonenumber'], $textInvoice);
+            } else if ($_c['user_notification_payment'] == 'wa') {
+                Message::sendWhatsapp($c['phonenumber'], $textInvoice);
+            }
+
+            return true;
+        }
+
+
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
 
         $mikrotik = Mikrotik::info($router_name);
@@ -202,17 +245,16 @@ class Package
         $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
         $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
         $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
-        $textInvoice = str_replace('[[invoice]]', $_c['CompanyName'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $in['invoice'], $textInvoice);
-        $textInvoice = str_replace('[[date]]', $date_now, $textInvoice);
+        $textInvoice = str_replace('[[date]]', date($_c['date_format'], strtotime($date_now)) . " " . $time, $textInvoice);
         $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
         $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
         $textInvoice = str_replace('[[type]]', $in['type'], $textInvoice);
         $textInvoice = str_replace('[[plan_name]]', $in['plan_name'], $textInvoice);
-        $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " ". number_format($in['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " " . number_format($in['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
         $textInvoice = str_replace('[[user_name]]', $in['username'], $textInvoice);
         $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
-        $textInvoice = str_replace('[[expired_date]]', date($_c['date_format'], strtotime($in['expiration'])) . " ".$in['time'], $textInvoice);
+        $textInvoice = str_replace('[[expired_date]]', date($_c['date_format'], strtotime($in['expiration'])) . " " . $in['time'], $textInvoice);
 
         if ($_c['user_notification_payment'] == 'sms') {
             Message::sendSMS($c['phonenumber'], $textInvoice);
