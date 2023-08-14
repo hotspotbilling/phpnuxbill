@@ -204,12 +204,12 @@ class Mikrotik
             '/ppp secret print .proplist=name',
             RouterOS\Query::where('name', $username)
         );
-        $userName = $client->sendSync($printRequest)->getProperty('name');
+        $id = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ppp/secret/remove');
         $client(
             $removeRequest
-                ->setArgument('numbers', $userName)
+                ->setArgument('numbers', $id)
         );
     }
 
