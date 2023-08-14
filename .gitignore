@@ -20,3 +20,6 @@ system/plugin/ui/*
 ui/ui_custom/**
 !ui/ui_custom/index.html
 !ui/ui_custom/README.md
+system/uploads/admin.png
+system/uploads/logo.png
+system/uploads/user.jpg
