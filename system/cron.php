@@ -19,9 +19,9 @@ ORM::configure('logging', true);
 include "autoload/Hookers.php";
 
 // notification message
-if(file_exists("uploads/notifications.json")){
-    $_notifmsg =json_decode(file_get_contents('uploads/notifications.json'), true);
-}else{
+if (file_exists("uploads/notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents('uploads/notifications.json'), true);
+} else {
     $_notifmsg = json_decode(file_get_contents('uploads/notifications.default.json'), true);
 }
 
@@ -87,6 +87,21 @@ foreach ($d as $ds) {
             //update database user dengan status off
             $u->status = 'off';
             $u->save();
+
+            // autorenewal from deposit
+            if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
+                $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
+                    if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
+                        // if success, then get the balance
+                        Balance::min($ds['customer_id'], $p['price']);
+                    } else {
+                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+                            "\nRouter: " . $router_name .
+                            "\nPrice: " . $p['price']);
+                    }
+                }
+            }
         } else echo " : ACTIVE \r\n";
     } else {
         $date_now = strtotime(date("Y-m-d H:i:s"));
@@ -107,6 +122,21 @@ foreach ($d as $ds) {
 
             $u->status = 'off';
             $u->save();
+
+            // autorenewal from deposit
+            if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
+                $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
+                    if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
+                        // if success, then get the balance
+                        Balance::min($ds['customer_id'], $p['price']);
+                    } else {
+                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+                            "\nRouter: " . $router_name .
+                            "\nPrice: " . $p['price']);
+                    }
+                }
+            }
         } else echo " : ACTIVE \r\n";
     }
 }

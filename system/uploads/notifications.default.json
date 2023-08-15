@@ -1,5 +1,5 @@
 {
-	"user_notification_expired_text": "Hello [[name]], your internet package [[package]] has been expired.",
+	"expired": "Hello [[name]], your internet package [[package]] has been expired.",
 	"reminder_7_day": "Hello *[[name]]*, \r\nyour internet package *[[package]]* will be expired in 7 days.",
 	"reminder_3_day": "Hello *[[name]]*, \r\nyour internet package *[[package]]* will be expired in 3 days.",
 	"reminder_1_day": "Hello *[[name]]*,\r\n your internet package *[[package]]* will be expired tomorrow.",

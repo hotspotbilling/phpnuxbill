@@ -15,8 +15,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Expired Notification Message')}</label>
                         <div class="col-md-6">
-                            <textarea class="form-control" id="user_notification_expired_text"
-                                name="user_notification_expired_text"
+                            <textarea class="form-control" id="expired"
+                                name="expired"
                                 placeholder="Hello [[name]], your internet package [[package]] has been expired"
                                 rows="3">{if $_json['expired']!=''}{Lang::htmlspecialchars($_json['expired'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
                         </div>
