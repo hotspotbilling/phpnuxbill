@@ -139,6 +139,8 @@
                                 {/if}
                                 <li {if $_routes[1] eq 'recharge'}class="active" {/if}><a
                                         href="{$_url}prepaid/recharge">{$_L['Recharge_Account']}</a></li>
+                                <li {if $_routes[1] eq 'deposit'}class="active" {/if}><a
+                                        href="{$_url}prepaid/deposit">{Lang::T('Refill Balance')}</a></li>
                                 {$_MENU_PREPAID}
                             </ul>
                         </li>
