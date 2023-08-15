@@ -91,7 +91,7 @@ switch ($action) {
         $data_limit = _post('data_limit');
         $data_unit = _post('data_unit');
         $id_bw = _post('id_bw');
-        $price = _post('pricebp');
+        $price = _post('price');
         $sharedusers = _post('sharedusers');
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');

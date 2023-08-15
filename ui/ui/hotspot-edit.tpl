@@ -84,7 +84,7 @@
 								<div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-addon">{$_c['currency_code']}</span>
-                                        <input type="number" class="form-control" name="pricebp" value="{$d['price']}" required>
+                                        <input type="number" class="form-control" name="price" value="{$d['price']}" required>
                                     </div>
 								</div>
 							</div>
