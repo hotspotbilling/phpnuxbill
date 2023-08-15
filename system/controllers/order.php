@@ -35,9 +35,13 @@ switch ($action) {
         $ui->assign('_title', 'Order Plan');
         $ui->assign('_system_menu', 'package');
         $routers = ORM::for_table('tbl_routers')->find_many();
-        $plans = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
+        $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'PPPOE')->find_many();
+        $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Hotspot')->find_many();
+        $plans_balance = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many();
         $ui->assign('routers', $routers);
-        $ui->assign('plans', $plans);
+        $ui->assign('plans_pppoe', $plans_pppoe);
+        $ui->assign('plans_hotspot', $plans_hotspot);
+        $ui->assign('plans_balance', $plans_balance);
         run_hook('customer_view_order_plan'); #HOOK
         $ui->display('user-orderPlan.tpl');
         break;
@@ -118,12 +122,16 @@ switch ($action) {
         run_hook('customer_buy_plan'); #HOOK
         include 'system/paymentgateway/' . $config['payment_gateway'] . '.php';
         call_user_func($config['payment_gateway'] . '_validate_config');
-
-        $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2'] * 1);
-        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3'] * 1);
-        if (empty($router) || empty($plan)) {
-            r2(U . $back, 'e', Lang::T("Plan Not found"));
+        if ($routes['2'] != '0') {
+            $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
+            if (empty($router) || empty($plan)) {
+                r2(U . $back, 'e', Lang::T("Plan Not found"));
+            }
+        }else{
+            $router['id'] = 0;
+            $router['name'] = 'balance';
         }
+        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
         $d = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
             ->where('status', 1)
@@ -172,5 +180,5 @@ switch ($action) {
         }
         break;
     default:
-        $ui->display('404.tpl');
+    r2(U . "order/package/", 's','');
 }

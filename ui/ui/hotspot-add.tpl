@@ -21,7 +21,6 @@
                                 <label class="col-md-2 control-label">{$_L['Plan_Name']}</label>
                                 <div class="col-md-6">
                                     <input type="text" class="form-control" id="name" name="name" maxlength="40">
-                                        <p class="help-block">{Lang::T('Cannot be change after saved')}</p>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -83,7 +82,10 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label">{$_L['Plan_Price']}</label>
                                 <div class="col-md-6">
-                                    <input type="text" class="form-control" id="pricebp" name="pricebp">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">{$_c['currency_code']}</span>
+                                        <input type="number" class="form-control" name="pricebp" required>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-group">

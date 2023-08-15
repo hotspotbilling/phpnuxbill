@@ -47,7 +47,7 @@
                                     <td align="center">
                                         <a href="{$_url}pool/edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{$_L['Edit']}</a>
-                                        <a href="{$_url}pool/delete/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{$_url}pool/delete/{$ds['id']}" id="{$ds['id']}" onclick="return confirm('{$_L['Delete']}?')"
                                             class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                     </td>
                                 </tr>

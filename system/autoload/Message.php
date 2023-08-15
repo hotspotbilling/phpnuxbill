@@ -39,20 +39,21 @@ class Message
         }
     }
 
-    public static function sendExpiredNotification($phone, $name, $package, $textExpired, $via)
+    public static function sendPackageNotification($phone, $name, $package, $message, $via)
     {
+        $msg = str_replace('[[name]]', "*$name*", $message);
+        $msg = str_replace('[[package]]', "*$package*", $msg);
         if (
             !empty($phone) && strlen($phone) > 5
-            && !empty($textExpired) && in_array($via, ['sms', 'wa'])
+            && !empty($message) && in_array($via, ['sms', 'wa'])
         ) {
-            $msg = str_replace('[[name]]', "*$name*", $textExpired);
-            $msg = str_replace('[[package]]', "*$package*", $msg);
             if ($via == 'sms') {
                 Message::sendSMS($phone, $msg);
             } else if ($via == 'wa') {
                 Message::sendWhatsapp($phone, $msg);
             }
         }
+        return "$via: $msg";
     }
 
 }

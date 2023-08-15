@@ -53,12 +53,14 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"
+                                    onerror="this.src='system/uploads/admin.default.png'"
                                     class="user-image" alt="Avatar">
                                 <span class="hidden-xs">{$_admin['fullname']}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"
+                                        onerror="this.src='system/uploads/admin.default.png'"
                                         class="img-circle" alt="Avatar">
 
                                     <p>
@@ -70,12 +72,12 @@
                                 </li>
                                 <li class="user-body">
                                     <div class="row">
-                                        <div class="col-xs-6 text-center">
-                                            <a href="{$_url}settings/change-password"> {$_L['Change_Password']}</a>
+                                        <div class="col-xs-7 text-center text-sm">
+                                            <a href="{$_url}settings/change-password"><i class="ion ion-settings"></i> {$_L['Change_Password']}</a>
                                         </div>
-                                        <div class="col-xs-6 text-center">
+                                        <div class="col-xs-5 text-center text-sm">
                                             <a href="{$_url}settings/users-edit/{$_admin['id']}">
-                                                {$_L['My_Account']}</a>
+                                            <i class="ion ion-person"></i> {$_L['My_Account']}</a>
                                         </div>
                                     </div>
                                 </li>
@@ -155,6 +157,8 @@
                                         href="{$_url}services/pppoe">{$_L['PPPOE_Plans']}</a></li>
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}bandwidth/list">{$_L['Bandwidth_Plans']}</a></li>
+                                    <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
+                                            href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></li>
                                 {$_MENU_SERVICES}
                             </ul>
                         </li>
@@ -224,7 +228,9 @@
                                 <li {if $_routes[1] eq 'app'}class="active" {/if}><a
                                         href="{$_url}settings/app">{$_L['General_Settings']}</a></li>
                                 <li {if $_routes[1] eq 'localisation'}class="active" {/if}><a
-                                        href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
+                                    href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
+                                <li {if $_routes[1] eq 'notifications'}class="active" {/if}><a
+                                    href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
                                 <li {if $_routes[1] eq 'users'}class="active" {/if}><a
                                         href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
                                 <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a

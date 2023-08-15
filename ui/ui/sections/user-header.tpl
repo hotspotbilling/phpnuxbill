@@ -53,12 +53,14 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
+                                    onerror="this.src='system/uploads/user.default.jpg'"
                                     class="user-image" alt="User Image">
                                 <span class="hidden-xs">{$_user['fullname']}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
+                                        onerror="this.src='system/uploads/user.default.jpg'"
                                         class="img-circle" alt="User Image">
 
                                     <p>
@@ -69,11 +71,11 @@
                                 </li>
                                 <li class="user-body">
                                     <div class="row">
-                                        <div class="col-xs-7 text-center">
+                                        <div class="col-xs-7 text-center text-sm">
                                             <a href="{$_url}accounts/change-password"><i class="ion ion-settings"></i>
                                                 {$_L['Change_Password']}</a>
                                         </div>
-                                        <div class="col-xs-5 text-center">
+                                        <div class="col-xs-5 text-center text-sm">
                                             <a href="{$_url}accounts/profile"><i class="ion ion-person"></i>
                                                 {$_L['My_Account']}</a>
                                         </div>

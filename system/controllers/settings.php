@@ -206,13 +206,15 @@ switch ($action) {
     case 'app-post':
         $company = _post('company');
         $footer = _post('footer');
+        $enable_balance = _post('enable_balance');
+        $allow_balance_transfer = _post('allow_balance_transfer');
         $disable_voucher = _post('disable_voucher');
         $telegram_bot = _post('telegram_bot');
         $telegram_target_id = _post('telegram_target_id');
         $sms_url = _post('sms_url');
         $wa_url = _post('wa_url');
         $user_notification_expired = _post('user_notification_expired');
-        $user_notification_expired_text = _post('user_notification_expired_text');
+        $user_notification_reminder = _post('user_notification_reminder');
         $user_notification_payment = _post('user_notification_payment');
         $address = _post('address');
         $tawkto = _post('tawkto');
@@ -254,6 +256,28 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'disable_voucher';
                 $d->value = $disable_voucher;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'enable_balance')->find_one();
+            if($d){
+                $d->value = $enable_balance;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'enable_balance';
+                $d->value = $enable_balance;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'allow_balance_transfer')->find_one();
+            if($d){
+                $d->value = $allow_balance_transfer;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'allow_balance_transfer';
+                $d->value = $allow_balance_transfer;
                 $d->save();
             }
 
@@ -312,14 +336,14 @@ switch ($action) {
                 $d->save();
             }
 
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_expired_text')->find_one();
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_reminder')->find_one();
             if($d){
-                $d->value = $user_notification_expired_text;
+                $d->value = $user_notification_reminder;
                 $d->save();
             }else{
                 $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_expired_text';
-                $d->value = $user_notification_expired_text;
+                $d->setting = 'user_notification_reminder';
+                $d->value = $user_notification_reminder;
                 $d->save();
             }
 
@@ -370,6 +394,7 @@ switch ($action) {
     case 'localisation-post':
         $tzone = _post('tzone');
         $date_format = _post('date_format');
+        $country_code_phone = _post('country_code_phone');
         $lan = _post('lan');
         run_hook('save_localisation'); #HOOK
         if ($tzone == '' or $date_format == '' or $lan == '') {
@@ -394,6 +419,18 @@ switch ($action) {
             if (strlen($thousands_sep) == '1') {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', 'thousands_sep')->find_one();
                 $d->value = $thousands_sep;
+                $d->save();
+            }
+
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'country_code_phone')->find_one();
+            if($d){
+                $d->value = $country_code_phone;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'country_code_phone';
+                $d->value = $country_code_phone;
                 $d->save();
             }
 
@@ -455,7 +492,22 @@ switch ($action) {
         }
         break;
 
-
+    case 'notifications':
+        if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
+            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        }
+        run_hook('view_notifications'); #HOOK
+        if(file_exists("system/uploads/notifications.json")){
+            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.json'), true));
+        }else{
+            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
+        }
+        $ui->display('app-notifications.tpl');
+        break;
+    case 'notifications-post':
+        file_put_contents("system/uploads/notifications.json", json_encode($_POST));
+        r2(U . 'settings/notifications', 's', $_L['Settings_Saved_Successfully']);
+        break;
     case 'dbstatus':
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);

@@ -33,8 +33,10 @@ Minimum Requirements
 - Linux or Windows OS
 - PHP Version 7.4
 - Both PDO & MySQLi Support
-- GD2 Image Library
-- CURL support
+- PHP-GD2 Image Library
+- PHP-CURL
+- PHP-ZIP
+- PHP-Mbstring
 - MySQL Version 4.1.x and above
 
 can be Installed in Raspberry Pi Device.
@@ -47,6 +49,10 @@ The problem with windows is hard to set cronjob, better Linux
 ## Installation
 
 [Installation instructions](https://github.com/hotspotbilling/phpnuxbill/wiki)
+
+## Docker Version
+
+[Docker Repository](https://github.com/animegasan/phpnuxbill)
 
 ## RADIUS system
 

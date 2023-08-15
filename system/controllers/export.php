@@ -61,6 +61,12 @@ switch ($action) {
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
 
+        if(file_exists('system/uploads/logo.png')){
+            $logo = 'system/uploads/logo.png';
+        }else{
+            $logo = 'system/uploads/logo.default.png';
+        }
+
         if ($x) {
             $html = '
 			<div id="page-wrap">
@@ -69,7 +75,7 @@ switch ($action) {
 					' . $config['address'] . '<br>
 					' . $_L['Phone_Number'] . ': ' . $config['phone'] . '<br>
 				</div>
-				<div id="logo"><img id="image" src="system/uploads/logo.png" alt="logo" /></div>
+				<div id="logo"><img id="image" src="'.$logo.'" alt="logo" /></div>
 			</div>
 			<div id="header">' . $_L['All_Transactions_at_Date'] . ': ' . date($config['date_format'], strtotime($mdate)) . '</div>
 			<table id="customers">
@@ -178,7 +184,6 @@ EOF;
         if ($stype != '') {
             $d->where('type', $stype);
         }
-
         $d->where_gte('recharged_on', $fdate);
         $d->where_lte('recharged_on', $tdate);
         $d->order_by_desc('id');
@@ -207,7 +212,6 @@ EOF;
         $fdate = _post('fdate');
         $tdate = _post('tdate');
         $stype = _post('stype');
-
         $d = ORM::for_table('tbl_transactions');
         if ($stype != '') {
             $d->where('type', $stype);
@@ -229,6 +233,11 @@ EOF;
 
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
+        if(file_exists('system/uploads/logo.png')){
+            $logo = 'system/uploads/logo.png';
+        }else{
+            $logo = 'system/uploads/logo.default.png';
+        }
 
         if ($x) {
             $html = '
@@ -238,7 +247,7 @@ EOF;
 					' . $config['address'] . '<br>
 					' . $_L['Phone_Number'] . ': ' . $config['phone'] . '<br>
 				</div>
-				<div id="logo"><img id="image" src="system/uploads/logo.png" alt="logo" /></div>
+				<div id="logo"><img id="image" src="'.$logo.'" alt="logo" /></div>
 			</div>
 			<div id="header">' . $_L['All_Transactions_at_Date'] . ': ' . date($config['date_format'], strtotime($fdate)) . ' - ' . date($config['date_format'], strtotime($tdate)) . '</div>
 			<table id="customers">
@@ -281,11 +290,7 @@ EOF;
 			<h3 class="sum">' . $config['currency_code'] . ' ' . number_format($xy, 2, $config['dec_point'], $config['thousands_sep']) . '</h3>';
 
             run_hook('pdf_by_period'); #HOOK
-            define('_MPDF_PATH', 'system/vendors/mpdf/');
-
-            require('system/vendors/mpdf/mpdf.php');
-
-            $mpdf = new mPDF('c', 'A4', '', '', 20, 15, 25, 25, 10, 10);
+            $mpdf = new \Mpdf\Mpdf();
             $mpdf->SetProtection(array('print'));
             $mpdf->SetTitle($config['CompanyName'] . ' Reports');
             $mpdf->SetAuthor($config['CompanyName']);

@@ -18,9 +18,15 @@ ORM::configure('logging', true);
 
 include "autoload/Hookers.php";
 
+// notification message
+if (file_exists("uploads/notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents('uploads/notifications.json'), true);
+} else {
+    $_notifmsg = json_decode(file_get_contents('uploads/notifications.default.json'), true);
+}
 
 //register all plugin
-foreach (glob("system/plugin/*.php") as $filename) {
+foreach (glob("plugin/*.php") as $filename) {
     include $filename;
 }
 
@@ -55,7 +61,7 @@ foreach ($result as $value) {
 }
 date_default_timezone_set($config['timezone']);
 
-$textExpired = $config['user_notification_expired_text'];
+$textExpired = $_notifmsg['expired'];
 
 $d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
 
@@ -76,11 +82,26 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 Mikrotik::setHotspotLimitUptime($client, $c['username']);
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                Message::sendExpiredNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
+                Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
             //update database user dengan status off
             $u->status = 'off';
             $u->save();
+
+            // autorenewal from deposit
+            if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
+                $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
+                    if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
+                        // if success, then get the balance
+                        Balance::min($ds['customer_id'], $p['price']);
+                    } else {
+                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+                            "\nRouter: " . $router_name .
+                            "\nPrice: " . $p['price']);
+                    }
+                }
+            }
         } else echo " : ACTIVE \r\n";
     } else {
         $date_now = strtotime(date("Y-m-d H:i:s"));
@@ -96,11 +117,26 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 Mikrotik::disablePpoeUser($client, $c['username']);
                 Mikrotik::removePpoeActive($client, $c['username']);
-                Message::sendExpiredNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
+                Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
 
             $u->status = 'off';
             $u->save();
+
+            // autorenewal from deposit
+            if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
+                $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
+                    if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
+                        // if success, then get the balance
+                        Balance::min($ds['customer_id'], $p['price']);
+                    } else {
+                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+                            "\nRouter: " . $router_name .
+                            "\nPrice: " . $p['price']);
+                    }
+                }
+            }
         } else echo " : ACTIVE \r\n";
     }
 }

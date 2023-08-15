@@ -9,6 +9,11 @@ $ui->assign('_title', $_L['Dashboard']);
 $user = User::_info();
 $ui->assign('_user', $user);
 
+if(isset($_GET['renewal'])){
+    $user->auto_renewal = $_GET['renewal'];
+    $user->save();
+}
+
 
 //Client Page
 $bill = User::_billing();

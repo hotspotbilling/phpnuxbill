@@ -204,24 +204,29 @@ class Mikrotik
             '/ppp secret print .proplist=name',
             RouterOS\Query::where('name', $username)
         );
-        $userName = $client->sendSync($printRequest)->getProperty('name');
+        $id = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ppp/secret/remove');
         $client(
             $removeRequest
-                ->setArgument('numbers', $userName)
+                ->setArgument('numbers', $id)
         );
     }
 
     public static function addPpoeUser($client, $plan, $customer)
     {
         $addRequest = new RouterOS\Request('/ppp/secret/add');
+        if(!empty($customer['pppoe_password'])){
+            $pass = $customer['pppoe_password'];
+        }else{
+            $pass = $customer['password'];
+        }
         $client->sendSync(
             $addRequest
                 ->setArgument('name', $customer['username'])
                 ->setArgument('service', 'pppoe')
                 ->setArgument('profile', $plan['name_plan'])
-                ->setArgument('password', $customer['password'])
+                ->setArgument('password', $pass)
         );
     }
 
