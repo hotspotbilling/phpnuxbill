@@ -359,3 +359,7 @@ $_L['Balance_Plans'] = 'Balance Plans';
 $_L['Buy_Balance'] = 'Buy Balance?';
 $_L['Price'] = 'Price';
 $_L['Validity'] = 'Validity';
+$_L['Disable_auto_renewal'] = 'Disable auto renewal?';
+$_L['Auto_Renewal_On'] = 'Auto Renewal On';
+$_L['Enable_auto_renewal'] = 'Enable auto renewal?';
+$_L['Auto_Renewal_Off'] = 'Auto Renewal Off';
