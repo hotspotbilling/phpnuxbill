@@ -44,7 +44,11 @@
                             <div class="form-group">
                                 <label>{$_L['Phone_Number']}</label>
                                 <div class="input-group">
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                    {if $_c['country_code_phone']!= ''}
+                                        <span class="input-group-addon" id="basic-addon1">+</span>
+                                    {else}
+                                        <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-phone-alt"></i></span>
+                                    {/if}
                                     <input type="text" class="form-control" name="username"
                                         placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
                                 </div>
