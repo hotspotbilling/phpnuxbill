@@ -5,33 +5,35 @@
         <div class="box box-solid box-default">
             <div class="box-header">{Lang::T('Order Internet Package')}</div>
         </div>
-        <div class="box box-solid box-primary">
-            <div class="box-header">{Lang::T('Balance Plans')}</div>
-            <div class="box-body row">
-                {foreach $plans_balance as $plan}
-                    <div class="col col-md-4">
-                        <div class="box box-solid box-default">
-                            <div class="box-header">{$plan['name_plan']}</div>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <tbody>
-                                        <tr>
-                                            <td>{Lang::T('Price')}</td>
-                                            <td>{Lang::moneyFormat($plan['price'])}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="box-body">
-                                <a href="{$_url}order/buy/0/{$plan['id']}"
-                                    onclick="return confirm('{Lang::T('Buy Balance?')}')"
-                                    class="btn btn-sm btn-block btn-primary">Buy</a>
+        {if $_c['enable_balance'] == 'yes'}
+            <div class="box box-solid box-primary">
+                <div class="box-header">{Lang::T('Balance Plans')}</div>
+                <div class="box-body row">
+                    {foreach $plans_balance as $plan}
+                        <div class="col col-md-4">
+                            <div class="box box-solid box-default">
+                                <div class="box-header">{$plan['name_plan']}</div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <td>{Lang::T('Price')}</td>
+                                                <td>{Lang::moneyFormat($plan['price'])}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="box-body">
+                                    <a href="{$_url}order/buy/0/{$plan['id']}"
+                                        onclick="return confirm('{Lang::T('Buy Balance?')}')"
+                                        class="btn btn-sm btn-block btn-primary">Buy</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {/foreach}
+                    {/foreach}
+                </div>
             </div>
-        </div>
+        {/if}
         {foreach $routers as $router}
             <div class="box box-solid box-info">
                 <div class="box-header text-black">{$router['name']}</div>

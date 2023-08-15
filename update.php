@@ -242,7 +242,7 @@ function deleteFolder($path)
                             </div>
                         <?php } else if ($step == 4) { ?>
                             <div class="panel panel-primary">
-                                <div class="panel-heading">Step 3</div>
+                                <div class="panel-heading">Step 4</div>
                                 <div class="panel-body">
                                     Updating database...
                                 </div>
