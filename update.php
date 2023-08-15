@@ -6,8 +6,11 @@
  * This script is for updating PHPNuxBill
  **/
 session_start();
+include "config.php";
 
-$download_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
+if(empty($update_url)){
+    $update_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
+}
 
 if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
     r2("./?_route=login&You_are_not_admin", 'e', 'You are not admin');
@@ -40,7 +43,7 @@ if (empty($step)) {
 
     // Download update
     $fp = fopen($file, 'w+');
-    $ch = curl_init($download_url);
+    $ch = curl_init($update_url);
     curl_setopt($ch, CURLOPT_POST, 0);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 600);
     curl_setopt($ch, CURLOPT_TIMEOUT, 600);
