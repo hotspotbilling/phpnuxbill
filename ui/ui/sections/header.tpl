@@ -28,6 +28,7 @@
             color: red;
             background: yellow;
         }
+
         .select2-container .select2-selection--single .select2-selection__rendered {
             margin-top: 0px !important;
         }
@@ -57,15 +58,15 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"
-                                    onerror="this.src='system/uploads/admin.default.png'"
-                                    class="user-image" alt="Avatar">
+                                    onerror="this.src='system/uploads/admin.default.png'" class="user-image"
+                                    alt="Avatar">
                                 <span class="hidden-xs">{$_admin['fullname']}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"
-                                        onerror="this.src='system/uploads/admin.default.png'"
-                                        class="img-circle" alt="Avatar">
+                                        onerror="this.src='system/uploads/admin.default.png'" class="img-circle"
+                                        alt="Avatar">
 
                                     <p>
                                         {$_admin['fullname']}
@@ -77,11 +78,12 @@
                                 <li class="user-body">
                                     <div class="row">
                                         <div class="col-xs-7 text-center text-sm">
-                                            <a href="{$_url}settings/change-password"><i class="ion ion-settings"></i> {$_L['Change_Password']}</a>
+                                            <a href="{$_url}settings/change-password"><i class="ion ion-settings"></i>
+                                                {$_L['Change_Password']}</a>
                                         </div>
                                         <div class="col-xs-5 text-center text-sm">
                                             <a href="{$_url}settings/users-edit/{$_admin['id']}">
-                                            <i class="ion ion-person"></i> {$_L['My_Account']}</a>
+                                                <i class="ion ion-person"></i> {$_L['My_Account']}</a>
                                         </div>
                                     </div>
                                 </li>
@@ -163,8 +165,8 @@
                                         href="{$_url}services/pppoe">{$_L['PPPOE_Plans']}</a></li>
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}bandwidth/list">{$_L['Bandwidth_Plans']}</a></li>
-                                    <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
-                                            href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></li>
+                                <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
+                                        href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></li>
                                 {$_MENU_SERVICES}
                             </ul>
                         </li>
@@ -223,7 +225,7 @@
                             </ul>
                         </li>
                         {$_MENU_AFTER_PAGES}
-                        <li class="{if $_system_menu eq 'settings'}active{/if} treeview">
+                        <li class="{if $_system_menu eq 'settings' || $_system_menu eq 'paymentgateway' }active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-gear-a"></i> <span>{$_L['Settings']}</span>
                                 <span class="pull-right-container">
@@ -234,26 +236,25 @@
                                 <li {if $_routes[1] eq 'app'}class="active" {/if}><a
                                         href="{$_url}settings/app">{$_L['General_Settings']}</a></li>
                                 <li {if $_routes[1] eq 'localisation'}class="active" {/if}><a
-                                    href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
+                                        href="{$_url}settings/localisation">{$_L['Localisation']}</a></li>
                                 <li {if $_routes[1] eq 'notifications'}class="active" {/if}><a
-                                    href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
+                                        href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
                                 <li {if $_routes[1] eq 'users'}class="active" {/if}><a
                                         href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
                                 <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
                                         href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li>
-                                <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
-                                        href="{$_url}pluginmanager">{Lang::T('Plugin Manager')}</a></li>
+                                <li {if $_routes[0] eq 'pluginmanager'}class="active" {/if}>
+                                    <a href="{$_url}pluginmanager">{Lang::T('Plugin Manager')}</a>
+                                </li>
+                                <li {if $_system_menu eq 'paymentgateway'}class="active" {/if}>
+                                    <a href="{$_url}paymentgateway">
+                                        <span class="text">{Lang::T('Payment Gateway')}</span>
+                                    </a>
+                                </li>
                                 {$_MENU_SETTINGS}
                             </ul>
                         </li>
                         {$_MENU_AFTER_SETTINGS}
-                        <li {if $_system_menu eq 'paymentgateway'}class="active" {/if}>
-                            <a href="{$_url}paymentgateway">
-                                <i class="ion ion-cash"></i>
-                                <span class="text">{Lang::T('Payment Gateway')}</span>
-                            </a>
-                        </li>
-                        {$_MENU_AFTER_PAYMENTGATEWAY}
                         <li {if $_system_menu eq 'community'}class="active" {/if}>
                             <a href="{$_url}community">
                                 <i class="ion ion-chatboxes"></i>
