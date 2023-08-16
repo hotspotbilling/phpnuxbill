@@ -12,6 +12,7 @@ if(empty($update_url)){
     $update_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
 }
 
+
 if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
     r2("./?_route=login&You_are_not_admin", 'e', 'You are not admin');
 }
@@ -35,7 +36,8 @@ if (!extension_loaded('zip')) {
 
 
 $file = pathFixer('system/cache/phpnuxbill.zip');
-$folder = pathFixer('system/cache/phpnuxbill-master/');
+$folder = pathFixer('system/cache/phpnuxbill-'.basename($update_url, ".zip").'/');
+
 if (empty($step)) {
     $step++;
 } else if ($step == 1) {
