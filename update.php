@@ -219,7 +219,7 @@ function deleteFolder($path)
                             <?= $msg ?>
                         </div>
                     <?php } ?>
-                    <?php if ($continue || $step == 4) { ?>
+                    <?php if ($continue || $step == 5) { ?>
                         <?php if ($step == 1) { ?>
                             <div class="panel panel-primary">
                                 <div class="panel-heading">Step 1</div>
