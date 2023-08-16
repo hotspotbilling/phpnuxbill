@@ -44,7 +44,7 @@
                                                     <td>{$ds['name_plan']}</td>
                                                     <td>{$ds['typebp']}</td>
                                                     <td>{$ds['name_bw']}</td>
-                                                    <td>{$ds['price']}</td>
+                                                    <td>{Lang::moneyFormat($ds['price'])}</td>
                                                     <td>{$ds['time_limit']} {$ds['time_unit']}</td>
                                                     <td>{$ds['data_limit']} {$ds['data_unit']}</td>
                                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>

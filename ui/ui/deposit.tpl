@@ -9,23 +9,23 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Select_Account']}</label>
                         <div class="col-md-6">
-                            <select id="personSelect" class="form-control" name="id_customer" style="width: 100%"
+                            <select id="personSelect" class="form-control select2" name="id_customer" style="width: 100%"
                                 data-placeholder="{$_L['Select_Customer']}...">
                                 <option></option>
                                 {foreach $c as $cs}
-                                    <option value="{$cs['id']}">{$cs['username']}</option>
+                                    <option value="{$cs['id']}">{$cs['username']} - {$cs['fullname']}</option>
                                 {/foreach}
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Service_Plan']}</label>
+                        <label class="col-md-2 control-label"><a href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></label>
                         <div class="col-md-6">
-                            <select id="planSelect" class="form-control" name="id_plan" style="width: 100%"
+                            <select id="planSelect" class="form-control select2" name="id_plan" style="width: 100%"
                                 data-placeholder="{$_L['Select_Plans']}...">
                                 <option></option>
                                 {foreach $p as $pl}
-                                    <option value="{$pl['id']}">{$pl['name_plan']}</option>
+                                    <option value="{$pl['id']}">{$pl['name_plan']} - {Lang::moneyFormat($pl['price'])}</option>
                                 {/foreach}
                             </select>
                         </div>

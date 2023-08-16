@@ -18,7 +18,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Routers']}</label>
                         <div class="col-md-6">
-                            <select id="server" name="server" class="form-control">
+                            <select id="server" name="server" class="form-control select2">
                                 <option value=''>{$_L['Select_Routers']}</option>
                             </select>
                         </div>
@@ -26,7 +26,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Service_Plan']}</label>
                         <div class="col-md-6">
-                            <select id="plan" name="plan" class="form-control">
+                            <select id="plan" name="plan" class="form-control select2">
                                 <option value=''>{$_L['Select_Plans']}</option>
                             </select>
                         </div>

@@ -41,7 +41,7 @@
                                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
                                                     <td>{$ds['name_plan']}</td>
                                                     <td>{$ds['name_bw']}</td>
-                                                    <td>{$ds['price']}</td>
+                                                    <td>{Lang::moneyFormat($ds['price'])}</td>
                                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                                     <td>{$ds['pool']}</td>
                                                     <td>{$ds['routers']}</td>

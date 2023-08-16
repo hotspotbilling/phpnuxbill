@@ -15,7 +15,8 @@
 
     <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
-
+    <link rel="stylesheet" href="ui/ui/styles/select2.min.css" />
+    <link rel="stylesheet" href="ui/ui/styles/select2-bootstrap.min.css" />
     <style>
         ::-moz-selection {
             /* Code for Firefox */
@@ -26,6 +27,9 @@
         ::selection {
             color: red;
             background: yellow;
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            margin-top: 0px !important;
         }
     </style>
 
