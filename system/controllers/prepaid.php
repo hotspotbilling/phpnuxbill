@@ -87,6 +87,7 @@ switch ($action) {
                 $ui->assign('in', $in);
                 $ui->assign('date', date("Y-m-d H:i:s"));
                 $ui->display('invoice.tpl');
+                _log('[' . $admin['username'] . ']: ' . 'Recharge '.$c['username'].' ['.$in['plan_name'].']['.Lang::moneyFormat($in['price']).']', 'Admin', $admin['id']);
             }else{
                 r2(U . 'prepaid/recharge', 'e', "Failed to recharge account");
             }
@@ -141,6 +142,7 @@ switch ($action) {
                 }
                 $d->delete();
             }
+            _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer '.$c['username'].'  ['.$in['plan_name'].']['.Lang::moneyFormat($in['price']).']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Delete_Successfully']);
         }
         break;
@@ -165,7 +167,8 @@ switch ($action) {
             $d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->save();
-            //TODO set mikrotik for editedd plan
+            Package::changeTo($username,$id_plan);
+            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer '.$d['username'].' to ['.$d['plan_name'].']['.Lang::moneyFormat($d['price']).']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
         } else {
             r2(U . 'prepaid/edit/' . $id, 'e', $msg);
