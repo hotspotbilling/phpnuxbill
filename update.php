@@ -254,8 +254,8 @@ function deleteFolder($path)
                                 </div>
                             </div>
                         <?php } else if ($step == 5) { ?>
-                            <div class="panel panel-primary">
-                                <div class="panel-success">Update Finished</div>
+                            <div class="panel panel-success">
+                                <div class="panel-heading">Update Finished</div>
                                 <div class="panel-body">
                                     PHPNuxBill has been updated to Version <b><?= $version ?></b>
                                 </div>
