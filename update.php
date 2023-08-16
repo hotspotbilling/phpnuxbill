@@ -103,7 +103,11 @@ if (empty($step)) {
         foreach ($updates as $version => $queries) {
             if (!in_array($version, $dones)) {
                 foreach ($queries as $q) {
-                    $dbh->exec($q);
+                    try{
+                    $db->exec($q);
+                    }catch(PDOException $e){
+                        //ignore, it exists already
+                    }
                 }
                 $dones[] = $version;
             }
