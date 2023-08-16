@@ -5,8 +5,8 @@
 				<div class="panel panel-primary panel-hovered panel-stacked mb30">
 					<div class="panel-heading">{$_L['Add_Pool']}</div>
 						<div class="panel-body">
-			
-                <form class="form-horizontal" method="post" role="form" action="{$_url}pool/add-post" >            
+
+                <form class="form-horizontal" method="post" role="form" action="{$_url}pool/add-post" >
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Pool_Name']}</label>
 						<div class="col-md-6">
@@ -18,11 +18,11 @@
 						<div class="col-md-6">
 							<input type="text" class="form-control" id="ip_address" name="ip_address" placeholder="ex: 192.168.88.2-192.168.88.254">
 						</div>
-                    </div>	
+                    </div>
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Routers']}</label>
 						<div class="col-md-6">
-							<select id="routers" name="routers" class="form-control">
+							<select id="routers" name="routers" class="form-control select2">
                                 {foreach $r as $rs}
 									<option value="{$rs['name']}">{$rs['name']}</option>
                                 {/foreach}
@@ -36,7 +36,7 @@
 						</div>
 					</div>
                 </form>
-				
+
 					</div>
 				</div>
 			</div>

@@ -17,7 +17,7 @@
                     <div class="form-group">
 						<label class="col-md-2 control-label">{$_L['Service_Plan']}</label>
 						<div class="col-md-6">
-							<select id="id_plan" name="id_plan" class="form-control">
+							<select id="id_plan" name="id_plan" class="form-control select2">
                                 {foreach $p as $ps}
 									<option value="{$ps['id']}" {if $d['plan_id'] eq $ps['id']} selected {/if}>{$ps['name_plan']}</option>
                                 {/foreach}

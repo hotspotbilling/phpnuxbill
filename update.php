@@ -6,8 +6,11 @@
  * This script is for updating PHPNuxBill
  **/
 session_start();
+include "config.php";
 
-$download_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
+if(empty($update_url)){
+    $update_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
+}
 
 if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
     r2("./?_route=login&You_are_not_admin", 'e', 'You are not admin');
@@ -40,7 +43,7 @@ if (empty($step)) {
 
     // Download update
     $fp = fopen($file, 'w+');
-    $ch = curl_init($download_url);
+    $ch = curl_init($update_url);
     curl_setopt($ch, CURLOPT_POST, 0);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 600);
     curl_setopt($ch, CURLOPT_TIMEOUT, 600);
@@ -100,7 +103,11 @@ if (empty($step)) {
         foreach ($updates as $version => $queries) {
             if (!in_array($version, $dones)) {
                 foreach ($queries as $q) {
-                    $dbh->exec($q);
+                    try{
+                    $db->exec($q);
+                    }catch(PDOException $e){
+                        //ignore, it exists already
+                    }
                 }
                 $dones[] = $version;
             }
@@ -212,7 +219,7 @@ function deleteFolder($path)
                             <?= $msg ?>
                         </div>
                     <?php } ?>
-                    <?php if ($continue || $step == 4) { ?>
+                    <?php if ($continue || $step == 5) { ?>
                         <?php if ($step == 1) { ?>
                             <div class="panel panel-primary">
                                 <div class="panel-heading">Step 1</div>
@@ -239,7 +246,7 @@ function deleteFolder($path)
                             </div>
                         <?php } else if ($step == 4) { ?>
                             <div class="panel panel-primary">
-                                <div class="panel-heading">Step 3</div>
+                                <div class="panel-heading">Step 4</div>
                                 <div class="panel-body">
                                     Updating database...
                                 </div>

@@ -72,7 +72,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['BW_Name']}</label>
 								<div class="col-md-6">
-									<select id="id_bw" name="id_bw" class="form-control">
+									<select id="id_bw" name="id_bw" class="form-control select2">
 										{foreach $b as $bs}
 											<option value="{$bs['id']}" {if $d['id_bw'] eq $bs['id']} selected {/if}>{$bs['name_bw']}</option>
 										{/foreach}
@@ -84,7 +84,7 @@
 								<div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-addon">{$_c['currency_code']}</span>
-                                        <input type="number" class="form-control" name="pricebp" value="{$d['price']}" required>
+                                        <input type="number" class="form-control" name="price" value="{$d['price']}" required>
                                     </div>
 								</div>
 							</div>

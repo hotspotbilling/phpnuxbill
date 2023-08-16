@@ -44,31 +44,37 @@
                         <div class="panel-body">
                             <div class="form-container">
                                 <div class="form-group">
-                                <label>{$_L['Phone_Number']}</label>
+                                    <label>{$_L['Phone_Number']}</label>
                                     <div class="input-group">
-                                        <span class="input-group-addon" id="basic-addon1">+</span>
+                                        {if $_c['country_code_phone']!= ''}
+                                            <span class="input-group-addon" id="basic-addon1">+</span>
+                                        {else}
+                                            <span class="input-group-addon" id="basic-addon1"><i
+                                                    class="glyphicon glyphicon-phone-alt"></i></span>
+                                        {/if}
                                         <input type="text" class="form-control" name="username" value="{$username}"
                                             placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                <label>{Lang::T('SMS Verification Code')}</label>
+                                    <label>{Lang::T('SMS Verification Code')}</label>
                                     <input type="text" required class="form-control" id="otp_code" value=""
                                         placeholder="{Lang::T('Verification Code')}" name="otp_code">
                                 </div>
                                 <div class="form-group">
-                                <label>{$_L['Full_Name']}</label>
+                                    <label>{$_L['Full_Name']}</label>
                                     <input type="text" required class="form-control" id="fullname" value="{$fullname}"
                                         name="fullname">
                                 </div>
                                 <div class="form-group">
                                     <label>{$_L['Email']}</label>
-                                    <input type="text" required class="form-control" placeholder="xxxxxx@xxx.xx" id="email" value="{$email}"
-                                        name="email">
+                                    <input type="text" required class="form-control" placeholder="xxxxxx@xxx.xx"
+                                        id="email" value="{$email}" name="email">
                                 </div>
                                 <div class="form-group">
-                                <label>{$_L['Address']}</label>
-                                    <input type="text" name="address" id="address" value="{$address}" class="form-control">
+                                    <label>{$_L['Address']}</label>
+                                    <input type="text" name="address" id="address" value="{$address}"
+                                        class="form-control">
                                 </div>
                             </div>
                         </div>
@@ -80,12 +86,13 @@
                         <div class="panel-body">
                             <div class="form-container">
                                 <div class="form-group">
-                                <label>{$_L['Password']}</label>
+                                    <label>{$_L['Password']}</label>
                                     <input type="password" required class="form-control" id="password" name="password">
                                 </div>
                                 <div class="form-group">
-                                <label>{$_L['Confirm_Password']}</label>
-                                    <input type="password" required class="form-control" id="cpassword" name="cpassword">
+                                    <label>{$_L['Confirm_Password']}</label>
+                                    <input type="password" required class="form-control" id="cpassword"
+                                        name="cpassword">
                                 </div>
                                 <div class="btn-group btn-group-justified mb15">
                                     <div class="btn-group">

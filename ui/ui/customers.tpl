@@ -36,6 +36,7 @@
                             <tr>
                                 <th>{$_L['Username']}</th>
                                 <th>{$_L['Full_Name']}</th>
+                                <th>{Lang::T('Balance')}</th>
                                 <th>{$_L['Phone_Number']}</th>
                                 <th>{$_L['Email']}</th>
                                 <th>{$_L['Created_On']}</th>
@@ -48,6 +49,7 @@
                                 <tr>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['fullname']}</td>
+                                    <td>{Lang::moneyFormat($ds['balance'])}</td>
                                     <td>{$ds['phonenumber']}</td>
                                     <td>{$ds['email']}</td>
                                     <td>{$ds['created_at']}</td>

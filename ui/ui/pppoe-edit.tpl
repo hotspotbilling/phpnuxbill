@@ -27,7 +27,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['BW_Name']}</label>
 								<div class="col-md-6">
-									<select id="id_bw" name="id_bw" class="form-control">
+									<select id="id_bw" name="id_bw" class="form-control select2">
 										{foreach $b as $bs}
 											<option value="{$bs['id']}" {if $d['id_bw'] eq $bs['id']} selected {/if}>{$bs['name_bw']}</option>
 										{/foreach}
@@ -60,7 +60,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Pool']}</label>
 								<div class="col-md-6">
-									<select id="pool_name" name="pool_name" class="form-control">
+									<select id="pool_name" name="pool_name" class="form-control select2">
 										{foreach $p as $ps}
 											<option value="{$ps['pool_name']}" {if $d['pool_name'] eq $ps['pool_name']} selected {/if}>{$ps['pool_name']}</option>
 										{/foreach}

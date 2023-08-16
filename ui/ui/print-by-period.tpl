@@ -38,7 +38,7 @@
                             <td>{$ds['username']}</td>
                             <td class="text-center">{$ds['plan_name']}</td>
                             <td class="text-center">{$ds['type']}</td>
-                            <td class="text-right">{$_c['currency_code']} {number_format($ds['price'],2,$_c['dec_point'],$_c['thousands_sep'])}</td>
+                            <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>
                             <td>{date($_c['date_format'], strtotime($ds['recharged_on']))}</td>
                             <td>{date($_c['date_format'], strtotime($ds['expiration']))} {$ds['time']}</td>
                             <td class="text-center">{$ds['method']}</td>
@@ -49,7 +49,7 @@
             </div>
 			<div class="clearfix text-right total-sum mb10">
 				<h4 class="text-uppercase text-bold">{$_L['Total_Income']}:</h4>
-				<h3 class="sum">{$_c['currency_code']} {number_format($dr,2,$_c['dec_point'],$_c['thousands_sep'])}</h3>
+				<h3 class="sum">{Lang::moneyFormat($dr)}</h3>
 			</div>
         </div>
         <button type="button" id="actprint" class="btn btn-default btn-sm no-print">{$_L['Click_Here_to_Print']}</button>

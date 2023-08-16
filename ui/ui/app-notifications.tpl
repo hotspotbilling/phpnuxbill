@@ -82,7 +82,8 @@
                             <b>[[plan_price]]</b> Internet Package Prices.<br>
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
-                            <b>[[expired_date]]</b> Expired datetime.
+                            <b>[[expired_date]]</b> Expired datetime.<br>
+                            <b>[[footer]]</b> Invoice Footer.
                         </p>
                     </div>
                 </div>
@@ -107,7 +108,8 @@
                             <b>[[plan_price]]</b> Internet Package Prices.<br>
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
-                            <b>[[trx_date]]</b> Transaction datetime.
+                            <b>[[trx_date]]</b> Transaction datetime.<br>
+                            <b>[[footer]]</b> Invoice Footer.
                         </p>
                     </div>
                 </div>

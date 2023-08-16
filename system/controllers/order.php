@@ -122,16 +122,16 @@ switch ($action) {
         run_hook('customer_buy_plan'); #HOOK
         include 'system/paymentgateway/' . $config['payment_gateway'] . '.php';
         call_user_func($config['payment_gateway'] . '_validate_config');
-        if ($routes['2'] != '0') {
+        if ($routes['2']>0) {
             $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
-            if (empty($router) || empty($plan)) {
-                r2(U . $back, 'e', Lang::T("Plan Not found"));
-            }
         }else{
             $router['id'] = 0;
             $router['name'] = 'balance';
         }
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
+        if (empty($router) || empty($plan)) {
+            r2(U . "order/package", 'e', Lang::T("Plan Not found"));
+        }
         $d = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
             ->where('status', 1)

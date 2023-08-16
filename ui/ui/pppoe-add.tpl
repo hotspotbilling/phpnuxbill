@@ -26,7 +26,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['BW_Name']}</label>
 								<div class="col-md-6">
-									<select id="id_bw" name="id_bw" class="form-control">
+									<select id="id_bw" name="id_bw" class="form-control select2">
 										<option value="">{$_L['Select_BW']}...</option>
 										{foreach $d as $ds}
 											<option value="{$ds['id']}">{$ds['name_bw']}</option>
@@ -60,7 +60,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Router_Name']}</label>
 								<div class="col-md-6">
-									<select id="routers" name="routers" class="form-control">
+									<select id="routers" name="routers" class="form-control select2">
 										<option value=''>{$_L['Select_Routers']}</option>
 										{foreach $r as $rs}
 											<option value="{$rs['name']}">{$rs['name']}</option>
@@ -72,7 +72,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label">{$_L['Pool']}</label>
 								<div class="col-md-6">
-									<select id="pool_name" name="pool_name" class="form-control">
+									<select id="pool_name" name="pool_name" class="form-control select2">
 										<option value=''>{$_L['Select_Pool']}</option>
 									</select>
 								</div>

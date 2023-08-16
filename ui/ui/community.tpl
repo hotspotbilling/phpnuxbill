@@ -10,9 +10,9 @@
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                     <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
-                        class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Github
+                        class="btn btn-primary btn-sm btn-block"><i class="ion ion-chatboxes"></i> Github
                         Discussions</a>
-                    <a href="https://t.me/phpnuxbill" target="_blank" class="btn btn-primary btn-lg btn-block"><i
+                    <a href="https://t.me/phpnuxbill" target="_blank" class="btn btn-primary btn-sm btn-block"><i
                             class="ion ion-chatboxes"></i> Telegram Group</a>
                 </div>
             </div>
@@ -28,7 +28,7 @@
             </div>
             <div class="box-footer">
                 <a href="https://github.com/hotspotbilling/phpnuxbill/issues" target="_blank"
-                    class="btn btn-primary btn-lg btn-block"><i class="ion ion-chatboxes"></i> Give Feedback</a>
+                    class="btn btn-primary btn-sm btn-block"><i class="ion ion-chatboxes"></i> Give Feedback</a>
             </div>
         </div>
     </div>
@@ -63,9 +63,9 @@
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                     <a href="https://trakteer.id/ibnux" target="_blank"
-                        class="btn btn-primary btn-lg btn-block">Trakteer</a>
+                        class="btn btn-primary btn-sm btn-block">Trakteer</a>
                     <a href="https://karyakarsa.com/ibnux/support" target="_blank"
-                        class="btn btn-primary btn-lg btn-block">karyakarsa</a>
+                        class="btn btn-primary btn-sm btn-block">karyakarsa</a>
                 </div>
             </div>
         </div>
@@ -101,7 +101,7 @@
                 </table>
             </div>
             <div class="box-footer">
-                <a href="https://paypal.me/ibnux" target="_blank" class="btn btn-primary btn-lg btn-block">Paypal</a>
+                <a href="https://paypal.me/ibnux" target="_blank" class="btn btn-primary btn-sm btn-block">Paypal</a>
             </div>
         </div>
     </div>
@@ -114,7 +114,7 @@
             </div>
             <div class="box-body">$50 Paid Support<br>donation confirmation?<br>Or ask any Donation Alternative</div>
             <div class="box-footer">
-                <a href="https://t.me/ibnux" target="_blank" class="btn btn-primary btn-lg btn-block">Telegram</a>
+                <a href="https://t.me/ibnux" target="_blank" class="btn btn-primary btn-sm btn-block">Telegram</a>
             </div>
         </div>
         <div class="box box-primary box-hovered mb20 activities">
@@ -126,7 +126,7 @@
             </div>
             <div class="box-footer">
                 <a href="https://wa.nux.my.id/login" target="_blank"
-                    class="btn btn-primary btn-lg btn-block">wa.nux.my.id</a>
+                    class="btn btn-primary btn-sm btn-block">wa.nux.my.id</a>
             </div>
         </div>
     </div>
@@ -142,11 +142,23 @@
             <div class="box-footer" id="latestVersion">ver</div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                    <a href="./update.php" target="_blank"
-                        class="btn btn-success btn-lg btn-block">Install Latest Version</a>
+                    <a href="./update.php" target="_blank" class="btn btn-success btn-sm btn-block">Install Latest
+                        Version</a>
                     <a href="https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip" target="_blank"
-                        class="btn btn-warning btn-lg btn-block">Download Latest Version</a>
+                        class="btn btn-warning btn-sm btn-block">Download Latest Version</a>
                 </div>
+            </div>
+            <div class="box-footer">
+                <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                    <a href="./CHANGELOG.md" target="_blank" class="btn btn-default btn-sm btn-block">Current
+                        Changelog</a>
+                    <a href="https://github.com/hotspotbilling/phpnuxbill/blob/master/CHANGELOG.md" target="_blank"
+                        class="btn btn-default btn-sm btn-block">Repo Changelog</a>
+                </div>
+            </div>
+            <div class="box-footer">
+                If you Download manual the update file, sometime update change database, after uploading, click this button to update database structure.
+                <a href="./update.php?step=4" class="btn btn-default btn-sm btn-block">Update Database</a>
             </div>
         </div>
     </div>

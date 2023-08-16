@@ -14,10 +14,18 @@
 
 <script src="ui/ui/scripts/plugins/select2.min.js"></script>
 <script src="ui/ui/scripts/custom.js"></script>
+<script src="ui/ui/scripts/select2.min.js"></script>
 
 {if isset($xfooter)}
     {$xfooter}
 {/if}
+{literal}
+<script>
+$(document).ready(function() {
+    $('.select2').select2({theme: "bootstrap"});
+});
+</script>
+{/literal}
 
 </body>
 

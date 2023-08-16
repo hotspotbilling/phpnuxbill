@@ -363,3 +363,5 @@ $_L['Disable_auto_renewal'] = 'Disable auto renewal?';
 $_L['Auto_Renewal_On'] = 'Auto Renewal On';
 $_L['Enable_auto_renewal'] = 'Enable auto renewal?';
 $_L['Auto_Renewal_Off'] = 'Auto Renewal Off';
+$_L['Refill_Balance'] = 'Refill Balance';
+$_L['Invoice_Footer'] = 'Invoice Footer';

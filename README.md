@@ -6,6 +6,8 @@
 
 - Voucher Generator and Print
 - Self registration
+- User Balance
+- Auto Renewal Package using Balance
 - Multi Router Mikrotik
 - Hotspot & PPPOE
 - Easy Installation

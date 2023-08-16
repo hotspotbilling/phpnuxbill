@@ -24,7 +24,7 @@
                                 <tr>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['plan_name']}</td>
-                                    <td>{number_format($ds['price'],2,$_c['dec_point'],$_c['thousands_sep'])}</td>
+                                    <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['type']}</td>
                                     <td class="text-success">{date($_c['date_format'], strtotime($ds['recharged_on']))}</td>
                                     <td class="text-danger">{date($_c['date_format'], strtotime($ds['expiration']))}

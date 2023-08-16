@@ -71,7 +71,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label">{$_L['BW_Name']}</label>
                                 <div class="col-md-6">
-                                    <select id="id_bw" name="id_bw" class="form-control">
+                                    <select id="id_bw" name="id_bw" class="form-control select2">
                                         <option value="">{$_L['Select_BW']}...</option>
                                         {foreach $d as $ds}
                                             <option value="{$ds['id']}">{$ds['name_bw']}</option>
@@ -84,7 +84,7 @@
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-addon">{$_c['currency_code']}</span>
-                                        <input type="number" class="form-control" name="pricebp" required>
+                                        <input type="number" class="form-control" name="price" required>
                                     </div>
                                 </div>
                             </div>
@@ -112,7 +112,7 @@
                             <div class="form-group">
                                 <label class="col-md-2 control-label">{$_L['Router_Name']}</label>
                                 <div class="col-md-6">
-                                    <select id="routers" name="routers" class="form-control">
+                                    <select id="routers" name="routers" class="form-control select2">
                                         {foreach $r as $rs}
                                             <option value="{$rs['name']}">{$rs['name']}</option>
                                         {/foreach}
