@@ -3,6 +3,6 @@
 	"reminder_7_day": "Hello *[[name]]*, \r\nyour internet package *[[package]]* will be expired in 7 days.",
 	"reminder_3_day": "Hello *[[name]]*, \r\nyour internet package *[[package]]* will be expired in 3 days.",
 	"reminder_1_day": "Hello *[[name]]*,\r\n your internet package *[[package]]* will be expired tomorrow.",
-	"invoice_paid": "*[[company_name]]*\r\n[[address]]\r\n[[phone]]\r\n\r\n\r\nINVOICE: *[[invoice]]*\r\nDate : [[date]]\r\n[[payment_gateway]] [[payment_channel]]\r\n\r\n\r\nType : *[[type]]*\r\nPackage : *[[plan_name]]*\r\nPrice : *[[plan_price]]*\r\n\r\nUsername : *[[user_name]]*\r\nPassword : ***********\r\n\r\nExpired : *[[expired_date]]*\r\n\r\n\r\nThank you...",
-	"invoice_balance": "*[[company_name]]*\r\n[[address]]\r\n[[phone]]\r\n\r\n\r\nINVOICE: *[[invoice]]*\r\nDate : [[date]]\r\n[[payment_gateway]] [[payment_channel]]\r\n\r\n\r\nType : *[[type]]*\r\nPackage : *[[plan_name]]*\r\nPrice : *[[plan_price]]*\r\n\r\nThank you..."
+	"invoice_paid": "*[[company_name]]*\r\n[[address]]\r\n[[phone]]\r\n\r\n\r\nINVOICE: *[[invoice]]*\r\nDate : [[date]]\r\n[[payment_gateway]] [[payment_channel]]\r\n\r\n\r\nType : *[[type]]*\r\nPackage : *[[plan_name]]*\r\nPrice : *[[plan_price]]*\r\n\r\nUsername : *[[user_name]]*\r\nPassword : ***********\r\n\r\nExpired : *[[expired_date]]*\r\n\r\n====================\r\n[[footer]]",
+	"invoice_balance": "*[[company_name]]*\r\n[[address]]\r\n[[phone]]\r\n\r\n\r\nINVOICE: *[[invoice]]*\r\nDate : [[date]]\r\n[[payment_gateway]] [[payment_channel]]\r\n\r\n\r\nType : *[[type]]*\r\nPackage : *[[plan_name]]*\r\nPrice : *[[plan_price]]*\r\n\r\n====================\r\n[[footer]]"
 }

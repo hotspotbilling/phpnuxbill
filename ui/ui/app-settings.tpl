@@ -247,6 +247,24 @@
                         add dst-host=tawk.to<br>
                         add dst-host=*.tawk.to</p>
                 </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Invoice')}
+                </div>
+                <div class="panel-heading"></div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Invoice Footer')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="note" name="note"
+                                rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
+                            <span class="help-block">{$_L['You_can_use_html_tag']}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="panel-body">

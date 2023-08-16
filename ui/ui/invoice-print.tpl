@@ -43,7 +43,8 @@
                                 {$_L['Expires_On']} : <b>{date($_c['date_format'], strtotime($d['expiration']))}
                                     {$d['time']}</b><br>
                             {/if}
-                            ============================================
+                            ============================================<br>
+                            <center>{$_c['note']}</center>
                         </fieldset>
                     </td>
                 </tr>

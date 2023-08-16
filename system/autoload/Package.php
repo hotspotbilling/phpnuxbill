@@ -62,6 +62,7 @@ class Package
             $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " " . number_format($p['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
             $textInvoice = str_replace('[[user_name]]', $c['username'], $textInvoice);
             $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
+            $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
 
             if ($_c['user_notification_payment'] == 'sms') {
                 Message::sendSMS($c['phonenumber'], $textInvoice);
@@ -255,6 +256,7 @@ class Package
         $textInvoice = str_replace('[[user_name]]', $in['username'], $textInvoice);
         $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
         $textInvoice = str_replace('[[expired_date]]', date($_c['date_format'], strtotime($in['expiration'])) . " " . $in['time'], $textInvoice);
+        $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
 
         if ($_c['user_notification_payment'] == 'sms') {
             Message::sendSMS($c['phonenumber'], $textInvoice);

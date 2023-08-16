@@ -28,7 +28,8 @@
                             {$_L['Expires_On']} : <b>{date($_c['date_format'], strtotime($in['expiration']))}
                                 {$in['time']}</b><br>
                         {/if}
-                        =====================================================
+                        =====================================================<br>
+                        <center>{$_c['note']}</center>
                     </fieldset>
                 </div>
                 <form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
