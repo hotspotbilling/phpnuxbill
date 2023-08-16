@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2023.8.16
+
+- Admin Can Add Balance to Customer
+- Show Balance in user
+- Using Select2 for Dropdown
+
 ## 2023.8.15
 
 - Fix PPPOE Delete Customer
