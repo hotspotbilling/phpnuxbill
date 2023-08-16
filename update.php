@@ -6,8 +6,12 @@
  * This script is for updating PHPNuxBill
  **/
 session_start();
+include "config.php";
 
-$download_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
+if(empty($update_url)){
+    $update_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
+}
+
 
 if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
     r2("./?_route=login&You_are_not_admin", 'e', 'You are not admin');
@@ -32,7 +36,8 @@ if (!extension_loaded('zip')) {
 
 
 $file = pathFixer('system/cache/phpnuxbill.zip');
-$folder = pathFixer('system/cache/phpnuxbill-master/');
+$folder = pathFixer('system/cache/phpnuxbill-'.basename($update_url, ".zip").'/');
+
 if (empty($step)) {
     $step++;
 } else if ($step == 1) {
@@ -40,7 +45,7 @@ if (empty($step)) {
 
     // Download update
     $fp = fopen($file, 'w+');
-    $ch = curl_init($download_url);
+    $ch = curl_init($update_url);
     curl_setopt($ch, CURLOPT_POST, 0);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 600);
     curl_setopt($ch, CURLOPT_TIMEOUT, 600);
@@ -82,6 +87,36 @@ if (empty($step)) {
         $msgType = "danger";
         $continue = false;
     }
+} else if ($step == 4) {
+    if (file_exists("system/updates.json")) {
+        require 'config.php';
+        $db = new pdo(
+            "mysql:host=$db_host;dbname=$db_name",
+            $db_user,
+            $db_password,
+            array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
+        );
+
+        $updates = json_decode(file_get_contents("system/updates.json"), true);
+        $dones = [];
+        if (file_exists("system/cache/updates.done.json")) {
+            $dones = json_decode(file_get_contents("system/cache/updates.done.json"), true);
+        }
+        foreach ($updates as $version => $queries) {
+            if (!in_array($version, $dones)) {
+                foreach ($queries as $q) {
+                    try{
+                    $db->exec($q);
+                    }catch(PDOException $e){
+                        //ignore, it exists already
+                    }
+                }
+                $dones[] = $version;
+            }
+        }
+        file_put_contents("system/cache/updates.done.json", json_encode($dones));
+    }
+    $step++;
 } else {
     $version = json_decode(file_get_contents('version.json'), true)['version'];
     $continue = false;
@@ -152,7 +187,7 @@ function deleteFolder($path)
     <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
     <?php if ($continue) { ?>
-        <meta http-equiv="refresh" content="1; ./update.php?step=<?= $step ?>">
+        <meta http-equiv="refresh" content="3; ./update.php?step=<?= $step ?>">
     <?php } ?>
     <style>
         ::-moz-selection {
@@ -186,7 +221,7 @@ function deleteFolder($path)
                             <?= $msg ?>
                         </div>
                     <?php } ?>
-                    <?php if ($continue || $step == 4) { ?>
+                    <?php if ($continue || $step == 5) { ?>
                         <?php if ($step == 1) { ?>
                             <div class="panel panel-primary">
                                 <div class="panel-heading">Step 1</div>
@@ -213,7 +248,14 @@ function deleteFolder($path)
                             </div>
                         <?php } else if ($step == 4) { ?>
                             <div class="panel panel-primary">
-                                <div class="panel-success">Update Finished</div>
+                                <div class="panel-heading">Step 4</div>
+                                <div class="panel-body">
+                                    Updating database...
+                                </div>
+                            </div>
+                        <?php } else if ($step == 5) { ?>
+                            <div class="panel panel-success">
+                                <div class="panel-heading">Update Finished</div>
                                 <div class="panel-body">
                                     PHPNuxBill has been updated to Version <b><?= $version ?></b>
                                 </div>

@@ -86,7 +86,7 @@
                                     <td rowspan="5" width="1"><img src="qrcode/?data={$vs['code']}"></td>
                                 </tr>
                                 <tr>
-                                    <td valign="middle" align="center" style="font-size:25px">{$_c['currency_code']} {number_format($vs['price'],2,$_c['dec_point'],$_c['thousands_sep'])}</td>
+                                    <td valign="middle" align="center" style="font-size:25px">{Lang::moneyFormat($vs['price'])}</td>
                                 </tr>
                                 <tr>
                                     <td valign="middle" align="center" style="font-size:20px">{$_L['Code_Voucher']}</td>

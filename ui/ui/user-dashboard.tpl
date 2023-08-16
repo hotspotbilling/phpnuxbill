@@ -62,6 +62,21 @@
                             style="background-color: black; color:black; width:100%; border: 0px;"
                             onclick="this.select()"></td>
                 </tr>
+                {if $_c['enable_balance'] == 'yes'}
+                    <tr>
+                        <td class="small text-warning text-uppercase text-normal">{Lang::T('Balance')}</td>
+                        <td class="small mb15 text-bold">
+                            {Lang::moneyFormat($_user['balance'])}
+                            {if $_user['auto_renewal'] == 1}
+                                <a class="label label-success pull-right" href="{$_url}home&renewal=0"
+                                    onclick="return confirm('{Lang::T('Disable auto renewal?')}')">{Lang::T('Auto Renewal On')}</a>
+                            {else}
+                                <a class="label label-danger pull-right" href="{$_url}home&renewal=1"
+                                    onclick="return confirm('{Lang::T('Enable auto renewal?')}')">{Lang::T('Auto Renewal Off')}</a>
+                            {/if}
+                        </td>
+                    </tr>
+                {/if}
                 <tr>
                     <td class="small text-primary text-uppercase text-normal">{$_L['Plan_Name']}</td>
                     <td class="small mb15">{$_bill['namebp']}</td>
@@ -125,39 +140,39 @@
         {/if}
         <br>
         {if $_c['disable_voucher'] != 'yes'}
-        <div class="box box-primary box-solid mb30">
-            <div class="box-header">
-                <h3 class="box-title">{$_L['Voucher_Activation']}</h3>
-            </div>
-            <div class="box-body">
-                <form method="post" role="form" class="form-horizontal" action="{$_url}voucher/activation-post">
-                    <div class="form-group">
-                        <label class="col-sm-4 control-label text-center">{$_L['Code_Voucher']}</label>
-                        <div class="col-sm-7">
-                            <input type="text" id="code" name="code" class="form-control"
-                                placeholder="{$_L['Enter_Voucher_Code']}">
+            <div class="box box-primary box-solid mb30">
+                <div class="box-header">
+                    <h3 class="box-title">{$_L['Voucher_Activation']}</h3>
+                </div>
+                <div class="box-body">
+                    <form method="post" role="form" class="form-horizontal" action="{$_url}voucher/activation-post">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label text-center">{$_L['Code_Voucher']}</label>
+                            <div class="col-sm-7">
+                                <input type="text" id="code" name="code" class="form-control"
+                                    placeholder="{$_L['Enter_Voucher_Code']}">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group" align="center">
-                        <button class="btn btn-success" type="submit">{$_L['Recharge']}</button>
-                    </div>
-                </form>
-            </div>
-            <div class="box-body">
-                <div class="btn-group btn-group-justified" role="group">
-                    <a class="btn btn-warning" href="{$_url}voucher/activation">
-                        <i class="ion ion-ios-cart"></i>
-                        {$_L['Order_Voucher']}
-                    </a>
-                    {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
-                        <a href="{$_url}order/package" class="btn btn-primary">
+                        <div class="form-group" align="center">
+                            <button class="btn btn-success" type="submit">{$_L['Recharge']}</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="box-body">
+                    <div class="btn-group btn-group-justified" role="group">
+                        <a class="btn btn-warning" href="{$_url}voucher/activation">
                             <i class="ion ion-ios-cart"></i>
-                            {Lang::T('Order Package')}
+                            {$_L['Order_Voucher']}
                         </a>
-                    {/if}
+                        {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
+                            <a href="{$_url}order/package" class="btn btn-primary">
+                                <i class="ion ion-ios-cart"></i>
+                                {Lang::T('Order Package')}
+                            </a>
+                        {/if}
+                    </div>
                 </div>
             </div>
-        </div>
         {/if}
     </div>
 </div>

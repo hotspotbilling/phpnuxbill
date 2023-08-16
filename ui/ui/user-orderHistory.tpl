@@ -28,7 +28,7 @@
                                     <td>{$ds['gateway']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td>{$ds['payment_channel']}</td>
-                                    <td>{number_format($ds['price'],2,$_c['dec_point'],$_c['thousands_sep'])}</td>
+                                    <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td class="text-primary">{date("{$_c['date_format']} H:i",
                                         strtotime($ds['created_date']))}</td>
                                     <td class="text-danger">{date("{$_c['date_format']} H:i",

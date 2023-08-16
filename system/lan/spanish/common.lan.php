@@ -328,6 +328,16 @@ $_L['Not_Online_Login_now'] = 'Not Online, Login now?';
 $_L['You_are_Online_Logout'] = 'You are Online, Logout?';
 $_L['Connect_to_Internet'] = 'Connect to Internet?';
 $_L['Your_account_not_connected_to_internet'] = 'Your account not connected to internet';
-
-
-
+$_L['Balance'] = 'Balance';
+$_L['Balance_System'] = 'Balance System';
+$_L['Enable_System'] = 'Enable System';
+$_L['Allow_Transfer'] = 'Allow Transfer';
+$_L['Telegram_Notification'] = 'Telegram Notification';
+$_L['SMS_OTP_Registration'] = 'SMS OTP Registration';
+$_L['Whatsapp_Notification'] = 'Whatsapp Notification';
+$_L['Tawkto_Chat_Widget'] = 'Tawk.to Chat Widget';
+$_L['Invoice'] = 'Invoice';
+$_L['Country_Code_Phone'] = 'Country Code Phone';
+$_L['Voucher_activation_menu_will_be_hidden'] = 'Voucher activation menu will be hidden';
+$_L['Customer_can_deposit_money_to_buy_voucher'] = 'Customer can deposit money to buy voucher';
+$_L['Allow_balance_transfer_between_customers'] = 'Allow balance transfer between customers';

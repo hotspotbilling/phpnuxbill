@@ -2,12 +2,34 @@
 
 # CHANGELOG
 
+## 2023.8.16
+
+- Admin Can Add Balance to Customer
+- Show Balance in user
+- Using Select2 for Dropdown
+
+## 2023.8.15
+
+- Fix PPPOE Delete Customer
+- Fix Header Admin and Customer
+- Fix PDF Export by Period
+- Add pppoe_password for Customer, this pppoe_password only admin can change
+- Country Code Number Settings
+- Customer Meta Table for Custom Fields
+- Fix Add and Edit Customer Form for admin
+- add Notification Message Editor
+- cron reminder
+- Balance System, Customer can deposit money
+- Auto renewal when package expired using Customer Balance
+
+
 ## 2023.8.1
 
 - Add Update file script, one click updating PHPNuxBill
 - Add Custom UI folder, to custome your own template
 - Delete debug text
 - Fix Vendor JS
+
 ## 2023.7.28
 
 - Fix link buy Voucher
@@ -22,13 +44,13 @@
   Because the first time phpmixbill created, plan validity only for days and Months, many request ask for minutes and hours, i change it, but not the database.
 ## 2023.6.15
 
-- User can connect to internet from User Dashboard
+- Customer can connect to internet from Customer Dashboard
 - Fix Confirm when delete
 - Change Logo PHPNuxBill
 - Using Composer
-- Fix Search User
-- Fix user check, if not found will logout
-- User password show but hidden
+- Fix Search Customer
+- Fix Customer check, if not found will logout
+- Customer password show but hidden
 - Voucher code hidden
 
 ## 2023.6.8

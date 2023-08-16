@@ -41,13 +41,13 @@
                                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
                                                     <td>{$ds['name_plan']}</td>
                                                     <td>{$ds['name_bw']}</td>
-                                                    <td>{$ds['price']}</td>
+                                                    <td>{Lang::moneyFormat($ds['price'])}</td>
                                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                                     <td>{$ds['pool']}</td>
                                                     <td>{$ds['routers']}</td>
                                                     <td>
                                                         <a href="{$_url}services/pppoe-edit/{$ds['id']}" class="btn btn-info btn-xs">{$_L['Edit']}</a>
-                                                        <a href="{$_url}services/pppoe-delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a>
+                                                        <a href="{$_url}services/pppoe-delete/{$ds['id']}" onclick="return confirm('{$_L['Delete']}?')" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                                     </td>
                                                 </tr>
                                             {/foreach}

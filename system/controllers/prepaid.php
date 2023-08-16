@@ -72,8 +72,6 @@ switch ($action) {
         $type = _post('type');
         $server = _post('server');
         $plan = _post('plan');
-
-        $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time = date("H:i:s");
 
@@ -83,212 +81,28 @@ switch ($action) {
         }
 
         if ($msg == '') {
-            $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
-            $p = ORM::for_table('tbl_plans')->where('id', $plan)->where('enabled', '1')->find_one();
-            $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
-
-            $mikrotik = Mikrotik::info($server);
-            if($p['validity_unit']=='Months'){
-                $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' month'));
-            }else if($p['validity_unit']=='Days'){
-                $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' day'));
-            }else if($p['validity_unit']=='Hrs'){
-                $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' hour')));
-                $date_exp = $datetime[0];
-                $time = $datetime[1];
-            }else if($p['validity_unit']=='Mins'){
-                $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' minute')));
-                $date_exp = $datetime[0];
-                $time = $datetime[1];
+            if(Package::rechargeUser($id_customer, $server, $plan, "Recharge", $admin['fullname'])){
+                $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
+                $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+                $ui->assign('in', $in);
+                $ui->assign('date', date("Y-m-d H:i:s"));
+                $ui->display('invoice.tpl');
+                _log('[' . $admin['username'] . ']: ' . 'Recharge '.$c['username'].' ['.$in['plan_name'].']['.Lang::moneyFormat($in['price']).']', 'Admin', $admin['id']);
+            }else{
+                r2(U . 'prepaid/recharge', 'e', "Failed to recharge account");
             }
-            run_hook('recharge_customer'); #HOOK
-            if ($type == 'Hotspot') {
-                if ($b) {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removeHotspotUser($client,$c['username']);
-                        Mikrotik::addHotspotUser($client,$p,$c);
-                    }
-
-                    $b->customer_id = $id_customer;
-                    $b->username = $c['username'];
-                    $b->plan_id = $plan;
-                    $b->namebp = $p['name_plan'];
-                    $b->recharged_on = $date_only;
-                    $b->expiration = $date_exp;
-                    $b->time = $time;
-                    $b->status = "on";
-                    $b->method = "admin";
-                    $b->routers = $server;
-                    $b->type = "Hotspot";
-                    $b->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "admin";
-                    $t->routers = $server;
-                    $t->type = "Hotspot";
-                    $t->save();
-                } else {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::addHotspotUser($client,$p,$c);
-                    }
-
-                    $d = ORM::for_table('tbl_user_recharges')->create();
-                    $d->customer_id = $id_customer;
-                    $d->username = $c['username'];
-                    $d->plan_id = $plan;
-                    $d->namebp = $p['name_plan'];
-                    $d->recharged_on = $date_only;
-                    $d->expiration = $date_exp;
-                    $d->time = $time;
-                    $d->status = "on";
-                    $d->method = "admin";
-                    $d->routers = $server;
-                    $d->type = "Hotspot";
-                    $d->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "admin";
-                    $t->routers = $server;
-                    $t->type = "Hotspot";
-                    $t->save();
-                }
-                Message::sendTelegram( "$admin[fullname] #Recharge Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
-                "\nRouter: ".$server.
-                "\nPrice: ".$p['price']);
-            } else {
-
-                if ($b) {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removePpoeUser($client,$c['username']);
-                        Mikrotik::addPpoeUser($client,$p,$c);
-                    }
-
-                    $b->customer_id = $id_customer;
-                    $b->username = $c['username'];
-                    $b->plan_id = $plan;
-                    $b->namebp = $p['name_plan'];
-                    $b->recharged_on = $date_only;
-                    $b->expiration = $date_exp;
-                    $b->time = $time;
-                    $b->status = "on";
-                    $b->method = "admin";
-                    $b->routers = $server;
-                    $b->type = "PPPOE";
-                    $b->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "admin";
-                    $t->routers = $server;
-                    $t->type = "PPPOE";
-                    $t->save();
-                } else {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::addPpoeUser($client,$p,$c);
-                    }
-
-                    $d = ORM::for_table('tbl_user_recharges')->create();
-                    $d->customer_id = $id_customer;
-                    $d->username = $c['username'];
-                    $d->plan_id = $plan;
-                    $d->namebp = $p['name_plan'];
-                    $d->recharged_on = $date_only;
-                    $d->expiration = $date_exp;
-                    $d->time = $time;
-                    $d->status = "on";
-                    $d->method = "admin";
-                    $d->routers = $server;
-                    $d->type = "PPPOE";
-                    $d->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "admin";
-                    $t->routers = $server;
-                    $t->type = "PPPOE";
-                    $t->save();
-                }
-                Message::sendTelegram( "$admin[fullname] #Recharge Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
-                "\nRouter: ".$server.
-                "\nPrice: ".$p['price']);
-            }
-
-            $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
-            $ui->assign('in', $in);
-
-            $msg = "*$config[CompanyName]*\n".
-					"$config[address]\n".
-					"$config[phone]\n".
-					"\n\n".
-					"INVOICE: *$in[invoice]*\n".
-                    "$_L[Date] : $date_now\n".
-					"$_L[Sales] : $admin[fullname]\n".
-					"\n\n".
-					"$_L[Type] : *$in[type]*\n".
-					"$_L[Plan_Name] : *$in[plan_name]*\n".
-					"$_L[Plan_Price] : *$config[currency_code] ".number_format($in['price'],2,$config['dec_point'],$config['thousands_sep'])."*\n\n".
-					"$_L[Username] : *$in[username]*\n".
-					"$_L[Password] : **********\n\n".
-					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))."*\n".
-					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
-					"\n\n".
-					"$config[note]";
-
-            if ($_c['user_notification_payment'] == 'sms') {
-                Message::sendSMS($c['phonenumber'], $msg);
-            } else if ($_c['user_notification_payment'] == 'wa') {
-                Message::sendWhatsapp($c['phonenumber'], $msg);
-            }
-
-            $ui->assign('date', $date_now);
-            $ui->display('invoice.tpl');
         } else {
             r2(U . 'prepaid/recharge', 'e', $msg);
         }
         break;
 
     case 'print':
-        $date_now = date("Y-m-d H:i:s");
         $id = _post('id');
 
         $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
         $ui->assign('d', $d);
 
-        $ui->assign('date', $date_now);
+        $ui->assign('date', date("Y-m-d H:i:s"));
         run_hook('print_invoice'); #HOOK
         $ui->display('invoice-print.tpl');
         break;
@@ -328,6 +142,7 @@ switch ($action) {
                 }
                 $d->delete();
             }
+            _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer '.$c['username'].'  ['.$in['plan_name'].']['.Lang::moneyFormat($in['price']).']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Delete_Successfully']);
         }
         break;
@@ -352,7 +167,8 @@ switch ($action) {
             $d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->save();
-            //TODO set mikrotik for editedd plan
+            Package::changeTo($username,$id_plan);
+            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer '.$d['username'].' to ['.$d['plan_name'].']['.Lang::moneyFormat($d['price']).']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
         } else {
             r2(U . 'prepaid/edit/' . $id, 'e', $msg);
@@ -526,7 +342,7 @@ switch ($action) {
 
     case 'refill':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/ui/scripts/form-elements.init.js"></script>');
-
+        $ui->assign('_title', $_L['Refill_Account']);
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);
         run_hook('view_refill'); #HOOK
@@ -540,221 +356,50 @@ switch ($action) {
 
         $v1 = ORM::for_table('tbl_voucher')->where('code', $code)->where('status', 0)->find_one();
 
-        $c = ORM::for_table('tbl_customers')->find_one($user);
-        $p = ORM::for_table('tbl_plans')->find_one($v1['id_plan']);
-        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $user)->find_one();
-
-        $date_now = date("Y-m-d H:i:s");
-        $date_only = date("Y-m-d");
-        $time = date("H:i:s");
-
-        $mikrotik = Mikrotik::info($v1['routers']);
-
-        if($p['validity_unit']=='Months'){
-            $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' month'));
-        }else if($p['validity_unit']=='Days'){
-            $date_exp = date("Y-m-d", strtotime('+'.$p['validity'].' day'));
-        }else if($p['validity_unit']=='Hrs'){
-            $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' hour')));
-            $date_exp = $datetime[0];
-            $time = $datetime[1];
-        }else if($p['validity_unit']=='Mins'){
-            $datetime = explode(' ',date("Y-m-d H:i:s", strtotime('+'.$p['validity'].' minute')));
-            $date_exp = $datetime[0];
-            $time = $datetime[1];
-        }
         run_hook('refill_customer'); #HOOK
         if ($v1) {
-            if ($v1['type'] == 'Hotspot') {
-                if ($b) {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removeHotspotUser($client,$c['username']);
-                        Mikrotik::addHotspotUser($client,$p,$c);
-                    }
-
-                    $b->customer_id = $user;
-                    $b->username = $c['username'];
-                    $b->plan_id = $v1['id_plan'];
-                    $b->namebp = $p['name_plan'];
-                    $b->recharged_on = $date_only;
-                    $b->expiration = $date_exp;
-                    $b->time = $time;
-                    $b->status = "on";
-                    $b->method = "voucher";
-                    $b->routers = $v1['routers'];
-                    $b->type = "Hotspot";
-                    $b->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "voucher";
-                    $t->routers = $v1['routers'];
-                    $t->type = "Hotspot";
-                    $t->save();
-                } else {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::addHotspotUser($client,$p,$c);
-                    }
-
-                    $d = ORM::for_table('tbl_user_recharges')->create();
-                    $d->customer_id = $user;
-                    $d->username = $c['username'];
-                    $d->plan_id = $v1['id_plan'];
-                    $d->namebp = $p['name_plan'];
-                    $d->recharged_on = $date_only;
-                    $d->expiration = $date_exp;
-                    $d->time = $time;
-                    $d->status = "on";
-                    $d->method = "voucher";
-                    $d->routers = $v1['routers'];
-                    $d->type = "Hotspot";
-                    $d->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "voucher";
-                    $t->routers = $v1['routers'];
-                    $t->type = "Hotspot";
-                    $t->save();
-                }
-
+            if(Package::rechargeUser($user, $v1['routers'], $v1['id_plan'], "Refill", "Voucher")){
                 $v1->status = "1";
                 $v1->user = $c['username'];
                 $v1->save();
-
-                Message::sendTelegram( "$admin[fullname] #Refill #Voucher #Hotspot for #u$c[username]\n".$p['name_plan'].
-                "\nCode: ".$code.
-                "\nRouter: ".$v1['routers'].
-                "\nPrice: ".$p['price']);
-            } else {
-                if ($b) {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removePpoeUser($client,$c['username']);
-                        Mikrotik::addPpoeUser($client,$p,$c);
-                    }
-
-                    $b->customer_id = $user;
-                    $b->username = $c['username'];
-                    $b->plan_id = $v1['id_plan'];
-                    $b->namebp = $p['name_plan'];
-                    $b->recharged_on = $date_only;
-                    $b->expiration = $date_exp;
-                    $b->time = $time;
-                    $b->status = "on";
-                    $b->method = "voucher";
-                    $b->routers = $v1['routers'];
-                    $b->type = "PPPOE";
-                    $b->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "voucher";
-                    $t->routers = $v1['routers'];
-                    $t->type = "PPPOE";
-                    $t->save();
-                } else {
-                    if(!$config['radius_mode']){
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::addPpoeUser($client,$p,$c);
-                    }
-
-                    $d = ORM::for_table('tbl_user_recharges')->create();
-                    $d->customer_id = $user;
-                    $d->username = $c['username'];
-                    $d->plan_id = $v1['id_plan'];
-                    $d->namebp = $p['name_plan'];
-                    $d->recharged_on = $date_only;
-                    $d->expiration = $date_exp;
-                    $d->time = $time;
-                    $d->status = "on";
-                    $d->method = "voucher";
-                    $d->routers = $v1['routers'];
-                    $d->type = "PPPOE";
-                    $d->save();
-
-                    // insert table transactions
-                    $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
-                    $t->username = $c['username'];
-                    $t->plan_name = $p['name_plan'];
-                    $t->price = $p['price'];
-                    $t->recharged_on = $date_only;
-                    $t->expiration = $date_exp;
-                    $t->time = $time;
-                    $t->method = "voucher";
-                    $t->routers = $v1['routers'];
-                    $t->type = "PPPOE";
-                    $t->save();
-                }
-
-                $v1->status = "1";
-                $v1->user = $c['username'];
-                $v1->save();
-
-
-                Message::sendTelegram( "$admin[fullname] Refill #Voucher #PPPOE for #u$c[username]\n".$p['name_plan'].
-                "\nCode: ".$code.
-                "\nRouter: ".$v1['routers'].
-                "\nPrice: ".$p['price']);
+                $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
+                $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+                $ui->assign('in', $in);
+                $ui->assign('date', date("Y-m-d H:i:s"));
+                $ui->display('invoice.tpl');
+            }else{
+                r2(U . 'prepaid/refill', 'e', "Failed to refill account");
             }
-            $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
-            $ui->assign('in', $in);
-
-
-            $msg = "*$config[CompanyName]*\n".
-					"$config[address]\n".
-					"$config[phone]\n".
-					"\n\n".
-					"INVOICE: *$in[invoice]*\n".
-                    "$_L[Date] : $date_now\n".
-					"$_L[Sales] : $admin[fullname]\n".
-					"\n\n".
-					"$_L[Type] : *$in[type]*\n".
-					"$_L[Plan_Name] : *$in[plan_name]*\n".
-					"$_L[Plan_Price] : *$config[currency_code] ".number_format($in['price'],2,$config['dec_point'],$config['thousands_sep'])."*\n\n".
-					"$_L[Username] : *$in[username]*\n".
-					"$_L[Password] : **********\n\n".
-					"$_L[Created_On] :\n*".date($config['date_format'], strtotime($in['recharged_on']))."*\n".
-					"$_L[Expires_On] :\n*".date($config['date_format'], strtotime($in['expiration']))." $in[time]*\n".
-					"\n\n".
-					"$config[note]";
-
-            if ($_c['user_notification_payment'] == 'sms') {
-                Message::sendSMS($c['phonenumber'], $msg);
-            } else if ($_c['user_notification_payment'] == 'wa') {
-                Message::sendWhatsapp($c['phonenumber'], $msg);
-            }
-            $ui->assign('date', $date_now);
-            $ui->display('invoice.tpl');
         } else {
             r2(U . 'prepaid/refill', 'e', $_L['Voucher_Not_Valid']);
         }
         break;
+    case 'deposit':
+        $ui->assign('_title', Lang::T('Refill Balance'));
+        $ui->assign('c', ORM::for_table('tbl_customers')->find_many());
+        $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
+        run_hook('view_deposit'); #HOOK
+        $ui->display('deposit.tpl');
+        break;
+    case 'deposit-post':
+        $user = _post('id_customer');
+        $plan = _post('id_plan');
 
+        run_hook('deposit_customer'); #HOOK
+        if (!empty($user) && !empty($plan)) {
+            if(Package::rechargeUser($user, 'balance', $plan, "Deposit", $admin['fullname'])){
+                $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
+                $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+                $ui->assign('in', $in);
+                $ui->assign('date', date("Y-m-d H:i:s"));
+                $ui->display('invoice.tpl');
+            }else{
+                r2(U . 'prepaid/refill', 'e', "Failed to refill account");
+            }
+        } else {
+            r2(U . 'prepaid/refill', 'e', "All field is required");
+        }
+        break;
     default:
         echo 'action not defined';
 }

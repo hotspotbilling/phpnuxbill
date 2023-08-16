@@ -128,6 +128,12 @@ if (isset($_SESSION['notify'])) {
 
 include "autoload/Hookers.php";
 
+// notification message
+if(file_exists("system/uploads/notifications.json")){
+    $_notifmsg =json_decode(file_get_contents('system/uploads/notifications.json'), true);
+}else{
+    $_notifmsg = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
+}
 
 //register all plugin
 foreach (glob("system/plugin/*.php") as $filename) {

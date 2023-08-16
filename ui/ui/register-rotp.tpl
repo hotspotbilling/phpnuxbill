@@ -51,15 +51,23 @@
                     </div>
                 </div>
             </div>
-            <form  action="{$_url}register" method="post">
+            <form action="{$_url}register" method="post">
                 <div class="col-md-4">
                     <div class="panel panel-primary">
                         <div class="panel-heading">1. {$_L['Register_Member']}</div>
                         <div class="panel-body">
                             <div class="form-group">
                                 <label>{$_L['Phone_Number']}</label>
-                                <input type="text" class="form-control" name="username"
-                                    placeholder="{$_L['Phone_Number']}">
+                                <div class="input-group">
+                                    {if $_c['country_code_phone']!= ''}
+                                        <span class="input-group-addon" id="basic-addon1">+</span>
+                                    {else}
+                                        <span class="input-group-addon" id="basic-addon1"><i
+                                                class="glyphicon glyphicon-phone-alt"></i></span>
+                                    {/if}
+                                    <input type="text" class="form-control" name="username"
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                </div>
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">

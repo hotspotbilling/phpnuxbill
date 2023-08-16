@@ -59,7 +59,11 @@ switch ($action) {
                         } else {
                             if (!$config['radius_mode']) {
                                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                                Mikrotik::setPpoeUser($client, $c['username'], $npass);
+                                if(!empty($d['pppoe_password'])){
+                                    Mikrotik::setPpoeUser($client, $c['username'], $d['pppoe_password']);
+                                }else{
+                                    Mikrotik::setPpoeUser($client, $c['username'], $npass);
+                                }
                                 Mikrotik::removePpoeActive($client, $user['username']);
                             }
                             $d->password = $npass;
