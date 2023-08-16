@@ -39,7 +39,7 @@
     <div class="wrapper">
 
         <header class="main-header">
-            <a href="{$_url}?_route=home" class="logo">
+            <a href="{$_url}home" class="logo">
                 <span class="logo-mini"><b>N</b>uX</span>
                 <span class="logo-lg">{$_c['CompanyName']}</span>
             </a>
