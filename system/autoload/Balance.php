@@ -19,17 +19,17 @@ class Balance
     {
         global $config;
         if ($config['allow_balance_transfer'] == 'yes') {
-            if(Balance::min($id_customer, $amount)){
-                if(Balance::plusByPhone($phoneTarget, $amount)){
+            if (Balance::min($id_customer, $amount)) {
+                if (Balance::plusByPhone($phoneTarget, $amount)) {
                     return true;
-                }else{
+                } else {
                     Balance::plus($id_customer, $amount);
                     return false;
                 }
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return false;
         }
     }
@@ -38,7 +38,7 @@ class Balance
     {
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         if ($c && $c['balance'] >= $amount) {
-            $c->balance = $amount - $c['balance'];
+            $c->balance = $c['balance'] - $amount;
             $c->save();
             return true;
         } else {
@@ -49,7 +49,7 @@ class Balance
     public static function plusByPhone($phone_customer, $amount)
     {
         $c = ORM::for_table('tbl_customers')->where('username', $phone_customer)->find_one();
-        if($c){
+        if ($c) {
             $c->balance = $amount + $c['balance'];
             $c->save();
             return true;
@@ -61,7 +61,7 @@ class Balance
     {
         $c = ORM::for_table('tbl_customers')->where('username', $phone_customer)->find_one();
         if ($c && $c['balance'] >= $amount) {
-            $c->balance = $amount - $c['balance'];
+            $c->balance = $c['balance'] - $amount;
             $c->save();
             return true;
         } else {

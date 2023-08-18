@@ -59,6 +59,9 @@ $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
+
+$_c = $config;
+
 date_default_timezone_set($config['timezone']);
 
 $textExpired = $_notifmsg['expired'];
@@ -95,12 +98,20 @@ foreach ($d as $ds) {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
+                        echo "plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
+                        echo "auto renewall Success\n";
                     } else {
+                        echo "plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
+                        echo "auto renewall Failed\n";
                         Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
                             "\nRouter: " . $router_name .
                             "\nPrice: " . $p['price']);
                     }
+                }else{
+                    echo "no renewall | plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
                 }
+            }else{
+                echo "no renewall | balance $config[enable_balance] auto_renewal $c[auto_renewal]\n";
             }
         } else echo " : ACTIVE \r\n";
     } else {

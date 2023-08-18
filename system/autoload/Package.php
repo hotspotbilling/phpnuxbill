@@ -33,7 +33,7 @@ class Package
 
         if ($router_name == 'balance') {
             // insert table transactions
-            $inv = "INV-" . _raid(5);
+            $inv = "INV-" . Package::_raid(5);
             $t = ORM::for_table('tbl_transactions')->create();
             $t->invoice = $inv;
             $t->username = $c['username'];
@@ -114,7 +114,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -147,7 +147,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -188,7 +188,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -221,7 +221,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -300,5 +300,11 @@ class Package
                 }
             }
         }
+    }
+
+
+    public static function _raid($l)
+    {
+        return substr(str_shuffle(str_repeat('0123456789', $l)), 0, $l);
     }
 }
