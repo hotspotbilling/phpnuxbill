@@ -365,3 +365,6 @@ $_L['Enable_auto_renewal'] = 'Enable auto renewal?';
 $_L['Auto_Renewal_Off'] = 'Auto Renewal Off';
 $_L['Refill_Balance'] = 'Refill Balance';
 $_L['Invoice_Footer'] = 'Invoice Footer';
+$_L['Pay_With_Balance'] = 'Pay With Balance';
+$_L['Pay_this_with_Balance_your_active_package_will_be_overwrite'] = 'Pay this with Balance? your active package will be overwrite';
+$_L['Success_to_buy_package'] = 'Success to buy package';

@@ -33,6 +33,10 @@
                     {/foreach}
                 </div>
             </div>
+
+            <div class="box box-solid box-success">
+                <div class="box-header text-center text-bold">{Lang::T('Balance')} {Lang::moneyFormat($_user['balance'])}</div>
+            </div>
         {/if}
         {foreach $routers as $router}
             <div class="box box-solid box-info">
@@ -69,9 +73,16 @@
                                             </table>
                                         </div>
                                         <div class="box-body">
-                                            <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
-                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-primary">Buy</a>
+                                            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                                                <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
+                                                    onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                                    class="btn btn-sm btn-block btn-warning text-black">Buy</a>
+                                                {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
+                                                    <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}"
+                                                        onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
+                                                        class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
+                                                {/if}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -106,9 +117,16 @@
                                             </table>
                                         </div>
                                         <div class="box-body">
-                                            <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
-                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-primary">Buy</a>
+                                            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                                                <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
+                                                    onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                                    class="btn btn-sm btn-block btn-warning text-black">Buy</a>
+                                                {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
+                                                    <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}"
+                                                        onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
+                                                        class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
+                                                {/if}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

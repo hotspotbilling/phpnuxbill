@@ -142,7 +142,7 @@ foreach ($d as $ds) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
                     } else {
-                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
                             "\nRouter: " . $router_name .
                             "\nPrice: " . $p['price']);
                     }

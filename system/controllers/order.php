@@ -97,7 +97,7 @@ switch ($action) {
             }
         }
         if (empty($trx)) {
-            r2(U . "home", 'e', Lang::T("Transaction Not found"));
+            r2(U . "order", 'e', Lang::T("Transaction Not found"));
         }
         $router = ORM::for_table('tbl_routers')->find_one($trx['routers_id']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
@@ -108,6 +108,30 @@ switch ($action) {
         $ui->assign('bandw', $bandw);
         $ui->assign('_title', 'TRX #' . $trxid);
         $ui->display('user-orderView.tpl');
+        break;
+    case 'pay':
+        if ($_c['enable_balance'] != 'yes'){
+            r2(U . "order", 'e', Lang::T("Balance not enabled"));
+        }
+        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
+        $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
+        if (empty($router) || empty($plan)) {
+            r2(U . "order/package", 'e', Lang::T("Plan Not found"));
+        }
+        if ($plan && $plan['enabled'] && $user['balance'] >= $plan['price']) {
+            if (Package::rechargeUser($user['id'], $plan['routers'], $plan['id'], 'Customer', 'Balance')) {
+                // if success, then get the balance
+                Balance::min($user['id'], $plan['price']);
+                r2(U . "home", 's', Lang::T("Success to buy package"));
+            } else {
+                r2(U . "order/package", 'e', Lang::T("Failed to buy package"));
+                Message::sendTelegram("Buy Package with Balance Failed\n\n#u$c[username] #buy \n" . $plan['name_plan'] .
+                    "\nRouter: " . $router_name .
+                    "\nPrice: " . $p['price']);
+            }
+        }else{
+            echo "no renewall | plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
+        }
         break;
     case 'buy':
         if (strpos($user['email'], '@') === false) {
