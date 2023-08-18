@@ -191,10 +191,6 @@ function _admin($login = true)
     }
 }
 
-function _raid($l)
-{
-    return substr(str_shuffle(str_repeat('0123456789', $l)), 0, $l);
-}
 
 function _log($description, $type = '', $userid = '0')
 {

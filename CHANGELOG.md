@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2023.8.18
+
+- Fix Auto Renewall Cronjob
+
 ## 2023.8.16
 
 - Admin Can Add Balance to Customer
