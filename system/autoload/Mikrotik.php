@@ -119,6 +119,8 @@ class Mikrotik
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
+                        ->setArgument('comment', $customer['fullname'] .' | '.$customer['address'])
+                        ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
                 );
             } else if ($plan['limit_type'] == "Data_Limit") {
@@ -131,6 +133,8 @@ class Mikrotik
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
+                        ->setArgument('comment', $customer['fullname'] .' | '.$customer['address'])
+                        ->setArgument('email', $customer['email'])
                         ->setArgument('limit-bytes-total', $datalimit)
                 );
             } else if ($plan['limit_type'] == "Both_Limit") {
@@ -147,6 +151,8 @@ class Mikrotik
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
+                        ->setArgument('comment', $customer['fullname'] .' | '.$customer['address'])
+                        ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
                         ->setArgument('limit-bytes-total', $datalimit)
                 );
@@ -156,6 +162,8 @@ class Mikrotik
                 $addRequest
                     ->setArgument('name', $customer['username'])
                     ->setArgument('profile', $plan['name_plan'])
+                    ->setArgument('comment', $customer['fullname'] .' | '.$customer['address'])
+                    ->setArgument('email', $customer['email'])
                     ->setArgument('password', $customer['password'])
             );
         }
