@@ -70,7 +70,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-md-2 control-label">{$_L['BW_Name']}</label>
+								<label class="col-md-2 control-label"><a href="{$_url}bandwidth/add">{$_L['BW_Name']}</a></label>
 								<div class="col-md-6">
 									<select id="id_bw" name="id_bw" class="form-control select2">
 										{foreach $b as $bs}
@@ -109,7 +109,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-md-2 control-label">{$_L['Router_Name']}</label>
+								<label class="col-md-2 control-label"><a href="{$_url}routers/add">{$_L['Router_Name']}</a></label>
 								<div class="col-md-6">
 									<input type="text" class="form-control" id="routers" name="routers" value="{$d['routers']}" readonly>
 								</div>

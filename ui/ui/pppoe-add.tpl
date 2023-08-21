@@ -24,7 +24,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-md-2 control-label">{$_L['BW_Name']}</label>
+								<label class="col-md-2 control-label"><a href="{$_url}bandwidth/add">{$_L['BW_Name']}</a></label>
 								<div class="col-md-6">
 									<select id="id_bw" name="id_bw" class="form-control select2">
 										<option value="">{$_L['Select_BW']}...</option>
@@ -58,7 +58,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-md-2 control-label">{$_L['Router_Name']}</label>
+								<label class="col-md-2 control-label"><a href="{$_url}routers/add">{$_L['Router_Name']}</a></label>
 								<div class="col-md-6">
 									<select id="routers" name="routers" class="form-control select2">
 										<option value=''>{$_L['Select_Routers']}</option>
@@ -70,7 +70,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="col-md-2 control-label">{$_L['Pool']}</label>
+								<label class="col-md-2 control-label"><a href="{$_url}pool/add">{$_L['Pool']}</a></label>
 								<div class="col-md-6">
 									<select id="pool_name" name="pool_name" class="form-control select2">
 										<option value=''>{$_L['Select_Pool']}</option>
