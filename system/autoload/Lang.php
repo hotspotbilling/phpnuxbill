@@ -31,4 +31,22 @@ class Lang
             return $phone;
         }
     }
+
+    public static function dateFormat($date){
+        global $config;
+        return date($config['date_format'], strtotime($date));
+    }
+
+    public static function dateTimeFormat($date){
+        global $config;
+        return date($config['date_format']. ' H:i', strtotime($date));
+    }
+
+    public static function nl2br($text){
+        return nl2br($text);
+    }
+
+    public static function arrayCount($arr){
+        return count($arr);
+    }
 }

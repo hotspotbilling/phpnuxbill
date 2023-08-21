@@ -13,15 +13,17 @@
                                     <select name="what">
                                         <option value="username" {if $what=='username'}selected{/if}>Username</option>
                                         <option value="fullname" {if $what=='fullname'}selected{/if}>Name</option>
-                                        <option value="phonenumber" {if $what=='phonenumber'}selected{/if}>Phone</option>
+                                        <option value="phonenumber" {if $what=='phonenumber'}selected{/if}>Phone
+                                        </option>
                                         <option value="email" {if $what=='email'}selected{/if}>Email</option>
                                     </select>
                                 </div>
                                 <input type="text" name="search" value="{$search}" class="form-control"
                                     placeholder="{$_L['Search_by_Username']}...">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-success" type="submit"><span class="fa fa-search"></span></button>
-                                    </div>
+                                <div class="input-group-btn">
+                                    <button class="btn btn-success" type="submit"><span
+                                            class="fa fa-search"></span></button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -34,6 +36,7 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
+                                <th>{$_L['Manage']}</th>
                                 <th>{$_L['Username']}</th>
                                 <th>{$_L['Full_Name']}</th>
                                 <th>{Lang::T('Balance')}</th>
@@ -41,27 +44,23 @@
                                 <th>{$_L['Email']}</th>
                                 <th>{$_L['Created_On']}</th>
                                 <th>{$_L['Recharge']}</th>
-                                <th>{$_L['Manage']}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
                                 <tr>
+                                    <td align="center">
+                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}"
+                                            class="btn btn-success btn-sm">{Lang::T('View')}</a>
+                                    </td>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['fullname']}</td>
                                     <td>{Lang::moneyFormat($ds['balance'])}</td>
                                     <td>{$ds['phonenumber']}</td>
                                     <td>{$ds['email']}</td>
-                                    <td>{$ds['created_at']}</td>
+                                    <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
                                     <td align="center"><a href="{$_url}prepaid/recharge-user/{$ds['id']}" id="{$ds['id']}"
                                             class="btn btn-primary btn-sm">{$_L['Recharge']}</a></td>
-                                    <td align="center">
-                                        <a href="{$_url}customers/edit/{$ds['id']}"
-                                            class="btn btn-warning btn-sm">{$_L['Edit']}</a>
-                                        <a href="{$_url}customers/delete/{$ds['id']}" id="{$ds['id']}"
-                                            class="btn btn-danger btn-sm"
-                                            onclick="return confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
-                                    </td>
                                 </tr>
                             {/foreach}
                         </tbody>
