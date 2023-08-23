@@ -41,7 +41,7 @@
             <div class="box-header">
                 <h3 class="box-title">{$_L['Announcement']}</h3>
             </div>
-            <div class="box-body" style="max-height:296px;overflow:auto;">
+            <div class="box-body">
                 {include file="$_path/../pages/Announcement.html"}
             </div>
         </div>
