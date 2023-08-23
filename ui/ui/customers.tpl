@@ -9,17 +9,8 @@
                     <div class="col-md-8">
                         <form id="site-search" method="post" action="{$_url}customers/list/">
                             <div class="input-group">
-                                <div class="input-group-addon no-border">
-                                    <select name="what">
-                                        <option value="username" {if $what=='username'}selected{/if}>Username</option>
-                                        <option value="fullname" {if $what=='fullname'}selected{/if}>Name</option>
-                                        <option value="phonenumber" {if $what=='phonenumber'}selected{/if}>Phone
-                                        </option>
-                                        <option value="email" {if $what=='email'}selected{/if}>Email</option>
-                                    </select>
-                                </div>
                                 <input type="text" name="search" value="{$search}" class="form-control"
-                                    placeholder="{$_L['Search_by_Username']}...">
+                                    placeholder="{Lang::T('Search')}...">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit"><span
                                             class="fa fa-search"></span></button>

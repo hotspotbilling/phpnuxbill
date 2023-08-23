@@ -24,15 +24,11 @@ switch ($action) {
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/customers.js"></script>');
         $search = _post('search');
-        $what = _post('what');
-        if (!in_array($what, ['username', 'fullname', 'phonenumber', 'email'])) {
-            $what = 'username';
-        }
         run_hook('list_customers'); #HOOK
         if ($search != '') {
-            $paginator = Paginator::bootstrap('tbl_customers', 'username', '%' . $search . '%');
+            $paginator = Paginator::bootstrapRaw('tbl_customers', "(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')", [$search, $search, $search, $search]);
             $d = ORM::for_table('tbl_customers')
-                ->where_like($what, '%' . $search . '%')
+                ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')", [$search, $search, $search, $search])
                 ->offset($paginator['startpoint'])
                 ->limit($paginator['limit'])
                 ->order_by_desc('id')->find_many();
@@ -42,7 +38,6 @@ switch ($action) {
         }
 
         $ui->assign('search', htmlspecialchars($search));
-        $ui->assign('what', $what);
         $ui->assign('d', $d);
         $ui->assign('paginator', $paginator);
         $ui->display('customers.tpl');
@@ -53,10 +48,14 @@ switch ($action) {
         $ui->display('customers-add.tpl');
         break;
 
+    case 'viewu':
+        $customer = ORM::for_table('tbl_customers')->where('username', $routes['2'])->find_one();
     case 'view':
         $id  = $routes['2'];
         run_hook('view_customer'); #HOOK
-        $customer = ORM::for_table('tbl_customers')->find_one($id);
+        if(!$customer){
+            $customer = ORM::for_table('tbl_customers')->find_one($id);
+        }
         if ($customer) {
             $v  = $routes['3'];
             if (empty($v) || $v == 'order') {
@@ -71,7 +70,7 @@ switch ($action) {
                     ->find_many();
                 // $ui->assign('paginator', $paginator);
                 $ui->assign('order', $order);
-            }else if($v=='activation'){
+            } else if ($v == 'activation') {
                 // $paginator = Paginator::bootstrap('tbl_transactions', 'username', $customer['username']);
                 $activation = ORM::for_table('tbl_transactions')
                     ->where('username', $customer['username'])
@@ -82,6 +81,8 @@ switch ($action) {
                 // $ui->assign('paginator', $paginator);
                 $ui->assign('activation', $activation);
             }
+            $package = ORM::for_table('tbl_user_recharges')->where('username',$customer['username'])->find_one();
+            $ui->assign('package', $package);
             $ui->assign('v', $v);
             $ui->assign('d', $customer);
             $ui->display('customers-view.tpl');

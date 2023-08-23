@@ -2,9 +2,6 @@
 
 <div class="row">
     <div class="col-sm-4 col-md-4">
-        <a href="{$_url}customers/list"
-                            class="btn btn-primary btn-sm btn-block">{Lang::T('Back')}</a>
-                            <br>
         <div class="box box-primary">
             <div class="box-body box-profile">
                 <img class="profile-user-img img-responsive img-circle"
@@ -15,41 +12,42 @@
 
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>{$_L['Username']}</b> <a class="pull-right">{$d['username']}</a>
+                        <b>{$_L['Username']}</b> <span class="pull-right">{$d['username']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{$_L['Phone_Number']}</b> <a class="pull-right">{$d['phonenumber']}</a>
+                        <b>{$_L['Phone_Number']}</b> <span class="pull-right">{$d['phonenumber']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{$_L['Email']}</b> <a class="pull-right">{$d['email']}</a>
+                        <b>{$_L['Email']}</b> <span class="pull-right">{$d['email']}</span>
                     </li>
                 </ul>
                 <p class="text-muted">{Lang::nl2br($d['address'])}</p>
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>{$_L['Password']}</b> <a class="pull-right" style="background-color: black; color:black;"
-                            onclick="this.select()">{$d['password']}</a>
+                        <b>{$_L['Password']}</b> <span class="pull-right" style="background-color: black; color:black;"
+                            onclick="this.select()">{$d['password']}</span>
                     </li>
                     {if $d['pppoe_password'] != ''}
                         <li class="list-group-item">
-                            <b>PPPOE {$_L['Password']}</b> <a class="pull-right"
+                            <b>PPPOE {$_L['Password']}</b> <span class="pull-right"
                                 style="background-color: black; color:black;"
-                                onclick="this.select()">{$d['pppoe_password']}</a>
+                                onclick="this.select()">{$d['pppoe_password']}</span>
                         </li>
                     {/if}
                     <li class="list-group-item">
-                        <b>{Lang::T('Balance')}</b> <a class="pull-right">{Lang::moneyFormat($d['balance'])}</a>
+                        <b>{Lang::T('Balance')}</b> <span class="pull-right">{Lang::moneyFormat($d['balance'])}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('Auto Renewal')}</b> <a
-                            class="pull-right">{if $d['auto_renewal']}yes{else}no{/if}</a>
+                        <b>{Lang::T('Auto Renewal')}</b> <span
+                            class="pull-right">{if $d['auto_renewal']}yes{else}no{/if}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{$_L['Created_On']}</b> <a class="pull-right">{Lang::dateTimeFormat($d['created_at'])}</a>
+                        <b>{$_L['Created_On']}</b> <span
+                            class="pull-right">{Lang::dateTimeFormat($d['created_at'])}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('Last Login')}</b> <a
-                            class="pull-right">{Lang::dateTimeFormat($d['last_login'])}</a>
+                        <b>{Lang::T('Last Login')}</b> <span
+                            class="pull-right">{Lang::dateTimeFormat($d['last_login'])}</span>
                     </li>
                 </ul>
                 <div class="row">
@@ -64,8 +62,31 @@
                     </div>
                 </div>
             </div>
-            <!-- /.box-body -->
         </div>
+        {if $package}
+            <div class="box box-{if $package['status']=='on'}success{else}danger{/if}">
+                <div class="box-body box-profile">
+                    <h4 class="text-center">{$package['type']} - {$package['namebp']}</h4>
+                    <ul class="list-group list-group-unbordered">
+                        <li class="list-group-item">
+                            {Lang::T('Active')} <span
+                                class="pull-right">{if $package['status']=='on'}yes{else}no{/if}</span>
+                        </li>
+                        <li class="list-group-item">
+                            {$_L['Created_On']} <span class="pull-right">{Lang::dateFormat($package['recharged_on'])}</span>
+                        </li>
+                        <li class="list-group-item">
+                            {$_L['Expires_On']} <span
+                                class="pull-right">{Lang::dateTimeFormat($package['expiration']+' '+$package['time'])}</span>
+                        </li>
+                        <li class="list-group-item">
+                            {$package['routers']} <span class="pull-right">{$package['method']}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        {/if}
+        <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block mt-1">{Lang::T('Back')}</a><br>
     </div>
     <div class="col-sm-8 col-md-8">
         <ul class="nav nav-tabs">
