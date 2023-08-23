@@ -66,7 +66,7 @@ date_default_timezone_set($config['timezone']);
 
 $textExpired = $_notifmsg['expired'];
 
-$d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
+$d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('expiration', date("Y-m-d"))->find_many();
 
 run_hook('cronjob'); #HOOK
 
