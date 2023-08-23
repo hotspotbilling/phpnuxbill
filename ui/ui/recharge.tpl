@@ -10,10 +10,6 @@
 								<label class="col-md-2 control-label">{$_L['Select_Account']}</label>
 								<div class="col-md-6">
 									<select id="personSelect" class="form-control select2" name="id_customer" style="width: 100%" data-placeholder="{$_L['Select_Customer']}...">
-									<option></option>
-										{foreach $c as $cs}
-											<option value="{$cs['id']}">{$cs['username']}</option>
-										{/foreach}
 									</select>
 								</div>
 							</div>

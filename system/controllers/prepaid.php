@@ -18,7 +18,24 @@ if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
 }
 
-use PEAR2\Net\RouterOS;
+$select2_customer = <<<EOT
+<script>
+document.addEventListener("DOMContentLoaded", function(event) {
+    $('#personSelect').select2({
+        theme: "bootstrap",
+        ajax: {
+            url: function(params) {
+                if(params.term != undefined){
+                    return './index.php?_route=autoload/customer_select2&s='+params.term;
+                }else{
+                    return './index.php?_route=autoload/customer_select2';
+                }
+            }
+        }
+    });
+});
+</script>
+EOT;
 
 require_once 'system/autoload/PEAR2/Autoload.php';
 
@@ -43,8 +60,7 @@ switch ($action) {
         break;
 
     case 'recharge':
-        $c = ORM::for_table('tbl_customers')->find_many();
-        $ui->assign('c', $c);
+        $ui->assign('xfooter', $select2_customer);
         $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
@@ -81,14 +97,14 @@ switch ($action) {
         }
 
         if ($msg == '') {
-            if(Package::rechargeUser($id_customer, $server, $plan, "Recharge", $admin['fullname'])){
+            if (Package::rechargeUser($id_customer, $server, $plan, "Recharge", $admin['fullname'])) {
                 $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
                 $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
                 $ui->assign('in', $in);
                 $ui->assign('date', date("Y-m-d H:i:s"));
                 $ui->display('invoice.tpl');
-                _log('[' . $admin['username'] . ']: ' . 'Recharge '.$c['username'].' ['.$in['plan_name'].']['.Lang::moneyFormat($in['price']).']', 'Admin', $admin['id']);
-            }else{
+                _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $c['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', 'Admin', $admin['id']);
+            } else {
                 r2(U . 'prepaid/recharge', 'e', "Failed to recharge account");
             }
         } else {
@@ -129,20 +145,20 @@ switch ($action) {
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
             if ($d['type'] == 'Hotspot') {
-                if(!$config['radius_mode']){
+                if (!$config['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client,$c['username']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
                 }
 
                 $d->delete();
             } else {
-                if(!$config['radius_mode']){
+                if (!$config['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoeUser($client,$c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                 }
                 $d->delete();
             }
-            _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer '.$c['username'].'  ['.$in['plan_name'].']['.Lang::moneyFormat($in['price']).']', 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer ' . $c['username'] . '  [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Delete_Successfully']);
         }
         break;
@@ -167,8 +183,8 @@ switch ($action) {
             $d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->save();
-            Package::changeTo($username,$id_plan);
-            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer '.$d['username'].' to ['.$d['plan_name'].']['.Lang::moneyFormat($d['price']).']', 'Admin', $admin['id']);
+            Package::changeTo($username, $id_plan);
+            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['plan_name'] . '][' . Lang::moneyFormat($d['price']) . ']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
         } else {
             r2(U . 'prepaid/edit/' . $id, 'e', $msg);
@@ -341,10 +357,8 @@ switch ($action) {
         break;
 
     case 'refill':
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/ui/scripts/form-elements.init.js"></script>');
+        $ui->assign('xfooter', $select2_customer);
         $ui->assign('_title', $_L['Refill_Account']);
-        $c = ORM::for_table('tbl_customers')->find_many();
-        $ui->assign('c', $c);
         run_hook('view_refill'); #HOOK
         $ui->display('refill.tpl');
 
@@ -358,7 +372,7 @@ switch ($action) {
 
         run_hook('refill_customer'); #HOOK
         if ($v1) {
-            if(Package::rechargeUser($user, $v1['routers'], $v1['id_plan'], "Refill", "Voucher")){
+            if (Package::rechargeUser($user, $v1['routers'], $v1['id_plan'], "Refill", "Voucher")) {
                 $v1->status = "1";
                 $v1->user = $c['username'];
                 $v1->save();
@@ -367,7 +381,7 @@ switch ($action) {
                 $ui->assign('in', $in);
                 $ui->assign('date', date("Y-m-d H:i:s"));
                 $ui->display('invoice.tpl');
-            }else{
+            } else {
                 r2(U . 'prepaid/refill', 'e', "Failed to refill account");
             }
         } else {
@@ -376,7 +390,7 @@ switch ($action) {
         break;
     case 'deposit':
         $ui->assign('_title', Lang::T('Refill Balance'));
-        $ui->assign('c', ORM::for_table('tbl_customers')->find_many());
+        $ui->assign('xfooter', $select2_customer);
         $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
         run_hook('view_deposit'); #HOOK
         $ui->display('deposit.tpl');
@@ -387,13 +401,13 @@ switch ($action) {
 
         run_hook('deposit_customer'); #HOOK
         if (!empty($user) && !empty($plan)) {
-            if(Package::rechargeUser($user, 'balance', $plan, "Deposit", $admin['fullname'])){
+            if (Package::rechargeUser($user, 'balance', $plan, "Deposit", $admin['fullname'])) {
                 $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
                 $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
                 $ui->assign('in', $in);
                 $ui->assign('date', date("Y-m-d H:i:s"));
                 $ui->display('invoice.tpl');
-            }else{
+            } else {
                 r2(U . 'prepaid/refill', 'e', "Failed to refill account");
             }
         } else {
