@@ -11,10 +11,8 @@
 <script src="ui/ui/scripts/jquery.min.js"></script>
 <script src="ui/ui/scripts/bootstrap.min.js"></script>
 <script src="ui/ui/scripts/adminlte.min.js"></script>
-
 <script src="ui/ui/scripts/plugins/select2.min.js"></script>
 <script src="ui/ui/scripts/custom.js"></script>
-<script src="ui/ui/scripts/select2.min.js"></script>
 
 {if isset($xfooter)}
     {$xfooter}

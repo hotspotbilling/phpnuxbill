@@ -2,6 +2,9 @@
 
 <div class="row">
     <div class="col-sm-4 col-md-4">
+        <a href="{$_url}customers/list"
+                            class="btn btn-primary btn-sm btn-block">{Lang::T('Back')}</a>
+                            <br>
         <div class="box box-primary">
             <div class="box-body box-profile">
                 <img class="profile-user-img img-responsive img-circle"
