@@ -18,15 +18,11 @@ class Balance
     public static function transfer($id_customer, $phoneTarget, $amount)
     {
         global $config;
-        if ($config['allow_balance_transfer'] == 'yes') {
-            if (Balance::min($id_customer, $amount)) {
-                if (Balance::plusByPhone($phoneTarget, $amount)) {
-                    return true;
-                } else {
-                    Balance::plus($id_customer, $amount);
-                    return false;
-                }
+        if (Balance::min($id_customer, $amount)) {
+            if (Balance::plusByPhone($phoneTarget, $amount)) {
+                return true;
             } else {
+                Balance::plus($id_customer, $amount);
                 return false;
             }
         } else {

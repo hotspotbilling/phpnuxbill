@@ -63,7 +63,7 @@ switch ($action) {
         }
         break;
     case 'view':
-        $trxid = $routes['2'] * 1;
+        $trxid = $routes['2'];
         $trx = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
             ->find_one($trxid);
