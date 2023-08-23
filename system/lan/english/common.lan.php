@@ -379,3 +379,4 @@ $_L['Cannot_send_to_yourself'] = 'Cannot send to yourself';
 $_L['Sending_balance_success'] = 'Sending balance success';
 $_L['From'] = 'From';
 $_L['To'] = 'To';
+$_L['insufficient_balance'] = 'insufficient balance';
