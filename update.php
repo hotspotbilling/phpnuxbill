@@ -12,6 +12,7 @@ if(empty($update_url)){
     $update_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
 }
 
+
 if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
     r2("./?_route=login&You_are_not_admin", 'e', 'You are not admin');
 }
@@ -35,7 +36,8 @@ if (!extension_loaded('zip')) {
 
 
 $file = pathFixer('system/cache/phpnuxbill.zip');
-$folder = pathFixer('system/cache/phpnuxbill-master/');
+$folder = pathFixer('system/cache/phpnuxbill-'.basename($update_url, ".zip").'/');
+
 if (empty($step)) {
     $step++;
 } else if ($step == 1) {
@@ -252,8 +254,8 @@ function deleteFolder($path)
                                 </div>
                             </div>
                         <?php } else if ($step == 5) { ?>
-                            <div class="panel panel-primary">
-                                <div class="panel-success">Update Finished</div>
+                            <div class="panel panel-success">
+                                <div class="panel-heading">Update Finished</div>
                                 <div class="panel-body">
                                     PHPNuxBill has been updated to Version <b><?= $version ?></b>
                                 </div>

@@ -145,5 +145,5 @@ switch ($action) {
         break;
 
     default:
-        echo 'action not defined';
+        r2(U . 'pool/list/', 's', '');
 }

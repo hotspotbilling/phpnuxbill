@@ -22,11 +22,10 @@ ORM::configure('logging', true);
 include "autoload/Hookers.php";
 
 // notification message
-if(file_exists("uploads/notifications.json")){
-    $_notifmsg =json_decode(file_get_contents('uploads/notifications.json'), true);
-}else{
-    $_notifmsg = json_decode(file_get_contents('uploads/notifications.default.json'), true);
+if(file_exists("system/uploads/notifications.json")){
+    $_notifmsg =json_decode(file_get_contents('system/uploads/notifications.json'), true);
 }
+$_notifmsg_default = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
 
 //register all plugin
 foreach (glob("plugin/*.php") as $filename) {
@@ -74,17 +73,17 @@ run_hook('cronjob_reminder'); #HOOK
 $day7 = date('Y-m-d', strtotime("+7 day"));
 $day3 = date('Y-m-d', strtotime("+3 day"));
 $day1 = date('Y-m-d', strtotime("+1 day"));
-print_r([$day1,$day3,$day7]);
+print_r([$day1, $day3, $day7]);
 foreach ($d as $ds) {
-    if(in_array($ds['expiration'],[$day1,$day3,$day7])){
+    if (in_array($ds['expiration'], [$day1, $day3, $day7])) {
         $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
-        if($ds['expiration']==$day7){
-            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $_notifmsg['reminder_7_day'], $config['user_notification_reminder'])."\n";
-        }else if($ds['expiration']==$day3){
-            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $_notifmsg['reminder_3_day'], $config['user_notification_reminder'])."\n";
-        }else if($ds['expiration']==$day1){
-            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $_notifmsg['reminder_1_day'], $config['user_notification_reminder'])."\n";
+        if ($ds['expiration'] == $day7) {
+            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], Lang::getNotifText('reminder_7_day'), $config['user_notification_reminder']) . "\n";
+        } else if ($ds['expiration'] == $day3) {
+            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], Lang::getNotifText('reminder_3_day'), $config['user_notification_reminder']) . "\n";
+        } else if ($ds['expiration'] == $day1) {
+            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], Lang::getNotifText('reminder_1_day'), $config['user_notification_reminder']) . "\n";
         }
     }
 }

@@ -41,7 +41,7 @@
             <div class="box-header">
                 <h3 class="box-title">{$_L['Announcement']}</h3>
             </div>
-            <div class="box-body" style="max-height:296px;overflow:auto;">
+            <div class="box-body">
                 {include file="$_path/../pages/Announcement.html"}
             </div>
         </div>
@@ -137,6 +137,39 @@
                     });
                 }, 2000);
             </script>
+        {/if}
+        {if $_c['enable_balance'] == 'yes'}
+            <div class="box box-primary box-solid mb30">
+                <div class="box-header">
+                    <h4 class="box-title">{Lang::T("Transfer Balance")}</h4>
+                </div>
+                <div class="box-body p-0">
+                    <form method="post" onsubmit="return askConfirm()" role="form" action="{$_url}home">
+                        <div class="form-group">
+                            <div class="col-sm-5">
+                                <input type="text" id="username" name="username" class="form-control" required
+                                    placeholder="{$_L['Username']}">
+                            </div>
+                            <div class="col-sm-5">
+                                <input type="number" id="balance" name="balance" autocomplete="off" class="form-control" required
+                                    placeholder="{$_L['Balance']}">
+                            </div>
+                            <div class="form-group col-sm-2" align="center">
+                                <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send" value="balance"><i class="glyphicon glyphicon-send"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                    <script>
+                        function askConfirm(){
+                            if(confirm('{Lang::T('Send your balance?')}')){
+                                document.getElementById('sendBtn').setAttribute('disabled', '');
+                                return true;
+                            }
+                            return false;
+                        }
+                    </script>
+                </div>
+            </div>
         {/if}
         <br>
         {if $_c['disable_voucher'] != 'yes'}

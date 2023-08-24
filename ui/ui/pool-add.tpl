@@ -20,7 +20,7 @@
 						</div>
                     </div>
                     <div class="form-group">
-						<label class="col-md-2 control-label">{$_L['Routers']}</label>
+						<label class="col-md-2 control-label"><a href="{$_url}routers/add">{$_L['Routers']}</a></label>
 						<div class="col-md-6">
 							<select id="routers" name="routers" class="form-control select2">
                                 {foreach $r as $rs}

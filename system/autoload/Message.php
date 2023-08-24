@@ -56,4 +56,20 @@ class Message
         return "$via: $msg";
     }
 
+    public static function sendBalanceNotification($phone, $name, $balance, $message, $via)
+    {
+        $msg = str_replace('[[name]]', "*$name*", $message);
+        $msg = str_replace('[[balance]]', "*" . Lang::moneyFormat($balance) . "*", $msg);
+        if (
+            !empty($phone) && strlen($phone) > 5
+            && !empty($message) && in_array($via, ['sms', 'wa'])
+        ) {
+            if ($via == 'sms') {
+                Message::sendSMS($phone, $msg);
+            } else if ($via == 'wa') {
+                Message::sendWhatsapp($phone, $msg);
+            }
+        }
+        return "$via: $msg";
+    }
 }

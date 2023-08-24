@@ -33,7 +33,7 @@ class Package
 
         if ($router_name == 'balance') {
             // insert table transactions
-            $inv = "INV-" . _raid(5);
+            $inv = "INV-" . Package::_raid(5);
             $t = ORM::for_table('tbl_transactions')->create();
             $t->invoice = $inv;
             $t->username = $c['username'];
@@ -49,7 +49,7 @@ class Package
 
             Balance::plus($id_customer, $p['price']);
 
-            $textInvoice = $_notifmsg['invoice_balance'];
+            $textInvoice = Lang::getNotifText('invoice_balance');
             $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
             $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
             $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
@@ -96,6 +96,7 @@ class Package
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
@@ -114,7 +115,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -128,6 +129,7 @@ class Package
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
@@ -147,7 +149,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -163,12 +165,13 @@ class Package
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
-                "\nPrice: " . $p['price']);
+                "\nPrice: " . Lang::moneyFormat($p['price']));
         } else {
 
             if ($b) {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
@@ -188,7 +191,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -202,6 +205,7 @@ class Package
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
@@ -221,7 +225,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . _raid(5);
+                $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
@@ -237,12 +241,12 @@ class Package
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
-                "\nPrice: " . $p['price']);
+                "\nPrice: " . Lang::moneyFormat($p['price']));
         }
 
         $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
 
-        $textInvoice = $_notifmsg['invoice_paid'];
+        $textInvoice = Lang::getNotifText('invoice_paid');
         $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
         $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
         $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
@@ -300,5 +304,11 @@ class Package
                 }
             }
         }
+    }
+
+
+    public static function _raid($l)
+    {
+        return substr(str_shuffle(str_repeat('0123456789', $l)), 0, $l);
     }
 }

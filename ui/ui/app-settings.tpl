@@ -107,6 +107,13 @@
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Allow balance transfer between customers')}</p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Minimum Balance Transfer')}</label>
+                        <div class="col-md-6">
+                            <input type="number" class="form-control" id="minimum_transfer" name="minimum_transfer"
+                                value="{$_c['minimum_transfer']}">
+                        </div>
+                    </div>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">

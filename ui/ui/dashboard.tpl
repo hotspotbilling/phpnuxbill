@@ -107,7 +107,7 @@
                         {foreach $expire as $expired}
                             <tr>
                                 <td>{$no++}</td>
-                                <td>{$expired['username']}</td>
+                                <td><a href="{$_url}customers/viewu/{$expired['username']}">{$expired['username']}</a></td>
                                 <td>{date($_c['date_format'], strtotime($expired['recharged_on']))}
                                 </td>
                                 <td>{date($_c['date_format'], strtotime($expired['expiration']))} {$expired['time']}

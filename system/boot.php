@@ -131,9 +131,8 @@ include "autoload/Hookers.php";
 // notification message
 if(file_exists("system/uploads/notifications.json")){
     $_notifmsg =json_decode(file_get_contents('system/uploads/notifications.json'), true);
-}else{
-    $_notifmsg = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
 }
+$_notifmsg_default = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
 
 //register all plugin
 foreach (glob("system/plugin/*.php") as $filename) {
@@ -191,10 +190,6 @@ function _admin($login = true)
     }
 }
 
-function _raid($l)
-{
-    return substr(str_shuffle(str_repeat('0123456789', $l)), 0, $l);
-}
 
 function _log($description, $type = '', $userid = '0')
 {

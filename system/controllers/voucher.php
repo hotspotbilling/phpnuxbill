@@ -73,7 +73,7 @@ switch ($action) {
 
                     // insert table transactions
                     $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
+                    $t->invoice = "INV-" . Package::_raid(5);
                     $t->username = $c['username'];
                     $t->plan_name = $p['name_plan'];
                     $t->price = $p['price'];
@@ -106,7 +106,7 @@ switch ($action) {
 
                     // insert table transactions
                     $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
+                    $t->invoice = "INV-" . Package::_raid(5);
                     $t->username = $c['username'];
                     $t->plan_name = $p['name_plan'];
                     $t->price = $p['price'];
@@ -150,7 +150,7 @@ switch ($action) {
 
                     // insert table transactions
                     $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
+                    $t->invoice = "INV-" . Package::_raid(5);
                     $t->username = $c['username'];
                     $t->plan_name = $p['name_plan'];
                     $t->price = $p['price'];
@@ -183,7 +183,7 @@ switch ($action) {
 
                     // insert table transactions
                     $t = ORM::for_table('tbl_transactions')->create();
-                    $t->invoice = "INV-" . _raid(5);
+                    $t->invoice = "INV-" . Package::_raid(5);
                     $t->username = $c['username'];
                     $t->plan_name = $p['name_plan'];
                     $t->price = $p['price'];

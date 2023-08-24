@@ -4,8 +4,9 @@ use PEAR2\Net\RouterOS;
 
 class Mikrotik
 {
-    public static function info($name){
-		$d = ORM::for_table('tbl_routers')->where('name',$name)->find_one();
+    public static function info($name)
+    {
+        $d = ORM::for_table('tbl_routers')->where('name', $name)->find_one();
         return $d;
     }
 
@@ -19,7 +20,8 @@ class Mikrotik
         }
     }
 
-    public static function isUserLogin($client, $username){
+    public static function isUserLogin($client, $username)
+    {
         $printRequest = new RouterOS\Request(
             '/ip hotspot active print',
             RouterOS\Query::where('user', $username)
@@ -27,7 +29,8 @@ class Mikrotik
         return $client->sendSync($printRequest)->getProperty('.id');
     }
 
-    public static function logMeIn($client, $user, $pass, $ip, $mac){
+    public static function logMeIn($client, $user, $pass, $ip, $mac)
+    {
         $addRequest = new RouterOS\Request('/ip/hotspot/active/login');
         $client->sendSync(
             $addRequest
@@ -38,7 +41,8 @@ class Mikrotik
         );
     }
 
-    public static function logMeOut($client, $user){
+    public static function logMeOut($client, $user)
+    {
         $printRequest = new RouterOS\Request(
             '/ip hotspot active print',
             RouterOS\Query::where('user', $user)
@@ -51,7 +55,8 @@ class Mikrotik
         );
     }
 
-    public static function addHotspotPlan($client, $name, $sharedusers, $rate){
+    public static function addHotspotPlan($client, $name, $sharedusers, $rate)
+    {
         $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
         $client->sendSync(
             $addRequest
@@ -61,7 +66,8 @@ class Mikrotik
         );
     }
 
-    public static function setHotspotPlan($client, $name, $sharedusers, $rate){
+    public static function setHotspotPlan($client, $name, $sharedusers, $rate)
+    {
         $printRequest = new RouterOS\Request(
             '/ip hotspot user profile print .proplist=name',
             RouterOS\Query::where('name', $name)
@@ -77,7 +83,8 @@ class Mikrotik
         );
     }
 
-    public static function removeHotspotPlan($client, $name){
+    public static function removeHotspotPlan($client, $name)
+    {
         $printRequest = new RouterOS\Request(
             '/ip hotspot user profile print .proplist=name',
             RouterOS\Query::where('name', $name)
@@ -119,6 +126,8 @@ class Mikrotik
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
+                        ->setArgument('comment', $customer['fullname'])
+                        ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
                 );
             } else if ($plan['limit_type'] == "Data_Limit") {
@@ -131,6 +140,8 @@ class Mikrotik
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
+                        ->setArgument('comment', $customer['fullname'])
+                        ->setArgument('email', $customer['email'])
                         ->setArgument('limit-bytes-total', $datalimit)
                 );
             } else if ($plan['limit_type'] == "Both_Limit") {
@@ -147,6 +158,8 @@ class Mikrotik
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
+                        ->setArgument('comment', $customer['fullname'])
+                        ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
                         ->setArgument('limit-bytes-total', $datalimit)
                 );
@@ -156,12 +169,15 @@ class Mikrotik
                 $addRequest
                     ->setArgument('name', $customer['username'])
                     ->setArgument('profile', $plan['name_plan'])
+                    ->setArgument('comment', $customer['fullname'])
+                    ->setArgument('email', $customer['email'])
                     ->setArgument('password', $customer['password'])
             );
         }
     }
 
-    public static function setHotspotUser($client, $user, $pass, $nuser= null){
+    public static function setHotspotUser($client, $user, $pass, $nuser = null)
+    {
         $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
         $printRequest->setArgument('.proplist', '.id');
         $printRequest->setQuery(RouterOS\Query::where('name', $user));
@@ -216,9 +232,9 @@ class Mikrotik
     public static function addPpoeUser($client, $plan, $customer)
     {
         $addRequest = new RouterOS\Request('/ppp/secret/add');
-        if(!empty($customer['pppoe_password'])){
+        if (!empty($customer['pppoe_password'])) {
             $pass = $customer['pppoe_password'];
-        }else{
+        } else {
             $pass = $customer['password'];
         }
         $client->sendSync(
@@ -226,11 +242,13 @@ class Mikrotik
                 ->setArgument('name', $customer['username'])
                 ->setArgument('service', 'pppoe')
                 ->setArgument('profile', $plan['name_plan'])
+                ->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'])
                 ->setArgument('password', $pass)
         );
     }
 
-    public static function setPpoeUser($client, $user, $pass, $nuser= null){
+    public static function setPpoeUser($client, $user, $pass, $nuser = null)
+    {
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         $printRequest->setArgument('.proplist', '.id');
         $printRequest->setQuery(RouterOS\Query::where('name', $user));
@@ -266,7 +284,8 @@ class Mikrotik
         $client->sendSync($removeRequest);
     }
 
-    public static function removePool($client, $name){
+    public static function removePool($client, $name)
+    {
         $printRequest = new RouterOS\Request(
             '/ip pool print .proplist=name',
             RouterOS\Query::where('name', $name)
@@ -274,29 +293,33 @@ class Mikrotik
         $poolName = $client->sendSync($printRequest)->getProperty('name');
 
         $removeRequest = new RouterOS\Request('/ip/pool/remove');
-        $client($removeRequest
-            ->setArgument('numbers', $poolName)
+        $client(
+            $removeRequest
+                ->setArgument('numbers', $poolName)
         );
     }
 
-    public static function addPool($client, $name, $ip_address){
+    public static function addPool($client, $name, $ip_address)
+    {
         $addRequest = new RouterOS\Request('/ip/pool/add');
-        $client->sendSync($addRequest
-            ->setArgument('name', $name)
-            ->setArgument('ranges', $ip_address)
+        $client->sendSync(
+            $addRequest
+                ->setArgument('name', $name)
+                ->setArgument('ranges', $ip_address)
         );
     }
 
-    public static function setPool($client, $name, $ip_address){
+    public static function setPool($client, $name, $ip_address)
+    {
         $printRequest = new RouterOS\Request(
             '/ip pool print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
         $poolName = $client->sendSync($printRequest)->getProperty('name');
 
-        if(empty($poolName)){
+        if (empty($poolName)) {
             self::addPool($client, $name, $ip_address);
-        }else{
+        } else {
             $setRequest = new RouterOS\Request('/ip/pool/set');
             $client(
                 $setRequest
@@ -307,7 +330,8 @@ class Mikrotik
     }
 
 
-    public static function addPpoePlan($client, $name, $pool, $rate){
+    public static function addPpoePlan($client, $name, $pool, $rate)
+    {
         $addRequest = new RouterOS\Request('/ppp/profile/add');
         $client->sendSync(
             $addRequest
@@ -318,15 +342,16 @@ class Mikrotik
         );
     }
 
-    public static function setPpoePlan($client, $name, $pool, $rate){
+    public static function setPpoePlan($client, $name, $pool, $rate)
+    {
         $printRequest = new RouterOS\Request(
             '/ppp profile print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
         $profileName = $client->sendSync($printRequest)->getProperty('name');
-        if(empty($profileName)){
+        if (empty($profileName)) {
             self::addPpoePlan($client, $name, $pool, $rate);
-        }else{
+        } else {
             $setRequest = new RouterOS\Request('/ppp/profile/set');
             $client(
                 $setRequest
@@ -338,7 +363,8 @@ class Mikrotik
         }
     }
 
-    public static function removePpoePlan($client, $name){
+    public static function removePpoePlan($client, $name)
+    {
         $printRequest = new RouterOS\Request(
             '/ppp profile print .proplist=name',
             RouterOS\Query::where('name', $name)
