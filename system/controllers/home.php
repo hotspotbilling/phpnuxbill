@@ -25,7 +25,7 @@ if (_post('send') == 'balance') {
         if ($user['balance'] < $balance) {
             r2(U . 'home', 'd', Lang::T('insufficient balance'));
         }
-        if (intval($config['minimum_transfer']) >= intval($balance)) {
+        if (!empty($config['minimum_transfer']) && intval($balance) <= intval($config['minimum_transfer'])) {
             r2(U . 'home', 'd', Lang::T('Minimum Transfer') . ' ' . Lang::moneyFormat($config['minimum_transfer']));
         }
         if ($user['username'] == $target['username']) {
