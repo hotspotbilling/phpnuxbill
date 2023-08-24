@@ -162,7 +162,9 @@
                     <script>
                         function askConfirm(){
                             if(confirm('{Lang::T('Send your balance?')}')){
-                                document.getElementById('sendBtn').setAttribute('disabled', '');
+                                setTimeout(() => {
+                                    document.getElementById('sendBtn').setAttribute('disabled', '');
+                                }, 1000);
                                 return true;
                             }
                             return false;
