@@ -502,6 +502,7 @@ switch ($action) {
         }else{
             $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
         }
+        $ui->assign('_default', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
         $ui->display('app-notifications.tpl');
         break;
     case 'notifications-post':

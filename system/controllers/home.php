@@ -28,7 +28,7 @@ if (_post('send') == 'balance') {
         if ($user['username'] == $target['username']) {
             r2(U . 'home', 'd', Lang::T('Cannot send to yourself'));
         }
-        if(Balance::transfer($user['id'], $username, $balance)){
+        if (Balance::transfer($user['id'], $username, $balance)) {
             //sender
             $d = ORM::for_table('tbl_payment_gateway')->create();
             $d->username = $user['username'];
@@ -46,6 +46,7 @@ if (_post('send') == 'balance') {
             $d->pg_url_payment = 'balance';
             $d->status = 2;
             $d->save();
+            Message::sendBalanceNotification($user['phonenumber'], $target['fullname'] . ' (' . $target['username'] . ')', $balance, Lang::getNotifText('balance_send'), $config['user_notification_reminder']);
             //receiver
             $d = ORM::for_table('tbl_payment_gateway')->create();
             $d->username = $target['username'];
@@ -63,9 +64,11 @@ if (_post('send') == 'balance') {
             $d->pg_url_payment = 'balance';
             $d->status = 2;
             $d->save();
+            Message::sendBalanceNotification($target['phonenumber'], $user['fullname'] . ' (' . $user['username'] . ')', $balance, Lang::getNotifText('balance_received'), $config['user_notification_reminder']);
+            Message::sendTelegram("#u$user[username] send balance to #u$target[username] \n" . Lang::moneyFormat($balance));
             r2(U . 'home', 's', Lang::T('Sending balance success'));
         }
-    }else{
+    } else {
         r2(U . 'home', 'd', 'Failed, balance is not available');
     }
 }

@@ -49,4 +49,13 @@ class Lang
     public static function arrayCount($arr){
         return count($arr);
     }
+
+    public static function getNotifText($key){
+        global $_notifmsg, $_notifmsg_default;
+        if(isset($_notifmsg[$key])){
+            return $_notifmsg[$key];
+        }else{
+            return $_notifmsg_default[$key];
+        }
+    }
 }

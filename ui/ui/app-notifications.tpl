@@ -113,6 +113,32 @@
                         </p>
                     </div>
                 </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Send Balance')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="balance_send" name="balance_send"
+                                rows="3">{if $_json['balance_send']}{Lang::htmlspecialchars($_json['balance_send'])}{else}{Lang::htmlspecialchars($_default['balance_send'])}{/if}</textarea>
+                        </div>
+                        <p class="col-md-4 help-block">
+                            <b>[[name]]</b> Receiver name.<br>
+                            <b>[[balance]]</b> how much balance have been send.
+                        </p>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Received Balance')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="balance_received" name="balance_received"
+                                rows="3">{if $_json['balance_received']}{Lang::htmlspecialchars($_json['balance_received'])}{else}{Lang::htmlspecialchars($_default['balance_received'])}{/if}</textarea>
+                        </div>
+                        <p class="col-md-4 help-block">
+                            <b>[[name]]</b> Sender name.<br>
+                            <b>[[balance]]</b> how much balance have been received.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div class="panel-body">

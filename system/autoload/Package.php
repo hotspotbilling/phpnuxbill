@@ -49,7 +49,7 @@ class Package
 
             Balance::plus($id_customer, $p['price']);
 
-            $textInvoice = $_notifmsg['invoice_balance'];
+            $textInvoice = Lang::getNotifText('invoice_balance');
             $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
             $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
             $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
@@ -165,7 +165,7 @@ class Package
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
-                "\nPrice: " . $p['price']);
+                "\nPrice: " . Lang::moneyFormat($p['price']));
         } else {
 
             if ($b) {
@@ -241,12 +241,12 @@ class Package
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
-                "\nPrice: " . $p['price']);
+                "\nPrice: " . Lang::moneyFormat($p['price']));
         }
 
         $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
 
-        $textInvoice = $_notifmsg['invoice_paid'];
+        $textInvoice = Lang::getNotifText('invoice_paid');
         $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
         $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
         $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);

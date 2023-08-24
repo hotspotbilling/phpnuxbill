@@ -380,3 +380,5 @@ $_L['Sending_balance_success'] = 'Sending balance success';
 $_L['From'] = 'From';
 $_L['To'] = 'To';
 $_L['insufficient_balance'] = 'insufficient balance';
+$_L['Send_Balance'] = 'Send Balance';
+$_L['Received_Balance'] = 'Received Balance';
