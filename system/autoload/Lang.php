@@ -42,6 +42,11 @@ class Lang
         return date($config['date_format']. ' H:i', strtotime($date));
     }
 
+    public static function dateAndTimeFormat($date, $time){
+        global $config;
+        return date($config['date_format']. ' H:i', strtotime("$date $time"));
+    }
+
     public static function nl2br($text){
         return nl2br($text);
     }

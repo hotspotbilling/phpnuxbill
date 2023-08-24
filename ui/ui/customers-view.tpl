@@ -77,7 +77,7 @@
                         </li>
                         <li class="list-group-item">
                             {$_L['Expires_On']} <span
-                                class="pull-right">{Lang::dateTimeFormat($package['expiration']+' '+$package['time'])}</span>
+                                class="pull-right">{Lang::dateAndTimeFormat($package['expiration'], $package['time'])}</span>
                         </li>
                         <li class="list-group-item">
                             {$package['routers']} <span class="pull-right">{$package['method']}</span>
