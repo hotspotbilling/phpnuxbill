@@ -19,11 +19,10 @@ ORM::configure('logging', true);
 include "autoload/Hookers.php";
 
 // notification message
-if (file_exists("uploads/notifications.json")) {
-    $_notifmsg = json_decode(file_get_contents('uploads/notifications.json'), true);
-} else {
-    $_notifmsg = json_decode(file_get_contents('uploads/notifications.default.json'), true);
+if(file_exists("system/uploads/notifications.json")){
+    $_notifmsg =json_decode(file_get_contents('system/uploads/notifications.json'), true);
 }
+$_notifmsg_default = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
 
 //register all plugin
 foreach (glob("plugin/*.php") as $filename) {
@@ -64,10 +63,10 @@ $_c = $config;
 
 date_default_timezone_set($config['timezone']);
 
-$textExpired = $_notifmsg['expired'];
+$textExpired = Lang::getNotifText('expired');
 
-$d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
-
+$d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('expiration', date("Y-m-d"))->find_many();
+echo "Found ".count($d)." user(s)\n";
 run_hook('cronjob'); #HOOK
 
 foreach ($d as $ds) {
@@ -142,7 +141,7 @@ foreach ($d as $ds) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
                     } else {
-                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+                        Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
                             "\nRouter: " . $router_name .
                             "\nPrice: " . $p['price']);
                     }

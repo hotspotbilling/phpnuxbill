@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2023.8.24
+
+- Balance transfer between Customer
+- Optimize Cronjob
+- View Customer Info
+- Ajax for select customer
+
 ## 2023.8.18
 
 - Fix Auto Renewall Cronjob

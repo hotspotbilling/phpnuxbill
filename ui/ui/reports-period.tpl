@@ -32,6 +32,7 @@
                                 <option value="" selected="">{$_L['All_Transactions']}</option>
                                 <option value="Hotspot">Hotspot</option>
                                 <option value="PPPOE">PPPOE</option>
+                                <option value="Balance">Balance</option>
                             </select>
                         </div>
                     </div>

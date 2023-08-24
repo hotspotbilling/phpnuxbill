@@ -213,6 +213,7 @@ switch ($action) {
         $telegram_target_id = _post('telegram_target_id');
         $sms_url = _post('sms_url');
         $wa_url = _post('wa_url');
+        $minimum_transfer = _post('minimum_transfer');
         $user_notification_expired = _post('user_notification_expired');
         $user_notification_reminder = _post('user_notification_reminder');
         $user_notification_payment = _post('user_notification_payment');
@@ -278,6 +279,17 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'allow_balance_transfer';
                 $d->value = $allow_balance_transfer;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'minimum_transfer')->find_one();
+            if($d){
+                $d->value = $minimum_transfer;
+                $d->save();
+            }else{
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'minimum_transfer';
+                $d->value = $minimum_transfer;
                 $d->save();
             }
 
@@ -502,6 +514,7 @@ switch ($action) {
         }else{
             $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
         }
+        $ui->assign('_default', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
         $ui->display('app-notifications.tpl');
         break;
     case 'notifications-post':
