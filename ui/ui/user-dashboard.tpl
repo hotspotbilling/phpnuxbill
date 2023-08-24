@@ -144,7 +144,7 @@
                     <h4 class="box-title">{Lang::T("Transfer Balance")}</h4>
                 </div>
                 <div class="box-body p-0">
-                    <form method="post" onsubmit="return confirm('{Lang::T('Send your balance?')}')" role="form" action="{$_url}home">
+                    <form method="post" onsubmit="return askConfirm()" role="form" action="{$_url}home">
                         <div class="form-group">
                             <div class="col-sm-5">
                                 <input type="text" id="username" name="username" class="form-control" required
@@ -155,10 +155,19 @@
                                     placeholder="{$_L['Balance']}">
                             </div>
                             <div class="form-group col-sm-2" align="center">
-                                <button class="btn btn-success btn-block" type="submit" name="send" value="balance"><i class="glyphicon glyphicon-send"></i></button>
+                                <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send" value="balance"><i class="glyphicon glyphicon-send"></i></button>
                             </div>
                         </div>
                     </form>
+                    <script>
+                        function askConfirm(){
+                            if(confirm('{Lang::T('Send your balance?')}')){
+                                document.getElementById('sendBtn').setAttribute('disabled', '');
+                                return true;
+                            }
+                            return false;
+                        }
+                    </script>
                 </div>
             </div>
         {/if}

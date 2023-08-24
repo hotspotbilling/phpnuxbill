@@ -382,3 +382,5 @@ $_L['To'] = 'To';
 $_L['insufficient_balance'] = 'insufficient balance';
 $_L['Send_Balance'] = 'Send Balance';
 $_L['Received_Balance'] = 'Received Balance';
+$_L['Minimum_Balance_Transfer'] = 'Minimum Balance Transfer';
+$_L['Minimum_Transfer'] = 'Minimum Transfer';

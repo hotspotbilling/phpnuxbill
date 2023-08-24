@@ -25,6 +25,9 @@ if (_post('send') == 'balance') {
         if ($user['balance'] < $balance) {
             r2(U . 'home', 'd', Lang::T('insufficient balance'));
         }
+        if (intval($config['minimum_transfer']) >= intval($balance)) {
+            r2(U . 'home', 'd', Lang::T('Minimum Transfer') . ' ' . Lang::moneyFormat($config['minimum_transfer']));
+        }
         if ($user['username'] == $target['username']) {
             r2(U . 'home', 'd', Lang::T('Cannot send to yourself'));
         }
@@ -46,7 +49,6 @@ if (_post('send') == 'balance') {
             $d->pg_url_payment = 'balance';
             $d->status = 2;
             $d->save();
-            Message::sendBalanceNotification($user['phonenumber'], $target['fullname'] . ' (' . $target['username'] . ')', $balance, Lang::getNotifText('balance_send'), $config['user_notification_reminder']);
             //receiver
             $d = ORM::for_table('tbl_payment_gateway')->create();
             $d->username = $target['username'];
@@ -64,7 +66,8 @@ if (_post('send') == 'balance') {
             $d->pg_url_payment = 'balance';
             $d->status = 2;
             $d->save();
-            Message::sendBalanceNotification($target['phonenumber'], $user['fullname'] . ' (' . $user['username'] . ')', $balance, Lang::getNotifText('balance_received'), $config['user_notification_reminder']);
+            Message::sendBalanceNotification($user['phonenumber'], $target['fullname'] . ' (' . $target['username'] . ')', $balance, Lang::getNotifText('balance_send'), $config['user_notification_payment']);
+            Message::sendBalanceNotification($target['phonenumber'], $user['fullname'] . ' (' . $user['username'] . ')', $balance, Lang::getNotifText('balance_received'), $config['user_notification_payment']);
             Message::sendTelegram("#u$user[username] send balance to #u$target[username] \n" . Lang::moneyFormat($balance));
             r2(U . 'home', 's', Lang::T('Sending balance success'));
         }
