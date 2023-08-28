@@ -138,7 +138,7 @@
                 }, 2000);
             </script>
         {/if}
-        {if $_c['enable_balance'] == 'yes'}
+        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes'}
             <div class="box box-primary box-solid mb30">
                 <div class="box-header">
                     <h4 class="box-title">{Lang::T("Transfer Balance")}</h4>
