@@ -168,6 +168,7 @@ switch ($action) {
         $id_plan = _post('id_plan');
         $recharged_on = _post('recharged_on');
         $expiration = _post('expiration');
+        $time = _post('time');
 
         $id = _post('id');
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
@@ -182,6 +183,7 @@ switch ($action) {
             $d->plan_id = $id_plan;
             $d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
+            $d->time = $time;
             $d->save();
             Package::changeTo($username, $id_plan);
             _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['plan_name'] . '][' . Lang::moneyFormat($d['price']) . ']', 'Admin', $admin['id']);
