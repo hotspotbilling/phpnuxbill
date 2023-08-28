@@ -108,9 +108,9 @@
                             <tr>
                                 <td>{$no++}</td>
                                 <td><a href="{$_url}customers/viewu/{$expired['username']}">{$expired['username']}</a></td>
-                                <td>{date($_c['date_format'], strtotime($expired['recharged_on']))}
+                                <td>{Lang::dateAndTimeFormat($expired['recharged_on'],$expired['recharged_time'])}
                                 </td>
-                                <td>{date($_c['date_format'], strtotime($expired['expiration']))} {$expired['time']}
+                                <td>{Lang::dateAndTimeFormat($expired['expiration'],$expired['time'])}
                                 </td>
                             </tr>
                         </tbody>

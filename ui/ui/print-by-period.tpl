@@ -39,8 +39,8 @@
                             <td class="text-center">{$ds['plan_name']}</td>
                             <td class="text-center">{$ds['type']}</td>
                             <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>
-                            <td>{date($_c['date_format'], strtotime($ds['recharged_on']))}</td>
-                            <td>{date($_c['date_format'], strtotime($ds['expiration']))} {$ds['time']}</td>
+                            <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
+                            <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
                             <td class="text-center">{$ds['method']}</td>
                             <td class="text-center">{$ds['routers']}</td>
                         </tr>

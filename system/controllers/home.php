@@ -15,7 +15,7 @@ if (isset($_GET['renewal'])) {
 }
 
 if (_post('send') == 'balance') {
-    if ($config['allow_balance_transfer'] == 'yes') {
+    if ($config['enable_balance'] == 'yes' && $config['allow_balance_transfer'] == 'yes') {
         $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
         if (!$target) {
             r2(U . 'home', 'd', Lang::T('Username not found'));

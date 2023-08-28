@@ -73,7 +73,8 @@
                                 class="pull-right">{if $package['status']=='on'}yes{else}no{/if}</span>
                         </li>
                         <li class="list-group-item">
-                            {$_L['Created_On']} <span class="pull-right">{Lang::dateFormat($package['recharged_on'])}</span>
+                            {$_L['Created_On']} <span
+                                class="pull-right">{Lang::dateAndTimeFormat($package['recharged_on'],$package['recharged_time'])}</span>
                         </li>
                         <li class="list-group-item">
                             {$_L['Expires_On']} <span
@@ -116,9 +117,9 @@
                                 <td>{$ds['plan_name']}</td>
                                 <td>{Lang::moneyFormat($ds['price'])}</td>
                                 <td>{$ds['type']}</td>
-                                <td class="text-success">{date($_c['date_format'], strtotime($ds['recharged_on']))}</td>
-                                <td class="text-danger">{date($_c['date_format'], strtotime($ds['expiration']))}
-                                    {$ds['time']}</td>
+                                <td class="text-success">{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}
+                                </td>
+                                <td class="text-danger">{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
                                 <td>{$ds['method']}</td>
                             </tr>
                         {/foreach}
@@ -146,12 +147,9 @@
                                 <td>{$ds['routers']}</td>
                                 <td>{$ds['payment_channel']}</td>
                                 <td>{Lang::moneyFormat($ds['price'])}</td>
-                                <td class="text-primary">{date("{$_c['date_format']} H:i",
-                                    strtotime($ds['created_date']))}</td>
-                                <td class="text-danger">{date("{$_c['date_format']} H:i",
-                                    strtotime($ds['expired_date']))}</td>
-                                <td class="text-success">{if $ds['status']!=1}{date("{$_c['date_format']} H:i",
-                                    strtotime($ds['paid_date']))}{/if}</td>
+                                <td class="text-primary">{Lang::dateTimeFormat($ds['created_date'])}</td>
+                                <td class="text-danger">{Lang::dateTimeFormat($ds['expired_date'])}</td>
+                                <td class="text-success">{if $ds['status']!=1}{Lang::dateTimeFormat($ds['paid_date'])}{/if}</td>
                                 <td>{if $ds['status']==1}{$_L['UNPAID']}
                                     {elseif $ds['status']==2}{$_L['PAID']}
                                     {elseif $ds['status']==3}{$_L['FAILED']}
