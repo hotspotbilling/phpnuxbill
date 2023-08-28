@@ -249,6 +249,7 @@ class Package
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
@@ -327,11 +328,14 @@ class Package
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
             }
@@ -339,12 +343,15 @@ class Package
             if ($b) {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             }

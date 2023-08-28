@@ -219,17 +219,17 @@ class Mikrotik
 
     public static function removePpoeUser($client, $username)
     {
-        $printRequest = new RouterOS\Request(
-            '/ppp secret print .proplist=name',
-            RouterOS\Query::where('name', $username)
-        );
-        $id = $client->sendSync($printRequest)->getProperty('.id');
 
-        $removeRequest = new RouterOS\Request('/ppp/secret/remove');
-        $client(
-            $removeRequest
-                ->setArgument('numbers', $id)
-        );
+    $printRequest = new RouterOS\Request('/ppp/secret/print');
+    $printRequest->setArgument('.proplist', '.id');
+    $printRequest->setQuery(RouterOS\Query::where('name', $username));
+    $id = $client->sendSync($printRequest)->getProperty('.id');
+
+    $removeRequest = new RouterOS\Request('/ppp/secret/remove');
+    $client(
+        $removeRequest
+            ->setArgument('numbers', $id)
+    );
     }
 
     public static function addPpoeUser($client, $plan, $customer)
