@@ -28,9 +28,9 @@ switch ($action) {
         $v1 = ORM::for_table('tbl_voucher')->where('code', $code)->where('status', 0)->find_one();
         run_hook('customer_activate_voucher'); #HOOK
         if ($v1) {
-            if (Package::rechargeUser($user, $v1['routers'], $v1['id_plan'], "Activation", "Voucher")) {
+            if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Activation", "Voucher")) {
                 $v1->status = "1";
-                $v1->user = $c['username'];
+                $v1->user = $user['username'];
                 $v1->save();
                 r2(U . "voucher/list-activated", 's', $_L['Activation_Vouchers_Successfully']);
             } else {

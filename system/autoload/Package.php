@@ -102,6 +102,23 @@ class Package
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
+                if ($b['namebp'] == $p['name_plan']) {
+                    // if it same internet plan, expired will extend
+                    if ($p['validity_unit'] == 'Months') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                    } else if ($p['validity_unit'] == 'Days') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                    } else if ($p['validity_unit'] == 'Hrs') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    } else if ($p['validity_unit'] == 'Mins') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    }
+                }
+
                 $b->customer_id = $id_customer;
                 $b->username = $c['username'];
                 $b->plan_id = $plan_id;
@@ -180,6 +197,24 @@ class Package
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
+                }
+
+
+                if ($b['namebp'] == $p['name_plan']) {
+                    // if it same internet plan, expired will extend
+                    if ($p['validity_unit'] == 'Months') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                    } else if ($p['validity_unit'] == 'Days') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                    } else if ($p['validity_unit'] == 'Hrs') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    } else if ($p['validity_unit'] == 'Mins') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    }
                 }
 
                 $b->customer_id = $id_customer;
