@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2023.8.28
+
+- Extend expiration if buy same package
+- Fix calendar
+- Add recharge time
+- Fix allow balance transfer
+
 ## 2023.8.24
 
 - Balance transfer between Customer
