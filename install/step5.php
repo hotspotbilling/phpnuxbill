@@ -24,7 +24,8 @@
                 <strong>Congratulations!</strong><br>
                 You have just install PHPNuxBill !<br><br>
                 <span class="text-danger">But wait!!<br>
-                Don't forget to rename folder <b>pages_example</b> to <b>pages</b></span><br><br>
+                Don't forget to rename folder <b>pages_example</b> to <b>pages</b>.<br>
+                if it not yet renamed</span><br><br>
                 To Login Admin Portal:<br>
                 Use this link -
                 <?php
