@@ -41,7 +41,7 @@ class Package
             $t->plan_name = $p['name_plan'];
             $t->price = $p['price'];
             $t->recharged_on = $date_only;
-            $t->recharge_time = date("H:i:s");
+            $t->recharged_time = date("H:i:s");
             $t->expiration = $date_only;
             $t->time = $time;
             $t->method = "$gateway - $channel";
@@ -107,7 +107,7 @@ class Package
                 $b->plan_id = $plan_id;
                 $b->namebp = $p['name_plan'];
                 $b->recharged_on = $date_only;
-                $b->recharge_time = $time_only;
+                $b->recharged_time = $time_only;
                 $b->expiration = $date_exp;
                 $b->time = $time;
                 $b->status = "on";
@@ -123,7 +123,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
-                $t->recharge_time = $time_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
@@ -143,7 +143,7 @@ class Package
                 $d->plan_id = $plan_id;
                 $d->namebp = $p['name_plan'];
                 $d->recharged_on = $date_only;
-                $d->recharge_time = $time_only;
+                $d->recharged_time = $time_only;
                 $d->expiration = $date_exp;
                 $d->time = $time;
                 $d->status = "on";
@@ -159,7 +159,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
-                $t->recharge_time = $time_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
@@ -187,7 +187,7 @@ class Package
                 $b->plan_id = $plan_id;
                 $b->namebp = $p['name_plan'];
                 $b->recharged_on = $date_only;
-                $b->recharge_time = $time_only;
+                $b->recharged_time = $time_only;
                 $b->expiration = $date_exp;
                 $b->time = $time;
                 $b->status = "on";
@@ -203,7 +203,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
-                $t->recharge_time = $time_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
@@ -223,7 +223,7 @@ class Package
                 $d->plan_id = $plan_id;
                 $d->namebp = $p['name_plan'];
                 $d->recharged_on = $date_only;
-                $d->recharge_time = $time_only;
+                $d->recharged_time = $time_only;
                 $d->expiration = $date_exp;
                 $d->time = $time;
                 $d->status = "on";
@@ -239,7 +239,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
-                $t->recharge_time = $time_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";

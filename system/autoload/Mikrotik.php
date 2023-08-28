@@ -12,11 +12,14 @@ class Mikrotik
 
     public static function getClient($ip, $user, $pass)
     {
+        global $ui;
         try {
             $iport = explode(":", $ip);
             return new RouterOS\Client($iport[0], $user, $pass, ($iport[1]) ? $iport[1] : null);
         } catch (Exception $e) {
-            die("Unable to connect to the router.<br>" . $e->getMessage());
+            $ui->assign("error_meesage","Unable to connect to the router.<br>" . $e->getMessage());
+            $ui->display('router-error.tpl');
+            die();
         }
     }
 

@@ -43,7 +43,7 @@
                                 value="{$d['expiration']}">
                         </div>
                         <div class="col-md-2">
-                            <input type="time" class="form-control" id="time" name="time" min="00:00" max="23:59"
+                            <input type="time" class="form-control" id="time" name="time"
                                 value="{$d['time']}">
                         </div>
                     </div>
