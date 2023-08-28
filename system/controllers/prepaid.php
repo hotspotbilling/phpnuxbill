@@ -181,7 +181,7 @@ switch ($action) {
             run_hook('edit_customer_plan'); #HOOK
             $d->username = $username;
             $d->plan_id = $id_plan;
-            $d->recharged_on = $recharged_on;
+            //$d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->time = $time;
             $d->save();

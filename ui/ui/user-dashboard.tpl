@@ -84,14 +84,14 @@
                 <tr>
                     <td class="small text-info text-uppercase text-normal">{$_L['Created_On']}</td>
                     <td class="small mb15">
-                        {if $_bill['time'] ne ''}{date($_c['date_format'], strtotime($_bill['recharged_on']))}
+                        {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['recharged_on'],$_bill['recharged_time'])}
                         {/if}&nbsp;</td>
                 </tr>
                 <tr>
                     <td class="small text-danger text-uppercase text-normal">{$_L['Expires_On']}</td>
                     <td class="small mb15">
-                        {if $_bill['time'] ne ''}{date($_c['date_format'], strtotime($_bill['expiration']))}
-                        {$_bill['time']}{/if}&nbsp;</td>
+                        {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
+                    </td>
                 </tr>
                 {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
                     {if $nux_ip}
@@ -151,23 +151,24 @@
                                     placeholder="{$_L['Username']}">
                             </div>
                             <div class="col-sm-5">
-                                <input type="number" id="balance" name="balance" autocomplete="off" class="form-control" required
-                                    placeholder="{$_L['Balance']}">
+                                <input type="number" id="balance" name="balance" autocomplete="off" class="form-control"
+                                    required placeholder="{$_L['Balance']}">
                             </div>
                             <div class="form-group col-sm-2" align="center">
-                                <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send" value="balance"><i class="glyphicon glyphicon-send"></i></button>
+                                <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
+                                    value="balance"><i class="glyphicon glyphicon-send"></i></button>
                             </div>
                         </div>
                     </form>
                     <script>
-                        function askConfirm(){
+                        function askConfirm() {
                             if(confirm('{Lang::T('Send your balance?')}')){
-                                setTimeout(() => {
-                                    document.getElementById('sendBtn').setAttribute('disabled', '');
-                                }, 1000);
-                                return true;
-                            }
-                            return false;
+                            setTimeout(() => {
+                                document.getElementById('sendBtn').setAttribute('disabled', '');
+                            }, 1000);
+                            return true;
+                        }
+                        return false;
                         }
                     </script>
                 </div>
