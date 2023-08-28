@@ -13,7 +13,8 @@
     <link type='text/css' href='css/style.css' rel='stylesheet' />
     <link type='text/css' href="css/bootstrap.min.css" rel="stylesheet">
 </head>
-<?php rename('../pages_template','../pages'); ?>
+<?php if (!file_exists('../pages')) rename('../pages_template', '../pages'); ?>
+
 <body style='background-color: #FBFBFB;'>
     <div id='main-container'>
         <img src="img/logo.png" class="img-responsive" alt="Logo" />
@@ -24,8 +25,15 @@
                 <strong>Congratulations!</strong><br>
                 You have just install PHPNuxBill !<br><br>
                 <span class="text-danger">But wait!!<br>
-                Don't forget to rename folder <b>pages_example</b> to <b>pages</b>.<br>
-                if it not yet renamed</span><br><br>
+                    <ol>
+                        <li>Don't forget to rename folder <b>pages_example</b> to <b>pages</b>.<br>
+                            if it not yet renamed</li>
+                        <li>Activate <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/Cron-Jobs" target="_blank">Cronjob</a> for Expired and Reminder.</li>
+                        <li>Check <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/How-It-Works---Cara-kerja" target="_blank">how PHPNuxbill Works</a></li>
+                        <li><a href="https://github.com/hotspotbilling/phpnuxbill/wiki#login-page-mikrotik" target="_blank">how to link Mikrotik Login to PHPNuxBill</a></li>
+                        <li>or use <a href="https://github.com/hotspotbilling/phpnuxbill-mikrotik-login-template" target="_blank">Mikrotik Login Template for PHPNuxBill</a></li>
+                    </ol>
+                </span><br><br>
                 To Login Admin Portal:<br>
                 Use this link -
                 <?php
