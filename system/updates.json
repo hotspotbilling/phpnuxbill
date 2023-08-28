@@ -13,5 +13,8 @@
     ],
     "2023.8.23" : [
         "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT 'For PPPOE Login';"
+    ],
+    "2023.8.28" : [
+        "ALTER TABLE `tbl_user_recharges` CHANGE `recharged_on` `recharged_on` DATETIME NOT NULL;"
     ]
 }
