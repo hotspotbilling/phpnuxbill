@@ -384,3 +384,4 @@ $_L['Send_Balance'] = 'Send Balance';
 $_L['Received_Balance'] = 'Received Balance';
 $_L['Minimum_Balance_Transfer'] = 'Minimum Balance Transfer';
 $_L['Minimum_Transfer'] = 'Minimum Transfer';
+$_L['Company_Logo'] = 'Company Logo';
