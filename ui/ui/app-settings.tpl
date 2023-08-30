@@ -24,7 +24,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Company Logo')}</label>
                         <div class="col-md-6">
                             <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-                            <span class="help-block">For PDF Reports | Beset size 1078 x 200 | uploaded image will be autosize</span>
+                            <span class="help-block">For PDF Reports | Best size 1078 x 200 | uploaded image will be autosize</span>
                         </div>
                         <span class="help-block col-md-4">
                             <a href="./{$logo}" target="_blank"><img src="./{$logo}" height="48" alt="logo for PDF"></a>
