@@ -33,7 +33,7 @@
                             ============================================<br>
                             {$_L['Type']} : <b>{$d['type']}</b><br>
                             {$_L['Plan_Name']} : <b>{$d['plan_name']}</b><br>
-                            {$_L['Plan_Price']} : <b>{Lang::moneyFormat($in['price'])}</b><br>
+                            {$_L['Plan_Price']} : <b>{Lang::moneyFormat($d['price'])}</b><br>
                             <br>
                             {$_L['Username']} : <b>{$d['username']}</b><br>
                             {$_L['Password']} : **********<br>
