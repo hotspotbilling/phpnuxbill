@@ -229,9 +229,6 @@ switch ($action) {
         run_hook('save_settings'); #HOOK
 
 
-        if ($_FILES['logo']['error'] > 0) {
-            r2(U . 'settings/app', 'e', 'Failed to process logo');
-        }
         if (!empty($_FILES['logo']['name'])) {
             if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
             File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
