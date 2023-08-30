@@ -12,11 +12,14 @@ class Mikrotik
 
     public static function getClient($ip, $user, $pass)
     {
+        global $ui;
         try {
             $iport = explode(":", $ip);
             return new RouterOS\Client($iport[0], $user, $pass, ($iport[1]) ? $iport[1] : null);
         } catch (Exception $e) {
-            die("Unable to connect to the router.<br>" . $e->getMessage());
+            $ui->assign("error_meesage","Unable to connect to the router.<br>" . $e->getMessage());
+            $ui->display('router-error.tpl');
+            die();
         }
     }
 
@@ -216,17 +219,17 @@ class Mikrotik
 
     public static function removePpoeUser($client, $username)
     {
-        $printRequest = new RouterOS\Request(
-            '/ppp secret print .proplist=name',
-            RouterOS\Query::where('name', $username)
-        );
-        $id = $client->sendSync($printRequest)->getProperty('.id');
 
-        $removeRequest = new RouterOS\Request('/ppp/secret/remove');
-        $client(
-            $removeRequest
-                ->setArgument('numbers', $id)
-        );
+    $printRequest = new RouterOS\Request('/ppp/secret/print');
+    $printRequest->setArgument('.proplist', '.id');
+    $printRequest->setQuery(RouterOS\Query::where('name', $username));
+    $id = $client->sendSync($printRequest)->getProperty('.id');
+
+    $removeRequest = new RouterOS\Request('/ppp/secret/remove');
+    $client(
+        $removeRequest
+            ->setArgument('numbers', $id)
+    );
     }
 
     public static function addPpoeUser($client, $plan, $customer)

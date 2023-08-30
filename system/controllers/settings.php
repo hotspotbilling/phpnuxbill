@@ -17,6 +17,12 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
+        if (file_exists('system/uploads/logo.png')) {
+            $logo = 'system/uploads/logo.png?' . time();
+        } else {
+            $logo = 'system/uploads/logo.default.png';
+        }
+        $ui->assign('logo', $logo);
         run_hook('view_app_settings'); #HOOK
         $ui->display('app-settings.tpl');
         break;
@@ -219,8 +225,15 @@ switch ($action) {
         $user_notification_payment = _post('user_notification_payment');
         $address = _post('address');
         $tawkto = _post('tawkto');
-        $radius_mode = _post('radius_mode')*1;
+        $radius_mode = _post('radius_mode') * 1;
         run_hook('save_settings'); #HOOK
+
+
+        if (!empty($_FILES['logo']['name'])) {
+            if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
+            File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
+            if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
+        }
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
         } else {
@@ -239,10 +252,10 @@ switch ($action) {
 
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'CompanyFooter')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $footer;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'CompanyFooter';
                 $d->value = $footer;
@@ -250,10 +263,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'disable_voucher')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $disable_voucher;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'disable_voucher';
                 $d->value = $disable_voucher;
@@ -261,10 +274,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'enable_balance')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $enable_balance;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'enable_balance';
                 $d->value = $enable_balance;
@@ -272,10 +285,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'allow_balance_transfer')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $allow_balance_transfer;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'allow_balance_transfer';
                 $d->value = $allow_balance_transfer;
@@ -283,10 +296,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'minimum_transfer')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $minimum_transfer;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'minimum_transfer';
                 $d->value = $minimum_transfer;
@@ -294,10 +307,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'telegram_bot')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $telegram_bot;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'telegram_bot';
                 $d->value = $telegram_bot;
@@ -305,10 +318,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'telegram_target_id')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $telegram_target_id;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'telegram_target_id';
                 $d->value = $telegram_target_id;
@@ -316,10 +329,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'sms_url')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $sms_url;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'sms_url';
                 $d->value = $sms_url;
@@ -327,10 +340,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'wa_url')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $wa_url;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'wa_url';
                 $d->value = $wa_url;
@@ -338,10 +351,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_expired')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $user_notification_expired;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'user_notification_expired';
                 $d->value = $user_notification_expired;
@@ -349,10 +362,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_reminder')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $user_notification_reminder;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'user_notification_reminder';
                 $d->value = $user_notification_reminder;
@@ -360,10 +373,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_payment')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $user_notification_payment;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'user_notification_payment';
                 $d->value = $user_notification_payment;
@@ -371,10 +384,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'tawkto')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $tawkto;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'tawkto';
                 $d->value = $tawkto;
@@ -382,10 +395,10 @@ switch ($action) {
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_mode')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $radius_mode;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'radius_mode';
                 $d->value = $radius_mode;
@@ -436,10 +449,10 @@ switch ($action) {
 
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'country_code_phone')->find_one();
-            if($d){
+            if ($d) {
                 $d->value = $country_code_phone;
                 $d->save();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'country_code_phone';
                 $d->value = $country_code_phone;
@@ -509,9 +522,9 @@ switch ($action) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         run_hook('view_notifications'); #HOOK
-        if(file_exists("system/uploads/notifications.json")){
+        if (file_exists("system/uploads/notifications.json")) {
             $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.json'), true));
-        }else{
+        } else {
             $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
         }
         $ui->assign('_default', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));

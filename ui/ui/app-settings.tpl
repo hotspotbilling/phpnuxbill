@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post">
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-sm-12 col-md-12">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">
@@ -17,9 +17,18 @@
                         <div class="col-md-6">
                             <input type="text" required class="form-control" id="company" name="company"
                                 value="{$_c['CompanyName']}">
-
                         </div>
                         <span class="help-block col-md-4">{$_L['App_Name_Help_Text']}</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Company Logo')}</label>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                            <span class="help-block">For PDF Reports | Beset size 1078 x 200 | uploaded image will be autosize</span>
+                        </div>
+                        <span class="help-block col-md-4">
+                            <a href="./{$logo}" target="_blank"><img src="./{$logo}" height="48" alt="logo for PDF"></a>
+                        </span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Company Footer')}</label>

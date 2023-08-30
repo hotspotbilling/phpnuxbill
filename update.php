@@ -208,7 +208,7 @@ function deleteFolder($path)
     <div class="container">
         <section class="content-header">
             <h1 class="text-center">
-                Update PHP NuxBill
+                Update PHPNuxBill
             </h1>
         </section>
 

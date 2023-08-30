@@ -2,6 +2,19 @@
 
 # CHANGELOG
 
+## 2023.8.30
+
+- Upload Logo from settings
+- Fix Print value
+- Fix Time when editing prepaid
+
+## 2023.8.28
+
+- Extend expiration if buy same package
+- Fix calendar
+- Add recharge time
+- Fix allow balance transfer
+
 ## 2023.8.24
 
 - Balance transfer between Customer

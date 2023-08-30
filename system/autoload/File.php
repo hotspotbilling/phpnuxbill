@@ -33,6 +33,63 @@ class File
         rmdir($path);
     }
 
+    public static function resizeCropImage($source_file, $dst_dir, $max_width, $max_height, $quality = 80)
+    {
+        $imgsize = getimagesize($source_file);
+        $width = $imgsize[0];
+        $height = $imgsize[1];
+        $mime = $imgsize['mime'];
+
+        switch ($mime) {
+            case 'image/gif':
+                $image_create = "imagecreatefromgif";
+                $image = "imagegif";
+                break;
+
+            case 'image/png':
+                $image_create = "imagecreatefrompng";
+                $image = "imagepng";
+                $quality = 7;
+                break;
+
+            case 'image/jpeg':
+                $image_create = "imagecreatefromjpeg";
+                $image = "imagejpeg";
+                $quality = 80;
+                break;
+
+            default:
+                return false;
+                break;
+        }
+
+        if ($max_width == 0) {
+            $max_width  = $width;
+        }
+
+        if ($max_height == 0) {
+            $max_height = $height;
+        }
+
+        $widthRatio = $max_width / $width;
+        $heightRatio = $max_height / $height;
+        $ratio = min($widthRatio, $heightRatio);
+        $nwidth  = (int)$width  * $ratio;
+        $nheight = (int)$height * $ratio;
+
+        $dst_img = imagecreatetruecolor($nwidth, $nheight);
+        $white = imagecolorallocate($dst_img, 255, 255, 255);
+        imagefill($dst_img, 0, 0, $white);
+        $src_img = $image_create($source_file);
+        imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $nwidth, $nheight, $width, $height);
+
+        $image($dst_img, $dst_dir, $quality);
+
+        if ($dst_img) imagedestroy($dst_img);
+        if ($src_img) imagedestroy($src_img);
+        return file_exists($dst_dir);
+    }
+
 
     /**
      * file path fixer

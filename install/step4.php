@@ -82,11 +82,8 @@ $wConfig = "../config.php";
 
 <body style='background-color: #FBFBFB;'>
 	<div id='main-container'>
-		<div class='header'>
-			<div class="header-box wrapper">
-				<div class="hd-logo"><a href="#"><img src="img/logo.png" alt="Logo"/></a></div>
-			</div>
-		</div>
+        <img src="img/logo.png" class="img-responsive" alt="Logo" />
+        <hr>
 
 		<div class="span12">
 			<h4> PHPNuxBill  Installer </h4>

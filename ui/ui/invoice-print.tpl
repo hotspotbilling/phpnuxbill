@@ -33,15 +33,14 @@
                             ============================================<br>
                             {$_L['Type']} : <b>{$d['type']}</b><br>
                             {$_L['Plan_Name']} : <b>{$d['plan_name']}</b><br>
-                            {$_L['Plan_Price']} : <b>{Lang::moneyFormat($in['price'])}</b><br>
+                            {$_L['Plan_Price']} : <b>{Lang::moneyFormat($d['price'])}</b><br>
                             <br>
                             {$_L['Username']} : <b>{$d['username']}</b><br>
                             {$_L['Password']} : **********<br>
                             {if $in['type'] != 'Balance'}
                                 <br>
-                                {$_L['Created_On']} : <b>{date($_c['date_format'], strtotime($d['recharged_on']))}</b><br>
-                                {$_L['Expires_On']} : <b>{date($_c['date_format'], strtotime($d['expiration']))}
-                                    {$d['time']}</b><br>
+                                {$_L['Created_On']} : <b>{Lang::dateAndTimeFormat($d['recharged_on'],$d['recharged_time'])}</b><br>
+                                {$_L['Expires_On']} : <b>{Lang::dateAndTimeFormat($d['expiration'],$d['time'])}</b><br>
                             {/if}
                             ============================================<br>
                             <center>{$_c['note']}</center>

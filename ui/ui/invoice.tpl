@@ -24,9 +24,8 @@
                         {$_L['Password']} : **********<br>
                         {if $in['type'] != 'Balance'}
                             <br>
-                            {$_L['Created_On']} : <b>{date($_c['date_format'], strtotime($in['recharged_on']))}</b><br>
-                            {$_L['Expires_On']} : <b>{date($_c['date_format'], strtotime($in['expiration']))}
-                                {$in['time']}</b><br>
+                            {$_L['Created_On']} : <b>{Lang::dateAndTimeFormat($in['recharged_on'],$in['recharged_time'])}</b><br>
+                            {$_L['Expires_On']} : <b>{Lang::dateAndTimeFormat($in['expiration'],$in['time'])}</b><br>
                         {/if}
                         =====================================================<br>
                         <center>{$_c['note']}</center>

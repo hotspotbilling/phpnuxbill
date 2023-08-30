@@ -22,6 +22,7 @@ class Package
         global $_c, $_L, $_notifmsg;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
+        $time_only = date("H:i:s");
         $time = date("H:i:s");
 
         if ($id_customer == '' or $router_name == '' or $plan_id == '') {
@@ -40,6 +41,7 @@ class Package
             $t->plan_name = $p['name_plan'];
             $t->price = $p['price'];
             $t->recharged_on = $date_only;
+            $t->recharged_time = date("H:i:s");
             $t->expiration = $date_only;
             $t->time = $time;
             $t->method = "$gateway - $channel";
@@ -100,11 +102,29 @@ class Package
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
+                if ($b['namebp'] == $p['name_plan']) {
+                    // if it same internet plan, expired will extend
+                    if ($p['validity_unit'] == 'Months') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                    } else if ($p['validity_unit'] == 'Days') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                    } else if ($p['validity_unit'] == 'Hrs') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    } else if ($p['validity_unit'] == 'Mins') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    }
+                }
+
                 $b->customer_id = $id_customer;
                 $b->username = $c['username'];
                 $b->plan_id = $plan_id;
                 $b->namebp = $p['name_plan'];
                 $b->recharged_on = $date_only;
+                $b->recharged_time = $time_only;
                 $b->expiration = $date_exp;
                 $b->time = $time;
                 $b->status = "on";
@@ -120,6 +140,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
@@ -139,6 +160,7 @@ class Package
                 $d->plan_id = $plan_id;
                 $d->namebp = $p['name_plan'];
                 $d->recharged_on = $date_only;
+                $d->recharged_time = $time_only;
                 $d->expiration = $date_exp;
                 $d->time = $time;
                 $d->status = "on";
@@ -154,6 +176,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
@@ -176,11 +199,30 @@ class Package
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
+
+                if ($b['namebp'] == $p['name_plan']) {
+                    // if it same internet plan, expired will extend
+                    if ($p['validity_unit'] == 'Months') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                    } else if ($p['validity_unit'] == 'Days') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                    } else if ($p['validity_unit'] == 'Hrs') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    } else if ($p['validity_unit'] == 'Mins') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    }
+                }
+
                 $b->customer_id = $id_customer;
                 $b->username = $c['username'];
                 $b->plan_id = $plan_id;
                 $b->namebp = $p['name_plan'];
                 $b->recharged_on = $date_only;
+                $b->recharged_time = $time_only;
                 $b->expiration = $date_exp;
                 $b->time = $time;
                 $b->status = "on";
@@ -196,6 +238,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
@@ -206,6 +249,7 @@ class Package
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
@@ -215,6 +259,7 @@ class Package
                 $d->plan_id = $plan_id;
                 $d->namebp = $p['name_plan'];
                 $d->recharged_on = $date_only;
+                $d->recharged_time = $time_only;
                 $d->expiration = $date_exp;
                 $d->time = $time;
                 $d->status = "on";
@@ -230,6 +275,7 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 $t->price = $p['price'];
                 $t->recharged_on = $date_only;
+                $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
@@ -282,11 +328,14 @@ class Package
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
             }
@@ -294,12 +343,15 @@ class Package
             if ($b) {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             }

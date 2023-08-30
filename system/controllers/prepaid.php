@@ -114,7 +114,6 @@ switch ($action) {
 
     case 'print':
         $id = _post('id');
-
         $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
         $ui->assign('d', $d);
 
@@ -168,6 +167,7 @@ switch ($action) {
         $id_plan = _post('id_plan');
         $recharged_on = _post('recharged_on');
         $expiration = _post('expiration');
+        $time = _post('time');
 
         $id = _post('id');
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
@@ -180,8 +180,9 @@ switch ($action) {
             run_hook('edit_customer_plan'); #HOOK
             $d->username = $username;
             $d->plan_id = $id_plan;
-            $d->recharged_on = $recharged_on;
+            //$d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
+            $d->time = $time;
             $d->save();
             Package::changeTo($username, $id_plan);
             _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['plan_name'] . '][' . Lang::moneyFormat($d['price']) . ']', 'Admin', $admin['id']);
@@ -365,19 +366,17 @@ switch ($action) {
         break;
 
     case 'refill-post':
-        $user = _post('id_customer');
         $code = _post('code');
-
+        $user = ORM::for_table('tbl_customers')->where('id', _post('id_customer'))->find_one();
         $v1 = ORM::for_table('tbl_voucher')->where('code', $code)->where('status', 0)->find_one();
 
         run_hook('refill_customer'); #HOOK
         if ($v1) {
-            if (Package::rechargeUser($user, $v1['routers'], $v1['id_plan'], "Refill", "Voucher")) {
+            if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Refill", "Voucher")) {
                 $v1->status = "1";
-                $v1->user = $c['username'];
+                $v1->user = $user['username'];
                 $v1->save();
-                $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
-                $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+                $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id')->find_one();
                 $ui->assign('in', $in);
                 $ui->assign('date', date("Y-m-d H:i:s"));
                 $ui->display('invoice.tpl');
