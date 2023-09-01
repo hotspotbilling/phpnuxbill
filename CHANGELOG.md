@@ -5,6 +5,7 @@
 ## 2023.9.1.1
 
 - Fix cronjob Delete customer
+- Fix reminder text
 
 ## 2023.9.1
 
