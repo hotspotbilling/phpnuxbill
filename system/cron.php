@@ -19,10 +19,10 @@ ORM::configure('logging', true);
 include "autoload/Hookers.php";
 
 // notification message
-if (file_exists("system/uploads/notifications.json")) {
-    $_notifmsg = json_decode(file_get_contents('system/uploads/notifications.json'), true);
+if (file_exists("uploads/notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents('uploads/notifications.json'), true);
 }
-$_notifmsg_default = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
+$_notifmsg_default = json_decode(file_get_contents('uploads/notifications.default.json'), true);
 
 //register all plugin
 foreach (glob("plugin/*.php") as $filename) {
