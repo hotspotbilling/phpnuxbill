@@ -204,8 +204,10 @@ class Package
                     // if it same internet plan, expired will extend
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                        $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Hrs') {
                         $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
                         $date_exp = $datetime[0];
