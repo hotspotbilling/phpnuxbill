@@ -19,8 +19,8 @@ ORM::configure('logging', true);
 include "autoload/Hookers.php";
 
 // notification message
-if(file_exists("system/uploads/notifications.json")){
-    $_notifmsg =json_decode(file_get_contents('system/uploads/notifications.json'), true);
+if (file_exists("system/uploads/notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents('system/uploads/notifications.json'), true);
 }
 $_notifmsg_default = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
 
@@ -66,7 +66,7 @@ date_default_timezone_set($config['timezone']);
 $textExpired = Lang::getNotifText('expired');
 
 $d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->where_lte('expiration', date("Y-m-d"))->find_many();
-echo "Found ".count($d)." user(s)\n";
+echo "Found " . count($d) . " user(s)\n";
 run_hook('cronjob'); #HOOK
 
 foreach ($d as $ds) {
@@ -84,6 +84,7 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 Mikrotik::setHotspotLimitUptime($client, $c['username']);
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                Mikrotik::removeHotspotUser($client, $c['username']);
                 Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
             //update database user dengan status off
@@ -106,10 +107,10 @@ foreach ($d as $ds) {
                             "\nRouter: " . $router_name .
                             "\nPrice: " . $p['price']);
                     }
-                }else{
+                } else {
                     echo "no renewall | plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
                 }
-            }else{
+            } else {
                 echo "no renewall | balance $config[enable_balance] auto_renewal $c[auto_renewal]\n";
             }
         } else echo " : ACTIVE \r\n";
@@ -127,6 +128,7 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 Mikrotik::disablePpoeUser($client, $c['username']);
                 Mikrotik::removePpoeActive($client, $c['username']);
+                Mikrotik::removePpoeUser($client, $c['username']);
                 Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
 

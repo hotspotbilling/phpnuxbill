@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2023.9.1.1
+
+- Fix cronjob Delete customer
+
 ## 2023.9.1
 
 - Critical bug fixes, bug happen when user buy package, expired time will be calculated from last expired, not from when they buy the package
