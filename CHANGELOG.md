@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2023.9.1
+
+- Critical bug fixes, bug happen when user buy package, expired time will be calculated from last expired, not from when they buy the package
+- Time not change after user buy package for extending
+- Add Cancel Button to user dashboard when it show unpaid package
+- Fix username in user dashboard
+
 ## 2023.8.30
 
 - Upload Logo from settings
