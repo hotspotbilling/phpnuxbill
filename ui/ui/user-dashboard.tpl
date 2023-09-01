@@ -65,7 +65,7 @@
             <table class="table table-bordered table-striped table-bordered table-hover">
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Username']}</td>
-                    <td class="small mb15">{$_bill['username']}</td>
+                    <td class="small mb15">{$_user['username']}</td>
                 </tr>
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Password']}</td>
