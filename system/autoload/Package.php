@@ -102,7 +102,7 @@ class Package
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
-                if ($b['namebp'] == $p['name_plan']) {
+                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
@@ -200,7 +200,7 @@ class Package
                 }
 
 
-                if ($b['namebp'] == $p['name_plan']) {
+                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
