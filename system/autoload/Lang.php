@@ -39,7 +39,11 @@ class Lang
 
     public static function dateTimeFormat($date){
         global $config;
-        return date($config['date_format']. ' H:i', strtotime($date));
+        if(strtotime($date) < strtotime("2000-01-01 00:00:00")){
+            return "";
+        }else{
+            return date($config['date_format']. ' H:i', strtotime($date));
+        }
     }
 
     public static function dateAndTimeFormat($date, $time){

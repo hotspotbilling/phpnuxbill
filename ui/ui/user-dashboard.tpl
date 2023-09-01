@@ -12,8 +12,7 @@
                     <tbody>
                         <tr>
                             <td>{Lang::T('expired')}</td>
-                            <td>{date({$_c['date_format']}, strtotime($unpaid['expired_date']))}
-                                {date('H:i', strtotime($unpaid['expired_date']))} </td>
+                            <td>{Lang::dateTimeFormat($unpaid['expired_date'])} </td>
                         </tr>
                         <tr>
                             <td>{$_L['Plan_Name']}</td>
@@ -30,10 +29,22 @@
                     </tbody>
                 </table>
                 <div class="box-footer p-2">
-                    <a class="btn btn-danger btn-block btn-sm" href="{$_url}order/view/{$unpaid['id']}">
-                        <span class="icon"><i class="ion ion-card"></i></span>
-                        <span>{Lang::T('PAY NOW')}</span>
-                    </a>
+                    <div class="btn-group btn-group-justified mb15">
+                        <div class="btn-group">
+                            <a href="{$_url}order/view/{$unpaid['id']}/cancel" class="btn btn-danger btn-sm"
+                                onclick="return confirm('{Lang::T('Cancel it?')}')">
+                                <span class="glyphicon glyphicon-trash"></span>
+                                {Lang::T('Cancel')}
+                            </a>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-success btn-block btn-sm" href="{$_url}order/view/{$unpaid['id']}">
+                                <span class="icon"><i class="ion ion-card"></i></span>
+                                <span>{Lang::T('PAY NOW')}</span>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         {/if}

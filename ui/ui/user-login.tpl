@@ -70,10 +70,10 @@
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">
-                                    <button type="submit" class="btn btn-primary">{$_L['Login']}</button>
+                                    <a href="{$_url}register" class="btn btn-success">{$_L['Register']}</a>
                                 </div>
                                 <div class="btn-group">
-                                    <a href="{$_url}register" class="btn btn-success">{$_L['Register']}</a>
+                                    <button type="submit" class="btn btn-primary">{$_L['Login']}</button>
                                 </div>
                             </div>
                         </form>
