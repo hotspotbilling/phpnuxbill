@@ -135,7 +135,11 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
+                if(!empty($pool_expired)){
+                    Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL '.$pool_expired, $pool_expired);
+                }
             }
+
 
             $d = ORM::for_table('tbl_plans')->create();
             $d->name_plan = $name;
@@ -216,6 +220,9 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
+                if(!empty($pool_expired)){
+                    Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL '.$pool_expired, $pool_expired);
+                }
             }
 
             $d->name_plan = $name;
@@ -351,6 +358,9 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addPpoePlan($client, $name, $pool, $rate);
+                if(!empty($pool_expired)){
+                    Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL '.$pool_expired, $pool_expired, '512K/512K');
+                }
             }
 
             $d = ORM::for_table('tbl_plans')->create();
@@ -419,6 +429,9 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPpoePlan($client, $name, $pool, $rate);
+                if(!empty($pool_expired)){
+                    Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL '.$pool_expired, $pool_expired, '512K/512K');
+                }
             }
 
             $d->name_plan = $name;

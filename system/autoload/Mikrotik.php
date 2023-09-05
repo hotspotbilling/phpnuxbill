@@ -17,7 +17,7 @@ class Mikrotik
             $iport = explode(":", $ip);
             return new RouterOS\Client($iport[0], $user, $pass, ($iport[1]) ? $iport[1] : null);
         } catch (Exception $e) {
-            $ui->assign("error_meesage","Unable to connect to the router.<br>" . $e->getMessage());
+            $ui->assign("error_meesage", "Unable to connect to the router.<br>" . $e->getMessage());
             $ui->display('router-error.tpl');
             die();
         }
@@ -75,15 +75,46 @@ class Mikrotik
             '/ip hotspot user profile print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
-        $profileName = $client->sendSync($printRequest)->getProperty('name');
+        $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($profileID)) {
+            Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
+        }else{
+            $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
+            $client(
+                $setRequest
+                    ->setArgument('numbers', $profileID)
+                    ->setArgument('shared-users', $sharedusers)
+                    ->setArgument('rate-limit', $rate)
+            );
+        }
+    }
 
-        $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-        $client(
-            $setRequest
-                ->setArgument('numbers', $profileName)
-                ->setArgument('shared-users', $sharedusers)
-                ->setArgument('rate-limit', $rate)
+    public static function setHotspotExpiredPlan($client, $name, $pool)
+    {
+        $printRequest = new RouterOS\Request(
+            '/ip hotspot user profile print .proplist=name',
+            RouterOS\Query::where('name', $name)
         );
+        $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($profileID)) {
+            $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
+            $client->sendSync(
+                $addRequest
+                    ->setArgument('name', $name)
+                    ->setArgument('shared-users', 3)
+                    ->setArgument('address-pool', $pool)
+                    ->setArgument('rate-limit', '512K/512K')
+            );
+        }else{
+            $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
+            $client(
+                $setRequest
+                    ->setArgument('numbers', $profileID)
+                    ->setArgument('shared-users', 3)
+                    ->setArgument('address-pool', $pool)
+                    ->setArgument('rate-limit', '512K/512K')
+            );
+        }
     }
 
     public static function removeHotspotPlan($client, $name)
@@ -92,12 +123,12 @@ class Mikrotik
             '/ip hotspot user profile print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
-        $profileName = $client->sendSync($printRequest)->getProperty('name');
+        $profileID = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ip/hotspot/user/profile/remove');
         $client(
             $removeRequest
-                ->setArgument('numbers', $profileName)
+                ->setArgument('numbers', $profileID)
         );
     }
 
@@ -107,11 +138,11 @@ class Mikrotik
             '/ip hotspot user print .proplist=name',
             RouterOS\Query::where('name', $username)
         );
-        $userName = $client->sendSync($printRequest)->getProperty('name');
+        $userID = $client->sendSync($printRequest)->getProperty('.id');
         $removeRequest = new RouterOS\Request('/ip/hotspot/user/remove');
         $client(
             $removeRequest
-                ->setArgument('numbers', $userName)
+                ->setArgument('numbers', $userID)
         );
     }
 
@@ -220,16 +251,16 @@ class Mikrotik
     public static function removePpoeUser($client, $username)
     {
 
-    $printRequest = new RouterOS\Request('/ppp/secret/print');
-    $printRequest->setArgument('.proplist', '.id');
-    $printRequest->setQuery(RouterOS\Query::where('name', $username));
-    $id = $client->sendSync($printRequest)->getProperty('.id');
+        $printRequest = new RouterOS\Request('/ppp/secret/print');
+        $printRequest->setArgument('.proplist', '.id');
+        $printRequest->setQuery(RouterOS\Query::where('name', $username));
+        $id = $client->sendSync($printRequest)->getProperty('.id');
 
-    $removeRequest = new RouterOS\Request('/ppp/secret/remove');
-    $client(
-        $removeRequest
-            ->setArgument('numbers', $id)
-    );
+        $removeRequest = new RouterOS\Request('/ppp/secret/remove');
+        $client(
+            $removeRequest
+                ->setArgument('numbers', $id)
+        );
     }
 
     public static function addPpoeUser($client, $plan, $customer)
@@ -293,12 +324,12 @@ class Mikrotik
             '/ip pool print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
-        $poolName = $client->sendSync($printRequest)->getProperty('name');
+        $poolID = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ip/pool/remove');
         $client(
             $removeRequest
-                ->setArgument('numbers', $poolName)
+                ->setArgument('numbers', $poolID)
         );
     }
 
@@ -318,15 +349,15 @@ class Mikrotik
             '/ip pool print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
-        $poolName = $client->sendSync($printRequest)->getProperty('name');
+        $poolID = $client->sendSync($printRequest)->getProperty('id');
 
-        if (empty($poolName)) {
+        if (empty($poolID)) {
             self::addPool($client, $name, $ip_address);
         } else {
             $setRequest = new RouterOS\Request('/ip/pool/set');
             $client(
                 $setRequest
-                    ->setArgument('numbers', $poolName)
+                    ->setArgument('numbers', $poolID)
                     ->setArgument('ranges', $ip_address)
             );
         }
@@ -351,14 +382,14 @@ class Mikrotik
             '/ppp profile print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
-        $profileName = $client->sendSync($printRequest)->getProperty('name');
-        if (empty($profileName)) {
+        $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($profileID)) {
             self::addPpoePlan($client, $name, $pool, $rate);
         } else {
             $setRequest = new RouterOS\Request('/ppp/profile/set');
             $client(
                 $setRequest
-                    ->setArgument('numbers', $profileName)
+                    ->setArgument('numbers', $profileID)
                     ->setArgument('local-address', $pool)
                     ->setArgument('remote-address', $pool)
                     ->setArgument('rate-limit', $rate)
@@ -372,12 +403,12 @@ class Mikrotik
             '/ppp profile print .proplist=name',
             RouterOS\Query::where('name', $name)
         );
-        $profileName = $client->sendSync($printRequest)->getProperty('name');
+        $profileID = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ppp/profile/remove');
         $client(
             $removeRequest
-                ->setArgument('numbers', $profileName)
+                ->setArgument('numbers', $profileID)
         );
     }
 }
