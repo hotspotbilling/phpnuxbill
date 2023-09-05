@@ -340,4 +340,5 @@ $_L['Invoice'] = 'Invoice';
 $_L['Country_Code_Phone'] = 'Country Code Phone';
 $_L['Voucher_activation_menu_will_be_hidden'] = 'Voucher activation menu will be hidden';
 $_L['Customer_can_deposit_money_to_buy_voucher'] = 'Customer can deposit money to buy voucher';
-$_L['Allow_balance_transfer_between_customers'] = 'Allow balance transfer between customers';
+$_L['Allow_balance_transfer_between_customers'] = 'Allow balance transfer between customers';$_L['Refill_Balance'] = 'Refill Balance';
+$_L['Balance_Plans'] = 'Balance Plans';

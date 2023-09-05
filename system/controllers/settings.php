@@ -31,8 +31,14 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
-        $lan = ORM::for_table('tbl_language')->find_many();
-        $ui->assign('lan', $lan);
+        $folders = [];
+        $files = scandir('system/lan/');
+        foreach ($files as $file) {
+            if(is_dir('system/lan/'.$file) && !in_array($file,['.','..'])){
+                $folders[] = $file;
+            }
+        }
+        $ui->assign('lan', $folders);
 
         $timezonelist = Timezone::timezoneList();
         $ui->assign('tlist', $timezonelist);

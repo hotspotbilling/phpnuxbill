@@ -338,3 +338,5 @@ $_L['Country_Code_Phone'] = 'Kode Negara Telepon';
 $_L['Voucher_activation_menu_will_be_hidden'] = 'Info Pembelian Voucher dan Redeem akan disembunyikan';
 $_L['Customer_can_deposit_money_to_buy_voucher'] = 'Pelanggan dapat topup saldo untuk langganan Internet';
 $_L['Allow_balance_transfer_between_customers'] = 'Bolehkan transfer saldo antar pelanggan';
+$_L['Refill_Balance'] = 'Refill Balance';
+$_L['Balance_Plans'] = 'Balance Plans';
