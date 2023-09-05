@@ -340,3 +340,4 @@ $_L['Customer_can_deposit_money_to_buy_voucher'] = 'Pelanggan dapat topup saldo 
 $_L['Allow_balance_transfer_between_customers'] = 'Bolehkan transfer saldo antar pelanggan';
 $_L['Refill_Balance'] = 'Refill Balance';
 $_L['Balance_Plans'] = 'Balance Plans';
+$_L['Expired_IP_Pool'] = 'Expired IP Pool';

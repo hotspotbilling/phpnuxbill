@@ -35,6 +35,7 @@
                                                     <th>{$_L['Data_Limit']}</th>
                                                     <th>{$_L['Plan_Validity']}</th>
                                                     <th>{$_L['Routers']}</th>
+                                                    <th>{Lang::T('Expired IP Pool')}</th>
                                                     <th>{$_L['Manage']}</th>
                                                 </tr>
                                             </thead>
@@ -49,6 +50,7 @@
                                                     <td>{$ds['data_limit']} {$ds['data_unit']}</td>
                                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                                     <td>{$ds['routers']}</td>
+                                                    <td>{$ds['pool_expired']}</td>
                                                     <td>
                                                         <a href="{$_url}services/edit/{$ds['id']}" class="btn btn-info btn-xs">{$_L['Edit']}</a>
                                                         <a href="{$_url}services/delete/{$ds['id']}" id="{$ds['id']}" onclick="return confirm('{$_L['Delete']}?')" class="btn btn-danger btn-xs">{$_L['Delete']}</a>

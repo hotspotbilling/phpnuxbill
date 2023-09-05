@@ -53,10 +53,10 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
+            $p = ORM::for_table('tbl_pool')->where('routers', $d['routers'])->find_many();
+            $ui->assign('p', $p);
             $b = ORM::for_table('tbl_bandwidth')->find_many();
             $ui->assign('b', $b);
-            $r = ORM::for_table('tbl_routers')->find_many();
-            $ui->assign('r', $r);
             run_hook('view_edit_plan'); #HOOK
             $ui->display('hotspot-edit.tpl');
         } else {
@@ -96,6 +96,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
+        $pool_expired = _post('pool_expired');
         $enabled = _post('enabled');
 
         $msg = '';
@@ -151,6 +152,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
             $d->routers = $routers;
+            $d->pool_expired = $pool_expired;
             $d->enabled = $enabled;
             $d->save();
 
@@ -176,6 +178,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
+        $pool_expired = _post('pool_expired');
         $enabled = _post('enabled');
 
         $msg = '';
@@ -228,6 +231,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
             $d->routers = $routers;
+            $d->pool_expired = $pool_expired;
             $d->enabled = $enabled;
             $d->save();
 
@@ -260,8 +264,6 @@ switch ($action) {
         $ui->assign('_title', $_L['PPPOE_Plans']);
         $d = ORM::for_table('tbl_bandwidth')->find_many();
         $ui->assign('d', $d);
-        $p = ORM::for_table('tbl_pool')->find_many();
-        $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
         run_hook('view_add_ppoe'); #HOOK
@@ -274,10 +276,10 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
+            $p = ORM::for_table('tbl_pool')->where('routers', $d['routers'])->find_many();
+            $ui->assign('p', $p);
             $b = ORM::for_table('tbl_bandwidth')->find_many();
             $ui->assign('b', $b);
-            $p = ORM::for_table('tbl_pool')->find_many();
-            $ui->assign('p', $p);
             $r = ORM::for_table('tbl_routers')->find_many();
             $ui->assign('r', $r);
             run_hook('view_edit_ppoe'); #HOOK
@@ -312,6 +314,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool = _post('pool_name');
+        $pool_expired = _post('pool_expired');
         $enabled = _post('enabled');
 
         $msg = '';
@@ -359,6 +362,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->routers = $routers;
             $d->pool = $pool;
+            $d->pool_expired = $pool_expired;
             $d->enabled = $enabled;
             $d->save();
 
@@ -377,6 +381,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool = _post('pool_name');
+        $pool_expired = _post('pool_expired');
         $enabled = _post('enabled');
 
         $msg = '';
@@ -423,6 +428,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->routers = $routers;
             $d->pool = $pool;
+            $d->pool_expired = $pool_expired;
             $d->enabled = $enabled;
             $d->save();
 

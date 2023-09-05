@@ -32,6 +32,7 @@
                                                     <th>{$_L['Plan_Price']}</th>
                                                     <th>{$_L['Plan_Validity']}</th>
                                                     <th>{$_L['Pool']}</th>
+                                                    <th>{Lang::T('Expired IP Pool')}</th>
                                                     <th>{$_L['Routers']}</th>
                                                     <th>{$_L['Manage']}</th>
                                                 </tr>
@@ -44,6 +45,7 @@
                                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                                     <td>{$ds['pool']}</td>
+                                                    <td>{$ds['pool_expired']}</td>
                                                     <td>{$ds['routers']}</td>
                                                     <td>
                                                         <a href="{$_url}services/pppoe-edit/{$ds['id']}" class="btn btn-info btn-xs">{$_L['Edit']}</a>

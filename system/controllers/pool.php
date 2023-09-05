@@ -15,9 +15,6 @@ if ($admin['user_type'] != 'Admin') {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
 }
 
-use PEAR2\Net\RouterOS;
-
-require_once 'system/autoload/PEAR2/Autoload.php';
 
 switch ($action) {
     case 'list':

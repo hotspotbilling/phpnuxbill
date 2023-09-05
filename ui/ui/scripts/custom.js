@@ -14,7 +14,7 @@ $(document).ready(function () {
         $('#TimeLimit').show();
 		$('#DataLimit').show();
     }
-	
+
 	if ($('#Unlimited').is(':checked')) {
         $('#Type').hide();
 		$('#TimeLimit').hide();
@@ -26,12 +26,12 @@ $(document).ready(function () {
 	if ($('#Hotspot').is(':checked')) {
         $('#p').hide();
 		$('#h').show();
-    } 
+    }
 	if ($('#PPPOE').is(':checked')) {
         $('#p').show();
 		$('#h').hide();
     }
-	
+
     });
 });
 $("#Hotspot").prop("checked", true).change();
@@ -48,6 +48,7 @@ $(document).ready(function(){
         cache: false,
         success: function(msg){
             $("#pool_name").html(msg);
+            $("#pool_expired").html(msg);
         }
     });
   });
@@ -62,10 +63,10 @@ $(function() {
 					dataType: "html",
 					url: "index.php?_route=autoload/server",
 					success: function(msg){
-						$("#server").html(msg);                                                     
+						$("#server").html(msg);
 					}
 				});
-				
+
 				$("#server").change(getAjaxAlamat);
 				function getAjaxAlamat(){
 					var server = $("#server").val();
