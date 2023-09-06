@@ -210,7 +210,7 @@ class Mikrotik
         }
     }
 
-    public static function setHotspotUser($client, $user, $pass, $nuser = null)
+    public static function setHotspotUser($client, $user, $pass)
     {
         $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
         $printRequest->setArgument('.proplist', '.id');
@@ -220,6 +220,19 @@ class Mikrotik
         $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
         $setRequest->setArgument('numbers', $id);
         $setRequest->setArgument('password', $pass);
+        $client->sendSync($setRequest);
+    }
+
+    public static function setHotspotUserPackage($client, $user, $plan)
+    {
+        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
+        $printRequest->setArgument('.proplist', '.id');
+        $printRequest->setQuery(RouterOS\Query::where('name', $user));
+        $id = $client->sendSync($printRequest)->getProperty('.id');
+
+        $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
+        $setRequest->setArgument('numbers', $id);
+        $setRequest->setArgument('profile', $plan);
         $client->sendSync($setRequest);
     }
 
@@ -233,19 +246,6 @@ class Mikrotik
         $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
         $removeRequest->setArgument('numbers', $id);
         $client->sendSync($removeRequest);
-    }
-
-    public static function setHotspotLimitUptime($client, $username)
-    {
-        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-        $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-        $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
-        $setRequest->setArgument('numbers', $id);
-        $setRequest->setArgument('limit-uptime', '00:00:05');
-        $client->sendSync($setRequest);
     }
 
     public static function removePpoeUser($client, $username)
@@ -281,7 +281,7 @@ class Mikrotik
         );
     }
 
-    public static function setPpoeUser($client, $user, $pass, $nuser = null)
+    public static function setPpoeUser($client, $user, $pass)
     {
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         $printRequest->setArgument('.proplist', '.id');
@@ -294,15 +294,16 @@ class Mikrotik
         $client->sendSync($setRequest);
     }
 
-    public static function disablePpoeUser($client, $username)
+    public static function setPpoeUserPlan($client, $user, $plan)
     {
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $username));
+        $printRequest->setQuery(RouterOS\Query::where('name', $user));
         $id = $client->sendSync($printRequest)->getProperty('.id');
 
-        $setRequest = new RouterOS\Request('/ppp/secret/disable');
+        $setRequest = new RouterOS\Request('/ppp/secret/set');
         $setRequest->setArgument('numbers', $id);
+        $setRequest->setArgument('profile', $plan);
         $client->sendSync($setRequest);
     }
 

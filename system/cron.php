@@ -79,12 +79,16 @@ foreach ($d as $ds) {
             $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
             $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
+            $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
             if (!$_c['radius_mode']) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                Mikrotik::setHotspotLimitUptime($client, $c['username']);
-                Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                Mikrotik::removeHotspotUser($client, $c['username']);
+                if(!empty($p['pool_expired'])){
+                    Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);
+                }else{
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                }
                 Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
             //update database user dengan status off
@@ -93,7 +97,6 @@ foreach ($d as $ds) {
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
                 if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
@@ -123,12 +126,16 @@ foreach ($d as $ds) {
             $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
             $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
+            $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
             if (!$_c['radius_mode']) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                Mikrotik::disablePpoeUser($client, $c['username']);
-                Mikrotik::removePpoeActive($client, $c['username']);
-                Mikrotik::removePpoeUser($client, $c['username']);
+                if(!empty($p['pool_expired'])){
+                    Mikrotik::setPpoeUserPlan($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);
+                }else{
+                    Mikrotik::removePpoeActive($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
+                }
                 Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
 
@@ -137,7 +144,6 @@ foreach ($d as $ds) {
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
                 if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
