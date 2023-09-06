@@ -72,7 +72,7 @@ class Mikrotik
     public static function setHotspotPlan($client, $name, $sharedusers, $rate)
     {
         $printRequest = new RouterOS\Request(
-            '/ip hotspot user profile print .proplist=name',
+            '/ip hotspot user profile print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
@@ -92,7 +92,7 @@ class Mikrotik
     public static function setHotspotExpiredPlan($client, $name, $pool)
     {
         $printRequest = new RouterOS\Request(
-            '/ip hotspot user profile print .proplist=name',
+            '/ip hotspot user profile print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
@@ -120,7 +120,7 @@ class Mikrotik
     public static function removeHotspotPlan($client, $name)
     {
         $printRequest = new RouterOS\Request(
-            '/ip hotspot user profile print .proplist=name',
+            '/ip hotspot user profile print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
@@ -135,7 +135,7 @@ class Mikrotik
     public static function removeHotspotUser($client, $username)
     {
         $printRequest = new RouterOS\Request(
-            '/ip hotspot user print .proplist=name',
+            '/ip hotspot user print .proplist=.id',
             RouterOS\Query::where('name', $username)
         );
         $userID = $client->sendSync($printRequest)->getProperty('.id');
@@ -322,7 +322,7 @@ class Mikrotik
     public static function removePool($client, $name)
     {
         $printRequest = new RouterOS\Request(
-            '/ip pool print .proplist=name',
+            '/ip pool print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
         $poolID = $client->sendSync($printRequest)->getProperty('.id');
@@ -347,7 +347,7 @@ class Mikrotik
     public static function setPool($client, $name, $ip_address)
     {
         $printRequest = new RouterOS\Request(
-            '/ip pool print .proplist=name',
+            '/ip pool print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
         $poolID = $client->sendSync($printRequest)->getProperty('id');
@@ -380,7 +380,7 @@ class Mikrotik
     public static function setPpoePlan($client, $name, $pool, $rate)
     {
         $printRequest = new RouterOS\Request(
-            '/ppp profile print .proplist=name',
+            '/ppp profile print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
@@ -401,7 +401,7 @@ class Mikrotik
     public static function removePpoePlan($client, $name)
     {
         $printRequest = new RouterOS\Request(
-            '/ppp profile print .proplist=name',
+            '/ppp profile print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
