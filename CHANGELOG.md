@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2023.9.6
+
+- Expired Pool
+Customer can be move to expired pool after plan expired by cron
+- Fix Delete customer
+- tbl_language removed
+
 ## 2023.9.1.1
 
 - Fix cronjob Delete customer
