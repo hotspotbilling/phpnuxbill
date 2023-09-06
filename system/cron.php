@@ -145,7 +145,11 @@ foreach ($d as $ds) {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
+                        echo "plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
+                        echo "auto renewall Success\n";
                     } else {
+                        echo "plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
+                        echo "auto renewall Failed\n";
                         Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
                             "\nRouter: " . $router_name .
                             "\nPrice: " . $p['price']);

@@ -385,3 +385,5 @@ $_L['Received_Balance'] = 'Received Balance';
 $_L['Minimum_Balance_Transfer'] = 'Minimum Balance Transfer';
 $_L['Minimum_Transfer'] = 'Minimum Transfer';
 $_L['Company_Logo'] = 'Company Logo';
+$_L['Expired_IP_Pool'] = 'Expired IP Pool';
+$_L['Expired_IP_Pool'] = 'Expired IP Pool';

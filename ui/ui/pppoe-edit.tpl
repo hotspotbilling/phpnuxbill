@@ -60,7 +60,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label"><a href="{$_url}pool/add">{$_L['Pool']}</a></label>
 								<div class="col-md-6">
-									<select id="pool_name" name="pool_name" class="form-control select2">
+									<select id="pool_name" name="pool_name" required class="form-control select2">
 										{foreach $p as $ps}
 											<option value="{$ps['pool_name']}" {if $d['pool'] eq $ps['pool_name']} selected {/if}>{$ps['pool_name']}</option>
 										{/foreach}
@@ -71,6 +71,7 @@
                                 <label class="col-md-2 control-label"><a href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
 								<div class="col-md-6">
 									<select id="pool_expired" name="pool_expired" class="form-control select2">
+                                        <option value=''>{$_L['Select_Pool']}</option>
 										{foreach $p as $ps}
 											<option value="{$ps['pool_name']}" {if $d['pool_expired'] eq $ps['pool_name']} selected {/if}>{$ps['pool_name']}</option>
 										{/foreach}
