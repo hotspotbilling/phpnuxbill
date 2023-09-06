@@ -158,6 +158,7 @@ CREATE TABLE
         `shared_users` int(10) DEFAULT NULL,
         `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `pool` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+        `pool_expired` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '',
         `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled\r\n'
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
