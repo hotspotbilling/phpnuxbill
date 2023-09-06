@@ -28,10 +28,10 @@ function _autoloader($class)
 }
 spl_autoload_register('_autoloader');
 
-require_once __DIR__.File::pathFixer('/../config.php');
+require_once '../config.php';
 require_once 'orm.php';
-require_once __DIR__.File::pathFixer('/autoload/PEAR2/Autoload.php');
-include __DIR__.File::pathFixer("/autoload/Hookers.php");
+require_once 'autoload/PEAR2/Autoload.php';
+include "autoload/Hookers.php";
 
 ORM::configure("mysql:host=$db_host;dbname=$db_name");
 ORM::configure('username', $db_user);
@@ -41,10 +41,10 @@ ORM::configure('logging', true);
 
 
 // notification message
-if (file_exists(__DIR__.File::pathFixer("uploads/notifications.json"))) {
-    $_notifmsg = json_decode(file_get_contents(__DIR__.File::pathFixer('uploads/notifications.json')), true);
+if (file_exists("uploads/notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents('uploads/notifications.json'), true);
 }
-$_notifmsg_default = json_decode(file_get_contents(__DIR__.File::pathFixer('uploads/notifications.default.json')), true);
+$_notifmsg_default = json_decode(file_get_contents('uploads/notifications.default.json'), true);
 
 //register all plugin
 foreach (glob(File::pathFixer("plugin/*.php")) as $filename) {
