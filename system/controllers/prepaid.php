@@ -146,14 +146,16 @@ switch ($action) {
             if ($d['type'] == 'Hotspot') {
                 if (!$config['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $d['username']);
+                    Mikrotik::removeHotspotUser($client, $d['username']);
                 }
 
                 $d->delete();
             } else {
                 if (!$config['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $d['username']);
+                    Mikrotik::removePpoeUser($client, $d['username']);
                 }
                 $d->delete();
             }

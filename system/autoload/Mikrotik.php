@@ -252,15 +252,12 @@ class Mikrotik
     {
 
         $printRequest = new RouterOS\Request('/ppp/secret/print');
-        $printRequest->setArgument('.proplist', '.id');
+        //$printRequest->setArgument('.proplist', '.id');
         $printRequest->setQuery(RouterOS\Query::where('name', $username));
         $id = $client->sendSync($printRequest)->getProperty('.id');
-
         $removeRequest = new RouterOS\Request('/ppp/secret/remove');
-        $client(
-            $removeRequest
-                ->setArgument('numbers', $id)
-        );
+        $removeRequest->setArgument('numbers', $id);
+        $client->sendSync($removeRequest);
     }
 
     public static function addPpoeUser($client, $plan, $customer)

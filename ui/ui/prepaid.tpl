@@ -53,6 +53,7 @@
                                         <a href="{$_url}prepaid/edit/{$ds['id']}"
                                             class="btn btn-warning btn-xs">{$_L['Edit']}</a>
                                         <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}"
+                                        onclick="return confirm('{$_L['Delete']}?')"
                                             class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                     </td>
                                 </tr>

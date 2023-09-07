@@ -28,12 +28,15 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Created_On']}</label>
-                        <div class="col-md-6">
-                            <input type="date" class="form-control" id="recharged_on" name="recharged_on" readonly
-                                value="{$d['recharged_on']} {$d['recharged_time']}">
+                        <div class="col-md-4">
+                            <input type="date" class="form-control" name="expiration" readonly
+                                value="{$d['recharged_on']}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" placeholder="00:00:00" readonly
+                                value="{$d['recharged_time']}">
                         </div>
                     </div>
                     <div class="form-group">
