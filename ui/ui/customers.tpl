@@ -24,34 +24,37 @@
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>{$_L['Manage']}</th>
+                                <th></th>
                                 <th>{$_L['Username']}</th>
                                 <th>{$_L['Full_Name']}</th>
                                 <th>{Lang::T('Balance')}</th>
                                 <th>{$_L['Phone_Number']}</th>
                                 <th>{$_L['Email']}</th>
                                 <th>{$_L['Created_On']}</th>
-                                <th>{$_L['Recharge']}</th>
+                                <th>{$_L['Manage']}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
                                 <tr>
-                                    <td align="center">
-                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}"
-                                            class="btn btn-success btn-sm">{Lang::T('View')}</a>
+                                    <td align="center" api-get-text="{$_url}autoload/customer_is_active/{$ds['id']}">
+                                        <span class="label label-default">-</span>
                                     </td>
-                                    <td>{$ds['username']}</td>
-                                    <td>{$ds['fullname']}</td>
+                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'" style="cursor:pointer;">{$ds['username']}</td>
+                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'" style="cursor: pointer;">{$ds['fullname']}</td>
                                     <td>{Lang::moneyFormat($ds['balance'])}</td>
                                     <td>{$ds['phonenumber']}</td>
                                     <td>{$ds['email']}</td>
                                     <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
-                                    <td align="center"><a href="{$_url}prepaid/recharge-user/{$ds['id']}" id="{$ds['id']}"
-                                            class="btn btn-primary btn-sm">{$_L['Recharge']}</a></td>
+                                    <td align="center">
+                                            <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                                class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
+                                            <a href="{$_url}prepaid/recharge-user/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                                class="btn btn-primary btn-xs">{$_L['Recharge']}</a>
+                                    </td>
                                 </tr>
                             {/foreach}
                         </tbody>

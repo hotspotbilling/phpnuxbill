@@ -12,9 +12,6 @@ $action = $routes['1'];
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-use PEAR2\Net\RouterOS;
-
-require_once 'system/autoload/PEAR2/Autoload.php';
 
 if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
@@ -34,7 +31,8 @@ switch ($action) {
                 ->order_by_desc('id')->find_many();
         } else {
             $paginator = Paginator::bootstrap('tbl_customers');
-            $d = ORM::for_table('tbl_customers')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $d = ORM::for_table('tbl_customers')
+            ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 
         $ui->assign('search', htmlspecialchars($search));

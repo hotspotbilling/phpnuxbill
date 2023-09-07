@@ -33,7 +33,7 @@
     <div class="col-lg-3 col-xs-6">
         <div class="small-box bg-yellow">
             <div class="inner">
-                <h4>{$u_act}</h4>
+                <h4>{$u_act}/{$u_all}</h4>
 
                 <p>{$_L['Users_Active']}</p>
             </div>
@@ -47,7 +47,7 @@
     <div class="col-lg-3 col-xs-6">
         <div class="small-box bg-red">
             <div class="inner">
-                <h4>{$u_all}</h4>
+                <h4>{$c_all}</h4>
 
                 <p>{$_L['Total_Users']}</p>
             </div>

@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2023.9.7
+
+- Fix PPPOE Delete Customer
+- Remove active Customer before deleting
+- Show IP and Mac even if it not Hotspot
+
 ## 2023.9.6
 
 - Expired Pool
