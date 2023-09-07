@@ -28,6 +28,12 @@ function _autoloader($class)
 }
 spl_autoload_register('_autoloader');
 
+
+if(php_sapi_name() !== 'cli'){
+    echo "<pre>";
+}
+
+
 require_once '../config.php';
 require_once 'orm.php';
 require_once 'autoload/PEAR2/Autoload.php';
@@ -54,6 +60,14 @@ foreach (glob(File::pathFixer("plugin/*.php")) as $filename) {
 $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
+}
+
+echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
+$res = ORM::raw_execute('SELECT NOW() AS WAKTU;');
+$statement = ORM::get_last_statement();
+$rows = array();
+while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+    echo "MYSQL Time\t" . $row['WAKTU'] . "\n";
 }
 
 $_c = $config;
