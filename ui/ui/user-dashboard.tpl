@@ -104,19 +104,19 @@
                         {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
                     </td>
                 </tr>
+                {if $nux_ip}
+                    <tr>
+                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
+                        <td class="small mb15">{$nux_ip}</td>
+                    </tr>
+                {/if}
+                {if $nux_mac}
+                    <tr>
+                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
+                        <td class="small mb15">{$nux_mac}</td>
+                    </tr>
+                {/if}
                 {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
-                    {if $nux_ip}
-                        <tr>
-                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
-                            <td class="small mb15">{$nux_ip}</td>
-                        </tr>
-                    {/if}
-                    {if $nux_mac}
-                        <tr>
-                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
-                            <td class="small mb15">{$nux_mac}</td>
-                        </tr>
-                    {/if}
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
                         <td class="small mb15" id="login_status">
