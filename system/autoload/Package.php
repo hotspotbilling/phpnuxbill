@@ -56,12 +56,13 @@ class Package
             $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
             $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
             $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
-            $textInvoice = str_replace('[[date]]', date($_c['date_format'], strtotime($date_only)) . " " . $time, $textInvoice);
+            $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat($date_now), $textInvoice);
             $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
             $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
             $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
             $textInvoice = str_replace('[[plan_name]]', $p['name_plan'], $textInvoice);
-            $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " " . number_format($p['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
+            $textInvoice = str_replace('[[plan_price]]', Lang::moneyFormat($p['price']), $textInvoice);
+            $textInvoice = str_replace('[[name]]', $c['fullname'], $textInvoice);
             $textInvoice = str_replace('[[user_name]]', $c['username'], $textInvoice);
             $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
             $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
@@ -310,15 +311,16 @@ class Package
         $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
         $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $in['invoice'], $textInvoice);
-        $textInvoice = str_replace('[[date]]', date($_c['date_format'], strtotime($date_now)) . " " . $time, $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat($date_now), $textInvoice);
         $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
         $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
         $textInvoice = str_replace('[[type]]', $in['type'], $textInvoice);
         $textInvoice = str_replace('[[plan_name]]', $in['plan_name'], $textInvoice);
-        $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " " . number_format($in['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]',  Lang::moneyFormat($in['price']), $textInvoice);
+        $textInvoice = str_replace('[[name]]', $c['fullname'], $textInvoice);
         $textInvoice = str_replace('[[user_name]]', $in['username'], $textInvoice);
         $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
-        $textInvoice = str_replace('[[expired_date]]', date($_c['date_format'], strtotime($in['expiration'])) . " " . $in['time'], $textInvoice);
+        $textInvoice = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($in['expiration'], $in['time']), $textInvoice);
         $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
 
         if ($_c['user_notification_payment'] == 'sms') {

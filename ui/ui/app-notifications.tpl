@@ -80,6 +80,7 @@
                             <b>[[type]]</b> is Hotspot/PPPOE.<br>
                             <b>[[plan_name]]</b> Internet Package.<br>
                             <b>[[plan_price]]</b> Internet Package Prices.<br>
+                            <b>[[name]]</b> Receiver name.<br>
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
                             <b>[[expired_date]]</b> Expired datetime.<br>
@@ -106,6 +107,7 @@
                             <b>[[type]]</b> is Hotspot/PPPOE.<br>
                             <b>[[plan_name]]</b> Internet Package.<br>
                             <b>[[plan_price]]</b> Internet Package Prices.<br>
+                            <b>[[name]]</b> Receiver name.<br>
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
                             <b>[[trx_date]]</b> Transaction datetime.<br>
