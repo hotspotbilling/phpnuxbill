@@ -6,7 +6,7 @@
 
 class Http
 {
-    public static function getData($url, $headers)
+    public static function getData($url, $headers = [])
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);

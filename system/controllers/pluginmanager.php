@@ -23,7 +23,7 @@ $cache = File::pathFixer('system/cache/plugin_repository.json');
 if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
     $json = json_decode(file_get_contents($cache), true);
 } else {
-    $data = file_get_contents($plugin_repository);
+    $data = Http::getData($plugin_repository);
     file_put_contents($cache, $data);
     $json = json_decode($data, true);
 }
