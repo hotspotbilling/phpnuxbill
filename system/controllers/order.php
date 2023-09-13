@@ -98,7 +98,7 @@ switch ($action) {
             }
         }
         if (empty($trx)) {
-            r2(U . "order", 'e', Lang::T("Transaction Not found"));
+            r2(U . "order/package", 'e', Lang::T("Transaction Not found"));
         }
         $router = ORM::for_table('tbl_routers')->find_one($trx['routers_id']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
@@ -111,8 +111,8 @@ switch ($action) {
         $ui->display('user-orderView.tpl');
         break;
     case 'pay':
-        if ($_c['enable_balance'] != 'yes'){
-            r2(U . "order", 'e', Lang::T("Balance not enabled"));
+        if ($_c['enable_balance'] != 'yes' && $config['allow_balance_transfer'] != 'yes') {
+            r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
         }
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
         $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
@@ -130,9 +130,90 @@ switch ($action) {
                     "\nRouter: " . $router_name .
                     "\nPrice: " . $p['price']);
             }
-        }else{
+        } else {
             echo "no renewall | plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
         }
+        break;
+    case 'send':
+        if ($_c['enable_balance'] != 'yes') {
+            r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
+        }
+        $ui->assign('_title', Lang::T('Buy for friend'));
+        $ui->assign('_system_menu', 'package');
+        $plan = ORM::for_table('tbl_plans')->find_one($routes['3']);
+        if (empty($plan)) {
+            r2(U . "order/package", 'e', Lang::T("Plan Not found"));
+        }
+        if (isset($_POST['send']) && $_POST['send'] == 'plan') {
+            $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
+            if (!$target) {
+                r2(U . 'home', 'd', Lang::T('Username not found'));
+            }
+            if ($user['balance'] < $plan['price']) {
+                r2(U . 'home', 'd', Lang::T('insufficient balance'));
+            }
+            if ($user['username'] == $target['username']) {
+                r2(U . "order/pay/$routes[2]/$routes[3]", 's', '^_^ v');
+            }
+            $active = ORM::for_table('tbl_user_recharges')
+                ->where('username', _post('username'))
+                ->where('status', 'on')
+                ->find_one();
+
+            if ($active['plan_id'] != $plan['id']) {
+                r2(U . "order/package", 'e', Lang::T("Target has active plan, different with current plant.")." [ <b>$active[namebp]</b> ]");
+            }
+            if (Package::rechargeUser($target['id'], $plan['routers'], $plan['id'], $user['fullname'], 'Balance')) {
+                // if success, then get the balance
+                Balance::min($user['id'], $plan['price']);
+                //sender
+                $d = ORM::for_table('tbl_payment_gateway')->create();
+                $d->username = $user['username'];
+                $d->gateway = $target['username'];
+                $d->plan_id = $plan['id'];
+                $d->plan_name = $plan['name_plan'];
+                $d->routers_id = $routes['2'];
+                $d->routers = $plan['routers'];
+                $d->price = $plan['price'];
+                $d->payment_method = "Balance";
+                $d->payment_channel = "Send Plan";
+                $d->created_date = date('Y-m-d H:i:s');
+                $d->paid_date = date('Y-m-d H:i:s');
+                $d->expired_date = date('Y-m-d H:i:s');
+                $d->pg_url_payment = 'balance';
+                $d->status = 2;
+                $d->save();
+                $trx_id = $d->id();
+                //receiver
+                $d = ORM::for_table('tbl_payment_gateway')->create();
+                $d->username = $target['username'];
+                $d->gateway = $user['username'];
+                $d->plan_id = $plan['id'];
+                $d->plan_name = $plan['name_plan'];
+                $d->routers_id = $routes['2'];
+                $d->routers = $plan['routers'];
+                $d->price = $plan['price'];
+                $d->payment_method = "Balance";
+                $d->payment_channel = "Received Plan";
+                $d->created_date = date('Y-m-d H:i:s');
+                $d->paid_date = date('Y-m-d H:i:s');
+                $d->expired_date = date('Y-m-d H:i:s');
+                $d->pg_url_payment = 'balance';
+                $d->status = 2;
+                $d->save();
+                r2(U . "order/view/$trx_id", 's', Lang::T("Success to send package"));
+            } else {
+                r2(U . "order/package", 'e', Lang::T("Failed to Send package"));
+                Message::sendTelegram("Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .
+                    "\nRouter: " . $plan['routers'] .
+                    "\nPrice: " . $plan['price']);
+            }
+        }
+
+        $ui->assign('username', $_GET['u']);
+        $ui->assign('router', $router);
+        $ui->assign('plan', $plan);
+        $ui->display('user-sendPlan.tpl');
         break;
     case 'buy':
         if (strpos($user['email'], '@') === false) {
@@ -147,9 +228,9 @@ switch ($action) {
         run_hook('customer_buy_plan'); #HOOK
         include 'system/paymentgateway/' . $config['payment_gateway'] . '.php';
         call_user_func($config['payment_gateway'] . '_validate_config');
-        if ($routes['2']>0) {
+        if ($routes['2'] > 0) {
             $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
-        }else{
+        } else {
             $router['id'] = 0;
             $router['name'] = 'balance';
         }
@@ -205,5 +286,5 @@ switch ($action) {
         }
         break;
     default:
-    r2(U . "order/package/", 's','');
+        r2(U . "order/package/", 's', '');
 }

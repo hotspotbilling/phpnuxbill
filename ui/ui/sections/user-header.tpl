@@ -104,7 +104,7 @@
             </nav>
         </header>
 
-        <aside class="main-sidebar">
+        <aside class="main-sidebar" style="position:fixed;">
             <section class="sidebar">
                 <ul class="sidebar-menu" data-widget="tree">
                     <li {if $_system_menu eq 'home'}class="active" {/if}>

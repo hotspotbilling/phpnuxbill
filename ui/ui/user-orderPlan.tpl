@@ -43,7 +43,7 @@
                     </div>
                 {/if}
                 {if count($plans_hotspot)>0}
-                    <div class="box-header">Hotspot</div>
+                    <div class="box-header">{Lang::T('Hotspot Plan')}</div>
                     <div class="box-body row">
                         {foreach $plans_hotspot as $plan}
                             {if $router['name'] eq $plan['routers']}
@@ -79,6 +79,11 @@
                                                         class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
                                                 {/if}
                                             </div>
+                                            {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
+                                                <a href="{$_url}order/send/{$router['id']}/{$plan['id']}"
+                                                    onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
+                                                    class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
+                                            {/if}
                                         </div>
                                     </div>
                                 </div>
@@ -87,7 +92,7 @@
                     </div>
                 {/if}
                 {if count($plans_pppoe)>0}
-                    <div class="box-header text-sm">PPPOE</div>
+                    <div class="box-header text-sm">{Lang::T('PPPOE Plan')}</div>
                     <div class="box-body row">
                         {foreach $plans_pppoe as $plan}
                             {if $router['name'] eq $plan['routers']}
@@ -123,6 +128,11 @@
                                                         class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
                                                 {/if}
                                             </div>
+                                            {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
+                                                <a href="{$_url}order/send/{$router['id']}/{$plan['id']}"
+                                                    onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
+                                                    class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
+                                            {/if}
                                         </div>
                                     </div>
                                 </div>

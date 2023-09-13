@@ -72,7 +72,17 @@ if (_post('send') == 'balance') {
             r2(U . 'home', 's', Lang::T('Sending balance success'));
         }
     } else {
-        r2(U . 'home', 'd', 'Failed, balance is not available');
+        r2(U . 'home', 'd', Lang::T('Failed, balance is not available'));
+    }
+}else if (_post('send') == 'plan') {
+    $active = ORM::for_table('tbl_user_recharges')
+        ->where('username', _post('username'))
+        ->find_one();
+    $router = ORM::for_table('tbl_routers') ->where('name', $active['routers'])->find_one();
+    if($router){
+        r2(U . "order/send/$router[id]/$active[plan_id]&u=".trim(_post('username')), 's', Lang::T('Review package before recharge'));
+    }else{
+        r2(U . 'package/order', 'w', Lang::T('Your friend do not have active package'));
     }
 }
 
