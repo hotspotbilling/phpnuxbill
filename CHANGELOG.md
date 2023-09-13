@@ -2,6 +2,14 @@
 
 # CHANGELOG
 
+- add Current balance in notification
+- Buy Plan for Friend
+- Recharge Friend plan
+- Fix recharge Plan
+- Show Customer active plan in Customer list
+- Fix Customer counter in dashboard
+- Show Customer Balance in header
+- Fix Plugin Manager using Http::Get
 ## 2023.9.7
 
 - Fix PPPOE Delete Customer
