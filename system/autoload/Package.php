@@ -5,8 +5,6 @@
  **/
 
 
-use PEAR2\Net\RouterOS;
-
 class Package
 {
     /**
@@ -49,7 +47,9 @@ class Package
             $t->type = "Balance";
             $t->save();
 
+            $balance_before = $c['balance'];
             Balance::plus($id_customer, $p['price']);
+            $balance = $c['balance'] + $p['price'];
 
             $textInvoice = Lang::getNotifText('invoice_balance');
             $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
@@ -66,6 +66,8 @@ class Package
             $textInvoice = str_replace('[[user_name]]', $c['username'], $textInvoice);
             $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
             $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
+            $textInvoice = str_replace('[[balance_before]]', Lang::moneyFormat($balance_before), $textInvoice);
+            $textInvoice = str_replace('[[balance]]', Lang::moneyFormat($balance), $textInvoice);
 
             if ($_c['user_notification_payment'] == 'sms') {
                 Message::sendSMS($c['phonenumber'], $textInvoice);

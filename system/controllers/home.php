@@ -25,7 +25,7 @@ if (_post('send') == 'balance') {
         if ($user['balance'] < $balance) {
             r2(U . 'home', 'd', Lang::T('insufficient balance'));
         }
-        if (!empty($config['minimum_transfer']) && intval($balance) <= intval($config['minimum_transfer'])) {
+        if (!empty($config['minimum_transfer']) && intval($balance) < intval($config['minimum_transfer'])) {
             r2(U . 'home', 'd', Lang::T('Minimum Transfer') . ' ' . Lang::moneyFormat($config['minimum_transfer']));
         }
         if ($user['username'] == $target['username']) {
@@ -66,22 +66,22 @@ if (_post('send') == 'balance') {
             $d->pg_url_payment = 'balance';
             $d->status = 2;
             $d->save();
-            Message::sendBalanceNotification($user['phonenumber'], $target['fullname'] . ' (' . $target['username'] . ')', $balance, Lang::getNotifText('balance_send'), $config['user_notification_payment']);
-            Message::sendBalanceNotification($target['phonenumber'], $user['fullname'] . ' (' . $user['username'] . ')', $balance, Lang::getNotifText('balance_received'), $config['user_notification_payment']);
+            Message::sendBalanceNotification($user['phonenumber'], $target['fullname'] . ' (' . $target['username'] . ')', $balance, ($user['balance'] - $balance), Lang::getNotifText('balance_send'), $config['user_notification_payment']);
+            Message::sendBalanceNotification($target['phonenumber'], $user['fullname'] . ' (' . $user['username'] . ')', $balance, ($target['balance'] + $balance), Lang::getNotifText('balance_received'), $config['user_notification_payment']);
             Message::sendTelegram("#u$user[username] send balance to #u$target[username] \n" . Lang::moneyFormat($balance));
             r2(U . 'home', 's', Lang::T('Sending balance success'));
         }
     } else {
         r2(U . 'home', 'd', Lang::T('Failed, balance is not available'));
     }
-}else if (_post('send') == 'plan') {
+} else if (_post('send') == 'plan') {
     $active = ORM::for_table('tbl_user_recharges')
         ->where('username', _post('username'))
         ->find_one();
-    $router = ORM::for_table('tbl_routers') ->where('name', $active['routers'])->find_one();
-    if($router){
-        r2(U . "order/send/$router[id]/$active[plan_id]&u=".trim(_post('username')), 's', Lang::T('Review package before recharge'));
-    }else{
+    $router = ORM::for_table('tbl_routers')->where('name', $active['routers'])->find_one();
+    if ($router) {
+        r2(U . "order/send/$router[id]/$active[plan_id]&u=" . trim(_post('username')), 's', Lang::T('Review package before recharge'));
+    } else {
         r2(U . 'package/order', 'w', Lang::T('Your friend do not have active package'));
     }
 }

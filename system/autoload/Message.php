@@ -56,9 +56,10 @@ class Message
         return "$via: $msg";
     }
 
-    public static function sendBalanceNotification($phone, $name, $balance, $message, $via)
+    public static function sendBalanceNotification($phone, $name, $balance, $balance_now, $message, $via)
     {
         $msg = str_replace('[[name]]', "*$name*", $message);
+        $msg = str_replace('[[current_balance]]', Lang::moneyFormat($balance_now), $msg);
         $msg = str_replace('[[balance]]', "*" . Lang::moneyFormat($balance) . "*", $msg);
         if (
             !empty($phone) && strlen($phone) > 5
