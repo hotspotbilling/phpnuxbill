@@ -27,6 +27,15 @@
             color: red;
             background: yellow;
         }
+
+        .content-wrapper{
+            margin-top: 50px;
+        }
+        @media (max-width: 767px) {
+            .content-wrapper{
+                margin-top: 100px;
+            }
+        }
     </style>
 
     {if isset($xheader)}
@@ -37,8 +46,7 @@
 
 <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
-
-        <header class="main-header">
+        <header class="main-header" style="position:fixed; width: 100%">
             <a href="{$_url}home" class="logo">
                 <span class="logo-mini"><b>N</b>uX</span>
                 <span class="logo-lg">{$_c['CompanyName']}</span>
@@ -47,8 +55,10 @@
                 <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
                     <span class="sr-only">Toggle navigation</span>
                 </a>
+                {if $_c['enable_balance'] == 'yes'}
+                    <p class="navbar-text text-white" style="float: inline-start; color: whitesmoke; text-align: center !important;">{Lang::T('Balance')} {Lang::moneyFormat($_user['balance'])}</p>
+                {/if}
                 <div class="navbar-custom-menu">
-
                     <ul class="nav navbar-nav">
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">

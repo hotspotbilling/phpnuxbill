@@ -33,10 +33,6 @@
                     {/foreach}
                 </div>
             </div>
-
-            <div class="box box-solid box-success">
-                <div class="box-header text-center text-bold">{Lang::T('Balance')} {Lang::moneyFormat($_user['balance'])}</div>
-            </div>
         {/if}
         {foreach $routers as $router}
             <div class="box box-solid box-info">
