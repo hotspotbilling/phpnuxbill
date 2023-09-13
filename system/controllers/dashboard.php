@@ -31,23 +31,23 @@ if ($imonth == '') {
 $ui->assign('imonth', $imonth);
 
 $u_act = ORM::for_table('tbl_user_recharges')->where('status', 'on')->count();
-if ($u_act == '') {
+if (empty($u_act)) {
     $u_act = '0';
 }
 $ui->assign('u_act', $u_act);
 
 $u_all = ORM::for_table('tbl_user_recharges')->count();
-if ($u_all == '') {
+if (empty($u_all)) {
     $u_all = '0';
 }
 $ui->assign('u_all', $u_all);
 
 
 $c_all = ORM::for_table('tbl_customers')->count();
-if ($u_all == '') {
+if (empty($c_all)) {
     $c_all = '0';
 }
-$ui->assign('c_all', $u_all);
+$ui->assign('c_all', $c_all);
 
 //user expire
 $expire = ORM::for_table('tbl_user_recharges')->where('expiration', $mdate)->order_by_desc('id')->find_many();
