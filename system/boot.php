@@ -93,6 +93,13 @@ foreach ($result as $value) {
 date_default_timezone_set($config['timezone']);
 $_c = $config;
 
+// check if proxy setup in database
+if(empty($http_proxy) && !empty($config['http_proxy'])){
+    $http_proxy = $config['http_proxy'];
+    if(empty($http_proxyauth) && !empty($config['http_proxyauth'])){
+        $http_proxyauth = $config['http_proxyauth'];
+    }
+}
 if ($config['radius_mode']) {
     ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
     ORM::configure('username', $radius_user, 'radius');

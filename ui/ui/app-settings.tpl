@@ -24,7 +24,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Company Logo')}</label>
                         <div class="col-md-6">
                             <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-                            <span class="help-block">For PDF Reports | Best size 1078 x 200 | uploaded image will be autosize</span>
+                            <span class="help-block">For PDF Reports | Best size 1078 x 200 | uploaded image will be
+                                autosize</span>
                         </div>
                         <span class="help-block col-md-4">
                             <a href="./{$logo}" target="_blank"><img src="./{$logo}" height="48" alt="logo for PDF"></a>
@@ -135,7 +136,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Telegram Bot Token</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="telegram_bot" name="telegram_bot"
+                            <input type="password" class="form-control" id="telegram_bot" name="telegram_bot" onmouseleave="this.type = 'password'"
+                            onmouseenter="this.type = 'text'"
                                 value="{$_c['telegram_bot']}" placeholder="123456:asdasgdkuasghddlashdashldhalskdklasd">
                         </div>
                     </div>
@@ -270,7 +272,6 @@
                     </div>
                     {Lang::T('Invoice')}
                 </div>
-                <div class="panel-heading"></div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Invoice Footer')}</label>
@@ -278,6 +279,30 @@
                             <textarea class="form-control" id="note" name="note"
                                 rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
                             <span class="help-block">{$_L['You_can_use_html_tag']}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Proxy')}
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Proxy Server')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="http_proxy" name="http_proxy"
+                                value="{$_c['http_proxy']}" placeholder="127.0.0.1:3128">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Proxy Server Login')}</label>
+                        <div class="col-md-6">
+                            <input type="password" class="form-control" id="http_proxyauth" name="http_proxyauth" autocomplete="off"
+                                value="{$_c['http_proxyauth']}" placeholder="username:password" onmouseleave="this.type = 'password'"
+                                onmouseenter="this.type = 'text'">
                         </div>
                     </div>
                 </div>

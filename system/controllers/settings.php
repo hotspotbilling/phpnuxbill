@@ -231,6 +231,8 @@ switch ($action) {
         $user_notification_payment = _post('user_notification_payment');
         $address = _post('address');
         $tawkto = _post('tawkto');
+        $http_proxy = _post('http_proxy');
+        $http_proxyauth = _post('http_proxyauth');
         $radius_mode = _post('radius_mode') * 1;
         run_hook('save_settings'); #HOOK
 
@@ -256,6 +258,28 @@ switch ($action) {
             $d->value = $phone;
             $d->save();
 
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'http_proxy')->find_one();
+            if ($d) {
+                $d->value = $http_proxy;
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'http_proxy';
+                $d->value = $http_proxy;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'http_proxyauth')->find_one();
+            if ($d) {
+                $d->value = $http_proxyauth;
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'http_proxyauth';
+                $d->value = $http_proxyauth;
+                $d->save();
+            }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'CompanyFooter')->find_one();
             if ($d) {

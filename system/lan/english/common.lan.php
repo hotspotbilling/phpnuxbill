@@ -387,3 +387,6 @@ $_L['Minimum_Transfer'] = 'Minimum Transfer';
 $_L['Company_Logo'] = 'Company Logo';
 $_L['Expired_IP_Pool'] = 'Expired IP Pool';
 $_L['Expired_IP_Pool'] = 'Expired IP Pool';
+$_L['Proxy'] = 'Proxy';
+$_L['Proxy_Server'] = 'Proxy Server';
+$_L['Proxy_Server_Login'] = 'Proxy Server Login';
