@@ -12,7 +12,7 @@ class Http
 {
     public static function getData($url, $headers = [])
     {
-        global $http_proxy,$http_proxyauth;
+        global $http_proxy, $http_proxyauth, $admin;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 0);
@@ -20,9 +20,9 @@ class Http
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        if(!empty($http_proxy)){
+        if (!empty($http_proxy)) {
             curl_setopt($ch, CURLOPT_PROXY, $http_proxy);
-            if(!empty($http_proxyauth)){
+            if (!empty($http_proxyauth)) {
                 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $http_proxyauth);
             }
         }
@@ -31,12 +31,15 @@ class Http
             $error_msg = curl_error($ch);
         }
         curl_close($ch);
+        if($admin && $error_msg){
+            r2(U . 'dashboard', 'd', $error_msg);
+        }
         return ($server_output) ? $server_output : $error_msg;
     }
 
     public static function postJsonData($url, $array_post, $headers = [], $basic = null)
     {
-        global $http_proxy,$http_proxyauth;
+        global $http_proxy, $http_proxyauth, $admin;
         $headers[] = 'Content-Type: application/json';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -45,9 +48,9 @@ class Http
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_VERBOSE, false);
         curl_setopt($ch, CURLINFO_HEADER_OUT, false);
-        if(!empty($http_proxy)){
+        if (!empty($http_proxy)) {
             curl_setopt($ch, CURLOPT_PROXY, $http_proxy);
-            if(!empty($http_proxyauth)){
+            if (!empty($http_proxyauth)) {
                 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $http_proxyauth);
             }
         }
@@ -62,13 +65,16 @@ class Http
             $error_msg = curl_error($ch);
         }
         curl_close($ch);
+        if($admin && $error_msg){
+            r2(U . 'dashboard', 'd', $error_msg);
+        }
         return ($server_output) ? $server_output : $error_msg;
     }
 
 
     public static function postData($url, $array_post, $headers = [], $basic = null)
     {
-        global $http_proxy,$http_proxyauth;
+        global $http_proxy, $http_proxyauth, $admin;
         $headers[] = 'Content-Type: application/x-www-form-urlencoded';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -77,9 +83,9 @@ class Http
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_VERBOSE, false);
         curl_setopt($ch, CURLINFO_HEADER_OUT, false);
-        if(!empty($http_proxy)){
+        if (!empty($http_proxy)) {
             curl_setopt($ch, CURLOPT_PROXY, $http_proxy);
-            if(!empty($http_proxyauth)){
+            if (!empty($http_proxyauth)) {
                 curl_setopt($ch, CURLOPT_PROXYUSERPWD, $http_proxyauth);
             }
         }
@@ -94,6 +100,9 @@ class Http
             $error_msg = curl_error($ch);
         }
         curl_close($ch);
+        if($admin && $error_msg){
+            r2(U . 'dashboard', 'd', $error_msg);
+        }
         return ($server_output) ? $server_output : $error_msg;
     }
 }
