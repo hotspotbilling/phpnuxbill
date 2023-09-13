@@ -94,12 +94,12 @@ foreach ($d as $ds) {
 
             if (!$_c['radius_mode']) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                Mikrotik::removeHotspotActiveUser($client, $c['username']);
                 if(!empty($p['pool_expired'])){
                     Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);
                 }else{
                     Mikrotik::removeHotspotUser($client, $c['username']);
                 }
+                Mikrotik::removeHotspotActiveUser($client, $c['username']);
                 Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
             //update database user dengan status off
@@ -141,12 +141,12 @@ foreach ($d as $ds) {
 
             if (!$_c['radius_mode']) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                Mikrotik::removePpoeActive($client, $c['username']);
                 if(!empty($p['pool_expired'])){
                     Mikrotik::setPpoeUserPlan($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);
                 }else{
                     Mikrotik::removePpoeUser($client, $c['username']);
                 }
+                Mikrotik::removePpoeActive($client, $c['username']);
                 Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
             }
 
