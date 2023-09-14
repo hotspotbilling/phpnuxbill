@@ -10,6 +10,7 @@
 - Fix Customer counter in dashboard
 - Show Customer Balance in header
 - Fix Plugin Manager using Http::Get
+- Show Some error page when crash
 ## 2023.9.7
 
 - Fix PPPOE Delete Customer
