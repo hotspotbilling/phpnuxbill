@@ -160,7 +160,7 @@ switch ($action) {
                 ->where('status', 'on')
                 ->find_one();
 
-            if ($active['plan_id'] != $plan['id']) {
+            if ($active && $active['plan_id'] != $plan['id']) {
                 r2(U . "order/package", 'e', Lang::T("Target has active plan, different with current plant.")." [ <b>$active[namebp]</b> ]");
             }
             if (Package::rechargeUser($target['id'], $plan['routers'], $plan['id'], $user['fullname'], 'Balance')) {
