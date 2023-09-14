@@ -130,7 +130,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6">
+    <div class="col-sm-6" id="update">
         <div class="box box-primary box-hovered mb20 activities">
             <div class="box-header">
                 <h3 class="box-title">PHPNUXBILL</h3>

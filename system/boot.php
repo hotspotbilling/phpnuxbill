@@ -290,34 +290,43 @@ $handler = $routes[0];
 if ($handler == '') {
     $handler = 'default';
 }
-$sys_render = File::pathFixer('system/controllers/' . $handler . '.php');
-if (file_exists($sys_render)) {
-    $menus = array();
-    // "name" => $name,
-    // "admin" => $admin,
-    // "position" => $position,
-    // "function" => $function
-    $ui->assign('_system_menu', $routes[0]);
-    foreach ($menu_registered as $menu) {
-        if ($menu['admin'] && _admin(false)) {
-            $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
-            if (!empty($menu['icon'])) {
-                $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+try {
+
+    $sys_render = File::pathFixer('system/controllers/' . $handler . '.php');
+    if (file_exists($sys_render)) {
+        $menus = array();
+        // "name" => $name,
+        // "admin" => $admin,
+        // "position" => $position,
+        // "function" => $function
+        $ui->assign('_system_menu', $routes[0]);
+        foreach ($menu_registered as $menu) {
+            if ($menu['admin'] && _admin(false)) {
+                $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+                if (!empty($menu['icon'])) {
+                    $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+                }
+                $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
+            } else if (!$menu['admin'] && _auth(false)) {
+                $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+                if (!empty($menu['icon'])) {
+                    $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+                }
+                $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
             }
-            $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
-        } else if (!$menu['admin'] && _auth(false)) {
-            $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
-            if (!empty($menu['icon'])) {
-                $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
-            }
-            $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
         }
+        foreach ($menus as $k => $v) {
+            $ui->assign('_MENU_' . $k, $v);
+        }
+        unset($menus, $menu_registered);
+        include($sys_render);
+    } else {
+        r2(U . 'dashboard', 'e', 'not found');
     }
-    foreach ($menus as $k => $v) {
-        $ui->assign('_MENU_' . $k, $v);
-    }
-    unset($menus, $menu_registered);
-    include($sys_render);
-} else {
-    r2(U . 'dashboard', 'e', 'not found');
+
+} catch (Exception $e) {
+    $ui->assign("error_title", "PHPNuxBill Crash");
+    $ui->assign("error_message", $e->getMessage());
+    $ui->display('router-error.tpl');
+    die();
 }
