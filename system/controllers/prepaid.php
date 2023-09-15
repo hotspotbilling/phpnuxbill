@@ -65,6 +65,9 @@ switch ($action) {
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
+        if(isset($routes['2']) && !empty($routes['2'])){
+            $ui->assign('cust', ORM::for_table('tbl_customers')->find_one($routes['2']));
+        }
         run_hook('view_recharge'); #HOOK
         $ui->display('recharge.tpl');
         break;

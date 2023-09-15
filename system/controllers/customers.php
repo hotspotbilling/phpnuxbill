@@ -45,7 +45,29 @@ switch ($action) {
         run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');
         break;
+    case 'sync':
 
+    case 'sync':
+        $id_customer  = $routes['2'];
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->find_one();
+        if($b){
+            $mikrotik = Mikrotik::info($b['routers']);
+            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+            $c = ORM::for_table('tbl_customers')->find_one($id_customer);
+            $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
+            if($p){
+                if($b['type']=='Hotspot'){
+                    Mikrotik::addHotspotUser($client, $p, $c);
+                }else if($b['type']=='PPPOE'){
+                    Mikrotik::addPpoeUser($client, $p, $c);
+                }
+                r2(U . 'customers/view/'.$id_customer , 's', 'success sync customer to Mikrotik');
+            }else{
+                r2(U . 'customers/view/'.$id_customer , 'e', 'Customer plan is inactive');
+            }
+        }
+        r2(U . 'customers/view/'.$id_customer , 'e', 'Cannot find active plan');
+        break;
     case 'viewu':
         $customer = ORM::for_table('tbl_customers')->where('username', $routes['2'])->find_one();
     case 'view':

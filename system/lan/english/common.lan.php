@@ -400,3 +400,5 @@ $_L['Recharge_a_friend'] = 'Recharge a friend';
 $_L['Buy_for_friend'] = 'Buy for friend';
 $_L['Buy_this_for_friend_account'] = 'Buy this for friend account?';
 $_L['Review_package_before_recharge'] = 'Review package before recharge';
+$_L['Deactivate'] = 'Deactivate';
+$_L['Sync'] = 'Sync';
