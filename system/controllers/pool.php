@@ -70,6 +70,17 @@ switch ($action) {
         }
         break;
 
+    case 'sync':
+        $pools = ORM::for_table('tbl_pool')->find_many();
+        $log = '';
+        foreach($pools as $pool){
+            $mikrotik = Mikrotik::info($pool['routers']);
+            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+            Mikrotik::addPool($client, $pool['pool_name'], $pool['range_ip']);
+            $log .= 'DONE: '.$pool['pool_name'].': '.$pool['range_ip'].'<br>';
+        }
+        r2(U . 'pool/list', 's', $log);
+        break;
     case 'add-post':
         $name = _post('name');
         $ip_address = _post('ip_address');
