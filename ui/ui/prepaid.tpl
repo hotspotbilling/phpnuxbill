@@ -41,7 +41,7 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr>
+                                <tr {if $ds['status']=='off'}class="danger"{/if}>
                                     <td><a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a></td>
                                     <td>{$ds['namebp']}</td>
                                     <td>{$ds['type']}</td>
