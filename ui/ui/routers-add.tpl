@@ -42,7 +42,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Router_Secret']}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="password" name="password">
+                            <input type="text" class="form-control" id="password" name="password"
+                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                     </div>
                     <div class="form-group">
