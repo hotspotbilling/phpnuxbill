@@ -84,8 +84,24 @@
                             {$package['routers']} <span class="pull-right">{$package['method']}</span>
                         </li>
                     </ul>
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <a href="{$_url}customers/deactivate/{$d['id']}" id="{$d['id']}"
+                                class="btn btn-danger btn-block btn-sm" onclick="return confirm('This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
+                        </div>
+                        <div class="col-xs-4">
+                            <a href="{$_url}customers/recharge/{$d['id']}" onclick="return confirm('This will extend Customer plan, same as recharge')"
+                                class="btn btn-success btn-sm btn-block">{Lang::T('Recharge')}</a>
+                        </div>
+                        <div class="col-xs-4">
+                            <a href="{$_url}customers/sync/{$d['id']}" onclick="return confirm('This will sync Customer to Mikrotik?')"
+                                class="btn btn-primary btn-sm btn-block">{Lang::T('Sync')}</a>
+                        </div>
+                    </div>
                 </div>
             </div>
+        {else}
+        <a href="{$_url}prepaid/recharge/{$d['id']}" class="btn btn-success btn-sm btn-block mt-1">{Lang::T('Recharge')}</a><br>
         {/if}
         <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block mt-1">{Lang::T('Back')}</a><br>
     </div>
