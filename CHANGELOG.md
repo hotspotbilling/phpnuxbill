@@ -2,6 +2,15 @@
 
 # CHANGELOG
 
+## 2023.9.15
+
+- Fix Customer balance header
+- Deactivate Customer active plan
+- Sync Customer Plan to Mikrotik
+- Recharge Customer from Customer Details
+
+## 2023.9.13
+
 - add Current balance in notification
 - Buy Plan for Friend
 - Recharge Friend plan

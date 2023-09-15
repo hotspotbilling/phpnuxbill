@@ -42,7 +42,7 @@ require_once 'system/autoload/PEAR2/Autoload.php';
 switch ($action) {
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/prepaid.js"></script>');
-
+        $ui->assign('_title', $_L['Customers']);
         $username = _post('username');
         if ($username != '') {
             $paginator = Paginator::bootstrap('tbl_user_recharges', 'username', '%' . $username . '%');
