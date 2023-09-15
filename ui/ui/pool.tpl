@@ -3,7 +3,14 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">{$_L['Pool']}</div>
+            <div class="panel-heading">
+                <div class="btn-group pull-right">
+                    <a class="btn btn-primary btn-xs" title="save" href="{$_url}pool/sync"
+                        onclick="return confirm('This will sync/send IP Pool to Mikrotik?')"><span
+                            class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
+                </div>
+                {$_L['Pool']}
+            </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
@@ -45,9 +52,9 @@
                                     <td>{$ds['range_ip']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td align="center">
-                                        <a href="{$_url}pool/edit/{$ds['id']}"
-                                            class="btn btn-info btn-xs">{$_L['Edit']}</a>
-                                        <a href="{$_url}pool/delete/{$ds['id']}" id="{$ds['id']}" onclick="return confirm('{$_L['Delete']}?')"
+                                        <a href="{$_url}pool/edit/{$ds['id']}" class="btn btn-info btn-xs">{$_L['Edit']}</a>
+                                        <a href="{$_url}pool/delete/{$ds['id']}" id="{$ds['id']}"
+                                            onclick="return confirm('{$_L['Delete']}?')"
                                             class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                     </td>
                                 </tr>

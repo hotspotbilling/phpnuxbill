@@ -40,6 +40,28 @@ EOT;
 require_once 'system/autoload/PEAR2/Autoload.php';
 
 switch ($action) {
+    case 'sync':
+        set_time_limit(-1);
+        $plans = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
+        echo count($plans);
+        $log = '';
+        $router = '';
+        foreach ($plans as $plan) {
+            if ($router != $plan['routers']) {
+                $mikrotik = Mikrotik::info($plan['routers']);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                $router = $plan['routers'];
+            }
+            $p = ORM::for_table('tbl_plans')->findOne($plan['plan_id']);
+            $c = ORM::for_table('tbl_customers')->findOne($plan['customer_id']);
+            if ($plan['type'] == 'Hotspot') {
+                Mikrotik::addHotspotUser($client, $p, $c);
+            } else if ($plan['type'] == 'PPPOE') {
+                Mikrotik::addPpoeUser($client, $p, $c);
+            }
+            $log .= "DONE : $plan[username], $plan[namebp], $plan[type], $plan[routers]<br>";
+        }
+        r2(U . 'prepaid/list', 's', $log);
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/prepaid.js"></script>');
         $ui->assign('_title', $_L['Customers']);
@@ -65,7 +87,7 @@ switch ($action) {
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
-        if(isset($routes['2']) && !empty($routes['2'])){
+        if (isset($routes['2']) && !empty($routes['2'])) {
             $ui->assign('cust', ORM::for_table('tbl_customers')->find_one($routes['2']));
         }
         run_hook('view_recharge'); #HOOK
