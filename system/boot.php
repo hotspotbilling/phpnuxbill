@@ -101,12 +101,12 @@ try {
             $http_proxyauth = $config['http_proxyauth'];
         }
     }
-    if ($config['radius_mode']) {
-        ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
-        ORM::configure('username', $radius_user, 'radius');
-        ORM::configure('password', $radius_password, 'radius');
-        ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
-        ORM::configure('return_result_sets', true, 'radius');
+    if (!empty($radius_user)) {
+        ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'rad');
+        ORM::configure('username', $radius_user, 'rad');
+        ORM::configure('password', $radius_pass, 'rad');
+        ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'rad');
+        ORM::configure('return_result_sets', true, 'rad');
     }
 } catch (Exception $e) {
     $ui = new Smarty();

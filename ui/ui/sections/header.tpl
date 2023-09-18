@@ -199,6 +199,8 @@
                             <ul class="treeview-menu">
                                 <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}routers/list">{$_L['Routers']}</a></li>
+                                <li {if $_routes[1] eq 'nas-list' and $_routes[1] eq 'list'}class="active" {/if}><a
+                                    href="{$_url}radius/nas-list">Radius NAS</a></li>
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}pool/list">{$_L['Pool']}</a></li>
                                 {$_MENU_NETWORK}
