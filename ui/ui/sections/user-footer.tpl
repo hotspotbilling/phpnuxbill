@@ -3,12 +3,22 @@
         {if isset($_c['CompanyFooter'])}
             <footer class="main-footer">
                 {$_c['CompanyFooter']}
+                <div class="pull-right hidden-xs">
+                    <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
+                    &bull;
+                    <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                </div>
             </footer>
         {else}
             <footer class="main-footer">
                 PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener"
                     target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener"
                     target="_blank">AdminLTE</a>
+                    <div class="pull-right hidden-xs">
+                        <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
+                        &bull;
+                        <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                    </div>
             </footer>
         {/if}
         </div>

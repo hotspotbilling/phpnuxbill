@@ -2,7 +2,7 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-primary panel-hovered">
-            <div class="panel-heading">{$_L[$pageHeader]}</div>
+            <div class="panel-heading">{$pageHeader}</div>
                 <div id="myNicPanel" style="width: 100%;"></div>
                 <div id="panel-edit" class="panel-body">{$htmls}</div>
             {if $writeable}

@@ -103,6 +103,12 @@
                                         <a href="{$_url}register" class="btn btn-success">{$_L['Cancel']}</a>
                                     </div>
                                 </div>
+                                <br>
+                                <center>
+                                    <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
+                                    &bull;
+                                    <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                                </center>
                             </div>
                         </div>
                     </div>

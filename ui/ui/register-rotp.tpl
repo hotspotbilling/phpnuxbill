@@ -78,6 +78,12 @@
                                         type="submit">{Lang::T('Request OTP')}</button>
                                 </div>
                             </div>
+                            <br>
+                            <center>
+                                <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
+                                &bull;
+                                <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                            </center>
                         </div>
                     </div>
                 </div>
