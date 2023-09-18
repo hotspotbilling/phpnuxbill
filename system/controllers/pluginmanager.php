@@ -21,9 +21,14 @@ if ($admin['user_type'] != 'Admin') {
 
 $cache = File::pathFixer('system/cache/plugin_repository.json');
 if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
-    $json = json_decode(file_get_contents($cache), true);
+    $txt = file_get_contents($cache);
+    $json = json_decode($txt, true);
+    if(empty($json['plugins']) && empty($json['payment_gateway'])){
+        unlink($cache);
+        r2(U . 'dashboard', 'd', $txt);
+    }
 } else {
-    $data = file_get_contents($plugin_repository);
+    $data = Http::getData($plugin_repository);
     file_put_contents($cache, $data);
     $json = json_decode($data, true);
 }

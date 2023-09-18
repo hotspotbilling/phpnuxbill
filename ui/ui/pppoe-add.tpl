@@ -60,7 +60,7 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label"><a href="{$_url}routers/add">{$_L['Router_Name']}</a></label>
 								<div class="col-md-6">
-									<select id="routers" name="routers" class="form-control select2">
+									<select id="routers" name="routers" required class="form-control select2">
 										<option value=''>{$_L['Select_Routers']}</option>
 										{foreach $r as $rs}
 											<option value="{$rs['name']}">{$rs['name']}</option>
@@ -72,14 +72,21 @@
 							<div class="form-group">
 								<label class="col-md-2 control-label"><a href="{$_url}pool/add">{$_L['Pool']}</a></label>
 								<div class="col-md-6">
-									<select id="pool_name" name="pool_name" class="form-control select2">
+									<select id="pool_name" name="pool_name" required class="form-control select2">
 										<option value=''>{$_L['Select_Pool']}</option>
 									</select>
 								</div>
 							</div>
-
 							<div class="form-group">
-								<div class="col-lg-offset-2 col-lg-10">
+								<label class="col-md-2 control-label"><a href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
+								<div class="col-md-6">
+									<select id="pool_expired" name="pool_expired" class="form-control select2">
+										<option value=''>{$_L['Select_Pool']}</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-md-offset-2 col-md-10">
 									<button class="btn btn-primary waves-effect waves-light" type="submit">{$_L['Save']}</button>
 									Or <a href="{$_url}services/pppoe">{$_L['Cancel']}</a>
 								</div>

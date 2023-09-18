@@ -45,18 +45,16 @@
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Default_Language']}</label>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <select class="form-control" name="lan" id="lan">
                                 {foreach $lan as $lans}
-                                    <option value="{$lans['folder']}" {if $_c['language'] eq $lans['folder']}
-                                        selected="selected" {/if}>{$lans['name']}</option>
+                                    <option value="{$lans}" {if $_c['language'] eq $lans}
+                                        selected="selected" {/if}>{$lans}</option>
                                 {/foreach}
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <a href="{$_url}settings/language" type="button"
-                                class="btn btn-line-success btn-icon-inline"><i
-                                    class="ion ion-android-add"></i>{$_L['Add_Language']}</a>
+                        <div class="col-md-4 help-block">
+                            To add new Language, just add the folder, it will automatically detected
                         </div>
                     </div>
                     <div class="form-group">
@@ -78,8 +76,8 @@
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="currency_code" name="currency_code"
                                 value="{$_c['currency_code']}">
-                            <span class="help-block">{$_L['currency_help']}</span>
                         </div>
+                        <span class="help-block col-md-4">{$_L['currency_help']}</span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Country Code Phone')}</label>

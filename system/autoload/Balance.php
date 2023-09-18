@@ -19,12 +19,7 @@ class Balance
     {
         global $config;
         if (Balance::min($id_customer, $amount)) {
-            if (Balance::plusByPhone($phoneTarget, $amount)) {
-                return true;
-            } else {
-                Balance::plus($id_customer, $amount);
-                return false;
-            }
+            return Balance::plusByPhone($phoneTarget, $amount);
         } else {
             return false;
         }

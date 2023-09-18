@@ -22,6 +22,17 @@
 $(document).ready(function() {
     $('.select2').select2({theme: "bootstrap"});
 });
+
+$(document).ready(function() {
+    $('.select2tag').select2({theme: "bootstrap", tags: true});
+});
+
+var listAtts = document.querySelectorAll(`[api-get-text]`);
+listAtts.forEach(function(el) {
+    $.get(el.getAttribute('api-get-text'), function(data) {
+        el.innerHTML = data;
+    });
+});
 </script>
 {/literal}
 

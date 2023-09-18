@@ -12,7 +12,7 @@ class Message
         global $config;
         run_hook('send_telegram'); #HOOK
         if (!empty($config['telegram_bot']) && !empty($config['telegram_target_id'])) {
-            file_get_contents('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $config['telegram_target_id'] . '&text=' . urlencode($txt));
+            Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $config['telegram_target_id'] . '&text=' . urlencode($txt));
         }
     }
 
@@ -24,7 +24,7 @@ class Message
         if (!empty($config['sms_url'])) {
             $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
             $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
-            file_get_contents($smsurl);
+            Http::getData($smsurl);
         }
     }
 
@@ -35,7 +35,7 @@ class Message
         if (!empty($config['wa_url'])) {
             $waurl = str_replace('[number]', urlencode($phone), $config['wa_url']);
             $waurl = str_replace('[text]', urlencode($txt), $waurl);
-            file_get_contents($waurl);
+            Http::getData($waurl);
         }
     }
 
@@ -56,9 +56,10 @@ class Message
         return "$via: $msg";
     }
 
-    public static function sendBalanceNotification($phone, $name, $balance, $message, $via)
+    public static function sendBalanceNotification($phone, $name, $balance, $balance_now, $message, $via)
     {
         $msg = str_replace('[[name]]', "*$name*", $message);
+        $msg = str_replace('[[current_balance]]', Lang::moneyFormat($balance_now), $msg);
         $msg = str_replace('[[balance]]', "*" . Lang::moneyFormat($balance) . "*", $msg);
         if (
             !empty($phone) && strlen($phone) > 5

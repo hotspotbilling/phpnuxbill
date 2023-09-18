@@ -4,6 +4,33 @@
  * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
 
  **/
+
+
+// on some server, it getting error because of slash is backwards
+function _autoloader($class)
+{
+    if (strpos($class, '_') !== false) {
+        $class = str_replace('_', DIRECTORY_SEPARATOR, $class);
+        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        } else {
+            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
+                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        }
+    } else {
+        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        } else {
+            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
+            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
+                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        }
+    }
+}
+
+spl_autoload_register('_autoloader');
+
 function r2($to, $ntype = 'e', $msg = '')
 {
     if ($msg == '') {
@@ -46,33 +73,52 @@ function _get($param, $defvalue = '')
         return safedata($_GET[$param]);
     }
 }
+try {
 
+    require_once File::pathFixer('system/orm.php');
 
-require('system/orm.php');
+    ORM::configure("mysql:host=$db_host;dbname=$db_name");
+    ORM::configure('username', $db_user);
+    ORM::configure('password', $db_password);
+    ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+    ORM::configure('return_result_sets', true);
+    if ($_app_stage != 'Live') {
+        ORM::configure('logging', true);
+    }
 
-ORM::configure("mysql:host=$db_host;dbname=$db_name");
-ORM::configure('username', $db_user);
-ORM::configure('password', $db_password);
-ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
-ORM::configure('return_result_sets', true);
-if ($_app_stage != 'Live') {
-    ORM::configure('logging', true);
-}
+    $result = ORM::for_table('tbl_appconfig')->find_many();
+    foreach ($result as $value) {
+        $config[$value['setting']] = $value['value'];
+    }
 
-$result = ORM::for_table('tbl_appconfig')->find_many();
-foreach ($result as $value) {
-    $config[$value['setting']] = $value['value'];
-}
+    date_default_timezone_set($config['timezone']);
+    $_c = $config;
 
-date_default_timezone_set($config['timezone']);
-$_c = $config;
-
-if ($config['radius_mode']) {
-    ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
-    ORM::configure('username', $radius_user, 'radius');
-    ORM::configure('password', $radius_password, 'radius');
-    ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
-    ORM::configure('return_result_sets', true, 'radius');
+    // check if proxy setup in database
+    if (empty($http_proxy) && !empty($config['http_proxy'])) {
+        $http_proxy = $config['http_proxy'];
+        if (empty($http_proxyauth) && !empty($config['http_proxyauth'])) {
+            $http_proxyauth = $config['http_proxyauth'];
+        }
+    }
+    if ($config['radius_mode']) {
+        ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
+        ORM::configure('username', $radius_user, 'radius');
+        ORM::configure('password', $radius_password, 'radius');
+        ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
+        ORM::configure('return_result_sets', true, 'radius');
+    }
+} catch (Exception $e) {
+    $ui = new Smarty();
+    $ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'default' => File::pathFixer('ui/ui/')]);
+    $ui->assign('_url', APP_URL . '/index.php?_route=');
+    $ui->setCompileDir(File::pathFixer('ui/compiled/'));
+    $ui->setConfigDir(File::pathFixer('ui/conf/'));
+    $ui->setCacheDir(File::pathFixer('ui/cache/'));
+    $ui->assign("error_title", "PHPNuxBill Crash");
+    $ui->assign("error_message", $e->getMessage());
+    $ui->display('router-error.tpl');
+    die();
 }
 
 function _notify($msg, $type = 'e')
@@ -81,15 +127,15 @@ function _notify($msg, $type = 'e')
     $_SESSION['notify'] = $msg;
 }
 
-$lan_file = 'system/lan/' . $config['language'] . '/common.lan.php';
+$lan_file = File::pathFixer('system/lan/' . $config['language'] . '/common.lan.php');
 require($lan_file);
 $ui = new Smarty();
-$ui->setTemplateDir(['custom' => 'ui/ui_custom/', 'default' => 'ui/ui/']);
-$ui->addTemplateDir('system/paymentgateway/ui/', 'pg');
-$ui->addTemplateDir('system/plugin/ui/', 'plugin');
-$ui->setCompileDir('ui/compiled/');
-$ui->setConfigDir('ui/conf/');
-$ui->setCacheDir('ui/cache/');
+$ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'default' => File::pathFixer('ui/ui/')]);
+$ui->addTemplateDir(File::pathFixer('system/paymentgateway/ui/'), 'pg');
+$ui->addTemplateDir(File::pathFixer('system/plugin/ui/'), 'plugin');
+$ui->setCompileDir(File::pathFixer('ui/compiled/'));
+$ui->setConfigDir(File::pathFixer('ui/conf/'));
+$ui->setCacheDir(File::pathFixer('ui/cache/'));
 $ui->assign('app_url', APP_URL);
 $ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL, PHP_URL_HOST)));
 define('U', APP_URL . '/index.php?_route=');
@@ -129,40 +175,16 @@ if (isset($_SESSION['notify'])) {
 include "autoload/Hookers.php";
 
 // notification message
-if(file_exists("system/uploads/notifications.json")){
-    $_notifmsg =json_decode(file_get_contents('system/uploads/notifications.json'), true);
+if (file_exists(File::pathFixer("system/uploads/notifications.json"))) {
+    $_notifmsg = json_decode(file_get_contents(File::pathFixer('system/uploads/notifications.json')), true);
 }
-$_notifmsg_default = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
+$_notifmsg_default = json_decode(file_get_contents(File::pathFixer('system/uploads/notifications.default.json')), true);
 
 //register all plugin
-foreach (glob("system/plugin/*.php") as $filename) {
+foreach (glob(File::pathFixer("system/plugin/*.php")) as $filename) {
     include $filename;
 }
 
-// on some server, it getting error because of slash is backwards
-function _autoloader($class)
-{
-    if (strpos($class, '_') !== false) {
-        $class = str_replace('_', DIRECTORY_SEPARATOR, $class);
-        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        } else {
-            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
-            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
-                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        }
-    } else {
-        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        } else {
-            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
-            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
-                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        }
-    }
-}
-
-spl_autoload_register('_autoloader');
 
 function _auth($login = true)
 {
@@ -281,34 +303,42 @@ $handler = $routes[0];
 if ($handler == '') {
     $handler = 'default';
 }
-$sys_render = 'system/controllers/' . $handler . '.php';
-if (file_exists($sys_render)) {
-    $menus = array();
-    // "name" => $name,
-    // "admin" => $admin,
-    // "position" => $position,
-    // "function" => $function
-    $ui->assign('_system_menu', $routes[0]);
-    foreach ($menu_registered as $menu) {
-        if ($menu['admin'] && _admin(false)) {
-            $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
-            if (!empty($menu['icon'])) {
-                $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+try {
+
+    $sys_render = File::pathFixer('system/controllers/' . $handler . '.php');
+    if (file_exists($sys_render)) {
+        $menus = array();
+        // "name" => $name,
+        // "admin" => $admin,
+        // "position" => $position,
+        // "function" => $function
+        $ui->assign('_system_menu', $routes[0]);
+        foreach ($menu_registered as $menu) {
+            if ($menu['admin'] && _admin(false)) {
+                $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+                if (!empty($menu['icon'])) {
+                    $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+                }
+                $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
+            } else if (!$menu['admin'] && _auth(false)) {
+                $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+                if (!empty($menu['icon'])) {
+                    $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+                }
+                $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
             }
-            $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
-        } else if (!$menu['admin'] && _auth(false)) {
-            $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
-            if (!empty($menu['icon'])) {
-                $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
-            }
-            $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
         }
+        foreach ($menus as $k => $v) {
+            $ui->assign('_MENU_' . $k, $v);
+        }
+        unset($menus, $menu_registered);
+        include($sys_render);
+    } else {
+        r2(U . 'dashboard', 'e', 'not found');
     }
-    foreach ($menus as $k => $v) {
-        $ui->assign('_MENU_' . $k, $v);
-    }
-    unset($menus, $menu_registered);
-    include($sys_render);
-} else {
-    r2(U . 'dashboard', 'e', 'not found');
+} catch (Exception $e) {
+    $ui->assign("error_title", "PHPNuxBill Crash");
+    $ui->assign("error_message", $e->getMessage());
+    $ui->display('router-error.tpl');
+    die();
 }

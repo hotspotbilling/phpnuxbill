@@ -12,9 +12,6 @@ $action = $routes['1'];
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-use PEAR2\Net\RouterOS;
-
-require_once 'system/autoload/PEAR2/Autoload.php';
 
 if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
@@ -34,7 +31,8 @@ switch ($action) {
                 ->order_by_desc('id')->find_many();
         } else {
             $paginator = Paginator::bootstrap('tbl_customers');
-            $d = ORM::for_table('tbl_customers')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $d = ORM::for_table('tbl_customers')
+                ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 
         $ui->assign('search', htmlspecialchars($search));
@@ -47,13 +45,67 @@ switch ($action) {
         run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');
         break;
-
+    case 'recharge':
+        $id_customer  = $routes['2'];
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
+        if ($b) {
+            $mikrotik = Mikrotik::info($b['routers']);
+            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+            if (Package::rechargeUser($id_customer, $b['routers'], $b['plan_id'], "Recharge", $admin['fullname'])) {
+                r2(U . 'customers/view/' . $id_customer, 's', 'Success Recharge Customer');
+            } else {
+                r2(U . 'customers/view/' . $id_customer, 'e', 'Customer plan is inactive');
+            }
+        }
+        r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
+    case 'deactivate':
+        $id_customer  = $routes['2'];
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
+        if ($b) {
+            $mikrotik = Mikrotik::info($b['routers']);
+            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+            if ($b['type'] == 'Hotspot') {
+                Mikrotik::removeHotspotUser($client, $b['username']);
+                Mikrotik::removeHotspotActiveUser($client, $b['username']);
+            } else if ($b['type'] == 'PPPOE') {
+                Mikrotik::removePpoeUser($client, $b['username']);
+                Mikrotik::removePpoeActive($client, $b['username']);
+            }
+            $b->status = 'off';
+            $b->expiration = date('Y-m-d');
+            $b->time = date('H:i:s');
+            $b->save();
+            r2(U . 'customers/view/' . $id_customer, 's', 'Success deactivate customer to Mikrotik');
+        }
+        r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
+        break;
+    case 'sync':
+        $id_customer  = $routes['2'];
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->find_one();
+        if ($b) {
+            $mikrotik = Mikrotik::info($b['routers']);
+            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+            $c = ORM::for_table('tbl_customers')->find_one($id_customer);
+            $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
+            if ($p) {
+                if ($b['type'] == 'Hotspot') {
+                    Mikrotik::addHotspotUser($client, $p, $c);
+                } else if ($b['type'] == 'PPPOE') {
+                    Mikrotik::addPpoeUser($client, $p, $c);
+                }
+                r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Mikrotik');
+            } else {
+                r2(U . 'customers/view/' . $id_customer, 'e', 'Customer plan is inactive');
+            }
+        }
+        r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
+        break;
     case 'viewu':
         $customer = ORM::for_table('tbl_customers')->where('username', $routes['2'])->find_one();
     case 'view':
         $id  = $routes['2'];
         run_hook('view_customer'); #HOOK
-        if(!$customer){
+        if (!$customer) {
             $customer = ORM::for_table('tbl_customers')->find_one($id);
         }
         if ($customer) {
@@ -81,7 +133,7 @@ switch ($action) {
                 // $ui->assign('paginator', $paginator);
                 $ui->assign('activation', $activation);
             }
-            $package = ORM::for_table('tbl_user_recharges')->where('username',$customer['username'])->find_one();
+            $package = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->find_one();
             $ui->assign('package', $package);
             $ui->assign('v', $v);
             $ui->assign('d', $customer);
@@ -113,14 +165,14 @@ switch ($action) {
                 if ($c['type'] == 'Hotspot') {
                     if (!$config['radius_mode']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removeHotspotUser($client, $c['username']);
-                        Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                        Mikrotik::removeHotspotUser($client, $d['username']);
+                        Mikrotik::removeHotspotActiveUser($client, $d['username']);
                     }
                 } else {
                     if (!$config['radius_mode']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removePpoeUser($client, $c['username']);
-                        Mikrotik::removePpoeActive($client, $c['username']);
+                        Mikrotik::removePpoeUser($client, $d['username']);
+                        Mikrotik::removePpoeActive($client, $d['username']);
                     }
                 }
                 try {

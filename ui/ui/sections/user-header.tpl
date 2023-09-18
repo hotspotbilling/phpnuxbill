@@ -27,6 +27,16 @@
             color: red;
             background: yellow;
         }
+
+        .content-wrapper {
+            margin-top: 50px;
+        }
+
+        @media (max-width: 767px) {
+            .content-wrapper {
+                margin-top: 100px;
+            }
+        }
     </style>
 
     {if isset($xheader)}
@@ -37,8 +47,7 @@
 
 <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
-
-        <header class="main-header">
+        <header class="main-header" style="position:fixed; width: 100%">
             <a href="{$_url}home" class="logo">
                 <span class="logo-mini"><b>N</b>uX</span>
                 <span class="logo-lg">{$_c['CompanyName']}</span>
@@ -48,20 +57,23 @@
                     <span class="sr-only">Toggle navigation</span>
                 </a>
                 <div class="navbar-custom-menu">
-
                     <ul class="nav navbar-nav">
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                {if $_c['enable_balance'] == 'yes'}
+                                    <span style="color: whitesmoke;">{Lang::moneyFormat($_user['balance'])}</span>
+                                {else}
+                                    <span>{$_user['fullname']}</span>
+                                {/if}
                                 <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
-                                    onerror="this.src='system/uploads/user.default.jpg'"
-                                    class="user-image" alt="User Image">
-                                <span class="hidden-xs">{$_user['fullname']}</span>
+                                    onerror="this.src='system/uploads/user.default.jpg'" class="user-image"
+                                    alt="User Image">
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
-                                        onerror="this.src='system/uploads/user.default.jpg'"
-                                        class="img-circle" alt="User Image">
+                                        onerror="this.src='system/uploads/user.default.jpg'" class="img-circle"
+                                        alt="User Image">
 
                                     <p>
                                         {$_user['fullname']}
@@ -94,7 +106,7 @@
             </nav>
         </header>
 
-        <aside class="main-sidebar">
+        <aside class="main-sidebar" style="position:fixed;">
             <section class="sidebar">
                 <ul class="sidebar-menu" data-widget="tree">
                     <li {if $_system_menu eq 'home'}class="active" {/if}>
@@ -105,12 +117,12 @@
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
                     {if $_c['disable_voucher'] != 'yes'}
-                    <li {if $_system_menu eq 'voucher'}class="active" {/if}>
-                        <a href="{$_url}voucher/activation">
-                            <i class="fa fa-ticket"></i>
-                            <span>{Lang::T('Voucher')}</span>
-                        </a>
-                    </li>
+                        <li {if $_system_menu eq 'voucher'}class="active" {/if}>
+                            <a href="{$_url}voucher/activation">
+                                <i class="fa fa-ticket"></i>
+                                <span>{Lang::T('Voucher')}</span>
+                            </a>
+                        </li>
                     {/if}
                     {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
                         <li {if $_system_menu eq 'package'}class="active" {/if}>

@@ -80,6 +80,7 @@
                             <b>[[type]]</b> is Hotspot/PPPOE.<br>
                             <b>[[plan_name]]</b> Internet Package.<br>
                             <b>[[plan_price]]</b> Internet Package Prices.<br>
+                            <b>[[name]]</b> Receiver name.<br>
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
                             <b>[[expired_date]]</b> Expired datetime.<br>
@@ -106,9 +107,12 @@
                             <b>[[type]]</b> is Hotspot/PPPOE.<br>
                             <b>[[plan_name]]</b> Internet Package.<br>
                             <b>[[plan_price]]</b> Internet Package Prices.<br>
+                            <b>[[name]]</b> Receiver name.<br>
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
                             <b>[[trx_date]]</b> Transaction datetime.<br>
+                            <b>[[balance_before]]</b> Balance Before.<br>
+                            <b>[[balance]]</b> Balance After.<br>
                             <b>[[footer]]</b> Invoice Footer.
                         </p>
                     </div>
@@ -122,7 +126,8 @@
                         </div>
                         <p class="col-md-4 help-block">
                             <b>[[name]]</b> Receiver name.<br>
-                            <b>[[balance]]</b> how much balance have been send.
+                            <b>[[balance]]</b> how much balance have been send.<br>
+                            <b>[[current_balance]]</b> Current Balance.
                         </p>
                     </div>
                 </div>
@@ -135,7 +140,8 @@
                         </div>
                         <p class="col-md-4 help-block">
                             <b>[[name]]</b> Sender name.<br>
-                            <b>[[balance]]</b> how much balance have been received.
+                            <b>[[balance]]</b> how much balance have been received.<br>
+                            <b>[[current_balance]]</b> Current Balance.
                         </p>
                     </div>
                 </div>

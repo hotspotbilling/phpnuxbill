@@ -12,8 +12,7 @@
                     <tbody>
                         <tr>
                             <td>{Lang::T('expired')}</td>
-                            <td>{date({$_c['date_format']}, strtotime($unpaid['expired_date']))}
-                                {date('H:i', strtotime($unpaid['expired_date']))} </td>
+                            <td>{Lang::dateTimeFormat($unpaid['expired_date'])} </td>
                         </tr>
                         <tr>
                             <td>{$_L['Plan_Name']}</td>
@@ -30,10 +29,22 @@
                     </tbody>
                 </table>
                 <div class="box-footer p-2">
-                    <a class="btn btn-danger btn-block btn-sm" href="{$_url}order/view/{$unpaid['id']}">
-                        <span class="icon"><i class="ion ion-card"></i></span>
-                        <span>{Lang::T('PAY NOW')}</span>
-                    </a>
+                    <div class="btn-group btn-group-justified mb15">
+                        <div class="btn-group">
+                            <a href="{$_url}order/view/{$unpaid['id']}/cancel" class="btn btn-danger btn-sm"
+                                onclick="return confirm('{Lang::T('Cancel it?')}')">
+                                <span class="glyphicon glyphicon-trash"></span>
+                                {Lang::T('Cancel')}
+                            </a>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-success btn-block btn-sm" href="{$_url}order/view/{$unpaid['id']}">
+                                <span class="icon"><i class="ion ion-card"></i></span>
+                                <span>{Lang::T('PAY NOW')}</span>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         {/if}
@@ -54,7 +65,7 @@
             <table class="table table-bordered table-striped table-bordered table-hover">
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Username']}</td>
-                    <td class="small mb15">{$_bill['username']}</td>
+                    <td class="small mb15">{$_user['username']}</td>
                 </tr>
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Password']}</td>
@@ -93,19 +104,19 @@
                         {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
                     </td>
                 </tr>
+                {if $nux_ip}
+                    <tr>
+                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
+                        <td class="small mb15">{$nux_ip}</td>
+                    </tr>
+                {/if}
+                {if $nux_mac}
+                    <tr>
+                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
+                        <td class="small mb15">{$nux_mac}</td>
+                    </tr>
+                {/if}
                 {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
-                    {if $nux_ip}
-                        <tr>
-                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
-                            <td class="small mb15">{$nux_ip}</td>
-                        </tr>
-                    {/if}
-                    {if $nux_mac}
-                        <tr>
-                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
-                            <td class="small mb15">{$nux_mac}</td>
-                        </tr>
-                    {/if}
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
                         <td class="small mb15" id="login_status">
@@ -156,7 +167,7 @@
                             </div>
                             <div class="form-group col-sm-2" align="center">
                                 <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
-                                    value="balance"><i class="glyphicon glyphicon-send"></i></button>
+                                    onclick="return confirm('{Lang::T("Are You Sure?")}')" value="balance"><i class="glyphicon glyphicon-send"></i></button>
                             </div>
                         </div>
                     </form>
@@ -171,6 +182,23 @@
                         return false;
                         }
                     </script>
+                </div>
+                <div class="box-header">
+                    <h4 class="box-title">{Lang::T("Recharge a friend")}</h4>
+                </div>
+                <div class="box-body p-0">
+                    <form method="post" role="form" action="{$_url}home">
+                        <div class="form-group">
+                            <div class="col-sm-10">
+                                <input type="text" id="username" name="username" class="form-control" required
+                                    placeholder="{$_L['Username']}">
+                            </div>
+                            <div class="form-group col-sm-2" align="center">
+                                <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
+                                    onclick="return confirm('{Lang::T("Are You Sure?")}')" value="plan"><i class="glyphicon glyphicon-send"></i></button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         {/if}

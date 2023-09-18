@@ -5,8 +5,6 @@
  **/
 
 
-use PEAR2\Net\RouterOS;
-
 class Package
 {
     /**
@@ -19,7 +17,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
     {
-        global $_c, $_L, $_notifmsg;
+        global $_c;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
@@ -49,22 +47,27 @@ class Package
             $t->type = "Balance";
             $t->save();
 
+            $balance_before = $c['balance'];
             Balance::plus($id_customer, $p['price']);
+            $balance = $c['balance'] + $p['price'];
 
             $textInvoice = Lang::getNotifText('invoice_balance');
             $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
             $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
             $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
             $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
-            $textInvoice = str_replace('[[date]]', date($_c['date_format'], strtotime($date_only)) . " " . $time, $textInvoice);
+            $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat($date_now), $textInvoice);
             $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
             $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
             $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
             $textInvoice = str_replace('[[plan_name]]', $p['name_plan'], $textInvoice);
-            $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " " . number_format($p['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
+            $textInvoice = str_replace('[[plan_price]]', Lang::moneyFormat($p['price']), $textInvoice);
+            $textInvoice = str_replace('[[name]]', $c['fullname'], $textInvoice);
             $textInvoice = str_replace('[[user_name]]', $c['username'], $textInvoice);
             $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
             $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
+            $textInvoice = str_replace('[[balance_before]]', Lang::moneyFormat($balance_before), $textInvoice);
+            $textInvoice = str_replace('[[balance]]', Lang::moneyFormat($balance), $textInvoice);
 
             if ($_c['user_notification_payment'] == 'sms') {
                 Message::sendSMS($c['phonenumber'], $textInvoice);
@@ -99,15 +102,19 @@ class Package
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
-                if ($b['namebp'] == $p['name_plan']) {
+                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                        $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Hrs') {
                         $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
                         $date_exp = $datetime[0];
@@ -150,7 +157,10 @@ class Package
             } else {
                 if (!$_c['radius_mode']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
@@ -196,16 +206,20 @@ class Package
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
 
-                if ($b['namebp'] == $p['name_plan']) {
+                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                        $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Hrs') {
                         $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
                         $date_exp = $datetime[0];
@@ -250,6 +264,8 @@ class Package
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
@@ -297,15 +313,16 @@ class Package
         $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
         $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $in['invoice'], $textInvoice);
-        $textInvoice = str_replace('[[date]]', date($_c['date_format'], strtotime($date_now)) . " " . $time, $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat($date_now), $textInvoice);
         $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
         $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
         $textInvoice = str_replace('[[type]]', $in['type'], $textInvoice);
         $textInvoice = str_replace('[[plan_name]]', $in['plan_name'], $textInvoice);
-        $textInvoice = str_replace('[[plan_price]]', $_c['currency_code'] . " " . number_format($in['price'], 2, $_c['dec_point'], $_c['thousands_sep']), $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]',  Lang::moneyFormat($in['price']), $textInvoice);
+        $textInvoice = str_replace('[[name]]', $c['fullname'], $textInvoice);
         $textInvoice = str_replace('[[user_name]]', $in['username'], $textInvoice);
         $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
-        $textInvoice = str_replace('[[expired_date]]', date($_c['date_format'], strtotime($in['expiration'])) . " " . $in['time'], $textInvoice);
+        $textInvoice = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($in['expiration'], $in['time']), $textInvoice);
         $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
 
         if ($_c['user_notification_payment'] == 'sms') {
@@ -329,6 +346,8 @@ class Package
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
             } else {
@@ -336,6 +355,8 @@ class Package
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
             }
@@ -345,6 +366,8 @@ class Package
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             } else {
@@ -352,6 +375,8 @@ class Package
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             }

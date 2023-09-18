@@ -241,8 +241,8 @@
                                         href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
                                 <li {if $_routes[1] eq 'users'}class="active" {/if}><a
                                         href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
-                                <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
-                                        href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li>
+                                {* <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
+                                        href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li> *}
                                 <li {if $_routes[0] eq 'pluginmanager'}class="active" {/if}>
                                     <a href="{$_url}pluginmanager">{Lang::T('Plugin Manager')}</a>
                                 </li>

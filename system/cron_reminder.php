@@ -7,46 +7,21 @@
  * 0 7 * * * /usr/bin/php /var/www/system/cron_reminder.php
  **/
 
-require('../config.php');
-require('orm.php');
-
-require_once 'autoload/PEAR2/Autoload.php';
-
-ORM::configure("mysql:host=$db_host;dbname=$db_name");
-ORM::configure('username', $db_user);
-ORM::configure('password', $db_password);
-ORM::configure('return_result_sets', true);
-ORM::configure('logging', true);
-
-
-include "autoload/Hookers.php";
-
-// notification message
-if(file_exists("system/uploads/notifications.json")){
-    $_notifmsg =json_decode(file_get_contents('system/uploads/notifications.json'), true);
-}
-$_notifmsg_default = json_decode(file_get_contents('system/uploads/notifications.default.json'), true);
-
-//register all plugin
-foreach (glob("plugin/*.php") as $filename) {
-    include $filename;
-}
-
 // on some server, it getting error because of slash is backwards
 function _autoloader($class)
 {
     if (strpos($class, '_') !== false) {
         $class = str_replace('_', DIRECTORY_SEPARATOR, $class);
-        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         } else {
             $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
             if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
                 include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         }
     } else {
-        if (file_exists('autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         } else {
             $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
             if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
@@ -54,8 +29,33 @@ function _autoloader($class)
         }
     }
 }
-
 spl_autoload_register('_autoloader');
+
+if(php_sapi_name() !== 'cli'){
+    echo "<pre>";
+}
+
+require_once '../config.php';
+require_once 'orm.php';
+require_once 'autoload/PEAR2/Autoload.php';
+include "autoload/Hookers.php";
+
+ORM::configure("mysql:host=$db_host;dbname=$db_name");
+ORM::configure('username', $db_user);
+ORM::configure('password', $db_password);
+ORM::configure('return_result_sets', true);
+ORM::configure('logging', true);
+
+// notification message
+if (file_exists("uploads/notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents('uploads/notifications.json'), true);
+}
+$_notifmsg_default = json_decode(file_get_contents('uploads/notifications.default.json'), true);
+
+//register all plugin
+foreach (glob(File::pathFixer("plugin/*.php")) as $filename) {
+    include $filename;
+}
 
 $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
@@ -68,6 +68,14 @@ $d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
 
 run_hook('cronjob_reminder'); #HOOK
 
+
+echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
+$res = ORM::raw_execute('SELECT NOW() AS WAKTU;');
+$statement = ORM::get_last_statement();
+$rows = array();
+while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+    echo "MYSQL Time\t" . $row['WAKTU'] . "\n";
+}
 
 
 $day7 = date('Y-m-d', strtotime("+7 day"));

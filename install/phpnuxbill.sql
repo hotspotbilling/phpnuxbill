@@ -65,22 +65,6 @@ CREATE TABLE
 
 --
 
--- Struktur dari tabel `tbl_language`
-
---
-
-CREATE TABLE
-    `tbl_language` (
-        `id` int(10) NOT NULL,
-        `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-        `folder` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-        `author` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
-    ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
-
 -- Struktur dari tabel `tbl_logs`
 
 --
@@ -174,6 +158,7 @@ CREATE TABLE
         `shared_users` int(10) DEFAULT NULL,
         `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
         `pool` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+        `pool_expired` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '',
         `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled\r\n'
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
@@ -345,14 +330,6 @@ ALTER TABLE `tbl_customers` ADD PRIMARY KEY (`id`);
 
 --
 
--- Indeks untuk tabel `tbl_language`
-
---
-
-ALTER TABLE `tbl_language` ADD PRIMARY KEY (`id`);
-
---
-
 -- Indeks untuk tabel `tbl_logs`
 
 --
@@ -463,15 +440,6 @@ ALTER TABLE
 
 ALTER TABLE
     `tbl_customers` MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
-
---
-
--- AUTO_INCREMENT untuk tabel `tbl_language`
-
---
-
-ALTER TABLE
-    `tbl_language` MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
 
@@ -610,39 +578,4 @@ VALUES (
         'Active',
         '2022-09-06 16:09:50',
         '2014-06-23 01:43:07'
-    );
-
---
-
--- Dumping data untuk tabel `tbl_language`
-
---
-
-INSERT INTO
-    `tbl_language` (
-        `id`,
-        `name`,
-        `folder`,
-        `author`
-    )
-VALUES (
-        1,
-        'Indonesia',
-        'indonesia',
-        'Ismail Marzuqi'
-    ), (
-        2,
-        'English',
-        'english',
-        'Ismail Marzuqi'
-    ), (
-        3,
-        'Spanish',
-        'spanish',
-        'Luis Hernandez'
-    ), (
-        4,
-        'Türkçe',
-        'turkish',
-        'Goktug Bogac Ogel'
     );

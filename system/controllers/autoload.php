@@ -36,6 +36,18 @@ switch ($action) {
 
         $ui->display('autoload.tpl');
         break;
+    case 'customer_is_active':
+        $d = ORM::for_table('tbl_user_recharges')->where('customer_id', $routes['2'])->findOne();
+        if ($d) {
+            if ($d['status'] == 'on') {
+                die('<span class="label label-success" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">'.$d['namebp'].'</span>');
+            } else {
+                die('<span class="label label-danger" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">'.$d['namebp'].'</span>');
+            }
+        } else {
+            die('<span class="label label-danger">&bull;</span>');
+        }
+        break;
     case 'customer_select2':
 
         $s = addslashes(_get('s'));

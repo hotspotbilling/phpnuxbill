@@ -17,5 +17,9 @@
     "2023.8.28" : [
         "ALTER TABLE `tbl_user_recharges` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;",
         "ALTER TABLE `tbl_transactions` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;"
+    ],
+    "2023.9.5" : [
+        "DROP TABLE `tbl_language`;",
+        "ALTER TABLE `tbl_plans` ADD `pool_expired`  varchar(40) NOT NULL DEFAULT '' AFTER `pool`;"
     ]
 }

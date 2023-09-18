@@ -2,6 +2,49 @@
 
 # CHANGELOG
 
+## 2023.9.15
+
+- Fix Customer balance header
+- Deactivate Customer active plan
+- Sync Customer Plan to Mikrotik
+- Recharge Customer from Customer Details
+
+## 2023.9.13
+
+- add Current balance in notification
+- Buy Plan for Friend
+- Recharge Friend plan
+- Fix recharge Plan
+- Show Customer active plan in Customer list
+- Fix Customer counter in dashboard
+- Show Customer Balance in header
+- Fix Plugin Manager using Http::Get
+- Show Some error page when crash
+## 2023.9.7
+
+- Fix PPPOE Delete Customer
+- Remove active Customer before deleting
+- Show IP and Mac even if it not Hotspot
+
+## 2023.9.6
+
+- Expired Pool
+Customer can be move to expired pool after plan expired by cron
+- Fix Delete customer
+- tbl_language removed
+
+## 2023.9.1.1
+
+- Fix cronjob Delete customer
+- Fix reminder text
+
+## 2023.9.1
+
+- Critical bug fixes, bug happen when user buy package, expired time will be calculated from last expired, not from when they buy the package
+- Time not change after user buy package for extending
+- Add Cancel Button to user dashboard when it show unpaid package
+- Fix username in user dashboard
+
 ## 2023.8.30
 
 - Upload Logo from settings
