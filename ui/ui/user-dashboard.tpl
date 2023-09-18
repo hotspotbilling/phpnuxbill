@@ -69,8 +69,9 @@
                 </tr>
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Password']}</td>
-                    <td class="small mb15"><input type="text" value="{$_user['password']}"
-                            style="background-color: black; color:black; width:100%; border: 0px;"
+                    <td class="small mb15"><input type="password" value="{$_user['password']}"
+                            style="width:100%; border: 0px;"
+                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                             onclick="this.select()"></td>
                 </tr>
                 {if $_c['enable_balance'] == 'yes'}
@@ -167,7 +168,8 @@
                             </div>
                             <div class="form-group col-sm-2" align="center">
                                 <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
-                                    onclick="return confirm('{Lang::T("Are You Sure?")}')" value="balance"><i class="glyphicon glyphicon-send"></i></button>
+                                    onclick="return confirm('{Lang::T("Are You Sure?")}')" value="balance"><i
+                                        class="glyphicon glyphicon-send"></i></button>
                             </div>
                         </div>
                     </form>
@@ -195,7 +197,8 @@
                             </div>
                             <div class="form-group col-sm-2" align="center">
                                 <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
-                                    onclick="return confirm('{Lang::T("Are You Sure?")}')" value="plan"><i class="glyphicon glyphicon-send"></i></button>
+                                    onclick="return confirm('{Lang::T("Are You Sure?")}')" value="plan"><i
+                                        class="glyphicon glyphicon-send"></i></button>
                             </div>
                         </div>
                     </form>

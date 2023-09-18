@@ -86,14 +86,20 @@
                                 </div>
                                 <br>
                                 <div class="btn-group btn-group-justified mb15">
-                                <div class="btn-group">
-                                    <a href="{$_url}login" class="btn btn-warning">{$_L['Cancel']}</a>
-                                </div>
+                                    <div class="btn-group">
+                                        <a href="{$_url}login" class="btn btn-warning">{$_L['Cancel']}</a>
+                                    </div>
                                     <div class="btn-group">
                                         <button class="btn btn-success waves-effect waves-light"
                                             type="submit">{$_L['Register']}</button>
                                     </div>
                                 </div>
+                                <br>
+                                <center>
+                                    <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
+                                    &bull;
+                                    <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                                </center>
                             </div>
                         </div>
                     </div>

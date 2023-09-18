@@ -49,16 +49,19 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr>
+                                <tr {if $ds['status'] eq '1'}class="danger"{/if}>
                                     <td>{$ds['id']}</td>
                                     <td>{$ds['type']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td>{$ds['name_plan']}</td>
-                                    <td><span style="background-color: black; color:black;">{$ds['code']}</span></td>
-                                    <td align="center">{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success">Not
+                                    <td width="10px"><input type="password" value="{$ds['code']}"
+                                            style="width:120px;border: 0px; text-align: right;" class="pull-right"
+                                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                                            onclick="this.select()"></td>
+                            <td align="center">{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success">Not
                                             Use</label> {else} <label class="btn-tag btn-tag-danger">Used</label>
                                         {/if}</td>
-                                    <td align="center">{if $ds['user'] eq '0'} - {else} {$ds['user']} {/if}</td>
+                                    <td align="center">{if $ds['user'] eq '0'} - {else}<a href="{$_url}customers/viewu/{$ds['user']}">{$ds['user']}</a>{/if}</td>
                                     <td>
                                         <a href="{$_url}prepaid/voucher-delete/{$ds['id']}" id="{$ds['id']}"
                                             class="btn btn-danger btn-xs"

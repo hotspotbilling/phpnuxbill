@@ -218,14 +218,19 @@
                                 <li {if $_routes[1] eq 'Voucher'}class="active" {/if}><a
                                         href="{$_url}pages/Voucher">{$_L['Voucher']} Template</a></li>
                                 <li {if $_routes[1] eq 'Announcement'}class="active" {/if}><a
-                                        href="{$_url}pages/Announcement">{$_L['Announcement']} Editor</a></li>
+                                        href="{$_url}pages/Announcement">{$_L['Announcement']}</a></li>
                                 <li {if $_routes[1] eq 'Registration_Info'}class="active" {/if}><a
-                                        href="{$_url}pages/Registration_Info">{$_L['Registration_Info']} Editor</a></li>
+                                    href="{$_url}pages/Registration_Info">{$_L['Registration_Info']}</a></li>
+                                <li {if $_routes[1] eq 'Privacy_Policy'}class="active" {/if}><a
+                                    href="{$_url}pages/Privacy_Policy">Privacy Policy</a></li>
+                                <li {if $_routes[1] eq 'Terms_of_Conditions'}class="active" {/if}><a
+                                        href="{$_url}pages/Terms_of_Conditions">Terms and Conditions</a></li>
                                 {$_MENU_PAGES}
                             </ul>
                         </li>
                         {$_MENU_AFTER_PAGES}
-                        <li class="{if $_system_menu eq 'settings' || $_system_menu eq 'paymentgateway' }active{/if} treeview">
+                        <li
+                            class="{if $_system_menu eq 'settings' || $_system_menu eq 'paymentgateway' }active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-gear-a"></i> <span>{$_L['Settings']}</span>
                                 <span class="pull-right-container">
