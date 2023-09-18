@@ -24,14 +24,17 @@
                 <p class="text-muted">{Lang::nl2br($d['address'])}</p>
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>{$_L['Password']}</b> <span class="pull-right" style="background-color: black; color:black;"
-                            onclick="this.select()">{$d['password']}</span>
+                        <b>{$_L['Password']}</b> <input type="password" value="{$d['password']}"
+                            style=" border: 0px; text-align: right;" class="pull-right"
+                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                            onclick="this.select()">
                     </li>
                     {if $d['pppoe_password'] != ''}
                         <li class="list-group-item">
-                            <b>PPPOE {$_L['Password']}</b> <span class="pull-right"
-                                style="background-color: black; color:black;"
-                                onclick="this.select()">{$d['pppoe_password']}</span>
+                            <b>PPPOE {$_L['Password']}</b> <input type="password" value="{$d['pppoe_password']}"
+                            style=" border: 0px; text-align: right;" class="pull-right"
+                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                            onclick="this.select()">
                         </li>
                     {/if}
                     <li class="list-group-item">
@@ -87,21 +90,25 @@
                     <div class="row">
                         <div class="col-xs-4">
                             <a href="{$_url}customers/deactivate/{$d['id']}" id="{$d['id']}"
-                                class="btn btn-danger btn-block btn-sm" onclick="return confirm('This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
+                                class="btn btn-danger btn-block btn-sm"
+                                onclick="return confirm('This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
                         </div>
                         <div class="col-xs-4">
-                            <a href="{$_url}customers/recharge/{$d['id']}" onclick="return confirm('This will extend Customer plan, same as recharge')"
+                            <a href="{$_url}customers/recharge/{$d['id']}"
+                                onclick="return confirm('This will extend Customer plan, same as recharge')"
                                 class="btn btn-success btn-sm btn-block">{Lang::T('Recharge')}</a>
                         </div>
                         <div class="col-xs-4">
-                            <a href="{$_url}customers/sync/{$d['id']}" onclick="return confirm('This will sync Customer to Mikrotik?')"
+                            <a href="{$_url}customers/sync/{$d['id']}"
+                                onclick="return confirm('This will sync Customer to Mikrotik?')"
                                 class="btn btn-primary btn-sm btn-block">{Lang::T('Sync')}</a>
                         </div>
                     </div>
                 </div>
             </div>
         {else}
-        <a href="{$_url}prepaid/recharge/{$d['id']}" class="btn btn-success btn-sm btn-block mt-1">{Lang::T('Recharge')}</a><br>
+            <a href="{$_url}prepaid/recharge/{$d['id']}"
+                class="btn btn-success btn-sm btn-block mt-1">{Lang::T('Recharge')}</a><br>
         {/if}
         <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block mt-1">{Lang::T('Back')}</a><br>
     </div>
