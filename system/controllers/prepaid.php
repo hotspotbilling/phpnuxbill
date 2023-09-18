@@ -37,8 +37,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
 </script>
 EOT;
 
-require_once 'system/autoload/PEAR2/Autoload.php';
-
 switch ($action) {
     case 'sync':
         set_time_limit(-1);

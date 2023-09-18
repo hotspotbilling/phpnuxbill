@@ -102,11 +102,11 @@ try {
         }
     }
     if (!empty($radius_user)) {
-        ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'rad');
-        ORM::configure('username', $radius_user, 'rad');
-        ORM::configure('password', $radius_pass, 'rad');
-        ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'rad');
-        ORM::configure('return_result_sets', true, 'rad');
+        ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
+        ORM::configure('username', $radius_user, 'radius');
+        ORM::configure('password', $radius_pass, 'radius');
+        ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
+        ORM::configure('return_result_sets', true, 'radius');
     }
 } catch (Exception $e) {
     $ui = new Smarty();
