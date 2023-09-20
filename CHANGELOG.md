@@ -2,12 +2,13 @@
 
 # CHANGELOG
 
-## 2023.9.15
+## 2023.9.20
 
 - Fix Customer balance header
 - Deactivate Customer active plan
 - Sync Customer Plan to Mikrotik
 - Recharge Customer from Customer Details
+- Add Privacy Policy and Terms and Conditions Pages
 
 ## 2023.9.13
 

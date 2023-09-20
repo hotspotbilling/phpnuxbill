@@ -98,7 +98,7 @@
                                 <center>
                                     <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
                                     &bull;
-                                    <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                                    <a href="./pages/Terms_and_Conditions.html" target="_blank">T &amp; C</a>
                                 </center>
                             </div>
                         </div>
