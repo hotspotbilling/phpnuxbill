@@ -10,7 +10,7 @@
                     <a href="javascript:saveIt()" class="btn btn-primary btn-block">SAVE</a>
                     <br>
                     <p class="help-block">{$_L['Info_Page']}</p>
-                    <input type="text" class="form-control" onclick="this.select()" readonly value="{$app_url}/pages/{$pageHeader}.html">
+                    <input type="text" class="form-control" onclick="this.select()" readonly value="{$app_url}/pages/{$PageFile}.html">
                 </div>
             {else}
                 <div class="panel-footer">
@@ -20,7 +20,7 @@
         </div>
     </div>
 </div>
-<form id="formpages" class="hidden" method="post" role="form" action="{$_url}pages/{$pageHeader}-post" >
+<form id="formpages" class="hidden" method="post" role="form" action="{$_url}pages/{$PageFile}-post" >
     <textarea name="html" id="html"></textarea>
 </form>
 <script src="ui/ui/scripts/nicEdit.js"></script>
