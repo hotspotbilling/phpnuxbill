@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2023.9.21
+
+- Customer can extend Plan
+- Customer can Deactivate active plan
+- add variable nux-router to select  only plan from that router
+- Show user expired until 30 items
+
 ## 2023.9.20
 
 - Fix Customer balance header
