@@ -114,7 +114,7 @@
                     </tr>
                     <tr>
                         <td class="small text-danger text-uppercase text-normal">{$_L['Expires_On']}</td>
-                        <td class="small mb15">
+                        <td class="small mb15 text-danger">
                             {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
                         </td>
                     </tr>
