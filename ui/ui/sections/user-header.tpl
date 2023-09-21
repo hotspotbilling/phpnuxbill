@@ -61,7 +61,7 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 {if $_c['enable_balance'] == 'yes'}
-                                    <span style="color: whitesmoke;">{Lang::moneyFormat($_user['balance'])}</span>
+                                    <span style="color: whitesmoke;">&nbsp;{Lang::moneyFormat($_user['balance'])}&nbsp;</span>
                                 {else}
                                     <span>{$_user['fullname']}</span>
                                 {/if}
