@@ -134,7 +134,7 @@
                         <tr>
                             <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
                             <td class="small mb15" id="login_status">
-                                Loading....
+                            <img src="ui/ui/images/loading.gif">
                             </td>
                         </tr>
                     {/if}
