@@ -402,3 +402,4 @@ $_L['Activate'] = 'Activate';
 $_L['Deactivate'] = 'Deactivate';
 $_L['Sync'] = 'Sync';
 $_L['Failed_to_create_PaymeTrust_transaction'] = 'Failed to create PaymeTrust transaction.';
+$_L['Location'] = 'Location';

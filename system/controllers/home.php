@@ -90,6 +90,29 @@ if (_post('send') == 'balance') {
 $bill = User::_billing();
 $ui->assign('_bill', $bill);
 
+if(isset($_GET['deactivate']) && $_GET['deactivate'] == 1){
+    if ($bill) {
+        $mikrotik = Mikrotik::info($bill['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        if ($bill['type'] == 'Hotspot') {
+            Mikrotik::removeHotspotUser($client, $bill['username']);
+            Mikrotik::removeHotspotActiveUser($client, $bill['username']);
+        } else if ($bill['type'] == 'PPPOE') {
+            Mikrotik::removePpoeUser($client, $bill['username']);
+            Mikrotik::removePpoeActive($client, $bill['username']);
+        }
+        $bill->status = 'off';
+        $bill->expiration = date('Y-m-d');
+        $bill->time = date('H:i:s');
+        $bill->save();
+        _log('User ' . $bill['username'] . ' Deactivate '.$bill['namebp'], 'User', $bill['customer_id']);
+        Message::sendTelegram('User u' . $bill['username'] . ' Deactivate '.$bill['namebp']);
+        r2(U . 'home', 's', 'Success deactivate '.$bill['namebp']);
+    }else{
+        r2(U . 'home', 'e', 'No Active Plan');
+    }
+}
+
 if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
