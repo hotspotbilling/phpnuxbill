@@ -90,7 +90,19 @@ if (_post('send') == 'balance') {
 $bill = User::_billing();
 $ui->assign('_bill', $bill);
 
-if(isset($_GET['deactivate']) && $_GET['deactivate'] == 1){
+if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
+    $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
+    if ($config['enable_balance'] == 'yes') {
+        $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
+        if($user['balance']>$plan['price']){
+            r2(U . "order/pay/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+        }else{
+            r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+        }
+    }else{
+        r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+    }
+}else if(isset($_GET['deactivate']) && $_GET['deactivate'] == 1){
     if ($bill) {
         $mikrotik = Mikrotik::info($bill['routers']);
         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);

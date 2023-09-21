@@ -116,6 +116,8 @@
                         <td class="small text-danger text-uppercase text-normal">{$_L['Expires_On']}</td>
                         <td class="small mb15 text-danger">
                             {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
+                            <a class="label label-primary pull-right" href="{$_url}home&recharge=1"
+                                onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
                         </td>
                     </tr>
                     {if $nux_ip}
