@@ -6,13 +6,13 @@
             <div class="box-header">{Lang::T('Order Internet Package')}</div>
         </div>
         {if $_c['enable_balance'] == 'yes'}
-            <div class="box box-solid box-primary">
+            <div class="box box-solid box-success bg-gray-light">
                 <div class="box-header">{Lang::T('Balance Plans')}</div>
                 <div class="box-body row">
                     {foreach $plans_balance as $plan}
                         <div class="col col-md-4">
                             <div class="box box-solid box-default">
-                                <div class="box-header">{$plan['name_plan']}</div>
+                                <div class="box-header text-bold">{$plan['name_plan']}</div>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <tbody>
@@ -35,22 +35,22 @@
             </div>
         {/if}
         {foreach $routers as $router}
-            {if Validator::isRouterHasPlan($plans_hotspot, $router['name'])>0 && Validator::isRouterHasPlan($plans_pppoe, $router['name'])>0}
-                <div class="box box-solid box-info">
-                    <div class="box-header text-black">{$router['name']}</div>
+            {if Validator::isRouterHasPlan($plans_hotspot, $router['name']) || Validator::isRouterHasPlan($plans_pppoe, $router['name'])}
+                <div class="box box-solid box-info bg-gray-light">
+                    <div class="box-header text-black text-bold">{$router['name']}</div>
                     {if $router['description'] != ''}
                         <div class="box-body">
                             {$router['description']}
                         </div>
                     {/if}
                     {if Validator::countRouterPlan($plans_hotspot, $router['name'])>0}
-                        <div class="box-header">{Lang::T('Hotspot Plan')}</div>
+                        <div class="box-header text-black">{Lang::T('Hotspot Plan')}</div>
                         <div class="box-body row">
                             {foreach $plans_hotspot as $plan}
                                 {if $router['name'] eq $plan['routers']}
                                     <div class="col col-md-4">
-                                        <div class="box box-solid box-default">
-                                            <div class="box-header">{$plan['name_plan']}</div>
+                                        <div class="box box-primary">
+                                            <div class="box-header text-bold">{$plan['name_plan']}</div>
                                             <div class="table-responsive">
                                                 <table class="table table-bordered table-striped">
                                                     <tbody>
@@ -93,13 +93,13 @@
                         </div>
                     {/if}
                     {if Validator::countRouterPlan($plans_pppoe,$router['name'])>0}
-                        <div class="box-header text-sm">{Lang::T('PPPOE Plan')}</div>
+                        <div class="box-header text-black">{Lang::T('PPPOE Plan')}</div>
                         <div class="box-body row">
                             {foreach $plans_pppoe as $plan}
                                 {if $router['name'] eq $plan['routers']}
                                     <div class="col col-md-4">
-                                        <div class="box box-solid box-default">
-                                            <div class="box-header">{$plan['name_plan']}</div>
+                                        <div class="box box- box-primary">
+                                            <div class="box-header text-bold">{$plan['name_plan']}</div>
                                             <div class="table-responsive">
                                                 <table class="table table-bordered table-striped">
                                                     <tbody>
