@@ -56,7 +56,11 @@ class Lang
     }
 
     public static function arrayCount($arr){
-        return count($arr);
+        if(is_array($arr)){
+            return count($arr);
+        }else{
+            return 0;
+        }
     }
 
     public static function getNotifText($key){
