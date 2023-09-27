@@ -75,6 +75,8 @@ switch ($action) {
             $b->expiration = date('Y-m-d');
             $b->time = date('H:i:s');
             $b->save();
+            _log('Admin ' . $admin['username'] . ' Deactivate '.$b['namebp'].' for '.$b['username'], 'User', $b['customer_id']);
+            Message::sendTelegram('Admin ' . $admin['username'] . ' Deactivate '.$b['namebp'].' for u'.$b['username']);
             r2(U . 'customers/view/' . $id_customer, 's', 'Success deactivate customer to Mikrotik');
         }
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');

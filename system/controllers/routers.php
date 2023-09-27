@@ -70,7 +70,7 @@ switch ($action) {
         $username = _post('username');
         $password = _post('password');
         $description = _post('description');
-        $enabled = _post('enabled')*1;
+        $enabled = _post('enabled');
 
         $msg = '';
         if(Validator::Length($name,30,4) == false){
@@ -113,7 +113,7 @@ switch ($action) {
         $username = _post('username');
         $password = _post('password');
         $description = _post('description');
-        $enabled = $_POST['enabled']*1;
+        $enabled = $_POST['enabled'];
         $msg = '';
         if(Validator::Length($name,30,4) == false){
             $msg .= 'Name should be between 5 to 30 characters'. '<br>';

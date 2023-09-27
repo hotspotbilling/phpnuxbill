@@ -225,8 +225,8 @@
                                     href="{$_url}pages/Registration_Info">{$_L['Registration_Info']}</a></li>
                                 <li {if $_routes[1] eq 'Privacy_Policy'}class="active" {/if}><a
                                     href="{$_url}pages/Privacy_Policy">Privacy Policy</a></li>
-                                <li {if $_routes[1] eq 'Terms_of_Conditions'}class="active" {/if}><a
-                                        href="{$_url}pages/Terms_of_Conditions">Terms and Conditions</a></li>
+                                <li {if $_routes[1] eq 'Terms_and_Conditions'}class="active" {/if}><a
+                                        href="{$_url}pages/Terms_and_Conditions">Terms and Conditions</a></li>
                                 {$_MENU_PAGES}
                             </ul>
                         </li>

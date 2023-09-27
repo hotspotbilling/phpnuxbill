@@ -15,7 +15,14 @@ if(strpos($action,"-post")===false){
     //echo $path;
     run_hook('view_edit_pages'); #HOOK
     if(!file_exists($path)){
-        touch($path);
+        $temp = "pages_template/".str_replace(".","",$action).".html";
+        if(file_exists($temp)){
+            if(!copy($temp, $path)){
+                touch($path);
+            }
+        }else{
+            touch($path);
+        }
     }
     if(file_exists($path)){
         $html = file_get_contents($path);

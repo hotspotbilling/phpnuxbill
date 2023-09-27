@@ -105,3 +105,29 @@ $(function() {
 		}
     });
 });
+
+
+function showPrivacy() {
+    $('#HTMLModal_title').html('Privacy Policy');
+    $('#HTMLModal_konten').html('<center><img src="ui/ui/images/loading.gif"></center>');
+    $('#HTMLModal').modal({
+        'show': true,
+        'backdrop': false,
+    });
+    $.get('pages/Privacy_Policy.html?' + (new Date()), function(data) {
+        $('#HTMLModal_konten').html(data);
+    });
+}
+
+function showTaC() {
+    $('#HTMLModal_title').html('Terms and Conditions');
+    $('#HTMLModal_konten').html('<center><img src="ui/ui/images/loading.gif"></center>');
+    $('#HTMLModal').modal({
+        'show': true,
+        'backdrop': false,
+    });
+    $.get('pages/Terms_and_Conditions.html?' + (new Date()), function(data) {
+        $('#HTMLModal_konten').html(data);
+        $('#HTMLModal').modal('handleUpdate')
+    });
+}

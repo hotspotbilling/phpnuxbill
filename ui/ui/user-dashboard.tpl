@@ -70,9 +70,8 @@
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{$_L['Password']}</td>
                     <td class="small mb15"><input type="password" value="{$_user['password']}"
-                            style="width:100%; border: 0px;"
-                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
-                            onclick="this.select()"></td>
+                            style="width:100%; border: 0px;" onmouseleave="this.type = 'password'"
+                            onmouseenter="this.type = 'text'" onclick="this.select()"></td>
                 </tr>
                 {if $_c['enable_balance'] == 'yes'}
                     <tr>
@@ -89,41 +88,58 @@
                         </td>
                     </tr>
                 {/if}
-                <tr>
-                    <td class="small text-primary text-uppercase text-normal">{$_L['Plan_Name']}</td>
-                    <td class="small mb15">{$_bill['namebp']}</td>
-                </tr>
-                <tr>
-                    <td class="small text-info text-uppercase text-normal">{$_L['Created_On']}</td>
-                    <td class="small mb15">
-                        {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['recharged_on'],$_bill['recharged_time'])}
-                        {/if}&nbsp;</td>
-                </tr>
-                <tr>
-                    <td class="small text-danger text-uppercase text-normal">{$_L['Expires_On']}</td>
-                    <td class="small mb15">
-                        {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
-                    </td>
-                </tr>
-                {if $nux_ip}
+                {if $_bill}
                     <tr>
-                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
-                        <td class="small mb15">{$nux_ip}</td>
+                        <td class="small text-primary text-uppercase text-normal">{strtoupper(Lang::T('Location'))}</td>
+                        <td class="small mb15">{$_bill['routers']}</td>
                     </tr>
-                {/if}
-                {if $nux_mac}
                     <tr>
-                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
-                        <td class="small mb15">{$nux_mac}</td>
-                    </tr>
-                {/if}
-                {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
-                    <tr>
-                        <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
-                        <td class="small mb15" id="login_status">
-                            Loading....
+                        <td class="small text-primary text-uppercase text-normal">{$_L['Plan_Name']}</td>
+                        <td class="small mb15">
+                            {$_bill['namebp']}
+                            {if $_bill['status'] == 'on'}
+                                <a class="label label-danger pull-right" href="{$_url}home&deactivate=1"
+                                    onclick="return confirm('{Lang::T('Deactivate')}?')">{Lang::T('Deactivate')}</a>
+                            {else}
+                                <a class="label label-warning pull-right" href="{$_url}order/package"
+                                >{Lang::T('expired')}</a>
+                            {/if}
                         </td>
                     </tr>
+                    <tr>
+                        <td class="small text-info text-uppercase text-normal">{$_L['Created_On']}</td>
+                        <td class="small mb15">
+                            {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['recharged_on'],$_bill['recharged_time'])}
+                            {/if}&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="small text-danger text-uppercase text-normal">{$_L['Expires_On']}</td>
+                        <td class="small mb15 text-danger">
+                            {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
+                            <a class="label label-primary pull-right" href="{$_url}home&recharge=1"
+                                onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
+                        </td>
+                    </tr>
+                    {if $nux_ip}
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
+                            <td class="small mb15">{$nux_ip}</td>
+                        </tr>
+                    {/if}
+                    {if $nux_mac}
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
+                            <td class="small mb15">{$nux_mac}</td>
+                        </tr>
+                    {/if}
+                    {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
+                            <td class="small mb15" id="login_status">
+                            <img src="ui/ui/images/loading.gif">
+                            </td>
+                        </tr>
+                    {/if}
                 {/if}
             </table>
             {if $_c['disable_voucher'] == 'yes'}

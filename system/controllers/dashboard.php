@@ -50,7 +50,7 @@ if (empty($c_all)) {
 $ui->assign('c_all', $c_all);
 
 //user expire
-$expire = ORM::for_table('tbl_user_recharges')->where('expiration', $mdate)->order_by_desc('id')->find_many();
+$expire = ORM::for_table('tbl_user_recharges')->whereLte('expiration', $mdate)->order_by_desc('id')->limit(30)->find_many();
 $ui->assign('expire', $expire);
 
 //activity log

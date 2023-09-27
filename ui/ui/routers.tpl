@@ -31,6 +31,7 @@
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>{$_L['Router_Name']}</th>
                                 <th>{$_L['IP_Address']}</th>
                                 <th>{$_L['Username']}</th>
@@ -42,6 +43,7 @@
                         <tbody>
                             {foreach $d as $ds}
                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled" {/if}>
+                                    <td>{$ds['id']}</td>
                                     <td>{$ds['name']}</td>
                                     <td>{$ds['ip_address']}</td>
                                     <td>{$ds['username']}</td>
@@ -50,7 +52,9 @@
                                     <td>
                                         <a href="{$_url}routers/edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{$_L['Edit']}</a>
-                                        <a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}" onclick="return confirm('{$_L['Delete']}?')" class="btn btn-danger btn-xs">{$_L['Delete']}</a>
+                                        <a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}"
+                                            onclick="return confirm('{$_L['Delete']}?')"
+                                            class="btn btn-danger btn-xs">{$_L['Delete']}</a>
                                     </td>
                                 </tr>
                             {/foreach}

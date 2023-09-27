@@ -4,9 +4,9 @@
             <footer class="main-footer">
                 {$_c['CompanyFooter']}
                 <div class="pull-right">
-                    <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
+                    <a href="javascript:showPrivacy()">Privacy</a>
                     &bull;
-                    <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                    <a href="javascript:showTaC()">T &amp; C</a>
                 </div>
             </footer>
         {else}
@@ -14,21 +14,40 @@
                 PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener"
                     target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener"
                     target="_blank">AdminLTE</a>
-                    <div class="pull-right">
-                        <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
-                        &bull;
-                        <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
-                    </div>
+                <div class="pull-right">
+                    <a href="javascript:showPrivacy()">Privacy</a>
+                    &bull;
+                    <a href="javascript:showTaC()">T &amp; C</a>
+                </div>
             </footer>
         {/if}
         </div>
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="HTMLModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body" id="HTMLModal_konten"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
 
         <script src="ui/ui/scripts/jquery.min.js"></script>
         <script src="ui/ui/scripts/bootstrap.min.js"></script>
         <script src="ui/ui/scripts/adminlte.min.js"></script>
 
         <script src="ui/ui/scripts/plugins/select2.min.js"></script>
-        <script src="ui/ui/scripts/custom.js"></script>
+        <script src="ui/ui/scripts/custom.js?v=2"></script>
 
         {if isset($xfooter)}
             {$xfooter}

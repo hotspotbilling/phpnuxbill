@@ -258,10 +258,10 @@ switch ($action) {
         break;
 
     case 'print-voucher':
-        $from_id = _post('from_id') * 1;
-        $planid = _post('planid') * 1;
-        $pagebreak = _post('pagebreak') * 1;
-        $limit = _post('limit') * 1;
+        $from_id = _post('from_id');
+        $planid = _post('planid');
+        $pagebreak = _post('pagebreak');
+        $limit = _post('limit');
 
         if ($pagebreak < 1) $pagebreak = 6;
 
