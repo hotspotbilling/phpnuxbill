@@ -18,7 +18,9 @@ class Http
         curl_setopt($ch, CURLOPT_POST, 0);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        if(is_array($headers) && count($headers)>0){
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         if (!empty($http_proxy)) {
             curl_setopt($ch, CURLOPT_PROXY, $http_proxy);
@@ -55,7 +57,9 @@ class Http
             }
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($array_post));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        if(is_array($headers) && count($headers)>0){
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
         if (!empty($basic)) {
             curl_setopt($ch, CURLOPT_USERPWD, $basic);
         }
@@ -90,7 +94,9 @@ class Http
             }
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($array_post));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        if(is_array($headers) && count($headers)>0){
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
         if (!empty($basic)) {
             curl_setopt($ch, CURLOPT_USERPWD, $basic);
         }

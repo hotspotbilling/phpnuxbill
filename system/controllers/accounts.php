@@ -140,5 +140,5 @@ switch ($action) {
         break;
 
     default:
-        echo 'action not defined';
+        $ui->display('a404.tpl');
 }

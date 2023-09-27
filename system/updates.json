@@ -21,5 +21,9 @@
     "2023.9.5" : [
         "DROP TABLE `tbl_language`;",
         "ALTER TABLE `tbl_plans` ADD `pool_expired`  varchar(40) NOT NULL DEFAULT '' AFTER `pool`;"
+    ],
+    "2023.9.27" : [
+        "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+        "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
     ]
 }

@@ -163,6 +163,8 @@
                                         href="{$_url}services/hotspot">{$_L['Hotspot_Plans']}</a></li>
                                 <li {if $_routes[1] eq 'pppoe'}class="active" {/if}><a
                                         href="{$_url}services/pppoe">{$_L['PPPOE_Plans']}</a></li>
+                                <li {if $_routes[1] eq 'radius'}class="active" {/if}><a
+                                        href="{$_url}services/radius">{Lang::T('Radius Plans')}</a></li>
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}bandwidth/list">{$_L['Bandwidth_Plans']}</a></li>
                                 <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
@@ -199,8 +201,8 @@
                             <ul class="treeview-menu">
                                 <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}routers/list">{$_L['Routers']}</a></li>
-                                <li {if $_routes[1] eq 'nas-list' and $_routes[1] eq 'list'}class="active" {/if}><a
-                                    href="{$_url}radius/nas-list">Radius NAS</a></li>
+                                <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list'}class="active" {/if}><a
+                                        href="{$_url}radius/nas-list">Radius NAS</a></li>
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}pool/list">{$_L['Pool']}</a></li>
                                 {$_MENU_NETWORK}
@@ -222,9 +224,9 @@
                                 <li {if $_routes[1] eq 'Announcement'}class="active" {/if}><a
                                         href="{$_url}pages/Announcement">{$_L['Announcement']}</a></li>
                                 <li {if $_routes[1] eq 'Registration_Info'}class="active" {/if}><a
-                                    href="{$_url}pages/Registration_Info">{$_L['Registration_Info']}</a></li>
+                                        href="{$_url}pages/Registration_Info">{$_L['Registration_Info']}</a></li>
                                 <li {if $_routes[1] eq 'Privacy_Policy'}class="active" {/if}><a
-                                    href="{$_url}pages/Privacy_Policy">Privacy Policy</a></li>
+                                        href="{$_url}pages/Privacy_Policy">Privacy Policy</a></li>
                                 <li {if $_routes[1] eq 'Terms_and_Conditions'}class="active" {/if}><a
                                         href="{$_url}pages/Terms_and_Conditions">Terms and Conditions</a></li>
                                 {$_MENU_PAGES}

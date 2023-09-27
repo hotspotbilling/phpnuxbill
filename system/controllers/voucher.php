@@ -54,5 +54,5 @@ switch ($action) {
         break;
 
     default:
-        $ui->display('404.tpl');
+        $ui->display('a404.tpl');
 }

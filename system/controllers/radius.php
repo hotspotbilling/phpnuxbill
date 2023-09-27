@@ -25,10 +25,12 @@ switch ($action) {
         $nas = ORM::for_table('nas', 'radius')->find_many();
         $ui->assign('nas', $nas);
         $ui->display('radius-nas.tpl');
+        break;
     case 'nas-add':
         $ui->assign('_system_menu', 'network');
         $ui->assign('_title', "Network Access Server");
         $ui->display('radius-nas-add.tpl');
+        break;
     case 'nas-add-post':
         $shortname = _post('shortname');
         $nasname = _post('nasname');
@@ -79,6 +81,7 @@ switch ($action) {
         }else{
             r2(U . 'radius/nas-add', 'e', $msg);
         }
+        break;
     default:
         $ui->display('a404.tpl');
 }
