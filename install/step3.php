@@ -58,6 +58,11 @@
 						<input type="text" class="form-control" id="dbname" name="dbname">
 					</div>
 
+                    <div class="form-group">
+						<label for="dbname"><input type="checkbox" class="form-control" id="radius" name="radius" value="yes"> Install Radius Table?</label>
+
+					</div>
+
 					<button type="submit" class="btn btn-primary">Submit</button>
 				</fieldset>
 			</form>
