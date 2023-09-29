@@ -75,7 +75,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label text-muted">Enable Radius</label>
                         <div class="col-md-6">
-                            <select name="radius_enable" id="radius_enable" class="form-control text-muted">
+                            <select name="radius_enable" id="radius_enable" class="form-control text-muted" onchange="alert('still not worked yet :)\nbut you can see any feature on development')">
                                 <option value="no">No</option>
                                 <option value="yes" {if $_c['radius_enable']}selected="selected" {/if}>Yes</option>
                             </select>

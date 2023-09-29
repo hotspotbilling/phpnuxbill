@@ -20,8 +20,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Type']}</label>
                         <div class="col-md-6">
-                            <input type="radio" id="Hot" name="type" value="Hotspot"> {$_L['Hotspot_Plans']}
-                            <input type="radio" id="POE" name="type" value="PPPOE"> {$_L['PPPOE_Plans']}
+                            <label><input type="radio" id="Hot" name="type" value="Hotspot"> {$_L['Hotspot_Plans']}</label>
+                            <label><input type="radio" id="POE" name="type" value="PPPOE"> {$_L['PPPOE_Plans']}</label>
                         </div>
                     </div>
                     <div class="form-group">
