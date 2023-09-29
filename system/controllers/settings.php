@@ -233,7 +233,7 @@ switch ($action) {
         $tawkto = _post('tawkto');
         $http_proxy = _post('http_proxy');
         $http_proxyauth = _post('http_proxyauth');
-        $radius_mode = _post('radius_mode') * 1;
+        $radius_enable = _post('radius_enable');
         run_hook('save_settings'); #HOOK
 
 
@@ -424,14 +424,14 @@ switch ($action) {
                 $d->save();
             }
 
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_mode')->find_one();
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_enable')->find_one();
             if ($d) {
-                $d->value = $radius_mode;
+                $d->value = $radius_enable;
                 $d->save();
             } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'radius_mode';
-                $d->value = $radius_mode;
+                $d->setting = 'radius_enable';
+                $d->value = $radius_enable;
                 $d->save();
             }
 

@@ -53,25 +53,6 @@
                             <input type="text" class="form-control" id="phone" name="phone" value="{$_c['phone']}">
                         </div>
                     </div>
-                    <div class="form-group hidden">
-                        <label class="col-md-2 control-label">Radius Mode?</label>
-                        <div class="col-md-6">
-                            <select name="radius_mode" id="radius_mode" class="form-control">
-                                <option value="0">No</option>
-                                <option value="1" {if $_c['radius_mode']}selected="selected" {/if}>Yes</option>
-                            </select>
-                        </div>
-                        <p class="help-block col-md-4">Still on Testing.<br>
-                            Changing from Radius will not add existing user to Mikrotik Hotspot.<br>
-                            With Radius user can use Hotspot or PPOE.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-2 control-label">APP URL</label>
-                        <div class="col-md-6">
-                            <input type="text" readonly class="form-control" value="{$app_url}">
-                        </div>
-                        <p class="help-block col-md-4">edit at config.php</p>
-                    </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>
                         <div class="col-md-6">
@@ -83,6 +64,23 @@
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Voucher activation menu will be hidden')}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">APP URL</label>
+                        <div class="col-md-6">
+                            <input type="text" readonly class="form-control" value="{$app_url}">
+                        </div>
+                        <p class="help-block col-md-4">edit at config.php</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label text-muted">Enable Radius</label>
+                        <div class="col-md-6">
+                            <select name="radius_enable" id="radius_enable" class="form-control text-muted">
+                                <option value="no">No</option>
+                                <option value="yes" {if $_c['radius_enable']}selected="selected" {/if}>Yes</option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4 text-red">Radius Not Yet Ready</p>
                     </div>
                 </div>
                 <div class="panel-heading">
