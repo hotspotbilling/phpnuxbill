@@ -14,7 +14,7 @@
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
                                 </div>
-                                <input type="text" name="name" class="form-control"
+                                <input type="text" name="name" class="form-control" value="{$name}"
                                     placeholder="{$_L['Search_by_Name']}...">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit">{$_L['Search']}</button>
@@ -31,7 +31,7 @@
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>ID</th>
                                 <th>Name</th>
                                 <th>IP</th>
                                 <th>Type</th>
@@ -42,10 +42,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {$no = 1}
                             {foreach $nas as $ds}
                                 <tr>
-                                    <td align="center">{$no++}</td>
+                                    <td align="center">{$ds['id']}</td>
                                     <td>{$ds['shortname']}</td>
                                     <td>{$ds['nasname']}</td>
                                     <td>{$ds['type']}</td>

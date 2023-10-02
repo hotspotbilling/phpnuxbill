@@ -57,7 +57,15 @@
                                     <td>{$ds['time_limit']} {$ds['time_unit']}</td>
                                     <td>{$ds['data_limit']} {$ds['data_unit']}</td>
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
-                                    <td>{$ds['routers']}</td>
+                                    <td>
+                                        {if $ds['is_radius']==1}
+                                            <span class="label label-primary">RADIUS</span>
+                                        {else}
+                                            {if $ds['routers']!=''}
+                                                <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
+                                            {/if}
+                                        {/if}
+                                    </td>
                                     <td>{$ds['pool_expired']}</td>
                                     <td>
                                         <a href="{$_url}services/edit/{$ds['id']}"

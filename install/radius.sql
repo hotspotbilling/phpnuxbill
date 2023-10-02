@@ -1,4 +1,3 @@
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
 CREATE TABLE `nas` (
   `id` int(10) NOT NULL,

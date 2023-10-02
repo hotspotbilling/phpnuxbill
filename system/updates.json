@@ -25,5 +25,12 @@
     "2023.9.27" : [
         "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
         "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+    ],
+    "2023.9.28" : [
+        "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+        "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+    ],
+    "2023.10.1" : [
+        "ALTER TABLE `tbl_plans` ADD `is_radius` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '1 is radius' AFTER `routers`; "
     ]
 }
