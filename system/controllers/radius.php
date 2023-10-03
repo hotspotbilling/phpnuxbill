@@ -55,17 +55,7 @@ switch ($action) {
             $msg .= 'NAS IP Exists<br>';
         }
         if ($msg == '') {
-            $b = ORM::for_table('nas', 'radius')->create();
-            $b->nasname = $nasname;
-            $b->shortname = $shortname;
-            $b->secret = $secret;
-            $b->ports = $ports;
-            $b->type = $type;
-            $b->server = $server;
-            $b->community = $community;
-            $b->description = $description;
-            $b->save();
-            $id = $b->id();
+            $id = Radius::addNas($shortname, $nasname, $ports, $secret, $description, $type, $server, $community);
             if ($id > 0) {
                 r2(U . 'radius/nas-edit/' . $id, 's', "NAS Added");
             } else {
@@ -119,10 +109,6 @@ switch ($action) {
         if (empty($type)) {
             $type = null;
         }
-        $d = ORM::for_table('nas', 'radius')->find_one($id);
-        if (!$d) {
-            $msg .= 'NAS NOT Exists<br>';
-        }
         if ($msg == '') {
             $d->nasname = $nasname;
             $d->shortname = $shortname;
@@ -133,7 +119,11 @@ switch ($action) {
             $d->community = $community;
             $d->description = $description;
             $d->save();
-            r2(U . 'radius/nas-edit/' . $id, 's', "NAS Saved");
+            if (Radius::updateNas($id, $shortname, $nasname, $ports, $secret, $description, $type, $server, $community)) {
+                r2(U . 'radius/nas-edit/' . $id, 's', "NAS Saved");
+            } else {
+                r2(U . 'radius/nas-add', 'e', 'NAS NOT Exists');
+            }
         } else {
             r2(U . 'radius/nas-add', 'e', $msg);
         }
