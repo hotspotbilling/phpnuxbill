@@ -165,13 +165,13 @@ switch ($action) {
             if ($c) {
                 $mikrotik = Mikrotik::info($c['routers']);
                 if ($c['type'] == 'Hotspot') {
-                    if (!$config['radius_mode']) {
+                    if (!$config['radius_enable']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removeHotspotUser($client, $d['username']);
                         Mikrotik::removeHotspotActiveUser($client, $d['username']);
                     }
                 } else {
-                    if (!$config['radius_mode']) {
+                    if (!$config['radius_enable']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removePpoeUser($client, $d['username']);
                         Mikrotik::removePpoeActive($client, $d['username']);
@@ -284,7 +284,7 @@ switch ($action) {
             if ($c) {
                 $mikrotik = Mikrotik::info($c['routers']);
                 if ($c['type'] == 'Hotspot') {
-                    if (!$config['radius_mode']) {
+                    if (!$config['radius_enable']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::setHotspotUser($client, $c['username'], $password);
                         Mikrotik::removeHotspotActiveUser($client, $user['username']);
@@ -293,7 +293,7 @@ switch ($action) {
                     $d->password = $password;
                     $d->save();
                 } else {
-                    if (!$config['radius_mode']) {
+                    if (!$config['radius_enable']) {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         if (!empty($d['pppoe_password'])) {
                             Mikrotik::setPpoeUser($client, $c['username'], $d['pppoe_password']);

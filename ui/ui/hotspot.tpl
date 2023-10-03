@@ -58,7 +58,7 @@
                                     <td>{$ds['data_limit']} {$ds['data_unit']}</td>
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                     <td>
-                                        {if $ds['is_radius']==1}
+                                        {if $ds['is_radius']}
                                             <span class="label label-primary">RADIUS</span>
                                         {else}
                                             {if $ds['routers']!=''}

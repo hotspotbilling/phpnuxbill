@@ -89,9 +89,7 @@ switch ($action) {
             $msg .= $_L['Router_already_exist'] . '<br>';
         }
 
-        if (!$config['radius_mode']) {
-            Mikrotik::getClient($ip_address, $username, $password);
-        }
+        Mikrotik::getClient($ip_address, $username, $password);
 
         if ($msg == '') {
             run_hook('add_router'); #HOOK
@@ -149,9 +147,7 @@ switch ($action) {
         }
 
 
-        if (!$config['radius_mode']) {
-            Mikrotik::getClient($ip_address, $username, $password);
-        }
+        Mikrotik::getClient($ip_address, $username, $password);
 
 
         if ($msg == '') {

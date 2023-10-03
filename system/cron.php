@@ -92,7 +92,7 @@ foreach ($d as $ds) {
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
-            if (!$_c['radius_mode']) {
+            if (!$_c['radius_enable']) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 if(!empty($p['pool_expired'])){
                     Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);
@@ -139,7 +139,7 @@ foreach ($d as $ds) {
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
-            if (!$_c['radius_mode']) {
+            if (!$_c['radius_enable']) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 if(!empty($p['pool_expired'])){
                     Mikrotik::setPpoeUserPlan($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);

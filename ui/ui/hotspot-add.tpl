@@ -17,7 +17,7 @@
                             </label>
                         </div>
                     </div>
-                    {if $_c['radius_enable'] == 'yes'}
+                    {if $_c['radius_enable']}
                         <div class="form-group">
                             <label class="col-md-2 control-label">Radius</label>
                             <div class="col-md-10">
@@ -167,10 +167,19 @@
 
 {literal}
     <script>
-    function isRadius(cek){
-        if(cek.checked){
+    function isRadius(cek) {
+        if (cek.checked) {
             $("#routerChoose").addClass('hidden');
-        }else{
+            document.getElementById("routers").required = false;
+            document.getElementById("Limited").disabled = true;
+            document.getElementById("Unlimited").checked = true;
+            document.getElementById("Limited").checked = false;
+            $('#Type').hide();
+            $('#TimeLimit').hide();
+            $('#DataLimit').hide();
+        } else {
+            document.getElementById("Limited").disabled = false;
+            document.getElementById("routers").required = true;
             $("#routerChoose").removeClass('hidden');
         }
     }

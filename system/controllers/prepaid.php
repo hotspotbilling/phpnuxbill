@@ -167,7 +167,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
             if ($d['type'] == 'Hotspot') {
-                if (!$config['radius_mode']) {
+                if (!$config['radius_enable']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $d['username']);
                     Mikrotik::removeHotspotActiveUser($client, $d['username']);
@@ -175,7 +175,7 @@ switch ($action) {
 
                 $d->delete();
             } else {
-                if (!$config['radius_mode']) {
+                if (!$config['radius_enable']) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePpoeUser($client, $d['username']);
                     Mikrotik::removePpoeActive($client, $d['username']);

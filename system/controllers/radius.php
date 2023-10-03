@@ -55,9 +55,9 @@ switch ($action) {
             $msg .= 'NAS IP Exists<br>';
         }
         if ($msg == '') {
-            $id = Radius::addNas($shortname, $nasname, $ports, $secret, $description, $type, $server, $community);
+            $id = Radius::nasAdd($shortname, $nasname, $ports, $secret, $description, $type, $server, $community);
             if ($id > 0) {
-                r2(U . 'radius/nas-edit/' . $id, 's', "NAS Added");
+                r2(U . 'radius/nas-list/', 's', "NAS Added");
             } else {
                 r2(U . 'radius/nas-add/', 'e', "NAS Added Failed");
             }
@@ -110,17 +110,8 @@ switch ($action) {
             $type = null;
         }
         if ($msg == '') {
-            $d->nasname = $nasname;
-            $d->shortname = $shortname;
-            $d->secret = $secret;
-            $d->ports = $ports;
-            $d->type = $type;
-            $d->server = $server;
-            $d->community = $community;
-            $d->description = $description;
-            $d->save();
-            if (Radius::updateNas($id, $shortname, $nasname, $ports, $secret, $description, $type, $server, $community)) {
-                r2(U . 'radius/nas-edit/' . $id, 's', "NAS Saved");
+            if (Radius::nasUpdate($id, $shortname, $nasname, $ports, $secret, $description, $type, $server, $community)) {
+                r2(U . 'radius/list/', 's', "NAS Saved");
             } else {
                 r2(U . 'radius/nas-add', 'e', 'NAS NOT Exists');
             }
@@ -141,13 +132,9 @@ switch ($action) {
         $ui->assign('_title', "Network Access Server");
         $name = _post('name');
         if (empty($name)) {
-            $nas = ORM::for_table('nas', 'radius')->find_many();
+            $nas = Radius::nasList();
         } else {
-            $nas = ORM::for_table('nas', 'radius')
-                ->where_like('nasname', $name)
-                ->where_like('shortname', $name)
-                ->where_like('description', $name)
-                ->find_many();
+            $nas = Radius::nasList($name);
         }
         $ui->assign('name', $name);
         $ui->assign('nas', $nas);
