@@ -16,7 +16,12 @@ $ui->assign('_admin', $admin);
 switch ($action) {
     case 'pool':
         $routers = _get('routers');
-        $d = ORM::for_table('tbl_pool')->where('routers', $routers)->find_many();
+        if(empty($routers)){
+            $d = ORM::for_table('tbl_pool')->find_many();
+        }else{
+            $d = ORM::for_table('tbl_pool')->where('routers', $routers)->find_many();
+        }
+        $ui->assign('routers', $routers);
         $ui->assign('d', $d);
         $ui->display('autoload-pool.tpl');
         break;
