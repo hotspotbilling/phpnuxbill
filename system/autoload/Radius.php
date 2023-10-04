@@ -105,24 +105,30 @@ class Radius
     public static function planUpdate($plan_id, $plan_name, $rate, $pool = null)
     {
         $rates = explode('/', $rate);
-        $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Ascend-Data-Rate')->findOne();
-        $r->groupname = $plan_name;
-        $r->value = $rates[1];
-        if ($r->save()) {
-            $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Ascend-Xmit-Rate')->findOne();
+        if(Radius::getTablePackage()->where_equal('plan_id', $plan_id)->find_one()){
+            $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Ascend-Data-Rate')->findOne();
             $r->groupname = $plan_name;
-            $r->value = $rates[0];
+            $r->value = $rates[1];
             if ($r->save()) {
-                if ($pool != null) {
-                    $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Framed-Pool')->findOne();
-                    $r->groupname = $plan_name;
-                    $r->value = $pool;
-                    if ($r->save()) {
+                $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Ascend-Xmit-Rate')->findOne();
+                $r->groupname = $plan_name;
+                $r->value = $rates[0];
+                if ($r->save()) {
+                    if ($pool != null) {
+                        $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Framed-Pool')->findOne();
+                        $r->groupname = $plan_name;
+                        $r->value = $pool;
+                        if ($r->save()) {
+                            return true;
+                        }
+                    } else {
                         return true;
                     }
-                } else {
-                    return true;
                 }
+            }
+        }else{
+            if(!empty($plan_id)){
+                return Radius::planAdd($plan_id, $plan_name, $rate, $pool);
             }
         }
         return false;

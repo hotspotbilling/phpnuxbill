@@ -54,7 +54,14 @@
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                     <td>{$ds['pool']}</td>
                                     <td>{$ds['pool_expired']}</td>
-                                    <td>{$ds['routers']}</td>
+                                    <td>
+                                    {if $ds['is_radius']}
+                                        <span class="label label-primary">RADIUS</span>
+                                    {else}
+                                        {if $ds['routers']!=''}
+                                            <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
+                                        {/if}
+                                    {/if}</td>
                                     <td>
                                         <a href="{$_url}services/pppoe-edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{$_L['Edit']}</a>

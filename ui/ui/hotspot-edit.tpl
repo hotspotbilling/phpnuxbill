@@ -39,8 +39,9 @@
                         <div class="col-md-10">
                             <input type="radio" id="Unlimited" name="typebp" value="Unlimited"
                                 {if $d['typebp'] eq 'Unlimited'} checked {/if}> {$_L['Unlimited']}
-                                <input type="radio" id="Limited" {if $_c['radius_enable'] and $d['is_radius']}disabled{/if} name="typebp" value="Limited"
-                                {if $d['typebp'] eq 'Limited'} checked {/if}> {$_L['Limited']}
+                            <input type="radio" id="Limited" {if $_c['radius_enable'] and $d['is_radius']}disabled{/if}
+                                name="typebp" value="Limited" {if $d['typebp'] eq 'Limited'} checked {/if}>
+                            {$_L['Limited']}
                         </div>
                     </div>
                     <div {if $d['typebp'] eq 'Unlimited'} style="display:none;" {/if} id="Type">
@@ -176,19 +177,21 @@
     </div>
 </div>
 
-{literal}
-    <script>
-        function isRadius(cek) {
-            if (cek.checked) {
-                $("#routerChoose").addClass('hidden');
-                document.getElementById("routers").required = false;
-                document.getElementById("Limited").disabled = true;
-            } else {
-                document.getElementById("Limited").disabled = false;
-                document.getElementById("routers").required = true;
-                $("#routerChoose").removeClass('hidden');
+{if $_c['radius_enable']}
+    {literal}
+        <script>
+            function isRadius(cek) {
+                if (cek.checked) {
+                    $("#routerChoose").addClass('hidden');
+                    document.getElementById("routers").required = false;
+                    document.getElementById("Limited").disabled = true;
+                } else {
+                    document.getElementById("Limited").disabled = false;
+                    document.getElementById("routers").required = true;
+                    $("#routerChoose").removeClass('hidden');
+                }
             }
-        }
-    </script>
-{/literal}
+        </script>
+    {/literal}
+{/if}
 {include file="sections/footer.tpl"}

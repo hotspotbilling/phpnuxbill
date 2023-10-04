@@ -20,11 +20,12 @@
                     {if $_c['radius_enable']}
                         <div class="form-group">
                             <label class="col-md-2 control-label">Radius</label>
-                            <div class="col-md-10">
+                            <div class="col-md-6">
                                 <label class="radio-inline">
                                     <input type="checkbox" name="radius" onclick="isRadius(this)" value="1"> Radius Plan
                                 </label>
                             </div>
+                            <p class="help-block col-md-4">{Lang::T('Cannot be change after saved')}</p>
                         </div>
                     {/if}
                     <div class="form-group">
@@ -164,26 +165,27 @@
         </div>
     </div>
 </div>
-
-{literal}
-    <script>
-    function isRadius(cek) {
-        if (cek.checked) {
-            $("#routerChoose").addClass('hidden');
-            document.getElementById("routers").required = false;
-            document.getElementById("Limited").disabled = true;
-            document.getElementById("Unlimited").checked = true;
-            document.getElementById("Limited").checked = false;
-            $('#Type').hide();
-            $('#TimeLimit').hide();
-            $('#DataLimit').hide();
-        } else {
-            document.getElementById("Limited").disabled = false;
-            document.getElementById("routers").required = true;
-            $("#routerChoose").removeClass('hidden');
-        }
-    }
-    </script>
-{/literal}
+{if $_c['radius_enable']}
+    {literal}
+        <script>
+            function isRadius(cek) {
+                if (cek.checked) {
+                    $("#routerChoose").addClass('hidden');
+                    document.getElementById("routers").required = false;
+                    document.getElementById("Limited").disabled = true;
+                    document.getElementById("Unlimited").checked = true;
+                    document.getElementById("Limited").checked = false;
+                    $('#Type').hide();
+                    $('#TimeLimit').hide();
+                    $('#DataLimit').hide();
+                } else {
+                    document.getElementById("Limited").disabled = false;
+                    document.getElementById("routers").required = true;
+                    $("#routerChoose").removeClass('hidden');
+                }
+            }
+        </script>
+    {/literal}
+{/if}
 
 {include file="sections/footer.tpl"}
