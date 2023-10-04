@@ -9,16 +9,16 @@ function _autoloader($class)
 {
     if (strpos($class, '_') !== false) {
         $class = str_replace('_', DIRECTORY_SEPARATOR, $class);
-        if (file_exists(__DIR__.DIRECTORY_SEPARATOR.'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include __DIR__.DIRECTORY_SEPARATOR.'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         } else {
             $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
             if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
                 include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         }
     } else {
-        if (file_exists(__DIR__.DIRECTORY_SEPARATOR.'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include __DIR__.DIRECTORY_SEPARATOR.'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
+        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
+            include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
         } else {
             $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
             if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
@@ -29,7 +29,7 @@ function _autoloader($class)
 spl_autoload_register('_autoloader');
 
 
-if(php_sapi_name() !== 'cli'){
+if (php_sapi_name() !== 'cli') {
     echo "<pre>";
 }
 
@@ -62,6 +62,14 @@ foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
 
+if (!empty($radius_user) && $config['radius_enable']) {
+    ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
+    ORM::configure('username', $radius_user, 'radius');
+    ORM::configure('password', $radius_pass, 'radius');
+    ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
+    ORM::configure('return_result_sets', true, 'radius');
+}
+
 echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
 $res = ORM::raw_execute('SELECT NOW() AS WAKTU;');
 $statement = ORM::get_last_statement();
@@ -92,11 +100,13 @@ foreach ($d as $ds) {
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
-            if (!$_c['radius_enable']) {
+            if ($_c['radius_enable']) {
+                Radius::customerDeactivate($c);
+            }else{
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                if(!empty($p['pool_expired'])){
-                    Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);
-                }else{
+                if (!empty($p['pool_expired'])) {
+                    Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL ' . $p['pool_expired']);
+                } else {
                     Mikrotik::removeHotspotUser($client, $c['username']);
                 }
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
@@ -139,11 +149,13 @@ foreach ($d as $ds) {
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
-            if (!$_c['radius_enable']) {
+            if ($_c['radius_enable']) {
+                Radius::customerDeactivate($c);
+            }else{
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                if(!empty($p['pool_expired'])){
-                    Mikrotik::setPpoeUserPlan($client, $c['username'], 'EXPIRED NUXBILL '.$p['pool_expired']);
-                }else{
+                if (!empty($p['pool_expired'])) {
+                    Mikrotik::setPpoeUserPlan($client, $c['username'], 'EXPIRED NUXBILL ' . $p['pool_expired']);
+                } else {
                     Mikrotik::removePpoeUser($client, $c['username']);
                 }
                 Mikrotik::removePpoeActive($client, $c['username']);
