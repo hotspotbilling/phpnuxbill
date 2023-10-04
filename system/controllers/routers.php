@@ -88,10 +88,12 @@ switch ($action) {
         if ($d) {
             $msg .= $_L['Router_already_exist'] . '<br>';
         }
-
-        Mikrotik::getClient($ip_address, $username, $password);
+        if (strtolower($name) == 'radius') {
+            $msg .= '<b>Radius</b> name is reserved<br>';
+        }
 
         if ($msg == '') {
+            Mikrotik::getClient($ip_address, $username, $password);
             run_hook('add_router'); #HOOK
             $d = ORM::for_table('tbl_routers')->create();
             $d->name = $name;
@@ -146,11 +148,13 @@ switch ($action) {
             }
         }
 
-
-        Mikrotik::getClient($ip_address, $username, $password);
+        if (strtolower($name) == 'radius') {
+            $msg .= '<b>Radius</b> name is reserved<br>';
+        }
 
 
         if ($msg == '') {
+            Mikrotik::getClient($ip_address, $username, $password);
             run_hook('router_edit'); #HOOK
             $d->name = $name;
             $d->ip_address = $ip_address;
