@@ -35,26 +35,26 @@ switch ($action) {
         }
         $ui->assign('_title', 'Order Plan');
         $ui->assign('_system_menu', 'package');
-        if(!empty($_SESSION['nux-router'])){
-            if($_SESSION['nux-router']=='radius'){
-                $radius_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius',1)->where('type', 'PPPOE')->find_many();
-                $radius_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius',1)->where('type', 'Hotspot')->find_many();
-            }else{
-                $routers = ORM::for_table('tbl_routers')->where('id',$_SESSION['nux-router'])->find_many();
+        if (!empty($_SESSION['nux-router'])) {
+            if ($_SESSION['nux-router'] == 'radius') {
+                $radius_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->find_many();
+                $radius_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->find_many();
+            } else {
+                $routers = ORM::for_table('tbl_routers')->where('id', $_SESSION['nux-router'])->find_many();
                 $rs = [];
-                foreach($routers as $r){
+                foreach ($routers as $r) {
                     $rs[] = $r['name'];
                 }
-                $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius',0)->where('type', 'PPPOE')->find_many();
-                $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius',0)->where('type', 'Hotspot')->find_many();
+                $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'PPPOE')->find_many();
+                $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'Hotspot')->find_many();
             }
-        }else{
-            $radius_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius',1)->where('type', 'PPPOE')->find_many();
-            $radius_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius',1)->where('type', 'Hotspot')->find_many();
+        } else {
+            $radius_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->find_many();
+            $radius_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->find_many();
 
             $routers = ORM::for_table('tbl_routers')->find_many();
-            $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius',0)->where('type', 'PPPOE')->find_many();
-            $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius',0)->where('type', 'Hotspot')->find_many();
+            $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 0)->where('type', 'PPPOE')->find_many();
+            $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 0)->where('type', 'Hotspot')->find_many();
         }
         $plans_balance = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many();
         $ui->assign('routers', $routers);
@@ -94,7 +94,7 @@ switch ($action) {
         }
         // jika url kosong, balikin ke buy
         if (empty($trx['pg_url_payment'])) {
-            r2(U . "order/buy/" . $trx['routers_id'] . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
+            r2(U . "order/buy/" . (($trx['routers_id'] == 0) ? $trx['routers'] : $trx['routers_id']) . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
         }
         if ($routes['3'] == 'check') {
             if (!file_exists('system/paymentgateway/' . $trx['gateway'] . '.php')) {
@@ -135,12 +135,16 @@ switch ($action) {
             r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
         }
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
-        $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
-        if (empty($router) || empty($plan)) {
+        if (empty($plan)) {
             r2(U . "order/package", 'e', Lang::T("Plan Not found"));
         }
+        if ($routes['2'] == 'radius') {
+            $router_name = 'radius';
+        } else {
+            $router_name = $plan['routers'];
+        }
         if ($plan && $plan['enabled'] && $user['balance'] >= $plan['price']) {
-            if (Package::rechargeUser($user['id'], $plan['routers'], $plan['id'], 'Customer', 'Balance')) {
+            if (Package::rechargeUser($user['id'], $router_name, $plan['id'], 'Customer', 'Balance')) {
                 // if success, then get the balance
                 Balance::min($user['id'], $plan['price']);
                 r2(U . "home", 's', Lang::T("Success to buy package"));
@@ -164,6 +168,11 @@ switch ($action) {
         if (empty($plan)) {
             r2(U . "order/package", 'e', Lang::T("Plan Not found"));
         }
+        if ($routes['2'] == 'radius') {
+            $router_name = 'radius';
+        } else {
+            $router_name = $plan['routers'];
+        }
         if (isset($_POST['send']) && $_POST['send'] == 'plan') {
             $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
             if (!$target) {
@@ -181,9 +190,9 @@ switch ($action) {
                 ->find_one();
 
             if ($active && $active['plan_id'] != $plan['id']) {
-                r2(U . "order/package", 'e', Lang::T("Target has active plan, different with current plant.")." [ <b>$active[namebp]</b> ]");
+                r2(U . "order/package", 'e', Lang::T("Target has active plan, different with current plant.") . " [ <b>$active[namebp]</b> ]");
             }
-            if (Package::rechargeUser($target['id'], $plan['routers'], $plan['id'], $user['fullname'], 'Balance')) {
+            if (Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['fullname'], 'Balance')) {
                 // if success, then get the balance
                 Balance::min($user['id'], $plan['price']);
                 //sender
@@ -193,7 +202,7 @@ switch ($action) {
                 $d->plan_id = $plan['id'];
                 $d->plan_name = $plan['name_plan'];
                 $d->routers_id = $routes['2'];
-                $d->routers = $plan['routers'];
+                $d->routers = $router_name;
                 $d->price = $plan['price'];
                 $d->payment_method = "Balance";
                 $d->payment_channel = "Send Plan";
@@ -211,7 +220,7 @@ switch ($action) {
                 $d->plan_id = $plan['id'];
                 $d->plan_name = $plan['name_plan'];
                 $d->routers_id = $routes['2'];
-                $d->routers = $plan['routers'];
+                $d->routers = $router_name;
                 $d->price = $plan['price'];
                 $d->payment_method = "Balance";
                 $d->payment_channel = "Received Plan";
@@ -225,13 +234,12 @@ switch ($action) {
             } else {
                 r2(U . "order/package", 'e', Lang::T("Failed to Send package"));
                 Message::sendTelegram("Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .
-                    "\nRouter: " . $plan['routers'] .
+                    "\nRouter: " . $router_name .
                     "\nPrice: " . $plan['price']);
             }
         }
-
         $ui->assign('username', $_GET['u']);
-        $ui->assign('router', $router);
+        $ui->assign('router', $router_name);
         $ui->assign('plan', $plan);
         $ui->display('user-sendPlan.tpl');
         break;
@@ -248,7 +256,11 @@ switch ($action) {
         run_hook('customer_buy_plan'); #HOOK
         include 'system/paymentgateway/' . $config['payment_gateway'] . '.php';
         call_user_func($config['payment_gateway'] . '_validate_config');
-        if ($routes['2'] > 0) {
+
+        if ($routes['2'] == 'radius') {
+            $router['id'] = 0;
+            $router['name'] = 'radius';
+        } else if ($routes['2'] > 0) {
             $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
         } else {
             $router['id'] = 0;
