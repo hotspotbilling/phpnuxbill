@@ -477,7 +477,6 @@ switch ($action) {
                 $d->save();
             }
 
-
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'country_code_phone')->find_one();
             if ($d) {
                 $d->value = $country_code_phone;
@@ -486,6 +485,37 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'country_code_phone';
                 $d->value = $country_code_phone;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_plan')->find_one();
+            if ($d) {
+                $d->value = _post('radius_plan');
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'radius_plan';
+                $d->value = _post('radius_plan');
+                $d->save();
+            }
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'hotspot_plan')->find_one();
+            if ($d) {
+                $d->value = _post('hotspot_plan');
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'hotspot_plan';
+                $d->value = _post('hotspot_plan');
+                $d->save();
+            }
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'pppoe_plan')->find_one();
+            if ($d) {
+                $d->value = _post('pppoe_plan');
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'pppoe_plan';
+                $d->value = _post('pppoe_plan');
                 $d->save();
             }
 

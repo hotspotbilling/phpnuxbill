@@ -34,6 +34,107 @@
                 </div>
             </div>
         {/if}
+        {if $_c['radius_enable']}
+            <div class="box box-solid box-info bg-gray-light">
+                <div class="box-header text-black text-bold">{if $_c['radius_plan']==''}Radius
+                    Plan{else}{$_c['radius_plan']}
+                    {/if}</div>
+                {if Lang::arrayCount($radius_hotspot)>0}
+                    <div class="box-header text-black">{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}</div>
+                    <div class="box-body row">
+                        {foreach $radius_hotspot as $plan}
+                            <div class="col col-md-4">
+                                <div class="box box-primary">
+                                    <div class="box-header text-bold">{$plan['name_plan']}</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <tbody>
+                                                <tr>
+                                                    <td>{Lang::T('Type')}</td>
+                                                    <td>{$plan['type']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{Lang::T('Price')}</td>
+                                                    <td>{Lang::moneyFormat($plan['price'])}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{Lang::T('Validity')}</td>
+                                                    <td>{$plan['validity']} {$plan['validity_unit']}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                                            <a href="{$_url}order/buy/radius/{$plan['id']}"
+                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                                class="btn btn-sm btn-block btn-warning text-black">Buy</a>
+                                            {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
+                                                <a href="{$_url}order/pay/radius/{$plan['id']}"
+                                                    onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
+                                                    class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
+                                            {/if}
+                                        </div>
+                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
+                                            <a href="{$_url}order/send/radius/{$plan['id']}"
+                                                onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
+                                                class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        {/foreach}
+                    </div>
+                {/if}
+                {if Lang::arrayCount($radius_pppoe)>0}
+                    <div class="box-header text-black">{if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}</div>
+                    <div class="box-body row">
+                        {foreach $radius_pppoe as $plan}
+                            <div class="col col-md-4">
+                                <div class="box box- box-primary">
+                                    <div class="box-header text-bold">{$plan['name_plan']}</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <tbody>
+                                                <tr>
+                                                    <td>{Lang::T('Type')}</td>
+                                                    <td>{$plan['type']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{Lang::T('Price')}</td>
+                                                    <td>{Lang::moneyFormat($plan['price'])}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>{Lang::T('Validity')}</td>
+                                                    <td>{$plan['validity']} {$plan['validity_unit']}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                                            <a href="{$_url}order/buy/radius/{$plan['id']}"
+                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                                class="btn btn-sm btn-block btn-warning text-black">Buy</a>
+                                            {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
+                                                <a href="{$_url}order/pay/radius/{$plan['id']}"
+                                                    onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
+                                                    class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
+                                            {/if}
+                                        </div>
+                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
+                                            <a href="{$_url}order/send/radius/{$plan['id']}"
+                                                onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
+                                                class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        {/foreach}
+                    </div>
+                {/if}
+            </div>
+        {/if}
         {foreach $routers as $router}
             {if Validator::isRouterHasPlan($plans_hotspot, $router['name']) || Validator::isRouterHasPlan($plans_pppoe, $router['name'])}
                 <div class="box box-solid box-info bg-gray-light">
@@ -44,7 +145,7 @@
                         </div>
                     {/if}
                     {if Validator::countRouterPlan($plans_hotspot, $router['name'])>0}
-                        <div class="box-header text-black">{Lang::T('Hotspot Plan')}</div>
+                        <div class="box-header text-black">{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}</div>
                         <div class="box-body row">
                             {foreach $plans_hotspot as $plan}
                                 {if $router['name'] eq $plan['routers']}
@@ -93,7 +194,7 @@
                         </div>
                     {/if}
                     {if Validator::countRouterPlan($plans_pppoe,$router['name'])>0}
-                        <div class="box-header text-black">{Lang::T('PPPOE Plan')}</div>
+                        <div class="box-header text-black">{if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}</div>
                         <div class="box-body row">
                             {foreach $plans_pppoe as $plan}
                                 {if $router['name'] eq $plan['routers']}
@@ -145,5 +246,6 @@
             {/if}
         {/foreach}
     </div>
+</div>
 </div>
 {include file="sections/user-footer.tpl"}

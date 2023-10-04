@@ -404,3 +404,4 @@ $_L['Sync'] = 'Sync';
 $_L['Failed_to_create_PaymeTrust_transaction'] = 'Failed to create PaymeTrust transaction.';
 $_L['Location'] = 'Location';
 $_L['Radius_Plans'] = 'Radius Plans';
+$_L['Change_title_in_user_Plan_order'] = 'Change title in user Plan order';

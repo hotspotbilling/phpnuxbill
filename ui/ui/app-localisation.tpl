@@ -48,8 +48,8 @@
                         <div class="col-md-6">
                             <select class="form-control" name="lan" id="lan">
                                 {foreach $lan as $lans}
-                                    <option value="{$lans}" {if $_c['language'] eq $lans}
-                                        selected="selected" {/if}>{$lans}</option>
+                                    <option value="{$lans}" {if $_c['language'] eq $lans} selected="selected" {/if}>{$lans}
+                                    </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -88,6 +88,31 @@
                                     name="country_code_phone" value="{$_c['country_code_phone']}">
                             </div>
                         </div>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Radius Plan</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="radius_plan" name="radius_plan"
+                                value="{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}">
+                        </div>
+                        <span class="help-block col-md-4">{Lang::T('Change title in user Plan order')}</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Hotspot Plan</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="hotspot_plan" name="hotspot_plan"
+                                value="{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}">
+                        </div>
+                        <span class="help-block col-md-4">{Lang::T('Change title in user Plan order')}</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">PPPOE Plan</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="pppoe_plan" name="pppoe_plan"
+                                value="{if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}">
+                        </div>
+                        <span class="help-block col-md-4">{Lang::T('Change title in user Plan order')}</span>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
