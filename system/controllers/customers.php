@@ -49,8 +49,6 @@ switch ($action) {
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
         if ($b) {
-            $mikrotik = Mikrotik::info($b['routers']);
-            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
             if (Package::rechargeUser($id_customer, $b['routers'], $b['plan_id'], "Recharge", $admin['fullname'])) {
                 r2(U . 'customers/view/' . $id_customer, 's', 'Success Recharge Customer');
             } else {
@@ -62,22 +60,30 @@ switch ($action) {
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
         if ($b) {
-            $mikrotik = Mikrotik::info($b['routers']);
-            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-            if ($b['type'] == 'Hotspot') {
-                Mikrotik::removeHotspotUser($client, $b['username']);
-                Mikrotik::removeHotspotActiveUser($client, $b['username']);
-            } else if ($b['type'] == 'PPPOE') {
-                Mikrotik::removePpoeUser($client, $b['username']);
-                Mikrotik::removePpoeActive($client, $b['username']);
+            $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
+            if ($p) {
+                if ($p['is_radius']) {
+                    //TODO: disconnect using radius
+                    Radius::customerDeactivate(ORM::for_table('tbl_customers')->find_one($id_customer));
+                } else {
+                    $mikrotik = Mikrotik::info($b['routers']);
+                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    if ($b['type'] == 'Hotspot') {
+                        Mikrotik::removeHotspotUser($client, $b['username']);
+                        Mikrotik::removeHotspotActiveUser($client, $b['username']);
+                    } else if ($b['type'] == 'PPPOE') {
+                        Mikrotik::removePpoeUser($client, $b['username']);
+                        Mikrotik::removePpoeActive($client, $b['username']);
+                    }
+                }
+                $b->status = 'off';
+                $b->expiration = date('Y-m-d');
+                $b->time = date('H:i:s');
+                $b->save();
+                _log('Admin ' . $admin['username'] . ' Deactivate ' . $b['namebp'] . ' for ' . $b['username'], 'User', $b['customer_id']);
+                Message::sendTelegram('Admin ' . $admin['username'] . ' Deactivate ' . $b['namebp'] . ' for u' . $b['username']);
+                r2(U . 'customers/view/' . $id_customer, 's', 'Success deactivate customer to Mikrotik');
             }
-            $b->status = 'off';
-            $b->expiration = date('Y-m-d');
-            $b->time = date('H:i:s');
-            $b->save();
-            _log('Admin ' . $admin['username'] . ' Deactivate '.$b['namebp'].' for '.$b['username'], 'User', $b['customer_id']);
-            Message::sendTelegram('Admin ' . $admin['username'] . ' Deactivate '.$b['namebp'].' for u'.$b['username']);
-            r2(U . 'customers/view/' . $id_customer, 's', 'Success deactivate customer to Mikrotik');
         }
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
         break;
@@ -85,17 +91,22 @@ switch ($action) {
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->find_one();
         if ($b) {
-            $mikrotik = Mikrotik::info($b['routers']);
-            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
             $c = ORM::for_table('tbl_customers')->find_one($id_customer);
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
             if ($p) {
-                if ($b['type'] == 'Hotspot') {
-                    Mikrotik::addHotspotUser($client, $p, $c);
-                } else if ($b['type'] == 'PPPOE') {
-                    Mikrotik::addPpoeUser($client, $p, $c);
+                if ($p['is_radius']) {
+                    Radius::customerAddPlan($c, $p);
+                    r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Radius');
+                } else {
+                    $mikrotik = Mikrotik::info($b['routers']);
+                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    if ($b['type'] == 'Hotspot') {
+                        Mikrotik::addHotspotUser($client, $p, $c);
+                    } else if ($b['type'] == 'PPPOE') {
+                        Mikrotik::addPpoeUser($client, $p, $c);
+                    }
+                    r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Mikrotik');
                 }
-                r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Mikrotik');
             } else {
                 r2(U . 'customers/view/' . $id_customer, 'e', 'Customer plan is inactive');
             }
@@ -163,28 +174,29 @@ switch ($action) {
         if ($d) {
             $c = ORM::for_table('tbl_user_recharges')->where('username', $d['username'])->find_one();
             if ($c) {
-                $mikrotik = Mikrotik::info($c['routers']);
-                if ($c['type'] == 'Hotspot') {
-                    if (!$config['radius_enable']) {
+                $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
+                if ($p['is_radius']) {
+                    Radius::customerDelete($d['username']);
+                } else {
+                    $mikrotik = Mikrotik::info($c['routers']);
+                    if ($c['type'] == 'Hotspot') {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removeHotspotUser($client, $d['username']);
                         Mikrotik::removeHotspotActiveUser($client, $d['username']);
-                    }
-                } else {
-                    if (!$config['radius_enable']) {
+                    } else {
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                         Mikrotik::removePpoeUser($client, $d['username']);
                         Mikrotik::removePpoeActive($client, $d['username']);
                     }
-                }
-                try {
-                    $d->delete();
-                } catch (Exception $e) {
-                } catch (Throwable $e) {
-                }
-                try {
-                    $c->delete();
-                } catch (Exception $e) {
+                    try {
+                        $d->delete();
+                    } catch (Exception $e) {
+                    } catch (Throwable $e) {
+                    }
+                    try {
+                        $c->delete();
+                    } catch (Exception $e) {
+                    }
                 }
             } else {
                 try {
@@ -272,61 +284,67 @@ switch ($action) {
             $msg .= $_L['Data_Not_Found'] . '<br>';
         }
 
-        if ($d['username'] != $username) {
+        $oldusername = $d['username'];
+        $oldPppoePassword =  $d['password'];
+        $oldPassPassword =  $d['pppoe_password'];
+        $userDiff = false;
+        $pppoeDiff = false;
+        $passDiff = false;
+        if ($oldusername != $username) {
             $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if ($c) {
                 $msg .= $_L['account_already_exist'] . '<br>';
             }
+            $userDiff = true;
+        }
+        if ($oldPppoePassword != $pppoe_password) {
+            $pppoeDiff = true;
+        }
+        if ($password != '' && $oldPassPassword != $password) {
+            $passDiff = true;
         }
 
         if ($msg == '') {
-            $c = ORM::for_table('tbl_user_recharges')->where('username', $username)->find_one();
-            if ($c) {
-                $mikrotik = Mikrotik::info($c['routers']);
-                if ($c['type'] == 'Hotspot') {
-                    if (!$config['radius_enable']) {
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::setHotspotUser($client, $c['username'], $password);
-                        Mikrotik::removeHotspotActiveUser($client, $user['username']);
-                    }
-
-                    $d->password = $password;
-                    $d->save();
-                } else {
-                    if (!$config['radius_enable']) {
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        if (!empty($d['pppoe_password'])) {
-                            Mikrotik::setPpoeUser($client, $c['username'], $d['pppoe_password']);
-                        } else {
-                            Mikrotik::setPpoeUser($client, $c['username'], $password);
+            if ($userDiff) {
+                $d->username = $username;
+            }
+            if ($password != '') {
+                $d->password = $password;
+            }
+            $d->pppoe_password = $pppoe_password;
+            $d->fullname = $fullname;
+            $d->email = $email;
+            $d->address = $address;
+            $d->phonenumber = $phonenumber;
+            $d->save();
+            if ($userDiff || $pppoeDiff || $passDiff) {
+                $c = ORM::for_table('tbl_user_recharges')->where('username', ($userDiff) ? $oldusername : $username)->find_one();
+                if ($c) {
+                    $c->username = $username;
+                    $c->save();
+                    $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
+                    if ($p['is_radius']) {
+                        if($userDiff){
+                            Radius::customerChangeUsername($oldusername, $username);
                         }
-                        Mikrotik::removePpoeActive($client, $user['username']);
+                        Radius::customerAddPlan($d, $p);
+                    }else{
+                        $mikrotik = Mikrotik::info($c['routers']);
+                        if ($c['type'] == 'Hotspot') {
+                            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                            Mikrotik::setHotspotUser($client, $c['username'], $password);
+                            Mikrotik::removeHotspotActiveUser($client, $d['username']);
+                        } else {
+                            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                            if (!empty($d['pppoe_password'])) {
+                                Mikrotik::setPpoeUser($client, $c['username'], $d['pppoe_password']);
+                            } else {
+                                Mikrotik::setPpoeUser($client, $c['username'], $password);
+                            }
+                            Mikrotik::removePpoeActive($client, $d['username']);
+                        }
                     }
-
-                    $d->password = $password;
-                    $d->save();
                 }
-                $d->username = $username;
-                if ($password != '') {
-                    $d->password = $password;
-                }
-                $d->pppoe_password = $pppoe_password;
-                $d->fullname = $fullname;
-                $d->email = $email;
-                $d->address = $address;
-                $d->phonenumber = $phonenumber;
-                $d->save();
-            } else {
-                $d->username = $username;
-                if ($password != '') {
-                    $d->password = $password;
-                }
-                $d->fullname = $fullname;
-                $d->pppoe_password = $pppoe_password;
-                $d->email = $email;
-                $d->address = $address;
-                $d->phonenumber = $phonenumber;
-                $d->save();
             }
             r2(U . 'customers/list', 's', 'User Updated Successfully');
         } else {

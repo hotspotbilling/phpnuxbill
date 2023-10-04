@@ -134,6 +134,14 @@ class Radius
         }
         return false;
     }
+
+    public static function planDelete($plan_id){
+        // Delete Plan
+        Radius::getTablePackage()->where_equal('plan_id', "plan_".$plan_id)->delete_many();
+        // Delete User Plan
+        Radius::getTableUserPackage()->where_equal('groupname', "plan_".$plan_id)->delete_many();
+    }
+
     public static function customerChangeUsername($from, $to){
         $c = Radius::getTableCustomer()->where_equal('username', $from)->findMany();
         if ($c) {
@@ -160,6 +168,11 @@ class Radius
             $r->value = md5(time().$customer['username'].$radius_pass);
             $r->save();
         }
+    }
+
+    public static function customerDelete($username){
+        Radius::getTableCustomer()->where_equal('username', $username)->delete_many();
+        Radius::getTableUserPackage()->where_equal('username', $username)->delete_many();
     }
 
     /**
