@@ -68,18 +68,18 @@ class Radius
         return $n->save();
     }
 
-    public static function planAdd($plan_id, $plan_name, $rate, $pool = null)
+    public static function planAdd($plan_id, $rate, $pool = null)
     {
         $rates = explode('/', $rate);
         $r = Radius::getTablePackage()->create();
-        $r->groupname = $plan_name;
+        $r->groupname = "plan_".$plan_id;
         $r->attribute = 'Ascend-Data-Rate';
         $r->op = ':=';
         $r->value = $rates[1];
         $r->plan_id = $plan_id;
         if ($r->save()) {
             $r = Radius::getTablePackage()->create();
-            $r->groupname = $plan_name;
+            $r->groupname = "plan_".$plan_id;
             $r->attribute = 'Ascend-Xmit-Rate';
             $r->op = ':=';
             $r->value = $rates[0];
@@ -87,7 +87,7 @@ class Radius
             if ($r->save()) {
                 if ($pool != null) {
                     $r = Radius::getTablePackage()->create();
-                    $r->groupname = $plan_name;
+                    $r->groupname = "plan_".$plan_id;
                     $r->attribute = 'Framed-Pool';
                     $r->op = ':=';
                     $r->value = $pool;
@@ -103,21 +103,21 @@ class Radius
         return false;
     }
 
-    public static function planUpdate($plan_id, $plan_name, $rate, $pool = null)
+    public static function planUpdate($plan_id, $rate, $pool = null)
     {
         $rates = explode('/', $rate);
         if (Radius::getTablePackage()->where_equal('plan_id', $plan_id)->find_one()) {
             $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Ascend-Data-Rate')->findOne();
-            $r->groupname = $plan_name;
+            $r->groupname = "plan_".$plan_id;
             $r->value = $rates[1];
             if ($r->save()) {
                 $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Ascend-Xmit-Rate')->findOne();
-                $r->groupname = $plan_name;
+                $r->groupname = "plan_".$plan_id;
                 $r->value = $rates[0];
                 if ($r->save()) {
                     if ($pool != null) {
                         $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Framed-Pool')->findOne();
-                        $r->groupname = $plan_name;
+                        $r->groupname = "plan_".$plan_id;
                         $r->value = $pool;
                         if ($r->save()) {
                             return true;
@@ -129,10 +129,37 @@ class Radius
             }
         } else {
             if (!empty($plan_id)) {
-                return Radius::planAdd($plan_id, $plan_name, $rate, $pool);
+                return Radius::planAdd($plan_id, $rate, $pool);
             }
         }
         return false;
+    }
+    public static function customerChangeUsername($from, $to){
+        $c = Radius::getTableCustomer()->where_equal('username', $from)->findMany();
+        if ($c) {
+            foreach($c as $u){
+                $u->username = $to;
+                $u->save();
+            }
+        }
+        $c = Radius::getTableUserPackage()->where_equal('username', $from)->findMany();
+        if ($c) {
+            foreach($c as $u){
+                $u->username = $to;
+                $u->save();
+            }
+        }
+    }
+
+    public static function customerDeactivate($customer){
+        global $radius_pass;
+        $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->findOne();
+        if($r){
+            // no need to delete, because it will make ID got higher
+            // we just change the password
+            $r->value = md5(time().$customer['username'].$radius_pass);
+            $r->save();
+        }
     }
 
     /**
@@ -143,12 +170,12 @@ class Radius
             $p = Radius::getTableUserPackage()->where_equal('username', $customer['username'])->findOne();
             if ($p) {
                 // if exists
-                $p->groupname = $plan['name_plan'];
+                $p->groupname = "plan_".$plan['id'];
                 return $p->save();
             }else{
                 $p = Radius::getTableUserPackage()->create();
                 $p->username = $customer['username'];
-                $p->groupname = $plan['name_plan'];
+                $p->groupname = "plan_".$plan['id'];
                 $p->priority = 1;
                 return $p->save();
             }
