@@ -138,8 +138,14 @@ class Radius
     public static function planDelete($plan_id){
         // Delete Plan
         Radius::getTablePackage()->where_equal('plan_id', "plan_".$plan_id)->delete_many();
-        // Delete User Plan
-        Radius::getTableUserPackage()->where_equal('groupname', "plan_".$plan_id)->delete_many();
+        // Reset User Plan
+        $c = Radius::getTableUserPackage()->where_equal('groupname', "plan_".$plan_id)->findMany();
+        if ($c) {
+            foreach($c as $u){
+                $u->groupname = '';
+                $u->save();
+            }
+        }
     }
 
     public static function customerChangeUsername($from, $to){
@@ -159,13 +165,13 @@ class Radius
         }
     }
 
-    public static function customerDeactivate($customer){
+    public static function customerDeactivate($username){
         global $radius_pass;
-        $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->findOne();
+        $r = Radius::getTableCustomer()->where_equal('username', $username)->whereEqual('attribute', 'Cleartext-Password')->findOne();
         if($r){
             // no need to delete, because it will make ID got higher
             // we just change the password
-            $r->value = md5(time().$customer['username'].$radius_pass);
+            $r->value = md5(time().$username.$radius_pass);
             $r->save();
         }
     }

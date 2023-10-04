@@ -135,7 +135,9 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_plan'); #HOOK
-            if (!$config['radius_enable']) {
+            if ($d['is_radius']) {
+                Radius::planDelete($d['id']);
+            }else{
                 $mikrotik = Mikrotik::info($d['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removeHotspotPlan($client, $d['name_plan']);
@@ -232,7 +234,7 @@ switch ($action) {
             $d->save();
             $plan_id = $d->id();
 
-            if ($config['radius_enable']) {
+            if ($d['is_radius']) {
                 Radius::planAdd($plan_id, $radiusRate);
             } else {
                 $mikrotik = Mikrotik::info($routers);
@@ -303,7 +305,7 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
 
-            if ($config['radius_enable']) {
+            if ($d['is_radius']) {
                 Radius::planUpdate($id, $radiusRate);
             } else {
                 $mikrotik = Mikrotik::info($routers);
@@ -376,7 +378,7 @@ switch ($action) {
             $b = ORM::for_table('tbl_bandwidth')->find_many();
             $ui->assign('b', $b);
             $r = [];
-            if (($d['is_radius'])) {
+            if ($d['is_radius']) {
                 $r = ORM::for_table('tbl_routers')->find_many();
             }
             $ui->assign('r', $r);
@@ -393,7 +395,9 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_ppoe'); #HOOK
-            if (!$config['radius_enable']) {
+            if ($d['is_radius']) {
+                Radius::planDelete($d['id']);
+            }else{
                 $mikrotik = Mikrotik::info($d['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removePpoePlan($client, $d['name_plan']);
@@ -476,7 +480,7 @@ switch ($action) {
             $d->save();
             $plan_id = $d->id();
 
-            if ($config['radius_enable']) {
+            if ($d['is_radius']) {
                 Radius::planAdd($plan_id, $radiusRate, $pool);
             } else {
                 $mikrotik = Mikrotik::info($routers);
@@ -541,7 +545,7 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
 
-            if ($config['radius_enable']) {
+            if ($d['is_radius']) {
                 Radius::planUpdate($id, $radiusRate, $pool);
             } else {
                 $mikrotik = Mikrotik::info($routers);

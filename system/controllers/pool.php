@@ -137,7 +137,7 @@ switch ($action) {
 
         $mikrotik = Mikrotik::info($routers);
         if ($msg == '') {
-            if (!$config['radius_enable']) {
+            if ($routers != 'radius') {
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPool($client, $d['pool_name'], $ip_address);
             }

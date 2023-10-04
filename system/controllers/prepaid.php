@@ -161,27 +161,26 @@ switch ($action) {
 
     case 'delete':
         $id  = $routes['2'];
-
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
-        $mikrotik = Mikrotik::info($d['routers']);
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
-            if ($d['type'] == 'Hotspot') {
-                if (!$config['radius_enable']) {
+            $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
+            if ($p['is_radius']) {
+                //TODO: disconnect using radius
+                Radius::customerDeactivate($d['username']);
+            } else {
+                $mikrotik = Mikrotik::info($d['routers']);
+                if ($d['type'] == 'Hotspot') {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $d['username']);
                     Mikrotik::removeHotspotActiveUser($client, $d['username']);
-                }
-
-                $d->delete();
-            } else {
-                if (!$config['radius_enable']) {
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePpoeUser($client, $d['username']);
                     Mikrotik::removePpoeActive($client, $d['username']);
                 }
-                $d->delete();
             }
+            $d->delete();
             _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer ' . $c['username'] . '  [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Delete_Successfully']);
         }

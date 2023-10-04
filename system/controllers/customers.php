@@ -64,7 +64,7 @@ switch ($action) {
             if ($p) {
                 if ($p['is_radius']) {
                     //TODO: disconnect using radius
-                    Radius::customerDeactivate(ORM::for_table('tbl_customers')->find_one($id_customer));
+                    Radius::customerDeactivate($b['username']);
                 } else {
                     $mikrotik = Mikrotik::info($b['routers']);
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);

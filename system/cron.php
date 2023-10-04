@@ -100,9 +100,8 @@ foreach ($d as $ds) {
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
-            if ($_c['radius_enable']) {
-                //TODO: disconnect using radius
-                Radius::customerDeactivate($c);
+            if ($p['is_radius']) {
+                Radius::customerDeactivate($c['username']);
             }else{
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 if (!empty($p['pool_expired'])) {
@@ -150,9 +149,9 @@ foreach ($d as $ds) {
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
-            if ($_c['radius_enable']) {
+            if ($p['is_radius']) {
                 //TODO: disconnect using radius
-                Radius::customerDeactivate($c);
+                Radius::customerDeactivate($c['username']);
             }else{
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 if (!empty($p['pool_expired'])) {
