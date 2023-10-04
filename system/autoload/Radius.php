@@ -23,10 +23,11 @@ class Radius
         return ORM::for_table('radusergroup', 'radius');
     }
 
-    public static function nasList($search = null){
-        if($search == null){
+    public static function nasList($search = null)
+    {
+        if ($search == null) {
             return ORM::for_table('nas', 'radius')->find_many();
-        }else{
+        } else {
             return ORM::for_table('nas', 'radius')
                 ->where_like('nasname', $search)
                 ->where_like('shortname', $search)
@@ -105,7 +106,7 @@ class Radius
     public static function planUpdate($plan_id, $plan_name, $rate, $pool = null)
     {
         $rates = explode('/', $rate);
-        if(Radius::getTablePackage()->where_equal('plan_id', $plan_id)->find_one()){
+        if (Radius::getTablePackage()->where_equal('plan_id', $plan_id)->find_one()) {
             $r = Radius::getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', 'Ascend-Data-Rate')->findOne();
             $r->groupname = $plan_name;
             $r->value = $rates[1];
@@ -126,9 +127,115 @@ class Radius
                     }
                 }
             }
-        }else{
-            if(!empty($plan_id)){
+        } else {
+            if (!empty($plan_id)) {
                 return Radius::planAdd($plan_id, $plan_name, $rate, $pool);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * When add a plan to Customer, use this
+     */
+    public static function customerAddPlan($customer, $plan){
+        if(Radius::customerAdd($customer, $plan)){
+            $p = Radius::getTableUserPackage()->where_equal('username', $customer['username'])->findOne();
+            if ($p) {
+                // if exists
+                $p->groupname = $plan['name_plan'];
+                return $p->save();
+            }else{
+                $p = Radius::getTableUserPackage()->create();
+                $p->username = $customer['username'];
+                $p->groupname = $plan['name_plan'];
+                $p->priority = 1;
+                return $p->save();
+            }
+        }
+        return false;
+    }
+
+    public static function customerAdd($customer, $plan)
+    {
+        if (Radius::getTableCustomer()->where_equal('username', $customer['username'])->findOne()) {
+            // Edit if exists
+            $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->findOne();
+            if($r){
+                if($plan['type']=='PPPOE'){
+                    if(empty($customer['pppoe_password'])){
+                        $r->value = $customer['password'];
+                    }else{
+                        $r->value = $customer['pppoe_password'];
+                    }
+                }else{
+                    $r->value = $customer['password'];
+                }
+                $r->save();
+            }else{
+                $r = Radius::getTableCustomer()->create();
+                $r->username = $customer['username'];
+                $r->attribute = 'Cleartext-Password';
+                $r->op = ':=';
+                if($plan['type']=='PPPOE'){
+                    if(empty($customer['pppoe_password'])){
+                        $r->value = $customer['password'];
+                    }else{
+                        $r->value = $customer['pppoe_password'];
+                    }
+                }else{
+                    $r->value = $customer['password'];
+                }
+                $r->save();
+            }
+            $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Simultaneous-Use')->findOne();
+            if($r){
+                if($plan['type']=='PPPOE'){
+                    $r->value = 1;
+                }else{
+                    $r->value = $plan['shared_users'];
+                }
+                $r->save();
+            }else{
+                $r = Radius::getTableCustomer()->create();
+                $r->username = $customer['username'];
+                $r->attribute = 'Simultaneous-Use';
+                $r->op = ':=';
+                if($plan['type']=='PPPOE'){
+                    $r->value = 1;
+                }else{
+                    $r->value = $plan['shared_users'];
+                }
+                $r->save();
+            }
+            return true;
+        } else {
+            // add if not exists
+            $r = Radius::getTableCustomer()->create();
+            $r->username = $customer['username'];
+            $r->attribute = 'Cleartext-Password';
+            $r->op = ':=';
+            if($plan['type']=='PPPOE'){
+                if(empty($customer['pppoe_password'])){
+                    $r->value = $customer['password'];
+                }else{
+                    $r->value = $customer['pppoe_password'];
+                }
+            }else{
+                $r->value = $customer['password'];
+            }
+            if ($r->save()) {
+                $r = Radius::getTableCustomer()->create();
+                $r->username = $customer['username'];
+                $r->attribute = 'Simultaneous-Use';
+                $r->op = ':=';
+                if($plan['type']=='PPPOE'){
+                    $r->value = 1;
+                }else{
+                    $r->value = $plan['shared_users'];
+                }
+                $r->save();
+                return true;
             }
         }
         return false;
