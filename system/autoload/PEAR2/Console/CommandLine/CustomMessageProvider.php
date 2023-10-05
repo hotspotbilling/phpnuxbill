@@ -20,6 +20,7 @@
  * @version   CVS: $Id: CustomMessageProvider.php 282427 2009-06-19 10:22:48Z izi $
  * @link      http://pear2.php.net/PEAR2_Console_CommandLine
  * @since     File available since release 1.1.0
+ *
  * @filesource
  */
 
@@ -56,8 +57,9 @@ interface CustomMessageProvider
      *                         indexes are message codes.
      *
      * @return string
+     *
      * @see PEAR2\Console\CommandLine_MessageProvider
-     * @see PEAR2\Console\CommandLine_MessageProvider_Default
+     * @see PEAR2\Console\CommandLine_MessageProvider\DefaultProvider
      */
     public function getWithCustomMessages(
         $code, $vars = array(), $messages = array()

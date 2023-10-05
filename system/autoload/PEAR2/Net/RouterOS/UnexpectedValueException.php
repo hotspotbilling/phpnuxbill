@@ -2,17 +2,18 @@
 
 /**
  * RouterOS API client implementation.
- * 
+
+ *
  * RouterOS is the flag product of the company MikroTik and is a powerful router software. One of its many abilities is to allow control over it via an API. This package provides a client for that API, in turn allowing you to use PHP to control RouterOS hosts.
- * 
+ *
  * PHP version 5
- * 
+ *
  * @category  Net
  * @package   PEAR2_Net_RouterOS
  * @author    Vasil Rangelov <boen.robot@gmail.com>
  * @copyright 2011 Vasil Rangelov
  * @license   http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
- * @version   1.0.0b5
+ * @version   1.0.0b6
  * @link      http://pear2.php.net/PEAR2_Net_RouterOS
  */
 /**
@@ -20,11 +21,19 @@
  */
 namespace PEAR2\Net\RouterOS;
 
+/**
+ * The base for this exception.
+ */
 use UnexpectedValueException as U;
 
 /**
+ * Used in $previous.
+ */
+use Exception as E;
+
+/**
  * Exception thrown when encountering an invalid value in a function argument.
- * 
+ *
  * @category Net
  * @package  PEAR2_Net_RouterOS
  * @author   Vasil Rangelov <boen.robot@gmail.com>
@@ -38,23 +47,25 @@ class UnexpectedValueException extends U implements Exception
     const CODE_RESPONSE_TYPE_UNKNOWN = 50100;
 
     /**
-     * @var mixed The unexpected value.
+     * The unexpected value.
+     *
+     * @var mixed
      */
     private $_value;
 
     /**
      * Creates a new UnexpectedValueException.
-     * 
-     * @param string     $message  The Exception message to throw.
-     * @param int        $code     The Exception code.
-     * @param \Exception $previous The previous exception used for the exception
+     *
+     * @param string $message  The Exception message to throw.
+     * @param int    $code     The Exception code.
+     * @param E|null $previous The previous exception used for the exception
      *     chaining.
-     * @param mixed      $value    The unexpected value.
+     * @param mixed  $value    The unexpected value.
      */
     public function __construct(
         $message,
         $code = 0,
-        $previous = null,
+        E $previous = null,
         $value = null
     ) {
         parent::__construct($message, $code, $previous);
@@ -63,7 +74,7 @@ class UnexpectedValueException extends U implements Exception
 
     /**
      * Gets the unexpected value.
-     * 
+     *
      * @return mixed The unexpected value.
      */
     public function getValue()
@@ -76,7 +87,7 @@ class UnexpectedValueException extends U implements Exception
 
     /**
      * Returns a string representation of the exception.
-     * 
+     *
      * @return string The exception as a string.
      */
     public function __toString()

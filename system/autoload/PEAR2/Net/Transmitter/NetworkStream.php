@@ -2,19 +2,20 @@
 
 /**
  * Wrapper for network stream functionality.
- * 
+
+ *
  * PHP has built in support for various types of network streams, such as HTTP and TCP sockets. One problem that arises with them is the fact that a single fread/fwrite call might not read/write all the data you intended, regardless of whether you're in blocking mode or not. While the PHP manual offers a workaround in the form of a loop with a few variables, using it every single time you want to read/write can be tedious.
 
 This package abstracts this away, so that when you want to get exactly N amount of bytes, you can be sure the upper levels of your app will be dealing with N bytes. Oh, and the functionality is nicely wrapped in an object (but that's just the icing on the cake).
- * 
+ *
  * PHP version 5
- * 
+ *
  * @category  Net
  * @package   PEAR2_Net_Transmitter
  * @author    Vasil Rangelov <boen.robot@gmail.com>
  * @copyright 2011 Vasil Rangelov
  * @license   http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
- * @version   1.0.0a5
+ * @version   1.0.0b2
  * @link      http://pear2.php.net/PEAR2_Net_Transmitter
  */
 /**
@@ -24,10 +25,10 @@ namespace PEAR2\Net\Transmitter;
 
 /**
  * A network transmitter.
- * 
- * This is a convinience wrapper for network streams. Used to ensure data
+ *
+ * This is a convenience wrapper for network streams. Used to ensure data
  * integrity.
- * 
+ *
  * @category Net
  * @package  PEAR2_Net_Transmitter
  * @author   Vasil Rangelov <boen.robot@gmail.com>
@@ -62,22 +63,27 @@ abstract class NetworkStream extends Stream
      * negotiated between 1.0 and 1.2).
      */
     const CRYPTO_TLS = 'TLS';
-    
+
     /**
-     * @var string The type of stream. Can be either "_CLIENT" or "_SERVER".
-     *     Used to complement the encryption type. Must be set by child classes
-     *     for {@link setCrypto()} to work properly.
+     * The type of stream. Can be either "_CLIENT" or "_SERVER".
+     *
+     * Used to complement the encryption type. Must be set by child classes
+     * for {@link setCrypto()} to work properly.
+     *
+     * @var string
      */
     protected $streamType = '';
 
     /**
-     * @var string The current cryptography setting.
+     * The current cryptography setting.
+     *
+     * @var string
      */
     protected $crypto = '';
 
     /**
      * Wraps around the specified stream.
-     * 
+     *
      * @param resource $stream The stream to wrap around.
      */
     public function __construct($stream)
@@ -87,7 +93,7 @@ abstract class NetworkStream extends Stream
 
     /**
      * Gets the current cryptography setting.
-     * 
+     *
      * @return string One of this class' CRYPTO_* constants.
      */
     public function getCrypto()
@@ -97,10 +103,10 @@ abstract class NetworkStream extends Stream
 
     /**
      * Sets the current connection's cryptography setting.
-     * 
+     *
      * @param string $type The encryption type to set. Must be one of this
      *     class' CRYPTO_* constants.
-     * 
+     *
      * @return boolean TRUE on success, FALSE on failure.
      */
     public function setCrypto($type)
@@ -123,12 +129,12 @@ abstract class NetworkStream extends Stream
 
     /**
      * Checks whether the stream is available for operations.
-     * 
+     *
      * @return bool TRUE if the stream is available, FALSE otherwise.
      */
     public function isAvailable()
     {
-        if (parent::isStream($this->stream)) {
+        if ($this->isStream($this->stream)) {
             if ($this->isBlocking && feof($this->stream)) {
                 return false;
             }
@@ -137,14 +143,14 @@ abstract class NetworkStream extends Stream
         }
         return false;
     }
-    
+
     /**
      * Sets the size of a stream's buffer.
-     * 
-     * @param int    $size      The desired size of the buffer, in bytes.
-     * @param string $direction The buffer of which direction to set. Valid
+     *
+     * @param int $size      The desired size of the buffer, in bytes.
+     * @param int $direction The buffer of which direction to set. Valid
      *     values are the DIRECTION_* constants.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function setBuffer($size, $direction = self::DIRECTION_ALL)
@@ -157,15 +163,15 @@ abstract class NetworkStream extends Stream
         }
         return $result;
     }
-    
+
     /**
      * Shutdown a full-duplex connection
-     * 
+     *
      * Shutdowns (partially or not) a full-duplex connection.
-     * 
-     * @param string $direction The direction for which to disable further
+     *
+     * @param int $direction The direction for which to disable further
      *     communications.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function shutdown($direction = self::DIRECTION_ALL)

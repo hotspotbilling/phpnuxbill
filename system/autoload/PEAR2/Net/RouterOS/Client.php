@@ -2,6 +2,7 @@
 
 /**
  * RouterOS API client implementation.
+
  *
  * RouterOS is the flag product of the company MikroTik and is a powerful router software. One of its many abilities is to allow control over it via an API. This package provides a client for that API, in turn allowing you to use PHP to control RouterOS hosts.
  *
@@ -12,7 +13,7 @@
  * @author    Vasil Rangelov <boen.robot@gmail.com>
  * @copyright 2011 Vasil Rangelov
  * @license   http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
- * @version   1.0.0b5
+ * @version   1.0.0b6
  * @link      http://pear2.php.net/PEAR2_Net_RouterOS
  */
 /**
@@ -64,36 +65,52 @@ class Client
     const FILTER_ALL = 3;
 
     /**
-     * @var Communicator The communicator for this client.
+     * The communicator for this client.
+     *
+     * @var Communicator
      */
     protected $com;
 
     /**
-     * @var int The number of currently pending requests.
+     * The number of currently pending requests.
+     *
+     * @var int
      */
     protected $pendingRequestsCount = 0;
 
     /**
-     * @var array An array of responses that have not yet been extracted or
-     *     passed to a callback. Key is the tag of the request, and the value
-     *     is an array of associated responses.
+     * An array of responses that have not yet been extracted
+     * or passed to a callback.
+     *
+     * Key is the tag of the request, and the value is an array of
+     * associated responses.
+     *
+     * @var array<string,Response[]>
      */
     protected $responseBuffer = array();
 
     /**
-     * @var array An array of callbacks to be executed as responses come.
-     *     Key is the tag of the request, and the value is the callback for it.
+     * An array of callbacks to be executed as responses come.
+     *
+     * Key is the tag of the request, and the value is the callback for it.
+     *
+     * @var array<string,callback>
      */
     protected $callbacks = array();
 
     /**
-     * @var Registry A registry for the operations. Particularly helpful at
-     *     persistent connections.
+     * A registry for the operations.
+     *
+     * Particularly helpful at persistent connections.
+     *
+     * @var Registry
      */
     protected $registry = null;
 
     /**
-     * @var bool Whether to stream future responses.
+     * Whether to stream future responses.
+     *
+     * @var bool
      */
     private $_streamingResponses = false;
 
@@ -103,24 +120,25 @@ class Client
      * Creates a new instance of a RouterOS API client with the specified
      * settings.
      *
-     * @param string   $host     Hostname (IP or domain) of the RouterOS server.
-     * @param string   $username The RouterOS username.
-     * @param string   $password The RouterOS password.
-     * @param int|null $port     The port on which the RouterOS server provides
-     *     the API service. You can also specify NULL, in which case the port
-     *     will automatically be chosen between 8728 and 8729, depending on the
-     *     value of $crypto.
-     * @param bool     $persist  Whether or not the connection should be a
+     * @param string        $host     Hostname (IP or domain) of RouterOS.
+     * @param string        $username The RouterOS username.
+     * @param string        $password The RouterOS password.
+     * @param int|null      $port     The port on which the RouterOS host
+     *     provides the API service. You can also specify NULL, in which case
+     *     the port will automatically be chosen between 8728 and 8729,
+     *     depending on the value of $crypto.
+     * @param bool          $persist  Whether or not the connection should be a
      *     persistent one.
-     * @param float    $timeout  The timeout for the connection.
-     * @param string   $crypto   The encryption for this connection. Must be one
-     *     of the PEAR2\Net\Transmitter\NetworkStream::CRYPTO_* constants. Off
-     *     by default. RouterOS currently supports only TLS, but the setting is
-     *     provided in this fashion for forward compatibility's sake. And for
-     *     the sake of simplicity, if you specify an encryption, don't specify a
-     *     context and your default context uses the value "DEFAULT" for
-     *     ciphers, "ADH" will be automatically added to the list of ciphers.
-     * @param resource $context  A context for the socket.
+     * @param double|null   $timeout  The timeout for the connection.
+     * @param string        $crypto   The encryption for this connection.
+     *     Must be one of the PEAR2\Net\Transmitter\NetworkStream::CRYPTO_*
+     *     constants. Off by default. RouterOS currently supports only TLS, but
+     *     the setting is provided in this fashion for forward compatibility's
+     *     sake. And for the sake of simplicity, if you specify an encryption,
+     *     don't specify a context and your default context uses the value
+     *     "DEFAULT" for ciphers, "ADH" will be automatically added to the list
+     *     of ciphers.
+     * @param resource|null $context  A context for the socket.
      *
      * @see sendSync()
      * @see sendAsync()
@@ -131,15 +149,10 @@ class Client
         $password = '',
         $port = 8728,
         $persist = false,
-        $timeout = 10,
+        $timeout = null,
         $crypto = N::CRYPTO_OFF,
         $context = null
     ) {
-        if(strpos($host,":")>-1){
-            $part = explode(":",$host);
-            $host = $part[0];
-            $port = $part[1];
-        }
         $this->com = new Communicator(
             $host,
             $port,
@@ -183,7 +196,7 @@ class Client
      * the class is invoked and its returned value is returned by this function.
      *
      * @param mixed $arg Value can be either a {@link Request} to send, which
-     *     would be sent asynchoniously if it has a tag, and synchroniously if
+     *     would be sent asynchronously if it has a tag, and synchronously if
      *     not, a number to loop with or NULL to complete all pending requests.
      *     Any other value is converted to string and treated as the tag of a
      *     request to complete.
@@ -210,7 +223,7 @@ class Client
      * @param string       $username The RouterOS username.
      * @param string       $password The RouterOS password.
      * @param int|null     $timeout  The time to wait for each response. NULL
-     *     waits indefinetly.
+     *     waits indefinitely.
      *
      * @return bool TRUE on success, FALSE on failure.
      */
@@ -263,7 +276,7 @@ class Client
      * @param string       $password The RouterOS password. Potentially parsed
      *     already by iconv.
      * @param int|null     $timeout  The time to wait for each response. NULL
-     *     waits indefinetly.
+     *     waits indefinitely.
      *
      * @return bool TRUE on success, FALSE on failure.
      */
@@ -274,15 +287,31 @@ class Client
         $timeout = null
     ) {
         $request = new Request('/login');
-        // Update Mikrotik Versi terbaru
-        // sayangnya ini ngga aman, bagusnya di setup ke port SSL
-        $request->setArgument('name', $username);
-        $request->setArgument('password', $password);
         $request->send($com);
         $response = new Response($com, false, $timeout);
-       return $response->getType() === Response::TYPE_FINAL;
-       null === $response->getProperty('ret');
- }
+        $request->setArgument('name', $username);
+        $request->setArgument('password', $password);
+        // $request->setArgument(
+        //     'response',
+        //     '00' . md5(
+        //         chr(0) . $password
+        //         . pack('H*', $response->getProperty('ret'))
+        //     )
+        // );
+        $request->verify($com)->send($com);
+
+        $response = new Response($com, false, $timeout);
+        if ($response->getType() === Response::TYPE_FINAL) {
+            return null === $response->getProperty('ret');
+        } else {
+            while ($response->getType() !== Response::TYPE_FINAL
+                && $response->getType() !== Response::TYPE_FATAL
+            ) {
+                $response = new Response($com, false, $timeout);
+            }
+            return false;
+        }
+    }
 
     /**
      * Sets the charset(s) for this connection.
@@ -307,6 +336,7 @@ class Client
      * @return string|array The old charset. If $charsetType is
      *     {@link Communicator::CHARSET_ALL}, the old values will be returned as
      *     an array with the types as keys, and charsets as values.
+     *
      * @see Communicator::setDefaultCharset()
      */
     public function setCharset(
@@ -326,6 +356,7 @@ class Client
      * @return string|array The current charset. If $charsetType is
      *     {@link Communicator::CHARSET_ALL}, the current values will be
      *     returned as an array with the types as keys, and charsets as values.
+     *
      * @see setCharset()
      */
     public function getCharset($charsetType)
@@ -336,16 +367,18 @@ class Client
     /**
      * Sends a request and waits for responses.
      *
-     * @param Request  $request  The request to send.
-     * @param callback $callback Optional. A function that is to be executed
-     *     when new responses for this request are available. The callback takes
-     *     two parameters. The {@link Response} object as the first, and the
-     *     {@link Client} object as the second one. If the function returns
-     *     TRUE, the request is canceled. Note that the callback may be executed
-     *     one last time after that with a response that notifies about the
-     *     canceling.
+     * @param Request       $request  The request to send.
+     * @param callback|null $callback Optional. A function that is to be
+     *     executed when new responses for this request are available.
+     *     The callback takes two parameters. The {@link Response} object as
+     *     the first, and the {@link Client} object as the second one. If the
+     *     callback returns TRUE, the request is canceled. Note that the
+     *     callback may be executed at least two times after that. Once with a
+     *     {@link Response::TYPE_ERROR} response that notifies about the
+     *     canceling, plus the {@link Response::TYPE_FINAL} response.
      *
      * @return $this The client object.
+     *
      * @see completeRequest()
      * @see loop()
      * @see cancelRequest()
@@ -392,10 +425,11 @@ class Client
      * pending request and/or has responses that are not yet extracted.
      *
      * @param string $tag    The tag of the request to look for.
-     * @param int    $filter One of the FILTER_* consntants. Limits the search
+     * @param int    $filter One of the FILTER_* constants. Limits the search
      *     to the specified places.
      *
      * @return bool TRUE if the request is active, FALSE otherwise.
+     *
      * @see getPendingRequestsCount()
      * @see completeRequest()
      */
@@ -417,6 +451,7 @@ class Client
      * @param Request $request The request to send.
      *
      * @return ResponseCollection The received responses as a collection.
+     *
      * @see sendAsync()
      * @see close()
      */
@@ -437,8 +472,8 @@ class Client
      * Starts an event loop for the RouterOS callbacks and finishes when a
      * specified request is completed.
      *
-     * @param string $tag The tag of the request to complete. Setting NULL
-     *     completes all requests.
+     * @param string|null $tag The tag of the request to complete.
+     *     Setting NULL completes all requests.
      *
      * @return ResponseCollection A collection of {@link Response} objects that
      *     haven't been passed to a callback function or previously extracted
@@ -481,11 +516,13 @@ class Client
      * Gets all new responses for a request that haven't been passed to a
      * callback and clears the buffer from them.
      *
-     * @param string $tag The tag of the request to extract new responses for.
+     * @param string|null $tag The tag of the request to extract
+     *     new responses for.
      *     Specifying NULL with extract new responses for all requests.
      *
      * @return ResponseCollection A collection of {@link Response} objects for
      *     the specified request.
+     *
      * @see loop()
      */
     public function extractNewResponses($tag = null)
@@ -526,12 +563,13 @@ class Client
      * are no more pending requests or when a specified timeout has passed
      * (whichever comes first).
      *
-     * @param int $sTimeout  Timeout for the loop. If NULL, there is no time
-     *     limit.
-     * @param int $usTimeout Microseconds to add to the time limit.
+     * @param int|null $sTimeout  Timeout for the loop.
+     *     If NULL, there is no time limit.
+     * @param int      $usTimeout Microseconds to add to the time limit.
      *
      * @return bool TRUE when there are any more pending requests, FALSE
      *     otherwise.
+     *
      * @see extractNewResponses()
      * @see getPendingRequestsCount()
      */
@@ -581,6 +619,7 @@ class Client
      * Gets the number of pending requests.
      *
      * @return int The number of pending requests.
+     *
      * @see isRequestActive()
      */
     public function getPendingRequestsCount()
@@ -592,15 +631,16 @@ class Client
      * Cancels a request.
      *
      * Cancels an active request. Using this function in favor of a plain call
-     * to the "/cancel" command is highly reccomended, as it also updates the
+     * to the "/cancel" command is highly recommended, as it also updates the
      * counter of pending requests properly. Note that canceling a request also
      * removes any responses for it that were not previously extracted with
      * {@link static::extractNewResponses()}.
      *
-     * @param string $tag Tag of the request to cancel. Setting NULL will cancel
-     *     all requests.
+     * @param string|null $tag Tag of the request to cancel.
+     *     Setting NULL will cancel all requests.
      *
      * @return $this The client object.
+     *
      * @see sendAsync()
      * @see close()
      */
@@ -671,6 +711,7 @@ class Client
      * @param bool $streamingResponses Whether to stream future responses.
      *
      * @return bool The previous value of the setting.
+     *
      * @see isStreamingResponses()
      */
     public function setStreamingResponses($streamingResponses)
@@ -686,6 +727,7 @@ class Client
      * Gets whether future responses are streamed.
      *
      * @return bool The value of the setting.
+     *
      * @see setStreamingResponses()
      */
     public function isStreamingResponses()
@@ -758,12 +800,13 @@ class Client
      * @param Request $request The request to send.
      *
      * @return $this The client object.
+     *
      * @see sendSync()
      * @see sendAsync()
      */
     protected function send(Request $request)
     {
-        $request->send($this->com, $this->registry);
+        $request->verify($this->com)->send($this->com, $this->registry);
         $this->pendingRequestsCount++;
         return $this;
     }
@@ -774,9 +817,10 @@ class Client
      * Dispatches the next response in queue, i.e. it executes the associated
      * callback if there is one, or places the response in the response buffer.
      *
-     * @param int $sTimeout  If a response is not immediatly available, wait
-     *     this many seconds. If NULL, wait indefinetly.
-     * @param int $usTimeout Microseconds to add to the waiting time.
+     * @param int|null $sTimeout  If a response is not immediately available,
+     *     wait this many seconds.
+     *     If NULL, wait indefinitely.
+     * @param int      $usTimeout Microseconds to add to the waiting time.
      *
      * @throws SocketException When there's no response within the time limit.
      * @return Response The dispatched response.
@@ -805,7 +849,14 @@ class Client
         if ('' != $tag) {
             if ($this->isRequestActive($tag, self::FILTER_CALLBACK)) {
                 if ($this->callbacks[$tag]($response, $this)) {
-                    $this->cancelRequest($tag);
+                    try {
+                        $this->cancelRequest($tag);
+                    } catch (DataFlowException $e) {
+                        if ($e->getCode() !== DataFlowException::CODE_UNKNOWN_REQUEST
+                        ) {
+                            throw $e;
+                        }
+                    }
                 } elseif ($isLastForRequest) {
                     unset($this->callbacks[$tag]);
                 }

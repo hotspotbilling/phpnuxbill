@@ -1,9 +1,10 @@
 <?php
 
 /**
- * ~~summary~~
+ * Wrapper for shared memory and locking functionality across different extensions.
+
  * 
- * ~~description~~
+ * Allows you to share data across requests as long as the PHP process is running. One of APC or WinCache is required to accomplish this, with other extensions being potentially pluggable as adapters.
  * 
  * PHP version 5
  * 
@@ -12,7 +13,7 @@
  * @author    Vasil Rangelov <boen.robot@gmail.com>
  * @copyright 2011 Vasil Rangelov
  * @license   http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
- * @version   0.1.3
+ * @version   0.2.0
  * @link      http://pear2.php.net/PEAR2_Cache_SHM
  */
 /**

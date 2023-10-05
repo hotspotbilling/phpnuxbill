@@ -2,17 +2,18 @@
 
 /**
  * RouterOS API client implementation.
- * 
+
+ *
  * RouterOS is the flag product of the company MikroTik and is a powerful router software. One of its many abilities is to allow control over it via an API. This package provides a client for that API, in turn allowing you to use PHP to control RouterOS hosts.
- * 
+ *
  * PHP version 5
- * 
+ *
  * @category  Net
  * @package   PEAR2_Net_RouterOS
  * @author    Vasil Rangelov <boen.robot@gmail.com>
  * @copyright 2011 Vasil Rangelov
  * @license   http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
- * @version   1.0.0b5
+ * @version   1.0.0b6
  * @link      http://pear2.php.net/PEAR2_Net_RouterOS
  */
 /**
@@ -28,7 +29,7 @@ use Exception as E;
 /**
  * Exception thrown when encountering something not supported by RouterOS or
  * this package.
- * 
+ *
  * @category Net
  * @package  PEAR2_Net_RouterOS
  * @author   Vasil Rangelov <boen.robot@gmail.com>
@@ -40,24 +41,30 @@ class NotSupportedException extends E implements Exception
 
     const CODE_CONTROL_BYTE = 1601;
 
+    const CODE_MENU_MISMATCH = 60000;
+
+    const CODE_ARG_PROHIBITED = 60001;
+
     /**
-     * @var mixed The unsuppported value.
+     * The unsupported value.
+     *
+     * @var mixed
      */
     private $_value;
 
     /**
      * Creates a new NotSupportedException.
-     * 
-     * @param string     $message  The Exception message to throw.
-     * @param int        $code     The Exception code.
-     * @param \Exception $previous The previous exception used for the exception
+     *
+     * @param string $message  The Exception message to throw.
+     * @param int    $code     The Exception code.
+     * @param E|null $previous The previous exception used for the exception
      *     chaining.
-     * @param mixed      $value    The unsupported value.
+     * @param mixed  $value    The unsupported value.
      */
     public function __construct(
         $message,
         $code = 0,
-        $previous = null,
+        E $previous = null,
         $value = null
     ) {
         parent::__construct($message, $code, $previous);
@@ -66,7 +73,7 @@ class NotSupportedException extends E implements Exception
 
     /**
      * Gets the unsupported value.
-     * 
+     *
      * @return mixed The unsupported value.
      */
     public function getValue()
@@ -79,7 +86,7 @@ class NotSupportedException extends E implements Exception
 
     /**
      * Returns a string representation of the exception.
-     * 
+     *
      * @return string The exception as a string.
      */
     public function __toString()

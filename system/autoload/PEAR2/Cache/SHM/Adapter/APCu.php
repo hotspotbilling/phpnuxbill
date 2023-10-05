@@ -40,7 +40,7 @@ use ArrayObject;
  * @license  http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
  * @link     http://pear2.php.net/PEAR2_Cache_SHM
  */
-class APC extends SHM
+class APCu extends SHM
 {
     /**
      * ID of the current storage.
@@ -103,8 +103,8 @@ class APC extends SHM
      */
     public static function isMeetingRequirements()
     {
-        return extension_loaded('apc')
-            && version_compare(phpversion('apc'), '3.1.1', '>=')
+        return extension_loaded('apcu')
+            && version_compare(phpversion('apcu'), '5.0.0', '>=')
             && ini_get('apc.enabled')
             && ('cli' !== PHP_SAPI || ini_get('apc.enable_cli'));
     }
@@ -132,7 +132,7 @@ class APC extends SHM
         $hasInstances = 0 !== static::$requestInstances[$internalPersistentId];
         if ($isAtShutdown === $hasInstances) {
             foreach (static::$locksBackup[$internalPersistentId] as $key) {
-                apc_delete($internalPersistentId . 'l ' . $key);
+                apcu_delete($internalPersistentId . 'l ' . $key);
             }
         }
     }
@@ -165,7 +165,7 @@ class APC extends SHM
         $lock = $this->persistentId . 'l ' . $key;
         $hasTimeout = $timeout !== null;
         $start = microtime(true);
-        while (!apc_add($lock, 1)) {
+        while (!apcu_add($lock, 1)) {
             if ($hasTimeout && (microtime(true) - $start) > $timeout) {
                 return false;
             }
@@ -185,7 +185,7 @@ class APC extends SHM
     public function unlock($key)
     {
         $lock = $this->persistentId . 'l ' . $key;
-        $success = apc_delete($lock);
+        $success = apcu_delete($lock);
         if ($success) {
             unset(
                 static::$locksBackup[$this->persistentId][array_search(
@@ -208,7 +208,7 @@ class APC extends SHM
      */
     public function exists($key)
     {
-        return apc_exists($this->persistentId . 'd ' . $key);
+        return apcu_exists($this->persistentId . 'd ' . $key);
     }
 
     /**
@@ -225,7 +225,7 @@ class APC extends SHM
      */
     public function add($key, $value, $ttl = 0)
     {
-        return apc_add($this->persistentId . 'd ' . $key, $value, $ttl);
+        return apcu_add($this->persistentId . 'd ' . $key, $value, $ttl);
     }
 
     /**
@@ -242,7 +242,7 @@ class APC extends SHM
      */
     public function set($key, $value, $ttl = 0)
     {
-        return apc_store($this->persistentId . 'd ' . $key, $value, $ttl);
+        return apcu_store($this->persistentId . 'd ' . $key, $value, $ttl);
     }
 
     /**
@@ -257,8 +257,8 @@ class APC extends SHM
     public function get($key)
     {
         $fullKey = $this->persistentId . 'd ' . $key;
-        if (apc_exists($fullKey)) {
-            $value = apc_fetch($fullKey, $success);
+        if (apcu_exists($fullKey)) {
+            $value = apcu_fetch($fullKey, $success);
             if (!$success) {
                 throw new SHM\InvalidArgumentException(
                     'Unable to fetch key. ' .
@@ -281,7 +281,7 @@ class APC extends SHM
      */
     public function delete($key)
     {
-        return apc_delete($this->persistentId . 'd ' . $key);
+        return apcu_delete($this->persistentId . 'd ' . $key);
     }
 
     /**
@@ -298,7 +298,7 @@ class APC extends SHM
      */
     public function inc($key, $step = 1)
     {
-        $newValue = apc_inc(
+        $newValue = apcu_inc(
             $this->persistentId . 'd ' . $key,
             (int) $step,
             $success
@@ -326,7 +326,7 @@ class APC extends SHM
      */
     public function dec($key, $step = 1)
     {
-        $newValue = apc_dec(
+        $newValue = apcu_dec(
             $this->persistentId . 'd ' . $key,
             (int) $step,
             $success
@@ -354,7 +354,7 @@ class APC extends SHM
      */
     public function cas($key, $old, $new)
     {
-        return apc_cas($this->persistentId . 'd ' . $key, $old, $new);
+        return apcu_cas($this->persistentId . 'd ' . $key, $old, $new);
     }
 
     /**
@@ -374,7 +374,7 @@ class APC extends SHM
             100,
             APC_LIST_ACTIVE
         ) as $key) {
-            apc_delete($key);
+            apcu_delete($key);
         }
     }
 
@@ -396,8 +396,7 @@ class APC extends SHM
     public function getIterator($filter = null, $keysOnly = false)
     {
         $result = array();
-        foreach (new APCIterator(
-            'user',
+        foreach (new APCUIterator(
             '/^' . preg_quote($this->persistentId, '/') . 'd /',
             APC_ITER_KEY,
             100,
@@ -408,7 +407,7 @@ class APC extends SHM
                 if ($keysOnly) {
                     $result[] = $localKey;
                 } else {
-                    $result[$localKey] = apc_fetch($key);
+                    $result[$localKey] = apcu_fetch($key);
                 }
             }
         }

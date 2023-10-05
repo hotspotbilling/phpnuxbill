@@ -11,14 +11,15 @@
  * through the world-wide-web at the following URI:
  * http://opensource.org/licenses/mit-license.php
  *
- * @category  Console 
+ * @category  Console
  * @package   PEAR2\Console\CommandLine
  * @author    David JEAN LOUIS <izimobil@gmail.com>
  * @copyright 2007-2009 David JEAN LOUIS
- * @license   http://opensource.org/licenses/mit-license.php MIT License 
- * @version   0.2.1
+ * @license   http://opensource.org/licenses/mit-license.php MIT License
+ * @version   0.2.3
  * @link      http://pear2.php.net/PEAR2_Console_CommandLine
  * @since     File available since release 0.1.0
+ *
  * @filesource
  */
 
@@ -42,14 +43,15 @@ interface MessageProvider
 
     /**
      * Retrieves the given string identifier corresponding message.
-     * For a list of identifiers please see the provided default message 
+     * For a list of identifiers please see the provided default message
      * provider.
      *
      * @param string $code The string identifier of the message
      * @param array  $vars An array of template variables
      *
      * @return string
-     * @see PEAR2\Console\CommandLine_MessageProvider_Default
+     *
+     * @see PEAR2\Console\CommandLine\MessageProvider\DefaultProvider
      */
     public function get($code, $vars=array());
 

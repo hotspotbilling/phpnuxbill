@@ -2,19 +2,20 @@
 
 /**
  * Wrapper for network stream functionality.
- * 
+
+ *
  * PHP has built in support for various types of network streams, such as HTTP and TCP sockets. One problem that arises with them is the fact that a single fread/fwrite call might not read/write all the data you intended, regardless of whether you're in blocking mode or not. While the PHP manual offers a workaround in the form of a loop with a few variables, using it every single time you want to read/write can be tedious.
 
 This package abstracts this away, so that when you want to get exactly N amount of bytes, you can be sure the upper levels of your app will be dealing with N bytes. Oh, and the functionality is nicely wrapped in an object (but that's just the icing on the cake).
- * 
+ *
  * PHP version 5
- * 
+ *
  * @category  Net
  * @package   PEAR2_Net_Transmitter
  * @author    Vasil Rangelov <boen.robot@gmail.com>
  * @copyright 2011 Vasil Rangelov
  * @license   http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
- * @version   1.0.0a5
+ * @version   1.0.0b2
  * @link      http://pear2.php.net/PEAR2_Net_Transmitter
  */
 /**
@@ -26,11 +27,11 @@ use Exception as E;
 
 /**
  * A stream transmitter.
- * 
- * This is a convinience wrapper for stream functionality. Used to ensure data
+ *
+ * This is a convenience wrapper for stream functionality. Used to ensure data
  * integrity. Designed for TCP sockets, but it has intentionally been made to
  * accept any stream.
- * 
+ *
  * @category Net
  * @package  PEAR2_Net_Transmitter
  * @author   Vasil Rangelov <boen.robot@gmail.com>
@@ -57,32 +58,44 @@ class Stream
     const DIRECTION_ALL = 3;
 
     /**
-     * @var resource The stream to wrap around.
+     * The stream to wrap around.
+     *
+     * @var resource
      */
     protected $stream;
 
     /**
-     * @var bool Whether to automaticaly close the stream on
-     *     object destruction if it's not a persistent one. Setting this to
-     *     FALSE may be useful if you're only using this class "part time",
-     *     while setting it to TRUE might be useful if you're doing some
-     *     "on offs".
+     * Whether to automatically close the stream on object destruction if
+     * it's not a persistent one.
+     *
+     * Setting this to FALSE may be useful if you're only using this class
+     * "part time", while setting it to TRUE might be useful if you're doing
+     * some "one offs".
+     *
+     * @var bool
      */
     protected $autoClose = false;
 
     /**
-     * @var bool A flag that tells whether or not the stream is persistent.
+     * A flag that tells whether or not the stream is persistent.
+     *
+     * @var bool
      */
     protected $persist;
 
     /**
-     * @var bool Whether the wrapped stream is in blocking mode or not.
+     * Whether the wrapped stream is in blocking mode or not.
+     *
+     * @var bool
      */
     protected $isBlocking = true;
-    
+
     /**
-     * @var array An associative array with the chunk size of each direction.
-     *     Key is the direction, value is the size in bytes as integer.
+     * An associative array with the chunk size of each direction.
+     *
+     * Key is the direction, value is the size in bytes as integer.
+     *
+     * @var array<int,int>
      */
     protected $chunkSize = array(
         self::DIRECTION_SEND => 0xFFFFF, self::DIRECTION_RECEIVE => 0xFFFFF
@@ -90,14 +103,14 @@ class Stream
 
     /**
      * Wraps around the specified stream.
-     * 
+     *
      * @param resource $stream    The stream to wrap around.
-     * @param bool     $autoClose Whether to automaticaly close the stream on
+     * @param bool     $autoClose Whether to automatically close the stream on
      *     object destruction if it's not a persistent one. Setting this to
      *     FALSE may be useful if you're only using this class "part time",
      *     while setting it to TRUE might be useful if you're doing some
      *     "on offs".
-     * 
+     *
      * @see static::isFresh()
      */
     public function __construct($stream, $autoClose = false)
@@ -117,12 +130,14 @@ class Stream
 
     /**
      * PHP error handler for connection errors.
-     * 
+     *
      * @param string $level   Level of PHP error raised. Ignored.
      * @param string $message Message raised by PHP.
-     * 
+     *
      * @return void
+     *
      * @throws SocketException That's how the error is handled.
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function handleError($level, $message)
@@ -132,9 +147,9 @@ class Stream
 
     /**
      * Checks if a given variable is a stream resource.
-     * 
+     *
      * @param mixed $var The variable to check.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public static function isStream($var)
@@ -145,11 +160,11 @@ class Stream
 
     /**
      * Checks whether the wrapped stream is fresh.
-     * 
+     *
      * Checks whether the wrapped stream is fresh. A stream is considered fresh
      * if there hasn't been any activity on it. Particularly useful for
      * detecting reused persistent connections.
-     * 
+     *
      * @return bool TRUE if the socket is fresh, FALSE otherwise.
      */
     public function isFresh()
@@ -159,8 +174,8 @@ class Stream
 
     /**
      * Checks whether the wrapped stream is a persistent one.
-     * 
-     * @return bool TRUE if the stream is a persistent one, FALSE otherwise. 
+     *
+     * @return bool TRUE if the stream is a persistent one, FALSE otherwise.
      */
     public function isPersistent()
     {
@@ -169,8 +184,8 @@ class Stream
 
     /**
      * Checks whether the wrapped stream is a blocking one.
-     * 
-     * @return bool TRUE if the stream is a blocking one, FALSE otherwise. 
+     *
+     * @return bool TRUE if the stream is a blocking one, FALSE otherwise.
      */
     public function isBlocking()
     {
@@ -179,9 +194,9 @@ class Stream
 
     /**
      * Sets blocking mode.
-     * 
+     *
      * @param bool $block Sets whether the stream is in blocking mode.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function setIsBlocking($block)
@@ -193,28 +208,28 @@ class Stream
         }
         return false;
     }
-    
+
     /**
      * Sets the timeout for the stream.
-     * 
+     *
      * @param int $seconds      Timeout in seconds.
      * @param int $microseconds Timeout in microseconds to be added to the
      *     seconds.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function setTimeout($seconds, $microseconds = 0)
     {
         return stream_set_timeout($this->stream, $seconds, $microseconds);
     }
-    
+
     /**
      * Sets the size of a stream's buffer.
-     * 
-     * @param int    $size      The desired size of the buffer, in bytes.
-     * @param string $direction The buffer of which direction to set. Valid
+     *
+     * @param int $size      The desired size of the buffer, in bytes.
+     * @param int $direction The buffer of which direction to set. Valid
      *     values are the DIRECTION_* constants.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function setBuffer($size, $direction = self::DIRECTION_ALL)
@@ -230,18 +245,18 @@ class Stream
         }
         return false;
     }
-    
+
     /**
      * Sets the size of the chunk.
-     * 
+     *
      * To ensure data integrity, as well as to allow for lower memory
      * consumption, data is sent/received in chunks. This function
      * allows you to set the size of each chunk. The default is 0xFFFFF.
-     * 
-     * @param int    $size      The desired size of the chunk, in bytes.
-     * @param string $direction The chunk of which direction to set. Valid
+     *
+     * @param int $size      The desired size of the chunk, in bytes.
+     * @param int $direction The chunk of which direction to set. Valid
      *     values are the DIRECTION_* constants.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function setChunk($size, $direction = self::DIRECTION_ALL)
@@ -262,14 +277,14 @@ class Stream
         }
         return false;
     }
-    
+
     /**
      * Gets the size of the chunk.
-     * 
-     * @param string $direction The chunk of which direction to get. Valid
+     *
+     * @param int $direction The chunk of which direction to get. Valid
      *     values are the DIRECTION_* constants.
-     * 
-     * @return int|array|false The chunk size in bytes,
+     *
+     * @return int|array<int,int>|false The chunk size in bytes,
      *     or an array of chunk sizes with the directions as keys.
      *     FALSE on invalid direction.
      */
@@ -287,18 +302,18 @@ class Stream
 
     /**
      * Sends a string or stream over the wrapped stream.
-     * 
+     *
      * Sends a string or stream over the wrapped stream. If a seekable stream is
      * provided, it will be seeked back to the same position it was passed as,
      * regardless of the $offset parameter.
-     * 
+     *
      * @param string|resource $contents The string or stream to send.
      * @param int             $offset   The offset from which to start sending.
      *     If a stream is provided, and this is set to NULL, sending will start
      *     from the current stream position.
      * @param int             $length   The maximum length to send. If omitted,
      *     the string/stream will be sent to its end.
-     * 
+     *
      * @return int The number of bytes sent.
      */
     public function send($contents, $offset = null, $length = null)
@@ -318,21 +333,22 @@ class Stream
                 ) {
                     break;
                 }
-                $bytesNow = @fwrite(
-                    $this->stream,
-                    fread($contents, $chunkSize)
-                );
-                if (0 != $bytesNow) {
-                    $bytes += $bytesNow;
-                } elseif ($this->isBlocking || false === $bytesNow) {
-                    throw $this->createException(
-                        'Failed while sending stream.',
-                        2,
-                        null,
-                        $bytes
+                $contentsToSend = fread($contents, $chunkSize);
+                if ('' != $contentsToSend) {
+                    $bytesNow = @fwrite(
+                        $this->stream,
+                        $contentsToSend
                     );
-                } else {
-                    usleep(300000);
+                    if (0 != $bytesNow) {
+                        $bytes += $bytesNow;
+                    } elseif ($this->isBlocking || false === $bytesNow) {
+                        throw $this->createException(
+                            'Failed while sending stream.',
+                            2,
+                            null,
+                            $bytes
+                        );
+                    }
                 }
                 $this->isAcceptingData(null);
             }
@@ -364,8 +380,6 @@ class Stream
                         null,
                         $bytes
                     );
-                } else {
-                    usleep(300000);
                 }
                 $this->isAcceptingData(null);
             }
@@ -375,13 +389,13 @@ class Stream
 
     /**
      * Reads from the wrapped stream to receive.
-     * 
+     *
      * Reads from the wrapped stream to receive content as a string.
-     * 
+     *
      * @param int    $length The number of bytes to receive.
      * @param string $what   Descriptive string about what is being received
      *     (used in exception messages).
-     * 
+     *
      * @return string The received content.
      */
     public function receive($length, $what = 'data')
@@ -412,16 +426,16 @@ class Stream
 
     /**
      * Reads from the wrapped stream to receive.
-     * 
+     *
      * Reads from the wrapped stream to receive content as a stream.
-     * 
+     *
      * @param int              $length  The number of bytes to receive.
      * @param FilterCollection $filters A collection of filters to apply to the
      *     stream while receiving. Note that the filters will not be present on
      *     the stream after receiving is done.
      * @param string           $what    Descriptive string about what is being
      *     received (used in exception messages).
-     * 
+     *
      * @return resource The received content.
      */
     public function receiveStream(
@@ -432,16 +446,16 @@ class Stream
         $result = fopen('php://temp', 'r+b');
         $appliedFilters = array();
         if (null !== $filters) {
-            foreach ($filters as $filtername => $params) {
+            foreach ($filters as $filterName => $params) {
                 $appliedFilters[] = stream_filter_append(
                     $result,
-                    $filtername,
+                    $filterName,
                     STREAM_FILTER_WRITE,
                     $params
                 );
             }
         }
-        
+
         $chunkSize = $this->chunkSize[self::DIRECTION_RECEIVE];
         while ($length > 0) {
             while ($this->isAvailable()) {
@@ -477,10 +491,10 @@ class Stream
 
     /**
      * Checks whether the stream is available for operations.
-     * 
+     *
      * For network streams, this means whether the other end has closed the
      * connection.
-     * 
+     *
      * @return bool TRUE if the stream is available, FALSE otherwise.
      */
     public function isAvailable()
@@ -490,13 +504,14 @@ class Stream
 
     /**
      * Checks whether there is data to be read from the wrapped stream.
-     * 
-     * @param int|null $sTimeout  If theere isn't data awaiting currently,
+     *
+     * @param int|null $sTimeout  If there isn't data awaiting currently,
      *     wait for it this many seconds for data to arrive. If NULL is
-     *     specified, wait indefinetly for that.
+     *     specified, wait indefinitely for that.
      * @param int      $usTimeout Microseconds to add to the waiting time.
-     * 
+     *
      * @return bool TRUE if there is data to be read, FALSE otherwise.
+     *
      * @SuppressWarnings(PHPMD.ShortVariable)
      */
     public function isDataAwaiting($sTimeout = 0, $usTimeout = 0)
@@ -522,14 +537,15 @@ class Stream
 
     /**
      * Checks whether the wrapped stream can be written to without a block.
-     * 
+     *
      * @param int|null $sTimeout  If the stream isn't currently accepting data,
      *     wait for it this many seconds to start accepting data. If NULL is
-     *     specified, wait indefinetly for that.
+     *     specified, wait indefinitely for that.
      * @param int      $usTimeout Microseconds to add to the waiting time.
-     * 
-     * @return bool TRUE if the wrapped stream would not block on a write, FALSE
-     *     otherwise.
+     *
+     * @return bool TRUE if the wrapped stream would not block on a write,
+     *     FALSE otherwise.
+     *
      * @SuppressWarnings(PHPMD.ShortVariable)
      */
     public function isAcceptingData($sTimeout = 0, $usTimeout = 0)
@@ -567,7 +583,7 @@ class Stream
 
     /**
      * Closes the opened stream, even if it is a persistent one.
-     * 
+     *
      * @return bool TRUE on success, FALSE on failure.
      */
     public function close()
@@ -577,10 +593,10 @@ class Stream
 
     /**
      * Creates a new exception.
-     * 
+     *
      * Creates a new exception. Used by the rest of the functions in this class.
      * Override in derived classes for custom exception handling.
-     * 
+     *
      * @param string                   $message  The exception message.
      * @param int                      $code     The exception code.
      * @param E|null                   $previous Previous exception thrown,
@@ -591,7 +607,7 @@ class Stream
      *     successfully before the failure.
      *     On failure when receiving, this is a string/stream holding
      *     the contents received successfully before the failure.
-     * 
+     *
      * @return StreamException The exception to then be thrown.
      */
     protected function createException(

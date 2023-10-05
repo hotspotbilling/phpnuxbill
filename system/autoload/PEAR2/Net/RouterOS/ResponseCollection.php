@@ -2,17 +2,18 @@
 
 /**
  * RouterOS API client implementation.
- * 
+
+ *
  * RouterOS is the flag product of the company MikroTik and is a powerful router software. One of its many abilities is to allow control over it via an API. This package provides a client for that API, in turn allowing you to use PHP to control RouterOS hosts.
- * 
+ *
  * PHP version 5
- * 
+ *
  * @category  Net
  * @package   PEAR2_Net_RouterOS
  * @author    Vasil Rangelov <boen.robot@gmail.com>
  * @copyright 2011 Vasil Rangelov
  * @license   http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
- * @version   1.0.0b5
+ * @version   1.0.0b6
  * @link      http://pear2.php.net/PEAR2_Net_RouterOS
  */
 /**
@@ -37,13 +38,13 @@ use SeekableIterator;
 
 /**
  * Represents a collection of RouterOS responses.
- * 
+ *
  * @category Net
  * @package  PEAR2_Net_RouterOS
  * @author   Vasil Rangelov <boen.robot@gmail.com>
  * @license  http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
  * @link     http://pear2.php.net/PEAR2_Net_RouterOS
- * 
+ *
  * @method string getType()
  *     Calls {@link Response::getType()}
  *     on the response pointed by the pointer.
@@ -59,61 +60,88 @@ use SeekableIterator;
  */
 class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 {
-    
+
     /**
-     * @var array An array with all {@link Response} objects.
+     * An array with all {@link Response} objects.
+     *
+     * An array with all Response objects.
+     *
+     * @var Response[]
      */
     protected $responses = array();
-    
+
     /**
-     * @var array An array with each {@link Response} object's type.
+     * An array with each Response object's type.
+     *
+     * An array with each {@link Response} object's type.
+     *
+     * @var string[]
      */
     protected $responseTypes = array();
-    
+
     /**
-     * @var array An array with each {@link Response} object's tag.
+     * An array with each Response object's tag.
+     *
+     * An array with each {@link Response} object's tag.
+     *
+     * @var string[]
      */
     protected $responseTags = array();
 
     /**
-     * @var array An array with positions of responses, based on an property
-     *     name. The name of each property is the array key, and the array value
-     *     is another array where the key is the value for that property, and
-     *     the value is the posistion of the response. For performance reasons,
-     *     each key is built only when {@link static::setIndex()} is called with
-     *     that property, and remains available for the lifetime of this
-     *     collection.
+     * An array with positions of responses, based on an property name.
+     *
+     * The name of each property is the array key, and the array value
+     * is another array where the key is the value for that property, and
+     * the value is the position of the response. For performance reasons,
+     * each key is built only when {@link static::setIndex()} is called with
+     * that property, and remains available for the lifetime of this collection.
+     *
+     * @var array<string,array<string,int>>
      */
     protected $responsesIndex = array();
-    
+
     /**
-     * @var array An array with all distinct properties across all
-     *     {@link Response} objects. Created at the first call of
-     *     {@link static::getPropertyMap()}.
+     * An array with all distinct properties.
+     *
+     * An array with all distinct properties across all {@link Response}
+     * objects. Created at the first call of {@link static::getPropertyMap()}.
+     *
+     * @var array<string,int[]>
      */
     protected $propertyMap = null;
-    
+
     /**
-     * @var int A pointer, as required by SeekableIterator.
+     * A pointer, as required by SeekableIterator.
+     *
+     * @var int
      */
     protected $position = 0;
 
     /**
-     * @var string|null Name of property to use as index. NULL when disabled.
+     * Name of property to use as index
+     *
+     * NULL when disabled.
+     *
+     * @var string|null
      */
     protected $index = null;
 
     /**
-     * @var array Criterias used by {@link compare()} to determine the order
-     *     between two respones. See {@link orderBy()} for a detailed
-     *     description of this array's format.
+     * Compare criteria.
+     *
+     * Used by {@link static::compare()} to determine the order between
+     * two responses. See {@link static::orderBy()} for a detailed description
+     * of this array's format.
+     *
+     * @var string[]|array<string,null|int|array<int|callable>>
      */
     protected $compareBy = array();
-    
+
     /**
      * Creates a new collection.
-     * 
-     * @param array $responses An array of responses, in network order.
+     *
+     * @param Response[] $responses An array of responses, in network order.
      */
     public function __construct(array $responses)
     {
@@ -129,16 +157,16 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * A shorthand gateway.
-     * 
+     *
      * This is a magic PHP method that allows you to call the object as a
      * function. Depending on the argument given, one of the other functions in
      * the class is invoked and its returned value is returned by this function.
-     * 
+     *
      * @param int|string|null $offset The offset of the response to seek to.
      *     If the offset is negative, seek to that relative to the end.
      *     If the collection is indexed, you can also supply a value to seek to.
-     *     Setting NULL will get the current response's interator.
-     * 
+     *     Setting NULL will get the current response's iterator.
+     *
      * @return Response|ArrayObject The {@link Response} at the specified
      *     offset, the current response's iterator (which is an ArrayObject)
      *     when NULL is given, or FALSE if the offset is invalid
@@ -153,15 +181,15 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Sets a property to be usable as a key in the collection.
-     * 
+     *
      * @param string|null $name The name of the property to use. Future calls
      *     that accept a position will then also be able to search values of
      *     that property for a matching value.
      *     Specifying NULL will disable such lookups (as is by default).
-     *     Note that in case this value occures multiple times within the
+     *     Note that in case this value occurs multiple times within the
      *     collection, only the last matching response will be accessible by
      *     that value.
-     * 
+     *
      * @return $this The object itself.
      */
     public function setIndex($name)
@@ -184,7 +212,7 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets the name of the property used as an index.
-     * 
+     *
      * @return string|null Name of property used as index. NULL when disabled.
      */
     public function getIndex()
@@ -194,11 +222,11 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets the whole collection as an array.
-     * 
+     *
      * @param bool $useIndex Whether to use the index values as keys for the
      *     resulting array.
-     * 
-     * @return array An array with all responses, in network order.
+     *
+     * @return Response[] An array with all responses, in network order.
      */
     public function toArray($useIndex = false)
     {
@@ -215,35 +243,22 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
     }
 
     /**
-     * Counts the responses/words in the collection.
-     * 
-     * @param int $mode The counter mode.
-     *     Either COUNT_NORMAL or COUNT_RECURSIVE.
-     *     When in normal mode, counts the number of responses.
-     *     When in recursive mode, counts the total number of API words.
-     * 
+     * Counts the responses in the collection.
+     *
      * @return int The number of responses in the collection.
      */
-    public function count($mode = COUNT_NORMAL)
+    public function count()
     {
-        if ($mode !== COUNT_NORMAL) {
-            $result = 0;
-            foreach ($this->responses as $response) {
-                $result += $response->count($mode);
-            }
-            return $result;
-        } else {
-            return count($this->responses);
-        }
+        return count($this->responses);
     }
 
     /**
      * Checks if an offset exists.
-     * 
+     *
      * @param int|string $offset The offset to check. If the
      *     collection is indexed, you can also supply a value to check.
      *     Note that negative numeric offsets are NOT accepted.
-     * 
+     *
      * @return bool TRUE if the offset exists, FALSE otherwise.
      */
     public function offsetExists($offset)
@@ -255,10 +270,10 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets a {@link Response} from a specified offset.
-     * 
+     *
      * @param int|string $offset The offset of the desired response. If the
      *     collection is indexed, you can also supply the value to search for.
-     * 
+     *
      * @return Response The response at the specified offset.
      */
     public function offsetGet($offset)
@@ -272,42 +287,44 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * N/A
-     * 
+     *
      * This method exists only because it is required for ArrayAccess. The
      * collection is read only.
-     * 
+     *
      * @param int|string $offset N/A
      * @param Response   $value  N/A
-     * 
+     *
      * @return void
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function offsetSet($offset, $value)
     {
-        
+
     }
 
     /**
      * N/A
-     * 
+     *
      * This method exists only because it is required for ArrayAccess. The
      * collection is read only.
-     * 
+     *
      * @param int|string $offset N/A
-     * 
+     *
      * @return void
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function offsetUnset($offset)
     {
-        
+
     }
 
     /**
      * Resets the pointer to 0, and returns the first response.
-     * 
-     * @return Response The first response in the collection, or FALSE if the
-     *     collection is empty.
+     *
+     * @return Response|false The first response in the collection,
+     *     or FALSE if the collection is empty.
      */
     public function rewind()
     {
@@ -316,13 +333,13 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Moves the position pointer to a specified position.
-     * 
+     *
      * @param int|string $position The position to move to. If the collection is
      *     indexed, you can also supply a value to move the pointer to.
      *     A non-existent index will move the pointer to "-1".
-     * 
-     * @return Response The {@link Response} at the specified position, or FALSE
-     *     if the specified position is not valid.
+     *
+     * @return Response|false The {@link Response} at the specified position,
+     *     or FALSE if the specified position is not valid.
      */
     public function seek($position)
     {
@@ -338,9 +355,9 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Moves the pointer forward by 1, and gets the next response.
-     * 
-     * @return Response The next {@link Response} object, or FALSE if the
-     *     position is not valid.
+     *
+     * @return Response|false The next {@link Response} object,
+     *     or FALSE if the position is not valid.
      */
     public function next()
     {
@@ -350,9 +367,9 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets the response at the current pointer position.
-     * 
-     * @return Response The response at the current pointer position, or FALSE
-     *     if the position is not valid.
+     *
+     * @return Response|false The response at the current pointer position,
+     *     or FALSE if the position is not valid.
      */
     public function current()
     {
@@ -361,9 +378,9 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Moves the pointer backwards by 1, and gets the previous response.
-     * 
-     * @return Response The next {@link Response} object, or FALSE if the
-     *     position is not valid.
+     *
+     * @return Response|false The next {@link Response} object,
+     *     or FALSE if the position is not valid.
      */
     public function prev()
     {
@@ -374,9 +391,9 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
     /**
      * Moves the pointer to the last valid position, and returns the last
      * response.
-     * 
-     * @return Response The last response in the collection, or FALSE if the
-     *     collection is empty.
+     *
+     * @return Response|false The last response in the collection,
+     *     or FALSE if the collection is empty.
      */
     public function end()
     {
@@ -386,9 +403,10 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets the key at the current pointer position.
-     * 
-     * @return int The key at the current pointer position, i.e. the pointer
-     *     position itself, or FALSE if the position is not valid.
+     *
+     * @return int|false The key at the current pointer position,
+     *     i.e. the pointer position itself, or FALSE if the position
+     *     is not valid.
      */
     public function key()
     {
@@ -397,7 +415,7 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Checks if the pointer is still pointing to an existing offset.
-     * 
+     *
      * @return bool TRUE if the pointer is valid, FALSE otherwise.
      */
     public function valid()
@@ -407,11 +425,12 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets all distinct property names.
-     * 
+     *
      * Gets all distinct property names across all responses.
-     * 
-     * @return array An array with all distinct property names as keys, and the
-     *     indexes at which they occur as values.
+     *
+     * @return array<string,int[]> An array with
+     *     all distinct property names as keys, and
+     *     the indexes at which they occur as values.
      */
     public function getPropertyMap()
     {
@@ -433,10 +452,10 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets all responses of a specified type.
-     * 
+     *
      * @param string $type The response type to filter by. Valid values are the
      *     Response::TYPE_* constants.
-     * 
+     *
      * @return static A new collection with responses of the
      *     specified type.
      */
@@ -451,9 +470,9 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Gets all responses with a specified tag.
-     * 
+     *
      * @param string $tag The tag to filter by.
-     * 
+     *
      * @return static A new collection with responses having the
      *     specified tag.
      */
@@ -468,8 +487,9 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Order resones by criteria.
-     * 
-     * @param mixed[] $criteria The criteria to order respones by. It takes the
+     *
+     * @param string[]|array<string,null|int|array<int|callable>> $criteria The
+     *     criteria to order responses by. It takes the
      *     form of an array where each key is the name of the property to use
      *     as (N+1)th sorting key. The value of each member can be either NULL
      *     (for that property, sort normally in ascending order), a single sort
@@ -479,12 +499,12 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
      *     array functions) or a callback.
      *     If a callback is provided, it must accept two arguments
      *     (the two values to be compared), and return -1, 0 or 1 if the first
-     *     value is respectively less than, equal to or greather than the second
+     *     value is respectively less than, equal to or greater than the second
      *     one.
      *     Each key of $criteria can also be numeric, in which case the
      *     value is the name of the property, and sorting is done normally in
      *     ascending order.
-     * 
+     *
      * @return static A new collection with the responses sorted in the
      *     specified order.
      */
@@ -498,14 +518,14 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
 
     /**
      * Calls a method of the response pointed by the pointer.
-     * 
+     *
      * Calls a method of the response pointed by the pointer. This is a magic
      * PHP method, thanks to which any function you call on the collection that
      * is not defined will be redirected to the response.
-     * 
+     *
      * @param string $method The name of the method to call.
      * @param array  $args   The arguments to pass to the method.
-     * 
+     *
      * @return mixed Whatever the called function returns.
      */
     public function __call($method, array $args)
@@ -517,15 +537,15 @@ class ResponseCollection implements ArrayAccess, SeekableIterator, Countable
     }
 
     /**
-     * Compares two respones.
-     * 
-     * Compares two respones, based on criteria defined in
+     * Compares two responses.
+     *
+     * Compares two responses, based on criteria defined in
      * {@link static::$compareBy}.
-     * 
+     *
      * @param Response $itemA The response to compare.
      * @param Response $itemB The response to compare $a against.
-     * 
-     * @return int Returns 0 if the two respones are equal according to every
+     *
+     * @return int Returns 0 if the two responses are equal according to every
      *     criteria specified, -1 if $a should be placed before $b, and 1 if $b
      *     should be placed before $a.
      */

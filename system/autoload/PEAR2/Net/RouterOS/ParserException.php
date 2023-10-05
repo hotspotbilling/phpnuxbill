@@ -22,7 +22,12 @@
 namespace PEAR2\Net\RouterOS;
 
 /**
- * Generic exception class of this package.
+ * Base of this class.
+ */
+use DomainException;
+
+/**
+ * Exception thrown when a value can't be parsed properly.
  *
  * @category Net
  * @package  PEAR2_Net_RouterOS
@@ -30,6 +35,9 @@ namespace PEAR2\Net\RouterOS;
  * @license  http://www.gnu.org/copyleft/lesser.html LGPL License 2.1
  * @link     http://pear2.php.net/PEAR2_Net_RouterOS
  */
-interface Exception
+class ParserException extends DomainException implements Exception
 {
+    const CODE_DATETIME = 1;
+    const CODE_DATEINTERVAL = 2;
+    const CODE_ARRAY = 3;
 }

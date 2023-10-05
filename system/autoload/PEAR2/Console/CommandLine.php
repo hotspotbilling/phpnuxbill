@@ -59,6 +59,7 @@ class CommandLine
      * Error messages.
      *
      * @var array $errors Error messages
+     *
      * @todo move this to PEAR2\Console\CommandLine\MessageProvider
      */
     public static $errors = array(
@@ -130,7 +131,7 @@ class CommandLine
     /**
      * The command line parser renderer instance.
      *
-     * @var    object that implements PEAR2\Console\CommandLine\Renderer interface
+     * @var PEAR2\Console\CommandLine\Renderer a renderer
      */
     public $renderer = false;
 
@@ -144,7 +145,7 @@ class CommandLine
     /**
      * The command line message provider instance.
      *
-     * @var PEAR2\Console\CommandLine\MessageProvider A message provider instance
+     * @var PEAR2\Console\CommandLine\MessageProvider A message provider
      */
     public $message_provider = false;
 
@@ -191,6 +192,7 @@ class CommandLine
      * convenience.
      *
      * @var PEAR2\Console\CommandLine The parent instance
+     * 
      * @todo move CommandLine::parent to CommandLine\Command
      */
     public $parent = false;
@@ -272,7 +274,7 @@ class CommandLine
      * </code>
      *
      * @var array
-     * @see PEAR2\Console\CommandLine\MessageProvider_Default
+     * @see PEAR2\Console\CommandLine\MessageProvider\DefaultProvider
      */
     public $messages = array();
 
@@ -285,6 +287,9 @@ class CommandLine
      * @var array $_dispatchLater Options to be dispatched
      */
     private $_dispatchLater = array();
+
+    private $_lastopt = false;
+    private $_stopflag = false;
 
     // }}}
     // __construct() {{{
@@ -345,7 +350,7 @@ class CommandLine
         // set default instances
         $this->renderer         = new CommandLine\Renderer_Default($this);
         $this->outputter        = new CommandLine\Outputter_Default();
-        $this->message_provider = new CommandLine\MessageProvider_Default();
+        $this->message_provider = new CommandLine\MessageProvider\DefaultProvider();
     }
 
     // }}}
@@ -481,6 +486,7 @@ class CommandLine
      * @param array $params An array containing the argument attributes
      *
      * @return PEAR2\Console\CommandLine\Argument the added argument
+     * 
      * @see PEAR2\Console\CommandLine\Argument
      */
     public function addArgument($name, $params = array())
@@ -842,6 +848,7 @@ class CommandLine
      * @param array  $params An array of search=>replaces entries
      *
      * @return void
+     * 
      * @todo remove Console::triggerError() and use exceptions only
      */
     public static function triggerError($msgId, $level, $params=array())
@@ -912,7 +919,7 @@ class CommandLine
         // Check if an invalid subcommand was specified. If there are
         // subcommands and no arguments, but an argument was provided, it is
         // an invalid subcommand.
-        if (   count($this->commands) > 0
+        if (count($this->commands) > 0
             && count($this->args) === 0
             && count($args) > 0
         ) {
@@ -925,7 +932,7 @@ class CommandLine
         }
         // if subcommand_required is set to true we must check that we have a
         // subcommand.
-        if (   count($this->commands)
+        if (count($this->commands)
             && $this->subcommand_required
             && !$result->command_name
         ) {
@@ -989,23 +996,21 @@ class CommandLine
      */
     protected function parseToken($token, $result, &$args, $argc)
     {
-        static $lastopt  = false;
-        static $stopflag = false;
         $last  = $argc === 0;
-        if (!$stopflag && $lastopt) {
+        if (!$this->_stopflag && $this->_lastopt) {
             if (substr($token, 0, 1) == '-') {
-                if ($lastopt->argument_optional) {
-                    $this->_dispatchAction($lastopt, '', $result);
-                    if ($lastopt->action != 'StoreArray') {
-                        $lastopt = false;
+                if ($this->_lastopt->argument_optional) {
+                    $this->_dispatchAction($this->_lastopt, '', $result);
+                    if ($this->_lastopt->action != 'StoreArray') {
+                        $this->_lastopt = false;
                     }
-                } else if (isset($result->options[$lastopt->name])) {
+                } else if (isset($result->options[$this->_lastopt->name])) {
                     // case of an option that expect a list of args
-                    $lastopt = false;
+                    $this->_lastopt = false;
                 } else {
                     throw CommandLine\Exception::factory(
                         'OPTION_VALUE_REQUIRED',
-                        array('name' => $lastopt->name),
+                        array('name' => $this->_lastopt->name),
                         $this,
                         $this->messages
                     );
@@ -1015,8 +1020,8 @@ class CommandLine
                 // is to consider that if there's already an element in the
                 // array, and the commandline expects one or more args, we
                 // leave last tokens to arguments
-                if ($lastopt->action == 'StoreArray'
-                    && !empty($result->options[$lastopt->name])
+                if ($this->_lastopt->action == 'StoreArray'
+                    && !empty($result->options[$this->_lastopt->name])
                     && count($this->args) > ($argc + count($args))
                 ) {
                     if (!is_null($token)) {
@@ -1024,22 +1029,22 @@ class CommandLine
                     }
                     return;
                 }
-                if (!is_null($token) || $lastopt->action == 'Password') {
-                    $this->_dispatchAction($lastopt, $token, $result);
+                if (!is_null($token) || $this->_lastopt->action == 'Password') {
+                    $this->_dispatchAction($this->_lastopt, $token, $result);
                 }
-                if ($lastopt->action != 'StoreArray') {
-                    $lastopt = false;
+                if ($this->_lastopt->action != 'StoreArray') {
+                    $this->_lastopt = false;
                 }
                 return;
             }
         }
-        if (!$stopflag && substr($token, 0, 2) == '--') {
+        if (!$this->_stopflag && substr($token, 0, 2) == '--') {
             // a long option
             $optkv = explode('=', $token, 2);
             if (trim($optkv[0]) == '--') {
                 // the special argument "--" forces in all cases the end of
                 // option scanning.
-                $stopflag = true;
+                $this->_stopflag = true;
                 return;
             }
             $opt = $this->findOption($optkv[0]);
@@ -1072,14 +1077,14 @@ class CommandLine
                     );
                 }
                 // we will have a value next time
-                $lastopt = $opt;
+                $this->_lastopt = $opt;
                 return;
             }
             if ($opt->action == 'StoreArray') {
-                $lastopt = $opt;
+                $this->_lastopt = $opt;
             }
             $this->_dispatchAction($opt, $value, $result);
-        } else if (!$stopflag && substr($token, 0, 1) == '-') {
+        } else if (!$this->_stopflag && substr($token, 0, 1) == '-') {
             // a short option
             $optname = substr($token, 0, 2);
             if ($optname == '-') {
@@ -1100,7 +1105,7 @@ class CommandLine
             // in short: handle -f<value> and -f <value>
             $next = substr($token, 2, 1);
             // check if we must wait for a value
-            if ($next === false) {
+            if (!$next) {
                 if ($opt->expectsArgument()) {
                     if ($last && !$opt->argument_optional) {
                         throw CommandLine\Exception::factory(
@@ -1111,7 +1116,7 @@ class CommandLine
                         );
                     }
                     // we will have a value next time
-                    $lastopt = $opt;
+                    $this->_lastopt = $opt;
                     return;
                 }
                 $value = false;
@@ -1136,7 +1141,7 @@ class CommandLine
                     }
                 }
                 if ($opt->action == 'StoreArray') {
-                    $lastopt = $opt;
+                    $this->_lastopt = $opt;
                 }
                 $value = substr($token, 2);
             }
@@ -1145,8 +1150,8 @@ class CommandLine
             // We have an argument.
             // if we are in POSIX compliant mode, we must set the stop flag to
             // true in order to stop option parsing.
-            if (!$stopflag && $this->force_posix) {
-                $stopflag = true;
+            if (!$this->_stopflag && $this->force_posix) {
+                $this->_stopflag = true;
             }
             if (!is_null($token)) {
                 $args[] = $token;
