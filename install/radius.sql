@@ -1,4 +1,5 @@
 
+DROP TABLE IF EXISTS `nas`;
 CREATE TABLE `nas` (
   `id` int(10) NOT NULL,
   `nasname` varchar(128) COLLATE utf8mb4_general_ci NOT NULL,
@@ -11,6 +12,7 @@ CREATE TABLE `nas` (
   `description` varchar(200) COLLATE utf8mb4_general_ci DEFAULT 'RADIUS Client'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `radacct`;
 CREATE TABLE `radacct` (
   `radacctid` bigint(21) NOT NULL,
   `acctsessionid` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -43,6 +45,7 @@ CREATE TABLE `radacct` (
   `class` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `radcheck`;
 CREATE TABLE `radcheck` (
   `id` int(11) UNSIGNED NOT NULL,
   `username` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -51,6 +54,7 @@ CREATE TABLE `radcheck` (
   `value` varchar(253) COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `radgroupcheck`;
 CREATE TABLE `radgroupcheck` (
   `id` int(11) UNSIGNED NOT NULL,
   `groupname` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -59,15 +63,17 @@ CREATE TABLE `radgroupcheck` (
   `value` varchar(253) COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `radgroupreply`;
 CREATE TABLE `radgroupreply` (
   `id` int(11) UNSIGNED NOT NULL,
   `groupname` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `attribute` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `op` char(2) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '=',
-  `value` varchar(253) COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''
-  `plan_id` int(11) UNSIGNED NOT NULL,
+  `value` varchar(253) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `plan_id` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `radpostauth`;
 CREATE TABLE `radpostauth` (
   `id` int(11) NOT NULL,
   `username` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -77,6 +83,7 @@ CREATE TABLE `radpostauth` (
   `class` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `radreply`;
 CREATE TABLE `radreply` (
   `id` int(11) UNSIGNED NOT NULL,
   `username` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -85,6 +92,7 @@ CREATE TABLE `radreply` (
   `value` varchar(253) COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `radusergroup`;
 CREATE TABLE `radusergroup` (
   `id` int(11) UNSIGNED NOT NULL,
   `username` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
@@ -163,7 +171,4 @@ ALTER TABLE `radreply`
 
 ALTER TABLE `radusergroup`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+SET FOREIGN_KEY_CHECKS=1;
