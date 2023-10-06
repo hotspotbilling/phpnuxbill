@@ -34,7 +34,7 @@ switch ($action) {
         $folders = [];
         $files = scandir('system/lan/');
         foreach ($files as $file) {
-            if(is_dir('system/lan/'.$file) && !in_array($file,['.','..'])){
+            if (is_dir('system/lan/' . $file) && !in_array($file, ['.', '..'])) {
                 $folders[] = $file;
             }
         }
@@ -422,6 +422,19 @@ switch ($action) {
                 $d->setting = 'tawkto';
                 $d->value = $tawkto;
                 $d->save();
+            }
+
+            if ($radius_enable) {
+                try {
+                    ORM::for_table('nasi', 'radius')->where('setting', 'tawkto')->find_one();
+                } catch (Exception $e) {
+                    $ui->assign("error_title", "RADIUS Error");
+                    $ui->assign("error_message", "Radius table not found.<br><br>" .
+                        $e->getMessage() .
+                        "<br><br>Download <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/Development/install/radius.sql\">here</a> or <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/install/radius.sql\">here</a> and import it to database.<br><br>Check config.php for radius connection details");
+                    $ui->display('router-error.tpl');
+                    die();
+                }
             }
 
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_enable')->find_one();
