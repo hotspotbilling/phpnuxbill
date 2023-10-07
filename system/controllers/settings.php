@@ -426,7 +426,7 @@ switch ($action) {
 
             if ($radius_enable) {
                 try {
-                    ORM::for_table('nasi', 'radius')->where('setting', 'tawkto')->find_one();
+                    ORM::for_table('nas', 'radius')->where('setting', 'tawkto')->find_one();
                 } catch (Exception $e) {
                     $ui->assign("error_title", "RADIUS Error");
                     $ui->assign("error_message", "Radius table not found.<br><br>" .
