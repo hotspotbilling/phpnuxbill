@@ -101,7 +101,7 @@ try {
             $http_proxyauth = $config['http_proxyauth'];
         }
     }
-    if (!empty($radius_user) && $config['radius_enable']) {
+    if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')) {
         ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
         ORM::configure('username', $radius_user, 'radius');
         ORM::configure('password', $radius_pass, 'radius');
