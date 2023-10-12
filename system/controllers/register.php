@@ -51,7 +51,8 @@ switch ($do) {
         if(!empty($config['sms_url'])){
             $otpPath .= sha1($username.$db_password).".txt";
             run_hook('validate_otp'); #HOOK
-            if(file_exists($otpPath) && time()-filemtime($otpPath)>300){
+            //expired 10 minutes
+            if(file_exists($otpPath) && time()-filemtime($otpPath)>1200){
                 unlink($otpPath);
                 r2(U . 'register', 's', 'Verification code expired');
             }else if(file_exists($otpPath)){
@@ -134,13 +135,14 @@ switch ($do) {
                     touch($otpPath.'index.html');
                 }
                 $otpPath .= sha1($username.$db_password).".txt";
-                if(file_exists($otpPath) && time()-filemtime($otpPath)<120){
+                //expired 10 minutes
+                if(file_exists($otpPath) && time()-filemtime($otpPath)<1200){
                     $ui->assign('username', $username);
                     $ui->assign('notify', '<div class="alert alert-success">
                     <button type="button" class="close" data-dismiss="alert">
                     <span aria-hidden="true">×</span>
                     </button>
-                    <div>Please wait '.(120-(time()-filemtime($otpPath))).' seconds before sending another SMS</div></div>');
+                    <div>Please wait '.(1200-(time()-filemtime($otpPath))).' seconds before sending another SMS</div></div>');
                     $ui->display('register-otp.tpl');
                 }else{
                     $otp = rand(100000,999999);
