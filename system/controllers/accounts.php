@@ -45,7 +45,7 @@ switch ($action) {
                         $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
                         if($p['is_radius']){
                             if($c['type'] == 'Hotspot' || ($c['type'] == 'PPPOE' && empty($d['pppoe_password']))){
-                                Radius::customerAdd($d, $p);
+                                Radius::customerUpsert($d, $p);
                             }
                         }else{
                             $mikrotik = Mikrotik::info($c['routers']);
