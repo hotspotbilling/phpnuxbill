@@ -235,7 +235,7 @@ switch ($action) {
             $plan_id = $d->id();
 
             if ($d['is_radius']) {
-                Radius::planAdd($plan_id, $radiusRate);
+                Radius::planUpSert($plan_id, $radiusRate);
             } else {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
@@ -306,7 +306,7 @@ switch ($action) {
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
 
             if ($d['is_radius']) {
-                Radius::planUpdate($id, $radiusRate);
+                Radius::planUpSert($id, $radiusRate);
             } else {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
@@ -481,7 +481,7 @@ switch ($action) {
             $plan_id = $d->id();
 
             if ($d['is_radius']) {
-                Radius::planAdd($plan_id, $radiusRate, $pool);
+                Radius::planUpSert($plan_id, $radiusRate, $pool);
             } else {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
@@ -546,7 +546,7 @@ switch ($action) {
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
 
             if ($d['is_radius']) {
-                Radius::planUpdate($id, $radiusRate, $pool);
+                Radius::planUpSert($id, $radiusRate, $pool);
             } else {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
