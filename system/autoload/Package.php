@@ -99,7 +99,7 @@ class Package
         if ($p['type'] == 'Hotspot') {
             if ($b) {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
+                    Radius::customerAddPlan($c, $p, "$date_exp $time");
                 }else{
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
@@ -158,7 +158,7 @@ class Package
                 $t->save();
             } else {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
+                    Radius::customerAddPlan($c, $p, "$date_exp $time");
                 }else{
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
@@ -207,7 +207,7 @@ class Package
 
             if ($b) {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
+                    Radius::customerAddPlan($c, $p, "$date_exp $time");
                 }else{
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
@@ -267,7 +267,7 @@ class Package
                 $t->save();
             } else {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
+                    Radius::customerAddPlan($c, $p, "$date_exp $time");
                 }else{
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
@@ -351,7 +351,7 @@ class Package
         if ($p['type'] == 'Hotspot') {
             if ($b) {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
+                    Radius::customerAddPlan($c, $p, $b['expiration'].''.$b['time']);
                 }else{
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
@@ -362,7 +362,7 @@ class Package
                 }
             } else {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
+                    Radius::customerAddPlan($c, $p, $b['expiration'].''.$b['time']);
                 }else{
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);

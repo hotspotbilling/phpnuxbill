@@ -132,7 +132,7 @@ class Radius
     /**
      * When add a plan to Customer, use this
      */
-    public static function customerAddPlan($customer, $plan)
+    public static function customerAddPlan($customer, $plan, $expired = null, $quota = null)
     {
         if (Radius::customerUpsert($customer, $plan)) {
             $p = Radius::getTableUserPackage()->where_equal('username', $customer['username'])->findOne();
@@ -147,6 +147,11 @@ class Radius
                 $p->priority = 1;
                 return $p->save();
             }
+            //expired
+            if ($plan['type'] == 'HOTSPOT') {
+
+            }
+            Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
         }
         return false;
     }
@@ -158,7 +163,7 @@ class Radius
         } else {
             Radius::upsertCustomer($customer['username'], 'Cleartext-Password',  $customer['password']);
         }
-        Radius::upsertCustomer($customer['username'], 'Simultaneous-Use',  ($plan['type'] == 'PPPOE')? 1: $plan['shared_users'] );
+        Radius::upsertCustomer($customer['username'], 'Simultaneous-Use', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
         return false;
     }
 
