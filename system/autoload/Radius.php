@@ -1,10 +1,17 @@
 <?php
+
 /**
  * Radius Class
  * based https://gist.github.com/nasirhafeez/6669b24aab0bda545f60f9da5ed14f25
  */
 class Radius
 {
+
+    public static function getClient()
+    {
+        global $config;
+        return (empty($config['radius_client'])) ? shell_exec('which radclient') : $config['radius_client'];
+    }
 
     public static function getTableNas()
     {
@@ -123,6 +130,7 @@ class Radius
             // we just change the password
             $r->value = md5(time() . $username . $radius_pass);
             $r->save();
+            Radius::disconnectCustomer($username);
         }
     }
 
@@ -162,7 +170,7 @@ class Radius
                         $datalimit = $plan['data_limit'] . "000000000";
                     else
                         $datalimit = $plan['data_limit'] . "000000";
-                        Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
                 } else if ($plan['limit_type'] == "Both_Limit") {
                     if ($plan['time_unit'] == 'Hrs')
                         $timelimit = $plan['time_limit'] * 60 * 60;
@@ -172,17 +180,17 @@ class Radius
                         $datalimit = $plan['data_limit'] . "000000000";
                     else
                         $datalimit = $plan['data_limit'] . "000000";
-                        Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
-                        Radius::upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Expire-After', $timelimit);
                 }
-            }else{
+            } else {
                 Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Max-Volume')->delete();
                 Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Expire-After')->delete();
             }
             // expired user
-            if($expired!=null){
+            if ($expired != null) {
                 Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
-            }else{
+            } else {
                 Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'expiration')->delete();
             }
             return true;
@@ -232,5 +240,18 @@ class Radius
         $r->op = $op;
         $r->value = $value;
         return $r->save();
+    }
+
+    public static function disconnectCustomer($username){
+        $nas = Radius::getTableNas()->findMany();
+        $count = count($nas)*15;
+        set_time_limit($count);
+        foreach ($nas as $n){
+            $port = 3799;
+            if(!empty($n['ports'])){
+                $port = $n['ports'];
+            }
+            shell_exec("echo 'User-Name = $username' | ".Radius::getClient()." ".trim($n['nasname']).":$port disconnect '".$n['secret']."'");
+        }
     }
 }

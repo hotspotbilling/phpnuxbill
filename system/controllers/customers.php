@@ -63,7 +63,6 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
             if ($p) {
                 if ($p['is_radius']) {
-                    //TODO: disconnect using radius
                     Radius::customerDeactivate($b['username']);
                 } else {
                     $mikrotik = Mikrotik::info($b['routers']);

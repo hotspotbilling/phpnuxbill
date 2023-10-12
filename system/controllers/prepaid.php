@@ -166,7 +166,6 @@ switch ($action) {
             run_hook('delete_customer_active_plan'); #HOOK
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             if ($p['is_radius']) {
-                //TODO: disconnect using radius
                 Radius::customerDeactivate($d['username']);
             } else {
                 $mikrotik = Mikrotik::info($d['routers']);

@@ -25,7 +25,7 @@ switch ($action) {
         $ui->assign('logo', $logo);
         if(empty($_c['radius_client'])){
             try{
-                $_c['radius_client'] = shell_exec('which radclient');
+                $_c['radius_client'] = Radius::getClient();
                 $ui->assign('_c', $_c);
             }catch(Exception $e){
                 //ignore

@@ -150,7 +150,6 @@ foreach ($d as $ds) {
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
             if ($p['is_radius']) {
-                //TODO: disconnect using radius
                 Radius::customerDeactivate($c['username']);
             }else{
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
