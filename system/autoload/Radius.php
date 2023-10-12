@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Radius Class
+ * based https://gist.github.com/nasirhafeez/6669b24aab0bda545f60f9da5ed14f25
+ */
 class Radius
 {
 
@@ -132,26 +135,57 @@ class Radius
     /**
      * When add a plan to Customer, use this
      */
-    public static function customerAddPlan($customer, $plan, $expired = null, $quota = null)
+    public static function customerAddPlan($customer, $plan, $expired = null)
     {
         if (Radius::customerUpsert($customer, $plan)) {
             $p = Radius::getTableUserPackage()->where_equal('username', $customer['username'])->findOne();
             if ($p) {
                 // if exists
                 $p->groupname = "plan_" . $plan['id'];
-                return $p->save();
+                $p->save();
             } else {
                 $p = Radius::getTableUserPackage()->create();
                 $p->username = $customer['username'];
                 $p->groupname = "plan_" . $plan['id'];
                 $p->priority = 1;
-                return $p->save();
+                $p->save();
             }
-            //expired
-            if ($plan['type'] == 'HOTSPOT') {
-
+            if ($plan['type'] == 'HOTSPOT' && $plan['typebp'] == "Limited") {
+                if ($plan['limit_type'] == "Time_Limit") {
+                    if ($plan['time_unit'] == 'Hrs')
+                        $timelimit = $plan['time_limit'] * 60 * 60;
+                    else
+                        $timelimit = $plan['time_limit'] * 60;
+                    Radius::upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                } else if ($plan['limit_type'] == "Data_Limit") {
+                    if ($plan['data_unit'] == 'GB')
+                        $datalimit = $plan['data_limit'] . "000000000";
+                    else
+                        $datalimit = $plan['data_limit'] . "000000";
+                        Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                } else if ($plan['limit_type'] == "Both_Limit") {
+                    if ($plan['time_unit'] == 'Hrs')
+                        $timelimit = $plan['time_limit'] * 60 * 60;
+                    else
+                        $timelimit = $plan['time_limit'] . ":00";
+                    if ($plan['data_unit'] == 'GB')
+                        $datalimit = $plan['data_limit'] . "000000000";
+                    else
+                        $datalimit = $plan['data_limit'] . "000000";
+                        Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                        Radius::upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                }
+            }else{
+                Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Max-Volume')->delete();
+                Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Expire-After')->delete();
             }
-            Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
+            // expired user
+            if($expired!=null){
+                Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
+            }else{
+                Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'expiration')->delete();
+            }
+            return true;
         }
         return false;
     }

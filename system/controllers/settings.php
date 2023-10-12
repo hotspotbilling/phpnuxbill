@@ -23,6 +23,14 @@ switch ($action) {
             $logo = 'system/uploads/logo.default.png';
         }
         $ui->assign('logo', $logo);
+        if(empty($_c['radius_client'])){
+            try{
+                $_c['radius_client'] = shell_exec('which radclient');
+                $ui->assign('_c', $_c);
+            }catch(Exception $e){
+                //ignore
+            }
+        }
         run_hook('view_app_settings'); #HOOK
         $ui->display('app-settings.tpl');
         break;
@@ -234,6 +242,7 @@ switch ($action) {
         $http_proxy = _post('http_proxy');
         $http_proxyauth = _post('http_proxyauth');
         $radius_enable = _post('radius_enable');
+        $radius_client = _post('radius_client');
         run_hook('save_settings'); #HOOK
 
 
@@ -445,6 +454,17 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'radius_enable';
                 $d->value = $radius_enable;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_client')->find_one();
+            if ($d) {
+                $d->value = $radius_client;
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'radius_client';
+                $d->value = $radius_client;
                 $d->save();
             }
 

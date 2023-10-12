@@ -82,6 +82,12 @@
                         </div>
                         <p class="help-block col-md-4 text-red">Radius Not Yet Ready</p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label text-muted">Radius Client</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="radius_client" value="{$_c['radius_client']}">
+                        </div>
+                    </div>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
