@@ -1,8 +1,10 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
  **/
+
 //error_reporting (0);
 $appurl = $_POST['appurl'];
 $db_host = $_POST['dbhost'];

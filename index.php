@@ -1,7 +1,9 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
-**/
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
+ **/
+
 session_start();
 
 if(isset($_GET['nux-mac']) && !empty($_GET['nux-mac'])){

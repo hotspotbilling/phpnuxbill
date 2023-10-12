@@ -1,11 +1,9 @@
 <?php
-
 /**
- * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
- * @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
-
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
  **/
+
 _admin();
 $ui->assign('_title', $_L['Recharge_Account']);
 $ui->assign('_system_menu', 'prepaid');

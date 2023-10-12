@@ -1,11 +1,7 @@
 <?php
-
 /**
- * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
- * @copyright	Copyright (C) 2014-2015 PHP Mikrotik Billing
- * @license		GNU General Public License version 2 or later; see LICENSE.txt
- *
- * created by iBNuX
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
  **/
 
 if (isset($routes['1'])) {

@@ -1,6 +1,11 @@
 <?php
 
 /**
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
+ **/
+
+/**
  * Radius Class
  * based https://gist.github.com/nasirhafeez/6669b24aab0bda545f60f9da5ed14f25
  */

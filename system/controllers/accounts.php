@@ -2,7 +2,7 @@
 
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
- *  by @ibnux
+ *  by https://t.me/ibnux
  **/
 
 

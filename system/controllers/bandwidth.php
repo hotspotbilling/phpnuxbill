@@ -1,7 +1,9 @@
 <?php
 /**
-* PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
-**/
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
+ **/
+
 _admin();
 $ui->assign('_title', $_L['Bandwidth_Plans']);
 $ui->assign('_system_menu', 'services');

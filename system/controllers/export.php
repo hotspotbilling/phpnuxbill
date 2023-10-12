@@ -1,8 +1,10 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
  **/
+
 _admin();
 $ui->assign('_title', $_L['Reports']);
 $ui->assign('_sysfrm_menu', 'reports');
