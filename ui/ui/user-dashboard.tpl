@@ -89,10 +89,12 @@
                     </tr>
                 {/if}
                 {if $_bill}
-                    <tr>
-                        <td class="small text-primary text-uppercase text-normal">{strtoupper(Lang::T('Location'))}</td>
-                        <td class="small mb15">{$_bill['routers']}</td>
-                    </tr>
+                    {if $_bill['routers'] != 'radius'}
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">{strtoupper(Lang::T('Location'))}</td>
+                            <td class="small mb15">{$_bill['routers']}</td>
+                        </tr>
+                    {/if}
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">{$_L['Plan_Name']}</td>
                         <td class="small mb15">
@@ -101,8 +103,7 @@
                                 <a class="label label-danger pull-right" href="{$_url}home&deactivate=1"
                                     onclick="return confirm('{Lang::T('Deactivate')}?')">{Lang::T('Deactivate')}</a>
                             {else}
-                                <a class="label label-warning pull-right" href="{$_url}order/package"
-                                >{Lang::T('expired')}</a>
+                                <a class="label label-warning pull-right" href="{$_url}order/package">{Lang::T('expired')}</a>
                             {/if}
                         </td>
                     </tr>
@@ -132,11 +133,11 @@
                             <td class="small mb15">{$nux_mac}</td>
                         </tr>
                     {/if}
-                    {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
+                    {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on' && $_bill['routers'] != 'radius'}
                         <tr>
                             <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
                             <td class="small mb15" id="login_status">
-                            <img src="ui/ui/images/loading.gif">
+                                <img src="ui/ui/images/loading.gif">
                             </td>
                         </tr>
                     {/if}
