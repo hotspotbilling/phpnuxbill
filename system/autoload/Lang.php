@@ -81,4 +81,9 @@ class Lang
             return $_notifmsg_default[$key];
         }
     }
+
+    public static function ucWords($text)
+    {
+        return ucwords(str_replace('_', ' ', $text));
+    }
 }

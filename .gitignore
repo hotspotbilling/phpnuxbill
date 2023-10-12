@@ -26,3 +26,6 @@ system/uploads/sms/**
 !system/uploads/sms/index.html
 system/uploads/system/**
 !system/uploads/system/index.html
+ui/themes/**
+!ui/themes/index.html
+!ui/themes/README.md

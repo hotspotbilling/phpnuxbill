@@ -30,6 +30,14 @@ switch ($action) {
                 //ignore
             }
         }
+        $themes = [];
+        $files = scandir('ui/themes/');
+        foreach ($files as $file) {
+            if (is_dir('ui/themes/' . $file) && !in_array($file, ['.', '..'])) {
+                $themes[] = $file;
+            }
+        }
+        $ui->assign('themes', $themes);
         run_hook('view_app_settings'); #HOOK
         $ui->display('app-settings.tpl');
         break;
@@ -46,7 +54,6 @@ switch ($action) {
             }
         }
         $ui->assign('lan', $folders);
-
         $timezonelist = Timezone::timezoneList();
         $ui->assign('tlist', $timezonelist);
         $ui->assign('xjq', ' $("#tzone").select2(); ');
@@ -242,6 +249,7 @@ switch ($action) {
         $http_proxyauth = _post('http_proxyauth');
         $radius_enable = _post('radius_enable');
         $radius_client = _post('radius_client');
+        $theme = _post('theme');
         run_hook('save_settings'); #HOOK
 
 
@@ -286,6 +294,18 @@ switch ($action) {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'http_proxyauth';
                 $d->value = $http_proxyauth;
+                $d->save();
+            }
+
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'theme')->find_one();
+            if ($d) {
+                $d->value = $theme;
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'theme';
+                $d->value = $theme;
                 $d->save();
             }
 

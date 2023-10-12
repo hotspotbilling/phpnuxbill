@@ -128,9 +128,18 @@ function _notify($msg, $type = 'e')
 }
 
 $lan_file = File::pathFixer('system/lan/' . $config['language'] . '/common.lan.php');
-require($lan_file);
+require $lan_file;
+
 $ui = new Smarty();
-$ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'default' => File::pathFixer('ui/ui/')]);
+
+if (!empty($config['theme']) && $config['theme'] != 'default') {
+    $_theme = APP_URL . '/ui/theme/' . $config['theme'];
+    $ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'theme' => $_theme, 'default' => File::pathFixer('ui/ui/')]);
+} else {
+    $_theme = APP_URL . '/ui/ui';
+    $ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'default' => File::pathFixer('ui/ui/')]);
+}
+$ui->assign('_theme', $_theme);
 $ui->addTemplateDir(File::pathFixer('system/paymentgateway/ui/'), 'pg');
 $ui->addTemplateDir(File::pathFixer('system/plugin/ui/'), 'plugin');
 $ui->setCompileDir(File::pathFixer('ui/compiled/'));
@@ -338,7 +347,7 @@ try {
     }
 } catch (Exception $e) {
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->assign("error_message", $e->getMessage().'<br><pre>'.$e->getTraceAsString().'</pre>');
+    $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->display('router-error.tpl');
     die();
 }

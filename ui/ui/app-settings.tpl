@@ -54,6 +54,17 @@
                         </div>
                     </div>
                     <div class="form-group">
+						<label class="col-md-2 control-label">Theme</label>
+						<div class="col-md-6">
+							<select name="theme" id="theme" class="form-control">
+								<option value="default" {if $_c['theme'] eq 'default'}selected="selected" {/if}>Default</option>
+                                    {foreach $themes as $theme}
+                                        <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>{Lang::ucWords($theme)}</option>
+                                    {/foreach}
+							</select>
+						</div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>
                         <div class="col-md-6">
                             <select name="disable_voucher" id="disable_voucher" class="form-control">
