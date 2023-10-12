@@ -41,21 +41,24 @@ switch ($action) {
     case 'sync':
         set_time_limit(-1);
         $plans = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
-        echo count($plans);
         $log = '';
         $router = '';
         foreach ($plans as $plan) {
-            if ($router != $plan['routers']) {
+            if ($router != $plan['routers'] && $plan['routers'] != 'radius') {
                 $mikrotik = Mikrotik::info($plan['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 $router = $plan['routers'];
             }
             $p = ORM::for_table('tbl_plans')->findOne($plan['plan_id']);
             $c = ORM::for_table('tbl_customers')->findOne($plan['customer_id']);
-            if ($plan['type'] == 'Hotspot') {
-                Mikrotik::addHotspotUser($client, $p, $c);
-            } else if ($plan['type'] == 'PPPOE') {
-                Mikrotik::addPpoeUser($client, $p, $c);
+            if($plan['routers'] == 'radius'){
+                Radius::customerAddPlan($c, $p, $plans['expiration'].' '.$plans['time']);
+            }else{
+                if ($plan['type'] == 'Hotspot') {
+                    Mikrotik::addHotspotUser($client, $p, $c);
+                } else if ($plan['type'] == 'PPPOE') {
+                    Mikrotik::addPpoeUser($client, $p, $c);
+                }
             }
             $log .= "DONE : $plan[username], $plan[namebp], $plan[type], $plan[routers]<br>";
         }

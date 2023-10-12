@@ -338,7 +338,7 @@ try {
     }
 } catch (Exception $e) {
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->assign("error_message", $e->getMessage());
+    $ui->assign("error_message", $e->getMessage().'<br><pre>'.$e->getTraceAsString().'</pre>');
     $ui->display('router-error.tpl');
     die();
 }

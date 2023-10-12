@@ -1,8 +1,11 @@
 <?php
 
 /**
- * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by @ibnux
  **/
+
+
 _auth();
 $ui->assign('_title', $_L['My_Account']);
 $ui->assign('_system_menu', 'accounts');
@@ -10,10 +13,6 @@ $ui->assign('_system_menu', 'accounts');
 $action = $routes['1'];
 $user = User::_info();
 $ui->assign('_user', $user);
-
-use PEAR2\Net\RouterOS;
-
-require_once 'system/autoload/PEAR2/Autoload.php';
 
 switch ($action) {
 
