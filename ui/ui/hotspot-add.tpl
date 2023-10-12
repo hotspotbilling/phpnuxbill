@@ -172,14 +172,7 @@
                 if (cek.checked) {
                     $("#routerChoose").addClass('hidden');
                     document.getElementById("routers").required = false;
-                    document.getElementById("Limited").disabled = true;
-                    document.getElementById("Unlimited").checked = true;
-                    document.getElementById("Limited").checked = false;
-                    $('#Type').hide();
-                    $('#TimeLimit').hide();
-                    $('#DataLimit').hide();
                 } else {
-                    document.getElementById("Limited").disabled = false;
                     document.getElementById("routers").required = true;
                     $("#routerChoose").removeClass('hidden');
                 }
