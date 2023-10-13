@@ -62,7 +62,7 @@
 
 <div class="row">
     <div class="col-md-7">
-        {if $_c['disable_voucher'] != 'yes'}
+        {if $_c['disable_voucher'] != 'yes' && $stocks['unused']>0 || $stocks['used']>0}
             <div class="panel panel-primary mb20 panel-hovered project-stats table-responsive">
                 <div class="panel-heading">Vouchers Stock</div>
                 <div class="table-responsive">
