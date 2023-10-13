@@ -50,7 +50,7 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->findOne($plan['plan_id']);
             $c = ORM::for_table('tbl_customers')->findOne($plan['customer_id']);
             if($plan['routers'] == 'radius'){
-                Radius::customerAddPlan($c, $p, $plans['expiration'].' '.$plans['time']);
+                Radius::customerAddPlan($c, $p, $plan['expiration'].' '.$plan['time']);
             }else{
                 if ($plan['type'] == 'Hotspot') {
                     Mikrotik::addHotspotUser($client, $p, $c);

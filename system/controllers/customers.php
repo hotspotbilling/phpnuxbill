@@ -95,7 +95,7 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
             if ($p) {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
+                    Radius::customerAddPlan($c, $p, $p['expiration'].' '.$p['time']);
                     r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Radius');
                 } else {
                     $mikrotik = Mikrotik::info($b['routers']);
@@ -327,7 +327,7 @@ switch ($action) {
                         if($userDiff){
                             Radius::customerChangeUsername($oldusername, $username);
                         }
-                        Radius::customerAddPlan($d, $p);
+                        Radius::customerAddPlan($d, $p, $p['expiration'].' '.$p['time']);
                     }else{
                         $mikrotik = Mikrotik::info($c['routers']);
                         if ($c['type'] == 'Hotspot') {
