@@ -193,12 +193,14 @@ class Radius
                     // Mikrotik Spesific
                     Radius::upsertCustomer($customer['username'], 'Mikrotik-Recv-Limit', $datalimit);
                     Radius::upsertCustomer($customer['username'], 'Mikrotik-Xmit-Limit', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
                 }
             } else {
                 Radius::delAtribute(Radius::getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
                 Radius::delAtribute(Radius::getTableCustomer(), 'Expire-After', 'username', $customer['username']);
                 Radius::delAtribute(Radius::getTableCustomer(), 'Mikrotik-Recv-Limit', 'username', $customer['username']);
                 Radius::delAtribute(Radius::getTableCustomer(), 'Mikrotik-Xmit-Limit', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'Mikrotik-Total-Limit', 'username', $customer['username']);
             }
             // expired user
             if ($expired != null) {
