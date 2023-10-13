@@ -88,6 +88,7 @@ class Radius
         $rates = explode('/', $rate);
         Radius::upsertPackage($plan_id, 'Ascend-Data-Rate', $rates[1], ':=');
         Radius::upsertPackage($plan_id, 'Ascend-Xmit-Rate', $rates[0], ':=');
+        Radius::upsertPackage($plan_id, 'Mikrotik-Rate-Limit', $rate, ':=');
         if ($pool != null) {
             Radius::upsertPackage($plan_id, 'Framed-Pool', $pool, ':=');
         }
@@ -151,6 +152,7 @@ class Radius
      */
     public static function customerAddPlan($customer, $plan, $expired = null)
     {
+        global $config;
         if (Radius::customerUpsert($customer, $plan)) {
             $p = Radius::getTableUserPackage()->where_equal('username', $customer['username'])->findOne();
             if ($p) {
@@ -188,16 +190,25 @@ class Radius
                         $datalimit = $plan['data_limit'] . "000000";
                     Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
                     Radius::upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                    // Mikrotik Spesific
+                    Radius::upsertCustomer($customer['username'], 'Mikrotik-Recv-Limit', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Mikrotik-Xmit-Limit', $datalimit);
                 }
             } else {
-                $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Max-Volume')->findOne();
-                if($r) $r->delete();
-                $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Expire-After')->findOne();
-                if($r) $r->delete();
+                Radius::delAtribute(Radius::getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'Expire-After', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'Mikrotik-Recv-Limit', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'Mikrotik-Xmit-Limit', 'username', $customer['username']);
             }
             // expired user
             if ($expired != null) {
                 Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
+                // Mikrotik Spesific
+                Radius::upsertCustomer(
+                    $customer['username'],
+                    'WISPr-Session-Terminate-Time',
+                    date('Y-m-d', strtotime($expired)).'T'.date('H:i:s', strtotime($expired)).Timezone::getTimeOffset($config['timezone'])
+                );
             } else {
                 $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'expiration')->findOne();
                 if($r) $r->delete();
@@ -215,7 +226,15 @@ class Radius
             Radius::upsertCustomer($customer['username'], 'Cleartext-Password',  $customer['password']);
         }
         Radius::upsertCustomer($customer['username'], 'Simultaneous-Use', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
+        // Mikrotik Spesific
+        Radius::upsertCustomer($customer['username'], 'Port-Limit', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
+        Radius::upsertCustomer($customer['username'], 'Mikrotik-Wireless-Comment',$customer['fullname']);
         return true;
+    }
+
+    private static function delAtribute($tabel, $attribute, $key, $value){
+        $r = $tabel->where_equal($key, $value)->whereEqual('attribute', $attribute)->findOne();
+        if($r) $r->delete();
     }
 
     /**

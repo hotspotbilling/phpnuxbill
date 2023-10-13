@@ -38,4 +38,13 @@ class Timezone {
 
         return $timezoneList;
     }
+
+    public static function getTimeOffset($tz = 'Asia/Jakarta'){
+        $utcTime = new DateTime('now', new DateTimeZone('UTC'));
+        $currentTimezone = new DateTimeZone($tz);
+        $offset = $currentTimezone->getOffset($utcTime);
+        $sign = ($offset > 0) ? '+' : '-';
+        $offset = gmdate('H:i', abs($offset));
+        return $sign.$offset;
+    }
 }
