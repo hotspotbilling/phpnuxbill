@@ -133,8 +133,8 @@ require $lan_file;
 $ui = new Smarty();
 
 if (!empty($config['theme']) && $config['theme'] != 'default') {
-    $_theme = APP_URL . '/ui/theme/' . $config['theme'];
-    $ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'theme' => $_theme, 'default' => File::pathFixer('ui/ui/')]);
+    $_theme = APP_URL . '/ui/themes/' . $config['theme'];
+    $ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'theme' => File::pathFixer('ui/themes/' . $config['theme']), 'default' => File::pathFixer('ui/ui/')]);
 } else {
     $_theme = APP_URL . '/ui/ui';
     $ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'default' => File::pathFixer('ui/ui/')]);
