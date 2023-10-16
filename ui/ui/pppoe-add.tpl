@@ -118,7 +118,6 @@
                 if (cek.checked) {
                     document.getElementById("routers").required = false;
                     document.getElementById("routers").disabled = true;
-                    document.getElementById("pool_expired").disabled = true;
                     $.ajax({
                         url: "index.php?_route=autoload/pool",
                         data: "routers=radius",
@@ -127,10 +126,17 @@
                             $("#pool_name").html(msg);
                         }
                     });
+                    $.ajax({
+                        url: "index.php?_route=autoload/pool",
+                        data: "routers=radius",
+                        cache: false,
+                        success: function(msg) {
+                            $("#pool_expired").html(msg);
+                        }
+                    });
                 } else {
                     document.getElementById("routers").required = true;
                     document.getElementById("routers").disabled = false;
-                    document.getElementById("pool_expired").disabled = false;
                 }
             }
         </script>

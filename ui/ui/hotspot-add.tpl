@@ -143,16 +143,16 @@
                                 <p class="help-block">{Lang::T('Cannot be change after saved')}</p>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="col-md-2 control-label"><a
-                                    href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
-                            <div class="col-md-6">
-                                <select id="pool_expired" name="pool_expired" class="form-control select2">
-                                    <option value=''>{$_L['Select_Pool']}</option>
-                                </select>
-                            </div>
-                        </div>
                     </span>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label"><a
+                                href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
+                        <div class="col-md-6">
+                            <select id="pool_expired" name="pool_expired" class="form-control select2">
+                                <option value=''>{$_L['Select_Pool']}</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
                             <button class="btn btn-success waves-effect waves-light"
@@ -177,6 +177,16 @@
                     $("#routerChoose").removeClass('hidden');
                 }
             }
+            setTimeout(() => {
+                $.ajax({
+                    url: "index.php?_route=autoload/pool",
+                    data: "routers=radius",
+                    cache: false,
+                    success: function(msg) {
+                        $("#pool_expired").html(msg);
+                    }
+                });
+            }, 2000);
         </script>
     {/literal}
 {/if}
