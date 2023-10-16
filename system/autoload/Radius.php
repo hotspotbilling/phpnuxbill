@@ -283,7 +283,7 @@ class Radius
     /**
      * To insert or update existing customer Attribute
      */
-    private static function upsertCustomerAttr($username, $attr, $value, $op = ':=')
+    public static function upsertCustomerAttr($username, $attr, $value, $op = ':=')
     {
         $r = Radius::getTableCustomerAttr()->where_equal('username', $username)->whereEqual('attribute', $attr)->find_one();
         if (!$r) {
