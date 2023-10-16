@@ -207,7 +207,7 @@ class Radius
             }
             // expired user
             if ($expired != null) {
-                Radius::upsertCustomer($customer['username'], 'access-period', strtotime($expired) - time());
+                //Radius::upsertCustomer($customer['username'], 'access-period', strtotime($expired) - time());
                 Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
                 // Mikrotik Spesific
                 Radius::upsertCustomer(
@@ -216,7 +216,7 @@ class Radius
                     date('Y-m-d', strtotime($expired)) . 'T' . date('H:i:s', strtotime($expired)) . Timezone::getTimeOffset($config['timezone'])
                 );
             } else {
-                Radius::delAtribute(Radius::getTableCustomer(), 'access-period', 'username', $customer['username']);
+                //Radius::delAtribute(Radius::getTableCustomer(), 'access-period', 'username', $customer['username']);
                 Radius::delAtribute(Radius::getTableCustomer(), 'expiration', 'username', $customer['username']);
             }
 
