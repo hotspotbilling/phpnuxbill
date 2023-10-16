@@ -4,7 +4,7 @@
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
-                PhpNuxBill
+                Radius
             </div>
             <div class="panel-body">
                 <div class="text-center" style="padding: 15px">
@@ -40,17 +40,29 @@
                         <tbody>
                             {foreach $d as $ds}
                                 <tr>
-                                    <td>{$ds['id']}</td>
-                                    <td>{Lang::dateTimeFormat($ds['date'])}</td>
-                                    <td>{$ds['type']}</td>
-                                    <td>{$ds['ip']}</td>
-                                    <td style="overflow-x: scroll;">{$ds['description']}</td>
+                                    <td width="30px">{$ds['id']}</td>
+                                    <td width="200px">{Lang::dateTimeFormat($ds['authdate'])}</td>
+                                    <td width="100px">{$ds['username']}</td>
+                                    <td width="10px"><input type="password" value="{$ds['pass']}"
+                                            style="width:300px;border: 0px; text-align: right;" class="pull-right"
+                                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                                            onclick="this.select()"></td>
+                                    <td>{$ds['reply']}</td>
                                 </tr>
                             {/foreach}
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+                <nav aria-label="...">
+                    <ul class="pager">
+                        {if $page > 0}
+                            <li class="previous "><a href="{$_url}logs/radius/{$page-1}"><span
+                                        aria-hidden="true">&larr;</span> Newer</a></li>
+                        {/if}
+                        <li class="next"><a href="{$_url}logs/radius/{$page+1}">Older <span
+                                    aria-hidden="true">&rarr;</span></a></li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

@@ -264,8 +264,7 @@
                             </ul>
                         </li>
                         {$_MENU_AFTER_SETTINGS}
-                        <li
-                            class="{if $_system_menu eq 'logs' }active{/if} treeview">
+                        <li class="{if $_system_menu eq 'logs' }active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-clock"></i> <span>{Lang::T('Logs')}</span>
                                 <span class="pull-right-container">
@@ -273,10 +272,16 @@
                                 </span>
                             </a>
                             <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'phpnuxbill'}class="active" {/if}><a
+                                <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}logs/phpnuxbill">PhpNuxBill</a></li>
-                                {$_MENU_LOGS}
                             </ul>
+                            {if $_c['radius_enable']}
+                                <ul class="treeview-menu">
+                                    <li {if $_routes[1] eq 'radius'}class="active" {/if}><a href="{$_url}logs/radius">Radius</a>
+                                    </li>
+                                </ul>
+                            {/if}
+                            {$_MENU_LOGS}
                         </li>
                         {$_MENU_AFTER_LOGS}
                         <li {if $_system_menu eq 'community'}class="active" {/if}>
