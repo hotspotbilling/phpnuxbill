@@ -25,6 +25,9 @@
 						<div class="col-md-6">
 							<input type="text" class="form-control" id="routers" name="routers" value="{$d['routers']}" readonly>
 						</div>
+                        {if $_c['radius_enable']}
+                            <p class="help-block col-md-4">For Radius, you need to add <b>Pool Name</b> in Mikrotik manually</p>
+                        {/if}
                     </div>
 
 					<div class="form-group">

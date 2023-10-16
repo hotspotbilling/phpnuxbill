@@ -31,6 +31,9 @@
                                 {/foreach}
                             </select>
 						</div>
+                        {if $_c['radius_enable']}
+                            <p class="help-block col-md-4">For Radius, you need to add <b>Pool Name</b> in Mikrotik manually</p>
+                        {/if}
                     </div>
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
