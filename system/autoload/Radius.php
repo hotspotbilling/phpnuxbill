@@ -202,16 +202,17 @@ class Radius
             }
             // expired user
             if ($expired != null) {
+                Radius::upsertCustomer($customer['username'], 'access-period', strtotime($expired) - time());
                 Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
                 // Mikrotik Spesific
                 Radius::upsertCustomer(
                     $customer['username'],
                     'WISPr-Session-Terminate-Time',
-                    date('Y-m-d', strtotime($expired)).'T'.date('H:i:s', strtotime($expired)).Timezone::getTimeOffset($config['timezone'])
+                    date('Y-m-d', strtotime($expired)) . 'T' . date('H:i:s', strtotime($expired)) . Timezone::getTimeOffset($config['timezone'])
                 );
             } else {
-                $r = Radius::getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'expiration')->findOne();
-                if($r) $r->delete();
+                Radius::delAtribute(Radius::getTableCustomer(), 'access-period', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'expiration', 'username', $customer['username']);
             }
             return true;
         }
@@ -228,13 +229,14 @@ class Radius
         Radius::upsertCustomer($customer['username'], 'Simultaneous-Use', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
         // Mikrotik Spesific
         Radius::upsertCustomer($customer['username'], 'Port-Limit', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
-        Radius::upsertCustomer($customer['username'], 'Mikrotik-Wireless-Comment',$customer['fullname']);
+        Radius::upsertCustomer($customer['username'], 'Mikrotik-Wireless-Comment', $customer['fullname']);
         return true;
     }
 
-    private static function delAtribute($tabel, $attribute, $key, $value){
+    private static function delAtribute($tabel, $attribute, $key, $value)
+    {
         $r = $tabel->where_equal($key, $value)->whereEqual('attribute', $attribute)->findOne();
-        if($r) $r->delete();
+        if ($r) $r->delete();
     }
 
     /**
@@ -270,17 +272,18 @@ class Radius
         return $r->save();
     }
 
-    public static function disconnectCustomer($username){
+    public static function disconnectCustomer($username)
+    {
         $nas = Radius::getTableNas()->findMany();
-        $count = count($nas)*15;
+        $count = count($nas) * 15;
         set_time_limit($count);
         $result = [];
-        foreach ($nas as $n){
+        foreach ($nas as $n) {
             $port = 3799;
-            if(!empty($n['ports'])){
+            if (!empty($n['ports'])) {
                 $port = $n['ports'];
             }
-            $result[] = $n['nasname'].': '.shell_exec("echo 'User-Name = $username' | ".Radius::getClient()." ".trim($n['nasname']).":$port disconnect '".$n['secret']."'");
+            $result[] = $n['nasname'] . ': ' . shell_exec("echo 'User-Name = $username' | " . Radius::getClient() . " " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
         }
         return $result;
     }
