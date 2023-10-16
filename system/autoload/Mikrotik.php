@@ -21,7 +21,7 @@ class Mikrotik
             return new RouterOS\Client($iport[0], $user, $pass, ($iport[1]) ? $iport[1] : null);
         } catch (Exception $e) {
             $ui->assign("error_title", "Mikrotik Connection Error");
-            $ui->assign("error_message", "Unable to connect to the router.<br>" . $e->getMessage());
+            $ui->assign("error_message", "Unable to connect to the router : $ip<br>" . $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
             $ui->display('router-error.tpl');
             die();
         }

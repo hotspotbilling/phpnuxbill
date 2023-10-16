@@ -62,7 +62,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_pool')->find_one($id);
         $mikrotik = Mikrotik::info($d['routers']);
         if ($d) {
-            if ($d['routers']!='radius') {
+            if ($d['routers'] != 'radius') {
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::removePool($client, $d['pool_name']);
             }
@@ -75,11 +75,13 @@ switch ($action) {
     case 'sync':
         $pools = ORM::for_table('tbl_pool')->find_many();
         $log = '';
-        foreach($pools as $pool){
-            $mikrotik = Mikrotik::info($pool['routers']);
-            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-            Mikrotik::addPool($client, $pool['pool_name'], $pool['range_ip']);
-            $log .= 'DONE: '.$pool['pool_name'].': '.$pool['range_ip'].'<br>';
+        foreach ($pools as $pool) {
+            if ($pool['routers'] != 'radius') {
+                $mikrotik = Mikrotik::info($pool['routers']);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                Mikrotik::addPool($client, $pool['pool_name'], $pool['range_ip']);
+                $log .= 'DONE: ' . $pool['pool_name'] . ': ' . $pool['range_ip'] . '<br>';
+            }
         }
         r2(U . 'pool/list', 's', $log);
         break;
