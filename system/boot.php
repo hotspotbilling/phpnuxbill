@@ -116,7 +116,7 @@ try {
     $ui->setConfigDir(File::pathFixer('ui/conf/'));
     $ui->setCacheDir(File::pathFixer('ui/cache/'));
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->assign("error_message", $e->getMessage());
+    $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->display('router-error.tpl');
     die();
 }
