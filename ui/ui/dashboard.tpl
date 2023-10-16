@@ -127,7 +127,7 @@
             <div class="panel-heading">{Lang::T('Payment Gateway')}: {$_c['payment_gateway']}</div>
         </div>
         <div class="panel panel-info panel-hovered mb20 activities">
-            <div class="panel-heading">{$_L['Activity_Log']}</div>
+            <div class="panel-heading"><a href="{$_url}logs">{$_L['Activity_Log']}</a></div>
             <div class="panel-body">
                 <ul class="list-unstyled">
                     {foreach $dlog as $dlogs}
