@@ -28,6 +28,11 @@ class Radius
         return ORM::for_table('radcheck', 'radius');
     }
 
+    public static function getTableCustomerAttr()
+    {
+        return ORM::for_table('radreply', 'radius');
+    }
+
     public static function getTablePackage()
     {
         return ORM::for_table('radgroupreply', 'radius');
@@ -89,9 +94,9 @@ class Radius
         Radius::upsertPackage($plan_id, 'Ascend-Data-Rate', $rates[1], ':=');
         Radius::upsertPackage($plan_id, 'Ascend-Xmit-Rate', $rates[0], ':=');
         Radius::upsertPackage($plan_id, 'Mikrotik-Rate-Limit', $rate, ':=');
-        if ($pool != null) {
-            Radius::upsertPackage($plan_id, 'Framed-Pool', $pool, ':=');
-        }
+        // if ($pool != null) {
+        //     Radius::upsertPackage($plan_id, 'Framed-Pool', $pool, ':=');
+        // }
     }
 
     public static function planDelete($plan_id)
@@ -214,6 +219,10 @@ class Radius
                 Radius::delAtribute(Radius::getTableCustomer(), 'access-period', 'username', $customer['username']);
                 Radius::delAtribute(Radius::getTableCustomer(), 'expiration', 'username', $customer['username']);
             }
+
+            if ($plan['type'] == 'PPPOE') {
+                Radius::upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
+            }
             return true;
         }
         return false;
@@ -264,6 +273,21 @@ class Radius
         $r = Radius::getTableCustomer()->where_equal('username', $username)->whereEqual('attribute', $attr)->find_one();
         if (!$r) {
             $r = Radius::getTableCustomer()->create();
+            $r->username = $username;
+        }
+        $r->attribute = $attr;
+        $r->op = $op;
+        $r->value = $value;
+        return $r->save();
+    }
+    /**
+     * To insert or update existing customer Attribute
+     */
+    private static function upsertCustomerAttr($username, $attr, $value, $op = ':=')
+    {
+        $r = Radius::getTableCustomerAttr()->where_equal('username', $username)->whereEqual('attribute', $attr)->find_one();
+        if (!$r) {
+            $r = Radius::getTableCustomerAttr()->create();
             $r->username = $username;
         }
         $r->attribute = $attr;
