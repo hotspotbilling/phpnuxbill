@@ -63,6 +63,7 @@
                                     {/foreach}
 							</select>
 						</div>
+                        <p class="help-block col-md-4"><a href="https://github.com/hotspotbilling/phpnuxbill/wiki/Themes" target="_blank">Theme info</a></p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>

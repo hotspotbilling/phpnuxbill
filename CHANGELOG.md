@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2023.10.17
+
+- Happy Birthday To Me 🎂 \(^o^)/
+- Support FreeRadius with Mysql
+- Bring back Themes support
+- Log Viewer
+
 ## 2023.9.21
 
 - Customer can extend Plan
