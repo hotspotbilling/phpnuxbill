@@ -274,13 +274,11 @@
                             <ul class="treeview-menu">
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}logs/phpnuxbill">PhpNuxBill</a></li>
-                            </ul>
                             {if $_c['radius_enable']}
-                                <ul class="treeview-menu">
                                     <li {if $_routes[1] eq 'radius'}class="active" {/if}><a href="{$_url}logs/radius">Radius</a>
                                     </li>
-                                </ul>
                             {/if}
+                            </ul>
                             {$_MENU_LOGS}
                         </li>
                         {$_MENU_AFTER_LOGS}

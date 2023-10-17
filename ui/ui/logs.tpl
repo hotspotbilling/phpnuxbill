@@ -9,7 +9,7 @@
             <div class="panel-body">
                 <div class="text-center" style="padding: 15px">
                     <div class="col-md-4">
-                        <form id="site-search" method="post" action="{$_url}logs/radius/">
+                        <form id="site-search" method="post" action="{$_url}logs/list/">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -23,7 +23,7 @@
                         </form>
                     </div>
                     <div class="col-md-8">
-                        <form class="form-inline" method="post" action="{$_url}logs/radius/">
+                        <form class="form-inline" method="post" action="{$_url}logs/list/">
                             <div class="input-group has-error">
                                 <span class="input-group-addon">Keep Logs </span>
                                 <input type="text" name="keep" class="form-control" placeholder="90" value="90">
