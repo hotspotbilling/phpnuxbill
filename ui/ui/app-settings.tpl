@@ -86,12 +86,12 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label text-muted">Enable Radius</label>
                         <div class="col-md-6">
-                            <select name="radius_enable" id="radius_enable" class="form-control text-muted" onchange="alert('still not worked yet :)\nbut you can see any feature on development')">
+                            <select name="radius_enable" id="radius_enable" class="form-control text-muted">
                                 <option value="0">No</option>
                                 <option value="1" {if $_c['radius_enable']}selected="selected" {/if}>Yes</option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4 text-red">Radius Not Yet Ready</p>
+                        <p class="help-block col-md-4"><a href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius" target="_blank">Radius Instructions</a></p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label text-muted">Radius Client</label>
@@ -333,6 +333,18 @@
             <pre>/ip hotspot walled-garden
 add dst-host={$_domain}
 add dst-host=*.{$_domain}</pre>
+
+<pre>
+# Expired Cronjob Every 5 Minutes
+*/5 * * * * cd {$dir} && {$php} cron.php
+
+# Expired Cronjob Every 5 Minutes
+0 * * * * cd {$dir} && {$php} cron.php
+</pre>
+<pre>
+# Reminder Cronjob Every 7 AM
+0 7 * * * cd {$dir} && {$php} reminder.php
+</pre>
         </div>
     </div>
 </form>

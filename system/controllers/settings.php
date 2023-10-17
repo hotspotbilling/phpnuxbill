@@ -37,6 +37,12 @@ switch ($action) {
                 $themes[] = $file;
             }
         }
+        $php = trim(shell_exec('which php'));
+        if(empty($php)){
+            $php = 'php';
+        }
+        $ui->assign('php', $php);
+        $ui->assign('dir', str_replace('controllers','', __DIR__));
         $ui->assign('themes', $themes);
         run_hook('view_app_settings'); #HOOK
         $ui->display('app-settings.tpl');
