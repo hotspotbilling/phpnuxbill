@@ -132,7 +132,7 @@ class Radius
         }
     }
 
-    public static function customerDeactivate($username)
+    public static function customerDeactivate($username, $radiusDisconnect = true) {
     {
         global $radius_pass;
         $r = Radius::getTableCustomer()->where_equal('username', $username)->whereEqual('attribute', 'Cleartext-Password')->findOne();
@@ -141,7 +141,9 @@ class Radius
             // we just change the password
             $r->value = md5(time() . $username . $radius_pass);
             $r->save();
-            return Radius::disconnectCustomer($username);
+            if($radiusDisconnect)
+                return Radius::disconnectCustomer($username);
+            }
         }
         return '';
     }
@@ -307,7 +309,7 @@ class Radius
             if (!empty($n['ports'])) {
                 $port = $n['ports'];
             }
-            $result[] = $n['nasname'] . ': ' . shell_exec("echo 'User-Name = $username' | " . Radius::getClient() . " " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
+            $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username' | " . Radius::getClient() . " " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
         }
         return $result;
     }

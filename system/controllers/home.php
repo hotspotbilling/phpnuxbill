@@ -106,14 +106,23 @@ if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
     }
 }else if(isset($_GET['deactivate']) && $_GET['deactivate'] == 1){
     if ($bill) {
-        $mikrotik = Mikrotik::info($bill['routers']);
-        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        if ($bill['type'] == 'Hotspot') {
-            Mikrotik::removeHotspotUser($client, $bill['username']);
-            Mikrotik::removeHotspotActiveUser($client, $bill['username']);
-        } else if ($bill['type'] == 'PPPOE') {
-            Mikrotik::removePpoeUser($client, $bill['username']);
-            Mikrotik::removePpoeActive($client, $bill['username']);
+        $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
+        if($p['is_radius']){
+            Radius::customerDeactivate($user['username']);
+        }else{
+            try{
+                $mikrotik = Mikrotik::info($bill['routers']);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                if ($bill['type'] == 'Hotspot') {
+                    Mikrotik::removeHotspotUser($client, $bill['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $bill['username']);
+                } else if ($bill['type'] == 'PPPOE') {
+                    Mikrotik::removePpoeUser($client, $bill['username']);
+                    Mikrotik::removePpoeActive($client, $bill['username']);
+                }
+            }catch(Exception $e){
+                //ignore it maybe mikrotik has been deleted
+            }
         }
         $bill->status = 'off';
         $bill->expiration = date('Y-m-d');

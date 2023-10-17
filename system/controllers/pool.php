@@ -60,10 +60,10 @@ switch ($action) {
         $id  = $routes['2'];
         run_hook('delete_pool'); #HOOK
         $d = ORM::for_table('tbl_pool')->find_one($id);
-        $mikrotik = Mikrotik::info($d['routers']);
         if ($d) {
             if ($d['routers'] != 'radius') {
                 try{
+                    $mikrotik = Mikrotik::info($d['routers']);
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePool($client, $d['pool_name']);
                 }catch(Exception $e){
@@ -106,9 +106,9 @@ switch ($action) {
         if ($d) {
             $msg .= $_L['Pool_already_exist'] . '<br>';
         }
-        $mikrotik = Mikrotik::info($routers);
         if ($msg == '') {
             if ($routers != 'radius') {
+                $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addPool($client, $name, $ip_address);
             }
@@ -143,9 +143,9 @@ switch ($action) {
             $msg .= $_L['Data_Not_Found'] . '<br>';
         }
 
-        $mikrotik = Mikrotik::info($routers);
         if ($msg == '') {
             if ($routers != 'radius') {
+                $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPool($client, $d['pool_name'], $ip_address);
             }
