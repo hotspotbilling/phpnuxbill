@@ -254,9 +254,13 @@ switch ($action) {
 
 
         if (!empty($_FILES['logo']['name'])) {
-            if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
-            File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
-            if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
+            if(function_exists('imagecreatetruecolor')){
+                if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
+                File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
+                if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
+            }else{
+                r2(U . 'settings/app', 'e', 'PHP GD is not installed');
+            }
         }
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
