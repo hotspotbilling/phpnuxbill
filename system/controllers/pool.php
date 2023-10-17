@@ -63,8 +63,12 @@ switch ($action) {
         $mikrotik = Mikrotik::info($d['routers']);
         if ($d) {
             if ($d['routers'] != 'radius') {
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::removePool($client, $d['pool_name']);
+                try{
+                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removePool($client, $d['pool_name']);
+                }catch(Exception $e){
+                    //ignore exception, it means router has already deleted
+                }
             }
             $d->delete();
 

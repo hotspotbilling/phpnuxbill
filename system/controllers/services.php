@@ -167,9 +167,13 @@ switch ($action) {
             if ($d['is_radius']) {
                 Radius::planDelete($d['id']);
             } else {
-                $mikrotik = Mikrotik::info($d['routers']);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::removeHotspotPlan($client, $d['name_plan']);
+                try{
+                    $mikrotik = Mikrotik::info($d['routers']);
+                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotPlan($client, $d['name_plan']);
+                }catch(Exception $e){
+                    //ignore exception, it means router has already deleted
+                }
             }
 
             $d->delete();
@@ -427,9 +431,13 @@ switch ($action) {
             if ($d['is_radius']) {
                 Radius::planDelete($d['id']);
             } else {
-                $mikrotik = Mikrotik::info($d['routers']);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::removePpoePlan($client, $d['name_plan']);
+                try{
+                    $mikrotik = Mikrotik::info($d['routers']);
+                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removePpoePlan($client, $d['name_plan']);
+                }catch(Exception $e){
+                    //ignore exception, it means router has already deleted
+                }
             }
             $d->delete();
 
