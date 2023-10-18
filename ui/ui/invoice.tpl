@@ -19,6 +19,7 @@
                         {$_L['Type']} : <b>{$in['type']}</b><br>
                         {$_L['Plan_Name']} : <b>{$in['plan_name']}</b><br>
                         {$_L['Plan_Price']} : <b>{Lang::moneyFormat($in['price'])}</b><br>
+                        {$in['method']}<br>
                         <br>
                         {$_L['Username']} : <b>{$in['username']}</b><br>
                         {$_L['Password']} : **********<br>
@@ -35,6 +36,8 @@
                     <input type="hidden" name="id" value="{$in['id']}">
                     <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-print"></i>
                         {$_L['Click_Here_to_Print']}</button>
+                    <a href="{$_url}prepaid/view/{$in['id']}/print" class="btn btn-info"><i
+                        class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend To Customer")}</a>
                     <a href="{$_url}prepaid/list" class="btn btn-primary"><i
                             class="ion-reply-all"></i>{$_L['Finish']}</a>
                 </form>

@@ -137,12 +137,27 @@ switch ($action) {
         }
         break;
 
+    case 'view':
+        $id = $routes['2'];
+        $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
+        $ui->assign('in', $d);
+
+        if(!empty($routes['3'])){
+
+            r2(U . 'prepaid/view/'.$id, 'e', "Success send to customer");
+        }
+
+        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'],$d['recharged_time']));
+        $ui->display('invoice.tpl');
+        break;
+
+
     case 'print':
         $id = _post('id');
         $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
         $ui->assign('d', $d);
 
-        $ui->assign('date', date("Y-m-d H:i:s"));
+        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'],$d['recharged_time']));
         run_hook('print_invoice'); #HOOK
         $ui->display('invoice-print.tpl');
         break;
