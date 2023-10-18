@@ -149,7 +149,7 @@
         $.getJSON("./version.json?" + Math.random(), function(data) {
             var localVersion = data.version;
             $('#version').html('Version: ' + localVersion);
-            $.getJSON("https://raw.githubusercontent.com/ibnux/phpnuxbill/master/version.json?" + Math
+            $.getJSON("https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?" + Math
                 .random(),
                 function(data) {
                     var latestVersion = data.version;
