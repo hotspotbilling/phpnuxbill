@@ -256,6 +256,7 @@ switch ($action) {
         $radius_enable = _post('radius_enable');
         $radius_client = _post('radius_client');
         $theme = _post('theme');
+        $voucher_format = _post('voucher_format');
         run_hook('save_settings'); #HOOK
 
 
@@ -330,6 +331,16 @@ switch ($action) {
                 $d->save();
             }
 
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_format')->find_one();
+            if ($d) {
+                $d->value = $voucher_format;
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'voucher_format';
+                $d->value = $voucher_format;
+                $d->save();
+            }
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'disable_voucher')->find_one();
             if ($d) {
                 $d->value = $disable_voucher;

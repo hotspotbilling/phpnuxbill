@@ -54,17 +54,37 @@
                         </div>
                     </div>
                     <div class="form-group">
-						<label class="col-md-2 control-label">Theme</label>
-						<div class="col-md-6">
-							<select name="theme" id="theme" class="form-control">
-								<option value="default" {if $_c['theme'] eq 'default'}selected="selected" {/if}>Default</option>
-                                    {foreach $themes as $theme}
-                                        <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>{Lang::ucWords($theme)}</option>
-                                    {/foreach}
-							</select>
-						</div>
-                        <p class="help-block col-md-4"><a href="https://github.com/hotspotbilling/phpnuxbill/wiki/Themes" target="_blank">Theme info</a></p>
+                        <label class="col-md-2 control-label">Theme</label>
+                        <div class="col-md-6">
+                            <select name="theme" id="theme" class="form-control">
+                                <option value="default" {if $_c['theme'] eq 'default'}selected="selected" {/if}>Default
+                                </option>
+                                {foreach $themes as $theme}
+                                    <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
+                                        {Lang::ucWords($theme)}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4"><a
+                                href="https://github.com/hotspotbilling/phpnuxbill/wiki/Themes" target="_blank">Theme
+                                info</a></p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">APP URL</label>
+                        <div class="col-md-6">
+                            <input type="text" readonly class="form-control" value="{$app_url}">
+                        </div>
+                        <p class="help-block col-md-4">edit at config.php</p>
+                    </div>
+                </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
+                    Voucher
+                </div>
+                <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>
                         <div class="col-md-6">
@@ -78,24 +98,44 @@
                         <p class="help-block col-md-4">{Lang::T('Voucher activation menu will be hidden')}</p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">APP URL</label>
+                        <label class="col-md-2 control-label">{Lang::T('Voucher Format')}</label>
                         <div class="col-md-6">
-                            <input type="text" readonly class="form-control" value="{$app_url}">
+                            <select name="voucher_format" id="voucher_format" class="form-control">
+                                <option value="up" {if $_c['voucher_format'] == 'up'}selected="selected" {/if}>UPPERCASE
+                                </option>
+                                <option value="low" {if $_c['voucher_format'] == 'low'}selected="selected" {/if}>
+                                    lowercase
+                                </option>
+                                <option value="rand" {if $_c['voucher_format'] == 'rand'}selected="selected" {/if}>
+                                    RaNdoM
+                                </option>
+                            </select>
                         </div>
-                        <p class="help-block col-md-4">edit at config.php</p>
+                        <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
                     </div>
+                </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
+                    FreeRadius
+                </div>
+                <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label text-muted">Enable Radius</label>
+                        <label class="col-md-2 control-label">Enable Radius</label>
                         <div class="col-md-6">
                             <select name="radius_enable" id="radius_enable" class="form-control text-muted">
                                 <option value="0">No</option>
                                 <option value="1" {if $_c['radius_enable']}selected="selected" {/if}>Yes</option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4"><a href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius" target="_blank">Radius Instructions</a></p>
+                        <p class="help-block col-md-4"><a
+                                href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius"
+                                target="_blank">Radius Instructions</a></p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label text-muted">Radius Client</label>
+                        <label class="col-md-2 control-label">Radius Client</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="radius_client" value="{$_c['radius_client']}">
                         </div>
@@ -152,8 +192,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Telegram Bot Token</label>
                         <div class="col-md-6">
-                            <input type="password" class="form-control" id="telegram_bot" name="telegram_bot" onmouseleave="this.type = 'password'"
-                            onmouseenter="this.type = 'text'"
+                            <input type="password" class="form-control" id="telegram_bot" name="telegram_bot"
+                                onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                                 value="{$_c['telegram_bot']}" placeholder="123456:asdasgdkuasghddlashdashldhalskdklasd">
                         </div>
                     </div>
@@ -316,9 +356,9 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Proxy Server Login')}</label>
                         <div class="col-md-6">
-                            <input type="password" class="form-control" id="http_proxyauth" name="http_proxyauth" autocomplete="off"
-                                value="{$_c['http_proxyauth']}" placeholder="username:password" onmouseleave="this.type = 'password'"
-                                onmouseenter="this.type = 'text'">
+                            <input type="password" class="form-control" id="http_proxyauth" name="http_proxyauth"
+                                autocomplete="off" value="{$_c['http_proxyauth']}" placeholder="username:password"
+                                onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                     </div>
                 </div>
@@ -335,14 +375,14 @@
 add dst-host={$_domain}
 add dst-host=*.{$_domain}</pre>
 
-<pre>
+            <pre>
 # Expired Cronjob Every 5 Minutes
 */5 * * * * cd {$dir} && {$php} cron.php
 
 # Expired Cronjob Every 1 Hour
 0 * * * * cd {$dir} && {$php} cron.php
 </pre>
-<pre>
+            <pre>
 # Reminder Cronjob Every 7 AM
 0 7 * * * cd {$dir} && {$php} reminder.php
 </pre>

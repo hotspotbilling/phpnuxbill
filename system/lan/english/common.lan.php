@@ -406,3 +406,4 @@ $_L['Location'] = 'Location';
 $_L['Radius_Plans'] = 'Radius Plans';
 $_L['Change_title_in_user_Plan_order'] = 'Change title in user Plan order';
 $_L['Logs'] = 'Logs';
+$_L['Voucher_Format'] = 'Voucher Format';

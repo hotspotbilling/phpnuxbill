@@ -86,4 +86,17 @@ class Lang
     {
         return ucwords(str_replace('_', ' ', $text));
     }
+
+    public static function randomUpLowCase($text){
+        $jml = strlen($text);
+        $result = '';
+        for($i = 0; $i < $jml;$i++){
+            if(rand(0,99)%2){
+                $result .= strtolower(substr($text,$i,1));
+            }else{
+                $result .= substr($text,$i,1);
+            }
+        }
+        return $result;
+    }
 }
