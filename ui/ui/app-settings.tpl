@@ -339,7 +339,7 @@ add dst-host=*.{$_domain}</pre>
 # Expired Cronjob Every 5 Minutes
 */5 * * * * cd {$dir} && {$php} cron.php
 
-# Expired Cronjob Every 5 Minutes
+# Expired Cronjob Every 1 Hour
 0 * * * * cd {$dir} && {$php} cron.php
 </pre>
 <pre>
