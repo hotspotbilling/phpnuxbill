@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -49,9 +50,9 @@ switch ($action) {
             }
             $p = ORM::for_table('tbl_plans')->findOne($plan['plan_id']);
             $c = ORM::for_table('tbl_customers')->findOne($plan['customer_id']);
-            if($plan['routers'] == 'radius'){
-                Radius::customerAddPlan($c, $p, $plan['expiration'].' '.$plan['time']);
-            }else{
+            if ($plan['routers'] == 'radius') {
+                Radius::customerAddPlan($c, $p, $plan['expiration'] . ' ' . $plan['time']);
+            } else {
                 if ($plan['type'] == 'Hotspot') {
                     Mikrotik::addHotspotUser($client, $p, $c);
                 } else if ($plan['type'] == 'PPPOE') {
@@ -261,10 +262,16 @@ switch ($action) {
         $planid = _post('planid');
         $pagebreak = _post('pagebreak');
         $limit = _post('limit');
-
-        if ($pagebreak < 1) $pagebreak = 6;
+        $vpl = _post('vpl');
+        if(empty($vpl)){
+            $vpl = 3;
+        }
+        if ($pagebreak < 1) $pagebreak = 12;
 
         if ($limit < 1) $limit = $pagebreak * 2;
+        if(empty($from_id)){
+            $from_id = 0;
+        }
 
         if ($from_id > 0 && $planid > 0) {
             $v = ORM::for_table('tbl_plans')
@@ -315,9 +322,12 @@ switch ($action) {
                 ->where('tbl_voucher.status', '0')
                 ->count();
         }
+        $template = file_get_contents("pages/Voucher.html");
+        $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
 
         $ui->assign('_title', $_L['Voucher_Hotspot']);
         $ui->assign('from_id', $from_id);
+        $ui->assign('vpl', $vpl);
         $ui->assign('pagebreak', $pagebreak);
 
         $plans = ORM::for_table('tbl_plans')->find_many();
@@ -325,7 +335,17 @@ switch ($action) {
         $ui->assign('limit', $limit);
         $ui->assign('planid', $planid);
 
-        $ui->assign('v', $v);
+        $voucher = [];
+        foreach ($v as $vs) {
+            $temp = $template;
+            $temp = str_replace('[[qrcode]]', '<img src="qrcode/?data=' . $vs['code'] . '">', $temp);
+            $temp = str_replace('[[price]]', Lang::moneyFormat($vs['price']), $temp);
+            $temp = str_replace('[[voucher_code]]', $vs['code'], $temp);
+            $temp = str_replace('[[plan]]', $vs['name_plan'], $temp);
+            $voucher[] = $temp;
+        }
+
+        $ui->assign('voucher',$voucher);
         $ui->assign('vc', $vc);
 
         //for counting pagebreak
@@ -354,7 +374,11 @@ switch ($action) {
             run_hook('create_voucher'); #HOOK
             for ($i = 0; $i < $numbervoucher; $i++) {
                 $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
-                //TODO: IMPLEMENT Voucher Generator
+                if ($config['voucher_format'] == 'low') {
+                    $code = strtolower($code);
+                } else if ($config['voucher_format'] == 'rand') {
+                    $code = Lang::randomUpLowCase($code);
+                }
                 $d = ORM::for_table('tbl_voucher')->create();
                 $d->type = $type;
                 $d->routers = $server;

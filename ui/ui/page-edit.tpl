@@ -3,39 +3,53 @@
     <div class="col-sm-12">
         <div class="panel mb20 panel-primary panel-hovered">
             <div class="panel-heading">{$pageHeader}</div>
-                <div id="myNicPanel" style="width: 100%;"></div>
-                <div id="panel-edit" class="panel-body">{$htmls}</div>
+            <div id="myNicPanel" style="width: 100%;"></div>
+            <div id="panel-edit" class="panel-body">{$htmls}</div>
             {if $writeable}
                 <div class="panel-footer">
                     <a href="javascript:saveIt()" class="btn btn-primary btn-block">SAVE</a>
                     <br>
                     <p class="help-block">{$_L['Info_Page']}</p>
-                    <input type="text" class="form-control" onclick="this.select()" readonly value="{$app_url}/pages/{$PageFile}.html">
+                    <input type="text" class="form-control" onclick="this.select()" readonly
+                        value="{$app_url}/pages/{$PageFile}.html">
                 </div>
             {else}
                 <div class="panel-footer">
                     {$_L['Failed_Save_Page']}
                 </div>
             {/if}
+            {if $PageFile=='Voucher'}
+                <div class="panel-footer">
+                    <p class="help-block">
+                        <b>[[company_name]]</b> Your Company Name at Settings.<br>
+                        <b>[[price]]</b> Plan Price.<br>
+                        <b>[[voucher_code]]</b> Voucher Code.<br>
+                        <b>[[plan]]</b> Voucher Plan.<br>
+                    </p>
+                </div>
+            {/if}
         </div>
     </div>
 </div>
-<form id="formpages" class="hidden" method="post" role="form" action="{$_url}pages/{$PageFile}-post" >
+<form id="formpages" class="hidden" method="post" role="form" action="{$_url}pages/{$PageFile}-post">
     <textarea name="html" id="html"></textarea>
 </form>
 <script src="ui/ui/scripts/nicEdit.js"></script>
+{literal}
 <script type="text/javascript">
     var myNicEditor
     bkLib.onDomLoaded(function() {
-        myNicEditor = new nicEditor();
+        myNicEditor = new nicEditor({fullPanel : true});
         myNicEditor.setPanel('myNicPanel');
         myNicEditor.addInstance('panel-edit');
     });
-    function saveIt(){
+
+    function saveIt() {
         //alert(document.getElementById('panel-edit').innerHTML);
         document.getElementById('html').value = nicEditors.findEditor('panel-edit').getContent()
         document.getElementById('formpages').submit();
     }
 </script>
+{/literal}
 
 {include file="sections/footer.tpl"}
