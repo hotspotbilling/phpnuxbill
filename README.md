@@ -2,6 +2,8 @@
 
 ![PHPNuxBill](install/img/logo.png)
 
+![StandWithPalestine](https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/StandWithPalestine.svg)
+
 ## Feature
 
 - Voucher Generator and Print
