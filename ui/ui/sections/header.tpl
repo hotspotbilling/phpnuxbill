@@ -183,6 +183,8 @@
                                         href="{$_url}reports/daily-report">{$_L['Daily_Report']}</a></li>
                                 <li {if $_routes[1] eq 'by-period'}class="active" {/if}><a
                                         href="{$_url}reports/by-period">{$_L['Period_Reports']}</a></li>
+                                <li {if $_routes[1] eq 'activation'}class="active" {/if}><a
+                                    href="{$_url}reports/activation">{Lang::T('Activation History')}</a></li>
                                 {$_MENU_REPORTS}
                             </ul>
                         </li>

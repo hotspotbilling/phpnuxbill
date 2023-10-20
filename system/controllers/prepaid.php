@@ -355,13 +355,16 @@ switch ($action) {
         $ui->assign('planid', $planid);
 
         $voucher = [];
+        $n = 1;
         foreach ($v as $vs) {
             $temp = $template;
             $temp = str_replace('[[qrcode]]', '<img src="qrcode/?data=' . $vs['code'] . '">', $temp);
             $temp = str_replace('[[price]]', Lang::moneyFormat($vs['price']), $temp);
             $temp = str_replace('[[voucher_code]]', $vs['code'], $temp);
             $temp = str_replace('[[plan]]', $vs['name_plan'], $temp);
+            $temp = str_replace('[[counter]]', $n, $temp);
             $voucher[] = $temp;
+            $n++;
         }
 
         $ui->assign('voucher',$voucher);

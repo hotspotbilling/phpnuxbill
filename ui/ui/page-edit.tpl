@@ -31,6 +31,7 @@
                         <b>[[price]]</b> Plan Price.<br>
                         <b>[[voucher_code]]</b> Voucher Code.<br>
                         <b>[[plan]]</b> Voucher Plan.<br>
+                        <b>[[counter]]</b> Counter.<br>
                     </p>
                 </div>
             {/if}

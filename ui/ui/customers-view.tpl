@@ -124,6 +124,7 @@
                 {if Lang::arrayCount($activation)}
                     <thead>
                         <tr>
+                            <th>{$_L['Invoice']}</th>
                             <th>{$_L['Username']}</th>
                             <th>{$_L['Plan_Name']}</th>
                             <th>{$_L['Plan_Price']}</th>
@@ -136,6 +137,7 @@
                     <tbody>
                         {foreach $activation as $ds}
                             <tr onclick="window.location.href = '{$_url}prepaid/view/{$ds['id']}'" style="cursor:pointer;">
+                                <td>{$ds['invoice']}</td>
                                 <td>{$ds['username']}</td>
                                 <td>{$ds['plan_name']}</td>
                                 <td>{Lang::moneyFormat($ds['price'])}</td>
