@@ -75,4 +75,30 @@ class Message
         }
         return "$via: $msg";
     }
+
+    public static function sendInvoice($cust, $trx){
+        global $config;
+        $textInvoice = Lang::getNotifText('invoice_paid');
+        $textInvoice = str_replace('[[company_name]]', $config['CompanyName'], $textInvoice);
+        $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
+        $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
+        $textInvoice = str_replace('[[invoice]]', $trx['invoice'], $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateAndTimeFormat($trx['recharged_on'], $trx['recharged_time']), $textInvoice);
+        $textInvoice = str_replace('[[payment_gateway]]', $config['gateway'], $textInvoice);
+        $textInvoice = str_replace('[[payment_channel]]', $config['channel'], $textInvoice);
+        $textInvoice = str_replace('[[type]]', $trx['type'], $textInvoice);
+        $textInvoice = str_replace('[[plan_name]]', $trx['plan_name'], $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]',  Lang::moneyFormat($trx['price']), $textInvoice);
+        $textInvoice = str_replace('[[name]]', $cust['fullname'], $textInvoice);
+        $textInvoice = str_replace('[[user_name]]', $trx['username'], $textInvoice);
+        $textInvoice = str_replace('[[user_password]]', $cust['password'], $textInvoice);
+        $textInvoice = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($trx['expiration'], $trx['time']), $textInvoice);
+        $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
+
+        if ($config['user_notification_payment'] == 'sms') {
+            Message::sendSMS($cust['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'wa') {
+            Message::sendWhatsapp($cust['phonenumber'], $textInvoice);
+        }
+    }
 }

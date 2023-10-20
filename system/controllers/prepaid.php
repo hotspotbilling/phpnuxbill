@@ -142,11 +142,15 @@ switch ($action) {
         $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
         $ui->assign('in', $d);
 
-        if(!empty($routes['3'])){
-
-            r2(U . 'prepaid/view/'.$id, 'e', "Success send to customer");
+        if(!empty($routes['3']) && $routes['3']=='send'){
+            $c = ORM::for_table('tbl_customers')->where('username', $d['username'])->find_one();
+            if($c){
+                Message::sendInvoice($c, $d);
+                r2(U . 'prepaid/view/'.$id, 's', "Success send to customer");
+            }
+            r2(U . 'prepaid/view/'.$id, 'd', "Customer not found");
         }
-
+        $ui->assign('_title', 'View Invoice');
         $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'],$d['recharged_time']));
         $ui->display('invoice.tpl');
         break;

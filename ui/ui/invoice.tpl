@@ -1,9 +1,9 @@
 {include file="sections/header.tpl"}
 
 <div class="row">
-    <div class="col-md-6 col-sm-12">
+    <div class="col-md-6 col-sm-12 col-md-offset-3">
         <div class="panel panel-hovered panel-primary panel-stacked mb30">
-            <div class="panel-heading">PRINT INVOICE</div>
+            <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
                 <div class="well">
                     <fieldset>
@@ -34,12 +34,12 @@
                 </div>
                 <form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
                     <input type="hidden" name="id" value="{$in['id']}">
+                    <a href="{$_url}prepaid/list" class="btn btn-primary btn-sm"><i
+                            class="ion-reply-all"></i>{$_L['Finish']}</a>
+                    <a href="{$_url}prepaid/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
+                        class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend To Customer")}</a>
                     <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-print"></i>
                         {$_L['Click_Here_to_Print']}</button>
-                    <a href="{$_url}prepaid/view/{$in['id']}/print" class="btn btn-info"><i
-                        class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend To Customer")}</a>
-                    <a href="{$_url}prepaid/list" class="btn btn-primary"><i
-                            class="ion-reply-all"></i>{$_L['Finish']}</a>
                 </form>
 
             </div>
