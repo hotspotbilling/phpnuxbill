@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2023.10.20
+
+- View Invoice
+- Resend Invoice
+- Custom Voucher
+
 ## 2023.10.17
 
 - Happy Birthday To Me 🎂 \(^o^)/
