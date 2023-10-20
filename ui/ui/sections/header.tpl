@@ -301,4 +301,11 @@
             </section>
 
             <section class="content">
-{if isset($notify)}{$notify}{/if}
+{if isset($notify)}
+    <div class="alert alert-{if $notify_t == 's'}success{else}danger{/if}">
+		<button type="button" class="close" data-dismiss="alert">
+		<span aria-hidden="true">×</span>
+		</button>
+		<div>{$notify}</div>
+    </div>
+{/if}

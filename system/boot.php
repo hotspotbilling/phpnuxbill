@@ -164,19 +164,8 @@ function _msglog($type, $msg)
 if (isset($_SESSION['notify'])) {
     $notify = $_SESSION['notify'];
     $ntype = $_SESSION['ntype'];
-    if ($ntype == 's') {
-        $ui->assign('notify', '<div class="alert alert-info">
-		<button type="button" class="close" data-dismiss="alert">
-		<span aria-hidden="true">×</span>
-		</button>
-		<div>' . $notify . '</div></div>');
-    } else {
-        $ui->assign('notify', '<div class="alert alert-danger">
-		<button type="button" class="close" data-dismiss="alert">
-		<span aria-hidden="true">×</span>
-		</button>
-		<div>' . $notify . '</div></div>');
-    }
+    $ui->assign('notify', $notify);
+    $ui->assign('notify_t', $ntype);
     unset($_SESSION['notify']);
     unset($_SESSION['ntype']);
 }
