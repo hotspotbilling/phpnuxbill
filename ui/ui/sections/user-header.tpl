@@ -125,6 +125,14 @@
                         </li>
                     {/if}
                     {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
+                        {if $_c['enable_balance'] == 'yes'}
+                            <li {if $_system_menu eq 'balance'}class="active" {/if}>
+                                <a href="{$_url}order/balance">
+                                    <i class="ion ion-ios-cart"></i>
+                                    <span>{Lang::T('Buy Balance')}</span>
+                                </a>
+                            </li>
+                        {/if}
                         <li {if $_system_menu eq 'package'}class="active" {/if}>
                             <a href="{$_url}order/package">
                                 <i class="ion ion-ios-cart"></i>

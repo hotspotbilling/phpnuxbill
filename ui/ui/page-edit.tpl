@@ -2,7 +2,13 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-primary panel-hovered">
-            <div class="panel-heading">{$pageHeader}</div>
+            <div class="panel-heading">
+                <div class="btn-group pull-right">
+                    <a class="btn btn-danger btn-xs" title="Reset File" href="{$_url}pages/{$PageFile}-reset" onclick="return confirm('Reset File?')"><span
+                            class="glyphicon glyphicon-refresh" aria-hidden="true"></span></a>
+                </div>
+                {$pageHeader}
+            </div>
             <div id="myNicPanel" style="width: 100%;"></div>
             <div id="panel-edit" class="panel-body">{$htmls}</div>
             {if $writeable}
@@ -36,20 +42,20 @@
 </form>
 <script src="ui/ui/scripts/nicEdit.js"></script>
 {literal}
-<script type="text/javascript">
-    var myNicEditor
-    bkLib.onDomLoaded(function() {
-        myNicEditor = new nicEditor({fullPanel : true});
-        myNicEditor.setPanel('myNicPanel');
-        myNicEditor.addInstance('panel-edit');
-    });
+    <script type="text/javascript">
+        var myNicEditor
+        bkLib.onDomLoaded(function() {
+            myNicEditor = new nicEditor({fullPanel : true});
+            myNicEditor.setPanel('myNicPanel');
+            myNicEditor.addInstance('panel-edit');
+        });
 
-    function saveIt() {
-        //alert(document.getElementById('panel-edit').innerHTML);
-        document.getElementById('html').value = nicEditors.findEditor('panel-edit').getContent()
-        document.getElementById('formpages').submit();
-    }
-</script>
+        function saveIt() {
+            //alert(document.getElementById('panel-edit').innerHTML);
+            document.getElementById('html').value = nicEditors.findEditor('panel-edit').getContent()
+            document.getElementById('formpages').submit();
+        }
+    </script>
 {/literal}
 
 {include file="sections/footer.tpl"}

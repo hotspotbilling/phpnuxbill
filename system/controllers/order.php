@@ -31,43 +31,51 @@ switch ($action) {
         run_hook('customer_view_order_history'); #HOOK
         $ui->display('user-orderHistory.tpl');
         break;
-    case 'package':
-        if (strpos($user['email'], '@') === false) {
-            r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
-        }
-        $ui->assign('_title', 'Order Plan');
-        $ui->assign('_system_menu', 'package');
-        if (!empty($_SESSION['nux-router'])) {
-            if ($_SESSION['nux-router'] == 'radius') {
+        case 'balance':
+            if (strpos($user['email'], '@') === false) {
+                r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
+            }
+            $ui->assign('_title', 'Top Up');
+            $ui->assign('_system_menu', 'balance');
+            $plans_balance = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many();
+            $ui->assign('plans_balance', $plans_balance);
+            $ui->display('user-orderBalance.tpl');
+            break;
+        case 'package':
+            if (strpos($user['email'], '@') === false) {
+                r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
+            }
+            $ui->assign('_title', 'Order Plan');
+            $ui->assign('_system_menu', 'package');
+            if (!empty($_SESSION['nux-router'])) {
+                if ($_SESSION['nux-router'] == 'radius') {
+                    $radius_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->find_many();
+                    $radius_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->find_many();
+                } else {
+                    $routers = ORM::for_table('tbl_routers')->where('id', $_SESSION['nux-router'])->find_many();
+                    $rs = [];
+                    foreach ($routers as $r) {
+                        $rs[] = $r['name'];
+                    }
+                    $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'PPPOE')->find_many();
+                    $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'Hotspot')->find_many();
+                }
+            } else {
                 $radius_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->find_many();
                 $radius_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->find_many();
-            } else {
-                $routers = ORM::for_table('tbl_routers')->where('id', $_SESSION['nux-router'])->find_many();
-                $rs = [];
-                foreach ($routers as $r) {
-                    $rs[] = $r['name'];
-                }
-                $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'PPPOE')->find_many();
-                $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'Hotspot')->find_many();
-            }
-        } else {
-            $radius_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->find_many();
-            $radius_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->find_many();
 
-            $routers = ORM::for_table('tbl_routers')->find_many();
-            $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 0)->where('type', 'PPPOE')->find_many();
-            $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 0)->where('type', 'Hotspot')->find_many();
-        }
-        $plans_balance = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many();
-        $ui->assign('routers', $routers);
-        $ui->assign('radius_pppoe', $radius_pppoe);
-        $ui->assign('radius_hotspot', $radius_hotspot);
-        $ui->assign('plans_pppoe', $plans_pppoe);
-        $ui->assign('plans_hotspot', $plans_hotspot);
-        $ui->assign('plans_balance', $plans_balance);
-        run_hook('customer_view_order_plan'); #HOOK
-        $ui->display('user-orderPlan.tpl');
-        break;
+                $routers = ORM::for_table('tbl_routers')->find_many();
+                $plans_pppoe = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 0)->where('type', 'PPPOE')->find_many();
+                $plans_hotspot = ORM::for_table('tbl_plans')->where('enabled', '1')->where('is_radius', 0)->where('type', 'Hotspot')->find_many();
+            }
+            $ui->assign('routers', $routers);
+            $ui->assign('radius_pppoe', $radius_pppoe);
+            $ui->assign('radius_hotspot', $radius_hotspot);
+            $ui->assign('plans_pppoe', $plans_pppoe);
+            $ui->assign('plans_hotspot', $plans_hotspot);
+            run_hook('customer_view_order_plan'); #HOOK
+            $ui->display('user-orderPlan.tpl');
+            break;
     case 'unpaid':
         $d = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])

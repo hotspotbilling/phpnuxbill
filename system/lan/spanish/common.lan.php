@@ -354,7 +354,7 @@ $_L['User_Cannot_change_this_only_admin_if_it_Empty_it_will_use_user_password'] 
 $_L['Invoice_Balance_Message'] = 'Invoice Balance Message';
 $_L['Invoice_Notification_Payment'] = 'Invoice Notification Payment';
 $_L['Balance_Notification_Payment'] = 'Balance Notification Payment';
-$_L['Buy_Balance'] = 'Buy Balance?';
+$_L['Buy_Balance'] = 'Buy Balance';
 $_L['Price'] = 'Price';
 $_L['Validity'] = 'Validity';
 $_L['Disable_auto_renewal'] = 'Disable auto renewal?';

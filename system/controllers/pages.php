@@ -12,7 +12,19 @@ $action = $routes['1'];
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-if(strpos($action,"-post")===false){
+if(strpos($action,"-reset")!==false){
+    $action = str_replace("-reset","",$action);
+    $path = "pages/".str_replace(".","",$action).".html";
+    $temp = "pages_template/".str_replace(".","",$action).".html";
+    if(file_exists($temp)){
+        if(!copy($temp, $path)){
+            file_put_contents($path, Http::getData('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/pages_template/'.$action.'.html'));
+        }
+    }else{
+        file_put_contents($path, Http::getData('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/pages_template/'.$action.'.html'));
+    }
+    r2(U . 'pages/'.$action);
+}else if(strpos($action,"-post")===false){
     $path = "pages/".str_replace(".","",$action).".html";
     //echo $path;
     run_hook('view_edit_pages'); #HOOK

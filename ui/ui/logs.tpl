@@ -14,7 +14,7 @@
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
                                 </div>
-                                <input type="text" name="name" class="form-control" value="{$name}"
+                                <input type="text" name="q" class="form-control" value="{$q}"
                                     placeholder="{$_L['Search_by_Name']}...">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit">{$_L['Search']}</button>
