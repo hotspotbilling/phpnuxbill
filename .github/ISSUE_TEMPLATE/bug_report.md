@@ -8,7 +8,7 @@ assignees: ibnux
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is. Error connecting to router is not a bug, is your router port is not accessable, ask community for help, go to discussion or telegram group 
 
 **To Reproduce**
 Steps to reproduce the behavior:
