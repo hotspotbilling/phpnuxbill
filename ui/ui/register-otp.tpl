@@ -22,10 +22,11 @@
             <hr>
         </div>
         {if isset($notify)}
-            <div class="row">
-                <div class="col-md-6 col-md-offset-3">
-                    {$notify}
-                </div>
+            <div class="alert alert-{if $notify_t == 's'}success{else}danger{/if}">
+                <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <div>{$notify}</div>
             </div>
         {/if}
         <div class="row">
