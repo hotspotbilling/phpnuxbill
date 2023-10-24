@@ -38,6 +38,7 @@
                                 <th>Port</th>
                                 <th>Server</th>
                                 <th>Community</th>
+                                <th>Routers</th>
                                 <th>{$_L['Manage']}</th>
                             </tr>
                         </thead>
@@ -51,6 +52,7 @@
                                     <td>{$ds['ports']}</td>
                                     <td>{$ds['server']}</td>
                                     <td>{$ds['community']}</td>
+                                    <td>{$ds['routers']}</td>
                                     <td align="center">
                                         <a href="{$_url}radius/nas-edit/{$ds['id']}" class="btn btn-info btn-xs">{$_L['Edit']}</a>
                                         <a href="{$_url}radius/nas-delete/{$ds['id']}" id="{$ds['id']}"

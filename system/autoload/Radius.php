@@ -43,7 +43,7 @@ class Radius
         return ORM::for_table('radusergroup', 'radius');
     }
 
-    public static function nasAdd($name, $ip, $ports, $secret, $description = "", $type = 'other', $server = null, $community = null)
+    public static function nasAdd($name, $ip, $ports, $secret, $routers = "", $description = "", $type = 'other', $server = null, $community = null)
     {
         $n = Radius::getTableNas()->create();
         $n->nasname = $ip;
@@ -54,11 +54,12 @@ class Radius
         $n->description = $description;
         $n->server = $server;
         $n->community = $community;
+        $n->routers = $routers;
         $n->save();
         return $n->id();
     }
 
-    public static function nasUpdate($id, $name, $ip, $ports, $secret, $description = "", $type = 'other', $server = null, $community = null)
+    public static function nasUpdate($id, $name, $ip, $ports, $secret, $routers = "", $description = "", $type = 'other', $server = null, $community = null)
     {
         $n = Radius::getTableNas()->find_one($id);
         if (empty($n)) {
@@ -72,6 +73,7 @@ class Radius
         $n->description = $description;
         $n->server = $server;
         $n->community = $community;
+        $n->routers = $routers;
         return $n->save();
     }
 
@@ -119,17 +121,17 @@ class Radius
         }
     }
 
-    public static function customerDeactivate($username, $radiusDisconnect = true) {
-    {
-        global $radius_pass;
-        $r = Radius::getTableCustomer()->where_equal('username', $username)->whereEqual('attribute', 'Cleartext-Password')->findOne();
-        if ($r) {
-            // no need to delete, because it will make ID got higher
-            // we just change the password
-            $r->value = md5(time() . $username . $radius_pass);
-            $r->save();
-            if($radiusDisconnect)
-                return Radius::disconnectCustomer($username);
+    public static function customerDeactivate($username, $radiusDisconnect = true)
+    { {
+            global $radius_pass;
+            $r = Radius::getTableCustomer()->where_equal('username', $username)->whereEqual('attribute', 'Cleartext-Password')->findOne();
+            if ($r) {
+                // no need to delete, because it will make ID got higher
+                // we just change the password
+                $r->value = md5(time() . $username . $radius_pass);
+                $r->save();
+                if ($radiusDisconnect)
+                    return Radius::disconnectCustomer($username);
             }
         }
         return '';

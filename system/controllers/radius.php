@@ -21,6 +21,7 @@ switch ($action) {
     case 'nas-add':
         $ui->assign('_system_menu', 'network');
         $ui->assign('_title', "Network Access Server");
+        $ui->assign('routers', ORM::for_table('tbl_routers')->find_many());
         $ui->display('radius-nas-add.tpl');
         break;
     case 'nas-add-post':
@@ -32,6 +33,7 @@ switch ($action) {
         $server = _post('server', null);
         $community = _post('community', null);
         $description = _post('description');
+        $routers = _post('routers');
         $msg = '';
 
         if (Validator::Length($shortname, 30, 2) == false) {
@@ -54,7 +56,7 @@ switch ($action) {
             $msg .= 'NAS IP Exists<br>';
         }
         if ($msg == '') {
-            $id = Radius::nasAdd($shortname, $nasname, $ports, $secret, $description, $type, $server, $community);
+            $id = Radius::nasAdd($shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community);
             if ($id > 0) {
                 r2(U . 'radius/nas-list/', 's', "NAS Added");
             } else {
@@ -74,6 +76,7 @@ switch ($action) {
             $d = ORM::for_table('nas', 'radius')->where_equal('shortname', _get('name'))->find_one();
         }
         if ($d) {
+            $ui->assign('routers', ORM::for_table('tbl_routers')->find_many());
             $ui->assign('d', $d);
             $ui->display('radius-nas-edit.tpl');
         } else {
@@ -91,6 +94,7 @@ switch ($action) {
         $server = _post('server', null);
         $community = _post('community', null);
         $description = _post('description');
+        $routers = _post('routers');
         $msg = '';
 
         if (Validator::Length($shortname, 30, 2) == false) {
@@ -109,7 +113,7 @@ switch ($action) {
             $type = null;
         }
         if ($msg == '') {
-            if (Radius::nasUpdate($id, $shortname, $nasname, $ports, $secret, $description, $type, $server, $community)) {
+            if (Radius::nasUpdate($id, $shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community)) {
                 r2(U . 'radius/list/', 's', "NAS Saved");
             } else {
                 r2(U . 'radius/nas-add', 'e', 'NAS NOT Exists');
