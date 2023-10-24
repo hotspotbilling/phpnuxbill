@@ -43,19 +43,6 @@ class Radius
         return ORM::for_table('radusergroup', 'radius');
     }
 
-    public static function nasList($search = null)
-    {
-        if ($search == null) {
-            return ORM::for_table('nas', 'radius')->find_many();
-        } else {
-            return ORM::for_table('nas', 'radius')
-                ->where_like('nasname', $search)
-                ->where_like('shortname', $search)
-                ->where_like('description', $search)
-                ->find_many();
-        }
-    }
-
     public static function nasAdd($name, $ip, $ports, $secret, $description = "", $type = 'other', $server = null, $community = null)
     {
         $n = Radius::getTableNas()->create();

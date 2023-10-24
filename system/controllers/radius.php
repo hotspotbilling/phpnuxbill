@@ -131,10 +131,22 @@ switch ($action) {
         $ui->assign('_title', "Network Access Server");
         $name = _post('name');
         if (empty($name)) {
-            $nas = Radius::nasList();
+            $paginator = Paginator::build(ORM::for_table('nas', 'radius'));
+            $nas = ORM::for_table('nas', 'radius')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
         } else {
-            $nas = Radius::nasList($name);
+            $paginator = Paginator::build(ORM::for_table('nas', 'radius'), [
+                'nasname' => '%'.$search.'%',
+                'shortname' => '%'.$search.'%',
+                'description' => '%'.$search.'%'
+            ]);
+            $nas = ORM::for_table('nas', 'radius')
+            ->where_like('nasname', $search)
+            ->where_like('shortname', $search)
+            ->where_like('description', $search)
+            ->offset($paginator['startpoint'])->limit($paginator['limit'])
+            ->find_many();
         }
+        $ui->assign('paginator', $paginator);
         $ui->assign('name', $name);
         $ui->assign('nas', $nas);
         $ui->display('radius-nas.tpl');
