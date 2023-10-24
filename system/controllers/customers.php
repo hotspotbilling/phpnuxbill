@@ -24,14 +24,19 @@ switch ($action) {
         $search = _post('search');
         run_hook('list_customers'); #HOOK
         if ($search != '') {
-            $paginator = Paginator::bootstrapRaw('tbl_customers', "(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')", [$search, $search, $search, $search]);
+            $paginator = Paginator::build(ORM::for_table('tbl_customers'), [
+                'username' => '%' . $search . '%',
+                'fullname' => '%' . $search . '%',
+                'phonenumber' => '%' . $search . '%',
+                'email' => '%' . $search . '%'
+            ], $search);
             $d = ORM::for_table('tbl_customers')
                 ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')", [$search, $search, $search, $search])
                 ->offset($paginator['startpoint'])
                 ->limit($paginator['limit'])
                 ->order_by_desc('id')->find_many();
         } else {
-            $paginator = Paginator::bootstrap('tbl_customers');
+            $paginator = Paginator::build(ORM::for_table('tbl_customers'));
             $d = ORM::for_table('tbl_customers')
                 ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
@@ -125,25 +130,24 @@ switch ($action) {
             $v  = $routes['3'];
             if (empty($v) || $v == 'order') {
                 $v = 'order';
-                // $paginator = Paginator::bootstrap('tbl_payment_gateway', 'username', $customer['username']);
-                // print_r($paginator);
+                $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'),['username'=>$customer['username']]);
                 $order = ORM::for_table('tbl_payment_gateway')
                     ->where('username', $customer['username'])
-                    ->offset(0)
-                    ->limit(30)
+                    ->offset($paginator['startpoint'])
+                    ->limit($paginator['limit'])
                     ->order_by_desc('id')
                     ->find_many();
-                // $ui->assign('paginator', $paginator);
+                $ui->assign('paginator', $paginator);
                 $ui->assign('order', $order);
             } else if ($v == 'activation') {
-                // $paginator = Paginator::bootstrap('tbl_transactions', 'username', $customer['username']);
+                $paginator = Paginator::build(ORM::for_table('tbl_transactions'),['username'=>$customer['username']]);
                 $activation = ORM::for_table('tbl_transactions')
                     ->where('username', $customer['username'])
-                    ->offset(0)
-                    ->limit(30)
+                    ->offset($paginator['startpoint'])
+                    ->limit($paginator['limit'])
                     ->order_by_desc('id')
                     ->find_many();
-                // $ui->assign('paginator', $paginator);
+                $ui->assign('paginator', $paginator);
                 $ui->assign('activation', $activation);
             }
             $package = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->find_one();

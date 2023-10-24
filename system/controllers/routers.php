@@ -27,10 +27,10 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::bootstrap('tbl_routers', 'name', '%' . $name . '%');
+            $paginator = Paginator::build(ORM::for_table('tbl_routers'), ['name' => '%' . $name . '%'], $name);
             $d = ORM::for_table('tbl_routers')->where_like('name', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         } else {
-            $paginator = Paginator::bootstrap('tbl_routers');
+            $paginator = Paginator::build(ORM::for_table('tbl_routers'));
             $d = ORM::for_table('tbl_routers')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 

@@ -22,10 +22,10 @@ switch ($action) {
         run_hook('view_list_bandwidth'); #HOOK
 		$name = _post('name');
 		if ($name != ''){
-			$paginator = Paginator::bootstrap('tbl_bandwidth','name_bw','%'.$name.'%');
+            $paginator = Paginator::build(ORM::for_table('tbl_bandwidth'), ['name_bw' => '%' . $name . '%'], $name);
 			$d = ORM::for_table('tbl_bandwidth')->where_like('name_bw','%'.$name.'%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
 		}else{
-			$paginator = Paginator::bootstrap('tbl_bandwidth');
+            $paginator = Paginator::build(ORM::for_table('tbl_bandwidth'));
 			$d = ORM::for_table('tbl_bandwidth')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
 		}
 
