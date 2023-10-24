@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -22,11 +23,11 @@ switch ($action) {
             $logo = 'system/uploads/logo.default.png';
         }
         $ui->assign('logo', $logo);
-        if(empty($_c['radius_client'])){
-            try{
+        if (empty($_c['radius_client'])) {
+            try {
                 $_c['radius_client'] = Radius::getClient();
                 $ui->assign('_c', $_c);
-            }catch(Exception $e){
+            } catch (Exception $e) {
                 //ignore
             }
         }
@@ -38,11 +39,11 @@ switch ($action) {
             }
         }
         $php = trim(shell_exec('which php'));
-        if(empty($php)){
+        if (empty($php)) {
             $php = 'php';
         }
         $ui->assign('php', $php);
-        $ui->assign('dir', str_replace('controllers','', __DIR__));
+        $ui->assign('dir', str_replace('controllers', '', __DIR__));
         $ui->assign('themes', $themes);
         run_hook('view_app_settings'); #HOOK
         $ui->display('app-settings.tpl');
@@ -76,10 +77,10 @@ switch ($action) {
 
         $username = _post('username');
         if ($username != '') {
-            $paginator = Paginator::bootstrap('tbl_users', 'username', '%' . $username . '%');
+            $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $username . '%'], $username);
             $d = ORM::for_table('tbl_users')->where_like('username', '%' . $username . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
         } else {
-            $paginator = Paginator::bootstrap('tbl_users');
+            $paginator = Paginator::build(ORM::for_table('tbl_users'));
             $d = ORM::for_table('tbl_users')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
         }
 
@@ -261,11 +262,11 @@ switch ($action) {
 
 
         if (!empty($_FILES['logo']['name'])) {
-            if(function_exists('imagecreatetruecolor')){
+            if (function_exists('imagecreatetruecolor')) {
                 if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
                 File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
                 if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
-            }else{
+            } else {
                 r2(U . 'settings/app', 'e', 'PHP GD is not installed');
             }
         }

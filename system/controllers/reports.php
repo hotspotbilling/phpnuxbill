@@ -48,7 +48,7 @@ switch ($action) {
         $ui->display('reports-activation.tpl');
         break;
     case 'daily-report':
-        $paginator = Paginator::bootstrap('tbl_transactions', 'recharged_on', $mdate);
+        $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['recharged_on' => $mdate]);
         $d = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         $dr = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->sum('price');
 

@@ -19,7 +19,7 @@ switch ($action) {
         break;
     case 'history':
         $ui->assign('_system_menu', 'history');
-        $paginator = Paginator::bootstrap('tbl_payment_gateway', 'username', $user['username']);
+        $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'),['username'=>$user['username']]);
         $d = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
             ->order_by_desc('id')

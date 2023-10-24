@@ -67,10 +67,10 @@ switch ($action) {
         $ui->assign('_title', $_L['Customers']);
         $username = _post('username');
         if ($username != '') {
-            $paginator = Paginator::bootstrap('tbl_user_recharges', 'username', '%' . $username . '%');
+            $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'), ['username' => '%' . $username . '%'], $username);
             $d = ORM::for_table('tbl_user_recharges')->where_like('username', '%' . $username . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         } else {
-            $paginator = Paginator::bootstrap('tbl_user_recharges');
+            $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'));
             $d = ORM::for_table('tbl_user_recharges')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 
@@ -142,16 +142,16 @@ switch ($action) {
         $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
         $ui->assign('in', $d);
 
-        if(!empty($routes['3']) && $routes['3']=='send'){
+        if (!empty($routes['3']) && $routes['3'] == 'send') {
             $c = ORM::for_table('tbl_customers')->where('username', $d['username'])->find_one();
-            if($c){
+            if ($c) {
                 Message::sendInvoice($c, $d);
-                r2(U . 'prepaid/view/'.$id, 's', "Success send to customer");
+                r2(U . 'prepaid/view/' . $id, 's', "Success send to customer");
             }
-            r2(U . 'prepaid/view/'.$id, 'd', "Customer not found");
+            r2(U . 'prepaid/view/' . $id, 'd', "Customer not found");
         }
         $ui->assign('_title', 'View Invoice');
-        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'],$d['recharged_time']));
+        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'], $d['recharged_time']));
         $ui->display('invoice.tpl');
         break;
 
@@ -161,7 +161,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
         $ui->assign('d', $d);
 
-        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'],$d['recharged_time']));
+        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'], $d['recharged_time']));
         run_hook('print_invoice'); #HOOK
         $ui->display('invoice-print.tpl');
         break;
@@ -242,7 +242,7 @@ switch ($action) {
         $code = _post('code');
         if ($code != '') {
             $ui->assign('code', $code);
-            $paginator = Paginator::bootstrap('tbl_voucher', 'code', '%' . $code . '%');
+            $paginator = Paginator::build(ORM::for_table('tbl_voucher'), ['code' => '%' . $code . '%'], $code);
             $d = ORM::for_table('tbl_plans')->where('enabled', '1')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where_like('tbl_voucher.code', '%' . $code . '%')
@@ -250,7 +250,7 @@ switch ($action) {
                 ->limit($paginator['limit'])
                 ->find_many();
         } else {
-            $paginator = Paginator::bootstrap('tbl_voucher');
+            $paginator = Paginator::build(ORM::for_table('tbl_voucher'));
             $d = ORM::for_table('tbl_plans')->where('enabled', '1')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->offset($paginator['startpoint'])
@@ -282,13 +282,13 @@ switch ($action) {
         $pagebreak = _post('pagebreak');
         $limit = _post('limit');
         $vpl = _post('vpl');
-        if(empty($vpl)){
+        if (empty($vpl)) {
             $vpl = 3;
         }
         if ($pagebreak < 1) $pagebreak = 12;
 
         if ($limit < 1) $limit = $pagebreak * 2;
-        if(empty($from_id)){
+        if (empty($from_id)) {
             $from_id = 0;
         }
 
@@ -367,7 +367,7 @@ switch ($action) {
             $n++;
         }
 
-        $ui->assign('voucher',$voucher);
+        $ui->assign('voucher', $voucher);
         $ui->assign('vc', $vc);
 
         //for counting pagebreak

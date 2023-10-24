@@ -24,10 +24,10 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::bootstrap('tbl_pool', 'pool_name', '%' . $name . '%');
+            $paginator = Paginator::build(ORM::for_table('tbl_pool'), ['pool_name' => '%' . $name . '%'], $name);
             $d = ORM::for_table('tbl_pool')->where_like('pool_name', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         } else {
-            $paginator = Paginator::bootstrap('tbl_pool');
+            $paginator = Paginator::build(ORM::for_table('tbl_pool'));
             $d = ORM::for_table('tbl_pool')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 
@@ -62,11 +62,11 @@ switch ($action) {
         $d = ORM::for_table('tbl_pool')->find_one($id);
         if ($d) {
             if ($d['routers'] != 'radius') {
-                try{
+                try {
                     $mikrotik = Mikrotik::info($d['routers']);
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePool($client, $d['pool_name']);
-                }catch(Exception $e){
+                } catch (Exception $e) {
                     //ignore exception, it means router has already deleted
                 }
             }
