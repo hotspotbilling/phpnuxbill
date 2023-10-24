@@ -35,6 +35,18 @@ if (php_sapi_name() !== 'cli') {
     echo "<pre>";
 }
 
+if(!file_exists('../config.php')){
+    die("config.php file not found");
+}
+
+
+if(!file_exists('orm.php')){
+    die("orm.php file not found");
+}
+
+if(!file_exists('uploads/notifications.json')){
+    die("uploads/notifications.json file not found");
+}
 
 require_once '../config.php';
 require_once 'orm.php';
