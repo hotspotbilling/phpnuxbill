@@ -103,7 +103,7 @@ foreach ($d as $ds) {
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
             if ($p['is_radius']) {
-                if (!empty($p['pool_expired'])) {
+                if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
                 } else {
                     Radius::upsertCustomerAttr($c['username'], 'Framed-Pool', $plan['pool_expired'], ':=');
@@ -157,7 +157,7 @@ foreach ($d as $ds) {
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
             if ($p['is_radius']) {
-                if (!empty($p['pool_expired'])) {
+                if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
                 } else {
                     Radius::upsertCustomerAttr($c['username'], 'Framed-Pool', $plan['pool_expired'], ':=');
