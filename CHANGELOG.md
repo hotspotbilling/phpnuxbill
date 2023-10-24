@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2023.10.24
+
+- Fix logic cronjob
+- assign router to NAS, but not yet used
+- Fix Pagination
+- Move Alert from hardcode
+
 ## 2023.10.20
 
 - View Invoice
