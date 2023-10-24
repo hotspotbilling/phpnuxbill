@@ -9,7 +9,8 @@ CREATE TABLE `nas` (
   `secret` varchar(60) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'secret',
   `server` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `community` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(200) COLLATE utf8mb4_general_ci DEFAULT 'RADIUS Client'
+  `description` varchar(200) COLLATE utf8mb4_general_ci DEFAULT 'RADIUS Client',
+  `routers` varchar(32) COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `radacct`;

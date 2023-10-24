@@ -58,6 +58,19 @@
                         </div>
                     </div>
                     <div class="form-group">
+						<label class="col-md-2 control-label"><a href="{$_url}routers/add">{$_L['Routers']}</a></label>
+						<div class="col-md-6">
+							<select id="routers" name="routers" class="form-control select2">
+                                <option value="">No Router</option>
+                                {foreach $routers as $rs}
+                                <option {if $rs['name'] == $d['routers']}selected{/if} value="{$rs['name']}">{$rs['name']}</option>
+                                {/foreach}
+                            </select>
+						</div>
+                        <p class="help-block col-md-4">Assign NAS to Router</p>
+                    </div>
+                    <div class="form-gro
+                    <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-primary waves-effect waves-light"
                                 type="submit">{$_L['Save']}</button>
