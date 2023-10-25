@@ -58,9 +58,9 @@ The problem with windows is hard to set cronjob, better Linux
 
 [Docker Repository](https://github.com/animegasan/phpnuxbill)
 
-## RADIUS system
+## Freeradius
 
-Still on development
+Support [Freeradius with Database](https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius)
 
 ## Community Support
 
