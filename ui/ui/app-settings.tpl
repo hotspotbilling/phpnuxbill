@@ -384,7 +384,7 @@ add dst-host=*.{$_domain}</pre>
 </pre>
             <pre>
 # Reminder Cronjob Every 7 AM
-0 7 * * * cd {$dir} && {$php} reminder.php
+0 7 * * * cd {$dir} && {$php} cron_reminder.php
 </pre>
         </div>
     </div>
