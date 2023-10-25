@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2023.10.25
+
+- fix wrong file check in cron, error only for newly installed
+
 ## 2023.10.24
 
 - Fix logic cronjob
