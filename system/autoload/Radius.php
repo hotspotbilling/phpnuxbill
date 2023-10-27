@@ -15,7 +15,15 @@ class Radius
     public static function getClient()
     {
         global $config;
-        return (empty($config['radius_client'])) ? shell_exec('which radclient') : $config['radius_client'];
+        if(empty($config['radius_client'])){
+            if(function_exists("shell_exec")){
+                shell_exec('which radclient');
+            }else{
+                return "";
+            }
+        }else{
+            $config['radius_client'];
+        }
     }
 
     public static function getTableNas()

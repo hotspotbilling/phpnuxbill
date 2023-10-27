@@ -23,7 +23,7 @@ switch ($action) {
             $logo = 'system/uploads/logo.default.png';
         }
         $ui->assign('logo', $logo);
-        if (empty($_c['radius_client'])) {
+        if ( $_c['radius_enable'] && empty($_c['radius_client'])) {
             try {
                 $_c['radius_client'] = Radius::getClient();
                 $ui->assign('_c', $_c);
