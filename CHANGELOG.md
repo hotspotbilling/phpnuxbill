@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2023.10.27
+
+- Backup and restore database
+- Fix checking radius client
+
 ## 2023.10.25
 
 - fix wrong file check in cron, error only for newly installed
