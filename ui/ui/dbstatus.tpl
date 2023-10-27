@@ -53,6 +53,7 @@
                     </div>
                 </div>
             </form>
+            <div class="panel-footer">Restoring database will clean up data and then restore all the data</div>
         </div>
     </div>
 </div>
