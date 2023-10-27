@@ -126,9 +126,15 @@ function _notify($msg, $type = 'e')
     $_SESSION['ntype'] = $type;
     $_SESSION['notify'] = $msg;
 }
-
+if(empty($config['language'])){
+    $config['language'] = 'english';
+}
 $lan_file = File::pathFixer('system/lan/' . $config['language'] . '/common.lan.php');
-require $lan_file;
+if(file_exists($lan_file)){
+    require $lan_file;
+}else{
+    die("$lan_file not found");
+}
 
 $ui = new Smarty();
 

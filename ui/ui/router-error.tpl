@@ -38,8 +38,8 @@
                 <div class="col-md-3">
                     <img src="./ui/ui/images/error.png" class="img-responsive hidden-sm hidden-xs">
                 </div>
-                <div class="col-md-6">
-                    <div class="box box-danger box-solid text-center">
+                <div class="col-md-9">
+                    <div class="box box-danger box-solid">
 
                         <section class="content-header">
                             <h1 class="text-center">

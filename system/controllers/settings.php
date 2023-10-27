@@ -23,7 +23,7 @@ switch ($action) {
             $logo = 'system/uploads/logo.default.png';
         }
         $ui->assign('logo', $logo);
-        if ( $_c['radius_enable'] && empty($_c['radius_client'])) {
+        if ($_c['radius_enable'] && empty($_c['radius_client'])) {
             try {
                 $_c['radius_client'] = Radius::getClient();
                 $ui->assign('_c', $_c);
@@ -675,20 +675,12 @@ switch ($action) {
 
         $dbc = new mysqli($db_host, $db_user, $db_password, $db_name);
         if ($result = $dbc->query('SHOW TABLE STATUS')) {
-            $size = 0;
-            $decimals = 2;
             $tables = array();
             while ($row = $result->fetch_array()) {
-                $size += $row["Data_length"] + $row["Index_length"];
-                $total_size = ($row["Data_length"] + $row["Index_length"]) / 1024;
-                $tables[$row['Name']]['size'] = number_format($total_size, '0');
-                $tables[$row['Name']]['rows'] = $row["Rows"];
+                $tables[$row['Name']]['rows'] = ORM::for_table($row["Name"])->count();
                 $tables[$row['Name']]['name'] = $row["Name"];
             }
-            $mbytes = number_format($size / (1024 * 1024), $decimals, $config['dec_point'], $config['thousands_sep']);
-
             $ui->assign('tables', $tables);
-            $ui->assign('dbsize', $mbytes);
             run_hook('view_database'); #HOOK
             $ui->display('dbstatus.tpl');
         }
@@ -698,92 +690,52 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
-
-        try {
-            run_hook('backup_database'); #HOOK
-            $mysqli = new mysqli($db_host, $db_user, $db_password, $db_name);
-            if ($mysqli->connect_errno) {
-                throw new Exception("Failed to connect to MySQL: " . $mysqli->connect_error);
-            }
-
-            header('Pragma: public');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Content-Type: application/force-download');
-            header('Content-Type: application/octet-stream');
-            header('Content-Type: application/download');
-            header('Content-Disposition: attachment;filename="backup_' . date('Y-m-d_h_i_s') . '.sql"');
-            header('Content-Transfer-Encoding: binary');
-
-            ob_start();
-            $f_output = fopen("php://output", 'w');
-
-            print("-- pjl SQL Dump\n");
-            print("-- Server version:" . $mysqli->server_info . "\n");
-            print("-- Generated: " . date('Y-m-d h:i:s') . "\n");
-            print('-- Current PHP version: ' . phpversion() . "\n");
-            print('-- Host: ' . $db_host . "\n");
-            print('-- Database:' . $db_name . "\n");
-
-            $aTables = array();
-            $strSQL = 'SHOW TABLES';
-            if (!$res_tables = $mysqli->query($strSQL))
-                throw new Exception("MySQL Error: " . $mysqli->error . 'SQL: ' . $strSQL);
-
-            while ($row = $res_tables->fetch_array()) {
-                $aTables[] = $row[0];
-            }
-
-            $res_tables->free();
-
-            foreach ($aTables as $table) {
-                print("-- --------------------------------------------------------\n");
-                print("-- Structure for '" . $table . "'\n");
-                print("--\n\n");
-
-                $strSQL = 'SHOW CREATE TABLE ' . $table;
-                if (!$res_create = $mysqli->query($strSQL))
-                    throw new Exception("MySQL Error: " . $mysqli->error . 'SQL: ' . $strSQL);
-                $row_create = $res_create->fetch_assoc();
-
-                print("\n" . $row_create['Create Table'] . ";\n");
-                print("-- --------------------------------------------------------\n");
-                print('-- Dump Data for `' . $table . "`\n");
-                print("--\n\n");
-                $res_create->free();
-
-                $strSQL = 'SELECT * FROM ' . $table;
-                if (!$res_select = $mysqli->query($strSQL))
-                    throw new Exception("MySQL Error: " . $mysqli->error . 'SQL: ' . $strSQL);
-
-                $fields_info = $res_select->fetch_fields();
-
-                while ($values = $res_select->fetch_assoc()) {
-                    $strFields = '';
-                    $strValues = '';
-                    foreach ($fields_info as $field) {
-                        if ($strFields != '') $strFields .= ',';
-                        $strFields .= "`" . $field->name . "`";
-
-                        if ($strValues != '') $strValues .= ',';
-                        $strValues .= '"' . preg_replace('/[^(\x20-\x7F)\x0A]*/', '', $values[$field->name] . '"');
-                    }
-                    print("INSERT INTO " . $table . " (" . $strFields . ") VALUES (" . $strValues . ");\n");
-                }
-                print("\n\n\n");
-                $res_select->free();
-            }
-            _log('[' . $admin['username'] . ']: ' . $_L['Download_Database_Backup'], 'Admin', $admin['id']);
-        } catch (Exception $e) {
-            print($e->getMessage());
+        $tables = $_POST['tables'];
+        set_time_limit(-1);
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Content-Type: application/force-download');
+        header('Content-Type: application/octet-stream');
+        header('Content-Type: application/download');
+        header('Content-Disposition: attachment;filename="phpnuxbill_' . count($tables) . '_tables_' . date('Y-m-d_H_i') . '.json"');
+        header('Content-Transfer-Encoding: binary');
+        $array = [];
+        foreach ($tables as $table) {
+            $array[$table] = ORM::for_table($table)->find_array();
         }
-
-        fclose($f_output);
-        print(ob_get_clean());
-        $mysqli->close();
-
+        echo json_encode($array);
         break;
-
+    case 'dbrestore':
+        if ($admin['user_type'] != 'Admin') {
+            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        }
+        if (file_exists($_FILES['json']['tmp_name'])) {
+            $suc = 0;
+            $fal = 0;
+            $json = json_decode(file_get_contents($_FILES['json']['tmp_name']), true);
+            foreach ($json as $table => $records) {
+                ORM::raw_execute("TRUNCATE $table;");
+                foreach ($records as $rec) {
+                    $t = ORM::for_table($table)->create();
+                    foreach ($rec as $k => $v) {
+                        if ($k != 'id') {
+                            $t->set($k, $v);
+                        }
+                    }
+                    if ($t->save()) {
+                        $suc++;
+                    } else {
+                        $fal++;
+                    }
+                }
+            }
+            if (file_exists($_FILES['json']['tmp_name'])) unlink($_FILES['json']['tmp_name']);
+            r2(U . "settings/dbstatus", 's', "Restored $suc success $fal failed");
+        } else {
+            r2(U . "settings/dbstatus", 'e', 'Upload failed');
+        }
+        break;
     case 'language':
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
