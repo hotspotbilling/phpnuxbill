@@ -302,7 +302,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $pool_expired = _post('pool_expired');
         $enabled = _post('enabled');
-
+        $routers = _post('routers');
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
             $msg .= 'The validity must be a number' . '<br>';
