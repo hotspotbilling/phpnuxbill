@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2023.11.9
+
+- fix bug variable in cron
+- fix update plan
+
 ## 2023.10.27
 
 - Backup and restore database
