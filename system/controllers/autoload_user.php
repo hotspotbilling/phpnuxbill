@@ -12,10 +12,10 @@ _auth();
 
 $action = $routes['1'];
 $user = User::_info();
-$bill = User::_billing();
 
 switch ($action) {
     case 'isLogin':
+        $bill = ORM::for_table('tbl_user_recharges')->where('id', $routes['2'])->where('username', $user['username'])->findOne();
         if ($bill['type'] == 'Hotspot' && $bill['status'] == 'on') {
             $m = Mikrotik::info($bill['routers']);
             $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
