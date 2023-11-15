@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2023.11.15
+
+- Customer Multi Router package
+- Fix edit package, Admin can change Customer to another router
+
 ## 2023.11.9
 
 - fix bug variable in cron
