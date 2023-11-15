@@ -219,7 +219,11 @@ switch ($action) {
         } else {
             $msg .= $_L['Data_Not_Found'] . '<br>';
         }
-
+        $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
+        if ($d) {
+        } else {
+            $msg .= ' Plan Not Found<br>';
+        }
         if ($msg == '') {
             run_hook('edit_customer_plan'); #HOOK
             $d->username = $username;
@@ -227,8 +231,9 @@ switch ($action) {
             //$d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->time = $time;
+            $d->routers = $p['routers'];
             $d->save();
-            Package::changeTo($username, $id_plan);
+            Package::changeTo($username, $id_plan, $id);
             _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['plan_name'] . '][' . Lang::moneyFormat($d['price']) . ']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
         } else {
