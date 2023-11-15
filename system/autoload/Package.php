@@ -81,7 +81,7 @@ class Package
         }
 
 
-        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('routers', $router_name)->find_one();
 
         $mikrotik = Mikrotik::info($router_name);
         if ($p['validity_unit'] == 'Months') {
