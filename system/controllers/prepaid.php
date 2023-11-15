@@ -171,7 +171,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
-            $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
+            $p = ORM::for_table('tbl_plans')->where('enabled', '1')->where_not_equal('type', 'Balance')->find_many();
             $ui->assign('p', $p);
             run_hook('view_edit_customer_plan'); #HOOK
             $ui->display('prepaid-edit.tpl');

@@ -326,7 +326,7 @@ class Package
         global $_c;
         $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
-        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->find_one();
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->where('routers', $p['routers'])->find_one();
         $mikrotik = Mikrotik::info($p['routers']);
         if ($p['type'] == 'Hotspot') {
             if ($b) {
