@@ -88,23 +88,25 @@ if (_post('send') == 'balance') {
     }
 }
 
-//Client Page
-$bills = User::_billing();
-$ui->assign('_bills', $bills);
+$ui->assign('_bills', User::_billing());
 
 if(isset($_GET['recharge']) && !empty($_GET['recharge'])){
-    $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
-    if ($config['enable_balance'] == 'yes') {
-        $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
-        if($user['balance']>$plan['price']){
-            r2(U . "order/pay/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['recharge'])->where('username', $user['username'])->findOne();
+    if ($bill) {
+        $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
+        if ($config['enable_balance'] == 'yes') {
+            $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
+            if($user['balance']>$plan['price']){
+                r2(U . "order/pay/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+            }else{
+                r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+            }
         }else{
             r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
         }
-    }else{
-        r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
     }
 }else if(isset($_GET['deactivate']) && !empty($_GET['deactivate'])){
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['deactivate'])->where('username', $user['username'])->findOne();
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
         if($p['is_radius']){
@@ -139,6 +141,7 @@ if(isset($_GET['recharge']) && !empty($_GET['recharge'])){
 if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
     if ($_GET['mikrotik'] == 'login') {
         $m = Mikrotik::info($bill['routers']);
         $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
