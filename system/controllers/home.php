@@ -89,10 +89,10 @@ if (_post('send') == 'balance') {
 }
 
 //Client Page
-$bill = User::_billing();
-$ui->assign('_bill', $bill);
+$bills = User::_billing();
+$ui->assign('_bills', $bills);
 
-if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
+if(isset($_GET['recharge']) && !empty($_GET['recharge'])){
     $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
     if ($config['enable_balance'] == 'yes') {
         $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
@@ -104,7 +104,7 @@ if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
     }else{
         r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
     }
-}else if(isset($_GET['deactivate']) && $_GET['deactivate'] == 1){
+}else if(isset($_GET['deactivate']) && !empty($_GET['deactivate'])){
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
         if($p['is_radius']){
