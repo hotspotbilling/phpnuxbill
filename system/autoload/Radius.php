@@ -297,6 +297,10 @@ class Radius
 
     public static function disconnectCustomer($username)
     {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
         $nas = Radius::getTableNas()->findMany();
         $count = count($nas) * 15;
         set_time_limit($count);
