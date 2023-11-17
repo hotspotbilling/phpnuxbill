@@ -408,3 +408,4 @@ $_L['Change_title_in_user_Plan_order'] = 'Change title in user Plan order';
 $_L['Logs'] = 'Logs';
 $_L['Voucher_Format'] = 'Voucher Format';
 $_L['Resend_To_Customer'] = 'Resend To Customer';
+$_L['Your_friend_do_not_have_active_package'] = 'Your friend do not have active package';

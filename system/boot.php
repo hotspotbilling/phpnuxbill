@@ -346,7 +346,7 @@ try {
     }
 } catch (Exception $e) {
     if (isset($_SESSION['uid'])) {
-        r2(U , 'e', $e->getMessage());
+        r2(U . 'home' , 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
