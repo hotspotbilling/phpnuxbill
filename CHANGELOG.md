@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+
+## 2023.11.17
+
+- Error details not show in Customer
+
 ## 2023.11.15
 
 - Customer Multi Router package

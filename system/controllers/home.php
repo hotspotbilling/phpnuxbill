@@ -84,7 +84,7 @@ if (_post('send') == 'balance') {
     if ($router) {
         r2(U . "order/send/$router[id]/$active[plan_id]&u=" . trim(_post('username')), 's', Lang::T('Review package before recharge'));
     } else {
-        r2(U . 'package/order', 'w', Lang::T('Your friend do not have active package'));
+        r2(U . 'home', 'w', Lang::T('Your friend do not have active package'));
     }
 }
 
