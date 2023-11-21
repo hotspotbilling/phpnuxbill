@@ -345,7 +345,7 @@ try {
         r2(U . 'dashboard', 'e', 'not found');
     }
 } catch (Exception $e) {
-    if (isset($_SESSION['uid'])) {
+    if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
         r2(U . 'home' , 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');

@@ -219,7 +219,7 @@ switch ($action) {
         } else {
             $msg .= $_L['Data_Not_Found'] . '<br>';
         }
-        $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
+        $p = ORM::for_table('tbl_plans')->where('id', $id_plan)->where('enabled', '1')->find_one();
         if ($d) {
         } else {
             $msg .= ' Plan Not Found<br>';
