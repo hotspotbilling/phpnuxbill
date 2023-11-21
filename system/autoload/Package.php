@@ -326,7 +326,7 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
         $b = ORM::for_table('tbl_user_recharges')->find_one($from_id);
-        if($p['routers'] == $b['routers']){
+        if($p['routers'] == $b['routers'] && $b['routers'] != 'radius'){
             $mikrotik = Mikrotik::info($p['routers']);
         }else{
             $mikrotik = Mikrotik::info($b['routers']);
@@ -370,7 +370,7 @@ class Package
             }
         }
         // call the next mikrotik
-        if($p['routers'] != $b['routers']){
+        if($p['routers'] != $b['routers'] && $p['routers'] != 'radius'){
             $mikrotik = Mikrotik::info($p['routers']);
         }
         if ($p['type'] == 'Hotspot') {
