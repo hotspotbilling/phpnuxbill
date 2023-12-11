@@ -508,7 +508,7 @@ class Mikrotik
         if ($_app_stage == 'demo') {
             return null;
         }
-        $smsRequest = new RouterOS\Request('/tool sms send port=usb1 channel=2');
+        $smsRequest = new RouterOS\Request('/tool sms send');
         $smsRequest
             ->setArgument('phone-number', $to)
             ->setArgument('message', $message);
