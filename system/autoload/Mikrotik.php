@@ -65,7 +65,7 @@ class Mikrotik
         );
         $id = $client->sendSync($printRequest)->getProperty('.id');
         $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
-        $client(
+        $client->sendSync(
             $removeRequest
                 ->setArgument('numbers', $id)
         );
@@ -101,7 +101,7 @@ class Mikrotik
             Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
         } else {
             $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-            $client(
+            $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $profileID)
                     ->setArgument('shared-users', $sharedusers)
@@ -132,7 +132,7 @@ class Mikrotik
             );
         } else {
             $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-            $client(
+            $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $profileID)
                     ->setArgument('shared-users', 3)
@@ -155,7 +155,7 @@ class Mikrotik
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ip/hotspot/user/profile/remove');
-        $client(
+        $client->sendSync(
             $removeRequest
                 ->setArgument('numbers', $profileID)
         );
@@ -173,7 +173,7 @@ class Mikrotik
         );
         $userID = $client->sendSync($printRequest)->getProperty('.id');
         $removeRequest = new RouterOS\Request('/ip/hotspot/user/remove');
-        $client(
+        $client->sendSync(
             $removeRequest
                 ->setArgument('numbers', $userID)
         );
@@ -397,7 +397,7 @@ class Mikrotik
         $poolID = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ip/pool/remove');
-        $client(
+        $client->sendSync(
             $removeRequest
                 ->setArgument('numbers', $poolID)
         );
@@ -433,7 +433,7 @@ class Mikrotik
             self::addPool($client, $name, $ip_address);
         } else {
             $setRequest = new RouterOS\Request('/ip/pool/set');
-            $client(
+            $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $poolID)
                     ->setArgument('ranges', $ip_address)
@@ -473,7 +473,7 @@ class Mikrotik
             self::addPpoePlan($client, $name, $pool, $rate);
         } else {
             $setRequest = new RouterOS\Request('/ppp/profile/set');
-            $client(
+            $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $profileID)
                     ->setArgument('local-address', $pool)
@@ -496,7 +496,7 @@ class Mikrotik
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
 
         $removeRequest = new RouterOS\Request('/ppp/profile/remove');
-        $client(
+        $client->sendSync(
             $removeRequest
                 ->setArgument('numbers', $profileID)
         );
@@ -508,12 +508,10 @@ class Mikrotik
         if ($_app_stage == 'demo') {
             return null;
         }
-
-        $req = new RouterOS\Request('/tool/sms/send');
-        $client(
-            $req
-                ->setArgument('phone', $to)
-                ->setArgument('message', $message)
-        );
+        $smsRequest = new RouterOS\Request('/tool sms send port=usb1 channel=2');
+        $smsRequest
+            ->setArgument('phone-number', $to)
+            ->setArgument('message', $message);
+        $client->sendSync($smsRequest);
     }
 }

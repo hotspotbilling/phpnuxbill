@@ -29,6 +29,7 @@ class Message
                     $mikrotik = Mikrotik::info($config['sms_url']);
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::sendSMS($client, $phone, $txt);
+                    die("mikrotik");
                 }catch(Exception $e){
                     // ignore, add to logs
                     _log("Failed to send SMS using Mikrotik.\n". $e->getMessage(), 'SMS', 0);
