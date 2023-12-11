@@ -231,7 +231,7 @@
                             <select class="form-control" onchange="document.getElementById('sms_url').value = this.value">
                                 <option value="">Select Router</option>
                                 {foreach $r as $rs}
-                                    <option value="{$rs['name']}">{$rs['name']}</option>
+                                <option value="{$rs['name']}" {if $rs['name']==$_c['sms_url']}selected{/if}>{$rs['name']}</option>
                                 {/foreach}
                             </select>
                         </div>
