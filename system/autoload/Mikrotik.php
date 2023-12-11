@@ -501,4 +501,19 @@ class Mikrotik
                 ->setArgument('numbers', $profileID)
         );
     }
+
+    public static function sendSMS($client, $to, $message)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+
+        $req = new RouterOS\Request('/tool/sms/send');
+        $client(
+            $req
+                ->setArgument('phone', $to)
+                ->setArgument('message', $message)
+        );
+    }
 }

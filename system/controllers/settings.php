@@ -38,8 +38,14 @@ switch ($action) {
                 $themes[] = $file;
             }
         }
-        $php = trim(shell_exec('which php'));
-        if (empty($php)) {
+        $r = ORM::for_table('tbl_routers')->find_many();
+        $ui->assign('r', $r);
+        if (function_exists("shell_exec")) {
+            $php = trim(shell_exec('which php'));
+            if (empty($php)) {
+                $php = 'php';
+            }
+        } else {
             $php = 'php';
         }
         $ui->assign('php', $php);
@@ -473,10 +479,9 @@ switch ($action) {
                 $d->value = $tawkto;
                 $d->save();
             }
-
             if ($radius_enable) {
                 try {
-                    Radius::getTableNas()->find_one(1);
+                    Radius::getTableNas()->find_many();
                 } catch (Exception $e) {
                     $ui->assign("error_title", "RADIUS Error");
                     $ui->assign("error_message", "Radius table not found.<br><br>" .

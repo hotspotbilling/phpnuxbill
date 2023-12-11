@@ -225,6 +225,20 @@
                             replaced.
                         </p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Or use Mikrotik SMS</label>
+                        <div class="col-md-6">
+                            <select class="form-control" onchange="document.getElementById('sms_url').value = this.value">
+                                <option value="">Select Router</option>
+                                {foreach $r as $rs}
+                                    <option value="{$rs['name']}">{$rs['name']}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">Must include <b>[text]</b> &amp; <b>[number]</b>, it will be
+                            replaced.
+                        </p>
+                    </div>
                     <small id="emailHelp" class="form-text text-muted">You can use WhatsApp in here too. <a
                             href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
                 </div>
