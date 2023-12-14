@@ -74,6 +74,11 @@
                             style="width:100%; border: 0px;" onmouseleave="this.type = 'password'"
                             onmouseenter="this.type = 'text'" onclick="this.select()"></td>
                 </tr>
+                <tr>
+                    <td class="small text-success text-uppercase text-normal">{Lang::T('Service Type')}</td>
+                    <td class="small mb15">{$_user['service_type']}</td>
+                </tr>
+
                 {if $_c['enable_balance'] == 'yes'}
                     <tr>
                         <td class="small text-warning text-uppercase text-normal">{Lang::T('Balance')}</td>
