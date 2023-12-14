@@ -37,6 +37,9 @@
                             onclick="this.select()">
                         </li>
                     {/if}
+					<li class="list-group-item">
+                        <b>{Lang::T('Service Type')}</b> <span class="pull-right">{Lang::T($d['service_type'])}</span>
+                    </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Balance')}</b> <span class="pull-right">{Lang::moneyFormat($d['balance'])}</span>
                     </li>

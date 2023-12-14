@@ -35,5 +35,8 @@
     ],
     "2023.10.24" : [
         "ALTER TABLE `nas` ADD `routers` VARCHAR(32) NOT NULL DEFAULT '' AFTER `description`;"
+    ],
+    "2023.12.15": [
+        "ALTER TABLE `tbl_customers` ADD `service_type` ENUM('Hotspot','PPPoE','Others') DEFAULT 'Others' COMMENT 'For selecting user type' AFTER `balance`;"
     ]
 }

@@ -72,6 +72,16 @@
                             <textarea name="address" id="address" class="form-control"></textarea>
                         </div>
                     </div>
+					<div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Service Type')}</label>
+                        <div class="col-md-6">
+						<select class="form-control" id="service_type" name="service_type">
+						<option value="Hotspot" {if $d['service_type'] eq 'Hotspot'}selected{/if}>Hotspot</option>
+						<option value="PPPoE" {if $d['service_type'] eq 'PPPoE'}selected{/if}>PPPoE</option>
+						<option value="Others" {if $d['service_type'] eq 'Others'}selected{/if}>Others</option>
+						</select>
+						</div>
+                    </div>
 
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">

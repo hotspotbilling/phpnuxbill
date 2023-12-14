@@ -33,6 +33,7 @@
                                 <th>{$_L['Phone_Number']}</th>
                                 <th>{$_L['Email']}</th>
                                 <th>{$_L['Package']}</th>
+                                <th>{Lang::T('Service Type')}</th>
                                 <th>{$_L['Created_On']}</th>
                                 <th>{$_L['Manage']}</th>
                             </tr>
@@ -48,6 +49,7 @@
                                     <td align="center" api-get-text="{$_url}autoload/customer_is_active/{$ds['id']}">
                                         <span class="label label-default">&bull;</span>
                                     </td>
+                                    <td>{$ds['service_type']}</td>
                                     <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
                                     <td align="center">
                                             <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
