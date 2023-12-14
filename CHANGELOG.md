@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2023.12.14
+
+- Can send SMS using Mikrotik with Modem Installed
+- Add Customer Type, so Customer can only show their PPPOE or Hotspot Package or both
 
 ## 2023.11.17
 

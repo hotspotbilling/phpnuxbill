@@ -379,3 +379,7 @@ $_L['Sync'] = 'Sync';
 $_L['Failed_to_create_PaymeTrust_transaction'] = 'Failed to create PaymeTrust transaction.';
 $_L['Location'] = 'Location';
 $_L['Voucher_Format'] = 'Voucher Format';
+$_L['Service_Type'] = 'Service Type';
+$_L['Others'] = 'Others';
+$_L['PPPoE'] = 'PPPoE';
+$_L['Hotspot'] = 'Hotspot';
