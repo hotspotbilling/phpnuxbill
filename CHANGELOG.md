@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2023.12.18
+
+- Split sms to 160 characters only for Mikrotik Modem
+
 ## 2023.12.14
 
 - Can send SMS using Mikrotik with Modem Installed
