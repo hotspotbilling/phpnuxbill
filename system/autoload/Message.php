@@ -24,10 +24,10 @@ class Message
         global $config;
         run_hook('send_sms'); #HOOK
         if (!empty($config['sms_url'])) {
-            if (strlen($txt) > 160) {
-                $txts = str_split($txt, 160);
-                foreach ($txts as $txt) {
-                    if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
+            if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
+                if (strlen($txt) > 160) {
+                    $txts = str_split($txt, 160);
+                    foreach ($txts as $txt) {
                         try {
                             $mikrotik = Mikrotik::info($config['sms_url']);
                             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
@@ -36,14 +36,8 @@ class Message
                             // ignore, add to logs
                             _log("Failed to send SMS using Mikrotik.\n" . $e->getMessage(), 'SMS', 0);
                         }
-                    } else {
-                        $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
-                        $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
-                        Http::getData($smsurl);
                     }
-                }
-            } else {
-                if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
+                }else{
                     try {
                         $mikrotik = Mikrotik::info($config['sms_url']);
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
@@ -52,11 +46,11 @@ class Message
                         // ignore, add to logs
                         _log("Failed to send SMS using Mikrotik.\n" . $e->getMessage(), 'SMS', 0);
                     }
-                } else {
-                    $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
-                    $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
-                    Http::getData($smsurl);
                 }
+            } else {
+                $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
+                $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
+                Http::getData($smsurl);
             }
         }
     }
