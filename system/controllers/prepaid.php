@@ -247,7 +247,7 @@ switch ($action) {
 
     case 'voucher':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/voucher.js"></script>');
-
+        $ui->assign('_title', $_L['Prepaid_Vouchers']);
         $code = _post('code');
         if ($code != '') {
             $ui->assign('code', $code);
@@ -274,7 +274,7 @@ switch ($action) {
         break;
 
     case 'add-voucher':
-
+        $ui->assign('_title', $_L['Add_Voucher']);
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);
         $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
