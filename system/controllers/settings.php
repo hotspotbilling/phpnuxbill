@@ -243,27 +243,7 @@ switch ($action) {
         break;
 
     case 'app-post':
-        $company = _post('company');
-        $footer = _post('footer');
-        $enable_balance = _post('enable_balance');
-        $allow_balance_transfer = _post('allow_balance_transfer');
-        $disable_voucher = _post('disable_voucher');
-        $telegram_bot = _post('telegram_bot');
-        $telegram_target_id = _post('telegram_target_id');
-        $sms_url = _post('sms_url');
-        $wa_url = _post('wa_url');
-        $minimum_transfer = _post('minimum_transfer');
-        $user_notification_expired = _post('user_notification_expired');
-        $user_notification_reminder = _post('user_notification_reminder');
-        $user_notification_payment = _post('user_notification_payment');
-        $address = _post('address');
-        $tawkto = _post('tawkto');
-        $http_proxy = _post('http_proxy');
-        $http_proxyauth = _post('http_proxyauth');
-        $radius_enable = _post('radius_enable');
-        $radius_client = _post('radius_client');
-        $theme = _post('theme');
-        $voucher_format = _post('voucher_format');
+        $company = _post('CompanyName');
         run_hook('save_settings'); #HOOK
 
 
@@ -279,206 +259,6 @@ switch ($action) {
         if ($company == '') {
             r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
         } else {
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'CompanyName')->find_one();
-            $d->value = $company;
-            $d->save();
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'address')->find_one();
-            $d->value = $address;
-            $d->save();
-
-            $phone = _post('phone');
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'phone')->find_one();
-            $d->value = $phone;
-            $d->save();
-
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'http_proxy')->find_one();
-            if ($d) {
-                $d->value = $http_proxy;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'http_proxy';
-                $d->value = $http_proxy;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'http_proxyauth')->find_one();
-            if ($d) {
-                $d->value = $http_proxyauth;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'http_proxyauth';
-                $d->value = $http_proxyauth;
-                $d->save();
-            }
-
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'theme')->find_one();
-            if ($d) {
-                $d->value = $theme;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'theme';
-                $d->value = $theme;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'CompanyFooter')->find_one();
-            if ($d) {
-                $d->value = $footer;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'CompanyFooter';
-                $d->value = $footer;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_format')->find_one();
-            if ($d) {
-                $d->value = $voucher_format;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'voucher_format';
-                $d->value = $voucher_format;
-                $d->save();
-            }
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'disable_voucher')->find_one();
-            if ($d) {
-                $d->value = $disable_voucher;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'disable_voucher';
-                $d->value = $disable_voucher;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'enable_balance')->find_one();
-            if ($d) {
-                $d->value = $enable_balance;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'enable_balance';
-                $d->value = $enable_balance;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'allow_balance_transfer')->find_one();
-            if ($d) {
-                $d->value = $allow_balance_transfer;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'allow_balance_transfer';
-                $d->value = $allow_balance_transfer;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'minimum_transfer')->find_one();
-            if ($d) {
-                $d->value = $minimum_transfer;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'minimum_transfer';
-                $d->value = $minimum_transfer;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'telegram_bot')->find_one();
-            if ($d) {
-                $d->value = $telegram_bot;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'telegram_bot';
-                $d->value = $telegram_bot;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'telegram_target_id')->find_one();
-            if ($d) {
-                $d->value = $telegram_target_id;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'telegram_target_id';
-                $d->value = $telegram_target_id;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'sms_url')->find_one();
-            if ($d) {
-                $d->value = $sms_url;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'sms_url';
-                $d->value = $sms_url;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'wa_url')->find_one();
-            if ($d) {
-                $d->value = $wa_url;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'wa_url';
-                $d->value = $wa_url;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_expired')->find_one();
-            if ($d) {
-                $d->value = $user_notification_expired;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_expired';
-                $d->value = $user_notification_expired;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_reminder')->find_one();
-            if ($d) {
-                $d->value = $user_notification_reminder;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_reminder';
-                $d->value = $user_notification_reminder;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_payment')->find_one();
-            if ($d) {
-                $d->value = $user_notification_payment;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_payment';
-                $d->value = $user_notification_payment;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'tawkto')->find_one();
-            if ($d) {
-                $d->value = $tawkto;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'tawkto';
-                $d->value = $tawkto;
-                $d->save();
-            }
             if ($radius_enable) {
                 try {
                     Radius::getTableNas()->find_many();
@@ -491,33 +271,19 @@ switch ($action) {
                     die();
                 }
             }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_enable')->find_one();
-            if ($d) {
-                $d->value = $radius_enable;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'radius_enable';
-                $d->value = $radius_enable;
-                $d->save();
+            // save all settings
+            foreach($_POST as $key => $value) {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+                if ($d) {
+                    $d->value = $value;
+                    $d->save();
+                } else {
+                    $d = ORM::for_table('tbl_appconfig')->create();
+                    $d->setting = $key;
+                    $d->value = $value;
+                    $d->save();
+                }
             }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_client')->find_one();
-            if ($d) {
-                $d->value = $radius_client;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'radius_client';
-                $d->value = $radius_client;
-                $d->save();
-            }
-
-            $note = _post('note');
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'note')->find_one();
-            $d->value = $note;
-            $d->save();
 
             _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
 

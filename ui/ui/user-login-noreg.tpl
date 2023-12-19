@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{$_title} - {$_L['Login']}</title>
+    <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
+
+    <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="hidden-xs" style="height:150px"></div>
+        <div class="form-head mb20">
+            <h1 class="site-logo h2 mb5 mt5 text-center text-uppercase text-bold"
+                style="text-shadow: 2px 2px 4px #757575;">{$_c['CompanyName']}</h1>
+            <hr>
+        </div>
+        {if isset($notify)}
+            <div class="row">
+                <div class="col-sm-6 col-sm-offset-3">
+                    {$notify}
+                </div>
+            </div>
+        {/if}
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="panel panel-info">
+                    <div class="panel-heading">{$_L['Announcement']}</div>
+                    <div class="panel-body">
+                        {include file="$_path/../pages/Announcement.html"}
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">{Lang::T('Login / Activate Voucher')}</div>
+                    <div class="panel-body">
+                        <form action="{$_url}login/activation" method="post">
+                            <div class="form-group">
+                                <label>{$_L['Phone_Number']}</label>
+                                <div class="input-group">
+                                    {if $_c['country_code_phone']!= ''}
+                                        <span class="input-group-addon" id="basic-addon1">+</span>
+                                    {else}
+                                        <span class="input-group-addon" id="basic-addon1"><i
+                                                class="glyphicon glyphicon-phone-alt"></i></span>
+                                    {/if}
+                                    <input type="text" class="form-control" name="username" required
+                                        placeholder="08xxxxxxx">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>{$_L['Enter_Voucher_Code']}</label>
+                                <input type="text" class="form-control" name="voucher" required autocomplete="off"
+                                    placeholder="{$_L['Code_Voucher']}">
+                            </div>
+                            <div class="btn-group btn-group-justified mb15">
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">{Lang::T('Login / Activate Voucher')}</button>
+                                </div>
+                            </div>
+                            <br>
+                            <center>
+                                <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
+                                &bull;
+                                <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
+                            </center>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="ui/ui/scripts/vendors.js"></script>
+</body>
+
+</html>
