@@ -78,13 +78,21 @@ switch ($do) {
                     $v1->save();
                     // add customer to mikrotik
                     if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
-                        $m = Mikrotik::info($v1['routers']);
-                        $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                        Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
-                        if(!empty($config['voucher_redirect'])){
-                            r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
-                        }else{
-                            r2(U . "login", 's', Lang::T("Voucher activation success, you are connected to internet"));
+                        try{
+                            $m = Mikrotik::info($v1['routers']);
+                            $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
+                            Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
+                            if(!empty($config['voucher_redirect'])){
+                                r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
+                            }else{
+                                r2(U . "login", 's', Lang::T("Voucher activation success, you are connected to internet"));
+                            }
+                        } catch (Exception $e) {
+                            if(!empty($config['voucher_redirect'])){
+                                r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                            }else{
+                                r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                            }
                         }
                     }
                     if(!empty($config['voucher_redirect'])){
@@ -103,13 +111,21 @@ switch ($do) {
                 // check if voucher used by this username
                 if ($v1['user'] == $user['username']) {
                     if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
-                        $m = Mikrotik::info($v1['routers']);
-                        $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                        Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
-                        if(!empty($config['voucher_redirect'])){
-                            r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
-                        }else{
-                            r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                        try{
+                            $m = Mikrotik::info($v1['routers']);
+                            $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
+                            Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
+                            if(!empty($config['voucher_redirect'])){
+                                r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
+                            }else{
+                                r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                            }
+                        } catch (Exception $e) {
+                            if(!empty($config['voucher_redirect'])){
+                                r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                            }else{
+                                r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                            }
                         }
                     }else{
                         if(!empty($config['voucher_redirect'])){
