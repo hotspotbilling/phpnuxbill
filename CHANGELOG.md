@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2023.12.19
+
+- Fix Search Customer
+- Disable Registration, Customer just activate voucher Code, and the voucher will be their password
+- Remove all used voucher codes
+
 ## 2023.12.18
 
 - Split sms to 160 characters only for Mikrotik Modem

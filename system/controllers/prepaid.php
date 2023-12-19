@@ -285,6 +285,12 @@ switch ($action) {
         $ui->display('voucher-add.tpl');
         break;
 
+    case 'remove-voucher':
+        $d = ORM::for_table('tbl_voucher')->where_equal('status', '1')->findMany();
+        if ($d) {
+            $d->delete();
+            r2(U . 'prepaid/voucher', 's', $_L['Delete_Successfully']);
+        }
     case 'print-voucher':
         $from_id = _post('from_id');
         $planid = _post('planid');
