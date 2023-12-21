@@ -9,12 +9,12 @@
 
     <!-- Css/Less Stylesheets -->
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
+     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
 
 
 </head>
 
-<body class="hold-transition login-page">
+<body class="hold-transition login-page modern-skin-purple with-bg">
     <div class="login-box">
         <div class="login-logo">
             <b>Nux</b>Billing
