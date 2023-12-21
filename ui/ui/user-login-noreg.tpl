@@ -8,7 +8,8 @@
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
 
 </head>
 

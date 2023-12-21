@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2023.12.21
+
+- Modern AdminLTE by @sabtech254
+- Update user-dashboard.tpl by @Focuslinkstech
+
 ## 2023.12.19
 
 - Fix Search Customer
