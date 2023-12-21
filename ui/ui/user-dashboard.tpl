@@ -76,8 +76,16 @@
                 </tr>
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{Lang::T('Service Type')}</td>
-                    <td class="small mb15">{$_user['service_type']}</td>
-                </tr>
+                      <td class="small mb15">
+                       {if $_user.service_type == 'Hotspot'}
+                          Hotspot
+                         {elseif $_user.service_type == 'PPPoE'}
+                        PPPoE
+                       {elseif $_user.service_type == 'Other' || $_user.service_type == null}
+                       Others
+                    {/if}
+                   </td>
+                 </tr>
 
                 {if $_c['enable_balance'] == 'yes'}
                     <tr>
