@@ -13,7 +13,7 @@
 
 </head>
 
-<body class="hold-transition login-page modern-skin-purple with-bg">
+<body>
     <div class="container">
         <div class="hidden-xs" style="height:150px"></div>
         <div class="form-head mb20">

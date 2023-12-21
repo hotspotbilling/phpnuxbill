@@ -7,14 +7,13 @@
     <title>{$_title} - {$_L['Login']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
-    <!-- Css/Less Stylesheets -->
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
-
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
 
 </head>
 
-<body class="hold-transition login-page modern-skin-purple with-bg">
+<body class="hold-transition login-page">
     <div class="login-box">
         <div class="login-logo">
             <b>Nux</b>Billing
@@ -37,9 +36,6 @@
             </form>
         </div>
     </div>
-    <script src="ui/ui/scripts/jquery.min.js"></script>
-    <script src="ui/ui/scripts/bootstrap.min.js"></script>
-    <script src="ui/ui/scripts/adminlte.min.js"></script>
 </body>
 
 </html>
