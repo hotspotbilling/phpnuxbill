@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
 <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
-    <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
+    
 
     <style>
         ::-moz-selection {
@@ -44,7 +44,7 @@
 
 </head>
 
-<body class="hold-transition modern-skin-green sidebar-mini">
+<body class="hold-transition modern-skin-dark sidebar-mini">
     <div class="wrapper">
         <header class="main-header" style="position:fixed; width: 100%">
             <a href="{$_url}home" class="logo">

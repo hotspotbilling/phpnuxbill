@@ -38,7 +38,7 @@
 
 </head>
 
-<body class="hold-transition modern-skin-green sidebar-mini">
+<body class="hold-transition modern-skin-dark sidebar-mini">
     <div class="wrapper">
 
         <header class="main-header">
