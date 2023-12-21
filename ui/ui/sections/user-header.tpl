@@ -76,8 +76,8 @@
 
                                     <p>
                                         {$_user['fullname']}
-                                        <small>{$_user['phonenumber']}</small><br>
-                                        <small>{$_user['email']}</small>
+                                        <small>{$_user['phonenumber']}<br>
+                                        {$_user['email']}</small>
                                     </p>
                                 </li>
                                 <li class="user-body">
