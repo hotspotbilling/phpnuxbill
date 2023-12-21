@@ -12,8 +12,7 @@
     <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
-
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
     <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
     <link rel="stylesheet" href="ui/ui/styles/select2.min.css" />
     <link rel="stylesheet" href="ui/ui/styles/select2-bootstrap.min.css" />
@@ -40,7 +39,7 @@
 
 </head>
 
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition modern-skin-green sidebar-mini">
     <div class="wrapper">
 
         <header class="main-header">

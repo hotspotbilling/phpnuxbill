@@ -8,11 +8,11 @@
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
+     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
 
 </head>
 
-<body>
+<body class="hold-transition login-page modern-skin-purple with-bg">
     <div class="container">
         <div class="hidden-xs" style="height:150px"></div>
         <div class="form-head mb20">
