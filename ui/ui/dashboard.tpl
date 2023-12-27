@@ -119,6 +119,7 @@
                     {/foreach}
                 </table>
             </div>
+          &nbsp;  {$paginator['contents']}
         </div>
     </div>
 
