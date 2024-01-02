@@ -223,13 +223,7 @@ function _admin($login = true)
 
 function _log($description, $type = '', $userid = '0')
 {
-    $d = ORM::for_table('tbl_logs')->create();
-    $d->date = date('Y-m-d H:i:s');
-    $d->type = $type;
-    $d->description = $description;
-    $d->userid = $userid;
-    $d->ip = $_SERVER["REMOTE_ADDR"];
-    $d->save();
+    Log::put($type, $description, $userid);
 }
 
 function Lang($key)
