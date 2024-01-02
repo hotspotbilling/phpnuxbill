@@ -44,7 +44,7 @@
                                     <td>{Lang::dateTimeFormat($ds['date'])}</td>
                                     <td>{$ds['type']}</td>
                                     <td>{$ds['ip']}</td>
-                                    <td style="overflow-x: scroll;">{$ds['description']}</td>
+                                    <td style="overflow-x: scroll;">{nl2br($ds['description'])}</td>
                                 </tr>
                             {/foreach}
                         </tbody>
