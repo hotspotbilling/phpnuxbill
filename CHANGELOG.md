@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.2
+
+- Pagination User Expired by @Focuslinkstech
+
 ## 2023.12.21
 
 - Modern AdminLTE by @sabtech254
