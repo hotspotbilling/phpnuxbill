@@ -47,7 +47,7 @@ switch ($do) {
         $username = _post('username');
         $v1 = ORM::for_table('tbl_voucher')->where('code', $voucher)->find_one();
         if ($v1) {
-            // coucher exists, check customer exists or not
+            // voucher exists, check customer exists or not
             $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if (!$user) {
                 $d = ORM::for_table('tbl_customers')->create();
@@ -63,7 +63,7 @@ switch ($do) {
                         r2(U . 'login', 'e', Lang::T('Voucher activation failed'));
                     }
                 } else {
-                    r2(U . 'login', 'e', Lang::T('Voucher activation failed').'.');
+                    r2(U . 'login', 'e', Lang::T('Voucher activation failed') . '.');
                 }
             }
             if ($v1['status'] == 0) {
@@ -72,32 +72,34 @@ switch ($do) {
                 $user->password = $voucher;
                 $user->save();
                 // voucher activation
-                if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Activation", "Voucher")) {
+                if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $voucher)) {
                     $v1->status = "1";
                     $v1->user = $user['username'];
                     $v1->save();
+                    $user->last_login = date('Y-m-d H:i:s');
+                    $user->save();
                     // add customer to mikrotik
                     if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
-                        try{
+                        try {
                             $m = Mikrotik::info($v1['routers']);
                             $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                             Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
-                            if(!empty($config['voucher_redirect'])){
+                            if (!empty($config['voucher_redirect'])) {
                                 r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
-                            }else{
+                            } else {
                                 r2(U . "login", 's', Lang::T("Voucher activation success, you are connected to internet"));
                             }
                         } catch (Exception $e) {
-                            if(!empty($config['voucher_redirect'])){
+                            if (!empty($config['voucher_redirect'])) {
                                 r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
-                            }else{
+                            } else {
                                 r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
                             }
                         }
                     }
-                    if(!empty($config['voucher_redirect'])){
+                    if (!empty($config['voucher_redirect'])) {
                         r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
-                    }else{
+                    } else {
                         r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
                     }
                 } else {
@@ -110,27 +112,29 @@ switch ($do) {
                 // used voucher
                 // check if voucher used by this username
                 if ($v1['user'] == $user['username']) {
+                    $user->last_login = date('Y-m-d H:i:s');
+                    $user->save();
                     if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
-                        try{
+                        try {
                             $m = Mikrotik::info($v1['routers']);
                             $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                             Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
-                            if(!empty($config['voucher_redirect'])){
+                            if (!empty($config['voucher_redirect'])) {
                                 r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
-                            }else{
+                            } else {
                                 r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
                             }
                         } catch (Exception $e) {
-                            if(!empty($config['voucher_redirect'])){
+                            if (!empty($config['voucher_redirect'])) {
                                 r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
-                            }else{
+                            } else {
                                 r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
                             }
                         }
-                    }else{
-                        if(!empty($config['voucher_redirect'])){
+                    } else {
+                        if (!empty($config['voucher_redirect'])) {
                             r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
-                        }else{
+                        } else {
                             r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
                         }
                     }
@@ -140,14 +144,14 @@ switch ($do) {
                 }
             }
         } else {
-            // voucher not found
-            r2(U . 'login', 'e', $_L['Voucher_Not_Valid']);
+            _msglog('e', $_L['Invalid_Username_or_Password']);
+            r2(U . 'login');
         }
     default:
         run_hook('customer_view_login'); #HOOK
-        if($config['disable_registration']=='yes'){
+        if ($config['disable_registration'] == 'yes') {
             $ui->display('user-login-noreg.tpl');
-        }else{
+        } else {
             $ui->display('user-login.tpl');
         }
         break;

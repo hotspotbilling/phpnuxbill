@@ -288,8 +288,14 @@ switch ($action) {
     case 'remove-voucher':
         $d = ORM::for_table('tbl_voucher')->where_equal('status', '1')->findMany();
         if ($d) {
-            $d->delete();
-            r2(U . 'prepaid/voucher', 's', $_L['Delete_Successfully']);
+            $jml = 0;
+            foreach ($d as $v) {
+                if(!ORM::for_table('tbl_user_recharges')->where_equal("method",'Voucher - '.$v['code'])->findOne()){
+                    $v->delete();
+                    $jml++;
+                }
+            }
+            r2(U . 'prepaid/voucher', 's', "$jml ".$_L['Delete_Successfully']);
         }
     case 'print-voucher':
         $from_id = _post('from_id');
@@ -410,6 +416,18 @@ switch ($action) {
             $msg .= 'The Length Code must be a number' . '<br>';
         }
         if ($msg == '') {
+            if(!empty($prefix)){
+                $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_prefix')->find_one();
+                if ($d) {
+                    $d->value = $prefix;
+                    $d->save();
+                } else {
+                    $d = ORM::for_table('tbl_appconfig')->create();
+                    $d->setting = 'voucher_prefix';
+                    $d->value = $prefix;
+                    $d->save();
+                }
+            }
             run_hook('create_voucher'); #HOOK
             for ($i = 0; $i < $numbervoucher; $i++) {
                 $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
@@ -459,7 +477,7 @@ switch ($action) {
 
         run_hook('refill_customer'); #HOOK
         if ($v1) {
-            if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Refill", "Voucher")) {
+            if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $code)) {
                 $v1->status = "1";
                 $v1->user = $user['username'];
                 $v1->save();

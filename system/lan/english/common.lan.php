@@ -418,3 +418,4 @@ $_L['Customer_just_Login_with_Phone_number_and_Voucher_Code_Voucher_will_be_pass
 $_L['Login__Activate_Voucher'] = 'Login / Activate Voucher';
 $_L['After_Customer_activate_voucher_or_login_customer_will_be_redirected_to_this_url'] = 'After Customer activate voucher or login, customer will be redirected to this url';
 $_L['Voucher_Prefix'] = 'Voucher Prefix';
+$_L['Voucher_activation_success_now_you_can_login'] = 'Voucher activation success, now you can login';
