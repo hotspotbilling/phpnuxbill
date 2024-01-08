@@ -393,6 +393,8 @@ switch ($action) {
     case 'voucher-post':
         $type = _post('type');
         $plan = _post('plan');
+        $voucher_format = _post('voucher_format');
+        $prefix = _post('prefix');
         $server = _post('server');
         $numbervoucher = _post('numbervoucher');
         $lengthcode = _post('lengthcode');
@@ -411,16 +413,16 @@ switch ($action) {
             run_hook('create_voucher'); #HOOK
             for ($i = 0; $i < $numbervoucher; $i++) {
                 $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
-                if ($config['voucher_format'] == 'low') {
+                if ($voucher_format == 'low') {
                     $code = strtolower($code);
-                } else if ($config['voucher_format'] == 'rand') {
+                } else if ($voucher_format == 'rand') {
                     $code = Lang::randomUpLowCase($code);
                 }
                 $d = ORM::for_table('tbl_voucher')->create();
                 $d->type = $type;
                 $d->routers = $server;
                 $d->id_plan = $plan;
-                $d->code = $code;
+                $d->code = $prefix.$code;
                 $d->user = '0';
                 $d->status = '0';
                 $d->save();

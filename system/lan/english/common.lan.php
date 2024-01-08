@@ -417,3 +417,4 @@ $_L['Disable_Registration'] = 'Disable Registration';
 $_L['Customer_just_Login_with_Phone_number_and_Voucher_Code_Voucher_will_be_password'] = 'Customer just Login with Phone number and Voucher Code, Voucher will be password';
 $_L['Login__Activate_Voucher'] = 'Login / Activate Voucher';
 $_L['After_Customer_activate_voucher_or_login_customer_will_be_redirected_to_this_url'] = 'After Customer activate voucher or login, customer will be redirected to this url';
+$_L['Voucher_Prefix'] = 'Voucher Prefix';
