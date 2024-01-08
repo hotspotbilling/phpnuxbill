@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.8
+
+- User Expired Order by Expired Date
+
 ## 2024.1.2
 
 - Pagination User Expired by @Focuslinkstech
