@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.9
+
+- Add Prefix when generate Voucher
+
 ## 2024.1.8
 
 - User Expired Order by Expired Date
