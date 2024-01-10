@@ -57,7 +57,7 @@ $expire = ORM::for_table('tbl_user_recharges')
     ->where_lte('expiration', $mdate)
     ->offset($paginator['startpoint'])
     ->limit($paginator['limit'])
-    ->order_by_desc('id')
+    ->order_by_desc('expiration')
     ->find_many();
 
 // Get the total count of expired records for pagination
@@ -67,7 +67,6 @@ $totalCount = ORM::for_table('tbl_user_recharges')
 
 // Pass the total count and current page to the paginator
 $paginator['total_count'] = $totalCount;
-$paginator['current_page'] = $paginator['current_page'];
 
 // Assign the pagination HTML to the template variable
 $ui->assign('paginator', $paginator);

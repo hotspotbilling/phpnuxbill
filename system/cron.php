@@ -118,7 +118,7 @@ foreach ($d as $ds) {
                 if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
                 } else {
-                    Radius::upsertCustomerAttr($c['username'], 'Framed-Pool', $plan['pool_expired'], ':=');
+                    Radius::upsertCustomerAttr($c['username'], 'Framed-Pool', $p['pool_expired'], ':=');
                     print_r(Radius::disconnectCustomer($c['username']));
                 }
             } else {
@@ -172,7 +172,7 @@ foreach ($d as $ds) {
                 if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
                 } else {
-                    Radius::upsertCustomerAttr($c['username'], 'Framed-Pool', $plan['pool_expired'], ':=');
+                    Radius::upsertCustomerAttr($c['username'], 'Framed-Pool', $p['pool_expired'], ':=');
                     print_r(Radius::disconnectCustomer($c['username']));
                 }
             } else {

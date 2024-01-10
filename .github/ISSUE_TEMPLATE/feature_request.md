@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+Please Remember, this project is free and open source, and @ibnux don't get any money from this project, any Feature Request will cost you $50-$5000
+
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 

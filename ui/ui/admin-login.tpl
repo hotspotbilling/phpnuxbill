@@ -7,10 +7,9 @@
     <title>{$_title} - {$_L['Login']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
-    <!-- Css/Less Stylesheets -->
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
-
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
+    
 
 </head>
 
@@ -37,9 +36,6 @@
             </form>
         </div>
     </div>
-    <script src="ui/ui/scripts/jquery.min.js"></script>
-    <script src="ui/ui/scripts/bootstrap.min.js"></script>
-    <script src="ui/ui/scripts/adminlte.min.js"></script>
 </body>
 
 </html>

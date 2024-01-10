@@ -2,6 +2,52 @@
 
 # CHANGELOG
 
+## 2024.1.9
+
+- Add Prefix when generate Voucher
+
+## 2024.1.8
+
+- User Expired Order by Expired Date
+
+## 2024.1.2
+
+- Pagination User Expired by @Focuslinkstech
+
+## 2023.12.21
+
+- Modern AdminLTE by @sabtech254
+- Update user-dashboard.tpl by @Focuslinkstech
+
+## 2023.12.19
+
+- Fix Search Customer
+- Disable Registration, Customer just activate voucher Code, and the voucher will be their password
+- Remove all used voucher codes
+
+## 2023.12.18
+
+- Split sms to 160 characters only for Mikrotik Modem
+
+## 2023.12.14
+
+- Can send SMS using Mikrotik with Modem Installed
+- Add Customer Type, so Customer can only show their PPPOE or Hotspot Package or both
+
+## 2023.11.17
+
+- Error details not show in Customer
+
+## 2023.11.15
+
+- Customer Multi Router package
+- Fix edit package, Admin can change Customer to another router
+
+## 2023.11.9
+
+- fix bug variable in cron
+- fix update plan
+
 ## 2023.10.27
 
 - Backup and restore database

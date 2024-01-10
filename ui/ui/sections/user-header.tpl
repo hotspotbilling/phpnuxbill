@@ -12,9 +12,8 @@
     <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
-
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
+<link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
+    
 
     <style>
         ::-moz-selection {
@@ -45,7 +44,7 @@
 
 </head>
 
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition modern-skin-dark sidebar-mini">
     <div class="wrapper">
         <header class="main-header" style="position:fixed; width: 100%">
             <a href="{$_url}home" class="logo">
@@ -77,8 +76,8 @@
 
                                     <p>
                                         {$_user['fullname']}
-                                        <small>{$_user['phonenumber']}</small><br>
-                                        <small>{$_user['email']}</small>
+                                        <small>{$_user['phonenumber']}<br>
+                                        {$_user['email']}</small>
                                     </p>
                                 </li>
                                 <li class="user-body">

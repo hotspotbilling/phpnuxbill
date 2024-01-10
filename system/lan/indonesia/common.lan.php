@@ -408,3 +408,7 @@ $_L['Change_title_in_user_Plan_order'] = 'Ubah judul dalam urutan paket pelangga
 $_L['Logs'] = 'Log';
 $_L['Voucher_Format'] = 'Format Voucher';
 $_L['Resend_To_Customer'] = 'Kirim Ulang Ke Pelanggan';
+$_L['Service_Type'] = 'Service Type';
+$_L['Others'] = 'Lainnya';
+$_L['PPPoE'] = 'PPPoE';
+$_L['Hotspot'] = 'Hotspot';

@@ -31,21 +31,41 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Number_of_Vouchers']}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="numbervoucher" value="1">
                         </div>
                     </div>
-
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Voucher Format')}</label>
+                        <div class="col-md-6">
+                            <select name="voucher_format" id="voucher_format" class="form-control">
+                                <option value="up" {if $_c['voucher_format'] == 'up'}selected="selected" {/if}>UPPERCASE
+                                </option>
+                                <option value="low" {if $_c['voucher_format'] == 'low'}selected="selected" {/if}>
+                                    lowercase
+                                </option>
+                                <option value="rand" {if $_c['voucher_format'] == 'rand'}selected="selected" {/if}>
+                                    RaNdoM
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Voucher Prefix')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="prefix" placeholder="NUX-" value="{$_c['voucher_prefix']}">
+                        </div>
+                        <p class="help-block col-md-4">NUX-VoUCHeRCOdE</p>
+                    </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{$_L['Length_Code']}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="lengthcode" value="12">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success waves-effect waves-light"
