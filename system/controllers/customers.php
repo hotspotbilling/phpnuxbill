@@ -32,10 +32,11 @@ switch ($action) {
                 'service_type' => '%' . $search . '%'
             ], $search);
             $d = ORM::for_table('tbl_customers')
-                ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')", [$search, $search, $search, $search])
+                ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')")
                 ->offset($paginator['startpoint'])
                 ->limit($paginator['limit'])
-                ->order_by_desc('id')->find_many();
+                ->order_by_asc('username')
+                ->find_many();
         } else {
             $paginator = Paginator::build(ORM::for_table('tbl_customers'));
             $d = ORM::for_table('tbl_customers')
@@ -226,7 +227,7 @@ switch ($action) {
         $password = _post('password');
         $pppoe_password = _post('pppoe_password');
         $email = _post('email');
-        $address = _post('address'); 
+        $address = _post('address');
         $phonenumber = _post('phonenumber');
         $service_type = _post('service_type');
         run_hook('add_customer'); #HOOK

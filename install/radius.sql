@@ -102,6 +102,13 @@ CREATE TABLE `radusergroup` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
+DROP TABLE IF EXISTS `nasreload`;
+CREATE TABLE `nasreload` (
+  nasipaddress varchar(15) NOT NULL,
+  reloadtime datetime NOT NULL,
+  PRIMARY KEY (nasipaddress)
+) ENGINE = INNODB;
+
 ALTER TABLE `nas`
   ADD PRIMARY KEY (`id`),
   ADD KEY `nasname` (`nasname`);

@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
 
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
+    
     <style>
         ::-moz-selection {
             /* Code for Firefox */

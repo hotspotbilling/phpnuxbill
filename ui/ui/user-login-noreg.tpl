@@ -30,7 +30,7 @@
             </div>
         {/if}
         <div class="row">
-            <div class="col-sm-6 col-sm-offset-1">
+            <div class="col-sm-8">
                 <div class="panel panel-info">
                     <div class="panel-heading">{$_L['Announcement']}</div>
                     <div class="panel-body">
@@ -40,9 +40,9 @@
             </div>
             <div class="col-sm-4">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">{$_L['Sign_In_Member']}</div>
+                    <div class="panel-heading">{Lang::T('Login / Activate Voucher')}</div>
                     <div class="panel-body">
-                        <form action="{$_url}login/post" method="post">
+                        <form action="{$_url}login/activation" method="post">
                             <div class="form-group">
                                 <label>{$_L['Phone_Number']}</label>
                                 <div class="input-group">
@@ -52,38 +52,26 @@
                                         <span class="input-group-addon" id="basic-addon1"><i
                                                 class="glyphicon glyphicon-phone-alt"></i></span>
                                     {/if}
-                                    <input type="text" class="form-control" name="username"
-                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                    <input type="text" class="form-control" name="username" required
+                                        placeholder="08xxxxxxx">
                                 </div>
-
                             </div>
                             <div class="form-group">
-                                <label>{$_L['Password']}</label>
-                                <input type="password" class="form-control" name="password"
-                                    placeholder="{$_L['Password']}">
-                            </div>
-
-                            <div class="clearfix hidden">
-                                <div class="ui-checkbox ui-checkbox-primary right">
-                                    <label>
-                                        <input type="checkbox">
-                                        <span>Remember me</span>
-                                    </label>
-                                </div>
+                                <label>{$_L['Enter_Voucher_Code']}</label>
+                                <input type="text" class="form-control" name="voucher" required autocomplete="off"
+                                    placeholder="{$_L['Code_Voucher']}">
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">
-                                    <a href="{$_url}register" class="btn btn-success">{$_L['Register']}</a>
-                                </div>
-                                <div class="btn-group">
-                                    <button type="submit" class="btn btn-primary">{$_L['Login']}</button>
+                                    <button type="submit"
+                                        class="btn btn-primary">{Lang::T('Login / Activate Voucher')}</button>
                                 </div>
                             </div>
                             <br>
                             <center>
-                                <a href="javascript:showPrivacy()">Privacy</a>
+                                <a href="./pages/Privacy_Policy.html" target="_blank">Privacy</a>
                                 &bull;
-                                <a href="javascript:showTaC()">T &amp; C</a>
+                                <a href="./pages/Terms_of_Conditions.html" target="_blank">ToC</a>
                             </center>
                         </form>
                     </div>
@@ -91,25 +79,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal -->
-    <div class="modal fade" id="HTMLModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                </div>
-                <div class="modal-body" id="HTMLModal_konten"></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">&times;</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <script src="ui/ui/scripts/vendors.js?v=1"></script>
+    <script src="ui/ui/scripts/vendors.js"></script>
 </body>
 
 </html>

@@ -116,7 +116,11 @@ try {
     $ui->setConfigDir(File::pathFixer('ui/conf/'));
     $ui->setCacheDir(File::pathFixer('ui/cache/'));
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
+    if (isset($_SESSION['uid'])) {
+        $ui->assign("error_message", $e->getMessage() . '<br>');
+    }else{
+        $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
+    }
     $ui->display('router-error.tpl');
     die();
 }
@@ -219,13 +223,7 @@ function _admin($login = true)
 
 function _log($description, $type = '', $userid = '0')
 {
-    $d = ORM::for_table('tbl_logs')->create();
-    $d->date = date('Y-m-d H:i:s');
-    $d->type = $type;
-    $d->description = $description;
-    $d->userid = $userid;
-    $d->ip = $_SERVER["REMOTE_ADDR"];
-    $d->save();
+    Log::put($type, $description, $userid);
 }
 
 function Lang($key)
@@ -341,8 +339,11 @@ try {
         r2(U . 'dashboard', 'e', 'not found');
     }
 } catch (Exception $e) {
-    $ui->assign("error_title", "PHPNuxBill Crash");
+    if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
+        r2(U . 'home' , 'e', $e->getMessage());
+    }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
+    $ui->assign("error_title", "PHPNuxBill Crash");
     $ui->display('router-error.tpl');
     die();
 }

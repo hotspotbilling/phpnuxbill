@@ -7,25 +7,13 @@
     <title>{$_title} - {$_L['Register']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-
-    <!-- Plugins -->
-    <link rel="stylesheet" href="ui/ui/styles/plugins/waves.css">
-    <link rel="stylesheet" href="ui/ui/styles/plugins/perfect-scrollbar.css">
-
-    <!-- Css/Less Stylesheets -->
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/main.min.css">
-
-    <!-- Match Media polyfill for IE9 -->
-    <!--[if IE 9]> <script src="ui/ui/scripts/ie/matchMedia.js"></script>  <![endif]-->
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
+    
 
 </head>
 
 <body id="app" class="app off-canvas body-full">
-
     <div class="container">
         <div class="hidden-xs" style="height:150px"></div>
         <div class="form-head mb20">

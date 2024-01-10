@@ -3,7 +3,13 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">{$_L['Prepaid_Vouchers']}</div>
+            <div class="panel-heading">
+            <div class="btn-group pull-right">
+                <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{$_url}prepaid/remove-voucher" onclick="return confirm('Delete all used voucher code?')"><span
+                        class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete All</a>
+            </div>
+            {$_L['Prepaid_Vouchers']}
+            </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
