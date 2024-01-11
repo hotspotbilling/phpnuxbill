@@ -19,6 +19,18 @@
                             </label>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Client Can Purchase')}</label>
+                        <div class="col-md-10">
+                            <label class="radio-inline warning">
+                                <input type="radio" {if $d['allow_purchase'] == yes}checked{/if} name="allow_purchase" value="yes"> Yes
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" {if $d['allow_purchase'] == no}checked{/if} name="allow_purchase" value="no">
+                                No
+                            </label>
+                        </div>
+                    </div>
                     {if $_c['radius_enable'] and $d['is_radius']}
                         <div class="form-group">
                             <label class="col-md-2 control-label">Radius</label>
