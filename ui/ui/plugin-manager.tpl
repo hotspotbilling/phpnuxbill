@@ -39,7 +39,7 @@
                             <div class="box-header">
                                 <h3 class="box-title">{$pg['name']}</h3>
                             </div>
-                            <div class="box-body">{$pg['description']}<br><small><i>@{$plugin['author']} Last update: {$plugin['last_update']}</i></small></div>
+                            <div class="box-body">{$pg['description']}<br><small><i>@{$pg['author']} Last update: {$pg['last_update']}</i></small></div>
                             <div class="box-footer ">
                                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                                     <a href="{$pg['url']}" target="_blank"
