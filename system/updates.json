@@ -38,5 +38,8 @@
     ],
     "2023.12.15": [
         "ALTER TABLE `tbl_customers` ADD `service_type` ENUM('Hotspot','PPPoE','Others') DEFAULT 'Others' COMMENT 'For selecting user type' AFTER `balance`;"
+    ],
+	"2024.1.11": [
+        "ALTER TABLE `tbl_plans` ADD `allow_purchase` ENUM('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page' AFTER `enabled`;"
     ]
 }
