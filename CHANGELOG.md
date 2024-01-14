@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.1.11
+
+- Add Plan only for admin by @Focuslinkstech
+- Fix Plugin Manager
+
 ## 2024.1.9
 
 - Add Prefix when generate Voucher

@@ -10,25 +10,15 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Status')}</label>
                         <div class="col-md-10">
-                            <label class="radio-inline warning">
-                                <input type="radio" {if $d['enabled'] == 1}checked{/if} name="enabled" value="1"> Enable
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" {if $d['enabled'] == 0}checked{/if} name="enabled" value="0">
-                                Disable
-                            </label>
+                            <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}> Enable
+                            <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> Disable
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Client Can Purchase')}</label>
                         <div class="col-md-10">
-                            <label class="radio-inline warning">
-                                <input type="radio" {if $d['allow_purchase'] == yes}checked{/if} name="allow_purchase" value="yes"> Yes
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" {if $d['allow_purchase'] == no}checked{/if} name="allow_purchase" value="no">
-                                No
-                            </label>
+                            <input type="radio" name="allow_purchase" value="yes" {if $d['allow_purchase'] == yes}checked{/if}> Yes
+                            <input type="radio" name="allow_purchase" value="no" {if $d['allow_purchase'] == no}checked{/if}> No
                         </div>
                     </div>
                     {if $_c['radius_enable'] and $d['is_radius']}
