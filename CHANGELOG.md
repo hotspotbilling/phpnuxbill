@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.15
+
+- Fix cron job for Plan only for admin by @Focuslinkstech
+
 ## 2024.1.11
 
 - Add Plan only for admin by @Focuslinkstech

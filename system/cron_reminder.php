@@ -67,7 +67,13 @@ $_notifmsg_default = json_decode(file_get_contents('uploads/notifications.defaul
 
 //register all plugin
 foreach (glob(File::pathFixer("plugin/*.php")) as $filename) {
-    include $filename;
+    try{
+        include $filename;
+    } catch(Throwable $e){
+        //ignore plugin error
+    }catch(Exception $e){
+        //ignore plugin error
+    }
 }
 
 $result = ORM::for_table('tbl_appconfig')->find_many();
