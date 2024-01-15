@@ -104,7 +104,8 @@ CREATE TABLE `tbl_plans` (
   `is_radius` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 is radius',
   `pool` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `pool_expired` varchar(40) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-  `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled\r\n'
+  `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled\r\n',
+  `allow_purchase` enum('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `tbl_pool`;

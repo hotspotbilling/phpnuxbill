@@ -137,7 +137,7 @@ foreach ($d as $ds) {
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price'] && $p['allow_purchase'] =='yes') {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
@@ -191,7 +191,7 @@ foreach ($d as $ds) {
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price']&& $p['allow_purchase'] =='yes') {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
