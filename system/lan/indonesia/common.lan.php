@@ -3,9 +3,6 @@
 -----------------------------------
 Language Name: Indonesia
 Contributor: Ismail Marzuqi
-Web: www.phpnuxbill.com
-Email: iesien22@yahoo.com
-
 2017
 Contributor: Ibnu Maksum (@ibnux)
 

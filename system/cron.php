@@ -35,16 +35,16 @@ if (php_sapi_name() !== 'cli') {
     echo "<pre>";
 }
 
-if(!file_exists('../config.php')){
+if (!file_exists('../config.php')) {
     die("config.php file not found");
 }
 
 
-if(!file_exists('orm.php')){
+if (!file_exists('orm.php')) {
     die("orm.php file not found");
 }
 
-if(!file_exists('uploads/notifications.default.json')){
+if (!file_exists('uploads/notifications.default.json')) {
     die("uploads/notifications.default.json file not found");
 }
 
@@ -68,7 +68,13 @@ $_notifmsg_default = json_decode(file_get_contents('uploads/notifications.defaul
 
 //register all plugin
 foreach (glob(File::pathFixer("plugin/*.php")) as $filename) {
-    include $filename;
+    try{
+        include $filename;
+    } catch(Throwable $e){
+        //ignore plugin error
+    }catch(Exception $e){
+        //ignore plugin error
+    }
 }
 
 $result = ORM::for_table('tbl_appconfig')->find_many();
@@ -111,9 +117,9 @@ foreach ($d as $ds) {
             echo " : EXPIRED \r\n";
             $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
             $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
-            $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
+            $m = Mikrotik::info($ds['routers']);
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
-
+            $price = Lang::moneyFormat($p['price']);
             if ($p['is_radius']) {
                 if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
@@ -130,14 +136,14 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
             }
-            Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
+            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
             //update database user dengan status off
             $u->status = 'off';
             $u->save();
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                if ($p && $p['enabled'] && $c['balance'] >= $p['price'] && $p['allow_purchase'] =='yes') {
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price'] && $p['allow_purchase'] == 'yes') {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
@@ -156,7 +162,8 @@ foreach ($d as $ds) {
             } else {
                 echo "no renewall | balance $config[enable_balance] auto_renewal $c[auto_renewal]\n";
             }
-        } else echo " : ACTIVE \r\n";
+        } else
+            echo " : ACTIVE \r\n";
     } else {
         $date_now = strtotime(date("Y-m-d H:i:s"));
         $expiration = strtotime($ds['expiration'] . ' ' . $ds['time']);
@@ -167,7 +174,7 @@ foreach ($d as $ds) {
             $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
-
+            $price = Lang::moneyFormat($p['price']);
             if ($p['is_radius']) {
                 if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
@@ -184,14 +191,14 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removePpoeActive($client, $c['username']);
             }
-            Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $textExpired, $config['user_notification_expired']);
+            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
 
             $u->status = 'off';
             $u->save();
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                if ($p && $p['enabled'] && $c['balance'] >= $p['price']&& $p['allow_purchase'] =='yes') {
+                if ($p && $p['enabled'] && $c['balance'] >= $p['price'] && $p['allow_purchase'] == 'yes') {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
@@ -206,6 +213,7 @@ foreach ($d as $ds) {
                     }
                 }
             }
-        } else echo " : ACTIVE \r\n";
+        } else
+            echo " : ACTIVE \r\n";
     }
 }

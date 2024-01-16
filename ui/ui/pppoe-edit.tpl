@@ -121,7 +121,7 @@
     </div>
 </div>
 
-{if $_c['radius_enable'] and $d['is_radius']}
+{if $_c['radius_enable'] && $d['is_radius']}
     {literal}
         <script>
             document.getElementById("routers").required = false;

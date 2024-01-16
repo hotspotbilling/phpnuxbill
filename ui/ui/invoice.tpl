@@ -5,42 +5,36 @@
         <div class="panel panel-hovered panel-primary panel-stacked mb30">
             <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
-                <div class="well">
-                    <fieldset>
-                        <center>
-                            <b>{$_c['CompanyName']}</b><br>
-                            {$_c['address']}<br>
-                            {$_c['phone']}<br>
-                        </center>
-                        ====================================================<br>
-                        INVOICE: <b>{$in['invoice']}</b> - {$_L['Date']} : {$date}<br>
-                        {$_L['Sales']} : {$_admin['fullname']}<br>
-                        ====================================================<br>
-                        {$_L['Type']} : <b>{$in['type']}</b><br>
-                        {$_L['Plan_Name']} : <b>{$in['plan_name']}</b><br>
-                        {$_L['Plan_Price']} : <b>{Lang::moneyFormat($in['price'])}</b><br>
-                        {$in['method']}<br>
-                        <br>
-                        {$_L['Username']} : <b>{$in['username']}</b><br>
-                        {$_L['Password']} : **********<br>
-                        {if $in['type'] != 'Balance'}
-                            <br>
-                            {$_L['Created_On']} : <b>{Lang::dateAndTimeFormat($in['recharged_on'],$in['recharged_time'])}</b><br>
-                            {$_L['Expires_On']} : <b>{Lang::dateAndTimeFormat($in['expiration'],$in['time'])}</b><br>
-                        {/if}
-                        =====================================================<br>
-                        <center>{$_c['note']}</center>
-                    </fieldset>
-                </div>
-                <form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
-                    <input type="hidden" name="id" value="{$in['id']}">
-                    <a href="{$_url}prepaid/list" class="btn btn-primary btn-sm"><i
-                            class="ion-reply-all"></i>{$_L['Finish']}</a>
-                    <a href="{$_url}prepaid/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
-                        class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend To Customer")}</a>
-                    <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-print"></i>
-                        {$_L['Click_Here_to_Print']}</button>
-                </form>
+<pre><b>{Lang::pad($_c['CompanyName'],' ', 2)}</b>
+{Lang::pad($_c['address'],' ', 2)}
+{Lang::pad($_c['phone'],' ', 2)}
+{Lang::pad("", '=')}
+{Lang::pads("Invoice", $in['invoice'], ' ')}
+{Lang::pads($_L['Date'], $date, ' ')}
+{Lang::pads($_L['Sales'], $_admin['fullname'], ' ')}
+{Lang::pad("", '=')}
+{Lang::pads($_L['Type'], $in['type'], ' ')}
+{Lang::pads($_L['Plan_Name'], $in['plan_name'], ' ')}
+{Lang::pads($_L['Plan_Price'], Lang::moneyFormat($in['price']), ' ')}
+{Lang::pad($in['method'], ' ', 2)}
+
+{Lang::pads($_L['Username'], $in['username'], ' ')}
+{Lang::pads($_L['Password'], '**********', ' ')}
+{if $in['type'] != 'Balance'}
+{Lang::pads($_L['Created_On'], Lang::dateAndTimeFormat($in['recharged_on'],$in['recharged_time']), ' ')}
+{Lang::pads($_L['Expires_On'], Lang::dateAndTimeFormat($in['expiration'],$in['time']), ' ')}
+{/if}
+{Lang::pad("", '=')}
+{Lang::pad($_c['note'],' ', 2)}</pre>
+<form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
+    <input type="hidden" name="id" value="{$in['id']}">
+    <a href="{$_url}prepaid/list" class="btn btn-primary btn-sm"><i
+            class="ion-reply-all"></i>{$_L['Finish']}</a>
+    <a href="{$_url}prepaid/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
+        class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend To Customer")}</a>
+    <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-print"></i>
+        {$_L['Click_Here_to_Print']}</button>
+</form>
 
             </div>
         </div>

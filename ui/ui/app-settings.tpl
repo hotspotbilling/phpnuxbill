@@ -54,6 +54,14 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label"><i class="glyphicon glyphicon-print"></i> Print Max Char</label>
+                        <div class="col-md-6">
+                            <input type="number" required class="form-control" id="printer_cols" placeholder="37" name="printer_cols"
+                                value="{$_c['printer_cols']}">
+                        </div>
+                        <span class="help-block col-md-4">For invoice print using Thermal Printer</span>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">Theme</label>
                         <div class="col-md-6">
                             <select name="theme" id="theme" class="form-control">
