@@ -223,7 +223,13 @@ function _admin($login = true)
 
 function _log($description, $type = '', $userid = '0')
 {
-    Log::put($type, $description, $userid);
+    $d = ORM::for_table('tbl_logs')->create();
+    $d->date = date('Y-m-d H:i:s');
+    $d->type = $type;
+    $d->description = $description;
+    $d->userid = $userid;
+    $d->ip = $_SERVER["REMOTE_ADDR"];
+    $d->save();
 }
 
 function Lang($key)
@@ -316,20 +322,30 @@ try {
         // "function" => $function
         $ui->assign('_system_menu', $routes[0]);
         foreach ($menu_registered as $menu) {
-            if ($menu['admin'] && _admin(false)) {
-                $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
-                if (!empty($menu['icon'])) {
-                    $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
-                }
-                $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
-            } else if (!$menu['admin'] && _auth(false)) {
-                $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
-                if (!empty($menu['icon'])) {
-                    $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
-                }
-                $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
-            }
-        }
+          if ($menu['admin'] && _admin(false)) {
+              $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+              if (!empty($menu['icon'])) {
+                  $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+              }
+              if (!empty($menu['label'])) {
+                $menus[$menu['position']] .= '<span class="pull-right-container">
+              <small class="label pull-right bg-'. $menu['color'] .'">' . $menu['label'] . '</small>
+            </span>';
+              }
+              $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
+          } else if (!$menu['admin'] && _auth(false)) {
+              $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+              if (!empty($menu['icon'])) {
+                  $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+              }
+              if (!empty($menu['label'])) {
+                $menus[$menu['position']] .= '<span class="pull-right-container">
+              <small class="label pull-right bg-'. $menu['color'] .'">' . $menu['label'] . '</small>
+            </span>';
+              }
+              $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
+          }
+      }
         foreach ($menus as $k => $v) {
             $ui->assign('_MENU_' . $k, $v);
         }
