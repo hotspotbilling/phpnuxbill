@@ -130,6 +130,7 @@ class Mikrotik
                     ->setArgument('address-pool', $pool)
                     ->setArgument('rate-limit', '512K/512K')
             );
+            die("| $profileID | $name | $pool |");
         } else {
             $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
             $client->sendSync(

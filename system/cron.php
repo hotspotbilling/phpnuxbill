@@ -117,7 +117,7 @@ foreach ($d as $ds) {
             echo " : EXPIRED \r\n";
             $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
             $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
-            $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
+            $m = Mikrotik::info($ds['routers']);
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
 
             if ($p['is_radius']) {

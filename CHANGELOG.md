@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.16
+
+- Add yellow color to table for plan not allowed to purchase
+
 ## 2024.1.15
 
 - Fix cron job for Plan only for admin by @Focuslinkstech
