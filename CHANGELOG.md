@@ -7,6 +7,7 @@
 - Add yellow color to table for plan not allowed to purchase
 - Fix Radius pool select
 - add price to reminder notification
+- Support thermal printer for invoice
 
 ## 2024.1.15
 

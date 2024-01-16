@@ -21,30 +21,27 @@
             <table width="200">
                 <tr>
                     <td>
-                        <fieldset>
-                            <center>
-                                <b>{$_c['CompanyName']}</b><br>
-                                {$_c['address']}<br>
-                                {$_c['phone']}<br>
-                            </center>
-                            ============================================<br>
-                            INVOICE: <b>{$d['invoice']}</b> - {$_L['Date']} : {$date}<br>
-                            {$_L['Sales']} : {$_admin['fullname']}<br>
-                            ============================================<br>
-                            {$_L['Type']} : <b>{$d['type']}</b><br>
-                            {$_L['Plan_Name']} : <b>{$d['plan_name']}</b><br>
-                            {$_L['Plan_Price']} : <b>{Lang::moneyFormat($d['price'])}</b><br>
-                            <br>
-                            {$_L['Username']} : <b>{$d['username']}</b><br>
-                            {$_L['Password']} : **********<br>
-                            {if $in['type'] != 'Balance'}
-                                <br>
-                                {$_L['Created_On']} : <b>{Lang::dateAndTimeFormat($d['recharged_on'],$d['recharged_time'])}</b><br>
-                                {$_L['Expires_On']} : <b>{Lang::dateAndTimeFormat($d['expiration'],$d['time'])}</b><br>
-                            {/if}
-                            ============================================<br>
-                            <center>{$_c['note']}</center>
-                        </fieldset>
+<pre style="border-style: none; background-color: white;"><b>{Lang::pad($_c['CompanyName'],' ', 2)}</b>
+{Lang::pad($_c['address'],' ', 2)}
+{Lang::pad($_c['phone'],' ', 2)}
+{Lang::pad("", '=')}
+{Lang::pads("Invoice", $in['invoice'], ' ')}
+{Lang::pads($_L['Date'], $date, ' ')}
+{Lang::pads($_L['Sales'], $_admin['fullname'], ' ')}
+{Lang::pad("", '=')}
+{Lang::pads($_L['Type'], $in['type'], ' ')}
+{Lang::pads($_L['Plan_Name'], $in['plan_name'], ' ')}
+{Lang::pads($_L['Plan_Price'], Lang::moneyFormat($in['price']), ' ')}
+{Lang::pad($in['method'], ' ', 2)}
+
+{Lang::pads($_L['Username'], $in['username'], ' ')}
+{Lang::pads($_L['Password'], '**********', ' ')}
+{if $in['type'] != 'Balance'}
+{Lang::pads($_L['Created_On'], Lang::dateAndTimeFormat($in['recharged_on'],$in['recharged_time']), ' ')}
+{Lang::pads($_L['Expires_On'], Lang::dateAndTimeFormat($in['expiration'],$in['time']), ' ')}
+{/if}
+{Lang::pad("", '=')}
+{Lang::pad($_c['note'],' ', 2)}</pre>
                     </td>
                 </tr>
             </table>

@@ -99,4 +99,28 @@ class Lang
         }
         return $result;
     }
+
+    /**
+     * $pad_type
+     * 0 Left
+     * 1 right
+     * 2 center
+     * */
+    public static function pad($text, $pad_string = ' ', $pad_type = 0){
+        global $config;
+        $cols = 37;
+        if($config['printer_cols']){
+            $cols = $config['printer_cols'];
+        }
+        return str_pad($text, $cols, $pad_string, $pad_type);
+    }
+
+    public static function pads($textLeft, $textRight, $pad_string = ' '){
+        global $config;
+        $cols = 37;
+        if($config['printer_cols']){
+            $cols = $config['printer_cols'];
+        }
+        return $textLeft.str_pad($textRight, $cols-strlen($textLeft), $pad_string, 0);
+    }
 }
