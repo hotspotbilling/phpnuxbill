@@ -3,8 +3,6 @@
 -----------------------------------
 Language Name: English
 Contributor: Ismail Marzuqi
-Web: www.phpnuxbill.com
-Email: iesien22@yahoo.com
 
 2017
 Contributor: Ibnu Maksum (@ibnux)
@@ -261,7 +259,6 @@ $_L['Plan_Not_found'] = 'Plan Not found';
 $_L['Failed_to_create_transaction'] = 'Failed to create transaction.';
 $_L['Seller_has_not_yet_setup_Xendit_payment_gateway'] = 'Seller has not yet setup Xendit payment gateway';
 $_L['Admin_has_not_yet_setup_Xendit_payment_gateway_please_tell_admin'] = 'Admin has not yet setup Xendit payment gateway, please tell admin';
-$_L['Buy_this_your_active_package_will_be_overwrite'] = 'Buy this? your active package will be overwrite';
 $_L['You_already_have_unpaid_transaction_cancel_it_or_pay_it'] = 'You already have unpaid transaction, cancel it or pay it.';
 $_L['Transaction_Not_found'] = 'Transaction Not found';
 $_L['Cancel_it'] = 'Cancel it?';
@@ -314,7 +311,6 @@ $_L['User_Notification'] = 'User Notification';
 $_L['Expired_Notification'] = 'Expired Notification';
 $_L['User_will_get_notification_when_package_expired'] = 'User will get notification when package expired';
 $_L['Expired_Notification_Message'] = 'Expired Notification Message';
-$_L['bnameb_will_be_replaced_with_Customer_Name_bpackageb_will_be_replaced_with_Package_name'] = '<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.';
 $_L['Payment_Notification'] = 'Payment Notification';
 $_L['User_will_get_invoice_notification_when_buy_package_or_package_refilled'] = 'User will get invoice notification when buy package or package refilled';
 $_L['Current_IP'] = 'Current IP';
@@ -420,9 +416,5 @@ $_L['After_Customer_activate_voucher_or_login_customer_will_be_redirected_to_thi
 $_L['Voucher_Prefix'] = 'Voucher Prefix';
 $_L['Voucher_activation_success_now_you_can_login'] = 'Voucher activation success, now you can login';
 $_L['Client_Can_Purchase'] = 'Client Can Purchase';
-$_L['Buy_this_your_active_package_will_be_overwritten'] = 'Buy this? your active package will be overwritten';
-$_L['Pay_this_with_Balance_your_active_package_will_be_overwritten'] = 'Pay this with Balance? your active package will be overwritten';
-$_L['Buy_this_your_active_package_will_be_overwritten'] = 'Buy this? your active package will be overwritten';
-$_L['Pay_this_with_Balance_your_active_package_will_be_overwritten'] = 'Pay this with Balance? your active package will be overwritten';
 $_L['Buy_this_your_active_package_will_be_overwritten'] = 'Buy this? your active package will be overwritten';
 $_L['Pay_this_with_Balance_your_active_package_will_be_overwritten'] = 'Pay this with Balance? your active package will be overwritten';

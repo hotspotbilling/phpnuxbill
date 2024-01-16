@@ -66,10 +66,11 @@ class Message
         }
     }
 
-    public static function sendPackageNotification($phone, $name, $package, $message, $via)
+    public static function sendPackageNotification($phone, $name, $package, $price, $message, $via)
     {
-        $msg = str_replace('[[name]]', "*$name*", $message);
-        $msg = str_replace('[[package]]', "*$package*", $msg);
+        $msg = str_replace('[[name]]', "$name", $message);
+        $msg = str_replace('[[package]]', "$package", $msg);
+        $msg = str_replace('[[price]]', "$price", $msg);
         if (
             !empty($phone) && strlen($phone) > 5
             && !empty($message) && in_array($via, ['sms', 'wa'])
@@ -85,9 +86,9 @@ class Message
 
     public static function sendBalanceNotification($phone, $name, $balance, $balance_now, $message, $via)
     {
-        $msg = str_replace('[[name]]', "*$name*", $message);
+        $msg = str_replace('[[name]]', "$name", $message);
         $msg = str_replace('[[current_balance]]', Lang::moneyFormat($balance_now), $msg);
-        $msg = str_replace('[[balance]]', "*" . Lang::moneyFormat($balance) . "*", $msg);
+        $msg = str_replace('[[balance]]', Lang::moneyFormat($balance), $msg);
         if (
             !empty($phone) && strlen($phone) > 5
             && !empty($message) && in_array($via, ['sms', 'wa'])

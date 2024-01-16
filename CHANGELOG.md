@@ -5,6 +5,8 @@
 ## 2024.1.16
 
 - Add yellow color to table for plan not allowed to purchase
+- Fix Radius pool select
+- add price to reminder notification
 
 ## 2024.1.15
 

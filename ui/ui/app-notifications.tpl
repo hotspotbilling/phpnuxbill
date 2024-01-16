@@ -21,7 +21,7 @@
                                 rows="3">{if $_json['expired']!=''}{Lang::htmlspecialchars($_json['expired'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            {Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}
+                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
                         </p>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_7_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            {Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}
+                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
                         </p>
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_3_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            {Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}
+                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
                         </p>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_1_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            {Lang::T('<b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name.')}
+                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
                         </p>
                     </div>
                 </div>
