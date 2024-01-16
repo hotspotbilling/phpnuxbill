@@ -112,7 +112,17 @@ class Lang
         if($config['printer_cols']){
             $cols = $config['printer_cols'];
         }
-        return str_pad($text, $cols, $pad_string, $pad_type);
+        $text = trim($text);
+        $texts = explode("\n", $text);
+        if(count($texts)>1){
+            $text = '';
+            foreach($texts as $t){
+                $text.= self::pad(trim($t), $pad_string, $pad_type)."\n";
+            }
+            return $text;
+        }else{
+            return str_pad(trim($text), $cols, $pad_string, $pad_type);
+        }
     }
 
     public static function pads($textLeft, $textRight, $pad_string = ' '){
