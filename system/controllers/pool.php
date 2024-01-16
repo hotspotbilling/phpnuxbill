@@ -68,6 +68,8 @@ switch ($action) {
                     Mikrotik::removePool($client, $d['pool_name']);
                 } catch (Exception $e) {
                     //ignore exception, it means router has already deleted
+                } catch(Throwable $e){
+                    //ignore exception, it means router has already deleted
                 }
             }
             $d->delete();

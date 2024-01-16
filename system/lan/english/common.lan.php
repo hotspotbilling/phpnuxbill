@@ -420,3 +420,9 @@ $_L['After_Customer_activate_voucher_or_login_customer_will_be_redirected_to_thi
 $_L['Voucher_Prefix'] = 'Voucher Prefix';
 $_L['Voucher_activation_success_now_you_can_login'] = 'Voucher activation success, now you can login';
 $_L['Client_Can_Purchase'] = 'Client Can Purchase';
+$_L['Buy_this_your_active_package_will_be_overwritten'] = 'Buy this? your active package will be overwritten';
+$_L['Pay_this_with_Balance_your_active_package_will_be_overwritten'] = 'Pay this with Balance? your active package will be overwritten';
+$_L['Buy_this_your_active_package_will_be_overwritten'] = 'Buy this? your active package will be overwritten';
+$_L['Pay_this_with_Balance_your_active_package_will_be_overwritten'] = 'Pay this with Balance? your active package will be overwritten';
+$_L['Buy_this_your_active_package_will_be_overwritten'] = 'Buy this? your active package will be overwritten';
+$_L['Pay_this_with_Balance_your_active_package_will_be_overwritten'] = 'Pay this with Balance? your active package will be overwritten';

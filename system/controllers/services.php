@@ -173,6 +173,8 @@ switch ($action) {
                     Mikrotik::removeHotspotPlan($client, $d['name_plan']);
                 } catch (Exception $e) {
                     //ignore exception, it means router has already deleted
+                } catch(Throwable $e){
+                    //ignore exception, it means router has already deleted
                 }
             }
 
@@ -440,6 +442,8 @@ switch ($action) {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePpoePlan($client, $d['name_plan']);
                 } catch (Exception $e) {
+                    //ignore exception, it means router has already deleted
+                } catch(Throwable $e){
                     //ignore exception, it means router has already deleted
                 }
             }

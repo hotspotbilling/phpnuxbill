@@ -96,6 +96,12 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
         if ($config['enable_balance'] == 'yes') {
             $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
+            if(!$plan['enabled']){
+                r2(U . "home", 'e', 'Plan is not exists');
+            }
+            if($plan['allow_purchase'] != 'yes'){
+                r2(U . "home", 'e', 'Cannot recharge this plan');
+            }
             if ($user['balance'] > $plan['price']) {
                 r2(U . "order/pay/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
             } else {
