@@ -15,7 +15,7 @@
 - Hotspot & PPPOE
 - Easy Installation
 - Multi Language
-- Payment Gateway Midtrans, Xendit and Tripay
+- Payment Gateway
 - SMS validation for login
 - Whatsapp Notification to Consumer
 - Telegram Notification for Admin

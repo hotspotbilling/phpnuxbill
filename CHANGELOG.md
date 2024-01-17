@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.17
+
+- Add minor change, for plugin, menu can have notifications by @Focuslinkstech
+
 ## 2024.1.16
 
 - Add yellow color to table for plan not allowed to purchase
