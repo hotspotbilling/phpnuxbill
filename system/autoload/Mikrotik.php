@@ -427,7 +427,7 @@ class Mikrotik
             '/ip pool print .proplist=.id',
             RouterOS\Query::where('name', $name)
         );
-        $poolID = $client->sendSync($printRequest)->getProperty('id');
+        $poolID = $client->sendSync($printRequest)->getProperty('.id');
 
         if (empty($poolID)) {
             self::addPool($client, $name, $ip_address);
