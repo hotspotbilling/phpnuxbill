@@ -23,7 +23,7 @@ switch ($action) {
         $q = (_post('q') ? _post('q') : _get('q'));
         $keep = _post('keep');
         if (!empty($keep)) {
-            ORM::raw_execute("DELETE FROM tbl_logs WHERE date < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))");
+            ORM::raw_execute("DELETE FROM tbl_logs WHERE UNIX_TIMESTAMP(date) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))");
             r2(U . "logs/list/", 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
