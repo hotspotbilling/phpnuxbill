@@ -17,7 +17,7 @@ $menu_registered = array();
  * | Customer menu: AFTER_DASHBOARD, ORDER, HISTORY, ACCOUNTS
  * @param string icon from ion icon, ion-person, only for AFTER_
  */
-function register_menu($name, $admin, $function, $position, $icon = '')
+function register_menu($name, $admin, $function, $position, $icon = '', $label = '', $color = '')
 {
     global $menu_registered;
     $menu_registered[] = [
@@ -25,7 +25,9 @@ function register_menu($name, $admin, $function, $position, $icon = '')
         "admin" => $admin,
         "position" => $position,
         "icon" => $icon,
-        "function" => $function
+        "function" => $function,
+        "label" => $label,
+        "color" => $color
     ];
 }
 
@@ -48,4 +50,3 @@ function run_hook($action){
         }
     }
 }
-
