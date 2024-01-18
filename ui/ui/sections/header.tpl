@@ -30,6 +30,23 @@
         .select2-container .select2-selection--single .select2-selection__rendered {
             margin-top: 0px !important;
         }
+
+        @media (min-width: 768px) {
+            .outer {
+                height: 200px
+                    /* Or whatever */
+            }
+        }
+
+        .text1line {
+            display: block;
+            /* or inline-block */
+            text-overflow: ellipsis;
+            word-wrap: break-word;
+            overflow: hidden;
+            max-height: 1em;
+            line-height: 1em;
+        }
     </style>
 
     {if isset($xheader)}
@@ -182,7 +199,7 @@
                                 <li {if $_routes[1] eq 'by-period'}class="active" {/if}><a
                                         href="{$_url}reports/by-period">{$_L['Period_Reports']}</a></li>
                                 <li {if $_routes[1] eq 'activation'}class="active" {/if}><a
-                                    href="{$_url}reports/activation">{Lang::T('Activation History')}</a></li>
+                                        href="{$_url}reports/activation">{Lang::T('Activation History')}</a></li>
                                 {$_MENU_REPORTS}
                             </ul>
                         </li>
@@ -252,15 +269,20 @@
                                         href="{$_url}settings/users">{$_L['Administrator_Users']}</a></li>
                                 <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
                                         href="{$_url}settings/dbstatus">{$_L['Backup_Restore']}</a></li>
-                                <li {if $_routes[0] eq 'pluginmanager'}class="active" {/if}>
-                                    <a href="{$_url}pluginmanager">{Lang::T('Plugin Manager')}</a>
-                                </li>
                                 <li {if $_system_menu eq 'paymentgateway'}class="active" {/if}>
                                     <a href="{$_url}paymentgateway">
                                         <span class="text">{Lang::T('Payment Gateway')}</span>
                                     </a>
                                 </li>
                                 {$_MENU_SETTINGS}
+                                <li {if $_routes[0] eq 'pluginmanager'}class="active" {/if}>
+                                    <a href="{$_url}pluginmanager"><i class="glyphicon glyphicon-tasks"></i>
+                                        {Lang::T('Plugin Manager')} <small class="label pull-right">Free</small></a>
+                                </li>
+                                <li {if $_routes[0] eq 'codecanyon'}class="active" {/if}>
+                                    <a href="{$_url}codecanyon"><i class="glyphicon glyphicon-shopping-cart"></i>
+                                        Codecanyon.net <small class="label pull-right">Paid</small></a>
+                                </li>
                             </ul>
                         </li>
                         {$_MENU_AFTER_SETTINGS}
@@ -274,10 +296,10 @@
                             <ul class="treeview-menu">
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}logs/phpnuxbill">PhpNuxBill</a></li>
-                            {if $_c['radius_enable']}
+                                {if $_c['radius_enable']}
                                     <li {if $_routes[1] eq 'radius'}class="active" {/if}><a href="{$_url}logs/radius">Radius</a>
                                     </li>
-                            {/if}
+                                {/if}
                             </ul>
                             {$_MENU_LOGS}
                         </li>
@@ -301,11 +323,11 @@
             </section>
 
             <section class="content">
-{if isset($notify)}
-    <div class="alert alert-{if $notify_t == 's'}success{else}danger{/if}">
-		<button type="button" class="close" data-dismiss="alert">
-		<span aria-hidden="true">×</span>
-		</button>
-		<div>{$notify}</div>
-    </div>
+                {if isset($notify)}
+                    <div class="alert alert-{if $notify_t == 's'}success{else}danger{/if}">
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <div>{$notify}</div>
+                    </div>
 {/if}

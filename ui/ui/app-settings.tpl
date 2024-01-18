@@ -413,6 +413,31 @@
                         </div>
                     </div>
                 </div>
+                <div class="panel-heading" id="envato">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
+                    Envato / Codecanyon
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Envato Personal Token</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="envato_token" name="envato_token"
+                                value="{$_c['envato_token']}" placeholder="BldWuBsxxxxxxxxxxxPDzPozHAPui">
+                        </div>
+                        <span class="help-block col-md-4"><a href="https://build.envato.com/create-token/" target="_blank">Create Token</a></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">Envato Permission<br>
+                        - View and search Envato sites<br>
+                        - Download the user's purchased items<br>
+                        - List purchases the user has made<br><br>
+                        <a href="https://codecanyon.net/category/php-scripts?term=phpnuxbill" target="_blank" class="btn btn-xs btn-primary">View MarketPlace</a>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="panel-body">
