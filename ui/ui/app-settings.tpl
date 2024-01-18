@@ -424,7 +424,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Envato Personal Token</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="envato_token" name="envato_token"
+                            <input type="password" class="form-control" id="envato_token" name="envato_token"
                                 value="{$_c['envato_token']}" placeholder="BldWuBsxxxxxxxxxxxPDzPozHAPui">
                         </div>
                         <span class="help-block col-md-4"><a href="https://build.envato.com/create-token/" target="_blank">Create Token</a></span>
