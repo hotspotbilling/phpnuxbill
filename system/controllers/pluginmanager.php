@@ -5,7 +5,7 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Plugin Manager']);
+$ui->assign('_title', 'Plugin Manager');
 $ui->assign('_system_menu', 'settings');
 
 $plugin_repository = 'https://hotspotbilling.github.io/Plugin-Repository/repository.json';

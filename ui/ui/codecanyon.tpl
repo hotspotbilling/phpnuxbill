@@ -4,7 +4,8 @@
         <div class="panel panel-primary panel-hovered">
             <div class="panel-heading">
                 <div class="btn-group pull-right">
-                    <a class="btn btn-danger btn-xs" href="https://codecanyon.net/category/php-scripts?term=phpnuxbill" target="_blank">Buy Plugin</a>
+                    <a class="btn btn-danger btn-xs" href="https://codecanyon.net/category/php-scripts?term=phpnuxbill"
+                        target="_blank">Buy Plugin</a>
                 </div>
                 Plugin Purcashed
             </div>
@@ -24,9 +25,9 @@
                                                 class="ion ion-chatboxes"></i> Author</a>
                                         <a href="{$plugin['item']['url']}" target="_blank" class="btn btn-success"><i
                                                 class="ion ion-chatboxes"></i> Product</a>
-                                        <a {if $zipExt } href="{$_url}codecanyon/install/{$plugin['item']['id']}/{$plugin['type']}"
+                                        <a {if $zipExt } href="{$_url}codecanyon/install/{$plugin['item']['id']}"
                                                 onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                            {else} href="#" onclick="alert('PHP ZIP extension is not available')"
+                                            {else} href="#" onclick="alert('PHP ZIP extension is not available')" 
                                             {/if}
                                             class="btn btn-danger"><i class="ion ion-chatboxes"></i> Install</a>
                                     </div>
@@ -43,7 +44,10 @@
                 {/if}
             </div>
             <div class="panel-footer">
-                Cached Until {$chached_until} <a href="{$_url}codecanyon/reload">Force reload</a>
+                {if $chached_until}Cached Until {$chached_until} <a href="{$_url}codecanyon/reload">Force reload</a>
+                &bull; {/if}<a
+                    href="https://github.com/hotspotbilling/phpnuxbill/wiki/Selling-Paid-Plugin-or-Payment-Gateway"
+                    target="_blank">Want to sell?</a>
             </div>
         </div>
     </div>

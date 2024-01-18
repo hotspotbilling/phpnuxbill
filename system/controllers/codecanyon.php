@@ -5,7 +5,7 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Code Canyon']);
+$ui->assign('_title', 'CodeCanyon.net');
 $ui->assign('_system_menu', 'settings');
 
 $plugin_repository = 'https://hotspotbilling.github.io/Plugin-Repository/repository.json';
@@ -43,12 +43,13 @@ switch ($action) {
             r2(U . 'codecanyon', 'e', 'Failed to get download url. ' . $json['description']);
         }
         $file = File::pathFixer('system/cache/codecanyon/');
-        if(!file_exists($file)){
+        if (!file_exists($file)) {
             mkdir($file);
         }
         $file .= $item_id . '.zip';
         if (file_exists($file))
             unlink($file);
+        //download
         $fp = fopen($file, 'w+');
         $ch = curl_init($json['download_url']);
         curl_setopt($ch, CURLOPT_POST, 0);
@@ -60,13 +61,25 @@ switch ($action) {
         curl_exec($ch);
         curl_close($ch);
         fclose($fp);
+        //extract
+        $target = File::pathFixer('system/cache/codecanyon/' . $item_id . '/');
         $zip = new ZipArchive();
         $zip->open($file);
-        $zip->extractTo(File::pathFixer('system/cache/codecanyon/'));
+        $zip->extractTo($target);
         $zip->close();
-        die($json['download_url']);
+        //moving
+        if (file_exists($target . 'plugin')) {
+            File::copyFolder($target, File::pathFixer('system/plugin/'), ['license.txt', 'changelog.txt', 'install.txt']);
+        } else if (file_exists($target . 'paymentgateway')) {
+            File::copyFolder($target, File::pathFixer('system/plugin/'), ['license.txt', 'changelog.txt', 'install.txt']);
+        }
+        //Cleaning
+        File::deleteFolder($target);
+        unlink($file);
+        r2(U . "codecanyon", 's', 'Installation success');
     case 'reload':
-        if (file_exists($cache)) unlink($cache);
+        if (file_exists($cache))
+            unlink($cache);
     default:
         if (class_exists('ZipArchive')) {
             $zipExt = true;
@@ -78,7 +91,7 @@ switch ($action) {
         if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
             $txt = file_get_contents($cache);
             $plugins = json_decode($txt, true);
-            $ui->assign('chached_until', date($config['date_format'] . ' H:i', filemtime($cache)+(24 * 60 * 60)));
+            $ui->assign('chached_until', date($config['date_format'] . ' H:i', filemtime($cache) + (24 * 60 * 60)));
             if (count($plugins) == 0) {
                 unlink($cache);
                 r2(U . 'codecanyon');
@@ -92,25 +105,18 @@ switch ($action) {
             if ($items && count($items['results']) > 0) {
                 foreach ($items['results'] as $item) {
                     $name = strtolower($item['item']['name']);
-                    //if(strpos($name,'phpnuxbill') !== false){
-                    if (strpos($name, 'wordpress') !== false) {
-                        //if(strpos($name,'plugin') !== false){
-                        if (strpos($name, 'theme') !== false) {
-                            $item['type'] = '1';
-                        } else if (strpos($name, 'payment gateway') !== false) {
-                            $item['type'] = '2';
-                        }
-                        if (in_array($item['type'], [1, 2])) {
-                            $plugins[] = $item;
-                        }
+                    if (strpos($name, 'phpnuxbill') !== false) {
+                        $plugins[] = $item;
                     }
                 }
                 $page++;
                 goto back;
             }
-            file_put_contents($cache, json_encode($plugins));
-            if (file_exists($cache)){
-                $ui->assign('chached_until', date($config['date_format'] . ' H:i', filemtime($cache)+(24 * 60 * 60)));
+            if (count($plugins) > 0) {
+                file_put_contents($cache, json_encode($plugins));
+                if (file_exists($cache)) {
+                    $ui->assign('chached_until', date($config['date_format'] . ' H:i', filemtime($cache) + (24 * 60 * 60)));
+                }
             }
         }
         $ui->assign('plugins', $plugins);
