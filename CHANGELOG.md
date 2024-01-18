@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.18
+
+- fix(mikrotik): set pool $poolId always empty
+
 ## 2024.1.17
 
 - Add minor change, for plugin, menu can have notifications by @Focuslinkstech
