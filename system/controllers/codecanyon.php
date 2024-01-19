@@ -71,7 +71,7 @@ switch ($action) {
         if (file_exists($target . 'plugin')) {
             File::copyFolder($target . 'plugin', File::pathFixer('system/plugin/'));
         } else if (file_exists($target . 'paymentgateway')) {
-            File::copyFolder($target . 'paymentgateway', File::pathFixer('system/plugin/'));
+            File::copyFolder($target . 'paymentgateway', File::pathFixer('system/paymentgateway/'));
         } else if (file_exists($target . 'theme')) {
             File::copyFolder($target . 'theme', File::pathFixer('ui/themes/'));
         }
