@@ -22,7 +22,7 @@
                                             class="ion ion-chatboxes"></i> Github</a>
                                     <a {if $zipExt } href="{$_url}pluginmanager/install/plugin/{$plugin['id']}"
                                             onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                        {else} href="#" onclick="alert('PHP ZIP extension is not available')" 
+                                        {else} href="#" onclick="alert('PHP ZIP extension is not installed')" 
                                         {/if}
                                         class="btn btn-warning"><i class="ion ion-chatboxes"></i> Install</a>
                                 </div>

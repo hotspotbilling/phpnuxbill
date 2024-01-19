@@ -27,7 +27,7 @@
                                                 class="ion ion-chatboxes"></i> Product</a>
                                         <a {if $zipExt } href="{$_url}codecanyon/install/{$plugin['item']['id']}"
                                                 onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                            {else} href="#" onclick="alert('PHP ZIP extension is not available')" 
+                                            {else} href="#" onclick="alert('PHP ZIP extension is not installed')" 
                                             {/if}
                                             class="btn btn-danger"><i class="ion ion-chatboxes"></i> Install</a>
                                     </div>
@@ -48,6 +48,8 @@
                 &bull; {/if}<a
                     href="https://github.com/hotspotbilling/phpnuxbill/wiki/Selling-Paid-Plugin-or-Payment-Gateway"
                     target="_blank">Want to sell?</a>
+                &bull;<a href="https://github.com/hotspotbilling/phpnuxbill/wiki/Selling-Paid-Plugin-or-Payment-Gateway"
+                    target="_blank"> want to sell your own plugin/paymentgateway/theme?</a>
             </div>
         </div>
     </div>
