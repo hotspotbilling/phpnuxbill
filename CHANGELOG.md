@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.1.19
+
+- Paid Plugin, Theme, and payment gateway marketplace using codecanyon.net
+- Fix Plugin manager List
+
 ## 2024.1.18
 
 - fix(mikrotik): set pool $poolId always empty
