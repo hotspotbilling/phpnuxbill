@@ -69,9 +69,11 @@ switch ($action) {
         $zip->close();
         //moving
         if (file_exists($target . 'plugin')) {
-            File::copyFolder($target, File::pathFixer('system/plugin/'), ['license.txt', 'changelog.txt', 'install.txt']);
+            File::copyFolder($target . 'plugin', File::pathFixer('system/plugin/'), ['license.txt', 'changelog.txt', 'install.txt']);
         } else if (file_exists($target . 'paymentgateway')) {
-            File::copyFolder($target, File::pathFixer('system/plugin/'), ['license.txt', 'changelog.txt', 'install.txt']);
+            File::copyFolder($target . 'paymentgateway', File::pathFixer('system/plugin/'), ['license.txt', 'changelog.txt', 'install.txt']);
+        } else if (file_exists($target . 'themes')) {
+            File::copyFolder($target . 'themes', File::pathFixer('ui/themes/'), ['license.txt', 'changelog.txt', 'install.txt']);
         }
         //Cleaning
         File::deleteFolder($target);
