@@ -47,9 +47,7 @@
                 {if $chached_until}Cached Until {$chached_until} <a href="{$_url}codecanyon/reload">Force reload</a>
                 &bull; {/if}<a
                     href="https://github.com/hotspotbilling/phpnuxbill/wiki/Selling-Paid-Plugin-or-Payment-Gateway"
-                    target="_blank">Want to sell?</a>
-                &bull;<a href="https://github.com/hotspotbilling/phpnuxbill/wiki/Selling-Paid-Plugin-or-Payment-Gateway"
-                    target="_blank"> want to sell your own plugin/paymentgateway/theme?</a>
+                    target="_blank"> Sell your own plugin/paymentgateway/theme?</a>
             </div>
         </div>
     </div>
