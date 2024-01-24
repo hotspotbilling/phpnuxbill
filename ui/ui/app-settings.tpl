@@ -54,10 +54,11 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label"><i class="glyphicon glyphicon-print"></i> Print Max Char</label>
+                        <label class="col-md-2 control-label"><i class="glyphicon glyphicon-print"></i> Print Max
+                            Char</label>
                         <div class="col-md-6">
-                            <input type="number" required class="form-control" id="printer_cols" placeholder="37" name="printer_cols"
-                                value="{$_c['printer_cols']}">
+                            <input type="number" required class="form-control" id="printer_cols" placeholder="37"
+                                name="printer_cols" value="{$_c['printer_cols']}">
                         </div>
                         <span class="help-block col-md-4">For invoice print using Thermal Printer</span>
                     </div>
@@ -218,6 +219,7 @@
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testTg()">Test TG</a>
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
@@ -244,6 +246,7 @@
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testSms()">Test SMS</a>
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
@@ -281,6 +284,7 @@
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testWa()">Test WA</a>
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
@@ -427,14 +431,17 @@
                             <input type="password" class="form-control" id="envato_token" name="envato_token"
                                 value="{$_c['envato_token']}" placeholder="BldWuBsxxxxxxxxxxxPDzPozHAPui">
                         </div>
-                        <span class="help-block col-md-4"><a href="https://build.envato.com/create-token/" target="_blank">Create Token</a></span>
+                        <span class="help-block col-md-4"><a href="https://build.envato.com/create-token/"
+                                target="_blank">Create Token</a></span>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">Envato Permission<br>
-                        - View and search Envato sites<br>
-                        - Download the user's purchased items<br>
-                        - List purchases the user has made<br><br>
-                        <a href="https://codecanyon.net/category/php-scripts?term=phpnuxbill" target="_blank" class="btn btn-xs btn-primary">View MarketPlace</a>
+                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">Envato
+                            Permission<br>
+                            - View and search Envato sites<br>
+                            - Download the user's purchased items<br>
+                            - List purchases the user has made<br><br>
+                            <a href="https://codecanyon.net/category/php-scripts?term=phpnuxbill" target="_blank"
+                                class="btn btn-xs btn-primary">View MarketPlace</a>
                         </label>
                     </div>
                 </div>
@@ -465,4 +472,23 @@ add dst-host=*.{$_domain}</pre>
         </div>
     </div>
 </form>
+<script>
+    function testWa() {
+        var target = prompt("Phone number\nSave First before Test", "");
+        if (target != null) {
+            window.location.href = '{$_url}settings/app&testWa='+target;
+        }
+    }
+
+    function testSms() {
+        var target = prompt("Phone number\nSave First before Test", "");
+        if (target != null) {
+            window.location.href = '{$_url}settings/app&testSms='+target;
+        }
+    }
+
+    function testTg() {
+        window.location.href = '{$_url}settings/app&testTg=test';
+    }
+</script>
 {include file="sections/footer.tpl"}

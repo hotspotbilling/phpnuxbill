@@ -14,7 +14,7 @@ class Message
         global $config;
         run_hook('send_telegram'); #HOOK
         if (!empty($config['telegram_bot']) && !empty($config['telegram_target_id'])) {
-            Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $config['telegram_target_id'] . '&text=' . urlencode($txt));
+            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $config['telegram_target_id'] . '&text=' . urlencode($txt));
         }
     }
 
@@ -27,17 +27,17 @@ class Message
             if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
                 if (strlen($txt) > 160) {
                     $txts = str_split($txt, 160);
-                    foreach ($txts as $txt) {
-                        try {
-                            $mikrotik = Mikrotik::info($config['sms_url']);
-                            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    try {
+                        $mikrotik = Mikrotik::info($config['sms_url']);
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        foreach ($txts as $txt) {
                             Mikrotik::sendSMS($client, $phone, $txt);
-                        } catch (Exception $e) {
-                            // ignore, add to logs
-                            _log("Failed to send SMS using Mikrotik.\n" . $e->getMessage(), 'SMS', 0);
                         }
+                    } catch (Exception $e) {
+                        // ignore, add to logs
+                        _log("Failed to send SMS using Mikrotik.\n" . $e->getMessage(), 'SMS', 0);
                     }
-                }else{
+                } else {
                     try {
                         $mikrotik = Mikrotik::info($config['sms_url']);
                         $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
@@ -50,7 +50,7 @@ class Message
             } else {
                 $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
                 $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
-                Http::getData($smsurl);
+                return Http::getData($smsurl);
             }
         }
     }

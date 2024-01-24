@@ -17,6 +17,20 @@ switch ($action) {
         if ($admin['user_type'] != 'Admin') {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
+
+        if (!empty(_get('testWa'))) {
+            $result = Message::sendWhatsapp(_get('testWa'), 'PHPNuxBill Test Whatsapp');
+            r2(U . "settings/app", 's', 'Test Whatsapp has been send<br>Result: ' . $result);
+        }
+        if (!empty(_get('testSms'))) {
+            $result = Message::sendSMS(_get('testSms'), 'PHPNuxBill Test SMS');
+            r2(U . "settings/app", 's', 'Test SMS has been send<br>Result: ' . $result);
+        }
+        if (!empty(_get('testTg'))) {
+            $result = Message::sendTelegram('PHPNuxBill Test Telegram');
+            r2(U . "settings/app", 's', 'Test Telegram has been send<br>Result: ' . $result);
+        }
+
         if (file_exists('system/uploads/logo.png')) {
             $logo = 'system/uploads/logo.png?' . time();
         } else {
@@ -272,7 +286,7 @@ switch ($action) {
                 }
             }
             // save all settings
-            foreach($_POST as $key => $value) {
+            foreach ($_POST as $key => $value) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
                     $d->value = $value;
