@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.1.24
+
+- Add Send test for SMS, Whatsapp and Telegram
+
 ## 2024.1.19
 
 - Paid Plugin, Theme, and payment gateway marketplace using codecanyon.net
