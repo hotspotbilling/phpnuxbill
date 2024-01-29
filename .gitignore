@@ -4,6 +4,7 @@ config.php
 ui/compiled/*.php
 ui/cache/*.php
 test.php
+sms.php
 pages/
 system/cache/**
 system/plugin/*

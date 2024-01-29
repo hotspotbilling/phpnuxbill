@@ -231,6 +231,9 @@ switch ($action) {
             //$d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->time = $time;
+            if(strtotime($expiration.' '.$time) > time()){
+                $d->status = 'on';
+            }
             if($p['is_radius']){
                 $d->routers = 'radius';
             }else{
