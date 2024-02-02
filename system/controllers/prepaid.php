@@ -174,6 +174,7 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->where('enabled', '1')->where_not_equal('type', 'Balance')->find_many();
             $ui->assign('p', $p);
             run_hook('view_edit_customer_plan'); #HOOK
+            $ui->assign('_title', 'Edit Plan');
             $ui->display('prepaid-edit.tpl');
         } else {
             r2(U . 'services/list', 'e', $_L['Account_Not_Found']);
@@ -228,11 +229,14 @@ switch ($action) {
             run_hook('edit_customer_plan'); #HOOK
             $d->username = $username;
             $d->plan_id = $id_plan;
+            $d->namebp = $p['name_plan'];
             //$d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->time = $time;
-            if(strtotime($expiration.' '.$time) > time()){
-                $d->status = 'on';
+            if($d['status'] == 'off'){
+                if(strtotime($expiration.' '.$time) > time()){
+                    $d->status = 'on';
+                }
             }
             if($p['is_radius']){
                 $d->routers = 'radius';

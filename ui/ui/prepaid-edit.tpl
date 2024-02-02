@@ -4,7 +4,7 @@
     <div class="col-sm-12">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h3 class="panel-title">{$_L['Recharge_Account']}</h3>
+                <h3 class="panel-title">Edit Plan</h3>
             </div>
             <div class="panel-body">
                 <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/edit-post">
