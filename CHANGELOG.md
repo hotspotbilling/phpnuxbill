@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.2.2
+
+- Fix edit plan for user
+
 ## 2024.1.24
 
 - Add Send test for SMS, Whatsapp and Telegram
