@@ -311,7 +311,7 @@
 
         // Create the chart data
         var data = {
-            labels: ['Active Users', 'Inactive Users', 'All Users'],
+            labels: ['Active Users', 'Inactive Users', 'Total Users'],
             datasets: [{
                 label: 'User Recharges',
                 data: [parseInt(u_act), parseInt(u_all), parseInt(c_all)],
