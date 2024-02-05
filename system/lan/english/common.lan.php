@@ -427,3 +427,4 @@ $_L['Buy_this_your_active_package_will_be_overwrite'] = 'Buy this? your active p
 $_L['Monthly_Registered_Customers'] = 'Monthly Registered Customers';
 $_L['Total_Monthly_Sales'] = 'Total Monthly Sales';
 $_L['Active_Users'] = 'Active Users';
+$_L['All_Users_Insights'] = 'All Users Insights';
