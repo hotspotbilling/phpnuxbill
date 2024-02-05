@@ -383,3 +383,6 @@ $_L['Service_Type'] = 'Service Type';
 $_L['Others'] = 'Others';
 $_L['PPPoE'] = 'PPPoE';
 $_L['Hotspot'] = 'Hotspot';
+$_L['Monthly_Registered_Customers'] = 'Monthly Registered Customers';
+$_L['Total_Monthly_Sales'] = 'Total Monthly Sales';
+$_L['Active_Users'] = 'Active Users';

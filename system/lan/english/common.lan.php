@@ -424,3 +424,6 @@ $_L['Buy_this_your_active_package_will_be_overwrite'] = 'Buy this? your active p
 $_L['Buy_this_your_active_package_will_be_overwrite'] = 'Buy this? your active package will be overwrite';
 $_L['Buy_this_your_active_package_will_be_overwrite'] = 'Buy this? your active package will be overwrite';
 $_L['Buy_this_your_active_package_will_be_overwrite'] = 'Buy this? your active package will be overwrite';
+$_L['Monthly_Registered_Customers'] = 'Monthly Registered Customers';
+$_L['Total_Monthly_Sales'] = 'Total Monthly Sales';
+$_L['Active_Users'] = 'Active Users';

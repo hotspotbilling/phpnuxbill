@@ -409,3 +409,6 @@ $_L['Service_Type'] = 'Service Type';
 $_L['Others'] = 'Lainnya';
 $_L['PPPoE'] = 'PPPoE';
 $_L['Hotspot'] = 'Hotspot';
+$_L['Monthly_Registered_Customers'] = 'Pendaftaran Pelanggan perbulan';
+$_L['Total_Monthly_Sales'] = 'Total penjualan Perbulan';
+$_L['Active_Users'] = 'Pelanggan Aktif';

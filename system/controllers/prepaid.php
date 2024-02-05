@@ -247,7 +247,7 @@ switch ($action) {
             if($d['status'] == 'on'){
                 Package::changeTo($username, $id_plan, $id);
             }
-            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['plan_name'] . '][' . Lang::moneyFormat($d['price']) . ']', 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . '][' . Lang::moneyFormat($d['price']) . ']', 'Admin', $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
         } else {
             r2(U . 'prepaid/edit/' . $id, 'e', $msg);
