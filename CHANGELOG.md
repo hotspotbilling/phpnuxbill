@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.2.5
+
+- Admin Dashboard Update
+  - Add Monthly Registered Customers
+  - Total Monthly Sales
+  - Active Users
+
 ## 2024.2.2
 
 - Fix edit plan for user
