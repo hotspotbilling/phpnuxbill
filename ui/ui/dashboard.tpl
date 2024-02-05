@@ -308,13 +308,15 @@
         var u_act = '{/literal}{$u_act}{literal}';
         var c_all = '{/literal}{$c_all}{literal}';
         var u_all = '{/literal}{$u_all}{literal}';
+        //lets calculate the inactive users as reported
+        var inactive = u_all - u_act;
 
         // Create the chart data
         var data = {
             labels: ['Active Users', 'Inactive Users', 'Total Users'],
             datasets: [{
                 label: 'User Recharges',
-                data: [parseInt(u_act), parseInt(u_all), parseInt(c_all)],
+                data: [parseInt(u_act), parseInt(inactive), parseInt(c_all)],
                 backgroundColor: ['rgba(4, 191, 13)', 'rgba(191, 35, 4)', 'rgba(0, 0, 255, 0.5'],
                 borderColor: ['rgba(0, 255, 0, 1)', 'rgba(255, 99, 132, 1)', 'rgba(0, 0, 255, 0.7'],
                 borderWidth: 1
