@@ -165,7 +165,7 @@
             <div class="panel-heading">{Lang::T('Payment Gateway')}: {$_c['payment_gateway']}</div>
         </div>
         <div class="panel panel-info panel-hovered mb20 activities">
-            <div class="panel-heading">{Lang::T('Active Users')}</div>
+            <div class="panel-heading">{Lang::T('All Users Insights')}</div>
             <div class="panel-body">
                 <canvas id="userRechargesChart"></canvas>
             </div>
@@ -306,16 +306,19 @@
     document.addEventListener("DOMContentLoaded", function () {
         // Get the data from PHP and assign it to JavaScript variables
         var u_act = '{/literal}{$u_act}{literal}';
+        var c_all = '{/literal}{$c_all}{literal}';
         var u_all = '{/literal}{$u_all}{literal}';
+        //lets calculate the inactive users as reported
+        var inactive = u_all - u_act;
 
         // Create the chart data
         var data = {
-            labels: ['Active Users', 'Inactive Users'],
+            labels: ['Active Users', 'Inactive Users', 'Total Users'],
             datasets: [{
                 label: 'User Recharges',
-                data: [parseInt(u_act), parseInt(u_all)],
-                backgroundColor: ['rgba(4, 191, 13)', 'rgba(191, 35, 4)'],
-                borderColor: ['rgba(0, 255, 0, 1)', 'rgba(255, 99, 132, 1)'],
+                data: [parseInt(u_act), parseInt(inactive), parseInt(c_all)],
+                backgroundColor: ['rgba(4, 191, 13)', 'rgba(191, 35, 4)', 'rgba(0, 0, 255, 0.5'],
+                borderColor: ['rgba(0, 255, 0, 1)', 'rgba(255, 99, 132, 1)', 'rgba(0, 0, 255, 0.7'],
                 borderWidth: 1
             }]
         };
