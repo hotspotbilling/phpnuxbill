@@ -514,4 +514,37 @@ class Mikrotik
             ->setArgument('message', $message);
         $client->sendSync($smsRequest);
     }
+
+    public static function addIpToAddressList($client, $ip, $listName, $comment = '')
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+        $addRequest = new RouterOS\Request('/ip/firewall/address-list/add');
+        $client->sendSync(
+            $addRequest
+                ->setArgument('address', $ip)
+                ->setArgument('comment', $comment)
+                ->setArgument('list', $listName)
+        );
+    }
+
+    public static function removeIpFromAddressList($client, $ip)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+        $printRequest = new RouterOS\Request(
+            '/ip firewall address-list print .proplist=.id',
+            RouterOS\Query::where('address', $ip)
+        );
+        $id = $client->sendSync($printRequest)->getProperty('.id');
+        $removeRequest = new RouterOS\Request('/ip/firewall/address-list/remove');
+        $client->sendSync(
+            $removeRequest
+                ->setArgument('numbers', $id)
+        );
+    }
 }

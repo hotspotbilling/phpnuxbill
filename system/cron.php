@@ -153,7 +153,7 @@ foreach ($d as $ds) {
                         echo "plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
                         echo "auto renewall Failed\n";
                         Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
-                            "\nRouter: " . $router_name .
+                            "\nRouter: " . $p['routers'] .
                             "\nPrice: " . $p['price']);
                     }
                 } else {
@@ -208,7 +208,7 @@ foreach ($d as $ds) {
                         echo "plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
                         echo "auto renewall Failed\n";
                         Message::sendTelegram("FAILED RENEWAL #cron\n\n#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
-                            "\nRouter: " . $router_name .
+                            "\nRouter: " . $p['routers'] .
                             "\nPrice: " . $p['price']);
                     }
                 }
