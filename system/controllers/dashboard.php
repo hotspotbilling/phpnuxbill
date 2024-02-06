@@ -124,8 +124,8 @@ if(file_exists($cacheMRfile) && time()- filemtime($cacheMRfile) < 3600){
 }
 
 $cacheMSfile = File::pathFixer('system/cache/monthlySales.json');
-//Cache for 24 hours
-if(file_exists($cacheMSfile) && time()- filemtime($cacheMSfile) < 86400){
+//Cache for 12 hours
+if(file_exists($cacheMSfile) && time()- filemtime($cacheMSfile) < 43200){
     $monthlySales = json_decode(file_get_contents($cacheMSfile), true);
 }else{
     // Query to retrieve monthly data
