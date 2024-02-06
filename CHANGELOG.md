@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.2.6
+
+- Cache graph for faster opening graph
+
 ## 2024.2.5
 
 - Admin Dashboard Update
