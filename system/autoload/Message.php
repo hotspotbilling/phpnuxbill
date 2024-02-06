@@ -111,8 +111,9 @@ class Message
         $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $trx['invoice'], $textInvoice);
         $textInvoice = str_replace('[[date]]', Lang::dateAndTimeFormat($trx['recharged_on'], $trx['recharged_time']), $textInvoice);
-        $textInvoice = str_replace('[[payment_gateway]]', $config['gateway'], $textInvoice);
-        $textInvoice = str_replace('[[payment_channel]]', $config['channel'], $textInvoice);
+        $gc = explode(" - ", $trx['method']);
+        $textInvoice = str_replace('[[payment_gateway]]', $gc[0], $textInvoice);
+        $textInvoice = str_replace('[[payment_channel]]', $gc[1], $textInvoice);
         $textInvoice = str_replace('[[type]]', $trx['type'], $textInvoice);
         $textInvoice = str_replace('[[plan_name]]', $trx['plan_name'], $textInvoice);
         $textInvoice = str_replace('[[plan_price]]',  Lang::moneyFormat($trx['price']), $textInvoice);
