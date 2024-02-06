@@ -100,68 +100,79 @@ foreach ($tmp as $plan) {
     }
 }
 
-//Monthly Registered Customers
-$result = ORM::for_table('tbl_customers')
-    ->select_expr('MONTH(created_at)', 'month')
-    ->select_expr('COUNT(*)', 'count')
-    ->where_raw('YEAR(created_at) = YEAR(NOW())')
-    ->group_by_expr('MONTH(created_at)')
-    ->find_many();
+$cacheMRfile = File::pathFixer('system/cache/monthlyRegistered.json');
+//Cache for 1 hour
+if(file_exists($cacheMRfile) && time()- filemtime($cacheMRfile) < 3600){
+    $monthlyRegistered = json_decode(file_get_contents($cacheMRfile), true);
+}else{
+    //Monthly Registered Customers
+    $result = ORM::for_table('tbl_customers')
+        ->select_expr('MONTH(created_at)', 'month')
+        ->select_expr('COUNT(*)', 'count')
+        ->where_raw('YEAR(created_at) = YEAR(NOW())')
+        ->group_by_expr('MONTH(created_at)')
+        ->find_many();
 
-$counts = [];
-foreach ($result as $row) {
-    $counts[] = [
-        'date' => $row->month,
-        'count' => $row->count
-    ];
+    $monthlyRegistered = [];
+    foreach ($result as $row) {
+        $monthlyRegistered[] = [
+            'date' => $row->month,
+            'count' => $row->count
+        ];
+    }
+    file_put_contents($cacheMRfile, json_encode($monthlyRegistered));
 }
 
-// Query to retrieve monthly data
-$query = ORM::for_table('tbl_transactions')
-    ->select_expr('MONTH(recharged_on)', 'month')
-    ->select_expr('SUM(price)', 'total')
-    ->where_raw("YEAR(recharged_on) = YEAR(CURRENT_DATE())") // Filter by the current year
-    ->group_by_expr('MONTH(recharged_on)')
-    ->find_many();
+$cacheMSfile = File::pathFixer('system/cache/monthlySales.json');
+//Cache for 24 hours
+if(file_exists($cacheMSfile) && time()- filemtime($cacheMSfile) < 86400){
+    $monthlySales = json_decode(file_get_contents($cacheMSfile), true);
+}else{
+    // Query to retrieve monthly data
+    $results = ORM::for_table('tbl_transactions')
+        ->select_expr('MONTH(recharged_on)', 'month')
+        ->select_expr('SUM(price)', 'total')
+        ->where_raw("YEAR(recharged_on) = YEAR(CURRENT_DATE())") // Filter by the current year
+        ->group_by_expr('MONTH(recharged_on)')
+        ->find_many();
 
-// Execute the query and retrieve the monthly sales data
-$results = $query->find_many();
+    // Create an array to hold the monthly sales data
+    $monthlySales = array();
 
-// Create an array to hold the monthly sales data
-$monthlySales = array();
+    // Iterate over the results and populate the array
+    foreach ($results as $result) {
+        $month = $result->month;
+        $totalSales = $result->total;
 
-// Iterate over the results and populate the array
-foreach ($results as $result) {
-    $month = $result->month;
-    $totalSales = $result->total;
-
-    $monthlySales[$month] = array(
-        'month' => $month,
-        'totalSales' => $totalSales
-    );
-}
-
-// Fill in missing months with zero sales
-for ($month = 1; $month <= 12; $month++) {
-    if (!isset($monthlySales[$month])) {
         $monthlySales[$month] = array(
             'month' => $month,
-            'totalSales' => 0
+            'totalSales' => $totalSales
         );
     }
+
+    // Fill in missing months with zero sales
+    for ($month = 1; $month <= 12; $month++) {
+        if (!isset($monthlySales[$month])) {
+            $monthlySales[$month] = array(
+                'month' => $month,
+                'totalSales' => 0
+            );
+        }
+    }
+
+    // Sort the array by month
+    ksort($monthlySales);
+
+    // Reindex the array
+    $monthlySales = array_values($monthlySales);
+    file_put_contents($cacheMSfile, json_encode($monthlySales));
 }
-
-// Sort the array by month
-ksort($monthlySales);
-
-// Reindex the array
-$monthlySales = array_values($monthlySales);
 
 // Assign the monthly sales data to Smarty
 $ui->assign('monthlySales', $monthlySales);
 $ui->assign('xheader', '<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.28.0/dist/apexcharts.min.js"></script>');
 $ui->assign('xfooter', '');
-$ui->assign('counts', $counts);
+$ui->assign('monthlyRegistered', $monthlyRegistered);
 $ui->assign('stocks', $stocks);
 $ui->assign('plans', $plans);
 
