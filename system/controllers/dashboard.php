@@ -78,29 +78,40 @@ $ui->assign('dlog', $dlog);
 $log = ORM::for_table('tbl_logs')->count();
 $ui->assign('log', $log);
 
-// Count stock
-$tmp = $v = ORM::for_table('tbl_plans')->select('id')->select('name_plan')->find_many();
-$plans = array();
-$stocks = array("used" => 0, "unused" => 0);
-$n = 0;
-foreach ($tmp as $plan) {
-    $unused = ORM::for_table('tbl_voucher')
-        ->where('id_plan', $plan['id'])
-        ->where('status', 0)->count();
-    $used = ORM::for_table('tbl_voucher')
-        ->where('id_plan', $plan['id'])
-        ->where('status', 1)->count();
-    if ($unused > 0 || $used > 0) {
-        $plans[$n]['name_plan'] = $plan['name_plan'];
-        $plans[$n]['unused'] = $unused;
-        $plans[$n]['used'] = $used;
-        $stocks["unused"] += $unused;
-        $stocks["used"] += $used;
-        $n++;
+
+$cacheStocksfile = File::pathFixer('system/cache/VoucherStocks.temp');
+$cachePlanfile = File::pathFixer('system/cache/VoucherPlans.temp');
+//Cache for 5 minutes
+if(file_exists($cacheStocksfile) && time()- filemtime($cacheStocksfile) < 600){
+    $stocks = json_decode(file_get_contents($cacheStocksfile), true);
+    $plans = json_decode(file_get_contents($cachePlanfile), true);
+}else{
+    // Count stock
+    $tmp = $v = ORM::for_table('tbl_plans')->select('id')->select('name_plan')->find_many();
+    $plans = array();
+    $stocks = array("used" => 0, "unused" => 0);
+    $n = 0;
+    foreach ($tmp as $plan) {
+        $unused = ORM::for_table('tbl_voucher')
+            ->where('id_plan', $plan['id'])
+            ->where('status', 0)->count();
+        $used = ORM::for_table('tbl_voucher')
+            ->where('id_plan', $plan['id'])
+            ->where('status', 1)->count();
+        if ($unused > 0 || $used > 0) {
+            $plans[$n]['name_plan'] = $plan['name_plan'];
+            $plans[$n]['unused'] = $unused;
+            $plans[$n]['used'] = $used;
+            $stocks["unused"] += $unused;
+            $stocks["used"] += $used;
+            $n++;
+        }
     }
+    file_put_contents($cacheStocksfile, json_encode($stocks));
+    file_put_contents($cachePlanfile, json_encode($plans));
 }
 
-$cacheMRfile = File::pathFixer('system/cache/monthlyRegistered.json');
+$cacheMRfile = File::pathFixer('system/cache/monthlyRegistered.temp');
 //Cache for 1 hour
 if(file_exists($cacheMRfile) && time()- filemtime($cacheMRfile) < 3600){
     $monthlyRegistered = json_decode(file_get_contents($cacheMRfile), true);
@@ -123,7 +134,7 @@ if(file_exists($cacheMRfile) && time()- filemtime($cacheMRfile) < 3600){
     file_put_contents($cacheMRfile, json_encode($monthlyRegistered));
 }
 
-$cacheMSfile = File::pathFixer('system/cache/monthlySales.json');
+$cacheMSfile = File::pathFixer('system/cache/monthlySales.temp');
 //Cache for 12 hours
 if(file_exists($cacheMSfile) && time()- filemtime($cacheMSfile) < 43200){
     $monthlySales = json_decode(file_get_contents($cacheMSfile), true);
