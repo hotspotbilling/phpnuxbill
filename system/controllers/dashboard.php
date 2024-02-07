@@ -51,26 +51,28 @@ if (empty($c_all)) {
 }
 $ui->assign('c_all', $c_all);
 
-//user expire
-$paginator = Paginator::build(ORM::for_table('tbl_user_recharges'));
-$expire = ORM::for_table('tbl_user_recharges')
-    ->where_lte('expiration', $mdate)
-    ->offset($paginator['startpoint'])
-    ->limit($paginator['limit'])
-    ->order_by_desc('expiration')
-    ->find_many();
+if($config['hide_uet'] != 'yes'){
+    //user expire
+    $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'));
+    $expire = ORM::for_table('tbl_user_recharges')
+        ->where_lte('expiration', $mdate)
+        ->offset($paginator['startpoint'])
+        ->limit($paginator['limit'])
+        ->order_by_desc('expiration')
+        ->find_many();
 
-// Get the total count of expired records for pagination
-$totalCount = ORM::for_table('tbl_user_recharges')
-    ->where_lte('expiration', $mdate)
-    ->count();
+    // Get the total count of expired records for pagination
+    $totalCount = ORM::for_table('tbl_user_recharges')
+        ->where_lte('expiration', $mdate)
+        ->count();
 
-// Pass the total count and current page to the paginator
-$paginator['total_count'] = $totalCount;
+    // Pass the total count and current page to the paginator
+    $paginator['total_count'] = $totalCount;
 
-// Assign the pagination HTML to the template variable
-$ui->assign('paginator', $paginator);
-$ui->assign('expire', $expire);
+    // Assign the pagination HTML to the template variable
+    $ui->assign('paginator', $paginator);
+    $ui->assign('expire', $expire);
+}
 
 //activity log
 $dlog = ORM::for_table('tbl_logs')->limit(5)->order_by_desc('id')->find_many();
@@ -79,36 +81,38 @@ $log = ORM::for_table('tbl_logs')->count();
 $ui->assign('log', $log);
 
 
-$cacheStocksfile = File::pathFixer('system/cache/VoucherStocks.temp');
-$cachePlanfile = File::pathFixer('system/cache/VoucherPlans.temp');
-//Cache for 5 minutes
-if(file_exists($cacheStocksfile) && time()- filemtime($cacheStocksfile) < 600){
-    $stocks = json_decode(file_get_contents($cacheStocksfile), true);
-    $plans = json_decode(file_get_contents($cachePlanfile), true);
-}else{
-    // Count stock
-    $tmp = $v = ORM::for_table('tbl_plans')->select('id')->select('name_plan')->find_many();
-    $plans = array();
-    $stocks = array("used" => 0, "unused" => 0);
-    $n = 0;
-    foreach ($tmp as $plan) {
-        $unused = ORM::for_table('tbl_voucher')
-            ->where('id_plan', $plan['id'])
-            ->where('status', 0)->count();
-        $used = ORM::for_table('tbl_voucher')
-            ->where('id_plan', $plan['id'])
-            ->where('status', 1)->count();
-        if ($unused > 0 || $used > 0) {
-            $plans[$n]['name_plan'] = $plan['name_plan'];
-            $plans[$n]['unused'] = $unused;
-            $plans[$n]['used'] = $used;
-            $stocks["unused"] += $unused;
-            $stocks["used"] += $used;
-            $n++;
+if($config['hide_vs'] != 'yes'){
+    $cacheStocksfile = File::pathFixer('system/cache/VoucherStocks.temp');
+    $cachePlanfile = File::pathFixer('system/cache/VoucherPlans.temp');
+    //Cache for 5 minutes
+    if(file_exists($cacheStocksfile) && time()- filemtime($cacheStocksfile) < 600){
+        $stocks = json_decode(file_get_contents($cacheStocksfile), true);
+        $plans = json_decode(file_get_contents($cachePlanfile), true);
+    }else{
+        // Count stock
+        $tmp = $v = ORM::for_table('tbl_plans')->select('id')->select('name_plan')->find_many();
+        $plans = array();
+        $stocks = array("used" => 0, "unused" => 0);
+        $n = 0;
+        foreach ($tmp as $plan) {
+            $unused = ORM::for_table('tbl_voucher')
+                ->where('id_plan', $plan['id'])
+                ->where('status', 0)->count();
+            $used = ORM::for_table('tbl_voucher')
+                ->where('id_plan', $plan['id'])
+                ->where('status', 1)->count();
+            if ($unused > 0 || $used > 0) {
+                $plans[$n]['name_plan'] = $plan['name_plan'];
+                $plans[$n]['unused'] = $unused;
+                $plans[$n]['used'] = $used;
+                $stocks["unused"] += $unused;
+                $stocks["used"] += $used;
+                $n++;
+            }
         }
+        file_put_contents($cacheStocksfile, json_encode($stocks));
+        file_put_contents($cachePlanfile, json_encode($plans));
     }
-    file_put_contents($cacheStocksfile, json_encode($stocks));
-    file_put_contents($cachePlanfile, json_encode($plans));
 }
 
 $cacheMRfile = File::pathFixer('system/cache/monthlyRegistered.temp');
@@ -181,7 +185,6 @@ if(file_exists($cacheMSfile) && time()- filemtime($cacheMSfile) < 43200){
 
 // Assign the monthly sales data to Smarty
 $ui->assign('monthlySales', $monthlySales);
-$ui->assign('xheader', '<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.28.0/dist/apexcharts.min.js"></script>');
 $ui->assign('xfooter', '');
 $ui->assign('monthlyRegistered', $monthlyRegistered);
 $ui->assign('stocks', $stocks);

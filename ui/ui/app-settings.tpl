@@ -91,6 +91,24 @@
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
+                    Hide Dashboard Content
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label"><input type="checkbox" name="hide_mrc" value="yes" {if $_c['hide_mrc'] eq 'yes'}checked{/if}> {Lang::T('Monthly Registered Customers')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_tms" value="yes" {if $_c['hide_tms'] eq 'yes'}checked{/if}> {Lang::T('Total Monthly Sales')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_aui" value="yes" {if $_c['hide_aui'] eq 'yes'}checked{/if}> {Lang::T('All Users Insights')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_al" value="yes" {if $_c['hide_al'] eq 'yes'}checked{/if}> {$_L['Activity_Log']}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_uet" value="yes" {if $_c['hide_uet'] eq 'yes'}checked{/if}> {$_L['User_Expired_Today']}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_vs" value="yes" {if $_c['hide_vs'] eq 'yes'}checked{/if}> Vouchers Stock</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_pg" value="yes" {if $_c['hide_pg'] eq 'yes'}checked{/if}> Payment Gateway</label>
+                    </div>
+                </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
                     Voucher
                 </div>
                 <div class="panel-body">
@@ -417,7 +435,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading" id="envato">
+                {* <div class="panel-heading" id="envato">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
@@ -444,7 +462,7 @@
                                 class="btn btn-xs btn-primary">View MarketPlace</a>
                         </label>
                     </div>
-                </div>
+                </div> *}
             </div>
 
             <div class="panel-body">
