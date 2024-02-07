@@ -59,8 +59,8 @@ class Package
             $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
             $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
             $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat($date_now), $textInvoice);
-            $textInvoice = str_replace('[[payment_gateway]]', $_c['gateway'], $textInvoice);
-            $textInvoice = str_replace('[[payment_channel]]', $_c['channel'], $textInvoice);
+            $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
+            $textInvoice = str_replace('[[payment_channel]]', $channel, $textInvoice);
             $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
             $textInvoice = str_replace('[[plan_name]]', $p['name_plan'], $textInvoice);
             $textInvoice = str_replace('[[plan_price]]', Lang::moneyFormat($p['price']), $textInvoice);
@@ -316,8 +316,7 @@ class Package
                 "\nPrice: " . Lang::moneyFormat($p['price']));
         }
 
-        $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
-        Message::sendInvoice($c, $in);
+        Message::sendInvoice($c, $t);
         return true;
     }
 

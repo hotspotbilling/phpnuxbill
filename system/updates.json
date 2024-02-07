@@ -41,5 +41,9 @@
     ],
 	"2024.1.11": [
         "ALTER TABLE `tbl_plans` ADD `allow_purchase` ENUM('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page' AFTER `enabled`;"
+    ],
+    "2024.2.7": [
+        "ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;",
+        "ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;"
     ]
 }

@@ -452,6 +452,7 @@ switch ($action) {
                 $d->code = $prefix.$code;
                 $d->user = '0';
                 $d->status = '0';
+                $d->generated_by = $admin['id'];
                 $d->save();
             }
 
