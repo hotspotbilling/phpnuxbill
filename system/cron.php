@@ -81,6 +81,8 @@ $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
+date_default_timezone_set($config['timezone']);
+ORM::raw_execute("SET time_zone = '$config[timezone]';");
 
 if (!empty($radius_user) && $config['radius_enable']) {
     ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
@@ -88,6 +90,7 @@ if (!empty($radius_user) && $config['radius_enable']) {
     ORM::configure('password', $radius_pass, 'radius');
     ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
     ORM::configure('return_result_sets', true, 'radius');
+    ORM::raw_execute("SET time_zone = '$config[timezone]';",[],'radius');
 }
 
 echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
@@ -100,7 +103,6 @@ while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
 
 $_c = $config;
 
-date_default_timezone_set($config['timezone']);
 
 $textExpired = Lang::getNotifText('expired');
 

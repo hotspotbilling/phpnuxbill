@@ -92,6 +92,7 @@ try {
     }
 
     date_default_timezone_set($config['timezone']);
+    ORM::raw_execute("SET time_zone = '$config[timezone]';");
     $_c = $config;
 
     // check if proxy setup in database
@@ -107,6 +108,7 @@ try {
         ORM::configure('password', $radius_pass, 'radius');
         ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
         ORM::configure('return_result_sets', true, 'radius');
+        ORM::raw_execute("SET time_zone = '$config[timezone]';",[],'radius');
     }
 } catch (Throwable $e) {
     $ui = new Smarty();

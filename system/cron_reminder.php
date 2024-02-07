@@ -81,6 +81,7 @@ foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
 date_default_timezone_set($config['timezone']);
+ORM::raw_execute("SET time_zone = '$config[timezone]';");
 
 
 $d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
