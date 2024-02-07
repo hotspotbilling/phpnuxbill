@@ -56,6 +56,24 @@ class Lang
         return date($config['date_format'] . ' H:i', strtotime("$date $time"));
     }
 
+    public static function timeElapsed($time){
+            $s = $time%60;
+            $m = floor(($time%3600)/60);
+            $h = floor(($time%86400)/3600);
+            $d = floor(($time%2592000)/86400);
+            $M = floor($time/2592000);
+            $result = '';
+            if($M>0){
+                $result = $M.'m ';
+            }
+            if($d>0){
+                $result .= $d.'d ';
+            }else if($M>0){
+                $result .= '0d ';
+            }
+            return "$result$h:$m:$s";
+    }
+
     public static function nl2br($text)
     {
         return nl2br($text);
