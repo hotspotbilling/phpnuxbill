@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.2.7
+
+- Hide Dashboard content
+
 ## 2024.2.6
 
 - Cache graph for faster opening graph
