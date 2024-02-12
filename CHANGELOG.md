@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.2.12
+
+- Admin Level : SuperAdmin,Admin,Report,Agent,Sales
+- Export Customers to CSV
+- Session using Cookie
+
 ## 2024.2.7
 
 - Hide Dashboard content
