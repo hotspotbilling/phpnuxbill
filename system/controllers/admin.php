@@ -22,6 +22,7 @@ switch ($do) {
                 $d_pass = $d['password'];
                 if (Password::_verify($password, $d_pass) == true) {
                     $_SESSION['aid'] = $d['id'];
+                    Admin::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . $_L['Login_Successful'], 'Admin', $d['id']);

@@ -238,7 +238,7 @@ switch ($action) {
         if (Validator::Length($fullname, 36, 2) == false) {
             $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
         }
-        if (!Validator::Length($password, 35, 2)) {
+        if (!Validator::Length($password, 36, 2)) {
             $msg .= 'Password should be between 3 to 35 characters' . '<br>';
         }
 
@@ -275,14 +275,14 @@ switch ($action) {
         $service_type = _post('service_type');
         run_hook('edit_customer'); #HOOK
         $msg = '';
-        if (Validator::Length($username, 16, 2) == false) {
+        if (Validator::Length($username, 35, 2) == false) {
             $msg .= 'Username should be between 3 to 15 characters' . '<br>';
         }
-        if (Validator::Length($fullname, 26, 1) == false) {
+        if (Validator::Length($fullname, 36, 1) == false) {
             $msg .= 'Full Name should be between 2 to 25 characters' . '<br>';
         }
         if ($password != '') {
-            if (!Validator::Length($password, 15, 2)) {
+            if (!Validator::Length($password, 36, 2)) {
                 $msg .= 'Password should be between 3 to 15 characters' . '<br>';
             }
         }

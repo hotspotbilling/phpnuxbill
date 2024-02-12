@@ -116,7 +116,7 @@ try {
     $ui->setConfigDir(File::pathFixer('ui/conf/'));
     $ui->setCacheDir(File::pathFixer('ui/cache/'));
     $ui->assign("error_title", "PHPNuxBill Crash");
-    if (isset($_SESSION['uid'])) {
+    if (_auth()) {
         $ui->assign("error_message", $e->getMessage() . '<br>');
     } else {
         $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
@@ -131,7 +131,7 @@ try {
     $ui->setConfigDir(File::pathFixer('ui/conf/'));
     $ui->setCacheDir(File::pathFixer('ui/cache/'));
     $ui->assign("error_title", "PHPNuxBill Crash");
-    if (isset($_SESSION['uid'])) {
+    if (_auth()) {
         $ui->assign("error_message", $e->getMessage() . '<br>');
     } else {
         $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
@@ -215,7 +215,7 @@ foreach (glob(File::pathFixer("system/plugin/*.php")) as $filename) {
 
 function _auth($login = true)
 {
-    if (isset($_SESSION['uid'])) {
+    if (User::getID()) {
         return true;
     } else {
         if ($login) {
@@ -228,7 +228,7 @@ function _auth($login = true)
 
 function _admin($login = true)
 {
-    if (isset($_SESSION['aid'])) {
+    if (Admin::getID()) {
         return true;
     } else {
         if ($login) {
@@ -372,7 +372,7 @@ try {
         r2(U . 'dashboard', 'e', 'not found');
     }
 } catch (Throwable $e) {
-    if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
+    if (Admin::getID()) {
         r2(U . 'home', 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
@@ -380,7 +380,7 @@ try {
     $ui->display('router-error.tpl');
     die();
 } catch (Exception $e) {
-    if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
+    if (Admin::getID()) {
         r2(U . 'home', 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
