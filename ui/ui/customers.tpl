@@ -3,7 +3,14 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">{$_L['Manage_Accounts']}</div>
+            <div class="panel-heading">
+                <div class="btn-group pull-right">
+                    <a class="btn btn-primary btn-xs" title="save" href="{$_url}customers/csv"
+                        onclick="return confirm('This will export to CSV?')"><span
+                            class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
+                </div>
+                {$_L['Manage_Accounts']}
+            </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
@@ -41,8 +48,10 @@
                         <tbody>
                             {foreach $d as $ds}
                                 <tr>
-                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'" style="cursor:pointer;">{$ds['username']}</td>
-                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'" style="cursor: pointer;">{$ds['fullname']}</td>
+                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
+                                        style="cursor:pointer;">{$ds['username']}</td>
+                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
+                                        style="cursor: pointer;">{$ds['fullname']}</td>
                                     <td>{Lang::moneyFormat($ds['balance'])}</td>
                                     <td>{$ds['phonenumber']}</td>
                                     <td>{$ds['email']}</td>
@@ -52,10 +61,10 @@
                                     <td>{$ds['service_type']}</td>
                                     <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
                                     <td align="center">
-                                            <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
-                                                class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
-                                            <a href="{$_url}prepaid/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
-                                                class="btn btn-primary btn-xs">{$_L['Recharge']}</a>
+                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                            class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
+                                        <a href="{$_url}prepaid/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                            class="btn btn-primary btn-xs">{$_L['Recharge']}</a>
                                     </td>
                                 </tr>
                             {/foreach}

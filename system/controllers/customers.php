@@ -20,7 +20,6 @@ if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
 
 switch ($action) {
     case 'list':
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/customers.js"></script>');
         $search = _post('search');
         run_hook('list_customers'); #HOOK
         if ($search != '') {
@@ -49,6 +48,42 @@ switch ($action) {
         $ui->display('customers.tpl');
         break;
 
+    case 'csv':
+        $cs = ORM::for_table('tbl_customers')
+            ->select('tbl_customers.id','id')
+            ->select('tbl_customers.username','username')
+            ->select('fullname')
+            ->select('phonenumber')
+            ->select('email')
+            ->select('balance')
+            ->select('namebp')
+            ->select('routers')
+            ->select('status')
+            ->select('method','Payment')
+            ->join('tbl_user_recharges', array('tbl_customers.id', '=', 'tbl_user_recharges.customer_id'))
+            ->order_by_asc('tbl_customers.id')->find_array();
+        $h = false;
+        set_time_limit(-1);
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header("Content-type: text/csv");
+        header('Content-Disposition: attachment;filename="phpnuxbill_customers_' . date('Y-m-d_H_i') . '.csv"');
+        header('Content-Transfer-Encoding: binary');
+        foreach ($cs as $c) {
+            $ks = [];
+            $vs = [];
+            foreach ($c as $k => $v) {
+                $ks[] = $k;
+                $vs[] = $v;
+            }
+            if(!$h){
+                echo '"'.implode('";"', $ks)."\"\n";
+                $h = true;
+            }
+            echo '"'.implode('";"', $vs)."\"\n";
+        }
+        break;
     case 'add':
         run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');

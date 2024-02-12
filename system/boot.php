@@ -372,7 +372,7 @@ try {
         r2(U . 'dashboard', 'e', 'not found');
     }
 } catch (Throwable $e) {
-    if (Admin::getID()) {
+    if (!Admin::getID()) {
         r2(U . 'home', 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
@@ -380,7 +380,7 @@ try {
     $ui->display('router-error.tpl');
     die();
 } catch (Exception $e) {
-    if (Admin::getID()) {
+    if (!Admin::getID()) {
         r2(U . 'home', 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');

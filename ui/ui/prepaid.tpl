@@ -8,6 +8,11 @@
                     <a class="btn btn-primary btn-xs" title="save" href="{$_url}prepaid/sync"
                         onclick="return confirm('This will sync/send Caustomer active plan to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
+                </div>
+                <div class="btn-group pull-right">
+                    <a class="btn btn-info btn-xs" title="save" href="{$_url}customers/csv"
+                        onclick="return confirm('This will export to CSV?')"><span
+                            class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
                 </div>{$_L['Prepaid_User']}
             </div>
             <div class="panel-body">
