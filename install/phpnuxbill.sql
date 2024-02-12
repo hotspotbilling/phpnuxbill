@@ -190,6 +190,7 @@ CREATE TABLE `tb_languages` (
 
 ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;
 ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;
+ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
 
 ALTER TABLE `tbl_appconfig`
   ADD PRIMARY KEY (`id`);

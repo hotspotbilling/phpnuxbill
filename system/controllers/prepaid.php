@@ -13,7 +13,7 @@ $action = $routes['1'];
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Sales'])) {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
 }
 
@@ -128,7 +128,7 @@ switch ($action) {
                 $ui->assign('in', $in);
                 $ui->assign('date', date("Y-m-d H:i:s"));
                 $ui->display('invoice.tpl');
-                _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $c['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', 'Admin', $admin['id']);
+                _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $c['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
             } else {
                 r2(U . 'prepaid/recharge', 'e', "Failed to recharge account");
             }
@@ -202,7 +202,7 @@ switch ($action) {
                 }
             }
             $d->delete();
-            _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer ' . $c['username'] . '  [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer ' . $c['username'] . '  [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Delete_Successfully']);
         }
         break;
@@ -247,7 +247,7 @@ switch ($action) {
             if($d['status'] == 'on'){
                 Package::changeTo($username, $id_plan, $id);
             }
-            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . '][' . Lang::moneyFormat($p['price']) . ']', 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . '][' . Lang::moneyFormat($p['price']) . ']', $admin['user_type'], $admin['id']);
             r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
         } else {
             r2(U . 'prepaid/edit/' . $id, 'e', $msg);

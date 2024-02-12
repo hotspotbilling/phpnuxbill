@@ -17,7 +17,7 @@ use PEAR2\Net\RouterOS;
 
 require_once 'system/autoload/PEAR2/Autoload.php';
 
-if ($admin['user_type'] != 'Admin') {
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
 }
 

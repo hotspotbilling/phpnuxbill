@@ -14,7 +14,7 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 
-if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
 }
 
@@ -50,8 +50,8 @@ switch ($action) {
 
     case 'csv':
         $cs = ORM::for_table('tbl_customers')
-            ->select('tbl_customers.id','id')
-            ->select('tbl_customers.username','username')
+            ->select('tbl_customers.id', 'id')
+            ->select('tbl_customers.username', 'username')
             ->select('fullname')
             ->select('phonenumber')
             ->select('email')
@@ -59,7 +59,7 @@ switch ($action) {
             ->select('namebp')
             ->select('routers')
             ->select('status')
-            ->select('method','Payment')
+            ->select('method', 'Payment')
             ->join('tbl_user_recharges', array('tbl_customers.id', '=', 'tbl_user_recharges.customer_id'))
             ->order_by_asc('tbl_customers.id')->find_array();
         $h = false;
@@ -77,11 +77,11 @@ switch ($action) {
                 $ks[] = $k;
                 $vs[] = $v;
             }
-            if(!$h){
-                echo '"'.implode('";"', $ks)."\"\n";
+            if (!$h) {
+                echo '"' . implode('";"', $ks) . "\"\n";
                 $h = true;
             }
-            echo '"'.implode('";"', $vs)."\"\n";
+            echo '"' . implode('";"', $vs) . "\"\n";
         }
         break;
     case 'add':
@@ -137,7 +137,7 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
             if ($p) {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, $p['expiration'].' '.$p['time']);
+                    Radius::customerAddPlan($c, $p, $p['expiration'] . ' ' . $p['time']);
                     r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Radius');
                 } else {
                     $mikrotik = Mikrotik::info($b['routers']);
@@ -167,7 +167,7 @@ switch ($action) {
             $v  = $routes['3'];
             if (empty($v) || $v == 'order') {
                 $v = 'order';
-                $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'),['username'=>$customer['username']]);
+                $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'), ['username' => $customer['username']]);
                 $order = ORM::for_table('tbl_payment_gateway')
                     ->where('username', $customer['username'])
                     ->offset($paginator['startpoint'])
@@ -177,7 +177,7 @@ switch ($action) {
                 $ui->assign('paginator', $paginator);
                 $ui->assign('order', $order);
             } else if ($v == 'activation') {
-                $paginator = Paginator::build(ORM::for_table('tbl_transactions'),['username'=>$customer['username']]);
+                $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['username' => $customer['username']]);
                 $activation = ORM::for_table('tbl_transactions')
                     ->where('username', $customer['username'])
                     ->offset($paginator['startpoint'])
@@ -369,11 +369,11 @@ switch ($action) {
                     $c->save();
                     $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
                     if ($p['is_radius']) {
-                        if($userDiff){
+                        if ($userDiff) {
                             Radius::customerChangeUsername($oldusername, $username);
                         }
-                        Radius::customerAddPlan($d, $p, $p['expiration'].' '.$p['time']);
-                    }else{
+                        Radius::customerAddPlan($d, $p, $p['expiration'] . ' ' . $p['time']);
+                    } else {
                         $mikrotik = Mikrotik::info($c['routers']);
                         if ($c['type'] == 'Hotspot') {
                             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);

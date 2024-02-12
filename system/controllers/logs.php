@@ -13,7 +13,7 @@ $action = $routes['1'];
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-if ($admin['user_type'] != 'Admin') {
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
 }
 

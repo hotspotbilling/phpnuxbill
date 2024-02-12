@@ -24,8 +24,11 @@
                         <label class="col-md-2 control-label">{$_L['User_Type']}</label>
                         <div class="col-md-6">
                             <select name="user_type" id="user_type" class="form-control">
-                                <option value="Admin">{$_L['Full_Administrator']}</option>
-                                <option value="Sales">{$_L['Sales']}</option>
+                                <option value="SuperAdmin">SuperAdministrator</option>
+                                <option value="Admin">Administrator</option>
+                                <option value="Report">Report Viewer</option>
+                                <option value="Agent">Agent</option>
+                                <option value="Sales">Sales</option>
                             </select>
                             <span class="help-block">{$_L['user_type_help']}</span>
                         </div>

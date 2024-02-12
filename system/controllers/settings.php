@@ -14,7 +14,7 @@ $ui->assign('_admin', $admin);
 
 switch ($action) {
     case 'app':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
 
@@ -70,7 +70,7 @@ switch ($action) {
         break;
 
     case 'localisation':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         $folders = [];
@@ -89,7 +89,7 @@ switch ($action) {
         break;
 
     case 'users':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
 
@@ -111,7 +111,7 @@ switch ($action) {
         break;
 
     case 'users-add':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         run_hook('view_add_admin'); #HOOK
@@ -119,7 +119,7 @@ switch ($action) {
         break;
 
     case 'users-edit':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
 
@@ -135,7 +135,7 @@ switch ($action) {
         break;
 
     case 'users-delete':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
 
@@ -191,7 +191,7 @@ switch ($action) {
 
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . $_L['account_created_successfully'], 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . $_L['account_created_successfully'], $admin['user_type'], $admin['id']);
             r2(U . 'settings/users', 's', $_L['account_created_successfully']);
         } else {
             r2(U . 'settings/users-add', 'e', $msg);
@@ -249,7 +249,7 @@ switch ($action) {
 
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . $_L['User_Updated_Successfully'], 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . $_L['User_Updated_Successfully'], $admin['user_type'], $admin['id']);
             r2(U . 'settings/users', 's', 'User Updated Successfully');
         } else {
             r2(U . 'settings/users-edit/' . $id, 'e', $msg);
@@ -316,7 +316,7 @@ switch ($action) {
                 }
             }
 
-            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], $admin['user_type'], $admin['id']);
 
             r2(U . 'settings/app', 's', $_L['Settings_Saved_Successfully']);
         }
@@ -404,13 +404,13 @@ switch ($action) {
             $d->value = $lan;
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], $admin['user_type'], $admin['id']);
             r2(U . 'settings/localisation', 's', $_L['Settings_Saved_Successfully']);
         }
         break;
 
     case 'change-password':
-        if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         run_hook('view_change_password'); #HOOK
@@ -439,7 +439,7 @@ switch ($action) {
                     $d->save();
 
                     _msglog('s', $_L['Password_Changed_Successfully']);
-                    _log('[' . $admin['username'] . ']: Password changed successfully', 'Admin', $admin['id']);
+                    _log('[' . $admin['username'] . ']: Password changed successfully', $admin['user_type'], $admin['id']);
 
                     r2(U . 'admin');
                 } else {
@@ -454,7 +454,7 @@ switch ($action) {
         break;
 
     case 'notifications':
-        if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         run_hook('view_notifications'); #HOOK
@@ -471,7 +471,7 @@ switch ($action) {
         r2(U . 'settings/notifications', 's', $_L['Settings_Saved_Successfully']);
         break;
     case 'dbstatus':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
 
@@ -489,7 +489,7 @@ switch ($action) {
         break;
 
     case 'dbbackup':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         $tables = $_POST['tables'];
@@ -509,7 +509,7 @@ switch ($action) {
         echo json_encode($array);
         break;
     case 'dbrestore':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         if (file_exists($_FILES['json']['tmp_name'])) {
@@ -539,7 +539,7 @@ switch ($action) {
         }
         break;
     case 'language':
-        if ($admin['user_type'] != 'Admin') {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
         }
         run_hook('view_add_language'); #HOOK

@@ -28,8 +28,14 @@
                             <label class="col-md-2 control-label">{$_L['User_Type']}</label>
                             <div class="col-md-6">
                                 <select name="user_type" id="user_type" class="form-control">
-                                    <option value="Admin" {if $d['user_type'] eq 'Admin'}selected="selected" {/if}>Full
+                                    <option value="SuperAdmin" {if $d['user_type'] eq 'SuperAdmin'}selected="selected"
+                                        {/if}>SuperAdministrator</option>
+                                    <option value="Admin" {if $d['user_type'] eq 'Admin'}selected="selected" {/if}>
                                         Administrator</option>
+                                    <option value="Report" {if $d['user_type'] eq 'Report'}selected="selected" {/if}>Report
+                                        Viewer</option>
+                                    <option value="Agent" {if $d['user_type'] eq 'Agent'}selected="selected" {/if}>Agent
+                                    </option>
                                     <option value="Sales" {if $d['user_type'] eq 'Sales'}selected="selected" {/if}>Sales
                                     </option>
                                 </select>

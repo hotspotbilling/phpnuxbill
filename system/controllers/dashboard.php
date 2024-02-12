@@ -9,7 +9,7 @@ _admin();
 $ui->assign('_title', $_L['Dashboard']);
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
-if (!in_array($admin['user_type'], ['Admin', 'Sales'])) {
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     r2(U . "home", 'e', $_L['Do_Not_Access']);
 }
 

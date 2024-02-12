@@ -25,11 +25,11 @@ switch ($do) {
                     Admin::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
-                    _log($username . ' ' . $_L['Login_Successful'], 'Admin', $d['id']);
+                    _log($username . ' ' . $_L['Login_Successful'], $d['user_type'], $d['id']);
                     r2(U . 'dashboard');
                 } else {
                     _msglog('e', $_L['Invalid_Username_or_Password']);
-                    _log($username . ' ' . $_L['Failed_Login'], 'Admin');
+                    _log($username . ' ' . $_L['Failed_Login'], $d['user_type']);
                     r2(U . 'admin');
                 }
             } else {
