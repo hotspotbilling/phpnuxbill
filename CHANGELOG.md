@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.2.13
+
+- Auto translate language
+- change language structur to json
+- save collapse menu
+
 ## 2024.2.12
 
 - Admin Level : SuperAdmin,Admin,Report,Agent,Sales
