@@ -9,8 +9,8 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th width="50%">{$_L['Table_Name']}</th>
-                                <th>{$_L['Rows']}</th>
+                                <th width="50%">{Lang::T('Table Name')}</th>
+                                <th>{Lang::T('Rows')}</th>
                                 <th>Select</th>
                             </tr>
                         </thead>
@@ -31,7 +31,7 @@
                         <div class="col-md-4 text-right">
                             <button type="submit" class="btn btn-primary btn-xs btn-block"><i
                                     class="fa fa-download"></i>
-                                {$_L['Download_Database_Backup']}</button>
+                                {Lang::T('Download Database Backup')}</button>
                         </div>
                     </div>
                 </div>

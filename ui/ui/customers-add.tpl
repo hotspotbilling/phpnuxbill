@@ -3,12 +3,12 @@
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
-            <div class="panel-heading">{$_L['Add_Contact']}</div>
+            <div class="panel-heading">{Lang::T('Add New Contact')}</div>
             <div class="panel-body">
 
                 <form class="form-horizontal" method="post" role="form" action="{$_url}customers/add-post">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Username']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Username')}</label>
                         <div class="col-md-6">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
@@ -18,24 +18,24 @@
                                             class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="username" required
-                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Full_Name']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Full Name')}</label>
                         <div class="col-md-6">
                             <input type="text" required class="form-control" id="fullname" name="fullname">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Email']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Email')}</label>
                         <div class="col-md-6">
                             <input type="email" class="form-control" id="email" name="email">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Phone_Number']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
                         <div class="col-md-6">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
@@ -45,12 +45,12 @@
                                             class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="phonenumber"
-                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Password']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Password')}</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" autocomplete="off" required id="password"
                                 name="password" onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Address']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Address')}</label>
                         <div class="col-md-6">
                             <textarea name="address" id="address" class="form-control"></textarea>
                         </div>
@@ -86,8 +86,8 @@
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-primary waves-effect waves-light"
-                                type="submit">{$_L['Save']}</button>
-                            Or <a href="{$_url}customers/list">{$_L['Cancel']}</a>
+                                type="submit">{Lang::T('Save Changes')}</button>
+                            Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

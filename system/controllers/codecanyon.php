@@ -16,7 +16,7 @@ $ui->assign('_admin', $admin);
 $cache = File::pathFixer('system/cache/codecanyon.json');
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 if (empty($config['envato_token'])) {
     r2(U . 'settings/app', 'w', '<a href="' . U . 'settings/app#envato' . '">Envato Personal Access Token</a> is not set');

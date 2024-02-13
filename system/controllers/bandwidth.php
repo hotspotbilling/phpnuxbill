@@ -5,7 +5,7 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Bandwidth_Plans']);
+$ui->assign('_title', Lang::T('Bandwidth Plans'));
 $ui->assign('_system_menu', 'services');
 
 $action = $routes['1'];
@@ -13,7 +13,7 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-	r2(U."dashboard",'e',$_L['Do_Not_Access']);
+	r2(U."dashboard",'e',Lang::T('You do not have permission to access this page'));
 }
 
 switch ($action) {
@@ -57,7 +57,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
         if($d){
             $d->delete();
-            r2(U . 'bandwidth/list', 's', $_L['Delete_Successfully']);
+            r2(U . 'bandwidth/list', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -78,7 +78,7 @@ switch ($action) {
 
         $d = ORM::for_table('tbl_bandwidth')->where('name_bw',$name)->find_one();
         if($d){
-            $msg .= $_L['BW_already_exist']. '<br>';
+            $msg .= Lang::T('Name Bandwidth Already Exist'). '<br>';
         }
 
         if($msg == ''){
@@ -90,7 +90,7 @@ switch ($action) {
             $d->rate_up_unit = $rate_up_unit;
             $d->save();
 
-            r2(U . 'bandwidth/list', 's', $_L['Created_Successfully']);
+            r2(U . 'bandwidth/list', 's', Lang::T('Data Created Successfully'));
         }else{
             r2(U . 'bandwidth/add', 'e', $msg);
         }
@@ -112,13 +112,13 @@ switch ($action) {
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
         if($d){
         }else{
-            $msg .= $_L['Data_Not_Found']. '<br>';
+            $msg .= Lang::T('Data Not Found'). '<br>';
         }
 
         if($d['name_bw'] != $name){
             $c = ORM::for_table('tbl_bandwidth')->where('name_bw',$name)->find_one();
             if($c){
-                $msg .= $_L['BW_already_exist']. '<br>';
+                $msg .= Lang::T('Name Bandwidth Already Exist'). '<br>';
             }
         }
 
@@ -130,7 +130,7 @@ switch ($action) {
             $d->rate_up_unit = $rate_up_unit;
             $d->save();
 
-            r2(U . 'bandwidth/list', 's', $_L['Updated_Successfully']);
+            r2(U . 'bandwidth/list', 's', Lang::T('Data Updated Successfully'));
         }else{
             r2(U . 'bandwidth/edit/'.$id, 'e', $msg);
         }

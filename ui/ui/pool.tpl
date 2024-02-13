@@ -9,7 +9,7 @@
                         onclick="return confirm('This will sync/send IP Pool to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>
-                {$_L['Pool']}
+                {Lang::T('IP Pool')}
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
@@ -20,16 +20,16 @@
                                     <span class="fa fa-search"></span>
                                 </div>
                                 <input type="text" name="name" class="form-control"
-                                    placeholder="{$_L['Search_by_Name']}...">
+                                    placeholder="{Lang::T('Search by Name')}...">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
                             </div>
                         </form>
                     </div>
                     <div class="col-md-4">
                         <a href="{$_url}pool/add" class="btn btn-primary btn-block waves-effect"><i
-                                class="ion ion-android-add"> </i> {$_L['New_Pool']}</a>
+                                class="ion ion-android-add"> </i> {Lang::T('New Pool')}</a>
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
@@ -37,10 +37,10 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>{$_L['Pool_Name']}</th>
-                                <th>{$_L['Range_IP']}</th>
-                                <th>{$_L['Routers']}</th>
-                                <th>{$_L['Manage']}</th>
+                                <th>{Lang::T('Name Pool')}</th>
+                                <th>{Lang::T('Range IP')}</th>
+                                <th>{Lang::T('Routers')}</th>
+                                <th>{Lang::T('Manage')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -52,10 +52,10 @@
                                     <td>{$ds['range_ip']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td align="center">
-                                        <a href="{$_url}pool/edit/{$ds['id']}" class="btn btn-info btn-xs">{$_L['Edit']}</a>
+                                        <a href="{$_url}pool/edit/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         <a href="{$_url}pool/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{$_L['Delete']}?')"
-                                            class="btn btn-danger btn-xs">{$_L['Delete']}</a>
+                                            onclick="return confirm('{Lang::T('Delete')}?')"
+                                            class="btn btn-danger btn-xs">{Lang::T('Delete')}</a>
                                     </td>
                                 </tr>
                             {/foreach}

@@ -8,7 +8,7 @@
                 <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{$_url}prepaid/remove-voucher" onclick="return confirm('Delete all used voucher code?')"><span
                         class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete All</a>
             </div>
-            {$_L['Prepaid_Vouchers']}
+            {Lang::T('Prepaid Vouchers')}
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
@@ -19,9 +19,9 @@
                                     <span class="fa fa-search"></span>
                                 </div>
                                 <input type="text" name="code" class="form-control"
-                                    placeholder="{$_L['Search_by_Code']}..." value="{$_code}">
+                                    placeholder="{Lang::T('Search by Code Voucher')}..." value="{$_code}">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
                             </div>
                         </form>
@@ -30,7 +30,7 @@
                         <div class="btn-group btn-group-justified" role="group">
                             <div class="btn-group" role="group">
                                 <a href="{$_url}prepaid/add-voucher" class="btn btn-primary btn-block waves-effect"><i
-                                        class="ion ion-android-add"> </i> {$_L['Add_Voucher']}</a>
+                                        class="ion ion-android-add"> </i> {Lang::T('Add Vouchers')}</a>
                             </div>
                             <div class="btn-group" role="group">
                                 <a href="{$_url}prepaid/print-voucher" target="print_voucher" class="btn btn-info"><i
@@ -44,13 +44,13 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>{$_L['Type']}</th>
-                                <th>{$_L['Routers']}</th>
-                                <th>{$_L['Plan_Name']}</th>
-                                <th>{$_L['Code_Voucher']}</th>
-                                <th>{$_L['Status_Voucher']}</th>
-                                <th>{$_L['Customers']}</th>
-                                <th>{$_L['Manage']}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Routers')}</th>
+                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Code Voucher')}</th>
+                                <th>{Lang::T('Status Voucher')}</th>
+                                <th>{Lang::T('Customer')}</th>
+                                <th>{Lang::T('Manage')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -71,7 +71,7 @@
                                     <td>
                                         <a href="{$_url}prepaid/voucher-delete/{$ds['id']}" id="{$ds['id']}"
                                             class="btn btn-danger btn-xs"
-                                            onclick="return confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
+                                            onclick="return confirm('{Lang::T('Delete')}?')">{Lang::T('Delete')}</a>
                                     </td>
                                 </tr>
                             {/foreach}

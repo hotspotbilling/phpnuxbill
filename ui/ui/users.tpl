@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">{$_L['Manage_Administrator']}</div>
+            <div class="panel-heading">{Lang::T('Manage Administrator')}</div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
@@ -16,25 +16,25 @@
                                 <input type="text" name="username" class="form-control"
                                     placeholder="Search by Username...">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
                             </div>
                         </form>
                     </div>
                     <div class="col-md-4">
                         <a href="{$_url}settings/users-add" class="btn btn-primary btn-block waves-effect"><i
-                                class="ion ion-android-add"> </i> {$_L['Add_New_Administrator']}</a>
+                                class="ion ion-android-add"> </i> {Lang::T('Add New Administrator')}</a>
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{$_L['Username']}</th>
-                                <th>{$_L['Full_Name']}</th>
-                                <th>{$_L['Type']}</th>
-                                <th>{$_L['Last_Login']}</th>
-                                <th>{$_L['Manage']}</th>
+                                <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Full Name')}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Last Login')}</th>
+                                <th>{Lang::T('Manage')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -46,10 +46,10 @@
                                     <td>{$ds['last_login']}</td>
                                     <td>
                                         <a href="{$_url}settings/users-edit/{$ds['id']}"
-                                            class="btn btn-warning btn-sm">{$_L['Edit']}</a>
+                                            class="btn btn-warning btn-sm">{Lang::T('Edit')}</a>
                                         {if ($_admin['username']) neq ($ds['username'])}
                                             <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
-                                                class="btn btn-danger btn-sm" onclick="return confirm('{$_L['Delete']}?')">{$_L['Delete']}</a>
+                                                class="btn btn-danger btn-sm" onclick="return confirm('{Lang::T('Delete')}?')">{Lang::T('Delete')}</a>
                                         {/if}
                                     </td>
                                 </tr>

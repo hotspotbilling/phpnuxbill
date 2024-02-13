@@ -10,7 +10,7 @@
                 <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/edit-post">
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Select_Account']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Select Account')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="username" name="username"
                                 value="{$d['username']}" readonly>
@@ -18,7 +18,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Service_Plan']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Service Plan')}</label>
                         <div class="col-md-6">
                             <select id="id_plan" name="id_plan" class="form-control select2">
                                 {foreach $p as $ps}
@@ -29,7 +29,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Created_On']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Created On')}</label>
                         <div class="col-md-4">
                             <input type="date" class="form-control" name="expiration" readonly
                                 value="{$d['recharged_on']}">
@@ -40,7 +40,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Expires_On']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Expires On')}</label>
                         <div class="col-md-4">
                             <input type="date" class="form-control" id="expiration" name="expiration"
                                 value="{$d['expiration']}">
@@ -54,8 +54,8 @@
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success waves-effect waves-light"
-                                type="submit">{$_L['Edit']}</button>
-                            Or <a href="{$_url}prepaid/list">{$_L['Cancel']}</a>
+                                type="submit">{Lang::T('Edit')}</button>
+                            Or <a href="{$_url}prepaid/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

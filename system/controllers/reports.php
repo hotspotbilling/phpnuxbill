@@ -6,7 +6,7 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Reports']);
+$ui->assign('_title', Lang::T('Reports'));
 $ui->assign('_system_menu', 'reports');
 
 $action = $routes['1'];
@@ -14,7 +14,7 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Sales'])) {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 
 $mdate = date('Y-m-d');

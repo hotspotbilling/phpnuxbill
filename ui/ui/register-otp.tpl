@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>{$_title} - {$_L['Register']}</title>
+    <title>{$_title} - {Lang::T('Register')}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
@@ -33,7 +33,7 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="panel panel-info">
-                    <div class="panel-heading">{$_L['Registration_Info']}</div>
+                    <div class="panel-heading">{Lang::T('Registration Info')}</div>
                     <div class="panel-body">
                         {include file="$_path/../pages/Registration_Info.html"}
                     </div>
@@ -42,11 +42,11 @@
             <form action="{$_url}register/post" method="post">
                 <div class="col-md-4">
                     <div class="panel panel-primary">
-                        <div class="panel-heading">1. {$_L['Register_Member']}</div>
+                        <div class="panel-heading">1. {Lang::T('Register as Member')}</div>
                         <div class="panel-body">
                             <div class="form-container">
                                 <div class="form-group">
-                                    <label>{$_L['Phone_Number']}</label>
+                                    <label>{Lang::T('Phone Number')}</label>
                                     <div class="input-group">
                                         {if $_c['country_code_phone']!= ''}
                                             <span class="input-group-addon" id="basic-addon1">+</span>
@@ -55,7 +55,7 @@
                                                     class="glyphicon glyphicon-phone-alt"></i></span>
                                         {/if}
                                         <input type="text" class="form-control" name="username" value="{$username}"
-                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -64,17 +64,17 @@
                                         placeholder="{Lang::T('Verification Code')}" name="otp_code">
                                 </div>
                                 <div class="form-group">
-                                    <label>{$_L['Full_Name']}</label>
+                                    <label>{Lang::T('Full Name')}</label>
                                     <input type="text" required class="form-control" id="fullname" value="{$fullname}"
                                         name="fullname">
                                 </div>
                                 <div class="form-group">
-                                    <label>{$_L['Email']}</label>
+                                    <label>{Lang::T('Email')}</label>
                                     <input type="text" required class="form-control" placeholder="xxxxxx@xxx.xx"
                                         id="email" value="{$email}" name="email">
                                 </div>
                                 <div class="form-group">
-                                    <label>{$_L['Address']}</label>
+                                    <label>{Lang::T('Address')}</label>
                                     <input type="text" name="address" id="address" value="{$address}"
                                         class="form-control">
                                 </div>
@@ -84,25 +84,25 @@
                 </div>
                 <div class="col-md-4">
                     <div class="panel panel-primary">
-                        <div class="panel-heading">2. {$_L['Password']}</div>
+                        <div class="panel-heading">2. {Lang::T('Password')}</div>
                         <div class="panel-body">
                             <div class="form-container">
                                 <div class="form-group">
-                                    <label>{$_L['Password']}</label>
+                                    <label>{Lang::T('Password')}</label>
                                     <input type="password" required class="form-control" id="password" name="password">
                                 </div>
                                 <div class="form-group">
-                                    <label>{$_L['Confirm_Password']}</label>
+                                    <label>{Lang::T('Confirm Password')}</label>
                                     <input type="password" required class="form-control" id="cpassword"
                                         name="cpassword">
                                 </div>
                                 <div class="btn-group btn-group-justified mb15">
                                     <div class="btn-group">
                                         <button class="btn btn-primary waves-effect waves-light"
-                                            type="submit">{$_L['Register']}</button>
+                                            type="submit">{Lang::T('Register')}</button>
                                     </div>
                                     <div class="btn-group">
-                                        <a href="{$_url}register" class="btn btn-success">{$_L['Cancel']}</a>
+                                        <a href="{$_url}register" class="btn btn-success">{Lang::T('Cancel')}</a>
                                     </div>
                                 </div>
                                 <br>

@@ -5,7 +5,7 @@
  *  by https://t.me/ibnux
  **/
 _admin();
-$ui->assign('_title', $_L['Hotspot_Plans']);
+$ui->assign('_title', Lang::T('Hotspot Plans'));
 $ui->assign('_system_menu', 'services');
 
 $action = $routes['1'];
@@ -13,7 +13,7 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 
 use PEAR2\Net\RouterOS;
@@ -180,7 +180,7 @@ switch ($action) {
 
             $d->delete();
 
-            r2(U . 'services/hotspot', 's', $_L['Delete_Successfully']);
+            r2(U . 'services/hotspot', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -211,16 +211,16 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
         if (empty($radius)) {
             if ($routers == '') {
-                $msg .= $_L['All_field_is_required'] . '<br>';
+                $msg .= Lang::T('All field is required') . '<br>';
             }
         }
         $d = ORM::for_table('tbl_plans')->where('name_plan', $name)->where('type', 'Hotspot')->find_one();
         if ($d) {
-            $msg .= $_L['Plan_already_exist'] . '<br>';
+            $msg .= Lang::T('Name Plan Already Exist') . '<br>';
         }
 
         run_hook('add_plan'); #HOOK
@@ -283,7 +283,7 @@ switch ($action) {
             }
 
 
-            r2(U . 'services/hotspot', 's', $_L['Created_Successfully']);
+            r2(U . 'services/hotspot', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/add', 'e', $msg);
         }
@@ -316,12 +316,12 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
         run_hook('edit_plan'); #HOOK
         if ($msg == '') {
@@ -371,14 +371,14 @@ switch ($action) {
             $d->allow_purchase = $allow_purchase;
             $d->save();
 
-            r2(U . 'services/hotspot', 's', $_L['Updated_Successfully']);
+            r2(U . 'services/hotspot', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/edit/' . $id, 'e', $msg);
         }
         break;
 
     case 'pppoe':
-        $ui->assign('_title', $_L['PPPOE_Plans']);
+        $ui->assign('_title', Lang::T('PPPOE Plans'));
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pppoe.js"></script>');
 
         $name = _post('name');
@@ -397,7 +397,7 @@ switch ($action) {
         break;
 
     case 'pppoe-add':
-        $ui->assign('_title', $_L['PPPOE_Plans']);
+        $ui->assign('_title', Lang::T('PPPOE Plans'));
         $d = ORM::for_table('tbl_bandwidth')->find_many();
         $ui->assign('d', $d);
         $r = ORM::for_table('tbl_routers')->find_many();
@@ -407,7 +407,7 @@ switch ($action) {
         break;
 
     case 'pppoe-edit':
-        $ui->assign('_title', $_L['PPPOE_Plans']);
+        $ui->assign('_title', Lang::T('PPPOE Plans'));
         $id  = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
@@ -449,7 +449,7 @@ switch ($action) {
             }
             $d->delete();
 
-            r2(U . 'services/pppoe', 's', $_L['Delete_Successfully']);
+            r2(U . 'services/pppoe', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -475,17 +475,17 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '' or $pool == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
         if (empty($radius)) {
             if ($routers == '') {
-                $msg .= $_L['All_field_is_required'] . '<br>';
+                $msg .= Lang::T('All field is required') . '<br>';
             }
         }
 
         $d = ORM::for_table('tbl_plans')->where('name_plan', $name)->find_one();
         if ($d) {
-            $msg .= $_L['Plan_already_exist'] . '<br>';
+            $msg .= Lang::T('Name Plan Already Exist') . '<br>';
         }
         run_hook('add_ppoe'); #HOOK
         if ($msg == '') {
@@ -539,7 +539,7 @@ switch ($action) {
                 }
             }
 
-            r2(U . 'services/pppoe', 's', $_L['Created_Successfully']);
+            r2(U . 'services/pppoe', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/pppoe-add', 'e', $msg);
         }
@@ -566,13 +566,13 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '' or $pool == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
         run_hook('edit_ppoe'); #HOOK
         if ($msg == '') {
@@ -617,7 +617,7 @@ switch ($action) {
             $d->allow_purchase = $allow_purchase;
             $d->save();
 
-            r2(U . 'services/pppoe', 's', $_L['Updated_Successfully']);
+            r2(U . 'services/pppoe', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/pppoe-edit/' . $id, 'e', $msg);
         }
@@ -658,7 +658,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_balance'); #HOOK
             $d->delete();
-            r2(U . 'services/balance', 's', $_L['Delete_Successfully']);
+            r2(U . 'services/balance', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
     case 'balance-edit-post':
@@ -673,13 +673,13 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
         run_hook('edit_ppoe'); #HOOK
         if ($msg == '') {
@@ -689,7 +689,7 @@ switch ($action) {
             $d->allow_purchase = $allow_purchase;
             $d->save();
 
-            r2(U . 'services/balance', 's', $_L['Updated_Successfully']);
+            r2(U . 'services/balance', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/balance-edit/' . $id, 'e', $msg);
         }
@@ -705,12 +705,12 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_plans')->where('name_plan', $name)->find_one();
         if ($d) {
-            $msg .= $_L['Plan_already_exist'] . '<br>';
+            $msg .= Lang::T('Name Plan Already Exist') . '<br>';
         }
         run_hook('add_ppoe'); #HOOK
         if ($msg == '') {
@@ -727,7 +727,7 @@ switch ($action) {
             $d->allow_purchase = $allow_purchase;
             $d->save();
 
-            r2(U . 'services/balance', 's', $_L['Created_Successfully']);
+            r2(U . 'services/balance', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/balance-add', 'e', $msg);
         }

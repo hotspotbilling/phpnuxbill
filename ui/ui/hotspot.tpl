@@ -8,7 +8,7 @@
                     <a class="btn btn-primary btn-xs" title="save" href="{$_url}services/sync/hotspot"
                         onclick="return confirm('This will sync/send hotspot plan to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
-                </div>{$_L['Hotspot_Plans']}
+                </div>{Lang::T('Hotspot Plans')}
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
@@ -19,32 +19,32 @@
                                     <span class="fa fa-search"></span>
                                 </div>
                                 <input type="text" name="name" class="form-control"
-                                    placeholder="{$_L['Search_by_Name']}...">
+                                    placeholder="{Lang::T('Search by Name')}...">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
                             </div>
                         </form>
                     </div>
                     <div class="col-md-4">
                         <a href="{$_url}services/add" class="btn btn-primary btn-block waves-effect"><i
-                                class="ion ion-android-add"> </i> {$_L['New_Plan']}</a>
+                                class="ion ion-android-add"> </i> {Lang::T('New Service Plan')}</a>
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>{$_L['Plan_Name']}</th>
-                                <th>{$_L['Plan_Type']}</th>
-                                <th>{$_L['Bandwidth_Plans']}</th>
-                                <th>{$_L['Plan_Price']}</th>
-                                <th>{$_L['Time_Limit']}</th>
-                                <th>{$_L['Data_Limit']}</th>
-                                <th>{$_L['Plan_Validity']}</th>
-                                <th>{$_L['Routers']}</th>
+                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Plan Type')}</th>
+                                <th>{Lang::T('Bandwidth Plans')}</th>
+                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Time Limit')}</th>
+                                <th>{Lang::T('Data Limit')}</th>
+                                <th>{Lang::T('Plan Validity')}</th>
+                                <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Expired IP Pool')}</th>
-                                <th>{$_L['Manage']}</th>
+                                <th>{Lang::T('Manage')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,10 +70,10 @@
                                     <td>{$ds['pool_expired']}</td>
                                     <td>
                                         <a href="{$_url}services/edit/{$ds['id']}"
-                                            class="btn btn-info btn-xs">{$_L['Edit']}</a>
+                                            class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         <a href="{$_url}services/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{$_L['Delete']}?')"
-                                            class="btn btn-danger btn-xs">{$_L['Delete']}</a>
+                                            onclick="return confirm('{Lang::T('Delete')}?')"
+                                            class="btn btn-danger btn-xs">{Lang::T('Delete')}</a>
                                     </td>
                                 </tr>
                             {/foreach}

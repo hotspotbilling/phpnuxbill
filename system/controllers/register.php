@@ -41,7 +41,7 @@ switch ($do) {
             $msg .= 'Email is not Valid<br>';
         }
         if ($password != $cpassword) {
-            $msg .= $_L['PasswordsNotMatch'] . '<br>';
+            $msg .= Lang::T('Passwords does not match') . '<br>';
         }
 
         if(!empty($config['sms_url'])){
@@ -72,7 +72,7 @@ switch ($do) {
         }
         $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         if ($d) {
-            $msg .= $_L['account_already_exist'] . '<br>';
+            $msg .= Lang::T('Account already axist') . '<br>';
         }
         if ($msg == '') {
             run_hook('register_user'); #HOOK
@@ -85,7 +85,7 @@ switch ($do) {
             $d->phonenumber = $phonenumber;
             if ($d->save()) {
                 $user = $d->id();
-                r2(U . 'login', 's', $_L['Register_Success']);
+                r2(U . 'login', 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);
                 $ui->assign('fullname', $fullname);
@@ -115,7 +115,7 @@ switch ($do) {
             if(!empty($username)){
                 $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
                 if ($d) {
-                    r2(U . 'register', 's', $_L['account_already_exist']);
+                    r2(U . 'register', 's', Lang::T('Account already axist'));
                 }
                 if(!file_exists($otpPath)){
                     mkdir($otpPath);

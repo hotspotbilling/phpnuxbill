@@ -4,19 +4,19 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-hovered panel-primary">
-            <div class="panel-heading">{$_L['List_Activated_Voucher']}</div>
+            <div class="panel-heading">{Lang::T('List Activated Voucher')}</div>
             <div class="panel-body">
                 <div class="table-responsive">
                     <table id="datatable" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{$_L['Username']}</th>
-                                <th>{$_L['Plan_Name']}</th>
-                                <th>{$_L['Plan_Price']}</th>
-                                <th>{$_L['Type']}</th>
-                                <th>{$_L['Created_On']}</th>
-                                <th>{$_L['Expires_On']}</th>
-                                <th>{$_L['Method']}</th>
+                                <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Created On')}</th>
+                                <th>{Lang::T('Expires On')}</th>
+                                <th>{Lang::T('Method')}</th>
                             </tr>
                         </thead>
                         <tbody>

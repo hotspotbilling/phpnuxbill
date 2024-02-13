@@ -25,19 +25,19 @@ switch ($do) {
                     Admin::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
-                    _log($username . ' ' . $_L['Login_Successful'], $d['user_type'], $d['id']);
+                    _log($username . ' ' . Lang::T('Login Successful'), $d['user_type'], $d['id']);
                     r2(U . 'dashboard');
                 } else {
-                    _msglog('e', $_L['Invalid_Username_or_Password']);
-                    _log($username . ' ' . $_L['Failed_Login'], $d['user_type']);
+                    _msglog('e', Lang::T('Invalid Username or Password'));
+                    _log($username . ' ' . Lang::T('Failed Login'), $d['user_type']);
                     r2(U . 'admin');
                 }
             } else {
-                _msglog('e', $_L['Invalid_Username_or_Password']);
+                _msglog('e', Lang::T('Invalid Username or Password'));
                 r2(U . 'admin');
             }
         } else {
-            _msglog('e', $_L['Invalid_Username_or_Password']);
+            _msglog('e', Lang::T('Invalid Username or Password'));
             r2(U . 'admin');
         }
 

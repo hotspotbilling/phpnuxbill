@@ -26,19 +26,19 @@
 {Lang::pad($_c['phone'],' ', 2)}
 {Lang::pad("", '=')}
 {Lang::pads("Invoice", $in['invoice'], ' ')}
-{Lang::pads($_L['Date'], $date, ' ')}
-{Lang::pads($_L['Sales'], $_admin['fullname'], ' ')}
+{Lang::pads(Lang::T('Date'), $date, ' ')}
+{Lang::pads(Lang::T('Sales'), $_admin['fullname'], ' ')}
 {Lang::pad("", '=')}
-{Lang::pads($_L['Type'], $in['type'], ' ')}
-{Lang::pads($_L['Plan_Name'], $in['plan_name'], ' ')}
-{Lang::pads($_L['Plan_Price'], Lang::moneyFormat($in['price']), ' ')}
+{Lang::pads(Lang::T('Type'), $in['type'], ' ')}
+{Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ')}
+{Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ')}
 {Lang::pad($in['method'], ' ', 2)}
 
-{Lang::pads($_L['Username'], $in['username'], ' ')}
-{Lang::pads($_L['Password'], '**********', ' ')}
+{Lang::pads(Lang::T('Username'), $in['username'], ' ')}
+{Lang::pads(Lang::T('Password'), '**********', ' ')}
 {if $in['type'] != 'Balance'}
-{Lang::pads($_L['Created_On'], Lang::dateAndTimeFormat($in['recharged_on'],$in['recharged_time']), ' ')}
-{Lang::pads($_L['Expires_On'], Lang::dateAndTimeFormat($in['expiration'],$in['time']), ' ')}
+{Lang::pads(Lang::T('Created On'), Lang::dateAndTimeFormat($in['recharged_on'],$in['recharged_time']), ' ')}
+{Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'],$in['time']), ' ')}
 {/if}
 {Lang::pad("", '=')}
 {Lang::pad($_c['note'],' ', 2)}</pre>

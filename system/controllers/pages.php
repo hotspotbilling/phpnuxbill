@@ -54,9 +54,9 @@ if(strpos($action,"-reset")!==false){
         $html = _post("html");
         run_hook('save_pages'); #HOOK
         if(file_put_contents($path, str_replace(["<div","</div>"],"",$html))){
-            r2(U . 'pages/'.$action, 's', $_L['Success_Save_Page']);
+            r2(U . 'pages/'.$action, 's', Lang::T("Saving page success"));
         }else{
-            r2(U . 'pages/'.$action, 'e', $_L['Failed_Save_Page']);
+            r2(U . 'pages/'.$action, 'e', Lang::T("Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>"));
         }
     }else
         $ui->display('a404.tpl');

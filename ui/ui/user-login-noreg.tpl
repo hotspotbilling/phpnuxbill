@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>{$_title} - {$_L['Login']}</title>
+    <title>{$_title} - {Lang::T('Login')}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
@@ -32,7 +32,7 @@
         <div class="row">
             <div class="col-sm-8">
                 <div class="panel panel-info">
-                    <div class="panel-heading">{$_L['Announcement']}</div>
+                    <div class="panel-heading">{Lang::T('Announcement')}</div>
                     <div class="panel-body">
                         {include file="$_path/../pages/Announcement.html"}
                     </div>
@@ -44,7 +44,7 @@
                     <div class="panel-body">
                         <form action="{$_url}login/activation" method="post">
                             <div class="form-group">
-                                <label>{$_L['Phone_Number']}</label>
+                                <label>{Lang::T('Phone Number')}</label>
                                 <div class="input-group">
                                     {if $_c['country_code_phone']!= ''}
                                         <span class="input-group-addon" id="basic-addon1">+</span>
@@ -57,9 +57,9 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>{$_L['Enter_Voucher_Code']}</label>
+                                <label>{Lang::T('Enter voucher code here')}</label>
                                 <input type="text" class="form-control" name="voucher" required autocomplete="off"
-                                    placeholder="{$_L['Code_Voucher']}">
+                                    placeholder="{Lang::T('Code Voucher')}">
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">

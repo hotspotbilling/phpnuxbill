@@ -144,7 +144,7 @@
                 <h3 class="box-title">PHPNUXBILL</h3>
             </div>
             <div class="box-body">
-                {$_L['Welcome_Text_Admin']}
+                <b>PHPNuxBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate with router. If you get more profit with this application, please donate us.<br>Watch project <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">in here</a>
             </div>
             <div class="box-footer" id="currentVersion">ver</div>
             <div class="box-footer" id="latestVersion">ver</div>

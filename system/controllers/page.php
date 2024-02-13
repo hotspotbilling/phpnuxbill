@@ -5,7 +5,7 @@
  **/
 
 _auth();
-$ui->assign('_title', $_L['Order_Voucher']);
+$ui->assign('_title', Lang::T('Order Voucher'));
 $ui->assign('_system_menu', 'order');
 
 $action = $routes['1'];

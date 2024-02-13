@@ -6,7 +6,7 @@
  **/
 
 _auth();
-$ui->assign('_title', $_L['Dashboard']);
+$ui->assign('_title', Lang::T('Dashboard'));
 
 $user = User::_info();
 $ui->assign('_user', $user);

@@ -3,7 +3,7 @@
 					<div class="row">
 						<div class="col-sm-12">
 							<div class="panel panel-hovered mb20 panel-primary">
-								<div class="panel-heading">{$_L['Bandwidth_Plans']}</div>
+								<div class="panel-heading">{Lang::T('Bandwidth Plans')}</div>
 								<div class="panel-body">
 									<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
 										<div class="col-md-8">
@@ -12,25 +12,25 @@
 												<div class="input-group-addon">
 													<span class="fa fa-search"></span>
 												</div>
-												<input type="text" name="name" class="form-control" placeholder="{$_L['Search_by_Name']}...">
+												<input type="text" name="name" class="form-control" placeholder="{Lang::T('Search by Name')}...">
 												<div class="input-group-btn">
-													<button class="btn btn-success" type="submit">{$_L['Search']}</button>
+													<button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
 												</div>
 											</div>
 											</form>
 										</div>
 										<div class="col-md-4">
-											<a href="{$_url}bandwidth/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Bandwidth']}</a>
+											<a href="{$_url}bandwidth/add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {Lang::T('New Bandwidth')}</a>
 										</div>&nbsp;
 									</div>
 									<div class="table-responsive">
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th>{$_L['BW_Name']}</th>
-                                                    <th>{$_L['Rate_Download']}</th>
-                                                    <th>{$_L['Rate_Upload']}</th>
-                                                    <th>{$_L['Manage']}</th>
+                                                    <th>{Lang::T('Bandwidth Name')}</th>
+                                                    <th>{Lang::T('Rate Download')}</th>
+                                                    <th>{Lang::T('Rate Upload')}</th>
+                                                    <th>{Lang::T('Manage')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -40,8 +40,8 @@
                                                     <td>{$ds['rate_down']} {$ds['rate_down_unit']}</td>
                                                     <td>{$ds['rate_up']} {$ds['rate_up_unit']}</td>
                                                     <td>
-                                                        <a href="{$_url}bandwidth/edit/{$ds['id']}" class="btn btn-sm btn-warning">{$_L['Edit']}</a>
-                                                        <a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm" onclick="return confirm('{$_L['Delete']}?')" >{$_L['Delete']}</a>
+                                                        <a href="{$_url}bandwidth/edit/{$ds['id']}" class="btn btn-sm btn-warning">{Lang::T('Edit')}</a>
+                                                        <a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm" onclick="return confirm('{Lang::T('Delete')}?')" >{Lang::T('Delete')}</a>
                                                     </td>
                                                 </tr>
                                             {/foreach}

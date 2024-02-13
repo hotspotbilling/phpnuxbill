@@ -84,18 +84,18 @@
                                     <div class="row">
                                         <div class="col-xs-7 text-center text-sm">
                                             <a href="{$_url}accounts/change-password"><i class="ion ion-settings"></i>
-                                                {$_L['Change_Password']}</a>
+                                                {Lang::T('Change Password')}</a>
                                         </div>
                                         <div class="col-xs-5 text-center text-sm">
                                             <a href="{$_url}accounts/profile"><i class="ion ion-person"></i>
-                                                {$_L['My_Account']}</a>
+                                                {Lang::T('My Account')}</a>
                                         </div>
                                     </div>
                                 </li>
                                 <li class="user-footer">
                                     <div class="pull-right">
                                         <a href="{$_url}logout" class="btn btn-default btn-flat"><i
-                                                class="ion ion-power"></i> {$_L['Logout']}</a>
+                                                class="ion ion-power"></i> {Lang::T('Logout')}</a>
                                     </div>
                                 </li>
                             </ul>
@@ -111,7 +111,7 @@
                     <li {if $_system_menu eq 'home'}class="active" {/if}>
                         <a href="{$_url}home">
                             <i class="ion ion-monitor"></i>
-                            <span>{$_L['Dashboard']}</span>
+                            <span>{Lang::T('Dashboard')}</span>
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}

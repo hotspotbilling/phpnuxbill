@@ -14,7 +14,7 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 
 

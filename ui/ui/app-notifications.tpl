@@ -150,7 +150,7 @@
             <div class="panel-body">
                 <div class="form-group">
                     <button class="btn btn-success btn-block waves-effect waves-light"
-                        type="submit">{$_L['Save']}</button>
+                        type="submit">{Lang::T('Save Changes')}</button>
                 </div>
             </div>
         </div>

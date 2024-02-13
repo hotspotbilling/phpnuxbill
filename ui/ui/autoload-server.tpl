@@ -1,4 +1,4 @@
-<option value=''>{$_L['Select_Routers']}</option>
+<option value=''>{Lang::T('Select Routers')}</option>
 {if $_c['radius_enable']}
     <option value="radius">Radius</option>
 {/if}

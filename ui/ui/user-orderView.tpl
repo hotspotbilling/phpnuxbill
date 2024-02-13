@@ -38,7 +38,7 @@
                                 <td>{$trx['gateway']}</td>
                             </tr>
                             <tr>
-                                <td>{$_L['Balance']}</td>
+                                <td>{Lang::T('Balance')}</td>
                                 <td>{Lang::moneyFormat($trx['price'])}</td>
                             </tr>
                         </tbody>
@@ -64,11 +64,11 @@
                                 </tr>
                             {/if}
                             <tr>
-                                <td>{$_L['Plan_Name']}</td>
+                                <td>{Lang::T('Plan Name')}</td>
                                 <td>{$plan['name_plan']}</td>
                             </tr>
                             <tr>
-                                <td>{$_L['Plan_Price']}</td>
+                                <td>{Lang::T('Plan Price')}</td>
                                 <td>{Lang::moneyFormat($plan['price'])}</td>
                             </tr>
                             <tr>
@@ -97,11 +97,11 @@
                                     {/if}
                                 {/if}
                                 <tr>
-                                    <td>{$_L['Plan_Validity']}</td>
+                                    <td>{Lang::T('Plan Validity')}</td>
                                     <td>{$plan['validity']} {$plan['validity_unit']}</td>
                                 </tr>
                                 <tr>
-                                    <td>{$_L['Bandwidth_Plans']}</td>
+                                    <td>{Lang::T('Bandwidth Plans')}</td>
                                     <td>{$bandw['name_bw']}<br>{$bandw['rate_down']}{$bandw['rate_down_unit']}/{$bandw['rate_up']}{$bandw['rate_up_unit']}
                                     </td>
                                 </tr>

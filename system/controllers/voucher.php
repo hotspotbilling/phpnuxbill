@@ -4,7 +4,7 @@
  *  by https://t.me/ibnux
  **/
 _auth();
-$ui->assign('_title', $_L['Voucher']);
+$ui->assign('_title', Lang::T('Voucher'));
 $ui->assign('_system_menu', 'voucher');
 
 $action = $routes['1'];
@@ -29,12 +29,12 @@ switch ($action) {
                 $v1->status = "1";
                 $v1->user = $user['username'];
                 $v1->save();
-                r2(U . "voucher/list-activated", 's', $_L['Activation_Vouchers_Successfully']);
+                r2(U . "voucher/list-activated", 's', Lang::T('Activation Vouchers Successfully'));
             } else {
                 r2(U . 'voucher/activation', 'e', "Failed to refill account");
             }
         } else {
-            r2(U . 'voucher/activation', 'e', $_L['Voucher_Not_Valid']);
+            r2(U . 'voucher/activation', 'e', Lang::T('Voucher Not Valid'));
         }
         break;
 

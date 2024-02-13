@@ -6,7 +6,7 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Customers']);
+$ui->assign('_title', Lang::T('Customer'));
 $ui->assign('_system_menu', 'customers');
 
 $action = $routes['1'];
@@ -15,7 +15,7 @@ $ui->assign('_admin', $admin);
 
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 
 switch ($action) {
@@ -252,7 +252,7 @@ switch ($action) {
                 }
             }
 
-            r2(U . 'customers/list', 's', $_L['User_Delete_Ok']);
+            r2(U . 'customers/list', 's', Lang::T('User deleted Successfully'));
         }
         break;
 
@@ -279,7 +279,7 @@ switch ($action) {
 
         $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         if ($d) {
-            $msg .= $_L['account_already_exist'] . '<br>';
+            $msg .= Lang::T('Account already axist') . '<br>';
         }
 
         if ($msg == '') {
@@ -293,7 +293,7 @@ switch ($action) {
             $d->phonenumber = Lang::phoneFormat($phonenumber);
             $d->service_type = $service_type;
             $d->save();
-            r2(U . 'customers/list', 's', $_L['account_created_successfully']);
+            r2(U . 'customers/list', 's', Lang::T('Account Created Successfully'));
         } else {
             r2(U . 'customers/add', 'e', $msg);
         }
@@ -325,7 +325,7 @@ switch ($action) {
         $id = _post('id');
         $d = ORM::for_table('tbl_customers')->find_one($id);
         if (!$d) {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         $oldusername = $d['username'];
@@ -337,7 +337,7 @@ switch ($action) {
         if ($oldusername != $username) {
             $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if ($c) {
-                $msg .= $_L['account_already_exist'] . '<br>';
+                $msg .= Lang::T('Account already axist') . '<br>';
             }
             $userDiff = true;
         }

@@ -12,26 +12,26 @@
 
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>{$_L['Username']}</b> <span class="pull-right">{$d['username']}</span>
+                        <b>{Lang::T('Username')}</b> <span class="pull-right">{$d['username']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{$_L['Phone_Number']}</b> <span class="pull-right">{$d['phonenumber']}</span>
+                        <b>{Lang::T('Phone Number')}</b> <span class="pull-right">{$d['phonenumber']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{$_L['Email']}</b> <span class="pull-right">{$d['email']}</span>
+                        <b>{Lang::T('Email')}</b> <span class="pull-right">{$d['email']}</span>
                     </li>
                 </ul>
                 <p class="text-muted">{Lang::nl2br($d['address'])}</p>
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>{$_L['Password']}</b> <input type="password" value="{$d['password']}"
+                        <b>{Lang::T('Password')}</b> <input type="password" value="{$d['password']}"
                             style=" border: 0px; text-align: right;" class="pull-right"
                             onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                             onclick="this.select()">
                     </li>
                     {if $d['pppoe_password'] != ''}
                         <li class="list-group-item">
-                            <b>PPPOE {$_L['Password']}</b> <input type="password" value="{$d['pppoe_password']}"
+                            <b>PPPOE {Lang::T('Password')}</b> <input type="password" value="{$d['pppoe_password']}"
                             style=" border: 0px; text-align: right;" class="pull-right"
                             onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                             onclick="this.select()">
@@ -48,7 +48,7 @@
                             class="pull-right">{if $d['auto_renewal']}yes{else}no{/if}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{$_L['Created_On']}</b> <span
+                        <b>{Lang::T('Created On')}</b> <span
                             class="pull-right">{Lang::dateTimeFormat($d['created_at'])}</span>
                     </li>
                     <li class="list-group-item">
@@ -59,12 +59,12 @@
                 <div class="row">
                     <div class="col-xs-4">
                         <a href="{$_url}customers/delete/{$d['id']}" id="{$d['id']}"
-                            class="btn btn-danger btn-block btn-sm" onclick="return confirm('{$_L['Delete']}?')"><span
+                            class="btn btn-danger btn-block btn-sm" onclick="return confirm('{Lang::T('Delete')}?')"><span
                                 class="fa fa-trash"></span></a>
                     </div>
                     <div class="col-xs-8">
                         <a href="{$_url}customers/edit/{$d['id']}"
-                            class="btn btn-warning btn-sm btn-block">{$_L['Edit']}</a>
+                            class="btn btn-warning btn-sm btn-block">{Lang::T('Edit')}</a>
                     </div>
                 </div>
             </div>
@@ -79,11 +79,11 @@
                                 class="pull-right">{if $package['status']=='on'}yes{else}no{/if}</span>
                         </li>
                         <li class="list-group-item">
-                            {$_L['Created_On']} <span
+                            {Lang::T('Created On')} <span
                                 class="pull-right">{Lang::dateAndTimeFormat($package['recharged_on'],$package['recharged_time'])}</span>
                         </li>
                         <li class="list-group-item">
-                            {$_L['Expires_On']} <span
+                            {Lang::T('Expires On')} <span
                                 class="pull-right">{Lang::dateAndTimeFormat($package['expiration'], $package['time'])}</span>
                         </li>
                         <li class="list-group-item">
@@ -127,14 +127,14 @@
                 {if Lang::arrayCount($activation)}
                     <thead>
                         <tr>
-                            <th>{$_L['Invoice']}</th>
-                            <th>{$_L['Username']}</th>
-                            <th>{$_L['Plan_Name']}</th>
-                            <th>{$_L['Plan_Price']}</th>
-                            <th>{$_L['Type']}</th>
-                            <th>{$_L['Created_On']}</th>
-                            <th>{$_L['Expires_On']}</th>
-                            <th>{$_L['Method']}</th>
+                            <th>{Lang::T('Invoice')}</th>
+                            <th>{Lang::T('Username')}</th>
+                            <th>{Lang::T('Plan Name')}</th>
+                            <th>{Lang::T('Plan Price')}</th>
+                            <th>{Lang::T('Type')}</th>
+                            <th>{Lang::T('Created On')}</th>
+                            <th>{Lang::T('Expires On')}</th>
+                            <th>{Lang::T('Method')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -156,15 +156,15 @@
                 {if Lang::arrayCount($order)}
                     <thead>
                         <tr>
-                            <th>{$_L['Plan_Name']}</th>
+                            <th>{Lang::T('Plan Name')}</th>
                             <th>{Lang::T('Gateway')}</th>
                             <th>{Lang::T('Routers')}</th>
-                            <th>{$_L['Type']}</th>
-                            <th>{$_L['Plan_Price']}</th>
-                            <th>{$_L['Created_On']}</th>
-                            <th>{$_L['Expires_On']}</th>
+                            <th>{Lang::T('Type')}</th>
+                            <th>{Lang::T('Plan Price')}</th>
+                            <th>{Lang::T('Created On')}</th>
+                            <th>{Lang::T('Expires On')}</th>
                             <th>{Lang::T('Date Done')}</th>
-                            <th>{$_L['Method']}</th>
+                            <th>{Lang::T('Method')}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -178,11 +178,11 @@
                                 <td class="text-primary">{Lang::dateTimeFormat($ds['created_date'])}</td>
                                 <td class="text-danger">{Lang::dateTimeFormat($ds['expired_date'])}</td>
                                 <td class="text-success">{if $ds['status']!=1}{Lang::dateTimeFormat($ds['paid_date'])}{/if}</td>
-                                <td>{if $ds['status']==1}{$_L['UNPAID']}
-                                    {elseif $ds['status']==2}{$_L['PAID']}
+                                <td>{if $ds['status']==1}{Lang::T('UNPAID')}
+                                    {elseif $ds['status']==2}{Lang::T('PAID')}
                                     {elseif $ds['status']==3}{$_L['FAILED']}
-                                    {elseif $ds['status']==4}{$_L['CANCELED']}
-                                    {elseif $ds['status']==5}{$_L['UNKNOWN']}
+                                    {elseif $ds['status']==4}{Lang::T('CANCELED')}
+                                    {elseif $ds['status']==5}{Lang::T('UNKNOWN')}
                                     {/if}</td>
                             </tr>
                         {/foreach}

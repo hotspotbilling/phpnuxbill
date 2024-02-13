@@ -13,7 +13,7 @@ $ui->assign('_user', $user);
 switch ($action) {
     case 'voucher':
         $ui->assign('_system_menu', 'voucher');
-        $ui->assign('_title', $_L['Order_Voucher']);
+        $ui->assign('_title', Lang::T('Order Voucher'));
         run_hook('customer_view_order'); #HOOK
         $ui->display('user-order.tpl');
         break;

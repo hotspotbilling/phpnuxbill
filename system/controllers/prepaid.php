@@ -6,7 +6,7 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Recharge_Account']);
+$ui->assign('_title', Lang::T('Recharge Account'));
 $ui->assign('_system_menu', 'prepaid');
 
 $action = $routes['1'];
@@ -14,7 +14,7 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Sales'])) {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 
 $select2_customer = <<<EOT
@@ -64,7 +64,7 @@ switch ($action) {
         r2(U . 'prepaid/list', 's', $log);
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/prepaid.js"></script>');
-        $ui->assign('_title', $_L['Customers']);
+        $ui->assign('_title', Lang::T('Customer'));
         $username = _post('username');
         if ($username != '') {
             $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'), ['username' => '%' . $username . '%'], $username);
@@ -203,7 +203,7 @@ switch ($action) {
             }
             $d->delete();
             _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer ' . $c['username'] . '  [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
-            r2(U . 'prepaid/list', 's', $_L['Delete_Successfully']);
+            r2(U . 'prepaid/list', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -218,7 +218,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
         $p = ORM::for_table('tbl_plans')->where('id', $id_plan)->where('enabled', '1')->find_one();
         if ($d) {
@@ -248,7 +248,7 @@ switch ($action) {
                 Package::changeTo($username, $id_plan, $id);
             }
             _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . '][' . Lang::moneyFormat($p['price']) . ']', $admin['user_type'], $admin['id']);
-            r2(U . 'prepaid/list', 's', $_L['Updated_Successfully']);
+            r2(U . 'prepaid/list', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'prepaid/edit/' . $id, 'e', $msg);
         }
@@ -256,7 +256,7 @@ switch ($action) {
 
     case 'voucher':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/voucher.js"></script>');
-        $ui->assign('_title', $_L['Prepaid_Vouchers']);
+        $ui->assign('_title', Lang::T('Prepaid Vouchers'));
         $code = _post('code');
         if ($code != '') {
             $ui->assign('code', $code);
@@ -283,7 +283,7 @@ switch ($action) {
         break;
 
     case 'add-voucher':
-        $ui->assign('_title', $_L['Add_Voucher']);
+        $ui->assign('_title', Lang::T('Add Vouchers'));
         $c = ORM::for_table('tbl_customers')->find_many();
         $ui->assign('c', $c);
         $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
@@ -304,7 +304,7 @@ switch ($action) {
                     $jml++;
                 }
             }
-            r2(U . 'prepaid/voucher', 's', "$jml ".$_L['Delete_Successfully']);
+            r2(U . 'prepaid/voucher', 's', "$jml ".Lang::T('Data Deleted Successfully'));
         }
     case 'print-voucher':
         $from_id = _post('from_id');
@@ -374,7 +374,7 @@ switch ($action) {
         $template = file_get_contents("pages/Voucher.html");
         $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
 
-        $ui->assign('_title', $_L['Voucher_Hotspot']);
+        $ui->assign('_title', Lang::T('Hotspot Voucher'));
         $ui->assign('from_id', $from_id);
         $ui->assign('vpl', $vpl);
         $ui->assign('pagebreak', $pagebreak);
@@ -416,7 +416,7 @@ switch ($action) {
 
         $msg = '';
         if ($type == '' or $plan == '' or $server == '' or $numbervoucher == '' or $lengthcode == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
         if (Validator::UnsignedNumber($numbervoucher) == false) {
             $msg .= 'The Number of Vouchers must be a number' . '<br>';
@@ -456,7 +456,7 @@ switch ($action) {
                 $d->save();
             }
 
-            r2(U . 'prepaid/voucher', 's', $_L['Voucher_Successfully']);
+            r2(U . 'prepaid/voucher', 's', Lang::T('Create Vouchers Successfully'));
         } else {
             r2(U . 'prepaid/add-voucher/' . $id, 'e', $msg);
         }
@@ -468,13 +468,13 @@ switch ($action) {
         $d = ORM::for_table('tbl_voucher')->find_one($id);
         if ($d) {
             $d->delete();
-            r2(U . 'prepaid/voucher', 's', $_L['Delete_Successfully']);
+            r2(U . 'prepaid/voucher', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
     case 'refill':
         $ui->assign('xfooter', $select2_customer);
-        $ui->assign('_title', $_L['Refill_Account']);
+        $ui->assign('_title', Lang::T('Refill Account'));
         run_hook('view_refill'); #HOOK
         $ui->display('refill.tpl');
 
@@ -499,7 +499,7 @@ switch ($action) {
                 r2(U . 'prepaid/refill', 'e', "Failed to refill account");
             }
         } else {
-            r2(U . 'prepaid/refill', 'e', $_L['Voucher_Not_Valid']);
+            r2(U . 'prepaid/refill', 'e', Lang::T('Voucher Not Valid'));
         }
         break;
     case 'deposit':

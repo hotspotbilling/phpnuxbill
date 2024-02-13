@@ -30,3 +30,4 @@ system/uploads/system/**
 ui/themes/**
 !ui/themes/index.html
 !ui/themes/README.md
+scanLang.php

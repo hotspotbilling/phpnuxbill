@@ -15,9 +15,9 @@
                                     <span class="fa fa-search"></span>
                                 </div>
                                 <input type="text" name="q" class="form-control" value="{$q}"
-                                    placeholder="{$_L['Invoice']}...">
+                                    placeholder="{Lang::T('Invoice')}...">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
                             </div>
                         </form>
@@ -31,14 +31,14 @@
                     <table id="datatable" class="table table-bordered table-striped">
                         <thead>
                             <tr>
-                                <th>{$_L['Invoice']}</th>
-                                <th>{$_L['Username']}</th>
-                                <th>{$_L['Plan_Name']}</th>
-                                <th>{$_L['Plan_Price']}</th>
-                                <th>{$_L['Type']}</th>
-                                <th>{$_L['Created_On']}</th>
-                                <th>{$_L['Expires_On']}</th>
-                                <th>{$_L['Method']}</th>
+                                <th>{Lang::T('Invoice')}</th>
+                                <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Created On')}</th>
+                                <th>{Lang::T('Expires On')}</th>
+                                <th>{Lang::T('Method')}</th>
                             </tr>
                         </thead>
                         <tbody>

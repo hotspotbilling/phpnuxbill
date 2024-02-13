@@ -5,7 +5,7 @@
  *  by https://t.me/ibnux
  **/
 _admin();
-$ui->assign('_title', $_L['Settings']);
+$ui->assign('_title', Lang::T('Settings'));
 $ui->assign('_system_menu', 'settings');
 
 $action = $routes['1'];
@@ -15,7 +15,7 @@ $ui->assign('_admin', $admin);
 switch ($action) {
     case 'app':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
 
         if (!empty(_get('testWa'))) {
@@ -71,15 +71,16 @@ switch ($action) {
 
     case 'localisation':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
-        $folders = [];
-        $files = scandir('system/lan/');
-        foreach ($files as $file) {
-            if (is_dir('system/lan/' . $file) && !in_array($file, ['.', '..'])) {
-                $folders[] = $file;
-            }
-        }
+        // $folders = [];
+        // $files = scandir('system/lan/');
+        // foreach ($files as $file) {
+        //     if (is_dir('system/lan/' . $file) && !in_array($file, ['.', '..'])) {
+        //         $folders[] = $file;
+        //     }
+        // }
+        $folders = Lang::getIsoLang();
         $ui->assign('lan', $folders);
         $timezonelist = Timezone::timezoneList();
         $ui->assign('tlist', $timezonelist);
@@ -90,7 +91,7 @@ switch ($action) {
 
     case 'users':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
 
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/users.js"></script>');
@@ -112,7 +113,7 @@ switch ($action) {
 
     case 'users-add':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         run_hook('view_add_admin'); #HOOK
         $ui->display('users-add.tpl');
@@ -120,7 +121,7 @@ switch ($action) {
 
     case 'users-edit':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
 
         $id  = $routes['2'];
@@ -136,7 +137,7 @@ switch ($action) {
 
     case 'users-delete':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
 
         $id  = $routes['2'];
@@ -147,7 +148,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_admin'); #HOOK
             $d->delete();
-            r2(U . 'settings/users', 's', $_L['User_Delete_Ok']);
+            r2(U . 'settings/users', 's', Lang::T('User deleted Successfully'));
         } else {
             r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
         }
@@ -175,7 +176,7 @@ switch ($action) {
 
         $d = ORM::for_table('tbl_users')->where('username', $username)->find_one();
         if ($d) {
-            $msg .= $_L['account_already_exist'] . '<br>';
+            $msg .= Lang::T('Account already axist') . '<br>';
         }
         $date_now = date("Y-m-d H:i:s");
         run_hook('add_admin'); #HOOK
@@ -191,8 +192,8 @@ switch ($action) {
 
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . $_L['account_created_successfully'], $admin['user_type'], $admin['id']);
-            r2(U . 'settings/users', 's', $_L['account_created_successfully']);
+            _log('[' . $admin['username'] . ']: ' . Lang::T('Account Created Successfully'), $admin['user_type'], $admin['id']);
+            r2(U . 'settings/users', 's', Lang::T('Account Created Successfully'));
         } else {
             r2(U . 'settings/users-add', 'e', $msg);
         }
@@ -224,13 +225,13 @@ switch ($action) {
         $d = ORM::for_table('tbl_users')->find_one($id);
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         if ($d['username'] != $username) {
             $c = ORM::for_table('tbl_users')->where('username', $username)->find_one();
             if ($c) {
-                $msg .= $_L['account_already_exist'] . '<br>';
+                $msg .= Lang::T('Account already axist') . '<br>';
             }
         }
         run_hook('edit_admin'); #HOOK
@@ -249,7 +250,7 @@ switch ($action) {
 
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . $_L['User_Updated_Successfully'], $admin['user_type'], $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . Lang::T('User Updated Successfully'), $admin['user_type'], $admin['id']);
             r2(U . 'settings/users', 's', 'User Updated Successfully');
         } else {
             r2(U . 'settings/users-edit/' . $id, 'e', $msg);
@@ -271,7 +272,7 @@ switch ($action) {
             }
         }
         if ($company == '') {
-            r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
+            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
         } else {
             if ($radius_enable) {
                 try {
@@ -316,9 +317,9 @@ switch ($action) {
                 }
             }
 
-            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], $admin['user_type'], $admin['id']);
+            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
 
-            r2(U . 'settings/app', 's', $_L['Settings_Saved_Successfully']);
+            r2(U . 'settings/app', 's', Lang::T('Settings Saved Successfully'));
         }
         break;
 
@@ -329,7 +330,7 @@ switch ($action) {
         $lan = _post('lan');
         run_hook('save_localisation'); #HOOK
         if ($tzone == '' or $date_format == '' or $lan == '') {
-            r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
+            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
         } else {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'timezone')->find_one();
             $d->value = $tzone;
@@ -404,14 +405,14 @@ switch ($action) {
             $d->value = $lan;
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], $admin['user_type'], $admin['id']);
-            r2(U . 'settings/localisation', 's', $_L['Settings_Saved_Successfully']);
+            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
+            r2(U . 'settings/localisation', 's', Lang::T('Settings Saved Successfully'));
         }
         break;
 
     case 'change-password':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         run_hook('view_change_password'); #HOOK
         $ui->display('change-password.tpl');
@@ -438,24 +439,24 @@ switch ($action) {
                     $d->password = $npass;
                     $d->save();
 
-                    _msglog('s', $_L['Password_Changed_Successfully']);
+                    _msglog('s', Lang::T('Password changed successfully, Please login again'));
                     _log('[' . $admin['username'] . ']: Password changed successfully', $admin['user_type'], $admin['id']);
 
                     r2(U . 'admin');
                 } else {
-                    r2(U . 'settings/change-password', 'e', $_L['Incorrect_Current_Password']);
+                    r2(U . 'settings/change-password', 'e', Lang::T('Incorrect Current Password'));
                 }
             } else {
-                r2(U . 'settings/change-password', 'e', $_L['Incorrect_Current_Password']);
+                r2(U . 'settings/change-password', 'e', Lang::T('Incorrect Current Password'));
             }
         } else {
-            r2(U . 'settings/change-password', 'e', $_L['Incorrect_Current_Password']);
+            r2(U . 'settings/change-password', 'e', Lang::T('Incorrect Current Password'));
         }
         break;
 
     case 'notifications':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         run_hook('view_notifications'); #HOOK
         if (file_exists("system/uploads/notifications.json")) {
@@ -468,11 +469,11 @@ switch ($action) {
         break;
     case 'notifications-post':
         file_put_contents("system/uploads/notifications.json", json_encode($_POST));
-        r2(U . 'settings/notifications', 's', $_L['Settings_Saved_Successfully']);
+        r2(U . 'settings/notifications', 's', Lang::T('Settings Saved Successfully'));
         break;
     case 'dbstatus':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
 
         $dbc = new mysqli($db_host, $db_user, $db_password, $db_name);
@@ -490,7 +491,7 @@ switch ($action) {
 
     case 'dbbackup':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         $tables = $_POST['tables'];
         set_time_limit(-1);
@@ -510,7 +511,7 @@ switch ($action) {
         break;
     case 'dbrestore':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         if (file_exists($_FILES['json']['tmp_name'])) {
             $suc = 0;
@@ -540,7 +541,7 @@ switch ($action) {
         break;
     case 'language':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         run_hook('view_add_language'); #HOOK
         $ui->display('language-add.tpl');
@@ -552,12 +553,12 @@ switch ($action) {
         $translator = _post('translator');
 
         if ($name == '' or $folder == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_language')->where('name', $name)->find_one();
         if ($d) {
-            $msg .= $_L['Lang_already_exist'] . '<br>';
+            $msg .= Lang::T('Language Name Already Exist') . '<br>';
         }
         run_hook('save_language'); #HOOK
         if ($msg == '') {
@@ -567,7 +568,7 @@ switch ($action) {
             $b->author = $translator;
             $b->save();
 
-            r2(U . 'settings/localisation', 's', $_L['Created_Successfully']);
+            r2(U . 'settings/localisation', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'settings/language', 'e', $msg);
         }

@@ -6,11 +6,11 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Dashboard']);
+$ui->assign('_title', Lang::T('Dashboard'));
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "home", 'e', $_L['Do_Not_Access']);
+    r2(U . "home", 'e', Lang::T('You do not have permission to access this page'));
 }
 
 $fdate = date('Y-m-01');

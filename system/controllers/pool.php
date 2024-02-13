@@ -6,7 +6,7 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Network']);
+$ui->assign('_title', Lang::T('Network'));
 $ui->assign('_system_menu', 'network');
 
 $action = $routes['1'];
@@ -14,7 +14,7 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 
 
@@ -74,7 +74,7 @@ switch ($action) {
             }
             $d->delete();
 
-            r2(U . 'pool/list', 's', $_L['Delete_Successfully']);
+            r2(U . 'pool/list', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -101,12 +101,12 @@ switch ($action) {
             $msg .= 'Name should be between 3 to 30 characters' . '<br>';
         }
         if ($ip_address == '' or $routers == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_pool')->where('pool_name', $name)->find_one();
         if ($d) {
-            $msg .= $_L['Pool_already_exist'] . '<br>';
+            $msg .= Lang::T('Pool Name Already Exist') . '<br>';
         }
         if ($msg == '') {
             if ($routers != 'radius') {
@@ -121,7 +121,7 @@ switch ($action) {
             $b->routers = $routers;
             $b->save();
 
-            r2(U . 'pool/list', 's', $_L['Created_Successfully']);
+            r2(U . 'pool/list', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'pool/add', 'e', $msg);
         }
@@ -135,14 +135,14 @@ switch ($action) {
         $msg = '';
 
         if ($ip_address == '' or $routers == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $id = _post('id');
         $d = ORM::for_table('tbl_pool')->find_one($id);
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         if ($msg == '') {
@@ -156,7 +156,7 @@ switch ($action) {
             $d->routers = $routers;
             $d->save();
 
-            r2(U . 'pool/list', 's', $_L['Updated_Successfully']);
+            r2(U . 'pool/list', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'pool/edit/' . $id, 'e', $msg);
         }

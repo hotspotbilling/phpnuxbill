@@ -25,19 +25,19 @@ switch ($do) {
                     User::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
-                    _log($username . ' ' . $_L['Login_Successful'], 'User', $d['id']);
+                    _log($username . ' ' . Lang::T('Login Successful'), 'User', $d['id']);
                     r2(U . 'home');
                 } else {
-                    _msglog('e', $_L['Invalid_Username_or_Password']);
-                    _log($username . ' ' . $_L['Failed_Login'], 'User');
+                    _msglog('e', Lang::T('Invalid Username or Password'));
+                    _log($username . ' ' . Lang::T('Failed Login'), 'User');
                     r2(U . 'login');
                 }
             } else {
-                _msglog('e', $_L['Invalid_Username_or_Password']);
+                _msglog('e', Lang::T('Invalid Username or Password'));
                 r2(U . 'login');
             }
         } else {
-            _msglog('e', $_L['Invalid_Username_or_Password']);
+            _msglog('e', Lang::T('Invalid Username or Password'));
             r2(U . 'login');
         }
 
@@ -141,11 +141,11 @@ switch ($do) {
                     }
                 } else {
                     // voucher used by other customer
-                    r2(U . 'login', 'e', $_L['Voucher_Not_Valid']);
+                    r2(U . 'login', 'e', Lang::T('Voucher Not Valid'));
                 }
             }
         } else {
-            _msglog('e', $_L['Invalid_Username_or_Password']);
+            _msglog('e', Lang::T('Invalid Username or Password'));
             r2(U . 'login');
         }
     default:

@@ -8,9 +8,43 @@
 
 class Lang
 {
-    public static function T($var)
+    public static function T($key)
     {
-        return Lang($var);
+        global $_L, $lan_file, $config;
+        $L = $_SESSION['Lang'];
+        if (!empty($_L[$key])) {
+            return $_L[$key];
+        }
+        $val = $key;
+        $md5 = md5($key);
+        if (!empty($_L[$key])) {
+            return $_L[$key];
+        }else if (!empty($_L[$md5])) {
+            return $_L[$md5];
+        } else if (!empty($_L[str_replace(' ', '_', $key)])) {
+            return $_L[str_replace(' ', '_', $key)];
+        } else {
+            $iso = Lang::getIsoLang()[$config['language']];
+            if(!empty($iso) && !empty($val)){
+                $temp = Lang::translate($val, $iso);
+                if(!empty($temp)){
+                    $val = $temp;
+                }
+            }
+            $key = md5($key);
+            $_L[$key] = $val;
+            $_SESSION['Lang'][$key] = $val;
+            file_put_contents(File::pathFixer('system/lan/' . $config['language'] . '/common.lan.json'), json_encode($_SESSION['Lang']));
+            return $val;
+        }
+    }
+
+    public static function getIsoLang(){
+        global $isolang;
+        if(empty($isolang) || count($isolang)==0){
+            $isolang = json_decode(file_get_contents(File::pathFixer("system/lan/country.json")),true);
+        }
+        return $isolang;
     }
 
     public static function htmlspecialchars($var)
@@ -150,5 +184,26 @@ class Lang
             $cols = $config['printer_cols'];
         }
         return $textLeft.str_pad($textRight, $cols-strlen($textLeft), $pad_string, 0);
+    }
+
+    public static function translate($txt, $to='id'){
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL,"https://translate.google.com/m?hl=en&sl=en&tl=$to&ie=UTF-8&prev=_m&q=".urlencode($txt));
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (iPhone; CPU OS 13_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/28.1 Mobile/15E148 Safari/605.1.15");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt ($ch, CURLOPT_HEADER, 0);
+        $hasil = curl_exec ($ch);
+        curl_close($ch);
+        $temp = explode('<div class="result-container">', $hasil);
+        if(count($temp)>0){
+            $temp =  explode("</div", $temp[1]);
+            if(!empty($temp[0])){
+                return $temp[0];
+            }
+        }
+        return $txt;
     }
 }

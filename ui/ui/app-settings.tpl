@@ -9,16 +9,16 @@
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
-                    {$_L['General_Settings']}
+                    {Lang::T('General Settings')}
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['App_Name']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Application Name/ Company Name')}</label>
                         <div class="col-md-6">
                             <input type="text" required class="form-control" id="CompanyName" name="CompanyName"
                                 value="{$_c['CompanyName']}">
                         </div>
-                        <span class="help-block col-md-4">{$_L['App_Name_Help_Text']}</span>
+                        <span class="help-block col-md-4">{Lang::T('This Name will be shown on the Title')}</span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Company Logo')}</label>
@@ -40,15 +40,15 @@
                         <span class="help-block col-md-4">{Lang::T('Will show below user pages')}</span>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Address']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Address')}</label>
                         <div class="col-md-6">
                             <textarea class="form-control" id="address" name="address"
                                 rows="3">{Lang::htmlspecialchars($_c['address'])}</textarea>
                         </div>
-                        <span class="help-block col-md-4">{$_L['You_can_use_html_tag']}</span>
+                        <span class="help-block col-md-4">{Lang::T('You can use html tag')}</span>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Phone_Number']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="phone" name="phone" value="{$_c['phone']}">
                         </div>
@@ -98,8 +98,8 @@
                         <label class="col-md-3 control-label"><input type="checkbox" name="hide_mrc" value="yes" {if $_c['hide_mrc'] eq 'yes'}checked{/if}> {Lang::T('Monthly Registered Customers')}</label>
                         <label class="col-md-2 control-label"><input type="checkbox" name="hide_tms" value="yes" {if $_c['hide_tms'] eq 'yes'}checked{/if}> {Lang::T('Total Monthly Sales')}</label>
                         <label class="col-md-2 control-label"><input type="checkbox" name="hide_aui" value="yes" {if $_c['hide_aui'] eq 'yes'}checked{/if}> {Lang::T('All Users Insights')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_al" value="yes" {if $_c['hide_al'] eq 'yes'}checked{/if}> {$_L['Activity_Log']}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_uet" value="yes" {if $_c['hide_uet'] eq 'yes'}checked{/if}> {$_L['User_Expired_Today']}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_al" value="yes" {if $_c['hide_al'] eq 'yes'}checked{/if}> {Lang::T('Activity Log')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_uet" value="yes" {if $_c['hide_uet'] eq 'yes'}checked{/if}> {Lang::T('User Expired, Today')}</label>
                         <label class="col-md-2 control-label"><input type="checkbox" name="hide_vs" value="yes" {if $_c['hide_vs'] eq 'yes'}checked{/if}> Vouchers Stock</label>
                         <label class="col-md-2 control-label"><input type="checkbox" name="hide_pg" value="yes" {if $_c['hide_pg'] eq 'yes'}checked{/if}> Payment Gateway</label>
                     </div>
@@ -407,7 +407,7 @@
                         <div class="col-md-6">
                             <textarea class="form-control" id="note" name="note"
                                 rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
-                            <span class="help-block">{$_L['You_can_use_html_tag']}</span>
+                            <span class="help-block">{Lang::T('You can use html tag')}</span>
                         </div>
                     </div>
                 </div>
@@ -468,7 +468,7 @@
             <div class="panel-body">
                 <div class="form-group">
                     <button class="btn btn-success btn-block waves-effect waves-light"
-                        type="submit">{$_L['Save']}</button>
+                        type="submit">{Lang::T('Save Changes')}</button>
                 </div>
             </div>
 

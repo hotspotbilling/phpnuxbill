@@ -7,7 +7,7 @@
 
 
 _auth();
-$ui->assign('_title', $_L['My_Account']);
+$ui->assign('_title', Lang::T('My Account'));
 $ui->assign('_system_menu', 'accounts');
 
 $action = $routes['1'];
@@ -62,18 +62,18 @@ switch ($action) {
                     $d->password = $npass;
                     $d->save();
 
-                    _msglog('s', $_L['Password_Changed_Successfully']);
+                    _msglog('s', Lang::T('Password changed successfully, Please login again'));
                     _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
 
                     r2(U . 'login');
                 } else {
-                    r2(U . 'accounts/change-password', 'e', $_L['Incorrect_Current_Password']);
+                    r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
                 }
             } else {
-                r2(U . 'accounts/change-password', 'e', $_L['Incorrect_Current_Password']);
+                r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
             }
         } else {
-            r2(U . 'accounts/change-password', 'e', $_L['Incorrect_Current_Password']);
+            r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
         }
         break;
 
@@ -105,7 +105,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_customers')->find_one($user['id']);
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         if ($msg == '') {
@@ -115,8 +115,8 @@ switch ($action) {
             $d->phonenumber = $phonenumber;
             $d->save();
 
-            _log('[' . $user['username'] . ']: ' . $_L['User_Updated_Successfully'], 'User', $user['id']);
-            r2(U . 'accounts/profile', 's', $_L['User_Updated_Successfully']);
+            _log('[' . $user['username'] . ']: ' . Lang::T('User Updated Successfully'), 'User', $user['id']);
+            r2(U . 'accounts/profile', 's', Lang::T('User Updated Successfully'));
         } else {
             r2(U . 'accounts/profile', 'e', $msg);
         }
