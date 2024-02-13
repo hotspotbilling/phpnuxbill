@@ -165,7 +165,7 @@ if (empty($_SESSION['Lang'])) {
 }
 
 $ui = new Smarty();
-
+$ui->assign('_kolaps', $_COOKIE['kolaps']);
 if (!empty($config['theme']) && $config['theme'] != 'default') {
     $_theme = APP_URL . '/ui/themes/' . $config['theme'];
     $ui->setTemplateDir(['custom' => File::pathFixer('ui/ui_custom/'), 'theme' => File::pathFixer('ui/themes/' . $config['theme']), 'default' => File::pathFixer('ui/ui/')]);
