@@ -47,14 +47,21 @@
                         <label class="col-md-2 control-label">{Lang::T('Default Language')}</label>
                         <div class="col-md-6">
                             <select class="form-control" name="lan" id="lan">
+                                {foreach $lani as $lanis}
+                                    <option value="{$lanis@key}" {if $_c['language'] eq $lanis@key} selected="selected" {/if}>
+                                        {$lanis@key}
+                                    </option>
+                                {/foreach}
+                                <option disabled>_________</option>
                                 {foreach $lan as $lans}
-                                    <option value="{$lans@key}" {if $_c['language'] eq $lans@key} selected="selected" {/if}>{$lans@key}
+                                    <option value="{$lans@key}" {if $_c['language'] eq $lans@key} selected="selected" {/if}>
+                                        {$lans@key}
                                     </option>
                                 {/foreach}
                             </select>
                         </div>
                         <div class="col-md-4 help-block">
-                            To add new Language, just add the folder, it will automatically detected
+                            New Language will be automatically translated from English
                         </div>
                     </div>
                     <div class="form-group">
@@ -77,7 +84,8 @@
                             <input type="text" class="form-control" id="currency_code" name="currency_code"
                                 value="{$_c['currency_code']}">
                         </div>
-                        <span class="help-block col-md-4">{Lang::T('Keep it blank if you do not want to show currency code')}</span>
+                        <span
+                            class="help-block col-md-4">{Lang::T('Keep it blank if you do not want to show currency code')}</span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Country Code Phone')}</label>

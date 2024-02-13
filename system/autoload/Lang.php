@@ -16,25 +16,24 @@ class Lang
             return $_L[$key];
         }
         $val = $key;
-        $md5 = md5($key);
-        if (!empty($_L[$key])) {
+        if (isset($_L[$key])) {
             return $_L[$key];
-        }else if (!empty($_L[$md5])) {
-            return $_L[$md5];
-        } else if (!empty($_L[str_replace(' ', '_', $key)])) {
-            return $_L[str_replace(' ', '_', $key)];
+        }else if (isset($_L[$key])) {
+            return $_L[$key];
         } else {
             $iso = Lang::getIsoLang()[$config['language']];
+            if(empty($iso)){
+                return $val;
+            }
             if(!empty($iso) && !empty($val)){
                 $temp = Lang::translate($val, $iso);
                 if(!empty($temp)){
                     $val = $temp;
                 }
             }
-            $key = md5($key);
             $_L[$key] = $val;
             $_SESSION['Lang'][$key] = $val;
-            file_put_contents(File::pathFixer('system/lan/' . $config['language'] . '/common.lan.json'), json_encode($_SESSION['Lang']));
+            file_put_contents($lan_file, json_encode($_SESSION['Lang'], JSON_PRETTY_PRINT));
             return $val;
         }
     }

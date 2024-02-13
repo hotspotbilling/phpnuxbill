@@ -73,15 +73,22 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
-        // $folders = [];
-        // $files = scandir('system/lan/');
-        // foreach ($files as $file) {
-        //     if (is_dir('system/lan/' . $file) && !in_array($file, ['.', '..'])) {
-        //         $folders[] = $file;
-        //     }
-        // }
-        $folders = Lang::getIsoLang();
-        $ui->assign('lan', $folders);
+        $folders = [];
+        $files = scandir('system/lan/');
+        foreach ($files as $file) {
+            if (is_file('system/lan/' . $file) && !in_array($file, ['index.html', 'country.json','.DS_Store'])) {
+                $file = str_replace(".json", "", $file);
+                $folders[$file] = '';
+            }
+        }
+        $ui->assign('lani', $folders);
+        $lans = Lang::getIsoLang();
+        foreach ($lans as $lan => $val) {
+            if(isset($folders[$lan])){
+                unset($lans[$lan]);
+            }
+        }
+        $ui->assign('lan', $lans);
         $timezonelist = Timezone::timezoneList();
         $ui->assign('tlist', $timezonelist);
         $ui->assign('xjq', ' $("#tzone").select2(); ');
@@ -404,7 +411,7 @@ switch ($action) {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'language')->find_one();
             $d->value = $lan;
             $d->save();
-
+            unset($_SESSION['Lang']);
             _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
             r2(U . 'settings/localisation', 's', Lang::T('Settings Saved Successfully'));
         }
@@ -544,34 +551,17 @@ switch ($action) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         run_hook('view_add_language'); #HOOK
+        if (file_exists($lan_file)) {
+            $ui->assign('langs', json_decode(file_get_contents($lan_file), true));
+        }else{
+            $ui->assign('langs', []);
+        }
         $ui->display('language-add.tpl');
         break;
 
     case 'lang-post':
-        $name = _post('name');
-        $folder = _post('folder');
-        $translator = _post('translator');
-
-        if ($name == '' or $folder == '') {
-            $msg .= Lang::T('All field is required') . '<br>';
-        }
-
-        $d = ORM::for_table('tbl_language')->where('name', $name)->find_one();
-        if ($d) {
-            $msg .= Lang::T('Language Name Already Exist') . '<br>';
-        }
-        run_hook('save_language'); #HOOK
-        if ($msg == '') {
-            $b = ORM::for_table('tbl_language')->create();
-            $b->name = $name;
-            $b->folder = $folder;
-            $b->author = $translator;
-            $b->save();
-
-            r2(U . 'settings/localisation', 's', Lang::T('Data Created Successfully'));
-        } else {
-            r2(U . 'settings/language', 'e', $msg);
-        }
+        file_put_contents($lan_file, json_encode($_POST, JSON_PRETTY_PRINT));
+        r2(U . 'settings/language', 's', Lang::T('Translation saved Successfully'));
         break;
 
     default:
