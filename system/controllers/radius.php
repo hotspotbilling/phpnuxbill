@@ -19,7 +19,7 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
 switch ($action) {
 
     case 'nas-add':
-        $ui->assign('_system_menu', 'network');
+        $ui->assign('_system_menu', 'radius');
         $ui->assign('_title', "Network Access Server");
         $ui->assign('routers', ORM::for_table('tbl_routers')->find_many());
         $ui->display('radius-nas-add.tpl');
@@ -67,7 +67,7 @@ switch ($action) {
         }
         break;
     case 'nas-edit':
-        $ui->assign('_system_menu', 'network');
+        $ui->assign('_system_menu', 'radius');
         $ui->assign('_title', "Network Access Server");
 
         $id  = $routes['2'];
@@ -131,7 +131,7 @@ switch ($action) {
             r2(U . 'radius/nas-list', 'e', 'NAS Not found');
         }
     default:
-        $ui->assign('_system_menu', 'network');
+        $ui->assign('_system_menu', 'radius');
         $ui->assign('_title', "Network Access Server");
         $name = _post('name');
         if (empty($name)) {
