@@ -225,6 +225,22 @@
                             </ul>
                         </li>
                         {$_MENU_AFTER_NETWORKS}
+                        {if $_c['radius_enable']}
+                        <li class="{if $_system_menu eq 'radius'}active{/if} treeview">
+                            <a href="#">
+                                <i class="fa fa-database"></i> <span>{Lang::T('Radius')}</span>
+                                <span class="pull-right-container">
+                                    <i class="fa fa-angle-left pull-right"></i>
+                                </span>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list'}class="active" {/if}><a
+                                    href="{$_url}radius/nas-list">{Lang::T('Radius NAS')}</a></li>
+                                {$_MENU_RADIUS}
+                            </ul>
+                        </li>
+                        {$_MENU_AFTER_RADIUS}
+                        {/if}
                         <li class="{if $_system_menu eq 'pages'}active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-document"></i> <span>{Lang::T("Static Pages")}</span>
