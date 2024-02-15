@@ -30,26 +30,34 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Full Name')}</th>
+                                <th>{Lang::T('Phone')}</th>
+                                <th>{Lang::T('Email')}</th>
                                 <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Location')}</th>
                                 <th>{Lang::T('Last Login')}</th>
                                 <th>{Lang::T('Manage')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr>
+                                <tr {if $ds['status'] != 'Active'}class="danger"{/if}>
+                                    <td>{$ds['id']}</td>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['fullname']}</td>
+                                    <td>{$ds['phone']}</td>
+                                    <td>{$ds['email']}</td>
                                     <td>{$ds['user_type']}</td>
-                                    <td>{$ds['last_login']}</td>
+                                    <td>{$ds['city']}, {$ds['subdistrict']}, {$ds['ward']}</td>
+                                    <td>{Lang::dateTimeFormat($ds['last_login'])}</td>
                                     <td>
                                         <a href="{$_url}settings/users-edit/{$ds['id']}"
-                                            class="btn btn-warning btn-sm">{Lang::T('Edit')}</a>
+                                            class="btn btn-warning btn-xs">{Lang::T('Edit')}</a>
                                         {if ($_admin['username']) neq ($ds['username'])}
                                             <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
-                                                class="btn btn-danger btn-sm" onclick="return confirm('{Lang::T('Delete')}?')">{Lang::T('Delete')}</a>
+                                                class="btn btn-danger btn-xs" onclick="return confirm('{Lang::T('Delete')}?')">{Lang::T('Delete')}</a>
                                         {/if}
                                     </td>
                                 </tr>

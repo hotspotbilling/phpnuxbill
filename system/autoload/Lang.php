@@ -192,7 +192,7 @@ class Lang
         curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (iPhone; CPU OS 13_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/28.1 Mobile/15E148 Safari/605.1.15");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt ($ch, CURLOPT_HEADER, 0);
         $hasil = curl_exec ($ch);
         curl_close($ch);

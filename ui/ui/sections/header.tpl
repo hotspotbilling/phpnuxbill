@@ -84,7 +84,7 @@
 
                                     <p>
                                         {$_admin['fullname']}
-                                        <small>{if $_admin['user_type'] eq 'Admin'} {Lang::T('Administrator')}
+                                        <small>{if $_admin['user_type'] eq 'SuperAdmin'} {Lang::T('Administrator')}
                                             {else}
                                             {Lang::T('Sales')} {/if}</small>
                                     </p>
@@ -124,7 +124,7 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
-                    {if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'Sales'}
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li class="{if $_system_menu eq 'customers'}active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-android-contacts"></i> <span>{Lang::T('Customer')}</span>
@@ -204,7 +204,7 @@
                         </li>
                         {$_MENU_AFTER_REPORTS}
                     {/if}
-                    {if $_admin['user_type'] eq 'Admin'}
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li class="{if $_system_menu eq 'network'}active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-network"></i> <span>{Lang::T('Network')}</span>
@@ -215,10 +215,6 @@
                             <ul class="treeview-menu">
                                 <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}routers/list">{Lang::T('Routers')}</a></li>
-                                {if $_c['radius_enable']}
-                                    <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list'}class="active" {/if}><a
-                                            href="{$_url}radius/nas-list">Radius NAS</a></li>
-                                {/if}
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}pool/list">{Lang::T('IP Pool')}</a></li>
                                 {$_MENU_NETWORK}
@@ -226,21 +222,21 @@
                         </li>
                         {$_MENU_AFTER_NETWORKS}
                         {if $_c['radius_enable']}
-                        <li class="{if $_system_menu eq 'radius'}active{/if} treeview">
-                            <a href="#">
-                                <i class="fa fa-database"></i> <span>{Lang::T('Radius')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list'}class="active" {/if}><a
-                                    href="{$_url}radius/nas-list">{Lang::T('Radius NAS')}</a></li>
-                                {$_MENU_RADIUS}
-                            </ul>
-                        </li>
-                        {$_MENU_AFTER_RADIUS}
+                            <li class="{if $_system_menu eq 'radius'}active{/if} treeview">
+                                <a href="#">
+                                    <i class="fa fa-database"></i> <span>{Lang::T('Radius')}</span>
+                                    <span class="pull-right-container">
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </span>
+                                </a>
+                                <ul class="treeview-menu">
+                                    <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list'}class="active" {/if}><a
+                                            href="{$_url}radius/nas-list">{Lang::T('Radius NAS')}</a></li>
+                                    {$_MENU_RADIUS}
+                                </ul>
+                            </li>
                         {/if}
+                        {$_MENU_AFTER_RADIUS}
                         <li class="{if $_system_menu eq 'pages'}active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-document"></i> <span>{Lang::T("Static Pages")}</span>

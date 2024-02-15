@@ -393,5 +393,16 @@
     "Active Users": "Active Users",
     "All Users Insights": "All Users Insights",
     "Radius": "Radius",
-    "Radius NAS": "Radius NAS"
+    "Radius NAS": "Radius NAS",
+    "Profile": "Profile",
+    "Credentials": "Credentials",
+    "Phone": "Phone",
+    "City": "City",
+    "Sub District": "Sub District",
+    "Ward": "Ward",
+    "Send Notification": "Send Notification",
+    "Add User": "Add User",
+    "Username should be between 3 to 45 characters": "Username should be between 3 to 45 characters",
+    "Password should be minimum 6 characters": "Password should be minimum 6 characters",
+    "Login": "Login"
 }

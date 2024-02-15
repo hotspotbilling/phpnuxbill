@@ -76,7 +76,7 @@ switch ($action) {
         $folders = [];
         $files = scandir('system/lan/');
         foreach ($files as $file) {
-            if (is_file('system/lan/' . $file) && !in_array($file, ['index.html', 'country.json','.DS_Store'])) {
+            if (is_file('system/lan/' . $file) && !in_array($file, ['index.html', 'country.json', '.DS_Store'])) {
                 $file = str_replace(".json", "", $file);
                 $folders[$file] = '';
             }
@@ -84,7 +84,7 @@ switch ($action) {
         $ui->assign('lani', $folders);
         $lans = Lang::getIsoLang();
         foreach ($lans as $lan => $val) {
-            if(isset($folders[$lan])){
+            if (isset($folders[$lan])) {
                 unset($lans[$lan]);
             }
         }
@@ -97,19 +97,56 @@ switch ($action) {
         break;
 
     case 'users':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
-
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/users.js"></script>');
-
         $username = _post('username');
         if ($username != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $username . '%'], $username);
-            $d = ORM::for_table('tbl_users')->where_like('username', '%' . $username . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $username . '%'], $username);
+                $d = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $username . '%')
+                    ->offset($paginator['startpoint'])
+                    ->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            } else if ($admin['user_type'] == 'Admin') {
+                $paginator = Paginator::build(ORM::for_table('tbl_users'), [
+                    'username' => '%' . $username . '%',
+                    ['user_type' => 'Report'],
+                    ['user_type' => 'Agent'],
+                    ['user_type' => 'Sales']
+                ], $username);
+                $d = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $username . '%')
+                    ->where_any_is([
+                        ['user_type' => 'Report'],
+                        ['user_type' => 'Agent'],
+                        ['user_type' => 'Sales']
+                    ])
+                    ->offset($paginator['startpoint'])
+                    ->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            } else {
+                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $username . '%'], $username);
+                $d = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $username . '%')
+                    ->where('root', $admin['id'])
+                    ->offset($paginator['startpoint'])
+                    ->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            }
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_users'));
-            $d = ORM::for_table('tbl_users')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $paginator = Paginator::build(ORM::for_table('tbl_users'));
+                $d = ORM::for_table('tbl_users')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            } else if ($admin['user_type'] == 'Admin') {
+                $paginator = Paginator::build(ORM::for_table('tbl_users'));
+                $d = ORM::for_table('tbl_users')->where_any_is([
+                    ['user_type' => 'Report'],
+                    ['user_type' => 'Agent'],
+                    ['user_type' => 'Sales']
+                ])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            } else {
+                $paginator = Paginator::build(ORM::for_table('tbl_users'));
+                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+            }
         }
 
         $ui->assign('d', $d);
@@ -119,21 +156,36 @@ switch ($action) {
         break;
 
     case 'users-add':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
-        run_hook('view_add_admin'); #HOOK
+        $ui->assign('_title', Lang::T('Add User'));
         $ui->display('users-add.tpl');
         break;
 
     case 'users-edit':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
-
+        $ui->assign('_title', Lang::T('Edit User'));
         $id  = $routes['2'];
-        $d = ORM::for_table('tbl_users')->find_one($id);
+        if ($admin['id'] == $id) {
+            $d = ORM::for_table('tbl_users')->find_one($id);
+        } else {
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $d = ORM::for_table('tbl_users')->find_one($id);
+            } else if ($admin['user_type'] == 'Admin') {
+                $d = ORM::for_table('tbl_users')->where_any_is([
+                    ['user_type' => 'Report'],
+                    ['user_type' => 'Agent'],
+                    ['user_type' => 'Sales']
+                ])->find_one($id);
+            } else {
+                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);
+            }
+        }
         if ($d) {
+            $ui->assign('id', $id);
             $ui->assign('d', $d);
             run_hook('view_edit_admin'); #HOOK
             $ui->display('users-edit.tpl');
@@ -165,20 +217,22 @@ switch ($action) {
         $username = _post('username');
         $fullname = _post('fullname');
         $password = _post('password');
-        $cpassword = _post('cpassword');
         $user_type = _post('user_type');
+        $phone = _post('phone');
+        $email = _post('email');
+        $city = _post('city');
+        $subdistrict = _post('subdistrict');
+        $ward = _post('ward');
+        $send_notif = _post('send_notif');
         $msg = '';
-        if (Validator::Length($username, 16, 2) == false) {
-            $msg .= 'Username should be between 3 to 15 characters' . '<br>';
+        if (Validator::Length($username, 45, 2) == false) {
+            $msg .= Lang::T('Username should be between 3 to 45 characters') . '<br>';
         }
-        if (Validator::Length($fullname, 26, 2) == false) {
-            $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
+        if (Validator::Length($fullname, 45, 2) == false) {
+            $msg .= Lang::T('Full Name should be between 3 to 45 characters') . '<br>';
         }
-        if (!Validator::Length($password, 15, 5)) {
-            $msg .= 'Password should be between 6 to 15 characters' . '<br>';
-        }
-        if ($password != $cpassword) {
-            $msg .= 'Passwords does not match' . '<br>';
+        if (!Validator::Length($password, 1000, 5)) {
+            $msg .= Lang::T('Password should be minimum 6 characters') . '<br>';
         }
 
         $d = ORM::for_table('tbl_users')->where('username', $username)->find_one();
@@ -194,12 +248,22 @@ switch ($action) {
             $d->fullname = $fullname;
             $d->password = $password;
             $d->user_type = $user_type;
+            $d->phone = $phone;
+            $d->email = $email;
+            $d->city = $city;
+            $d->subdistrict = $subdistrict;
+            $d->ward = $ward;
             $d->status = 'Active';
             $d->creationdate = $date_now;
-
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . Lang::T('Account Created Successfully'), $admin['user_type'], $admin['id']);
+            if ($send_notif == 'wa') {
+                Message::sendWhatsapp(Lang::phoneFormat($phone), Lang::T('Hello, Your account has been created successfully.') . "\nUsername: $username\nPassword: $password\n\n" . $config['CompanyName']);
+            } else if ($send_notif == 'sms') {
+                Message::sendSMS($phone, Lang::T('Hello, Your account has been created successfully.') . "\nUsername: $username\nPassword: $password\n\n" . $config['CompanyName']);
+            }
+
+            _log('[' . $admin['username'] . ']: ' . "Created $user_type <b>$username</b>", $admin['user_type'], $admin['id']);
             r2(U . 'settings/users', 's', Lang::T('Account Created Successfully'));
         } else {
             r2(U . 'settings/users-add', 'e', $msg);
@@ -211,34 +275,53 @@ switch ($action) {
         $fullname = _post('fullname');
         $password = _post('password');
         $cpassword = _post('cpassword');
-
+        $user_type = _post('user_type');
+        $phone = _post('phone');
+        $email = _post('email');
+        $city = _post('city');
+        $subdistrict = _post('subdistrict');
+        $ward = _post('ward');
+        $status = _post('status');
         $msg = '';
-        if (Validator::Length($username, 16, 2) == false) {
-            $msg .= 'Username should be between 3 to 15 characters' . '<br>';
+        if (Validator::Length($username, 45, 2) == false) {
+            $msg .= Lang::T('Username should be between 3 to 45 characters') . '<br>';
         }
-        if (Validator::Length($fullname, 26, 2) == false) {
-            $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
+        if (Validator::Length($fullname, 45, 2) == false) {
+            $msg .= Lang::T('Full Name should be between 3 to 45 characters') . '<br>';
         }
         if ($password != '') {
-            if (!Validator::Length($password, 15, 5)) {
-                $msg .= 'Password should be between 6 to 15 characters' . '<br>';
+            if (!Validator::Length($password, 1000, 5)) {
+                $msg .= Lang::T('Password should be minimum 6 characters') . '<br>';
             }
             if ($password != $cpassword) {
-                $msg .= 'Passwords does not match' . '<br>';
+                $msg .= Lang::T('Passwords does not match') . '<br>';
             }
         }
 
         $id = _post('id');
-        $d = ORM::for_table('tbl_users')->find_one($id);
-        if ($d) {
+        if ($admin['id'] == $id) {
+            $d = ORM::for_table('tbl_users')->find_one($id);
         } else {
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $d = ORM::for_table('tbl_users')->find_one($id);
+            } else if ($admin['user_type'] == 'Admin') {
+                $d = ORM::for_table('tbl_users')->where_any_is([
+                    ['user_type' => 'Report'],
+                    ['user_type' => 'Agent'],
+                    ['user_type' => 'Sales']
+                ])->find_one($id);
+            } else {
+                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);
+            }
+        }
+        if (!$d) {
             $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         if ($d['username'] != $username) {
             $c = ORM::for_table('tbl_users')->where('username', $username)->find_one();
             if ($c) {
-                $msg .= Lang::T('Account already axist') . '<br>';
+                $msg .= "<b>$username</b> ".Lang::T('Account already axist') . '<br>';
             }
         }
         run_hook('edit_admin'); #HOOK
@@ -254,10 +337,16 @@ switch ($action) {
                 $user_type = _post('user_type');
                 $d->user_type = $user_type;
             }
+            $d->phone = $phone;
+            $d->email = $email;
+            $d->city = $city;
+            $d->subdistrict = $subdistrict;
+            $d->ward = $ward;
+            $d->status = $status;
 
             $d->save();
 
-            _log('[' . $admin['username'] . ']: ' . Lang::T('User Updated Successfully'), $admin['user_type'], $admin['id']);
+            _log('[' . $admin['username'] . ']: $username ' . Lang::T('User Updated Successfully'), $admin['user_type'], $admin['id']);
             r2(U . 'settings/users', 's', 'User Updated Successfully');
         } else {
             r2(U . 'settings/users-edit/' . $id, 'e', $msg);
@@ -308,9 +397,9 @@ switch ($action) {
             }
 
             //checkbox
-            $checks = ['hide_mrc','hide_tms','hide_aui','hide_al','hide_uet','hide_vs','hide_pg'];
+            $checks = ['hide_mrc', 'hide_tms', 'hide_aui', 'hide_al', 'hide_uet', 'hide_vs', 'hide_pg'];
             foreach ($checks as $check) {
-                if(!isset($_POST[$check])){
+                if (!isset($_POST[$check])) {
                     $d = ORM::for_table('tbl_appconfig')->where('setting', $check)->find_one();
                     if ($d) {
                         $d->value = 'no';
@@ -553,7 +642,7 @@ switch ($action) {
         run_hook('view_add_language'); #HOOK
         if (file_exists($lan_file)) {
             $ui->assign('langs', json_decode(file_get_contents($lan_file), true));
-        }else{
+        } else {
             $ui->assign('langs', []);
         }
         $ui->display('language-add.tpl');
