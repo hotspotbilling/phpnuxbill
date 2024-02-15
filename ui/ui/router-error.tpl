@@ -35,24 +35,19 @@
 
         <section class="content">
             <div class="row">
-                <div class="col-md-3">
-                    <img src="./ui/ui/images/error.png" class="img-responsive hidden-sm hidden-xs">
-                </div>
-                <div class="col-md-9">
+                <div class="col-md-10 col-md-offset-1">
                     <div class="box box-danger box-solid">
-
                         <section class="content-header">
                             <h1 class="text-center">
                                 {$error_title}
                             </h1>
                         </section>
-                        <div class="box-title" style="font-size:xx-large; color:red">
-                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        </div>
                         <div class="box-body" style="font-size: larger;">
-                            <br><br>
+                            <center>
+                            <img src="./ui/ui/images/error.png" class="img-responsive hidden-sm hidden-xs"></center>
+                            <br>
                             {$error_message}
-                            <br><br><br>
+                            <br>
                         </div>
                         <div class="box-footer">
                             <div class="btn-group btn-group-justified" role="group" aria-label="...">

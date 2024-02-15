@@ -385,5 +385,7 @@
     "All Users Insights": "Semua Wawasan Pengguna",
     "Disable Registration": "Nonaktifkan Pendaftaran",
     "Customer just Login with Phone number and Voucher Code, Voucher will be password": "Pelanggan cukup Login dengan Nomor Telepon dan Kode Voucher, Voucher akan menjadi kata sandi",
-    "After Customer activate voucher or login, customer will be redirected to this url": "Setelah Pelanggan mengaktifkan voucher atau login, Pelanggan akan diarahkan ke url ini"
+    "After Customer activate voucher or login, customer will be redirected to this url": "Setelah Pelanggan mengaktifkan voucher atau login, Pelanggan akan diarahkan ke url ini",
+    "Radius": "Radius",
+    "Radius NAS": "Radius NAS"
 }
