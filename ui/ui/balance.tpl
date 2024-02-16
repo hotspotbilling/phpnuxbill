@@ -39,7 +39,7 @@
                                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                                     <td>
                                                         <a href="{$_url}services/balance-edit/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                                        <a href="{$_url}services/balance-delete/{$ds['id']}" onclick="return confirm('{Lang::T('Delete')}?')" id="{$ds['id']}" class="btn btn-danger btn-xs">{Lang::T('Delete')}</a>
+                                                        <a href="{$_url}services/balance-delete/{$ds['id']}" onclick="return confirm('{Lang::T('Delete')}?')" id="{$ds['id']}" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                                     </td>
                                                 </tr>
                                             {/foreach}

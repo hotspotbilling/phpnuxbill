@@ -41,7 +41,7 @@
                                                     <td>{$ds['rate_up']} {$ds['rate_up_unit']}</td>
                                                     <td>
                                                         <a href="{$_url}bandwidth/edit/{$ds['id']}" class="btn btn-sm btn-warning">{Lang::T('Edit')}</a>
-                                                        <a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm" onclick="return confirm('{Lang::T('Delete')}?')" >{Lang::T('Delete')}</a>
+                                                        <a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm" onclick="return confirm('{Lang::T('Delete')}?')" ><i class="glyphicon glyphicon-trash"></i></a>
                                                     </td>
                                                 </tr>
                                             {/foreach}

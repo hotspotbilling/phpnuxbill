@@ -71,7 +71,7 @@
                                     <td>
                                         <a href="{$_url}prepaid/voucher-delete/{$ds['id']}" id="{$ds['id']}"
                                             class="btn btn-danger btn-xs"
-                                            onclick="return confirm('{Lang::T('Delete')}?')">{Lang::T('Delete')}</a>
+                                            onclick="return confirm('{Lang::T('Delete')}?')"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
                                 </tr>
                             {/foreach}

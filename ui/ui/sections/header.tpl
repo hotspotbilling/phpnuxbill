@@ -260,23 +260,29 @@
                             </ul>
                         </li>
                         {$_MENU_AFTER_PAGES}
-                        <li
-                            class="{if $_system_menu eq 'settings' || $_system_menu eq 'paymentgateway' }active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-gear-a"></i> <span>{Lang::T('Settings')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
+                    {/if}
+                    <li
+                        class="{if $_system_menu eq 'settings' || $_system_menu eq 'paymentgateway' }active{/if} treeview">
+                        <a href="#">
+                            <i class="ion ion-gear-a"></i> <span>{Lang::T('Settings')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                                 <li {if $_routes[1] eq 'app'}class="active" {/if}><a
                                         href="{$_url}settings/app">{Lang::T('General Settings')}</a></li>
                                 <li {if $_routes[1] eq 'localisation'}class="active" {/if}><a
                                         href="{$_url}settings/localisation">{Lang::T('Localisation')}</a></li>
                                 <li {if $_routes[1] eq 'notifications'}class="active" {/if}><a
                                         href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
+                            {/if}
+                            {if in_array($_admin['user_type'],['SuperAdmin','Admin','Agent'])}
                                 <li {if $_routes[1] eq 'users'}class="active" {/if}><a
                                         href="{$_url}settings/users">{Lang::T('Administrator Users')}</a></li>
+                            {/if}
+                            {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                                 <li {if $_routes[1] eq 'dbstatus'}class="active" {/if}><a
                                         href="{$_url}settings/dbstatus">{Lang::T('Backup/Restore')}</a></li>
                                 <li {if $_system_menu eq 'paymentgateway'}class="active" {/if}>
@@ -290,11 +296,13 @@
                                         {Lang::T('Plugin Manager')} <small class="label pull-right">Free</small></a>
                                 </li>
                                 {* <li {if $_routes[0] eq 'codecanyon'}class="active" {/if}>
-                                    <a href="{$_url}codecanyon"><i class="glyphicon glyphicon-shopping-cart"></i>
-                                        Codecanyon.net <small class="label pull-right">Paid</small></a>
-                                </li> *}
-                            </ul>
-                        </li>
+                                <a href="{$_url}codecanyon"><i class="glyphicon glyphicon-shopping-cart"></i>
+                                    Codecanyon.net <small class="label pull-right">Paid</small></a>
+                            </li> *}
+                            {/if}
+                        </ul>
+                    </li>
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         {$_MENU_AFTER_SETTINGS}
                         <li class="{if $_system_menu eq 'logs' }active{/if} treeview">
                             <a href="#">
@@ -313,14 +321,14 @@
                             </ul>
                             {$_MENU_LOGS}
                         </li>
-                        {$_MENU_AFTER_LOGS}
-                        <li {if $_system_menu eq 'community'}class="active" {/if}>
-                            <a href="{$_url}community">
-                                <i class="ion ion-chatboxes"></i>
-                                <span class="text">{Lang::T('Community')}</span>
-                            </a>
-                        </li>
                     {/if}
+                    {$_MENU_AFTER_LOGS}
+                    <li {if $_system_menu eq 'community'}class="active" {/if}>
+                        <a href="{$_url}community">
+                            <i class="ion ion-chatboxes"></i>
+                            <span class="text">{Lang::T('Community')}</span>
+                        </a>
+                    </li>
                 </ul>
             </section>
         </aside>

@@ -57,7 +57,7 @@
                                         <a href="{$_url}radius/nas-edit/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         <a href="{$_url}radius/nas-delete/{$ds['id']}" id="{$ds['id']}"
                                             onclick="return confirm('{Lang::T('Delete')}?')"
-                                            class="btn btn-danger btn-xs">{Lang::T('Delete')}</a>
+                                            class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
                                 </tr>
                             {/foreach}

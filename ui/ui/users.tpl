@@ -54,10 +54,10 @@
                                     <td>{Lang::dateTimeFormat($ds['last_login'])}</td>
                                     <td>
                                         <a href="{$_url}settings/users-edit/{$ds['id']}"
-                                            class="btn btn-warning btn-xs">{Lang::T('Edit')}</a>
+                                            class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         {if ($_admin['username']) neq ($ds['username'])}
                                             <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
-                                                class="btn btn-danger btn-xs" onclick="return confirm('{Lang::T('Delete')}?')">{Lang::T('Delete')}</a>
+                                                class="btn btn-danger btn-xs" onclick="return confirm('{Lang::T('Delete')}?')"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}
                                     </td>
                                 </tr>
