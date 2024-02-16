@@ -55,7 +55,7 @@
                                     <td>
                                         <a href="{$_url}settings/users-edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                        {if ($_admin['username']) neq ($ds['username'])}
+                                        {if ($_admin['id']) neq ($ds['id'])}
                                             <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
                                                 class="btn btn-danger btn-xs" onclick="return confirm('{Lang::T('Delete')}?')"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}

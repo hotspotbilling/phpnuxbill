@@ -4,16 +4,19 @@
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
-                <div class="btn-group pull-right">
-                    <a class="btn btn-primary btn-xs" title="save" href="{$_url}prepaid/sync"
-                        onclick="return confirm('This will sync/send Caustomer active plan to Mikrotik?')"><span
-                            class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
-                </div>
-                <div class="btn-group pull-right">
-                    <a class="btn btn-info btn-xs" title="save" href="{$_url}customers/csv"
-                        onclick="return confirm('This will export to CSV?')"><span
-                            class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
-                </div>{Lang::T('Prepaid Users')}
+                {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                    <div class="btn-group pull-right">
+                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}prepaid/sync"
+                            onclick="return confirm('This will sync/send Caustomer active plan to Mikrotik?')"><span
+                                class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
+                    </div>
+                    <div class="btn-group pull-right">
+                        <a class="btn btn-info btn-xs" title="save" href="{$_url}customers/csv"
+                            onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                                aria-hidden="true"></span> CSV</a>
+                    </div>
+                {/if}
+                {Lang::T('Prepaid Users')}
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
@@ -63,9 +66,11 @@
                                     <td>
                                         <a href="{$_url}prepaid/edit/{$ds['id']}"
                                             class="btn btn-warning btn-xs">{Lang::T('Edit')}</a>
-                                        <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{Lang::T('Delete')}?')"
-                                            class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
+                                        {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                                            <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}"
+                                                onclick="return confirm('{Lang::T('Delete')}?')"
+                                                class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
+                                        {/if}
                                     </td>
                                 </tr>
                             {/foreach}

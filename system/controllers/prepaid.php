@@ -156,11 +156,16 @@ switch ($action) {
 
 
     case 'print':
-        $id = _post('id');
-        $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
-        $ui->assign('in', $d);
+        $content = $_POST['content'];
+        if(!empty($content)){
+            $ui->assign('content', $content);
+        }else{
+            $id = _post('id');
+            $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
+            $ui->assign('in', $d);
+            $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'], $d['recharged_time']));
+        }
 
-        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'], $d['recharged_time']));
         run_hook('print_invoice'); #HOOK
         $ui->display('invoice-print.tpl');
         break;
@@ -282,7 +287,29 @@ switch ($action) {
                 ->offset($paginator['startpoint'])
                 ->limit($paginator['limit'])->find_many();
         }
-
+        // extract admin
+        $admins = [];
+        foreach ($d as $k) {
+            if(!empty($k['generated_by'])){
+                $admins[] = $k['generated_by'];
+            }
+        }
+        if(count($admins) > 0){
+            $adms = ORM::for_table('tbl_users')->where_in('id', $admins)->find_many();
+            unset($admins);
+            foreach($adms as $adm){
+                $tipe = $adm['user_type'];
+                if($tipe == 'Sales'){
+                    $tipe = ' [S]';
+                }else if($tipe == 'Agent'){
+                    $tipe = ' [A]';
+                }else{
+                    $tipe == '';
+                }
+                $admins[$adm['id']] = $adm['fullname'].$tipe;
+            }
+        }
+        $ui->assign('admins', $admins);
         $ui->assign('d', $d);
         $ui->assign('_code', $code);
         $ui->assign('paginator', $paginator);
@@ -466,6 +493,9 @@ switch ($action) {
                 $d->generated_by = $admin['id'];
                 $d->save();
             }
+            if($numbervoucher == 1){
+                r2(U . 'prepaid/voucher-view/'.$d->id(), 's', Lang::T('Create Vouchers Successfully'));
+            }
 
             r2(U . 'prepaid/voucher', 's', Lang::T('Create Vouchers Successfully'));
         } else {
@@ -473,6 +503,47 @@ switch ($action) {
         }
         break;
 
+    case 'voucher-view':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            $voucher = ORM::for_table('tbl_voucher')->find_one($id);
+        }else{
+            $voucher = ORM::for_table('tbl_voucher')->where('generated_by', $admin['id'])->find_one($id);
+        }
+        $plan = ORM::for_table('tbl_plans')->find_one($d['id_plan']);
+        if ($voucher && $plan) {
+            $content = Lang::pad($config['CompanyName'],' ', 2)."\n";
+            $content .= Lang::pad($config['address'],' ', 2)."\n";
+            $content .= Lang::pad($config['phone'],' ', 2)."\n";
+            $content .= Lang::pad("", '=')."\n";
+            $content .= Lang::pads('ID', $voucher['id'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Code'), $voucher['code'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Plan Name'), $plan['name_plan'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Type'), $voucher['type'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($plan['price']), ' ')."\n";
+            $content .= Lang::pads(Lang::T('Sales'), $admin['fullname'].' #'.$admin['id'], ' ')."\n";
+            $content .= Lang::pad("", '=')."\n";
+            $content .= Lang::pad($config['note'],' ', 2)."\n";
+            $ui->assign('print', $content);
+            $config['printer_cols'] = 30;
+            $content = Lang::pad($config['CompanyName'],' ', 2)."\n";
+            $content .= Lang::pad($config['address'],' ', 2)."\n";
+            $content .= Lang::pad($config['phone'],' ', 2)."\n";
+            $content .= Lang::pad("", '=')."\n";
+            $content .= Lang::pads('ID', $voucher['id'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Code'), $voucher['code'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Plan Name'), $plan['name_plan'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Type'), $voucher['type'], ' ')."\n";
+            $content .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($plan['price']), ' ')."\n";
+            $content .= Lang::pads(Lang::T('Sales'), $admin['fullname'].' #'.$admin['id'], ' ')."\n";
+            $content .= Lang::pad("", '=')."\n";
+            $content .= Lang::pad($config['note'],' ', 2)."\n";
+            $ui->assign('_title', Lang::T('View'));
+            $ui->assign('wa', urlencode("```$content```"));
+            $ui->display('voucher-view.tpl');
+        }else{
+            r2(U . 'prepaid/voucher/', 'e', Lang::T('Voucher Not Found'));
+        }
+        break;
     case 'voucher-delete':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));

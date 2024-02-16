@@ -129,6 +129,7 @@ switch ($action) {
                 $d = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $username . '%')
                     ->where('root', $admin['id'])
+                    ->where('id', $admin['id'])
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->find_many();
             }
@@ -145,7 +146,12 @@ switch ($action) {
                 ])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
             } else {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'));
-                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+                $d = ORM::for_table('tbl_users')
+                    ->where_any_is([
+                        ['id' => $admin['id']],
+                        ['root' => $admin['id']]
+                    ])
+                    ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
             }
         }
 
@@ -255,7 +261,7 @@ switch ($action) {
             $d->ward = $ward;
             $d->status = 'Active';
             $d->creationdate = $date_now;
-            if($admin['user_type']=='Agent'){
+            if ($admin['user_type'] == 'Agent') {
                 $d->root = $admin['id'];
             }
             $d->save();
@@ -324,7 +330,7 @@ switch ($action) {
         if ($d['username'] != $username) {
             $c = ORM::for_table('tbl_users')->where('username', $username)->find_one();
             if ($c) {
-                $msg .= "<b>$username</b> ".Lang::T('Account already axist') . '<br>';
+                $msg .= "<b>$username</b> " . Lang::T('Account already axist') . '<br>';
             }
         }
         run_hook('edit_admin'); #HOOK

@@ -21,6 +21,7 @@
             <table width="200">
                 <tr>
                     <td>
+                    {if $content}<pre style="border-style: none; background-color: white;">{$content}</pre>{else}
 <pre style="border-style: none; background-color: white;"><b>{Lang::pad($_c['CompanyName'],' ', 2)}</b>
 {Lang::pad($_c['address'],' ', 2)}
 {Lang::pad($_c['phone'],' ', 2)}
@@ -42,6 +43,7 @@
 {/if}
 {Lang::pad("", '=')}
 {Lang::pad($_c['note'],' ', 2)}</pre>
+{/if}
                     </td>
                 </tr>
             </table>

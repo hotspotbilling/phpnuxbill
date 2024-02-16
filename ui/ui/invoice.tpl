@@ -5,7 +5,9 @@
         <div class="panel panel-hovered panel-primary panel-stacked mb30">
             <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
-<pre><b>{Lang::pad($_c['CompanyName'],' ', 2)}</b>
+<form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
+<pre id="content"></pre>
+<textarea class="hidden" id="formcontent" name="content">{Lang::pad($_c['CompanyName'],' ', 2)}
 {Lang::pad($_c['address'],' ', 2)}
 {Lang::pad($_c['phone'],' ', 2)}
 {Lang::pad("", '=')}
@@ -25,8 +27,7 @@
 {Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'],$in['time']), ' ')}
 {/if}
 {Lang::pad("", '=')}
-{Lang::pad($_c['note'],' ', 2)}</pre>
-<form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
+{Lang::pad($_c['note'],' ', 2)}</textarea>
     <input type="hidden" name="id" value="{$in['id']}">
     <a href="{$_url}prepaid/list" class="btn btn-primary btn-sm"><i
             class="ion-reply-all"></i>{Lang::T('Finish')}</a>
@@ -35,19 +36,12 @@
     <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-print"></i>
         {Lang::T('Click Here to Print')}</button>
 </form>
-
             </div>
         </div>
     </div>
 </div>
 <script type="text/javascript">
     var s5_taf_parent = window.location;
-
-    function popup_print() {
-        window.open('print.php?page=<?php echo $_GET['
-            act '];?>', 'page',
-            'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=0,width=800,height=600,left=50,top=50,titlebar=yes'
-            )
-    }
+    document.getElementById('content').innerHTML = document.getElementById('formcontent').innerHTML;
 </script>
 {include file="sections/footer.tpl"}
