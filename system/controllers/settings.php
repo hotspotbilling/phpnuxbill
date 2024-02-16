@@ -255,6 +255,9 @@ switch ($action) {
             $d->ward = $ward;
             $d->status = 'Active';
             $d->creationdate = $date_now;
+            if($admin['user_type']=='Agent'){
+                $d->root = $admin['id'];
+            }
             $d->save();
 
             if ($send_notif == 'wa') {
