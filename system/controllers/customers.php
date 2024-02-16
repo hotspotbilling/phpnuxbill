@@ -14,10 +14,6 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 
-if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
-}
-
 switch ($action) {
     case 'list':
         $search = _post('search');
@@ -49,6 +45,9 @@ switch ($action) {
         break;
 
     case 'csv':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $cs = ORM::for_table('tbl_customers')
             ->select('tbl_customers.id', 'id')
             ->select('tbl_customers.username', 'username')
@@ -100,6 +99,9 @@ switch ($action) {
         }
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
     case 'deactivate':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
         if ($b) {
@@ -209,6 +211,9 @@ switch ($action) {
         break;
 
     case 'delete':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $id  = $routes['2'];
         run_hook('delete_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
@@ -290,6 +295,7 @@ switch ($action) {
             $d->email = $email;
             $d->fullname = $fullname;
             $d->address = $address;
+            $d->created_by = $admin['id'];
             $d->phonenumber = Lang::phoneFormat($phonenumber);
             $d->service_type = $service_type;
             $d->save();

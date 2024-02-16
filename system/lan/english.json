@@ -404,5 +404,9 @@
     "Add User": "Add User",
     "Username should be between 3 to 45 characters": "Username should be between 3 to 45 characters",
     "Password should be minimum 6 characters": "Password should be minimum 6 characters",
-    "Login": "Login"
+    "Login": "Login",
+    "SuperAdmin": "SuperAdmin",
+    "Admin": "Admin",
+    "Report": "Report",
+    "Agent": "Agent"
 }

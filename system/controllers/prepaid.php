@@ -13,10 +13,6 @@ $action = $routes['1'];
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Sales'])) {
-    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
-}
-
 $select2_customer = <<<EOT
 <script>
 document.addEventListener("DOMContentLoaded", function(event) {
@@ -38,6 +34,9 @@ EOT;
 
 switch ($action) {
     case 'sync':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         set_time_limit(-1);
         $plans = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
         $log = '';
@@ -167,6 +166,9 @@ switch ($action) {
         break;
 
     case 'edit':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $id  = $routes['2'];
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
@@ -182,6 +184,9 @@ switch ($action) {
         break;
 
     case 'delete':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $id  = $routes['2'];
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
@@ -208,6 +213,9 @@ switch ($action) {
         break;
 
     case 'edit-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $username = _post('username');
         $id_plan = _post('id_plan');
         $recharged_on = _post('recharged_on');
@@ -295,6 +303,9 @@ switch ($action) {
         break;
 
     case 'remove-voucher':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $d = ORM::for_table('tbl_voucher')->where_equal('status', '1')->findMany();
         if ($d) {
             $jml = 0;
@@ -463,6 +474,9 @@ switch ($action) {
         break;
 
     case 'voucher-delete':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        }
         $id  = $routes['2'];
         run_hook('delete_voucher'); #HOOK
         $d = ORM::for_table('tbl_voucher')->find_one($id);

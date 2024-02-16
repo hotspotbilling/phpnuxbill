@@ -13,10 +13,6 @@ $action = $routes['1'];
 $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Sales'])) {
-    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
-}
-
 $mdate = date('Y-m-d');
 $mtime = date('H:i:s');
 $tdate = date('Y-m-d', strtotime('today - 30 days'));

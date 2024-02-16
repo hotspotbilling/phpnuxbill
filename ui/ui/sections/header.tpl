@@ -67,7 +67,6 @@
                     <span class="sr-only">Toggle navigation</span>
                 </a>
                 <div class="navbar-custom-menu">
-
                     <ul class="nav navbar-nav">
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -81,12 +80,9 @@
                                     <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"
                                         onerror="this.src='system/uploads/admin.default.png'" class="img-circle"
                                         alt="Avatar">
-
                                     <p>
                                         {$_admin['fullname']}
-                                        <small>{if $_admin['user_type'] eq 'SuperAdmin'} {Lang::T('Administrator')}
-                                            {else}
-                                            {Lang::T('Sales')} {/if}</small>
+                                        <small>{Lang::T($_admin['user_type'])}</small>
                                     </p>
                                 </li>
                                 <li class="user-body">
@@ -113,7 +109,6 @@
                 </div>
             </nav>
         </header>
-
         <aside class="main-sidebar">
             <section class="sidebar">
                 <ul class="sidebar-menu" data-widget="tree">
@@ -124,7 +119,7 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
-                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                    {if !in_array($_admin['user_type'],['Report'])}
                         <li class="{if $_system_menu eq 'customers'}active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-android-contacts"></i> <span>{Lang::T('Customer')}</span>
@@ -164,6 +159,8 @@
                                 {$_MENU_PREPAID}
                             </ul>
                         </li>
+                    {/if}
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         {$_MENU_AFTER_PREPAID}
                         <li class="{if $_system_menu eq 'services'}active{/if} treeview">
                             <a href="#">
@@ -185,25 +182,25 @@
                             </ul>
                         </li>
                         {$_MENU_AFTER_SERVICES}
-                        <li class="{if $_system_menu eq 'reports'}active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'daily-report'}class="active" {/if}><a
-                                        href="{$_url}reports/daily-report">{Lang::T('Daily Reports')}</a></li>
-                                <li {if $_routes[1] eq 'by-period'}class="active" {/if}><a
-                                        href="{$_url}reports/by-period">{Lang::T('Period Reports')}</a></li>
-                                <li {if $_routes[1] eq 'activation'}class="active" {/if}><a
-                                        href="{$_url}reports/activation">{Lang::T('Activation History')}</a></li>
-                                {$_MENU_REPORTS}
-                            </ul>
-                        </li>
-                        {$_MENU_AFTER_REPORTS}
                     {/if}
+                    <li class="{if $_system_menu eq 'reports'}active{/if} treeview">
+                        <a href="#">
+                            <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[1] eq 'daily-report'}class="active" {/if}><a
+                                    href="{$_url}reports/daily-report">{Lang::T('Daily Reports')}</a></li>
+                            <li {if $_routes[1] eq 'by-period'}class="active" {/if}><a
+                                    href="{$_url}reports/by-period">{Lang::T('Period Reports')}</a></li>
+                            <li {if $_routes[1] eq 'activation'}class="active" {/if}><a
+                                    href="{$_url}reports/activation">{Lang::T('Activation History')}</a></li>
+                            {$_MENU_REPORTS}
+                        </ul>
+                    </li>
+                    {$_MENU_AFTER_REPORTS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li class="{if $_system_menu eq 'network'}active{/if} treeview">
                             <a href="#">
