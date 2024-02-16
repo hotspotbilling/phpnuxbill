@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
     <link rel="stylesheet" href="ui/ui/styles/select2.min.css" />
     <link rel="stylesheet" href="ui/ui/styles/select2-bootstrap.min.css" />
+    <link rel="stylesheet" href="ui/ui/styles/sweetalert2.min.css" />
+    <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
     <style>
         ::-moz-selection {
             /* Code for Firefox */
@@ -332,10 +334,20 @@
 
             <section class="content">
                 {if isset($notify)}
-                    <div class="alert alert-{if $notify_t == 's'}success{else}danger{/if}">
-                        <button type="button" class="close" data-dismiss="alert">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                        <div>{$notify}</div>
-                    </div>
-{/if}
+                <script>
+                    // Display SweetAlert toast notification
+                    Swal.fire({
+                        icon: '{if $notify_t == "s"}success{else}error{/if}',
+                        title: '{$notify}',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                </script>
+                {/if}
