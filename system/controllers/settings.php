@@ -100,23 +100,23 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
-        $username = _post('username');
-        if ($username != '') {
+        $search = _req('search');
+        if ($search != '') {
             if ($admin['user_type'] == 'SuperAdmin') {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $username . '%'], $username);
+                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $search . '%'], $search);
                 $d = ORM::for_table('tbl_users')
-                    ->where_like('username', '%' . $username . '%')
+                    ->where_like('username', '%' . $search . '%')
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->find_many();
             } else if ($admin['user_type'] == 'Admin') {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'), [
-                    'username' => '%' . $username . '%',
+                    'username' => '%' . $search . '%',
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
                     ['user_type' => 'Sales']
-                ], $username);
+                ], $search);
                 $d = ORM::for_table('tbl_users')
-                    ->where_like('username', '%' . $username . '%')
+                    ->where_like('username', '%' . $search . '%')
                     ->where_any_is([
                         ['user_type' => 'Report'],
                         ['user_type' => 'Agent'],
@@ -125,11 +125,13 @@ switch ($action) {
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->find_many();
             } else {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $username . '%'], $username);
+                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $search . '%'], $search);
                 $d = ORM::for_table('tbl_users')
-                    ->where_like('username', '%' . $username . '%')
-                    ->where('root', $admin['id'])
-                    ->where('id', $admin['id'])
+                    ->where_like('username', '%' . $search . '%')
+                    ->where_any_is([
+                        ['id' => $admin['id']],
+                        ['root' => $admin['id']]
+                    ])
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->find_many();
             }
@@ -154,8 +156,23 @@ switch ($action) {
                     ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
             }
         }
+        $admins = [];
+        foreach ($d as $k) {
+            if(!empty($k['root'])){
+                $admins[] = $k['root'];
+            }
+        }
+        if(count($admins) > 0){
+            $adms = ORM::for_table('tbl_users')->where_in('id', $admins)->find_many();
+            unset($admins);
+            foreach($adms as $adm){
+                $admins[$adm['id']] = $adm['fullname'];
+            }
+        }
+        $ui->assign('admins', $admins);
 
         $ui->assign('d', $d);
+        $ui->assign('search', $search);
         $ui->assign('paginator', $paginator);
         run_hook('view_list_admin'); #HOOK
         $ui->display('users.tpl');

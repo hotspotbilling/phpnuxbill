@@ -72,6 +72,16 @@ function _get($param, $defvalue = '')
         return safedata($_GET[$param]);
     }
 }
+
+function _req($param, $defvalue = '')
+{
+    if (!isset($_REQUEST[$param])) {
+        return $defvalue;
+    } else {
+        return safedata($_REQUEST[$param]);
+    }
+}
+
 try {
 
     require_once File::pathFixer('system/orm.php');

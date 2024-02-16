@@ -13,7 +13,7 @@
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
                                 </div>
-                                <input type="text" name="username" class="form-control"
+                                <input type="text" name="search" value="{$search}" class="form-control"
                                     placeholder="Search by Username...">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
@@ -37,6 +37,7 @@
                                 <th>{Lang::T('Email')}</th>
                                 <th>{Lang::T('Type')}</th>
                                 <th>{Lang::T('Location')}</th>
+                                <th>{Lang::T('Agent')}</th>
                                 <th>{Lang::T('Last Login')}</th>
                                 <th>{Lang::T('Manage')}</th>
                             </tr>
@@ -51,6 +52,9 @@
                                     <td>{$ds['email']}</td>
                                     <td>{$ds['user_type']}</td>
                                     <td>{$ds['city']}, {$ds['subdistrict']}, {$ds['ward']}</td>
+                                <td>{if $ds['root']}
+                                    <a href="{$_url}settings/users-edit/{$ds['root']}">
+                            {$admins[$ds['root']]}</a>{/if}</td>
                                     <td>{Lang::dateTimeFormat($ds['last_login'])}</td>
                                     <td>
                                         <a href="{$_url}settings/users-edit/{$ds['id']}"
