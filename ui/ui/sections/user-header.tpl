@@ -12,7 +12,9 @@
     <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
-<link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
+    <link rel="stylesheet" href="ui/ui/styles/sweetalert2.min.css" />
+    <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
     
 
     <style>
@@ -165,11 +167,22 @@
             </section>
             <section class="content">
 
-{if isset($notify)}
-<div class="alert alert-{if $notify_t == 's'}success{else}danger{/if}">
-    <button type="button" class="close" data-dismiss="alert">
-    <span aria-hidden="true">×</span>
-    </button>
-    <div>{$notify}</div>
-</div>
-{/if}
+
+                {if isset($notify)}
+                <script>
+                    // Display SweetAlert toast notification
+                    Swal.fire({
+                        icon: '{if $notify_t == "s"}success{else}warning{/if}',
+                        title: '{$notify}',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                </script>
+                {/if}
