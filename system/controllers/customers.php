@@ -422,15 +422,39 @@ switch ($action) {
                     $customField->set('field_value', $customFieldValue);
                     $customField->save();
                 }
+            }
 
-                if (isset($_POST['delete_custom_fields'])) {
-                    $fieldsToDelete = $_POST['delete_custom_fields'];
-                    foreach ($fieldsToDelete as $fieldName) {
-                        // Delete the custom field with the given field name
-                        ORM::for_table('tbl_customers_custom_fields')
-                            ->where('field_name', $fieldName)
-                            ->delete_many();
+            // Add new custom fields
+            if (isset($_POST['custom_field_name']) && isset($_POST['custom_field_value'])) {
+                $newCustomFieldNames = $_POST['custom_field_name'];
+                $newCustomFieldValues = $_POST['custom_field_value'];
+
+                // Check if the number of field names and values match
+                if (count($newCustomFieldNames) == count($newCustomFieldValues)) {
+                    $numNewFields = count($newCustomFieldNames);
+
+                    for ($i = 0; $i < $numNewFields; $i++) {
+                        $fieldName = $newCustomFieldNames[$i];
+                        $fieldValue = $newCustomFieldValues[$i];
+
+                        // Insert the new custom field
+                        $newCustomField = ORM::for_table('tbl_customers_custom_fields')->create();
+                        $newCustomField->set('customer_id', $id);
+                        $newCustomField->set('field_name', $fieldName);
+                        $newCustomField->set('field_value', $fieldValue);
+                        $newCustomField->save();
                     }
+                }
+            }
+
+            // Delete custom fields
+            if (isset($_POST['delete_custom_fields'])) {
+                $fieldsToDelete = $_POST['delete_custom_fields'];
+                foreach ($fieldsToDelete as $fieldName) {
+                    // Delete the custom field with the given field name
+                    ORM::for_table('tbl_customers_custom_fields')
+                        ->where('field_name', $fieldName)
+                        ->delete_many();
                 }
             }
 

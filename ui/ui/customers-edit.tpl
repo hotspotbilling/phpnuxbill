@@ -102,7 +102,16 @@
                     </div>
                     {/foreach}
                     {/if}
-                    <!--custom field edit end-->
+                    <!--custom field edit end -->
+                    <!--custom field add start -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Custom Field')}</label>
+                        <div id="custom-fields-container" class="col-md-6">
+                            <button class="btn btn-success btn-sm waves-effect waves-light" type="button"
+                                id="add-custom-field">+</button>
+                        </div>
+                    </div>
+                    <!--custom field add end -->
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-primary waves-effect waves-light" type="submit">{Lang::T('Save
@@ -116,5 +125,41 @@
     </div>
 </div>
 </div>
+
+{literal}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        var customFieldsContainer = document.getElementById('custom-fields-container');
+        var addCustomFieldButton = document.getElementById('add-custom-field');
+
+        addCustomFieldButton.addEventListener('click', function () {
+            var fieldIndex = customFieldsContainer.children.length;
+            var newField = document.createElement('div');
+            newField.className = 'form-group';
+            newField.innerHTML = `
+                <label class="col-md-2 control-label">Name:</label>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="custom_field_name[]" placeholder="Name">
+                </div>
+                <label class="col-md-2 control-label">Value:</label>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="custom_field_value[]" placeholder="Value">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="remove-custom-field btn btn-danger btn-sm waves-effect waves-light">-</button>
+                </div>
+            `;
+            customFieldsContainer.appendChild(newField);
+        });
+
+        customFieldsContainer.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-custom-field')) {
+                var fieldContainer = event.target.parentNode.parentNode;
+                fieldContainer.parentNode.removeChild(fieldContainer);
+            }
+        });
+    });
+</script>
+{/literal}
 
 {include file="sections/footer.tpl"}
