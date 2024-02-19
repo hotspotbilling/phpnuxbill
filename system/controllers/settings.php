@@ -549,9 +549,6 @@ switch ($action) {
         break;
 
     case 'change-password':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
-        }
         run_hook('view_change_password'); #HOOK
         $ui->display('change-password.tpl');
         break;
