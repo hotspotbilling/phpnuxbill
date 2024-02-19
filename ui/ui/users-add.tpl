@@ -46,19 +46,29 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('User Type')}</label>
                         <div class="col-md-9">
-                            <select name="user_type" id="user_type" class="form-control">
+                            <select name="user_type" id="user_type" class="form-control" onchange="checkUserType(this)">
                                 {if $_admin['user_type'] eq 'Agent'}
-                                    <option value="Sales">Sales</option>
+                                    <option value="Sales">{Lang::T('Sales')}</option>
                                 {/if}
                                 {if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'SuperAdmin'}
-                                    <option value="Report">Report Viewer</option>
-                                    <option value="Agent">Agent</option>
-                                    <option value="Sales">Sales</option>
+                                    <option value="Report">{Lang::T('Report Viewer')}</option>
+                                    <option value="Agent">{Lang::T('Agent')}</option>
+                                    <option value="Sales">{Lang::T('Sales')}</option>
                                 {/if}
                                 {if $_admin['user_type'] eq 'SuperAdmin'}
-                                    <option value="Admin">Administrator</option>
-                                    <option value="SuperAdmin">Super Administrator</option>
+                                    <option value="Admin">{Lang::T('Administrator')}</option>
+                                    <option value="SuperAdmin">{Lang::T('Super Administrator')}</option>
                                 {/if}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group hidden" id="agentChooser">
+                        <label class="col-md-3 control-label">{Lang::T('Agent')}</label>
+                        <div class="col-md-9">
+                            <select name="root" id="root" class="form-control">
+                                {foreach $agents as $agent}
+                                    <option value="{$agent['id']}">{$agent['username']} | {$agent['fullname']} | {$agent['phone']}</option>
+                                {/foreach}
                             </select>
                         </div>
                     </div>
@@ -94,4 +104,16 @@
         Or <a href="{$_url}settings/users">{Lang::T('Cancel')}</a>
     </div>
 </form>
+{literal}
+    <script>
+        function checkUserType($field){
+            if($field.value=='Sales'){
+                $('#agentChooser').removeClass('hidden');
+            }else{
+                $('#agentChooser').addClass('hidden');
+            }
+        }
+</script>
+{/literal}
+
 {include file="sections/footer.tpl"}

@@ -87,6 +87,16 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group {if $d['user_type'] eq 'Sales'}hidden{/if}" id="agentChooser">
+                            <label class="col-md-3 control-label">{Lang::T('Agent')}</label>
+                            <div class="col-md-9">
+                                <select name="root" id="root" class="form-control">
+                                    {foreach $agents as $agent}
+                                        <option value="{$agent['id']}">{$agent['username']} | {$agent['fullname']} | {$agent['phone']}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
                     {/if}
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Username')}</label>
@@ -120,4 +130,15 @@
     </div>
 </form>
 
+{literal}
+    <script>
+        function checkUserType($field){
+            if($field.value=='Sales'){
+                $('#agentChooser').removeClass('hidden');
+            }else{
+                $('#agentChooser').addClass('hidden');
+            }
+        }
+</script>
+{/literal}
 {include file="sections/footer.tpl"}

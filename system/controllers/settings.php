@@ -170,7 +170,6 @@ switch ($action) {
             }
         }
         $ui->assign('admins', $admins);
-
         $ui->assign('d', $d);
         $ui->assign('search', $search);
         $ui->assign('paginator', $paginator);
@@ -183,6 +182,7 @@ switch ($action) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         $ui->assign('_title', Lang::T('Add User'));
+        $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
         $ui->display('users-add.tpl');
         break;
 
@@ -197,13 +197,17 @@ switch ($action) {
         } else {
             if ($admin['user_type'] == 'SuperAdmin') {
                 $d = ORM::for_table('tbl_users')->find_one($id);
+                $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
             } else if ($admin['user_type'] == 'Admin') {
                 $d = ORM::for_table('tbl_users')->where_any_is([
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
                     ['user_type' => 'Sales']
                 ])->find_one($id);
+                $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
             } else {
+                // Agent cannot move Sales to other Agent
+                $ui->assign('agents', ORM::for_table('tbl_users')->where('id', $admin['id'])->find_many());
                 $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);
             }
         }
@@ -247,6 +251,7 @@ switch ($action) {
         $subdistrict = _post('subdistrict');
         $ward = _post('ward');
         $send_notif = _post('send_notif');
+        $root = _post('root');
         $msg = '';
         if (Validator::Length($username, 45, 2) == false) {
             $msg .= Lang::T('Username should be between 3 to 45 characters') . '<br>';
@@ -279,7 +284,10 @@ switch ($action) {
             $d->status = 'Active';
             $d->creationdate = $date_now;
             if ($admin['user_type'] == 'Agent') {
+                // Prevent hacking from form
                 $d->root = $admin['id'];
+            }else if($user_type == 'Sales'){
+                $d->root = $root;
             }
             $d->save();
 
@@ -308,6 +316,7 @@ switch ($action) {
         $subdistrict = _post('subdistrict');
         $ward = _post('ward');
         $status = _post('status');
+        $root = _post('root');
         $msg = '';
         if (Validator::Length($username, 45, 2) == false) {
             $msg .= Lang::T('Username should be between 3 to 45 characters') . '<br>';
@@ -369,6 +378,13 @@ switch ($action) {
             $d->subdistrict = $subdistrict;
             $d->ward = $ward;
             $d->status = $status;
+
+            if ($admin['user_type'] == 'Agent') {
+                // Prevent hacking from form
+                $d->root = $admin['id'];
+            }else if($user_type == 'Sales'){
+                $d->root = $root;
+            }
 
             $d->save();
 
