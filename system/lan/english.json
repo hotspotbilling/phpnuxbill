@@ -412,5 +412,6 @@
     "Sub_District": "Sub District",
     "Ward": "Ward",
     "Credentials": "Credentials",
-    "Agent": "Agent"
+    "Agent": "Agent",
+    "This_Token_will_act_as_SuperAdmin_Admin": "This Token will act as SuperAdmin\/Admin"
 }

@@ -60,23 +60,28 @@ switch ($action) {
             }
             $log .= "DONE : $plan[username], $plan[namebp], $plan[type], $plan[routers]<br>";
         }
+        if ($isApi) {
+            showResult(true, $log);
+        }
         r2(U . 'prepaid/list', 's', $log);
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/prepaid.js"></script>');
         $ui->assign('_title', Lang::T('Customer'));
-        $username = _post('username');
-        if ($username != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'), ['username' => '%' . $username . '%'], $username);
-            $d = ORM::for_table('tbl_user_recharges')->where_like('username', '%' . $username . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+        $search = _post('search');
+        if ($search != '') {
+            $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'), ['username' => '%' . $search . '%'], $search);
+            $d = ORM::for_table('tbl_user_recharges')->where_like('username', '%' . $search . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         } else {
             $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'));
-            $d = ORM::for_table('tbl_user_recharges')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $d = ORM::for_table('tbl_user_recharges')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_array();
         }
-
-        $ui->assign('d', $d);
-        $ui->assign('cari', $username);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_billing'); #HOOK
+        if ($isApi) {
+            showResult(true, $action, $d, ['search' => $search]);
+        }
+        $ui->assign('d', $d);
+        $ui->assign('search', $search);
+        $ui->assign('paginator', $paginator);
         $ui->display('prepaid.tpl');
         break;
 
@@ -157,9 +162,9 @@ switch ($action) {
 
     case 'print':
         $content = $_POST['content'];
-        if(!empty($content)){
+        if (!empty($content)) {
             $ui->assign('content', $content);
-        }else{
+        } else {
             $id = _post('id');
             $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
             $ui->assign('in', $d);
@@ -246,18 +251,18 @@ switch ($action) {
             //$d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->time = $time;
-            if($d['status'] == 'off'){
-                if(strtotime($expiration.' '.$time) > time()){
+            if ($d['status'] == 'off') {
+                if (strtotime($expiration . ' ' . $time) > time()) {
                     $d->status = 'on';
                 }
             }
-            if($p['is_radius']){
+            if ($p['is_radius']) {
                 $d->routers = 'radius';
-            }else{
+            } else {
                 $d->routers = $p['routers'];
             }
             $d->save();
-            if($d['status'] == 'on'){
+            if ($d['status'] == 'on') {
                 Package::changeTo($username, $id_plan, $id);
             }
             _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . '][' . Lang::moneyFormat($p['price']) . ']', $admin['user_type'], $admin['id']);
@@ -290,23 +295,23 @@ switch ($action) {
         // extract admin
         $admins = [];
         foreach ($d as $k) {
-            if(!empty($k['generated_by'])){
+            if (!empty($k['generated_by'])) {
                 $admins[] = $k['generated_by'];
             }
         }
-        if(count($admins) > 0){
+        if (count($admins) > 0) {
             $adms = ORM::for_table('tbl_users')->where_in('id', $admins)->find_many();
             unset($admins);
-            foreach($adms as $adm){
+            foreach ($adms as $adm) {
                 $tipe = $adm['user_type'];
-                if($tipe == 'Sales'){
+                if ($tipe == 'Sales') {
                     $tipe = ' [S]';
-                }else if($tipe == 'Agent'){
+                } else if ($tipe == 'Agent') {
                     $tipe = ' [A]';
-                }else{
+                } else {
                     $tipe == '';
                 }
-                $admins[$adm['id']] = $adm['fullname'].$tipe;
+                $admins[$adm['id']] = $adm['fullname'] . $tipe;
             }
         }
         $ui->assign('admins', $admins);
@@ -337,12 +342,12 @@ switch ($action) {
         if ($d) {
             $jml = 0;
             foreach ($d as $v) {
-                if(!ORM::for_table('tbl_user_recharges')->where_equal("method",'Voucher - '.$v['code'])->findOne()){
+                if (!ORM::for_table('tbl_user_recharges')->where_equal("method", 'Voucher - ' . $v['code'])->findOne()) {
                     $v->delete();
                     $jml++;
                 }
             }
-            r2(U . 'prepaid/voucher', 's', "$jml ".Lang::T('Data Deleted Successfully'));
+            r2(U . 'prepaid/voucher', 's', "$jml " . Lang::T('Data Deleted Successfully'));
         }
     case 'print-voucher':
         $from_id = _post('from_id');
@@ -463,7 +468,7 @@ switch ($action) {
             $msg .= 'The Length Code must be a number' . '<br>';
         }
         if ($msg == '') {
-            if(!empty($prefix)){
+            if (!empty($prefix)) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_prefix')->find_one();
                 if ($d) {
                     $d->value = $prefix;
@@ -487,14 +492,14 @@ switch ($action) {
                 $d->type = $type;
                 $d->routers = $server;
                 $d->id_plan = $plan;
-                $d->code = $prefix.$code;
+                $d->code = $prefix . $code;
                 $d->user = '0';
                 $d->status = '0';
                 $d->generated_by = $admin['id'];
                 $d->save();
             }
-            if($numbervoucher == 1){
-                r2(U . 'prepaid/voucher-view/'.$d->id(), 's', Lang::T('Create Vouchers Successfully'));
+            if ($numbervoucher == 1) {
+                r2(U . 'prepaid/voucher-view/' . $d->id(), 's', Lang::T('Create Vouchers Successfully'));
             }
 
             r2(U . 'prepaid/voucher', 's', Lang::T('Create Vouchers Successfully'));
@@ -506,41 +511,41 @@ switch ($action) {
     case 'voucher-view':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             $voucher = ORM::for_table('tbl_voucher')->find_one($id);
-        }else{
+        } else {
             $voucher = ORM::for_table('tbl_voucher')->where('generated_by', $admin['id'])->find_one($id);
         }
         $plan = ORM::for_table('tbl_plans')->find_one($d['id_plan']);
         if ($voucher && $plan) {
-            $content = Lang::pad($config['CompanyName'],' ', 2)."\n";
-            $content .= Lang::pad($config['address'],' ', 2)."\n";
-            $content .= Lang::pad($config['phone'],' ', 2)."\n";
-            $content .= Lang::pad("", '=')."\n";
-            $content .= Lang::pads('ID', $voucher['id'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Code'), $voucher['code'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Plan Name'), $plan['name_plan'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Type'), $voucher['type'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($plan['price']), ' ')."\n";
-            $content .= Lang::pads(Lang::T('Sales'), $admin['fullname'].' #'.$admin['id'], ' ')."\n";
-            $content .= Lang::pad("", '=')."\n";
-            $content .= Lang::pad($config['note'],' ', 2)."\n";
+            $content = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
+            $content .= Lang::pad($config['address'], ' ', 2) . "\n";
+            $content .= Lang::pad($config['phone'], ' ', 2) . "\n";
+            $content .= Lang::pad("", '=') . "\n";
+            $content .= Lang::pads('ID', $voucher['id'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Code'), $voucher['code'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Plan Name'), $plan['name_plan'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Type'), $voucher['type'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($plan['price']), ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Sales'), $admin['fullname'] . ' #' . $admin['id'], ' ') . "\n";
+            $content .= Lang::pad("", '=') . "\n";
+            $content .= Lang::pad($config['note'], ' ', 2) . "\n";
             $ui->assign('print', $content);
             $config['printer_cols'] = 30;
-            $content = Lang::pad($config['CompanyName'],' ', 2)."\n";
-            $content .= Lang::pad($config['address'],' ', 2)."\n";
-            $content .= Lang::pad($config['phone'],' ', 2)."\n";
-            $content .= Lang::pad("", '=')."\n";
-            $content .= Lang::pads('ID', $voucher['id'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Code'), $voucher['code'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Plan Name'), $plan['name_plan'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Type'), $voucher['type'], ' ')."\n";
-            $content .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($plan['price']), ' ')."\n";
-            $content .= Lang::pads(Lang::T('Sales'), $admin['fullname'].' #'.$admin['id'], ' ')."\n";
-            $content .= Lang::pad("", '=')."\n";
-            $content .= Lang::pad($config['note'],' ', 2)."\n";
+            $content = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
+            $content .= Lang::pad($config['address'], ' ', 2) . "\n";
+            $content .= Lang::pad($config['phone'], ' ', 2) . "\n";
+            $content .= Lang::pad("", '=') . "\n";
+            $content .= Lang::pads('ID', $voucher['id'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Code'), $voucher['code'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Plan Name'), $plan['name_plan'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Type'), $voucher['type'], ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($plan['price']), ' ') . "\n";
+            $content .= Lang::pads(Lang::T('Sales'), $admin['fullname'] . ' #' . $admin['id'], ' ') . "\n";
+            $content .= Lang::pad("", '=') . "\n";
+            $content .= Lang::pad($config['note'], ' ', 2) . "\n";
             $ui->assign('_title', Lang::T('View'));
             $ui->assign('wa', urlencode("```$content```"));
             $ui->display('voucher-view.tpl');
-        }else{
+        } else {
             r2(U . 'prepaid/voucher/', 'e', Lang::T('Voucher Not Found'));
         }
         break;

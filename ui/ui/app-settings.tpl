@@ -54,6 +54,14 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Invoice Footer')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="note" name="note"
+                                rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
+                            <span class="help-block">{Lang::T('You can use html tag')}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label"><i class="glyphicon glyphicon-print"></i> Print Max
                             Char</label>
                         <div class="col-md-6">
@@ -95,13 +103,21 @@
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><input type="checkbox" name="hide_mrc" value="yes" {if $_c['hide_mrc'] eq 'yes'}checked{/if}> {Lang::T('Monthly Registered Customers')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_tms" value="yes" {if $_c['hide_tms'] eq 'yes'}checked{/if}> {Lang::T('Total Monthly Sales')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_aui" value="yes" {if $_c['hide_aui'] eq 'yes'}checked{/if}> {Lang::T('All Users Insights')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_al" value="yes" {if $_c['hide_al'] eq 'yes'}checked{/if}> {Lang::T('Activity Log')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_uet" value="yes" {if $_c['hide_uet'] eq 'yes'}checked{/if}> {Lang::T('User Expired, Today')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_vs" value="yes" {if $_c['hide_vs'] eq 'yes'}checked{/if}> Vouchers Stock</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_pg" value="yes" {if $_c['hide_pg'] eq 'yes'}checked{/if}> Payment Gateway</label>
+                        <label class="col-md-3 control-label"><input type="checkbox" name="hide_mrc" value="yes"
+                                {if $_c['hide_mrc'] eq 'yes'}checked{/if}>
+                            {Lang::T('Monthly Registered Customers')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_tms" value="yes"
+                                {if $_c['hide_tms'] eq 'yes'}checked{/if}> {Lang::T('Total Monthly Sales')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_aui" value="yes"
+                                {if $_c['hide_aui'] eq 'yes'}checked{/if}> {Lang::T('All Users Insights')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_al" value="yes"
+                                {if $_c['hide_al'] eq 'yes'}checked{/if}> {Lang::T('Activity Log')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_uet" value="yes"
+                                {if $_c['hide_uet'] eq 'yes'}checked{/if}> {Lang::T('User Expired, Today')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_vs" value="yes"
+                                {if $_c['hide_vs'] eq 'yes'}checked{/if}> Vouchers Stock</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_pg" value="yes"
+                                {if $_c['hide_pg'] eq 'yes'}checked{/if}> Payment Gateway</label>
                     </div>
                 </div>
                 <div class="panel-heading">
@@ -399,16 +415,17 @@
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
-                    {Lang::T('Invoice')}
+                    API Key
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Invoice Footer')}</label>
+                        <label class="col-md-2 control-label">Access Token</label>
                         <div class="col-md-6">
-                            <textarea class="form-control" id="note" name="note"
-                                rows="3">{Lang::htmlspecialchars($_c['note'])}</textarea>
-                            <span class="help-block">{Lang::T('You can use html tag')}</span>
+                            <input type="password" class="form-control" id="api_key" name="api_key"
+                                value="{$_c['api_key']}" placeholder="Empty this to randomly created API key"
+                                onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
+                        <p class="col-md-4 help-block">{Lang::T('This Token will act as SuperAdmin/Admin')}</p>
                     </div>
                 </div>
                 <div class="panel-heading">

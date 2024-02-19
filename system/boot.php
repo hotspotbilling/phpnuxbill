@@ -80,7 +80,6 @@ $ui->setConfigDir(File::pathFixer('ui/conf/'));
 $ui->setCacheDir(File::pathFixer('ui/cache/'));
 $ui->assign('app_url', APP_URL);
 $ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL, PHP_URL_HOST)));
-define('U', APP_URL . '/index.php?_route=');
 $ui->assign('_url', APP_URL . '/index.php?_route=');
 $ui->assign('_path', __DIR__);
 $ui->assign('_c', $config);
@@ -102,70 +101,6 @@ if (isset($_SESSION['notify'])) {
     unset($_SESSION['ntype']);
 }
 
-function _auth($login = true)
-{
-    if (User::getID()) {
-        return true;
-    } else {
-        if ($login) {
-            r2(U . 'login');
-        } else {
-            return false;
-        }
-    }
-}
-
-function _admin($login = true)
-{
-    if (Admin::getID()) {
-        return true;
-    } else {
-        if ($login) {
-            r2(U . 'login');
-        } else {
-            return false;
-        }
-    }
-}
-
-
-function _log($description, $type = '', $userid = '0')
-{
-    $d = ORM::for_table('tbl_logs')->create();
-    $d->date = date('Y-m-d H:i:s');
-    $d->type = $type;
-    $d->description = $description;
-    $d->userid = $userid;
-    $d->ip = $_SERVER["REMOTE_ADDR"];
-    $d->save();
-}
-
-function Lang($key)
-{
-    return Lang::T($key);
-}
-
-function alphanumeric($str, $tambahan = "")
-{
-    return preg_replace("/[^a-zA-Z0-9" . $tambahan . "]+/", "", $str);
-}
-
-
-function sendTelegram($txt)
-{
-    Message::sendTelegram($txt);
-}
-
-function sendSMS($phone, $txt)
-{
-    Message::sendSMS($phone, $txt);
-}
-
-function sendWhatsapp($phone, $txt)
-{
-    Message::sendWhatsapp($phone, $txt);
-}
-
 
 // Routing Engine
 $req = _get('_route');
@@ -176,7 +111,7 @@ if ($handler == '') {
     $handler = 'default';
 }
 try {
-    $sys_render = File::pathFixer('system/controllers/' . $handler . '.php');
+    $sys_render = $root_path.File::pathFixer('system/controllers/' . $handler . '.php');
     if (file_exists($sys_render)) {
         $menus = array();
         // "name" => $name,

@@ -67,6 +67,7 @@ if ($_app_stage != 'Live') {
     ORM::configure('logging', true);
 }
 
+define('U', APP_URL . '/index.php?_route=');
 
 // notification message
 if (file_exists($root_path . File::pathFixer("system/uploads/notifications.json"))) {
@@ -151,4 +152,74 @@ function _req($param, $defvalue = '')
     } else {
         return safedata($_REQUEST[$param]);
     }
+}
+
+
+function _auth($login = true)
+{
+    if (User::getID()) {
+        return true;
+    } else {
+        if ($login) {
+            r2(U . 'login');
+        } else {
+            return false;
+        }
+    }
+}
+
+function _admin($login = true)
+{
+    if (Admin::getID()) {
+        return true;
+    } else {
+        if ($login) {
+            r2(U . 'login');
+        } else {
+            return false;
+        }
+    }
+}
+
+
+function _log($description, $type = '', $userid = '0')
+{
+    $d = ORM::for_table('tbl_logs')->create();
+    $d->date = date('Y-m-d H:i:s');
+    $d->type = $type;
+    $d->description = $description;
+    $d->userid = $userid;
+    $d->ip = $_SERVER["REMOTE_ADDR"];
+    $d->save();
+}
+
+function Lang($key)
+{
+    return Lang::T($key);
+}
+
+function alphanumeric($str, $tambahan = "")
+{
+    return preg_replace("/[^a-zA-Z0-9" . $tambahan . "]+/", "", $str);
+}
+
+
+function sendTelegram($txt)
+{
+    Message::sendTelegram($txt);
+}
+
+function sendSMS($phone, $txt)
+{
+    Message::sendSMS($phone, $txt);
+}
+
+function sendWhatsapp($phone, $txt)
+{
+    Message::sendWhatsapp($phone, $txt);
+}
+
+
+if(!isset($api_secret)){
+    $api_secret = $db_password;
 }

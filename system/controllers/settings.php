@@ -62,11 +62,91 @@ switch ($action) {
         } else {
             $php = 'php';
         }
+        if (empty($config['api_key'])) {
+            $config['api_key'] = sha1(uniqid(rand(), true));
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'api_key')->find_one();
+            if ($d) {
+                $d->value = $config['api_key'];
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'api_key';
+                $d->value = $config['api_key'];
+                $d->save();
+            }
+        }
+        $ui->assign('_c', $config);
         $ui->assign('php', $php);
         $ui->assign('dir', str_replace('controllers', '', __DIR__));
         $ui->assign('themes', $themes);
         run_hook('view_app_settings'); #HOOK
         $ui->display('app-settings.tpl');
+        break;
+
+    case 'app-post':
+        $company = _post('CompanyName');
+        run_hook('save_settings'); #HOOK
+
+
+        if (!empty($_FILES['logo']['name'])) {
+            if (function_exists('imagecreatetruecolor')) {
+                if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
+                File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
+                if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
+            } else {
+                r2(U . 'settings/app', 'e', 'PHP GD is not installed');
+            }
+        }
+        if ($company == '') {
+            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
+        } else {
+            if ($radius_enable) {
+                try {
+                    Radius::getTableNas()->find_many();
+                } catch (Exception $e) {
+                    $ui->assign("error_title", "RADIUS Error");
+                    $ui->assign("error_message", "Radius table not found.<br><br>" .
+                        $e->getMessage() .
+                        "<br><br>Download <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/Development/install/radius.sql\">here</a> or <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/install/radius.sql\">here</a> and import it to database.<br><br>Check config.php for radius connection details");
+                    $ui->display('router-error.tpl');
+                    die();
+                }
+            }
+            // save all settings
+            foreach ($_POST as $key => $value) {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+                if ($d) {
+                    $d->value = $value;
+                    $d->save();
+                } else {
+                    $d = ORM::for_table('tbl_appconfig')->create();
+                    $d->setting = $key;
+                    $d->value = $value;
+                    $d->save();
+                }
+            }
+
+            //checkbox
+            $checks = ['hide_mrc', 'hide_tms', 'hide_aui', 'hide_al', 'hide_uet', 'hide_vs', 'hide_pg'];
+            foreach ($checks as $check) {
+                if (!isset($_POST[$check])) {
+                    $d = ORM::for_table('tbl_appconfig')->where('setting', $check)->find_one();
+                    if ($d) {
+                        $d->value = 'no';
+                        $d->save();
+                    } else {
+                        $d = ORM::for_table('tbl_appconfig')->create();
+                        $d->setting = $check;
+                        $d->value = 'no';
+                        $d->save();
+                    }
+                }
+            }
+
+            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
+
+            r2(U . 'settings/app', 's', Lang::T('Settings Saved Successfully'));
+        }
         break;
 
     case 'localisation':
@@ -96,6 +176,93 @@ switch ($action) {
         $ui->display('app-localisation.tpl');
         break;
 
+    case 'localisation-post':
+        $tzone = _post('tzone');
+        $date_format = _post('date_format');
+        $country_code_phone = _post('country_code_phone');
+        $lan = _post('lan');
+        run_hook('save_localisation'); #HOOK
+        if ($tzone == '' or $date_format == '' or $lan == '') {
+            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
+        } else {
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'timezone')->find_one();
+            $d->value = $tzone;
+            $d->save();
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'date_format')->find_one();
+            $d->value = $date_format;
+            $d->save();
+
+            $dec_point = $_POST['dec_point'];
+            if (strlen($dec_point) == '1') {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', 'dec_point')->find_one();
+                $d->value = $dec_point;
+                $d->save();
+            }
+
+            $thousands_sep = $_POST['thousands_sep'];
+            if (strlen($thousands_sep) == '1') {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', 'thousands_sep')->find_one();
+                $d->value = $thousands_sep;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'country_code_phone')->find_one();
+            if ($d) {
+                $d->value = $country_code_phone;
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'country_code_phone';
+                $d->value = $country_code_phone;
+                $d->save();
+            }
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_plan')->find_one();
+            if ($d) {
+                $d->value = _post('radius_plan');
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'radius_plan';
+                $d->value = _post('radius_plan');
+                $d->save();
+            }
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'hotspot_plan')->find_one();
+            if ($d) {
+                $d->value = _post('hotspot_plan');
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'hotspot_plan';
+                $d->value = _post('hotspot_plan');
+                $d->save();
+            }
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'pppoe_plan')->find_one();
+            if ($d) {
+                $d->value = _post('pppoe_plan');
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'pppoe_plan';
+                $d->value = _post('pppoe_plan');
+                $d->save();
+            }
+
+            $currency_code = $_POST['currency_code'];
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'currency_code')->find_one();
+            $d->value = $currency_code;
+            $d->save();
+
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'language')->find_one();
+            $d->value = $lan;
+            $d->save();
+            unset($_SESSION['Lang']);
+            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
+            r2(U . 'settings/localisation', 's', Lang::T('Settings Saved Successfully'));
+        }
+        break;
+
     case 'users':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
@@ -107,7 +274,7 @@ switch ($action) {
                 $d = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $search . '%')
                     ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])->order_by_asc('id')->find_many();
+                    ->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else if ($admin['user_type'] == 'Admin') {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'), [
                     'username' => '%' . $search . '%',
@@ -123,7 +290,7 @@ switch ($action) {
                         ['user_type' => 'Sales']
                     ])
                     ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])->order_by_asc('id')->find_many();
+                    ->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $search . '%'], $search);
                 $d = ORM::for_table('tbl_users')
@@ -133,19 +300,19 @@ switch ($action) {
                         ['root' => $admin['id']]
                     ])
                     ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])->order_by_asc('id')->find_many();
+                    ->limit($paginator['limit'])->order_by_asc('id')->findArray();
             }
         } else {
             if ($admin['user_type'] == 'SuperAdmin') {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'));
-                $d = ORM::for_table('tbl_users')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+                $d = ORM::for_table('tbl_users')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else if ($admin['user_type'] == 'Admin') {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'));
                 $d = ORM::for_table('tbl_users')->where_any_is([
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
                     ['user_type' => 'Sales']
-                ])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+                ])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'));
                 $d = ORM::for_table('tbl_users')
@@ -153,7 +320,7 @@ switch ($action) {
                         ['id' => $admin['id']],
                         ['root' => $admin['id']]
                     ])
-                    ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
+                    ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
             }
         }
         $admins = [];
@@ -163,11 +330,17 @@ switch ($action) {
             }
         }
         if (count($admins) > 0) {
-            $adms = ORM::for_table('tbl_users')->where_in('id', $admins)->find_many();
+            $adms = ORM::for_table('tbl_users')->where_in('id', $admins)->findArray();
             unset($admins);
             foreach ($adms as $adm) {
                 $admins[$adm['id']] = $adm['fullname'];
             }
+        }
+        if ($isApi) {
+            showResult(true, $action, [
+                'admins' => $d,
+                'roots' => $admins
+            ], ['search' => $search]);
         }
         $ui->assign('admins', $admins);
         $ui->assign('d', $d);
@@ -193,22 +366,31 @@ switch ($action) {
         }
         //allow see himself
         if ($admin['id'] == $id) {
-            $d = ORM::for_table('tbl_users')->find_one($id);
+            $d = ORM::for_table('tbl_users')->where('id', $id)->find_array($id)[0];
         } else {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
                 // Super Admin can see anyone
-                $d = ORM::for_table('tbl_users')->find_one($id);
+                $d = ORM::for_table('tbl_users')->where('id', $id)->find_array()[0];
             } else if ($admin['user_type'] == 'Agent') {
                 // Agent can see Sales
-                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);
+                $d = ORM::for_table('tbl_users')->where_any_is([['root' => $admin['id']], ['id' => $id]])->find_array()[0];
             }
         }
         if ($d) {
+            run_hook('view_edit_admin'); #HOOK
             if ($d['user_type'] == 'Sales') {
-                $ui->assign('agent', ORM::for_table('tbl_users')->find_one($d['root']));
+                $ui->assign('agent', ORM::for_table('tbl_users')->where('id', $d['root'])->find_array()[0]);
+            }
+            if ($isApi) {
+                unset($d['password']);
+                $agent = $ui->get('agent');
+                if($agent) unset($agent['password']);
+                showResult(true, $action, [
+                    'admin' => $d,
+                    'agent' => $agent
+                ], ['search' => $search]);
             }
             $ui->assign('d', $d);
-            run_hook('view_edit_admin'); #HOOK
             $ui->assign('_title', $d['username']);
             $ui->display('users-view.tpl');
         } else {
@@ -424,159 +606,6 @@ switch ($action) {
             r2(U . 'settings/users', 's', 'User Updated Successfully');
         } else {
             r2(U . 'settings/users-edit/' . $id, 'e', $msg);
-        }
-        break;
-
-    case 'app-post':
-        $company = _post('CompanyName');
-        run_hook('save_settings'); #HOOK
-
-
-        if (!empty($_FILES['logo']['name'])) {
-            if (function_exists('imagecreatetruecolor')) {
-                if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
-                File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
-                if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
-            } else {
-                r2(U . 'settings/app', 'e', 'PHP GD is not installed');
-            }
-        }
-        if ($company == '') {
-            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
-        } else {
-            if ($radius_enable) {
-                try {
-                    Radius::getTableNas()->find_many();
-                } catch (Exception $e) {
-                    $ui->assign("error_title", "RADIUS Error");
-                    $ui->assign("error_message", "Radius table not found.<br><br>" .
-                        $e->getMessage() .
-                        "<br><br>Download <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/Development/install/radius.sql\">here</a> or <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/install/radius.sql\">here</a> and import it to database.<br><br>Check config.php for radius connection details");
-                    $ui->display('router-error.tpl');
-                    die();
-                }
-            }
-            // save all settings
-            foreach ($_POST as $key => $value) {
-                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
-                if ($d) {
-                    $d->value = $value;
-                    $d->save();
-                } else {
-                    $d = ORM::for_table('tbl_appconfig')->create();
-                    $d->setting = $key;
-                    $d->value = $value;
-                    $d->save();
-                }
-            }
-
-            //checkbox
-            $checks = ['hide_mrc', 'hide_tms', 'hide_aui', 'hide_al', 'hide_uet', 'hide_vs', 'hide_pg'];
-            foreach ($checks as $check) {
-                if (!isset($_POST[$check])) {
-                    $d = ORM::for_table('tbl_appconfig')->where('setting', $check)->find_one();
-                    if ($d) {
-                        $d->value = 'no';
-                        $d->save();
-                    } else {
-                        $d = ORM::for_table('tbl_appconfig')->create();
-                        $d->setting = $check;
-                        $d->value = 'no';
-                        $d->save();
-                    }
-                }
-            }
-
-            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
-
-            r2(U . 'settings/app', 's', Lang::T('Settings Saved Successfully'));
-        }
-        break;
-
-    case 'localisation-post':
-        $tzone = _post('tzone');
-        $date_format = _post('date_format');
-        $country_code_phone = _post('country_code_phone');
-        $lan = _post('lan');
-        run_hook('save_localisation'); #HOOK
-        if ($tzone == '' or $date_format == '' or $lan == '') {
-            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
-        } else {
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'timezone')->find_one();
-            $d->value = $tzone;
-            $d->save();
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'date_format')->find_one();
-            $d->value = $date_format;
-            $d->save();
-
-            $dec_point = $_POST['dec_point'];
-            if (strlen($dec_point) == '1') {
-                $d = ORM::for_table('tbl_appconfig')->where('setting', 'dec_point')->find_one();
-                $d->value = $dec_point;
-                $d->save();
-            }
-
-            $thousands_sep = $_POST['thousands_sep'];
-            if (strlen($thousands_sep) == '1') {
-                $d = ORM::for_table('tbl_appconfig')->where('setting', 'thousands_sep')->find_one();
-                $d->value = $thousands_sep;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'country_code_phone')->find_one();
-            if ($d) {
-                $d->value = $country_code_phone;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'country_code_phone';
-                $d->value = $country_code_phone;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_plan')->find_one();
-            if ($d) {
-                $d->value = _post('radius_plan');
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'radius_plan';
-                $d->value = _post('radius_plan');
-                $d->save();
-            }
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'hotspot_plan')->find_one();
-            if ($d) {
-                $d->value = _post('hotspot_plan');
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'hotspot_plan';
-                $d->value = _post('hotspot_plan');
-                $d->save();
-            }
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'pppoe_plan')->find_one();
-            if ($d) {
-                $d->value = _post('pppoe_plan');
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'pppoe_plan';
-                $d->value = _post('pppoe_plan');
-                $d->save();
-            }
-
-            $currency_code = $_POST['currency_code'];
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'currency_code')->find_one();
-            $d->value = $currency_code;
-            $d->save();
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'language')->find_one();
-            $d->value = $lan;
-            $d->save();
-            unset($_SESSION['Lang']);
-            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
-            r2(U . 'settings/localisation', 's', Lang::T('Settings Saved Successfully'));
         }
         break;
 

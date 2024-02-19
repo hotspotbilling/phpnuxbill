@@ -26,8 +26,8 @@
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
                                 </div>
-                                <input type="text" name="username" class="form-control"
-                                    placeholder="{Lang::T('Search by Username')}..." value="{$cari}">
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="{Lang::T('Search by Username')}..." value="{$search}">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
