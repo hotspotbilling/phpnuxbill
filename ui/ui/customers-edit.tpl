@@ -67,8 +67,9 @@
                             <input type="password" autocomplete="off" class="form-control" id="pppoe_password"
                                 name="pppoe_password" value="{$d['pppoe_password']}"
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
-                            <span class="help-block">{Lang::T('User Cannot change this, only admin. if it Empty it will
-                                use user password')}</span>
+                            <span class="help-block">
+                                {Lang::T('User Cannot change this, only admin. if it Empty it will use user password')}
+                            </span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -88,7 +89,7 @@
                             </select>
                         </div>
                     </div>
-                    <!--custom field edit start -->
+                    <!--Customers Attributes edit start -->
                     {if $customFields}
                     {foreach $customFields as $customField}
                     <div class="form-group">
@@ -102,20 +103,21 @@
                     </div>
                     {/foreach}
                     {/if}
-                    <!--custom field edit end -->
-                    <!--custom field add start -->
+                    <!--Customers Attributes edit end -->
+                    <!--Customers Attributes add start -->
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Custom Field')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Customers Attributes')}</label>
                         <div id="custom-fields-container" class="col-md-6">
                             <button class="btn btn-success btn-sm waves-effect waves-light" type="button"
                                 id="add-custom-field">+</button>
                         </div>
                     </div>
-                    <!--custom field add end -->
+                    <!--Customers Attributes add end -->
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-primary waves-effect waves-light" type="submit">{Lang::T('Save
-                                Changes')}</button>
+                            <button class="btn btn-primary waves-effect waves-light" type="submit">
+                                {Lang::T('Save Changes')}
+                            </button>
                             Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>

@@ -37,7 +37,7 @@
                             onclick="this.select()">
                     </li>
                     {/if}
-                    <!--custom field view start -->
+                    <!--Customers Attributes view start -->
                     {if $customFields}
                     {foreach $customFields as $customField}
                     <li class="list-group-item">
@@ -45,7 +45,7 @@
                     </li>
                     {/foreach}
                     {/if}
-                    <!--custom field view end -->
+                    <!--Customers Attributes view end -->
                     <li class="list-group-item">
                         <b>{Lang::T('Service Type')}</b> <span class="pull-right">{Lang::T($d['service_type'])}</span>
                     </li>

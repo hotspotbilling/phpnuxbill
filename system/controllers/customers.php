@@ -168,8 +168,8 @@ switch ($action) {
         if ($customer) {
 
 
-            // Fetch the custom field values from the tbl_customer_custom_fields table
-            $customFields = ORM::for_table('tbl_customers_custom_fields')
+            // Fetch the Customers Attributes values from the tbl_customer_custom_fields table
+            $customFields = ORM::for_table('tbl_customers_fields')
                 ->where('customer_id', $customer['id'])
                 ->find_many();
 
@@ -210,8 +210,8 @@ switch ($action) {
         $id  = $routes['2'];
         run_hook('edit_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
-        // Fetch the custom field values from the tbl_customers_custom_fields table
-        $customFields = ORM::for_table('tbl_customers_custom_fields')
+        // Fetch the Customers Attributes values from the tbl_customers_fields table
+        $customFields = ORM::for_table('tbl_customers_fields')
             ->where('customer_id', $id)
             ->find_many();
         if ($d) {
@@ -231,8 +231,8 @@ switch ($action) {
         run_hook('delete_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
         if ($d) {
-            // Delete the associated custom field records from tbl_customer_custom_fields table
-            ORM::for_table('tbl_customers_custom_fields')->where('customer_id', $id)->delete_many();
+            // Delete the associated Customers Attributes records from tbl_customer_custom_fields table
+            ORM::for_table('tbl_customers_fields')->where('customer_id', $id)->delete_many();
             $c = ORM::for_table('tbl_user_recharges')->where('username', $d['username'])->find_one();
             if ($c) {
                 $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
@@ -285,7 +285,7 @@ switch ($action) {
         $address = _post('address');
         $phonenumber = _post('phonenumber');
         $service_type = _post('service_type');
-        //post custom field
+        //post Customers Attributes
         $custom_field_names = (array) $_POST['custom_field_name'];
         $custom_field_values = (array) $_POST['custom_field_value'];
 
@@ -321,7 +321,7 @@ switch ($action) {
 
             // Retrieve the customer ID of the newly created customer
             $customerId = $d->id();
-            // Save custom field details
+            // Save Customers Attributes details
             if (!empty($custom_field_names) && !empty($custom_field_values)) {
                 $totalFields = min(count($custom_field_names), count($custom_field_values));
                 for ($i = 0; $i < $totalFields; $i++) {
@@ -329,7 +329,7 @@ switch ($action) {
                     $value = $custom_field_values[$i];
 
                     if (!empty($name)) {
-                        $customField = ORM::for_table('tbl_customers_custom_fields')->create();
+                        $customField = ORM::for_table('tbl_customers_fields')->create();
                         $customField->customer_id = $customerId;
                         $customField->field_name = $name;
                         $customField->field_value = $value;
@@ -369,8 +369,8 @@ switch ($action) {
         $id = _post('id');
         $d = ORM::for_table('tbl_customers')->find_one($id);
 
-        //lets find user custom field using id
-        $customFields = ORM::for_table('tbl_customers_custom_fields')
+        //lets find user Customers Attributes using id
+        $customFields = ORM::for_table('tbl_customers_fields')
             ->where('customer_id', $id)
             ->find_many();
 
@@ -414,7 +414,7 @@ switch ($action) {
             $d->save();
 
 
-            // Update custom field values in tbl_customers_custom_fields table
+            // Update Customers Attributes values in tbl_customers_fields table
             foreach ($customFields as $customField) {
                 $fieldName = $customField['field_name'];
                 if (isset($_POST['custom_fields'][$fieldName])) {
@@ -424,7 +424,7 @@ switch ($action) {
                 }
             }
 
-            // Add new custom fields
+            // Add new Customers Attributess
             if (isset($_POST['custom_field_name']) && isset($_POST['custom_field_value'])) {
                 $newCustomFieldNames = $_POST['custom_field_name'];
                 $newCustomFieldValues = $_POST['custom_field_value'];
@@ -437,8 +437,8 @@ switch ($action) {
                         $fieldName = $newCustomFieldNames[$i];
                         $fieldValue = $newCustomFieldValues[$i];
 
-                        // Insert the new custom field
-                        $newCustomField = ORM::for_table('tbl_customers_custom_fields')->create();
+                        // Insert the new Customers Attributes
+                        $newCustomField = ORM::for_table('tbl_customers_fields')->create();
                         $newCustomField->set('customer_id', $id);
                         $newCustomField->set('field_name', $fieldName);
                         $newCustomField->set('field_value', $fieldValue);
@@ -447,12 +447,12 @@ switch ($action) {
                 }
             }
 
-            // Delete custom fields
+            // Delete Customers Attributess
             if (isset($_POST['delete_custom_fields'])) {
                 $fieldsToDelete = $_POST['delete_custom_fields'];
                 foreach ($fieldsToDelete as $fieldName) {
-                    // Delete the custom field with the given field name
-                    ORM::for_table('tbl_customers_custom_fields')
+                    // Delete the Customers Attributes with the given field name
+                    ORM::for_table('tbl_customers_fields')
                         ->where('field_name', $fieldName)
                         ->delete_many();
                 }

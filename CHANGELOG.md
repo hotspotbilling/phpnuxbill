@@ -230,7 +230,7 @@ Customer can be move to expired pool after plan expired by cron
 - Fix PDF Export by Period
 - Add pppoe_password for Customer, this pppoe_password only admin can change
 - Country Code Number Settings
-- Customer Meta Table for Custom Fields
+- Customer Meta Table for Customers Attributess
 - Fix Add and Edit Customer Form for admin
 - add Notification Message Editor
 - cron reminder

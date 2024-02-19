@@ -188,8 +188,8 @@ CREATE TABLE `tb_languages` (
   `id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `tbl_customers_custom_fields`;
-CREATE TABLE tbl_customers_custom_fields (
+DROP TABLE IF EXISTS `tbl_customers_fields`;
+CREATE TABLE tbl_customers_fields (
   id INT PRIMARY KEY AUTO_INCREMENT,
   customer_id INT NOT NULL,
   field_name VARCHAR(255) NOT NULL,
