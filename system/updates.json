@@ -55,5 +55,8 @@
     ],
     "2024.2.16": [
         "ALTER TABLE `tbl_customers` ADD `created_by` INT NOT NULL DEFAULT '0' AFTER `auto_renewal`;"
+    ],
+    "2024.2.17": [
+        "CREATE TABLE `tbl_customers_custom_fields` (`id` INT PRIMARY KEY AUTO_INCREMENT, `customer_id` INT NOT NULL, `field_name` VARCHAR(255) NOT NULL, `field_value` VARCHAR(255) NOT NULL, FOREIGN KEY (customer_id) REFERENCES tbl_customers(id));"
     ]
 }

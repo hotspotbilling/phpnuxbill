@@ -166,6 +166,13 @@ switch ($action) {
             $customer = ORM::for_table('tbl_customers')->find_one($id);
         }
         if ($customer) {
+
+
+            // Fetch the custom field values from the tbl_customer_custom_fields table
+            $customFields = ORM::for_table('tbl_customers_custom_fields')
+                ->where('customer_id', $customer['id'])
+                ->find_many();
+
             $v  = $routes['3'];
             if (empty($v) || $v == 'order') {
                 $v = 'order';
@@ -193,6 +200,7 @@ switch ($action) {
             $ui->assign('package', $package);
             $ui->assign('v', $v);
             $ui->assign('d', $customer);
+            $ui->assign('customFields', $customFields);
             $ui->display('customers-view.tpl');
         } else {
             r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);
@@ -202,8 +210,13 @@ switch ($action) {
         $id  = $routes['2'];
         run_hook('edit_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
+        // Fetch the custom field values from the tbl_customers_custom_fields table
+        $customFields = ORM::for_table('tbl_customers_custom_fields')
+            ->where('customer_id', $id)
+            ->find_many();
         if ($d) {
             $ui->assign('d', $d);
+            $ui->assign('customFields', $customFields);
             $ui->display('customers-edit.tpl');
         } else {
             r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);
@@ -218,6 +231,8 @@ switch ($action) {
         run_hook('delete_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
         if ($d) {
+            // Delete the associated custom field records from tbl_customer_custom_fields table
+            ORM::for_table('tbl_customers_custom_fields')->where('customer_id', $id)->delete_many();
             $c = ORM::for_table('tbl_user_recharges')->where('username', $d['username'])->find_one();
             if ($c) {
                 $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
@@ -270,6 +285,10 @@ switch ($action) {
         $address = _post('address');
         $phonenumber = _post('phonenumber');
         $service_type = _post('service_type');
+        //post custom field
+        $custom_field_names = (array) $_POST['custom_field_name'];
+        $custom_field_values = (array) $_POST['custom_field_value'];
+
         run_hook('add_customer'); #HOOK
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
@@ -299,6 +318,25 @@ switch ($action) {
             $d->phonenumber = Lang::phoneFormat($phonenumber);
             $d->service_type = $service_type;
             $d->save();
+
+            // Retrieve the customer ID of the newly created customer
+            $customerId = $d->id();
+            // Save custom field details
+            if (!empty($custom_field_names) && !empty($custom_field_values)) {
+                $totalFields = min(count($custom_field_names), count($custom_field_values));
+                for ($i = 0; $i < $totalFields; $i++) {
+                    $name = $custom_field_names[$i];
+                    $value = $custom_field_values[$i];
+
+                    if (!empty($name)) {
+                        $customField = ORM::for_table('tbl_customers_custom_fields')->create();
+                        $customField->customer_id = $customerId;
+                        $customField->field_name = $name;
+                        $customField->field_value = $value;
+                        $customField->save();
+                    }
+                }
+            }
             r2(U . 'customers/list', 's', Lang::T('Account Created Successfully'));
         } else {
             r2(U . 'customers/add', 'e', $msg);
@@ -330,6 +368,12 @@ switch ($action) {
 
         $id = _post('id');
         $d = ORM::for_table('tbl_customers')->find_one($id);
+
+        //lets find user custom field using id
+        $customFields = ORM::for_table('tbl_customers_custom_fields')
+            ->where('customer_id', $id)
+            ->find_many();
+
         if (!$d) {
             $msg .= Lang::T('Data Not Found') . '<br>';
         }
@@ -343,7 +387,7 @@ switch ($action) {
         if ($oldusername != $username) {
             $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if ($c) {
-                $msg .= Lang::T('Account already axist') . '<br>';
+                $msg .= Lang::T('Account already exist') . '<br>';
             }
             $userDiff = true;
         }
@@ -368,6 +412,52 @@ switch ($action) {
             $d->phonenumber = $phonenumber;
             $d->service_type = $service_type;
             $d->save();
+
+
+            // Update custom field values in tbl_customers_custom_fields table
+            foreach ($customFields as $customField) {
+                $fieldName = $customField['field_name'];
+                if (isset($_POST['custom_fields'][$fieldName])) {
+                    $customFieldValue = $_POST['custom_fields'][$fieldName];
+                    $customField->set('field_value', $customFieldValue);
+                    $customField->save();
+                }
+            }
+
+            // Add new custom fields
+            if (isset($_POST['custom_field_name']) && isset($_POST['custom_field_value'])) {
+                $newCustomFieldNames = $_POST['custom_field_name'];
+                $newCustomFieldValues = $_POST['custom_field_value'];
+
+                // Check if the number of field names and values match
+                if (count($newCustomFieldNames) == count($newCustomFieldValues)) {
+                    $numNewFields = count($newCustomFieldNames);
+
+                    for ($i = 0; $i < $numNewFields; $i++) {
+                        $fieldName = $newCustomFieldNames[$i];
+                        $fieldValue = $newCustomFieldValues[$i];
+
+                        // Insert the new custom field
+                        $newCustomField = ORM::for_table('tbl_customers_custom_fields')->create();
+                        $newCustomField->set('customer_id', $id);
+                        $newCustomField->set('field_name', $fieldName);
+                        $newCustomField->set('field_value', $fieldValue);
+                        $newCustomField->save();
+                    }
+                }
+            }
+
+            // Delete custom fields
+            if (isset($_POST['delete_custom_fields'])) {
+                $fieldsToDelete = $_POST['delete_custom_fields'];
+                foreach ($fieldsToDelete as $fieldName) {
+                    // Delete the custom field with the given field name
+                    ORM::for_table('tbl_customers_custom_fields')
+                        ->where('field_name', $fieldName)
+                        ->delete_many();
+                }
+            }
+
             if ($userDiff || $pppoeDiff || $passDiff) {
                 $c = ORM::for_table('tbl_user_recharges')->where('username', ($userDiff) ? $oldusername : $username)->find_one();
                 if ($c) {

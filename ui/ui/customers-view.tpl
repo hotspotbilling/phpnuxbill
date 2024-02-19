@@ -30,22 +30,31 @@
                             onclick="this.select()">
                     </li>
                     {if $d['pppoe_password'] != ''}
-                        <li class="list-group-item">
-                            <b>PPPOE {Lang::T('Password')}</b> <input type="password" value="{$d['pppoe_password']}"
+                    <li class="list-group-item">
+                        <b>PPPOE {Lang::T('Password')}</b> <input type="password" value="{$d['pppoe_password']}"
                             style=" border: 0px; text-align: right;" class="pull-right"
                             onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                             onclick="this.select()">
-                        </li>
+                    </li>
                     {/if}
-					<li class="list-group-item">
+                    <!--custom field view start -->
+                    {if $customFields}
+                    {foreach $customFields as $customField}
+                    <li class="list-group-item">
+                        <b>{$customField.field_name}</b> <span class="pull-right">{$customField.field_value}</span>
+                    </li>
+                    {/foreach}
+                    {/if}
+                    <!--custom field view end -->
+                    <li class="list-group-item">
                         <b>{Lang::T('Service Type')}</b> <span class="pull-right">{Lang::T($d['service_type'])}</span>
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Balance')}</b> <span class="pull-right">{Lang::moneyFormat($d['balance'])}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('Auto Renewal')}</b> <span
-                            class="pull-right">{if $d['auto_renewal']}yes{else}no{/if}</span>
+                        <b>{Lang::T('Auto Renewal')}</b> <span class="pull-right">{if
+                            $d['auto_renewal']}yes{else}no{/if}</span>
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Created On')}</b> <span
@@ -59,8 +68,8 @@
                 <div class="row">
                     <div class="col-xs-4">
                         <a href="{$_url}customers/delete/{$d['id']}" id="{$d['id']}"
-                            class="btn btn-danger btn-block btn-sm" onclick="return confirm('{Lang::T('Delete')}?')"><span
-                                class="fa fa-trash"></span></a>
+                            class="btn btn-danger btn-block btn-sm"
+                            onclick="return confirm('{Lang::T('Delete')}?')"><span class="fa fa-trash"></span></a>
                     </div>
                     <div class="col-xs-8">
                         <a href="{$_url}customers/edit/{$d['id']}"
@@ -70,123 +79,124 @@
             </div>
         </div>
         {if $package}
-            <div class="box box-{if $package['status']=='on'}success{else}danger{/if}">
-                <div class="box-body box-profile">
-                    <h4 class="text-center">{$package['type']} - {$package['namebp']}</h4>
-                    <ul class="list-group list-group-unbordered">
-                        <li class="list-group-item">
-                            {Lang::T('Active')} <span
-                                class="pull-right">{if $package['status']=='on'}yes{else}no{/if}</span>
-                        </li>
-                        <li class="list-group-item">
-                            {Lang::T('Created On')} <span
-                                class="pull-right">{Lang::dateAndTimeFormat($package['recharged_on'],$package['recharged_time'])}</span>
-                        </li>
-                        <li class="list-group-item">
-                            {Lang::T('Expires On')} <span
-                                class="pull-right">{Lang::dateAndTimeFormat($package['expiration'], $package['time'])}</span>
-                        </li>
-                        <li class="list-group-item">
-                            {$package['routers']} <span class="pull-right">{$package['method']}</span>
-                        </li>
-                    </ul>
-                    <div class="row">
-                        <div class="col-xs-4">
-                            <a href="{$_url}customers/deactivate/{$d['id']}" id="{$d['id']}"
-                                class="btn btn-danger btn-block btn-sm"
-                                onclick="return confirm('This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
-                        </div>
-                        <div class="col-xs-4">
-                            <a href="{$_url}customers/recharge/{$d['id']}"
-                                onclick="return confirm('This will extend Customer plan, same as recharge')"
-                                class="btn btn-success btn-sm btn-block">{Lang::T('Recharge')}</a>
-                        </div>
-                        <div class="col-xs-4">
-                            <a href="{$_url}customers/sync/{$d['id']}"
-                                onclick="return confirm('This will sync Customer to Mikrotik?')"
-                                class="btn btn-primary btn-sm btn-block">{Lang::T('Sync')}</a>
-                        </div>
+        <div class="box box-{if $package['status']=='on'}success{else}danger{/if}">
+            <div class="box-body box-profile">
+                <h4 class="text-center">{$package['type']} - {$package['namebp']}</h4>
+                <ul class="list-group list-group-unbordered">
+                    <li class="list-group-item">
+                        {Lang::T('Active')} <span class="pull-right">{if
+                            $package['status']=='on'}yes{else}no{/if}</span>
+                    </li>
+                    <li class="list-group-item">
+                        {Lang::T('Created On')} <span
+                            class="pull-right">{Lang::dateAndTimeFormat($package['recharged_on'],$package['recharged_time'])}</span>
+                    </li>
+                    <li class="list-group-item">
+                        {Lang::T('Expires On')} <span
+                            class="pull-right">{Lang::dateAndTimeFormat($package['expiration'],
+                            $package['time'])}</span>
+                    </li>
+                    <li class="list-group-item">
+                        {$package['routers']} <span class="pull-right">{$package['method']}</span>
+                    </li>
+                </ul>
+                <div class="row">
+                    <div class="col-xs-4">
+                        <a href="{$_url}customers/deactivate/{$d['id']}" id="{$d['id']}"
+                            class="btn btn-danger btn-block btn-sm"
+                            onclick="return confirm('This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
+                    </div>
+                    <div class="col-xs-4">
+                        <a href="{$_url}customers/recharge/{$d['id']}"
+                            onclick="return confirm('This will extend Customer plan, same as recharge')"
+                            class="btn btn-success btn-sm btn-block">{Lang::T('Recharge')}</a>
+                    </div>
+                    <div class="col-xs-4">
+                        <a href="{$_url}customers/sync/{$d['id']}"
+                            onclick="return confirm('This will sync Customer to Mikrotik?')"
+                            class="btn btn-primary btn-sm btn-block">{Lang::T('Sync')}</a>
                     </div>
                 </div>
             </div>
+        </div>
         {else}
-            <a href="{$_url}prepaid/recharge/{$d['id']}"
-                class="btn btn-success btn-sm btn-block mt-1">{Lang::T('Recharge')}</a><br>
+        <a href="{$_url}prepaid/recharge/{$d['id']}"
+            class="btn btn-success btn-sm btn-block mt-1">{Lang::T('Recharge')}</a><br>
         {/if}
         <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block mt-1">{Lang::T('Back')}</a><br>
     </div>
     <div class="col-sm-8 col-md-8">
         <ul class="nav nav-tabs">
-            <li role="presentation" {if $v=='order'}class="active" {/if}><a
+            <li role="presentation" {if $v=='order' }class="active" {/if}><a
                     href="{$_url}customers/view/{$d['id']}/order">30 {Lang::T('Order History')}</a></li>
-            <li role="presentation" {if $v=='activation'}class="active" {/if}><a
+            <li role="presentation" {if $v=='activation' }class="active" {/if}><a
                     href="{$_url}customers/view/{$d['id']}/activation">30 {Lang::T('Activation History')}</a></li>
         </ul>
         <div class="table-responsive" style="background-color: white;">
             <table id="datatable" class="table table-bordered table-striped">
                 {if Lang::arrayCount($activation)}
-                    <thead>
-                        <tr>
-                            <th>{Lang::T('Invoice')}</th>
-                            <th>{Lang::T('Username')}</th>
-                            <th>{Lang::T('Plan Name')}</th>
-                            <th>{Lang::T('Plan Price')}</th>
-                            <th>{Lang::T('Type')}</th>
-                            <th>{Lang::T('Created On')}</th>
-                            <th>{Lang::T('Expires On')}</th>
-                            <th>{Lang::T('Method')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {foreach $activation as $ds}
-                            <tr onclick="window.location.href = '{$_url}prepaid/view/{$ds['id']}'" style="cursor:pointer;">
-                                <td>{$ds['invoice']}</td>
-                                <td>{$ds['username']}</td>
-                                <td>{$ds['plan_name']}</td>
-                                <td>{Lang::moneyFormat($ds['price'])}</td>
-                                <td>{$ds['type']}</td>
-                                <td class="text-success">{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}
-                                </td>
-                                <td class="text-danger">{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
-                                <td>{$ds['method']}</td>
-                            </tr>
-                        {/foreach}
-                    </tbody>
+                <thead>
+                    <tr>
+                        <th>{Lang::T('Invoice')}</th>
+                        <th>{Lang::T('Username')}</th>
+                        <th>{Lang::T('Plan Name')}</th>
+                        <th>{Lang::T('Plan Price')}</th>
+                        <th>{Lang::T('Type')}</th>
+                        <th>{Lang::T('Created On')}</th>
+                        <th>{Lang::T('Expires On')}</th>
+                        <th>{Lang::T('Method')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $activation as $ds}
+                    <tr onclick="window.location.href = '{$_url}prepaid/view/{$ds['id']}'" style="cursor:pointer;">
+                        <td>{$ds['invoice']}</td>
+                        <td>{$ds['username']}</td>
+                        <td>{$ds['plan_name']}</td>
+                        <td>{Lang::moneyFormat($ds['price'])}</td>
+                        <td>{$ds['type']}</td>
+                        <td class="text-success">{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}
+                        </td>
+                        <td class="text-danger">{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
+                        <td>{$ds['method']}</td>
+                    </tr>
+                    {/foreach}
+                </tbody>
                 {/if}
                 {if Lang::arrayCount($order)}
-                    <thead>
-                        <tr>
-                            <th>{Lang::T('Plan Name')}</th>
-                            <th>{Lang::T('Gateway')}</th>
-                            <th>{Lang::T('Routers')}</th>
-                            <th>{Lang::T('Type')}</th>
-                            <th>{Lang::T('Plan Price')}</th>
-                            <th>{Lang::T('Created On')}</th>
-                            <th>{Lang::T('Expires On')}</th>
-                            <th>{Lang::T('Date Done')}</th>
-                            <th>{Lang::T('Method')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {foreach $order as $ds}
-                            <tr>
-                                <td>{$ds['plan_name']}</td>
-                                <td>{$ds['gateway']}</td>
-                                <td>{$ds['routers']}</td>
-                                <td>{$ds['payment_channel']}</td>
-                                <td>{Lang::moneyFormat($ds['price'])}</td>
-                                <td class="text-primary">{Lang::dateTimeFormat($ds['created_date'])}</td>
-                                <td class="text-danger">{Lang::dateTimeFormat($ds['expired_date'])}</td>
-                                <td class="text-success">{if $ds['status']!=1}{Lang::dateTimeFormat($ds['paid_date'])}{/if}</td>
-                                <td>{if $ds['status']==1}{Lang::T('UNPAID')}
-                                    {elseif $ds['status']==2}{Lang::T('PAID')}
-                                    {elseif $ds['status']==3}{$_L['FAILED']}
-                                    {elseif $ds['status']==4}{Lang::T('CANCELED')}
-                                    {elseif $ds['status']==5}{Lang::T('UNKNOWN')}
-                                    {/if}</td>
-                            </tr>
-                        {/foreach}
-                    </tbody>
+                <thead>
+                    <tr>
+                        <th>{Lang::T('Plan Name')}</th>
+                        <th>{Lang::T('Gateway')}</th>
+                        <th>{Lang::T('Routers')}</th>
+                        <th>{Lang::T('Type')}</th>
+                        <th>{Lang::T('Plan Price')}</th>
+                        <th>{Lang::T('Created On')}</th>
+                        <th>{Lang::T('Expires On')}</th>
+                        <th>{Lang::T('Date Done')}</th>
+                        <th>{Lang::T('Method')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $order as $ds}
+                    <tr>
+                        <td>{$ds['plan_name']}</td>
+                        <td>{$ds['gateway']}</td>
+                        <td>{$ds['routers']}</td>
+                        <td>{$ds['payment_channel']}</td>
+                        <td>{Lang::moneyFormat($ds['price'])}</td>
+                        <td class="text-primary">{Lang::dateTimeFormat($ds['created_date'])}</td>
+                        <td class="text-danger">{Lang::dateTimeFormat($ds['expired_date'])}</td>
+                        <td class="text-success">{if $ds['status']!=1}{Lang::dateTimeFormat($ds['paid_date'])}{/if}</td>
+                        <td>{if $ds['status']==1}{Lang::T('UNPAID')}
+                            {elseif $ds['status']==2}{Lang::T('PAID')}
+                            {elseif $ds['status']==3}{$_L['FAILED']}
+                            {elseif $ds['status']==4}{Lang::T('CANCELED')}
+                            {elseif $ds['status']==5}{Lang::T('UNKNOWN')}
+                            {/if}</td>
+                    </tr>
+                    {/foreach}
+                </tbody>
                 {/if}
             </table>
         </div>
