@@ -203,6 +203,8 @@ ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin'
 ALTER TABLE `tbl_users` CHANGE `password` `password` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
 ALTER TABLE `tbl_users` ADD `phone` VARCHAR(32) NOT NULL DEFAULT '' AFTER `password`, ADD `email` VARCHAR(128) NOT NULL DEFAULT '' AFTER `phone`, ADD `city` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kota' AFTER `email`, ADD `subdistrict` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kecamatan' AFTER `city`, ADD `ward` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kelurahan' AFTER `subdistrict`;
 ALTER TABLE `tbl_customers` ADD `created_by` INT NOT NULL DEFAULT '0' AFTER `auto_renewal`;
+ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'address list' AFTER `pool_expired`;
+ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;
 
 ALTER TABLE `tbl_appconfig`
   ADD PRIMARY KEY (`id`);

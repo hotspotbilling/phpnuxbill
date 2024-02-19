@@ -173,7 +173,7 @@ switch ($action) {
                     Mikrotik::removeHotspotPlan($client, $d['name_plan']);
                 } catch (Exception $e) {
                     //ignore exception, it means router has already deleted
-                } catch(Throwable $e){
+                } catch (Throwable $e) {
                     //ignore exception, it means router has already deleted
                 }
             }
@@ -200,6 +200,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
         $allow_purchase = _post('allow_purchase');
 
@@ -243,6 +244,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $rate = trim($rate . " " . $b['burst']);
 
             $d = ORM::for_table('tbl_plans')->create();
             $d->name_plan = $name;
@@ -264,8 +266,9 @@ switch ($action) {
             } else {
                 $d->is_radius = 0;
                 $d->routers = $routers;
-                $d->pool_expired = $pool_expired;
             }
+            $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->allow_purchase = $allow_purchase;
             $d->save();
@@ -305,6 +308,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
         $allow_purchase = _post('allow_purchase');
         $routers = _post('routers');
@@ -343,6 +347,8 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
 
+            $rate = trim($rate . " " . $b['burst']);
+
             if ($d['is_radius']) {
                 Radius::planUpSert($id, $radiusRate);
             } else {
@@ -367,6 +373,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
             $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->allow_purchase = $allow_purchase;
             $d->save();
@@ -443,7 +450,7 @@ switch ($action) {
                     Mikrotik::removePpoePlan($client, $d['name_plan']);
                 } catch (Exception $e) {
                     //ignore exception, it means router has already deleted
-                } catch(Throwable $e){
+                } catch (Throwable $e) {
                     //ignore exception, it means router has already deleted
                 }
             }
@@ -506,6 +513,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $rate = trim($rate . " " . $b['burst']);
 
             $d = ORM::for_table('tbl_plans')->create();
             $d->type = 'PPPOE';
@@ -593,6 +601,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $rate = trim($rate . " " . $b['burst']);
 
             if ($d['is_radius']) {
                 Radius::planUpSert($id, $radiusRate, $pool);

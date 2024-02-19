@@ -67,6 +67,7 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
 		$rate_up = _post('rate_up');
 		$rate_up_unit = _post('rate_up_unit');
+		$burst = _post('burst');
         run_hook('add_bandwidth'); #HOOK
         $msg = '';
         if(Validator::Length($name,16,4) == false){
@@ -88,6 +89,7 @@ switch ($action) {
             $d->rate_down_unit = $rate_down_unit;
             $d->rate_up = $rate_up;
             $d->rate_up_unit = $rate_up_unit;
+            $d->burst = $burst;
             $d->save();
 
             r2(U . 'bandwidth/list', 's', Lang::T('Data Created Successfully'));
@@ -102,6 +104,7 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
 		$rate_up = _post('rate_up');
 		$rate_up_unit = _post('rate_up_unit');
+		$burst = _post('burst');
         run_hook('edit_bandwidth'); #HOOK
         $msg = '';
         if(Validator::Length($name,16,4) == false){
@@ -128,6 +131,7 @@ switch ($action) {
             $d->rate_down_unit = $rate_down_unit;
             $d->rate_up = $rate_up;
             $d->rate_up_unit = $rate_up_unit;
+            $d->burst = $burst;
             $d->save();
 
             r2(U . 'bandwidth/list', 's', Lang::T('Data Updated Successfully'));
