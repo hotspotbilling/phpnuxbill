@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.2.19
+
+- Start API Development
+- Multiple Admin Level
+- Customer Attributes by @Focuslinkstech
+- Radius Menu
+
 ## 2024.2.13
 
 - Auto translate language
