@@ -9,7 +9,7 @@
 					{foreach $langs as $lang}
 						<div class="form-group">
 							<div class="col-md-12">
-								<small>{$lang@key}</small>
+								<small>{str_replace('_',' ', $lang@key)}</small>
 								<input type="text" class="form-control" rows="1" name="{$lang@key}"
 									placeholder="{$lang@key}" value="{$lang}">
 							</div>

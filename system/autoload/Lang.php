@@ -11,11 +11,12 @@ class Lang
     public static function T($key)
     {
         global $_L, $lan_file, $config;
-        $L = $_SESSION['Lang'];
+        $_L = $_SESSION['Lang'];
         if (!empty($_L[$key])) {
             return $_L[$key];
         }
         $val = $key;
+        $key = Lang::sanitize($key);
         if (isset($_L[$key])) {
             return $_L[$key];
         }else if (isset($_L[$key])) {
@@ -36,6 +37,10 @@ class Lang
             file_put_contents($lan_file, json_encode($_SESSION['Lang'], JSON_PRETTY_PRINT));
             return $val;
         }
+    }
+
+    public static function sanitize($str){
+        return preg_replace("/[^A-Za-z0-9]/", '_', $str);;
     }
 
     public static function getIsoLang(){

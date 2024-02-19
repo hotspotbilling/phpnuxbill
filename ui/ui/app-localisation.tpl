@@ -61,7 +61,7 @@
                             </select>
                         </div>
                         <div class="col-md-4 help-block">
-                            New Language will be automatically translated from English
+                            <a href="{$_url}settings/language">{Lang::T('Language Editor')}</a>
                         </div>
                     </div>
                     <div class="form-group">
