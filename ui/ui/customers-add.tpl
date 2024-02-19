@@ -86,7 +86,7 @@
                     </div>
                     <!-- Customers Attributes add start -->
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Customers Attributes')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Attributes')}</label>
                         <div id="custom-fields-container" class="col-md-6">
                             <button class="btn btn-success btn-sm waves-effect waves-light" type="button"
                                 id="add-custom-field">+</button>

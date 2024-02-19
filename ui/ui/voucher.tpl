@@ -76,7 +76,7 @@
                                         {/if}</td>
                                     <td align="center">{if $ds['generated_by']}
                                             <a
-                                                href="{$_url}settings/users-edit/{$ds['generated_by']}">{$admins[$ds['generated_by']]}</a>
+                                                href="{$_url}settings/users-view/{$ds['generated_by']}">{$admins[$ds['generated_by']]}</a>
                                         {else} -
                                         {/if}
                                     </td>

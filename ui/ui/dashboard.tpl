@@ -191,7 +191,7 @@
                         {foreach $dlog as $dlogs}
                             <li class="primary">
                                 <span class="point"></span>
-                                <span class="time small text-muted">{time_elapsed_string($dlogs['date'],true)}</span>
+                                <span class="time small text-muted">{Lang::timeElapsed($dlogs['date'],true)}</span>
                                 <p>{$dlogs['description']}</p>
                             </li>
                         {/foreach}

@@ -158,14 +158,14 @@ switch ($action) {
         }
         $admins = [];
         foreach ($d as $k) {
-            if(!empty($k['root'])){
+            if (!empty($k['root'])) {
                 $admins[] = $k['root'];
             }
         }
-        if(count($admins) > 0){
+        if (count($admins) > 0) {
             $adms = ORM::for_table('tbl_users')->where_in('id', $admins)->find_many();
             unset($admins);
-            foreach($adms as $adm){
+            foreach ($adms as $adm) {
                 $admins[$adm['id']] = $adm['fullname'];
             }
         }
@@ -185,13 +185,45 @@ switch ($action) {
         $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
         $ui->display('users-add.tpl');
         break;
-
+    case 'users-view':
+        $ui->assign('_title', Lang::T('Edit User'));
+        $id  = $routes['2'];
+        if (empty($id)) {
+            $id = $admin['id'];
+        }
+        //allow see himself
+        if ($admin['id'] == $id) {
+            $d = ORM::for_table('tbl_users')->find_one($id);
+        } else {
+            if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+                // Super Admin can see anyone
+                $d = ORM::for_table('tbl_users')->find_one($id);
+            } else if ($admin['user_type'] == 'Agent') {
+                // Agent can see Sales
+                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);
+            }
+        }
+        if ($d) {
+            if ($d['user_type'] == 'Sales') {
+                $ui->assign('agent', ORM::for_table('tbl_users')->find_one($d['root']));
+            }
+            $ui->assign('d', $d);
+            run_hook('view_edit_admin'); #HOOK
+            $ui->assign('_title', $d['username']);
+            $ui->display('users-view.tpl');
+        } else {
+            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
+        }
+        break;
     case 'users-edit':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
         }
         $ui->assign('_title', Lang::T('Edit User'));
         $id  = $routes['2'];
+        if (empty($id)) {
+            $id = $admin['id'];
+        }
         if ($admin['id'] == $id) {
             $d = ORM::for_table('tbl_users')->find_one($id);
         } else {
@@ -286,7 +318,7 @@ switch ($action) {
             if ($admin['user_type'] == 'Agent') {
                 // Prevent hacking from form
                 $d->root = $admin['id'];
-            }else if($user_type == 'Sales'){
+            } else if ($user_type == 'Sales') {
                 $d->root = $root;
             }
             $d->save();
@@ -382,7 +414,7 @@ switch ($action) {
             if ($admin['user_type'] == 'Agent') {
                 // Prevent hacking from form
                 $d->root = $admin['id'];
-            }else if($user_type == 'Sales'){
+            } else if ($user_type == 'Sales') {
                 $d->root = $root;
             }
 

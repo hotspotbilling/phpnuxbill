@@ -53,10 +53,12 @@
                                     <td>{$ds['user_type']}</td>
                                     <td>{$ds['city']}, {$ds['subdistrict']}, {$ds['ward']}</td>
                                 <td>{if $ds['root']}
-                                    <a href="{$_url}settings/users-edit/{$ds['root']}">
+                                    <a href="{$_url}settings/users-view/{$ds['root']}">
                             {$admins[$ds['root']]}</a>{/if}</td>
                                     <td>{Lang::dateTimeFormat($ds['last_login'])}</td>
                                     <td>
+                                        <a href="{$_url}settings/users-view/{$ds['id']}"
+                                            class="btn btn-success btn-xs">{Lang::T('View')}</a>
                                         <a href="{$_url}settings/users-edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         {if ($_admin['id']) neq ($ds['id'])}

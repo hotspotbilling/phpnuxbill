@@ -1,96 +1,11 @@
 <?php
 
-/**
- *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
- *  by https://t.me/ibnux
- **/
-
-
-// on some server, it getting error because of slash is backwards
-function _autoloader($class)
-{
-    if (strpos($class, '_') !== false) {
-        $class = str_replace('_', DIRECTORY_SEPARATOR, $class);
-        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        } else {
-            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
-            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
-                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        }
-    } else {
-        if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php')) {
-            include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        } else {
-            $class = str_replace("\\", DIRECTORY_SEPARATOR, $class);
-            if (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php'))
-                include __DIR__ . DIRECTORY_SEPARATOR . 'autoload' . DIRECTORY_SEPARATOR . $class . '.php';
-        }
-    }
-}
-spl_autoload_register('_autoloader');
-
-
+include "../init.php";
+$isCli = true;
 if (php_sapi_name() !== 'cli') {
+    $isCli = false;
     echo "<pre>";
 }
-
-if (!file_exists('../config.php')) {
-    die("config.php file not found");
-}
-
-
-if (!file_exists('orm.php')) {
-    die("orm.php file not found");
-}
-
-if (!file_exists('uploads/notifications.default.json')) {
-    die("uploads/notifications.default.json file not found");
-}
-
-require_once '../config.php';
-require_once 'orm.php';
-require_once 'autoload/PEAR2/Autoload.php';
-include "autoload/Hookers.php";
-
-ORM::configure("mysql:host=$db_host;dbname=$db_name");
-ORM::configure('username', $db_user);
-ORM::configure('password', $db_password);
-ORM::configure('return_result_sets', true);
-ORM::configure('logging', true);
-
-
-// notification message
-if (file_exists("uploads/notifications.json")) {
-    $_notifmsg = json_decode(file_get_contents('uploads/notifications.json'), true);
-}
-$_notifmsg_default = json_decode(file_get_contents('uploads/notifications.default.json'), true);
-
-//register all plugin
-foreach (glob(File::pathFixer("plugin/*.php")) as $filename) {
-    try{
-        include $filename;
-    } catch(Throwable $e){
-        //ignore plugin error
-    }catch(Exception $e){
-        //ignore plugin error
-    }
-}
-
-$result = ORM::for_table('tbl_appconfig')->find_many();
-foreach ($result as $value) {
-    $config[$value['setting']] = $value['value'];
-}
-date_default_timezone_set($config['timezone']);
-
-if (!empty($radius_user) && $config['radius_enable']) {
-    ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
-    ORM::configure('username', $radius_user, 'radius');
-    ORM::configure('password', $radius_pass, 'radius');
-    ORM::configure('driver_options', array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'), 'radius');
-    ORM::configure('return_result_sets', true, 'radius');
-}
-
 echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
 $res = ORM::raw_execute('SELECT NOW() AS WAKTU;');
 $statement = ORM::get_last_statement();
@@ -112,7 +27,7 @@ foreach ($d as $ds) {
     if ($ds['type'] == 'Hotspot') {
         $date_now = strtotime(date("Y-m-d H:i:s"));
         $expiration = strtotime($ds['expiration'] . ' ' . $ds['time']);
-        echo $ds['expiration'] . " : " . $ds['username'];
+        echo $ds['expiration'] . " : " . (($isCli) ? $ds['username'] : Lang::maskText($ds['username']));
         if ($date_now >= $expiration) {
             echo " : EXPIRED \r\n";
             $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
@@ -167,7 +82,7 @@ foreach ($d as $ds) {
     } else {
         $date_now = strtotime(date("Y-m-d H:i:s"));
         $expiration = strtotime($ds['expiration'] . ' ' . $ds['time']);
-        echo $ds['expiration'] . " : " . $ds['username'];
+        echo $ds['expiration'] . " : " . (($isCli) ? $ds['username'] : Lang::maskText($ds['username']));
         if ($date_now >= $expiration) {
             echo " : EXPIRED \r\n";
             $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>{$_title}</title>
+    <title>{$_title} - {$_c['CompanyName']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
@@ -94,7 +94,7 @@
                                                 {Lang::T('Change Password')}</a>
                                         </div>
                                         <div class="col-xs-5 text-center text-sm">
-                                            <a href="{$_url}settings/users-edit/{$_admin['id']}">
+                                            <a href="{$_url}settings/users-view/{$_admin['id']}">
                                                 <i class="ion ion-person"></i> {Lang::T('My Account')}</a>
                                         </div>
                                     </div>

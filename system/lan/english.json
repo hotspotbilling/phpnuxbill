@@ -397,5 +397,20 @@
     "Radius_NAS": "Radius NAS",
     "Translation": "Translation",
     "Translation_saved_Successfully": "Translation saved Successfully",
-    "Language_Editor": "Language Editor"
+    "Language_Editor": "Language Editor",
+    "year": "year",
+    "month": "month",
+    "week": "week",
+    "day": "day",
+    "hour": "hour",
+    "minute": "minute",
+    "second": "second",
+    "Attributes": "Attributes",
+    "Profile": "Profile",
+    "Phone": "Phone",
+    "City": "City",
+    "Sub_District": "Sub District",
+    "Ward": "Ward",
+    "Credentials": "Credentials",
+    "Agent": "Agent"
 }

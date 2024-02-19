@@ -12,10 +12,10 @@
     <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css"> 
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
     <link rel="stylesheet" href="ui/ui/styles/sweetalert2.min.css" />
     <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
-    
+
 
     <style>
         ::-moz-selection {
