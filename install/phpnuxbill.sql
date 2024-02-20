@@ -181,14 +181,6 @@ CREATE TABLE `tb_languages` (
   `id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `tbl_customers_fields`;
-CREATE TABLE tbl_customers_fields (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  customer_id INT NOT NULL,
-  field_name VARCHAR(255) NOT NULL,
-  field_value VARCHAR(255) NOT NULL,
-  FOREIGN KEY (customer_id) REFERENCES tbl_customers(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;
 ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;
@@ -321,3 +313,12 @@ VALUES (
         '2022-09-06 16:09:50',
         '2014-06-23 01:43:07'
     );
+
+DROP TABLE IF EXISTS `tbl_customers_fields`;
+CREATE TABLE tbl_customers_fields (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  customer_id INT NOT NULL,
+  field_name VARCHAR(255) NOT NULL,
+  field_value VARCHAR(255) NOT NULL,
+  FOREIGN KEY (customer_id) REFERENCES tbl_customers(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
