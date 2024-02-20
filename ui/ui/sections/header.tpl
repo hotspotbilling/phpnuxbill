@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="ui/ui/styles/select2.min.css" />
     <link rel="stylesheet" href="ui/ui/styles/select2-bootstrap.min.css" />
     <link rel="stylesheet" href="ui/ui/styles/sweetalert2.min.css" />
+    <link rel="stylesheet" href="ui/ui/styles/plugins/pace.css" />
     <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
     <style>
         ::-moz-selection {
