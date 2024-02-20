@@ -423,5 +423,7 @@
     "Admin": "Admin",
     "Password_should_be_minimum_6_characters": "Password should be minimum 6 characters",
     "Add_User": "Add User",
-    "Send_Notification": "Send Notification"
+    "Send_Notification": "Send Notification",
+    "Code": "Code",
+    "Send_To_Customer": "Send To Customer"
 }
