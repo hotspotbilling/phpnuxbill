@@ -21,8 +21,8 @@
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
                                 </div>
-                                <input type="text" name="code" class="form-control"
-                                    placeholder="{Lang::T('Search by Code Voucher')}..." value="{$_code}">
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="{Lang::T('Search by Code Voucher')}..." value="{$search}">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
@@ -64,17 +64,17 @@
                                     <td>{$ds['type']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td>{$ds['name_plan']}</td>
-                                    <td width="10px"><input type="password" value="{$ds['code']}"
-                                            style="width:120px;border: 0px; text-align: right;" class="pull-right"
-                                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
-                                            onclick="this.select()"></td>
-                                    <td align="center">{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success">Not
+                                    <td style="background-color: black; color: black;"
+                                        onmouseleave="this.style.backgroundColor = 'black';"
+                                        onmouseenter="this.style.backgroundColor = 'white';">
+                                        {$ds['code']}</td>
+                                    <td>{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success">Not
                                             Use</label> {else} <label class="btn-tag btn-tag-danger">Used</label>
                                         {/if}</td>
-                                    <td align="center">{if $ds['user'] eq '0'} -
+                                    <td>{if $ds['user'] eq '0'} -
                                         {else}<a href="{$_url}customers/viewu/{$ds['user']}">{$ds['user']}</a>
                                         {/if}</td>
-                                    <td align="center">{if $ds['generated_by']}
+                                    <td>{if $ds['generated_by']}
                                             <a
                                                 href="{$_url}settings/users-view/{$ds['generated_by']}">{$admins[$ds['generated_by']]}</a>
                                         {else} -
@@ -98,7 +98,15 @@
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+
+                <ul class="pagination pagination-sm">
+                    {if $page>0}
+                        <li><a href="{$_url}prepaid/voucher&p={$page-1}&code={$_code}">{Lang::T('Prev')}</a></li>
+                    {/if}
+                    {if $d}
+                        <li><a href="{$_url}prepaid/voucher&p={$page+1}&code={$_code}">{Lang::T('Next')}</a></li>
+                    {/if}
+                </ul>
             </div>
         </div>
     </div>
