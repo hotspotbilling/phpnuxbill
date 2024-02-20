@@ -55,7 +55,7 @@
                                 <td>{if $ds['root']}
                                     <a href="{$_url}settings/users-view/{$ds['root']}">
                             {$admins[$ds['root']]}</a>{/if}</td>
-                                    <td>{Lang::dateTimeFormat($ds['last_login'])}</td>
+                        <td>{if $ds['last_login']}{Lang::timeElapsed($ds['last_login'])}{/if}</td>
                                     <td>
                                         <a href="{$_url}settings/users-view/{$ds['id']}"
                                             class="btn btn-success btn-xs">{Lang::T('View')}</a>
