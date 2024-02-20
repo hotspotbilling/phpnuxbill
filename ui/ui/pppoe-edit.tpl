@@ -88,6 +88,14 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Router Name')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="routers" name="routers" value="{$d['routers']}"
+                                readonly>
+                        </div>
+                    </div>
+                    <legend>{Lang::T('Expired Action')} <sub>{Lang::T('Optional')}</sub></legend>
+                    <div class="form-group">
                         <label class="col-md-2 control-label"><a
                                 href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
                         <div class="col-md-6">
@@ -100,14 +108,12 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Router Name')}</label>
+                    <div class="form-group" id="AddressList">
+                        <label class="col-md-2 control-label">{Lang::T('Address List')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="routers" name="routers" value="{$d['routers']}"
-                                readonly>
+                            <input type="text" class="form-control" name="list_expired" id="list_expired" value="{$d['list_expired']}">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success waves-effect waves-light"

@@ -54,7 +54,7 @@
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                     <td>{$ds['pool']}</td>
-                                    <td>{$ds['pool_expired']}</td>
+                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}{if $ds['pool_expired']} | {/if}{$ds['list_expired']}{/if}</td>
                                     <td>
                                     {if $ds['is_radius']}
                                         <span class="label label-primary">RADIUS</span>

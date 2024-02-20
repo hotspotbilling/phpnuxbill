@@ -147,19 +147,7 @@
                             </div>
                         </div>
                     </span>
-                    <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Expired Action')}</label>
-                        <div class="col-md-10">
-                            <label><input type="radio" onclick="setExp(1)" checked name="exp_act" value="pool"> IP
-                                Pool</label>
-                            &nbsp;&nbsp;
-                            <label><input type="radio" onclick="setExp(2)" name="exp_act" value="list"> Address
-                                List</label>
-                            &nbsp;&nbsp;
-                            <label><input type="radio" onclick="setExp(0)" name="exp_act" value="none">
-                                None</label>
-                        </div>
-                    </div>
+                    <legend>{Lang::T('Expired Action')} <sub>{Lang::T('Optional')}</sub></legend>
                     <div class="form-group" id="ipPool">
                         <label class="col-md-2 control-label"><a
                                 href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
@@ -169,7 +157,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group hidden" id="AddressList">
+                    <div class="form-group" id="AddressList">
                         <label class="col-md-2 control-label">{Lang::T('Address List')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="list_expired" id="list_expired">
@@ -206,23 +194,6 @@
                 } else {
                     document.getElementById("routers").required = true;
                     $("#routerChoose").removeClass('hidden');
-                }
-            }
-
-            function setExp(vl) {
-                if (vl == 1) {
-                    $('#list_expired').val('');
-                    $('#ipPool').removeClass('hidden');
-                    $('#AddressList').addClass('hidden');
-                } else if (vl == 2) {
-                    $('#pool_expired').prop('selectedIndex', 0);
-                    $('#ipPool').addClass('hidden');
-                    $('#AddressList').removeClass('hidden');
-                } else {
-                    $('#pool_expired').prop('selectedIndex', 0);
-                    $('#list_expired').val('');
-                    $('#ipPool').addClass('hidden');
-                    $('#AddressList').addClass('hidden');
                 }
             }
         </script>

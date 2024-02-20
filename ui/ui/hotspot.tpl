@@ -67,7 +67,7 @@
                                             {/if}
                                         {/if}
                                     </td>
-                                    <td>{$ds['pool_expired']}</td>
+                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}{if $ds['pool_expired']} | {/if}{$ds['list_expired']}{/if}</td>
                                     <td>
                                         <a href="{$_url}services/edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>

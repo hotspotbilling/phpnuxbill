@@ -470,6 +470,7 @@ switch ($action) {
         $routers = _post('routers');
         $pool = _post('pool_name');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
         $allow_purchase = _post('allow_purchase');
 
@@ -529,8 +530,9 @@ switch ($action) {
             } else {
                 $d->is_radius = 0;
                 $d->routers = $routers;
-                $d->pool_expired = $pool_expired;
             }
+            $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->allow_purchase = $allow_purchase;
             $d->save();
@@ -563,6 +565,7 @@ switch ($action) {
         $routers = _post('routers');
         $pool = _post('pool_name');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
         $allow_purchase = _post('allow_purchase');
 
@@ -622,6 +625,7 @@ switch ($action) {
             $d->routers = $routers;
             $d->pool = $pool;
             $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->allow_purchase = $allow_purchase;
             $d->save();

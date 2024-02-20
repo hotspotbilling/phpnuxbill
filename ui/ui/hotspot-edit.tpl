@@ -152,6 +152,7 @@
                             </div>
                         </div>
                     </span>
+                    <legend>{Lang::T('Expired Action')} <sub>{Lang::T('Optional')}</sub></legend>
                     <div class="form-group">
                         <label class="col-md-2 control-label"><a
                                 href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
@@ -163,6 +164,12 @@
                                         {/if}>{$ps['pool_name']}</option>
                                 {/foreach}
                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="AddressList">
+                        <label class="col-md-2 control-label">{Lang::T('Address List')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="list_expired" id="list_expired" value="{$d['list_expired']}">
                         </div>
                     </div>
                     <div class="form-group">

@@ -118,6 +118,7 @@ if (empty($step)) {
     }
     $step++;
 } else {
+    $path = 'ui/compiled/';
     $version = json_decode(file_get_contents('version.json'), true)['version'];
     $continue = false;
 }
@@ -185,7 +186,7 @@ function deleteFolder($path)
     <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
 
     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
-    
+
     <?php if ($continue) { ?>
         <meta http-equiv="refresh" content="3; ./update.php?step=<?= $step ?>">
     <?php } ?>
