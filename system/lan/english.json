@@ -425,5 +425,7 @@
     "Add_User": "Add User",
     "Send_Notification": "Send Notification",
     "Code": "Code",
-    "Send_To_Customer": "Send To Customer"
+    "Send_To_Customer": "Send To Customer",
+    "Prev": "Prev",
+    "Voucher_Not_Found": "Voucher Not Found"
 }

@@ -273,24 +273,55 @@ switch ($action) {
         break;
 
     case 'voucher':
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/voucher.js"></script>');
         $ui->assign('_title', Lang::T('Prepaid Vouchers'));
-        $code = _post('code');
-        if ($code != '') {
-            $ui->assign('code', $code);
-            $paginator = Paginator::build(ORM::for_table('tbl_voucher'), ['code' => '%' . $code . '%'], $code);
-            $d = ORM::for_table('tbl_plans')->where('enabled', '1')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where_like('tbl_voucher.code', '%' . $code . '%')
-                ->offset($paginator['startpoint'])
-                ->limit($paginator['limit'])
-                ->find_many();
+        $limit = 10;
+        $page = _get('p', 0);
+        $pageNow = $page * $limit;
+        $search = _req('search');
+        if ($search != '') {
+            if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+                $d = ORM::for_table('tbl_plans')->where('enabled', '1')
+                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                    ->where_like('tbl_voucher.code', '%' . $search . '%')
+                    ->offset($pageNow)
+                    ->limit($limit)
+                    ->findArray();
+            } else if ($admin['user_type'] == 'Agent') {
+                $sales = [];
+                $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
+                foreach ($sls as $s) {
+                    $sales[] = $s['id'];
+                }
+                $sales[] = $admin['id'];
+                $d = ORM::for_table('tbl_plans')
+                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                    ->where_in('generated_by', $sales)
+                    ->where_like('tbl_voucher.code', '%' . $search . '%')
+                    ->offset($pageNow)
+                    ->limit($limit)
+                    ->findArray();
+            }
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_voucher'));
-            $d = ORM::for_table('tbl_plans')->where('enabled', '1')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->offset($paginator['startpoint'])
-                ->limit($paginator['limit'])->find_many();
+            if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+                $d = ORM::for_table('tbl_plans')->where('enabled', '1')
+                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                    ->offset($pageNow)
+                    ->limit($limit)
+                    ->findArray();
+            } else if ($admin['user_type'] == 'Agent') {
+                $sales = [];
+                $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
+                foreach ($sls as $s) {
+                    $sales[] = $s['id'];
+                }
+                $sales[] = $admin['id'];
+                $d = ORM::for_table('tbl_plans')
+                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                    ->where_in('generated_by', $sales)
+                    ->offset($pageNow)
+                    ->limit($limit)
+                    ->findArray();
+            }
         }
         // extract admin
         $admins = [];
@@ -316,8 +347,8 @@ switch ($action) {
         }
         $ui->assign('admins', $admins);
         $ui->assign('d', $d);
-        $ui->assign('_code', $code);
-        $ui->assign('paginator', $paginator);
+        $ui->assign('search', $search);
+        $ui->assign('page', $page);
         run_hook('view_list_voucher'); #HOOK
         $ui->display('voucher.tpl');
         break;
@@ -371,48 +402,53 @@ switch ($action) {
                 ->where('tbl_voucher.status', '0')
                 ->where('tbl_plans.id', $planid)
                 ->where_gt('tbl_voucher.id', $from_id)
-                ->limit($limit)
-                ->find_many();
+                ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where('tbl_plans.id', $planid)
-                ->where_gt('tbl_voucher.id', $from_id)
-                ->count();
+                ->where_gt('tbl_voucher.id', $from_id);
         } else if ($from_id == 0 && $planid > 0) {
             $v = ORM::for_table('tbl_plans')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where('tbl_plans.id', $planid)
-                ->limit($limit)
-                ->find_many();
+                ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
-                ->where('tbl_plans.id', $planid)
-                ->count();
+                ->where('tbl_plans.id', $planid);
         } else if ($from_id > 0 && $planid == 0) {
             $v = ORM::for_table('tbl_plans')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where_gt('tbl_voucher.id', $from_id)
-                ->limit($limit)
-                ->find_many();
+                ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
-                ->where_gt('tbl_voucher.id', $from_id)
-                ->count();
+                ->where_gt('tbl_voucher.id', $from_id);
         } else {
             $v = ORM::for_table('tbl_plans')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
-                ->limit($limit)
-                ->find_many();
+                ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
                 ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->count();
+                ->where('tbl_voucher.status', '0');
+        }
+        if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            $v = $v->find_many();
+            $vc = $vc->count();
+        } else {
+            $sales = [];
+            $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
+            foreach ($sls as $s) {
+                $sales[] = $s['id'];
+            }
+            $sales[] = $admin['id'];
+            $v = $v->where_in('generated_by', $sales)->find_many();
+            $vc = $vc->where_in('generated_by', $sales)->count();
         }
         $template = file_get_contents("pages/Voucher.html");
         $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
@@ -509,10 +545,24 @@ switch ($action) {
         break;
 
     case 'voucher-view':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        $id = $routes[2];
+        if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             $voucher = ORM::for_table('tbl_voucher')->find_one($id);
         } else {
-            $voucher = ORM::for_table('tbl_voucher')->where('generated_by', $admin['id'])->find_one($id);
+            $sales = [];
+            $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
+            foreach ($sls as $s) {
+                $sales[] = $s['id'];
+            }
+            $sales[] = $admin['id'];
+            $voucher = ORM::for_table('tbl_voucher')
+                ->find_one($id);
+            if (!in_array($voucher['generated_by'], $sales)) {
+                r2(U . 'prepaid/voucher/', 'e', Lang::T('Voucher Not Found'));
+            }
+        }
+        if (!$voucher) {
+            r2(U . 'prepaid/voucher/', 'e', Lang::T('Voucher Not Found'));
         }
         $plan = ORM::for_table('tbl_plans')->find_one($d['id_plan']);
         if ($voucher && $plan) {

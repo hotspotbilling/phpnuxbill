@@ -41,6 +41,22 @@
             }
         }
 
+        @media only screen and (max-width: 40em) {
+            thead th:not(:first-child) {
+                display: none;
+            }
+
+            td,
+            th {
+                display: block;
+            }
+
+            td[data-th]:before {
+                content: attr(data-th);
+            }
+        }
+
+
         .text1line {
             display: block;
             /* or inline-block */
@@ -343,20 +359,20 @@
 
             <section class="content">
                 {if isset($notify)}
-                <script>
-                    // Display SweetAlert toast notification
-                    Swal.fire({
-                        icon: '{if $notify_t == "s"}success{else}error{/if}',
-                        title: '{$notify}',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                        }
-                    });
-                </script>
-                {/if}
+                    <script>
+                        // Display SweetAlert toast notification
+                        Swal.fire({
+                            icon: '{if $notify_t == "s"}success{else}error{/if}',
+                            title: '{$notify}',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        });
+                    </script>
+{/if}

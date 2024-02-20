@@ -18,10 +18,14 @@ class Paginator
         $page = (int)(empty(_get('p')) ? 1 : _get('p'));
         $pagination = "";
         foreach($colVal as $k=>$v) {
-            if(strpos($v,'%') === false) {
+            if(!is_array($v) && strpos($v,'%') === false) {
                 $table = $table->where($k, $v);
             }else{
-                $table = $table->where_like($k, $v);
+                if(is_array($v)){
+                    $table = $table->where_in($k, $v);
+                }else{
+                    $table = $table->where_like($k, $v);
+                }
             }
         }
         $totalReq = $table->count();
