@@ -101,12 +101,12 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group" id="AddressList">
+                    {* <div class="form-group" id="AddressList">
                         <label class="col-md-2 control-label">{Lang::T('Address List')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="list_expired" id="list_expired">
                         </div>
-                    </div>
+                    </div> *}
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
                             <button class="btn btn-primary waves-effect waves-light"

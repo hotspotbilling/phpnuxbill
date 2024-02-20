@@ -515,6 +515,18 @@ class Mikrotik
         $client->sendSync($smsRequest);
     }
 
+    public static function getIpHotspotUser($client, $username){
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+        $printRequest = new RouterOS\Request(
+            '/ip hotspot active print',
+            RouterOS\Query::where('user', $username)
+        );
+        return $client->sendSync($printRequest)->getProperty('address');
+    }
+
     public static function addIpToAddressList($client, $ip, $listName, $comment = '')
     {
         global $_app_stage;

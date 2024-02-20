@@ -100,17 +100,6 @@ class Package
 
         if ($p['type'] == 'Hotspot') {
             if ($b) {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, "$date_exp $time");
-                }else{
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client, $c['username']);
-                    Mikrotik::removePpoeUser($client, $c['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                    Mikrotik::removePpoeActive($client, $c['username']);
-                    Mikrotik::addHotspotUser($client, $p, $c);
-                }
-
                 if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
                     if ($p['validity_unit'] == 'Months') {
@@ -128,6 +117,17 @@ class Package
                         $date_exp = $datetime[0];
                         $time = $datetime[1];
                     }
+                }
+
+                if ($p['is_radius']) {
+                    Radius::customerAddPlan($c, $p, "$date_exp $time");
+                }else{
+                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
+                    Mikrotik::addHotspotUser($client, $p, $c);
                 }
 
                 $b->customer_id = $id_customer;
@@ -208,18 +208,6 @@ class Package
         } else {
 
             if ($b) {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, "$date_exp $time");
-                }else{
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client, $c['username']);
-                    Mikrotik::removePpoeUser($client, $c['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                    Mikrotik::removePpoeActive($client, $c['username']);
-                    Mikrotik::addPpoeUser($client, $p, $c);
-                }
-
-
                 if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
                     if ($p['validity_unit'] == 'Months') {
@@ -237,6 +225,17 @@ class Package
                         $date_exp = $datetime[0];
                         $time = $datetime[1];
                     }
+                }
+
+                if ($p['is_radius']) {
+                    Radius::customerAddPlan($c, $p, "$date_exp $time");
+                }else{
+                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
+                    Mikrotik::addPpoeUser($client, $p, $c);
                 }
 
                 $b->customer_id = $id_customer;

@@ -280,14 +280,16 @@ switch ($action) {
                     'username' => '%' . $search . '%',
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
-                    ['user_type' => 'Sales']
+                    ['user_type' => 'Sales'],
+                    ['id' => $admin['id']]
                 ], $search);
                 $d = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $search . '%')
                     ->where_any_is([
                         ['user_type' => 'Report'],
                         ['user_type' => 'Agent'],
-                        ['user_type' => 'Sales']
+                        ['user_type' => 'Sales'],
+                        ['id' => $admin['id']]
                     ])
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->findArray();
@@ -311,7 +313,8 @@ switch ($action) {
                 $d = ORM::for_table('tbl_users')->where_any_is([
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
-                    ['user_type' => 'Sales']
+                    ['user_type' => 'Sales'],
+                    ['id' => $admin['id']]
                 ])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else {
                 $paginator = Paginator::build(ORM::for_table('tbl_users'));
@@ -591,7 +594,9 @@ switch ($action) {
             $d->city = $city;
             $d->subdistrict = $subdistrict;
             $d->ward = $ward;
-            $d->status = $status;
+            if(isset($_POST['status'])){
+                $d->status = $status;
+            }
 
             if ($admin['user_type'] == 'Agent') {
                 // Prevent hacking from form

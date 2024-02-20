@@ -46,8 +46,9 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 if (!empty($p['pool_expired'])) {
                     Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL ' . $p['pool_expired']);
-                }if (!empty($p['list_expired'])) {
-                    Mikrotik::addIpToAddressList($client, $ip, $p['list_expired'], $c['username']);
+                // }if (!empty($p['list_expired'])) {
+                //     $ip = Mikrotik::getIpHotspotUser($client, $ds['username']);
+                //     Mikrotik::addIpToAddressList($client, $ip, $p['list_expired'], $c['username']);
                 } else {
                     Mikrotik::removeHotspotUser($client, $c['username']);
                 }
