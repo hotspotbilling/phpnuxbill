@@ -200,9 +200,6 @@ ALTER TABLE `tbl_bandwidth`
 ALTER TABLE `tbl_customers`
   ADD PRIMARY KEY (`id`);
 
-ALTER TABLE `tbl_customers_meta`
-  ADD PRIMARY KEY (`id`);
-
 ALTER TABLE `tbl_logs`
   ADD PRIMARY KEY (`id`);
 
@@ -242,9 +239,6 @@ ALTER TABLE `tbl_bandwidth`
 
 ALTER TABLE `tbl_customers`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `tbl_customers_meta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `tbl_logs`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
