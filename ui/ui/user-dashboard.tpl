@@ -76,16 +76,16 @@
                 </tr>
                 <tr>
                     <td class="small text-success text-uppercase text-normal">{Lang::T('Service Type')}</td>
-                      <td class="small mb15">
-                       {if $_user.service_type == 'Hotspot'}
-                          Hotspot
-                         {elseif $_user.service_type == 'PPPoE'}
-                        PPPoE
-                       {elseif $_user.service_type == 'Others' || $_user.service_type == null}
-                       Others
-                    {/if}
-                   </td>
-                 </tr>
+                    <td class="small mb15">
+                        {if $_user.service_type == 'Hotspot'}
+                            Hotspot
+                        {elseif $_user.service_type == 'PPPoE'}
+                            PPPoE
+                        {elseif $_user.service_type == 'Others' || $_user.service_type == null}
+                            Others
+                        {/if}
+                    </td>
+                </tr>
 
                 {if $_c['enable_balance'] == 'yes'}
                     <tr>
@@ -103,11 +103,20 @@
                     </tr>
                 {/if}
             </table>
-            {if $_bills}
+        </div>
+        {if $_bills}
+            <div class="box box-primary box-solid">
                 {foreach $_bills as $_bill}
                     {if $_bill['routers'] != 'radius'}
                         <div class="box-header">
                             <h3 class="box-title">{$_bill['routers']}</h3>
+                            <div class="btn-group pull-right">
+                                {if $_bill['type'] != 'Hotspot'}
+                                    {if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}
+                                {else}
+                                    {if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}
+                                {/if}
+                            </div>
                         </div>
                     {else}
                         <div class="box-header">
@@ -163,8 +172,8 @@
                         {/if}
                     </table>
                 {/foreach}
-            {/if}
-        </div>
+            </div>
+        {/if}
         {if $_c['disable_voucher'] == 'yes'}
             <div class="box-footer">
                 {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
