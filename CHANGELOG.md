@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.2.20
+
+- Fix list admin
+- Burst Limit
+- Pace Loading by @Focuslinkstech
+
 ## 2024.2.19
 
 - Start API Development
