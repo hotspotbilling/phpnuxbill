@@ -34,6 +34,7 @@
                             <textarea name="address" id="address" class="form-control">{$d['address']}</textarea>
                         </div>
                     </div>
+                    {if $_c['allow_phone_otp'] == 'no'}
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
                         <div class="col-md-6">
@@ -45,6 +46,23 @@
                             </div>
                         </div>
                     </div>
+                    {elseif $_c['allow_phone_otp'] == 'yes'}
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="basic-addon1">+</span>
+                                <input type="text" class="form-control" name="phonenumber" id="phonenumber"
+                                    value="{$d['phonenumber']}" readonly
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
+                                <span class="input-group-btn">
+                                    <a href="{$_url}accounts/phone-update" type="button"
+                                        class="btn btn-info btn-flat">{Lang::T('Change')}</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {/if}
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Email')}</label>
                         <div class="col-md-6">
@@ -54,8 +72,8 @@
 
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success waves-effect waves-light"
-                                type="submit">{Lang::T('Save Changes')}</button>
+                            <button class="btn btn-success waves-effect waves-light" type="submit">{Lang::T('Save
+                                Changes')}</button>
                             Or <a href="{$_url}home">{Lang::T('Cancel')}</a>
                         </div>
                     </div>

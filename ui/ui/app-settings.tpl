@@ -74,11 +74,11 @@
                         <label class="col-md-2 control-label">Theme</label>
                         <div class="col-md-6">
                             <select name="theme" id="theme" class="form-control">
-                                <option value="default" {if $_c['theme'] eq 'default'}selected="selected" {/if}>Default
+                                <option value="default" {if $_c['theme'] eq 'default' }selected="selected" {/if}>Default
                                 </option>
                                 {foreach $themes as $theme}
-                                    <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
-                                        {Lang::ucWords($theme)}</option>
+                                <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
+                                    {Lang::ucWords($theme)}</option>
                                 {/foreach}
                             </select>
                         </div>
@@ -103,21 +103,21 @@
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><input type="checkbox" name="hide_mrc" value="yes"
-                                {if $_c['hide_mrc'] eq 'yes'}checked{/if}>
+                        <label class="col-md-3 control-label"><input type="checkbox" name="hide_mrc" value="yes" {if
+                                $_c['hide_mrc'] eq 'yes' }checked{/if}>
                             {Lang::T('Monthly Registered Customers')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_tms" value="yes"
-                                {if $_c['hide_tms'] eq 'yes'}checked{/if}> {Lang::T('Total Monthly Sales')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_aui" value="yes"
-                                {if $_c['hide_aui'] eq 'yes'}checked{/if}> {Lang::T('All Users Insights')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_al" value="yes"
-                                {if $_c['hide_al'] eq 'yes'}checked{/if}> {Lang::T('Activity Log')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_uet" value="yes"
-                                {if $_c['hide_uet'] eq 'yes'}checked{/if}> {Lang::T('User Expired, Today')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_vs" value="yes"
-                                {if $_c['hide_vs'] eq 'yes'}checked{/if}> Vouchers Stock</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_pg" value="yes"
-                                {if $_c['hide_pg'] eq 'yes'}checked{/if}> Payment Gateway</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_tms" value="yes" {if
+                                $_c['hide_tms'] eq 'yes' }checked{/if}> {Lang::T('Total Monthly Sales')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_aui" value="yes" {if
+                                $_c['hide_aui'] eq 'yes' }checked{/if}> {Lang::T('All Users Insights')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_al" value="yes" {if
+                                $_c['hide_al'] eq 'yes' }checked{/if}> {Lang::T('Activity Log')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_uet" value="yes" {if
+                                $_c['hide_uet'] eq 'yes' }checked{/if}> {Lang::T('User Expired, Today')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_vs" value="yes" {if
+                                $_c['hide_vs'] eq 'yes' }checked{/if}> Vouchers Stock</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="hide_pg" value="yes" {if
+                                $_c['hide_pg'] eq 'yes' }checked{/if}> Payment Gateway</label>
                     </div>
                 </div>
                 <div class="panel-heading">
@@ -132,9 +132,9 @@
                         <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>
                         <div class="col-md-6">
                             <select name="disable_voucher" id="disable_voucher" class="form-control">
-                                <option value="no" {if $_c['disable_voucher'] == 'no'}selected="selected" {/if}>No
+                                <option value="no" {if $_c['disable_voucher']=='no' }selected="selected" {/if}>No
                                 </option>
-                                <option value="yes" {if $_c['disable_voucher'] == 'yes'}selected="selected" {/if}>Yes
+                                <option value="yes" {if $_c['disable_voucher']=='yes' }selected="selected" {/if}>Yes
                                 </option>
                             </select>
                         </div>
@@ -144,12 +144,12 @@
                         <label class="col-md-2 control-label">{Lang::T('Voucher Format')}</label>
                         <div class="col-md-6">
                             <select name="voucher_format" id="voucher_format" class="form-control">
-                                <option value="up" {if $_c['voucher_format'] == 'up'}selected="selected" {/if}>UPPERCASE
+                                <option value="up" {if $_c['voucher_format']=='up' }selected="selected" {/if}>UPPERCASE
                                 </option>
-                                <option value="low" {if $_c['voucher_format'] == 'low'}selected="selected" {/if}>
+                                <option value="low" {if $_c['voucher_format']=='low' }selected="selected" {/if}>
                                     lowercase
                                 </option>
-                                <option value="rand" {if $_c['voucher_format'] == 'rand'}selected="selected" {/if}>
+                                <option value="rand" {if $_c['voucher_format']=='rand' }selected="selected" {/if}>
                                     RaNdoM
                                 </option>
                             </select>
@@ -157,31 +157,33 @@
                         <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
                     </div>
                     {if $_c['disable_voucher'] != 'yes'}
-                        <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
-                            <div class="col-md-6">
-                                <select name="disable_registration" id="disable_registration" class="form-control">
-                                    <option value="no" {if $_c['disable_registration'] == 'no'}selected="selected" {/if}>No
-                                    </option>
-                                    <option value="yes" {if $_c['disable_registration'] == 'yes'}selected="selected" {/if}>
-                                        Yes
-                                    </option>
-                                </select>
-                            </div>
-                            <p class="help-block col-md-4">
-                                {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be password')}
-                            </p>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
+                        <div class="col-md-6">
+                            <select name="disable_registration" id="disable_registration" class="form-control">
+                                <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>No
+                                </option>
+                                <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
+                                    Yes
+                                </option>
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label class="col-md-2 control-label">Redirect after Activation</label>
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
-                                    placeholder="https://192.168.88.1/status" value="{$voucher_redirect}">
-                            </div>
-                            <p class="help-block col-md-4">
-                                {Lang::T('After Customer activate voucher or login, customer will be redirected to this url')}
-                            </p>
+                        <p class="help-block col-md-4">
+                            {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be
+                            password')}
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Redirect after Activation</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
+                                placeholder="https://192.168.88.1/status" value="{$voucher_redirect}">
                         </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('After Customer activate voucher or login, customer will be redirected to this
+                            url')}
+                        </p>
+                    </div>
                     {/if}
                 </div>
                 <div class="panel-heading">
@@ -223,9 +225,9 @@
                         <label class="col-md-2 control-label">{Lang::T('Enable System')}</label>
                         <div class="col-md-6">
                             <select name="enable_balance" id="enable_balance" class="form-control">
-                                <option value="no" {if $_c['enable_balance'] == 'no'}selected="selected" {/if}>No
+                                <option value="no" {if $_c['enable_balance']=='no' }selected="selected" {/if}>No
                                 </option>
-                                <option value="yes" {if $_c['enable_balance'] == 'yes'}selected="selected" {/if}>Yes
+                                <option value="yes" {if $_c['enable_balance']=='yes' }selected="selected" {/if}>Yes
                                 </option>
                             </select>
                         </div>
@@ -235,10 +237,10 @@
                         <label class="col-md-2 control-label">{Lang::T('Allow Transfer')}</label>
                         <div class="col-md-6">
                             <select name="allow_balance_transfer" id="allow_balance_transfer" class="form-control">
-                                <option value="no" {if $_c['allow_balance_transfer'] == 'no'}selected="selected" {/if}>
+                                <option value="no" {if $_c['allow_balance_transfer']=='no' }selected="selected" {/if}>
                                     No</option>
-                                <option value="yes" {if $_c['allow_balance_transfer'] == 'yes'}selected="selected"
-                                    {/if}>Yes</option>
+                                <option value="yes" {if $_c['allow_balance_transfer']=='yes' }selected="selected" {/if}>
+                                    Yes</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Allow balance transfer between customers')}</p>
@@ -304,8 +306,8 @@
                                 onchange="document.getElementById('sms_url').value = this.value">
                                 <option value="">Select Router</option>
                                 {foreach $r as $rs}
-                                    <option value="{$rs['name']}" {if $rs['name']==$_c['sms_url']}selected{/if}>
-                                        {$rs['name']}</option>
+                                <option value="{$rs['name']}" {if $rs['name']==$_c['sms_url']}selected{/if}>
+                                    {$rs['name']}</option>
                                 {/foreach}
                             </select>
                         </div>
@@ -352,9 +354,9 @@
                             <select name="user_notification_expired" id="user_notification_expired"
                                 class="form-control">
                                 <option value="none">None</option>
-                                <option value="wa" {if $_c['user_notification_expired'] == 'wa'}selected="selected"
+                                <option value="wa" {if $_c['user_notification_expired']=='wa' }selected="selected"
                                     {/if}>Whatsapp</option>
-                                <option value="sms" {if $_c['user_notification_expired'] == 'sms'}selected="selected"
+                                <option value="sms" {if $_c['user_notification_expired']=='sms' }selected="selected"
                                     {/if}>SMS</option>
                             </select>
                         </div>
@@ -366,9 +368,9 @@
                             <select name="user_notification_payment" id="user_notification_payment"
                                 class="form-control">
                                 <option value="none">None</option>
-                                <option value="wa" {if $_c['user_notification_payment'] == 'wa'}selected="selected"
+                                <option value="wa" {if $_c['user_notification_payment']=='wa' }selected="selected"
                                     {/if}>Whatsapp</option>
-                                <option value="sms" {if $_c['user_notification_payment'] == 'sms'}selected="selected"
+                                <option value="sms" {if $_c['user_notification_payment']=='sms' }selected="selected"
                                     {/if}>SMS</option>
                             </select>
                         </div>
@@ -381,9 +383,9 @@
                             <select name="user_notification_reminder" id="user_notification_reminder"
                                 class="form-control">
                                 <option value="none">None</option>
-                                <option value="wa" {if $_c['user_notification_reminder'] == 'wa'}selected="selected"
+                                <option value="wa" {if $_c['user_notification_reminder']=='wa' }selected="selected"
                                     {/if}>Whatsapp</option>
-                                <option value="sms" {if $_c['user_notification_reminder'] == 'sms'}selected="selected"
+                                <option value="sms" {if $_c['user_notification_reminder']=='sms' }selected="selected"
                                     {/if}>SMS</option>
                             </select>
                         </div>
@@ -452,6 +454,28 @@
                         </div>
                     </div>
                 </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Miscellaneous')}
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('OTP Required')}</label>
+                        <div class="col-md-6">
+                            <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
+                                <option value="no" {if $_c['allow_phone_otp']=='no' }selected="selected" {/if}>
+                                    No</option>
+                                <option value="yes" {if $_c['allow_phone_otp']=='yes' }selected="selected" {/if}>Yes
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('OTP is required when user want to change phone
+                            number')}</p>
+                    </div>
+                </div>
                 {* <div class="panel-heading" id="envato">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
@@ -484,8 +508,8 @@
 
             <div class="panel-body">
                 <div class="form-group">
-                    <button class="btn btn-success btn-block waves-effect waves-light"
-                        type="submit">{Lang::T('Save Changes')}</button>
+                    <button class="btn btn-success btn-block waves-effect waves-light" type="submit">{Lang::T('Save
+                        Changes')}</button>
                 </div>
             </div>
 
@@ -511,14 +535,14 @@ add dst-host=*.{$_domain}</pre>
     function testWa() {
         var target = prompt("Phone number\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{$_url}settings/app&testWa='+target;
+            window.location.href = '{$_url}settings/app&testWa=' + target;
         }
     }
 
     function testSms() {
         var target = prompt("Phone number\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{$_url}settings/app&testSms='+target;
+            window.location.href = '{$_url}settings/app&testSms=' + target;
         }
     }
 
