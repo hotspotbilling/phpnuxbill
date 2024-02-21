@@ -43,7 +43,7 @@
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-bordered table-striped">
+                    <table id="datatable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
                                 <th>ID</th>

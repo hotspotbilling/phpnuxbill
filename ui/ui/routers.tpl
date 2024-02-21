@@ -31,19 +31,18 @@
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>{Lang::T('Router Name')}</th>
                                 <th>{Lang::T('IP Address')}</th>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Description')}</th>
                                 <th>{Lang::T('Status')}</th>
                                 <th>{Lang::T('Manage')}</th>
+                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled" {/if}>
-                                    <td>{$ds['id']}</td>
                                     <td>{$ds['name']}</td>
                                     <td>{$ds['ip_address']}</td>
                                     <td>{$ds['username']}</td>
@@ -56,6 +55,7 @@
                                             onclick="return confirm('{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
+                                    <td>{$ds['id']}</td>
                                 </tr>
                             {/foreach}
                         </tbody>

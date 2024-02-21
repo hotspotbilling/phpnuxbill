@@ -427,5 +427,19 @@
     "Code": "Code",
     "Send_To_Customer": "Send To Customer",
     "Prev": "Prev",
-    "Voucher_Not_Found": "Voucher Not Found"
+    "Voucher_Not_Found": "Voucher Not Found",
+    "Miscellaneous": "Miscellaneous",
+    "OTP_Required": "OTP Required",
+    "Change": "Change",
+    "Change_Phone_Number": "Change Phone Number",
+    "Current_Number": "Current Number",
+    "New_Number": "New Number",
+    "Input_your_phone_number": "Input your phone number",
+    "OTP": "OTP",
+    "Enter_OTP_that_was_sent_to_your_phone": "Enter OTP that was sent to your phone",
+    "Update": "Update",
+    "OTP_is_required_when_user_want_to_change_phone_number": "OTP is required when user want to change phone number",
+    "Rate": "Rate",
+    "Burst": "Burst",
+    "Editing_Bandwidth_will_not_automatically_update_the_plan__you_need_to_edit_the_plan_then_save_again": "Editing Bandwidth will not automatically update the plan, you need to edit the plan then save again"
 }

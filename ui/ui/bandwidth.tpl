@@ -24,12 +24,12 @@
 										</div>&nbsp;
 									</div>
 									<div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-condensed table-striped table_mobile">
                                             <thead>
                                                 <tr>
                                                     <th>{Lang::T('Bandwidth Name')}</th>
-                                                    <th>{Lang::T('Rate Download')}</th>
-                                                    <th>{Lang::T('Rate Upload')}</th>
+                                                    <th>{Lang::T('Rate')}</th>
+                                                    <th>{Lang::T('Burst')}</th>
                                                     <th>{Lang::T('Manage')}</th>
                                                 </tr>
                                             </thead>
@@ -37,8 +37,8 @@
                                             {foreach $d as $ds}
                                                 <tr>
                                                     <td>{$ds['name_bw']}</td>
-                                                    <td>{$ds['rate_down']} {$ds['rate_down_unit']}</td>
-                                                    <td>{$ds['rate_up']} {$ds['rate_up_unit']}</td>
+                                                    <td>{$ds['rate_down']} {$ds['rate_down_unit']} / {$ds['rate_up']} {$ds['rate_up_unit']}</td>
+                                                    <td>{$ds['burst']}</td>
                                                     <td>
                                                         <a href="{$_url}bandwidth/edit/{$ds['id']}" class="btn btn-sm btn-warning">{Lang::T('Edit')}</a>
                                                         <a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}" class="btn btn-danger btn-sm" onclick="return confirm('{Lang::T('Delete')}?')" ><i class="glyphicon glyphicon-trash"></i></a>

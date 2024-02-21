@@ -43,6 +43,7 @@
                                 <th>{Lang::T('Expired IP Pool')}</th>
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Manage')}</th>
+                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,6 +71,7 @@
                                             onclick="return confirm('{Lang::T('Delete')}?')" id="{$ds['id']}"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
+                                    <td>{$ds['id']}</td>
                                 </tr>
                             {/foreach}
                         </tbody>

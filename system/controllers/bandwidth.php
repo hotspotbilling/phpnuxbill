@@ -44,6 +44,7 @@ switch ($action) {
         run_hook('view_edit_bandwith'); #HOOK
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
         if($d){
+            $ui->assign('burst',explode(" ", $d['burst']));
             $ui->assign('d',$d);
             $ui->display('bandwidth-edit.tpl');
         }else{
@@ -67,8 +68,19 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
 		$rate_up = _post('rate_up');
 		$rate_up_unit = _post('rate_up_unit');
-		$burst = _post('burst');
         run_hook('add_bandwidth'); #HOOK
+        $isBurst = true;
+        $burst = "";
+        if(isset($_POST['burst'])){
+            foreach($_POST['burst'] as $b){
+                if(empty($b)){
+                    $isBurst = false;
+                }
+            }
+            if($isBurst){
+                $burst = implode(' ', $_POST['burst']);
+            };
+        }
         $msg = '';
         if(Validator::Length($name,16,4) == false){
             $msg .= 'Name should be between 5 to 15 characters'. '<br>';
@@ -104,8 +116,19 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
 		$rate_up = _post('rate_up');
 		$rate_up_unit = _post('rate_up_unit');
-		$burst = _post('burst');
-        run_hook('edit_bandwidth'); #HOOK
+		run_hook('edit_bandwidth'); #HOOK
+        $isBurst = true;
+        $burst = "";
+        if(isset($_POST['burst'])){
+            foreach($_POST['burst'] as $b){
+                if(empty($b)){
+                    $isBurst = false;
+                }
+            }
+            if($isBurst){
+                $burst = implode(' ', $_POST['burst']);
+            };
+        }
         $msg = '';
         if(Validator::Length($name,16,4) == false){
             $msg .= 'Name should be between 5 to 15 characters'. '<br>';

@@ -2,6 +2,14 @@
 
 # CHANGELOG
 
+## 2024.2.21
+
+- Fix SQL Installer
+- remove multiple space in language
+- Change Phone Number require OTP by @Focuslinkstech
+- Change burst Form
+- Delete Table Responsive, first Column Freeze
+
 ## 2024.2.20
 
 - Fix list admin

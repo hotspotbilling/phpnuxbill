@@ -12,6 +12,7 @@ class Lang
     {
         global $_L, $lan_file, $config;
         $_L = $_SESSION['Lang'];
+        $key = preg_replace('/\s+/', ' ', $key);
         if (!empty($_L[$key])) {
             return $_L[$key];
         }

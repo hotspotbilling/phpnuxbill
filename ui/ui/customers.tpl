@@ -32,7 +32,7 @@
                                 class="ion ion-android-add"> </i> {Lang::T('Add New Contact')}</a>
                     </div>&nbsp;
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive table_mobile">
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>

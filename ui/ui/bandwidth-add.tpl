@@ -40,7 +40,31 @@
 					<div class="form-group">
 						<label class="col-md-2 control-label">Burst Limit</label>
 						<div class="col-md-6">
-							<input type="text" class="form-control" id="burst" name="burst" placeholder="[Burst/Limit] [Burst/Threshold] [Burst/Time] [Priority] [Limit/At]">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Burst/Limit]">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Burst Threshold</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Burst/Threshold]">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Burst Time</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Burst/Time]">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Priority</label>
+						<div class="col-md-6">
+							<input type="number" class="form-control" name="burst[]" placeholder="[Priority]">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Limit At</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Limit/At]">
 						</div>
 					</div>
 					<div class="form-group">
