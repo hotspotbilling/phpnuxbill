@@ -24,7 +24,7 @@
 										</div>&nbsp;
 									</div>
 									<div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
+                                        <table class="table table-bordered table-condensed table-striped table_mobile">
                                             <thead>
                                                 <tr>
                                                     <th>{Lang::T('Bandwidth Name')}</th>

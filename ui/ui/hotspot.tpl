@@ -45,13 +45,14 @@
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Expired IP Pool')}</th>
                                 <th>{Lang::T('Manage')}</th>
+                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled"
                                 {elseif $ds['allow_purchase'] != 'yes'}class="warning" title="Customer can't purchase" {/if}>
-                                    <td>{$ds['name_plan']}</td>
+                                    <td class="headcol">{$ds['name_plan']}</td>
                                     <td>{$ds['typebp']}</td>
                                     <td>{$ds['name_bw']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
@@ -75,6 +76,7 @@
                                             onclick="return confirm('{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
+                                    <td>{$ds['id']}</td>
                                 </tr>
                             {/foreach}
                         </tbody>

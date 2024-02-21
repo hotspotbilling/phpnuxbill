@@ -7,7 +7,7 @@
             <div class="panel-heading">{Lang::T('List Activated Voucher')}</div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-bordered table-striped">
+                    <table id="datatable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
                                 <th>{Lang::T('Username')}</th>

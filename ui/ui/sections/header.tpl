@@ -41,19 +41,11 @@
             }
         }
 
-        @media only screen and (max-width: 40em) {
-            thead th:not(:first-child) {
-                display: none;
-            }
-
-            td,
-            th {
-                display: block;
-            }
-
-            td[data-th]:before {
-                content: attr(data-th);
-            }
+        th:first-child,
+        td:first-child {
+            position: sticky;
+            left: 0px;
+            background-color: #f9f9f9;
         }
 
 

@@ -27,10 +27,9 @@
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Phone')}</th>
@@ -40,12 +39,12 @@
                                 <th>{Lang::T('Agent')}</th>
                                 <th>{Lang::T('Last Login')}</th>
                                 <th>{Lang::T('Manage')}</th>
+                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
                                 <tr {if $ds['status'] != 'Active'}class="danger"{/if}>
-                                    <td>{$ds['id']}</td>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['fullname']}</td>
                                     <td>{$ds['phone']}</td>
@@ -66,6 +65,7 @@
                                                 class="btn btn-danger btn-xs" onclick="return confirm('{Lang::T('Delete')}?')"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}
                                     </td>
+                                    <td>{$ds['id']}</td>
                                 </tr>
                             {/foreach}
                         </tbody>

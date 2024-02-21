@@ -108,7 +108,7 @@
                 <div class="panel panel-primary mb20 panel-hovered project-stats table-responsive">
                     <div class="panel-heading">Vouchers Stock</div>
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-condensed">
                             <thead>
                                 <tr>
                                     <th>{Lang::T('Plan Name')}</th>
@@ -139,20 +139,17 @@
             <div class="panel panel-warning mb20 panel-hovered project-stats table-responsive">
                 <div class="panel-heading">{Lang::T('User Expired, Today')}</div>
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-condensed">
                         <thead>
                             <tr>
-                                <th>Id</th>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Created On')}</th>
                                 <th>{Lang::T('Expires On')}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {$no = 1}
                             {foreach $expire as $expired}
                                 <tr>
-                                    <td>{$no++}</td>
                                     <td><a href="{$_url}customers/viewu/{$expired['username']}">{$expired['username']}</a></td>
                                     <td>{Lang::dateAndTimeFormat($expired['recharged_on'],$expired['recharged_time'])}
                                     </td>

@@ -31,7 +31,6 @@
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Name</th>
                                 <th>IP</th>
                                 <th>Type</th>
@@ -40,12 +39,12 @@
                                 <th>Community</th>
                                 <th>Routers</th>
                                 <th>{Lang::T('Manage')}</th>
+                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $nas as $ds}
                                 <tr>
-                                    <td align="center">{$ds['id']}</td>
                                     <td>{$ds['shortname']}</td>
                                     <td>{$ds['nasname']}</td>
                                     <td>{$ds['type']}</td>
@@ -59,6 +58,7 @@
                                             onclick="return confirm('{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
+                                    <td align="center">{$ds['id']}</td>
                                 </tr>
                             {/foreach}
                         </tbody>

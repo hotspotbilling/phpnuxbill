@@ -36,18 +36,16 @@
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>#</th>
                                 <th>{Lang::T('Name Pool')}</th>
                                 <th>{Lang::T('Range IP')}</th>
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Manage')}</th>
+                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {$no = 1}
                             {foreach $d as $ds}
                                 <tr>
-                                    <td align="center">{$no++}</td>
                                     <td>{$ds['pool_name']}</td>
                                     <td>{$ds['range_ip']}</td>
                                     <td>{$ds['routers']}</td>
@@ -57,6 +55,7 @@
                                             onclick="return confirm('{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
+                                    <td>{$ds['id']}</td>
                                 </tr>
                             {/foreach}
                         </tbody>
