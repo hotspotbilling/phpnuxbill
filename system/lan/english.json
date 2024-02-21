@@ -427,5 +427,16 @@
     "Code": "Code",
     "Send_To_Customer": "Send To Customer",
     "Prev": "Prev",
-    "Voucher_Not_Found": "Voucher Not Found"
+    "Voucher_Not_Found": "Voucher Not Found",
+    "Miscellaneous": "Miscellaneous",
+    "OTP_Required": "OTP Required",
+    "Change": "Change",
+    "Change_Phone_Number": "Change Phone Number",
+    "Current_Number": "Current Number",
+    "New_Number": "New Number",
+    "Input_your_phone_number": "Input your phone number",
+    "OTP": "OTP",
+    "Enter_OTP_that_was_sent_to_your_phone": "Enter OTP that was sent to your phone",
+    "Update": "Update",
+    "OTP_is_required_when_user_want_to_change_phone_number": "OTP is required when user want to change phone number"
 }
