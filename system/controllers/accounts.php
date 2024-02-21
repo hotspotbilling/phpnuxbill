@@ -122,6 +122,7 @@ switch ($action) {
         }
         break;
 
+
     case 'phone-update':
 
         $d = ORM::for_table('tbl_customers')->find_one($user['id']);
@@ -138,6 +139,11 @@ switch ($action) {
         $phone = _post('phone');
         $username = $user['username'];
         $otpPath = 'system/cache/sms/';
+
+        // Validate the phone number format
+        if (!preg_match('/^[0-9]{10,}$/', $phone)) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid phone number format'));
+        }
 
         if (empty($config['sms_url'])) {
             r2(U . 'accounts/phone-update', 'e', Lang::T('SMS server not Available, Please try again later'));
@@ -163,7 +169,16 @@ switch ($action) {
                     $otp = rand(100000, 999999);
                     file_put_contents($otpFile, $otp);
                     file_put_contents($phoneFile, $phone);
-                    Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    // send send OTP to user
+                    if ($_c['phone_otp_type'] === 'sms') {
+                        Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    } elseif ($_c['phone_otp_type'] === 'whatsapp') {
+                        Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    } elseif ($_c['phone_otp_type'] === 'both') {
+                        Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                        Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    }
+                    //redirect after sending OTP  
                     r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code has been sent to your phone'));
                 }
             }
@@ -177,41 +192,61 @@ switch ($action) {
         $username = $user['username'];
         $otpPath = 'system/cache/sms/';
 
+        // Validate the phone number format
+        if (!preg_match('/^[0-9]{10,}$/', $phone)) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid phone number format'));
+            exit();
+        }
+
         if (!empty($config['sms_url'])) {
             $otpFile = $otpPath . sha1($username . $db_password) . ".txt";
             $phoneFile = $otpPath . sha1($username . $db_password) . "_phone.txt";
+
+            // Check if OTP file exists
+            if (!file_exists($otpFile)) {
+                r2(U . 'accounts/phone-update', 'e', Lang::T('Please request OTP first'));
+                exit();
+            }
+
             // expired 10 minutes
-            if (file_exists($otpFile) && time() - filemtime($otpFile) > 1200) {
+            if (time() - filemtime($otpFile) > 1200) {
                 unlink($otpFile);
                 unlink($phoneFile);
-                r2(U . 'accounts/phone-update', 'e', 'Verification code expired');
-            } else if (file_exists($otpFile)) {
+                r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code expired'));
+                exit();
+            } else {
                 $code = file_get_contents($otpFile);
+
+                // Check if OTP code matches
                 if ($code != $otp_code) {
-                    r2(U . 'accounts/phone-update', 'e', 'Wrong Verification code');
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('Wrong Verification code'));
                     exit();
-                } elseif (file_exists($phoneFile)) {
-                    $savedPhone = file_get_contents($phoneFile);
-                    if ($savedPhone !== $phone) {
-                        r2(U . 'accounts/phone-update', 'e', 'The phone number does not match the one that requested the OTP');
-                        exit();
-                    } else {
-                        unlink($otpFile);
-                        unlink($phoneFile);
-                    }
-                } else {
-                    r2(U . 'accounts/phone-update', 'e', 'No Verification code');
                 }
+
+                // Check if the phone number matches the one that requested the OTP
+                $savedPhone = file_get_contents($phoneFile);
+                if ($savedPhone !== $phone) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('The phone number does not match the one that requested the OTP'));
+                    exit();
+                }
+
+                // OTP verification successful, delete OTP and phone number files
+                unlink($otpFile);
+                unlink($phoneFile);
             }
+        } else {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('SMS server not available'));
+            exit();
         }
 
+        // Update the phone number in the database
         $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         if ($d) {
             $d->phonenumber = Lang::phoneFormat($phone);
             $d->save();
         }
-        r2(U . 'accounts/profile', 's', 'Phone number updated successfully');
 
+        r2(U . 'accounts/profile', 's', Lang::T('Phone number updated successfully'));
         break;
 
     default:
