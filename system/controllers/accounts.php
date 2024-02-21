@@ -84,7 +84,7 @@ switch ($action) {
             $ui->assign('d', $d);
             $ui->display('user-profile.tpl');
         } else {
-            r2(U . 'home', 'e', $_L['Account_Not_Found']);
+            r2(U . 'home', 'e', Lang::T('Account Not Found'));
         }
         break;
 
