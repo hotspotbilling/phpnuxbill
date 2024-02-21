@@ -42,17 +42,17 @@ switch ($action) {
                     $c = ORM::for_table('tbl_user_recharges')->where('username', $user['username'])->find_one();
                     if ($c) {
                         $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
-                        if($p['is_radius']){
-                            if($c['type'] == 'Hotspot' || ($c['type'] == 'PPPOE' && empty($d['pppoe_password']))){
+                        if ($p['is_radius']) {
+                            if ($c['type'] == 'Hotspot' || ($c['type'] == 'PPPOE' && empty($d['pppoe_password']))) {
                                 Radius::customerUpsert($d, $p);
                             }
-                        }else{
+                        } else {
                             $mikrotik = Mikrotik::info($c['routers']);
                             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                             if ($c['type'] == 'Hotspot') {
-                                    Mikrotik::setHotspotUser($client, $c['username'], $npass);
-                                    Mikrotik::removeHotspotActiveUser($client, $user['username']);
-                            } else if(empty($d['pppoe_password'])){
+                                Mikrotik::setHotspotUser($client, $c['username'], $npass);
+                                Mikrotik::removeHotspotActiveUser($client, $user['username']);
+                            } else if (empty($d['pppoe_password'])) {
                                 // only change when pppoe_password empty
                                 Mikrotik::setPpoeUser($client, $c['username'], $npass);
                                 Mikrotik::removePpoeActive($client, $user['username']);
@@ -120,6 +120,98 @@ switch ($action) {
         } else {
             r2(U . 'accounts/profile', 'e', $msg);
         }
+        break;
+
+    case 'phone-update':
+
+        $d = ORM::for_table('tbl_customers')->find_one($user['id']);
+        if ($d) {
+            //run_hook('customer_view_edit_profile'); #HOOK
+            $ui->assign('d', $d);
+            $ui->display('user-phone-update.tpl');
+        } else {
+            r2(U . 'home', 'e', Lang::T('Account Not Found'));
+        }
+        break;
+
+    case 'phone-update-otp':
+        $phone = _post('phone');
+        $username = $user['username'];
+        $otpPath = 'system/cache/sms/';
+
+        if (empty($config['sms_url'])) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('SMS server not Available, Please try again later'));
+        }
+
+        if (!empty($config['sms_url'])) {
+            if (!empty($phone)) {
+                $d = ORM::for_table('tbl_customers')->where('username', $username)->where('phonenumber', $phone)->find_one();
+                if ($d) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('You cannot use your current phone number'));
+                }
+                if (!file_exists($otpPath)) {
+                    mkdir($otpPath);
+                    touch($otpPath . 'index.html');
+                }
+                $otpFile = $otpPath . sha1($username . $db_password) . ".txt";
+                $phoneFile = $otpPath . sha1($username . $db_password) . "_phone.txt";
+
+                // expired 10 minutes
+                if (file_exists($otpFile) && time() - filemtime($otpFile) < 1200) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('Please wait ' . (1200 - (time() - filemtime($otpFile))) . ' seconds before sending another SMS'));
+                } else {
+                    $otp = rand(100000, 999999);
+                    file_put_contents($otpFile, $otp);
+                    file_put_contents($phoneFile, $phone);
+                    Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code has been sent to your phone'));
+                }
+            }
+        }
+
+        break;
+
+    case 'phone-update-post':
+        $phone = _post('phone');
+        $otp_code = _post('otp');
+        $username = $user['username'];
+        $otpPath = 'system/cache/sms/';
+
+        if (!empty($config['sms_url'])) {
+            $otpFile = $otpPath . sha1($username . $db_password) . ".txt";
+            $phoneFile = $otpPath . sha1($username . $db_password) . "_phone.txt";
+            // expired 10 minutes
+            if (file_exists($otpFile) && time() - filemtime($otpFile) > 1200) {
+                unlink($otpFile);
+                unlink($phoneFile);
+                r2(U . 'accounts/phone-update', 'e', 'Verification code expired');
+            } else if (file_exists($otpFile)) {
+                $code = file_get_contents($otpFile);
+                if ($code != $otp_code) {
+                    r2(U . 'accounts/phone-update', 'e', 'Wrong Verification code');
+                    exit();
+                } elseif (file_exists($phoneFile)) {
+                    $savedPhone = file_get_contents($phoneFile);
+                    if ($savedPhone !== $phone) {
+                        r2(U . 'accounts/phone-update', 'e', 'The phone number does not match the one that requested the OTP');
+                        exit();
+                    } else {
+                        unlink($otpFile);
+                        unlink($phoneFile);
+                    }
+                } else {
+                    r2(U . 'accounts/phone-update', 'e', 'No Verification code');
+                }
+            }
+        }
+
+        $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+        if ($d) {
+            $d->phonenumber = Lang::phoneFormat($phone);
+            $d->save();
+        }
+        r2(U . 'accounts/profile', 's', 'Phone number updated successfully');
+
         break;
 
     default:
