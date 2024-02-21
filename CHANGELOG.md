@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.2.21
+
+- Fix SQL Installer
+- remove multiple space in language
+- Change Phone Number require OTP by @Focuslinkstech
+- Change burst Form
+
 ## 2024.2.20
 
 - Fix list admin

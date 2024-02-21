@@ -43,11 +43,39 @@
 							</select>
 						</div>
 					</div>
-
 					<div class="form-group">
 						<label class="col-md-2 control-label">Burst Limit</label>
 						<div class="col-md-6">
-							<input type="text" class="form-control" id="burst" name="burst" value="{$d['burst']}" placeholder="[Burst/Limit] [Burst/Threshold] [Burst/Time] [Priority] [Limit/At]">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Burst/Limit]" value="{$burst[0]}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Burst Threshold</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Burst/Threshold]" value="{$burst[1]}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Burst Time</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Burst/Time]" value="{$burst[2]}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Priority</label>
+						<div class="col-md-6">
+							<input type="number" class="form-control" name="burst[]" placeholder="[Priority]" value="{$burst[3]}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-2 control-label">Limit At</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" name="burst[]" placeholder="[Limit/At]" value="{$burst[4]}">
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-lg-offset-2 col-lg-10">
+					<small>{Lang::T('Editing Bandwidth will not automatically update the plan, you need to edit the plan then save again')}</small>
 						</div>
 					</div>
 					<div class="form-group">
