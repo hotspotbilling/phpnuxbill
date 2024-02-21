@@ -170,11 +170,11 @@ switch ($action) {
                     file_put_contents($otpFile, $otp);
                     file_put_contents($phoneFile, $phone);
                     // send send OTP to user
-                    if ($_c['phone_otp_type'] === 'sms') {
+                    if ($config['phone_otp_type'] === 'sms') {
                         Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
-                    } elseif ($_c['phone_otp_type'] === 'whatsapp') {
+                    } elseif ($config['phone_otp_type'] === 'whatsapp') {
                         Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
-                    } elseif ($_c['phone_otp_type'] === 'both') {
+                    } elseif ($config['phone_otp_type'] === 'both') {
                         Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
                         Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
                     }
