@@ -475,6 +475,21 @@
                         <p class="help-block col-md-4">{Lang::T('OTP is required when user want to change phone
                             number')}</p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('OTP Method')}</label>
+                        <div class="col-md-6">
+                            <select name="phone_otp_type" id="phone_otp_type" class="form-control">
+                                <option value="sms" {if $_c['phone_otp_type']=='sms' }selected="selected" {/if}>
+                                    {Lang::T('SMS')}
+                                <option value="whatsapp" {if $_c['phone_otp_type']=='whatsapp' }selected="selected"
+                                    {/if}> {Lang::T('WhatsApp')}
+                                <option value="both" {if $_c['phone_otp_type']=='both' }selected="selected" {/if}>
+                                    {Lang::T('SMS and WhatsApp')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}</p>
+                    </div>
                 </div>
                 {* <div class="panel-heading" id="envato">
                     <div class="btn-group pull-right">
