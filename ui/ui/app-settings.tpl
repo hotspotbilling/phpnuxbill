@@ -94,7 +94,7 @@
                         <p class="help-block col-md-4">edit at config.php</p>
                     </div>
                 </div>
-                <div class="panel-heading">
+                <div class="panel-heading" id="hide_dashboard_content">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>

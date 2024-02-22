@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.2.22
+
+- Add Loading when click submit
+- link to settings when hide widget
+
 ## 2024.2.21
 
 - Fix SQL Installer

@@ -441,5 +441,12 @@
     "OTP_is_required_when_user_want_to_change_phone_number": "OTP is required when user want to change phone number",
     "Rate": "Rate",
     "Burst": "Burst",
-    "Editing_Bandwidth_will_not_automatically_update_the_plan__you_need_to_edit_the_plan_then_save_again": "Editing Bandwidth will not automatically update the plan, you need to edit the plan then save again"
+    "Editing_Bandwidth_will_not_automatically_update_the_plan__you_need_to_edit_the_plan_then_save_again": "Editing Bandwidth will not automatically update the plan, you need to edit the plan then save again",
+    "OTP_Method": "OTP Method",
+    "SMS": "SMS",
+    "WhatsApp": "WhatsApp",
+    "SMS_and_WhatsApp": "SMS and WhatsApp",
+    "The_method_which_OTP_will_be_sent_to_user": "The method which OTP will be sent to user",
+    "Report_Viewer": "Report Viewer",
+    "Super_Administrator": "Super Administrator"
 }
