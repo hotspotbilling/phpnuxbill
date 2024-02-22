@@ -163,6 +163,10 @@ switch ($action) {
     case 'print':
         $content = $_POST['content'];
         if (!empty($content)) {
+            if($_POST['nux']=='print'){
+                //header("Location: nux://print?text=".urlencode($content));
+                $ui->assign('nuxprint', "nux://print?text=".urlencode($content));
+            }
             $ui->assign('content', $content);
         } else {
             $id = _post('id');

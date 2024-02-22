@@ -33,6 +33,11 @@
             class="ion-reply-all"></i>{Lang::T('Finish')}</a>
     <a href="{$_url}prepaid/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
         class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend To Customer")}</a>
+    <button type="submit" class="btn btn-success text-black btn-sm" name="nux" value="print">
+                    <i class="glyphicon glyphicon-print"></i>
+                    Nux Print
+                    <i class="glyphicon glyphicon-phone"></i>
+                </button>
     <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-print"></i>
         {Lang::T('Click Here to Print')}</button>
 </form>
