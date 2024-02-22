@@ -21,10 +21,32 @@
             <script>
                 $(document).ready(function() {
                     $('.select2').select2({theme: "bootstrap"});
-                });
-
-                $(document).ready(function() {
                     $('.select2tag').select2({theme: "bootstrap", tags: true});
+                    var listAtts = document.querySelectorAll(`button[type="submit"]`);
+                    listAtts.forEach(function(el) {
+                        if (el.addEventListener) { // all browsers except IE before version 9
+                            el.addEventListener("click", function() {
+                                $(this).html(
+                                    `<span class="glyphicon glyphicon-refresh" role="status" aria-hidden="true"></span>`
+                                );
+                                setTimeout(() => {
+                                    $(this).prop("disabled", true);
+                                }, 100);
+                            }, false);
+                        } else {
+                            if (el.attachEvent) { // IE before version 9
+                                el.attachEvent("click", function() {
+                                    $(this).html(
+                                        `<span class="glyphicon glyphicon-refresh" role="status" aria-hidden="true"></span>`
+                                    );
+                                    setTimeout(() => {
+                                        $(this).prop("disabled", true);
+                                    }, 100);
+                                });
+                            }
+                        }
+
+                    });
                 });
 
                 var listAtts = document.querySelectorAll(`[api-get-text]`);
