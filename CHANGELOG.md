@@ -5,6 +5,8 @@
 ## 2024.2.23
 
 - Integrate with PhpNuxBill Printer
+- Fix Invoice
+- add admin ID in transaction
 
 ## 2024.2.22
 
