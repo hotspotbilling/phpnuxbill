@@ -145,9 +145,9 @@ switch ($action) {
         $in = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
         $ui->assign('in', $in);
         if (!empty($routes['3']) && $routes['3'] == 'send') {
-            $c = ORM::for_table('tbl_customers')->where('username', $d['username'])->find_one();
+            $c = ORM::for_table('tbl_customers')->where('username', $in['username'])->find_one();
             if ($c) {
-                Message::sendInvoice($c, $d);
+                Message::sendInvoice($c, $in);
                 r2(U . 'prepaid/view/' . $id, 's', "Success send to customer");
             }
             r2(U . 'prepaid/view/' . $id, 'd', "Customer not found");
