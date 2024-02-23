@@ -39,7 +39,7 @@ Class Admin{
     }
 
     public static function _info($id = 0){
-        if(empty($id) && $id>0){
+        if(empty($id) && $id==0){
             $id = Admin::getID();
         }
         return ORM::for_table('tbl_users')->find_one($id);

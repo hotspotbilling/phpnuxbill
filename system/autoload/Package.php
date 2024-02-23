@@ -47,8 +47,10 @@ class Package
             $t->method = "$gateway - $channel";
             $t->routers = $router_name;
             $t->type = "Balance";
-            if ($channel == 'Administrator') {
+            if ($admin) {
                 $t->admin_id = $admin['id'];
+            }else{
+                $t->admin_id = '0';
             }
             $t->save();
 
@@ -149,8 +151,10 @@ class Package
                 $b->method = "$gateway - $channel";
                 $b->routers = $router_name;
                 $b->type = "Hotspot";
-                if ($channel == 'Administrator') {
+                if ($admin) {
                     $b->admin_id = $admin['id'];
+                }else{
+                    $b->admin_id = '0';
                 }
                 $b->save();
 
@@ -167,8 +171,10 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
-                if ($channel == 'Administrator') {
+                if ($admin) {
                     $t->admin_id = $admin['id'];
+                }else{
+                    $t->admin_id = '0';
                 }
                 $t->save();
             } else {
@@ -194,8 +200,10 @@ class Package
                 $d->method = "$gateway - $channel";
                 $d->routers = $router_name;
                 $d->type = "Hotspot";
-                if ($channel == 'Administrator') {
-                    $d->admin_id = $admin['id'];
+                if ($admin) {
+                    $b->admin_id = $admin['id'];
+                }else{
+                    $b->admin_id = '0';
                 }
                 $d->save();
 
@@ -212,8 +220,10 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
-                if ($channel == 'Administrator') {
+                if ($admin) {
                     $t->admin_id = $admin['id'];
+                }else{
+                    $t->admin_id = '0';
                 }
                 $t->save();
             }
@@ -265,8 +275,10 @@ class Package
                 $b->method = "$gateway - $channel";
                 $b->routers = $router_name;
                 $b->type = "PPPOE";
-                if ($channel == 'Administrator') {
+                if ($admin) {
                     $b->admin_id = $admin['id'];
+                }else{
+                    $b->admin_id = '0';
                 }
                 $b->save();
 
@@ -283,8 +295,10 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 $t->type = "PPPOE";
-                if ($channel == 'Administrator') {
+                if ($admin) {
                     $t->admin_id = $admin['id'];
+                }else{
+                    $t->admin_id = '0';
                 }
                 $t->save();
             } else {
@@ -310,8 +324,10 @@ class Package
                 $d->method = "$gateway - $channel";
                 $d->routers = $router_name;
                 $d->type = "PPPOE";
-                if ($channel == 'Administrator') {
+                if ($admin) {
                     $d->admin_id = $admin['id'];
+                }else{
+                    $d->admin_id = '0';
                 }
                 $d->save();
 
@@ -327,8 +343,10 @@ class Package
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
-                if ($channel == 'Administrator') {
+                if ($admin) {
                     $t->admin_id = $admin['id'];
+                }else{
+                    $t->admin_id = '0';
                 }
                 $t->type = "PPPOE";
                 $t->save();
