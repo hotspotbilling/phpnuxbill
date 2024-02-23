@@ -511,5 +511,6 @@ class Package
         $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
         $ui->assign('whatsapp', urlencode("```$invoice```"));
+        $ui->assign('in',$in);
     }
 }
