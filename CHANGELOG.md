@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.2.23
+
+- Integrate with PhpNuxBill Printer
+
 ## 2024.2.22
 
 - Add Loading when click submit

@@ -8,18 +8,23 @@
                     <pre id="content"></pre>
                     <textarea class="hidden" id="formcontent" name="content">{$print}</textarea>
                     <input type="hidden" name="id" value="{$in['id']}">
-                    <a href="{$_url}prepaid/voucher" class="btn btn-primary btn-sm"><i
+                    <a href="{$_url}prepaid/voucher" class="btn btn-default btn-sm"><i
                             class="ion-reply-all"></i>{Lang::T('Finish')}</a>
-                    <a href="https://api.whatsapp.com/send/?text={$wa}" target="_blank"
-                        class="btn btn-info text-black btn-sm">
-                        {Lang::T("Send To Customer")}</a>
-                    <button type="submit" class="btn btn-success text-black btn-sm" name="nux" value="print">
-                        <i class="glyphicon glyphicon-print"></i>
-                        Nux Print
-                        <i class="glyphicon glyphicon-phone"></i>
-                    </button>
-                    <button type="submit" class="btn btn-default btn-sm"><i class="fa fa-print"></i>
-                        {Lang::T('Click Here to Print')}</button>
+                    <a href="https://api.whatsapp.com/send/?text={$whatsapp}" target="_blank"
+                        class="btn btn-primary btn-sm">
+                        <i class="glyphicon glyphicon-share"></i> WhatsApp</a>
+                    <button type="submit" class="btn btn-info text-black btn-sm"><i class="glyphicon glyphicon-print"></i>
+                        Print</button>
+                        <a href="nux://print?text={urlencode($print)}"
+                        class="btn btn-success text-black btn-sm hidden-md hidden-lg">
+                            <i class="glyphicon glyphicon-phone"></i>
+                            NuxPrint
+                        </a>
+                        <a href="https://github.com/hotspotbilling/android-printer"
+                        class="btn btn-success text-black btn-sm hidden-xs hidden-sm" target="_blank">
+                            <i class="glyphicon glyphicon-phone"></i>
+                            NuxPrint
+                        </a>
                 </form>
                 <javascript type="text/javascript">
                 </javascript>

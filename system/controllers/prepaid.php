@@ -143,9 +143,8 @@ switch ($action) {
 
     case 'view':
         $id = $routes['2'];
-        $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
-        $ui->assign('in', $d);
-
+        $in = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
+        $ui->assign('in', $in);
         if (!empty($routes['3']) && $routes['3'] == 'send') {
             $c = ORM::for_table('tbl_customers')->where('username', $d['username'])->find_one();
             if ($c) {
@@ -154,6 +153,54 @@ switch ($action) {
             }
             r2(U . 'prepaid/view/' . $id, 'd', "Customer not found");
         }
+        //print
+        $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['address'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['phone'], ' ', 2) . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads("Invoice", $in['invoice'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Date'), $date, ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Sales'), $admin['fullname'], ' ') . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
+        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
+
+        $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
+        if ($in['type'] != 'Balance') {
+            $invoice .= Lang::pads(Lang::T('Created On'), Lang::dateAndTimeFormat($in['recharged_on'], $in['recharged_time']), ' ') . "\n";
+            $invoice .= Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'], $in['time']), ' ') . "\n";
+        }
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
+        $ui->assign('invoice', $invoice);
+        $config['printer_cols'] = 30;
+        //whatsapp
+        $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['address'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['phone'], ' ', 2) . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads("Invoice", $in['invoice'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Date'), $date, ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Sales'), $admin['fullname'], ' ') . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
+        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
+
+        $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
+        if ($in['type'] != 'Balance') {
+            $invoice .= Lang::pads(Lang::T('Created On'), Lang::dateAndTimeFormat($in['recharged_on'], $in['recharged_time']), ' ') . "\n";
+            $invoice .= Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'], $in['time']), ' ') . "\n";
+        }
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
+        $ui->assign('whatsapp', urlencode("```$invoice```"));
+
         $ui->assign('_title', 'View Invoice');
         $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'], $d['recharged_time']));
         $ui->display('invoice.tpl');
@@ -163,9 +210,9 @@ switch ($action) {
     case 'print':
         $content = $_POST['content'];
         if (!empty($content)) {
-            if($_POST['nux']=='print'){
+            if ($_POST['nux'] == 'print') {
                 //header("Location: nux://print?text=".urlencode($content));
-                $ui->assign('nuxprint', "nux://print?text=".urlencode($content));
+                $ui->assign('nuxprint', "nux://print?text=" . urlencode($content));
             }
             $ui->assign('content', $content);
         } else {
@@ -597,7 +644,7 @@ switch ($action) {
             $content .= Lang::pad("", '=') . "\n";
             $content .= Lang::pad($config['note'], ' ', 2) . "\n";
             $ui->assign('_title', Lang::T('View'));
-            $ui->assign('wa', urlencode("```$content```"));
+            $ui->assign('whatsapp', urlencode("```$content```"));
             $ui->display('voucher-view.tpl');
         } else {
             r2(U . 'prepaid/voucher/', 'e', Lang::T('Voucher Not Found'));

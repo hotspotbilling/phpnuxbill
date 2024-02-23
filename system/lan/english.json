@@ -448,5 +448,7 @@
     "SMS_and_WhatsApp": "SMS and WhatsApp",
     "The_method_which_OTP_will_be_sent_to_user": "The method which OTP will be sent to user",
     "Report_Viewer": "Report Viewer",
-    "Super_Administrator": "Super Administrator"
+    "Super_Administrator": "Super Administrator",
+    "Send_To": "Send To",
+    "Resend": "Resend"
 }
