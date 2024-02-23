@@ -65,5 +65,9 @@
     ],
     "2024.2.20.1" : [
         "DROP TABLE IF EXISTS `tbl_customers_meta`;"
+    ],
+    "2024.2.23" : [
+        "ALTER TABLE `tbl_transactions` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;",
+        "ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;"
     ]
 }

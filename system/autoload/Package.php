@@ -19,7 +19,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
     {
-        global $_c;
+        global $config, $admin;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
@@ -47,6 +47,9 @@ class Package
             $t->method = "$gateway - $channel";
             $t->routers = $router_name;
             $t->type = "Balance";
+            if ($channel == 'Administrator') {
+                $t->admin_id = $admin['id'];
+            }
             $t->save();
 
             $balance_before = $c['balance'];
@@ -54,9 +57,9 @@ class Package
             $balance = $c['balance'] + $p['price'];
 
             $textInvoice = Lang::getNotifText('invoice_balance');
-            $textInvoice = str_replace('[[company_name]]', $_c['CompanyName'], $textInvoice);
-            $textInvoice = str_replace('[[address]]', $_c['address'], $textInvoice);
-            $textInvoice = str_replace('[[phone]]', $_c['phone'], $textInvoice);
+            $textInvoice = str_replace('[[company_name]]', $config['CompanyName'], $textInvoice);
+            $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
+            $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
             $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
             $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat($date_now), $textInvoice);
             $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
@@ -67,13 +70,13 @@ class Package
             $textInvoice = str_replace('[[name]]', $c['fullname'], $textInvoice);
             $textInvoice = str_replace('[[user_name]]', $c['username'], $textInvoice);
             $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
-            $textInvoice = str_replace('[[footer]]', $_c['note'], $textInvoice);
+            $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
             $textInvoice = str_replace('[[balance_before]]', Lang::moneyFormat($balance_before), $textInvoice);
             $textInvoice = str_replace('[[balance]]', Lang::moneyFormat($balance), $textInvoice);
 
-            if ($_c['user_notification_payment'] == 'sms') {
+            if ($config['user_notification_payment'] == 'sms') {
                 Message::sendSMS($c['phonenumber'], $textInvoice);
-            } else if ($_c['user_notification_payment'] == 'wa') {
+            } else if ($config['user_notification_payment'] == 'wa') {
                 Message::sendWhatsapp($c['phonenumber'], $textInvoice);
             }
 
@@ -127,7 +130,7 @@ class Package
 
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
-                }else{
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removeHotspotActiveUser($client, $c['username']);
@@ -146,6 +149,9 @@ class Package
                 $b->method = "$gateway - $channel";
                 $b->routers = $router_name;
                 $b->type = "Hotspot";
+                if ($channel == 'Administrator') {
+                    $b->admin_id = $admin['id'];
+                }
                 $b->save();
 
                 // insert table transactions
@@ -161,11 +167,14 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
+                if ($channel == 'Administrator') {
+                    $t->admin_id = $admin['id'];
+                }
                 $t->save();
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
-                }else{
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::removeHotspotActiveUser($client, $c['username']);
@@ -185,6 +194,9 @@ class Package
                 $d->method = "$gateway - $channel";
                 $d->routers = $router_name;
                 $d->type = "Hotspot";
+                if ($channel == 'Administrator') {
+                    $d->admin_id = $admin['id'];
+                }
                 $d->save();
 
                 // insert table transactions
@@ -200,6 +212,9 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
+                if ($channel == 'Administrator') {
+                    $t->admin_id = $admin['id'];
+                }
                 $t->save();
             }
             Message::sendTelegram("#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
@@ -231,7 +246,7 @@ class Package
 
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
-                }else{
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::removePpoeActive($client, $c['username']);
@@ -250,6 +265,9 @@ class Package
                 $b->method = "$gateway - $channel";
                 $b->routers = $router_name;
                 $b->type = "PPPOE";
+                if ($channel == 'Administrator') {
+                    $b->admin_id = $admin['id'];
+                }
                 $b->save();
 
                 // insert table transactions
@@ -265,11 +283,14 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 $t->type = "PPPOE";
+                if ($channel == 'Administrator') {
+                    $t->admin_id = $admin['id'];
+                }
                 $t->save();
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
-                }else{
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::removePpoeActive($client, $c['username']);
@@ -289,6 +310,9 @@ class Package
                 $d->method = "$gateway - $channel";
                 $d->routers = $router_name;
                 $d->type = "PPPOE";
+                if ($channel == 'Administrator') {
+                    $d->admin_id = $admin['id'];
+                }
                 $d->save();
 
                 // insert table transactions
@@ -303,6 +327,9 @@ class Package
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
+                if ($channel == 'Administrator') {
+                    $t->admin_id = $admin['id'];
+                }
                 $t->type = "PPPOE";
                 $t->save();
             }
@@ -322,9 +349,9 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
         $b = ORM::for_table('tbl_user_recharges')->find_one($from_id);
-        if($p['routers'] == $b['routers'] && $b['routers'] != 'radius'){
+        if ($p['routers'] == $b['routers'] && $b['routers'] != 'radius') {
             $mikrotik = Mikrotik::info($p['routers']);
-        }else{
+        } else {
             $mikrotik = Mikrotik::info($b['routers']);
         }
         // delete first
@@ -358,21 +385,21 @@ class Package
             }
         }
         // call the next mikrotik
-        if($p['routers'] != $b['routers'] && $p['routers'] != 'radius'){
+        if ($p['routers'] != $b['routers'] && $p['routers'] != 'radius') {
             $mikrotik = Mikrotik::info($p['routers']);
         }
         if ($p['type'] == 'Hotspot') {
             if ($b) {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, $b['expiration'].''.$b['time']);
-                }else{
+                    Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
             } else {
                 if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, $b['expiration'].''.$b['time']);
-                }else{
+                    Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 }
@@ -381,14 +408,14 @@ class Package
             if ($b) {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p);
-                }else{
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p);
-                }else{
+                } else {
                     $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
@@ -400,5 +427,71 @@ class Package
     public static function _raid($l)
     {
         return substr(str_shuffle(str_repeat('0123456789', $l)), 0, $l);
+    }
+
+    /**
+     * @param in   tbl_transactions
+     * @param string $router_name router name for this package
+     * @param int   $plan_id plan id for this package
+     * @param string $gateway payment gateway name
+     * @param string $channel channel payment gateway
+     * @return boolean
+     */
+    public static function createInvoice($in)
+    {
+        global $config, $admin, $ui;
+        $date = Lang::dateAndTimeFormat($in['recharged_on'], $in['recharged_time']);
+        if ($admin['id'] != $in['admin_id'] && $in['admin_id'] > 0) {
+            $_admin = Admin::_info($in['admin_id']);
+            // if admin not deleted
+            if ($_admin) $admin = $_admin;
+        }
+        //print
+        $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['address'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['phone'], ' ', 2) . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads("Invoice", $in['invoice'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Date'), $date, ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Sales'), $admin['fullname'], ' ') . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
+        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
+
+        $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
+        if ($in['type'] != 'Balance') {
+            $invoice .= Lang::pads(Lang::T('Created On'), Lang::dateAndTimeFormat($in['recharged_on'], $in['recharged_time']), ' ') . "\n";
+            $invoice .= Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'], $in['time']), ' ') . "\n";
+        }
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
+        $ui->assign('invoice', $invoice);
+        $config['printer_cols'] = 30;
+        //whatsapp
+        $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['address'], ' ', 2) . "\n";
+        $invoice .= Lang::pad($config['phone'], ' ', 2) . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads("Invoice", $in['invoice'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Date'), $date, ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Sales'), $admin['fullname'], ' ') . "\n";
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
+        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
+
+        $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
+        $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
+        if ($in['type'] != 'Balance') {
+            $invoice .= Lang::pads(Lang::T('Created On'), Lang::dateAndTimeFormat($in['recharged_on'], $in['recharged_time']), ' ') . "\n";
+            $invoice .= Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'], $in['time']), ' ') . "\n";
+        }
+        $invoice .= Lang::pad("", '=') . "\n";
+        $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
+        $ui->assign('whatsapp', urlencode("```$invoice```"));
     }
 }

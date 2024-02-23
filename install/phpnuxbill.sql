@@ -181,16 +181,6 @@ CREATE TABLE `tb_languages` (
   `id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
-ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;
-ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;
-ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
-ALTER TABLE `tbl_users` CHANGE `password` `password` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
-ALTER TABLE `tbl_users` ADD `phone` VARCHAR(32) NOT NULL DEFAULT '' AFTER `password`, ADD `email` VARCHAR(128) NOT NULL DEFAULT '' AFTER `phone`, ADD `city` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kota' AFTER `email`, ADD `subdistrict` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kecamatan' AFTER `city`, ADD `ward` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kelurahan' AFTER `subdistrict`;
-ALTER TABLE `tbl_customers` ADD `created_by` INT NOT NULL DEFAULT '0' AFTER `auto_renewal`;
-ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'address list' AFTER `pool_expired`;
-ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;
-
 ALTER TABLE `tbl_appconfig`
   ADD PRIMARY KEY (`id`);
 
@@ -316,3 +306,14 @@ CREATE TABLE tbl_customers_fields (
   field_value VARCHAR(255) NOT NULL,
   FOREIGN KEY (customer_id) REFERENCES tbl_customers(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;
+ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;
+ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+ALTER TABLE `tbl_users` CHANGE `password` `password` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+ALTER TABLE `tbl_users` ADD `phone` VARCHAR(32) NOT NULL DEFAULT '' AFTER `password`, ADD `email` VARCHAR(128) NOT NULL DEFAULT '' AFTER `phone`, ADD `city` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kota' AFTER `email`, ADD `subdistrict` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kecamatan' AFTER `city`, ADD `ward` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kelurahan' AFTER `subdistrict`;
+ALTER TABLE `tbl_customers` ADD `created_by` INT NOT NULL DEFAULT '0' AFTER `auto_renewal`;
+ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'address list' AFTER `pool_expired`;
+ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;
+ALTER TABLE `tbl_transactions` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;
+ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;

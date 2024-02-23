@@ -129,8 +129,7 @@ switch ($action) {
             if (Package::rechargeUser($id_customer, $server, $plan, "Recharge", $admin['fullname'])) {
                 $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
                 $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
-                $ui->assign('in', $in);
-                $ui->assign('date', date("Y-m-d H:i:s"));
+                Package::createInvoice($in);
                 $ui->display('invoice.tpl');
                 _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $c['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
             } else {
@@ -153,56 +152,8 @@ switch ($action) {
             }
             r2(U . 'prepaid/view/' . $id, 'd', "Customer not found");
         }
-        //print
-        $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
-        $invoice .= Lang::pad($config['address'], ' ', 2) . "\n";
-        $invoice .= Lang::pad($config['phone'], ' ', 2) . "\n";
-        $invoice .= Lang::pad("", '=') . "\n";
-        $invoice .= Lang::pads("Invoice", $in['invoice'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Date'), $date, ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Sales'), $admin['fullname'], ' ') . "\n";
-        $invoice .= Lang::pad("", '=') . "\n";
-        $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
-        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
-
-        $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
-        if ($in['type'] != 'Balance') {
-            $invoice .= Lang::pads(Lang::T('Created On'), Lang::dateAndTimeFormat($in['recharged_on'], $in['recharged_time']), ' ') . "\n";
-            $invoice .= Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'], $in['time']), ' ') . "\n";
-        }
-        $invoice .= Lang::pad("", '=') . "\n";
-        $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
-        $ui->assign('invoice', $invoice);
-        $config['printer_cols'] = 30;
-        //whatsapp
-        $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
-        $invoice .= Lang::pad($config['address'], ' ', 2) . "\n";
-        $invoice .= Lang::pad($config['phone'], ' ', 2) . "\n";
-        $invoice .= Lang::pad("", '=') . "\n";
-        $invoice .= Lang::pads("Invoice", $in['invoice'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Date'), $date, ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Sales'), $admin['fullname'], ' ') . "\n";
-        $invoice .= Lang::pad("", '=') . "\n";
-        $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
-        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
-
-        $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
-        if ($in['type'] != 'Balance') {
-            $invoice .= Lang::pads(Lang::T('Created On'), Lang::dateAndTimeFormat($in['recharged_on'], $in['recharged_time']), ' ') . "\n";
-            $invoice .= Lang::pads(Lang::T('Expires On'), Lang::dateAndTimeFormat($in['expiration'], $in['time']), ' ') . "\n";
-        }
-        $invoice .= Lang::pad("", '=') . "\n";
-        $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
-        $ui->assign('whatsapp', urlencode("```$invoice```"));
-
+        Package::createInvoice($in);
         $ui->assign('_title', 'View Invoice');
-        $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'], $d['recharged_time']));
         $ui->display('invoice.tpl');
         break;
 
@@ -683,8 +634,7 @@ switch ($action) {
                 $v1->user = $user['username'];
                 $v1->save();
                 $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id')->find_one();
-                $ui->assign('in', $in);
-                $ui->assign('date', date("Y-m-d H:i:s"));
+                Package::createInvoice($in);
                 $ui->display('invoice.tpl');
             } else {
                 r2(U . 'prepaid/refill', 'e', "Failed to refill account");
@@ -709,8 +659,7 @@ switch ($action) {
             if (Package::rechargeUser($user, 'balance', $plan, "Deposit", $admin['fullname'])) {
                 $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
                 $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
-                $ui->assign('in', $in);
-                $ui->assign('date', date("Y-m-d H:i:s"));
+                Package::createInvoice($in);
                 $ui->display('invoice.tpl');
             } else {
                 r2(U . 'prepaid/refill', 'e', "Failed to refill account");
