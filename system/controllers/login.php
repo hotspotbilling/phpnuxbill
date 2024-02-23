@@ -26,7 +26,7 @@ switch ($do) {
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . Lang::T('Login Successful'), 'User', $d['id']);
-                    r2(U . 'home');
+                    _alert(Lang::T('Login Successful'),'success', "home");
                 } else {
                     _msglog('e', Lang::T('Invalid Username or Password'));
                     _log($username . ' ' . Lang::T('Failed Login'), 'User');
@@ -64,6 +64,7 @@ switch ($do) {
                         r2(U . 'login', 'e', Lang::T('Voucher activation failed'));
                     }
                 } else {
+                    _alert(Lang::T('Login Successful'),'success', "dashboard");
                     r2(U . 'login', 'e', Lang::T('Voucher activation failed') . '.');
                 }
             }

@@ -26,19 +26,16 @@ switch ($do) {
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . Lang::T('Login Successful'), $d['user_type'], $d['id']);
-                    r2(U . 'dashboard');
+                    _alert(Lang::T('Login Successful'),'success', "dashboard");
                 } else {
-                    _msglog('e', Lang::T('Invalid Username or Password'));
                     _log($username . ' ' . Lang::T('Failed Login'), $d['user_type']);
-                    r2(U . 'admin');
+                    _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
                 }
             } else {
-                _msglog('e', Lang::T('Invalid Username or Password'));
-                r2(U . 'admin');
+                _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
             }
         } else {
-            _msglog('e', Lang::T('Invalid Username or Password'));
-            r2(U . 'admin');
+            _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
         }
 
         break;

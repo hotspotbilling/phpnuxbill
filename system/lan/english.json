@@ -450,5 +450,9 @@
     "Report_Viewer": "Report Viewer",
     "Super_Administrator": "Super Administrator",
     "Send_To": "Send To",
-    "Resend": "Resend"
+    "Resend": "Resend",
+    "Alert": "Alert",
+    "success": "success",
+    "Click_Here": "Click Here",
+    "danger": "danger"
 }

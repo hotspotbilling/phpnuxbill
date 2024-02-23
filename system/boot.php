@@ -101,7 +101,6 @@ if (isset($_SESSION['notify'])) {
     unset($_SESSION['ntype']);
 }
 
-
 // Routing Engine
 $req = _get('_route');
 $routes = explode('/', $req);

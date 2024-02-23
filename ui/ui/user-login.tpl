@@ -4,13 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>{$_title} - {Lang::T('Login')}</title>
+    <title>{Lang::T('Login')} - {$_c['CompanyName']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
-    
-
 </head>
 
 <body>

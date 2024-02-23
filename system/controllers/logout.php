@@ -9,4 +9,4 @@ if (session_status() == PHP_SESSION_NONE) session_start();
 Admin::removeCookie();
 User::removeCookie();
 session_destroy();
-header('location: index.php');
+_alert(Lang::T('Logout Successful'),'warning', "login");

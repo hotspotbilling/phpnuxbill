@@ -219,6 +219,23 @@ function sendWhatsapp($phone, $txt)
     Message::sendWhatsapp($phone, $txt);
 }
 
+function _alert($text, $type = 'success', $url = "home")
+{
+    global $ui;
+    if(!isset($ui)) return;
+    if(strlen($url)>4){
+        if(substr($url,0,4)!="http"){
+            $url = U.$url;
+        }
+    }else{
+        $url = U.$url;
+    }
+    $ui->assign('text', $text);
+    $ui->assign('type', $type);
+    $ui->assign('url', $url);
+    $ui->display('alert.tpl');
+}
+
 
 if(!isset($api_secret)){
     $api_secret = $db_password;
