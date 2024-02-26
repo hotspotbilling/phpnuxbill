@@ -9,7 +9,6 @@ $ui->assign('_title', 'Pages');
 $ui->assign('_system_menu', 'pages');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if(strpos($action,"-reset")!==false){

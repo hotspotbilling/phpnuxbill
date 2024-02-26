@@ -11,7 +11,6 @@ $ui->assign('_system_menu', 'settings');
 $plugin_repository = 'https://hotspotbilling.github.io/Plugin-Repository/repository.json';
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 $cache = File::pathFixer('system/cache/codecanyon.json');
 

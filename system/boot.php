@@ -91,6 +91,7 @@ $handler = $routes[0];
 if ($handler == '') {
     $handler = 'default';
 }
+$admin = Admin::_info();
 try {
     $sys_render = $root_path.File::pathFixer('system/controllers/' . $handler . '.php');
     if (file_exists($sys_render)) {
@@ -102,15 +103,17 @@ try {
         $ui->assign('_system_menu', $routes[0]);
         foreach ($menu_registered as $menu) {
             if ($menu['admin'] && _admin(false)) {
-                $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
-                if (!empty($menu['icon'])) {
-                    $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+                if(count($menu['auth'])==0 || in_array($admin['user_type'], $menu['auth'])){
+                    $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
+                    if (!empty($menu['icon'])) {
+                        $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
+                    }
+                    if (!empty($menu['label'])) {
+                        $menus[$menu['position']] .= '<span class="pull-right-container">';
+                        $menus[$menu['position']] .= '<small class="label pull-right bg-' . $menu['color'] . '">' . $menu['label'] . '</small></span>';
+                    }
+                    $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
                 }
-                if (!empty($menu['label'])) {
-                    $menus[$menu['position']] .= '<span class="pull-right-container">';
-                    $menus[$menu['position']] .= '<small class="label pull-right bg-' . $menu['color'] . '">' . $menu['label'] . '</small></span>';
-                }
-                $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
             } else if (!$menu['admin'] && _auth(false)) {
                 $menus[$menu['position']] .= '<li' . (($routes[1] == $menu['function']) ? ' class="active"' : '') . '><a href="' . U . 'plugin/' . $menu['function'] . '">';
                 if (!empty($menu['icon'])) {

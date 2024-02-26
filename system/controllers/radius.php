@@ -8,7 +8,6 @@ $ui->assign('_title', $_L['Plugin Manager']);
 $ui->assign('_system_menu', 'settings');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 

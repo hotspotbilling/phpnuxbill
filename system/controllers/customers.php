@@ -10,7 +10,6 @@ $ui->assign('_title', Lang::T('Customer'));
 $ui->assign('_system_menu', 'customers');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 

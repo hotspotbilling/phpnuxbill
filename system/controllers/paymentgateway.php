@@ -8,7 +8,6 @@ _admin();
 $ui->assign('_system_menu', 'paymentgateway');
 
 $action = alphanumeric($routes['1']);
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if(file_exists('system/paymentgateway/'.$action.'.php')){

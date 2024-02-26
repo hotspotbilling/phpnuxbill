@@ -7,7 +7,6 @@
 
 _admin();
 $ui->assign('_title', Lang::T('Dashboard'));
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 $fdate = date('Y-m-01');

@@ -18,7 +18,7 @@ $menu_registered = array();
  * @param string icon from ion icon, ion-person, only for AFTER_
  * @param string label for showing label or number of notification or update
  * @param string color Label color
- * @param string auth ['SuperAdmin', 'Admin', 'Report', 'Agent', 'Sales'] will only show in this user, empty array for all users
+ * @param string auth authorization ['SuperAdmin', 'Admin', 'Report', 'Agent', 'Sales'] will only show in this user, empty array for all users
  */
 function register_menu($name, $admin, $function, $position, $icon = '', $label = '', $color = 'success', $auth = [])
 {

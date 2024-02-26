@@ -42,6 +42,10 @@ Class Admin{
         if(empty($id) && $id==0){
             $id = Admin::getID();
         }
-        return ORM::for_table('tbl_users')->find_one($id);
+        if($id){
+            return ORM::for_table('tbl_users')->find_one($id);
+        }else{
+            return [];
+        }
     }
 }

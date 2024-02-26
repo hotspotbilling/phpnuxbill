@@ -10,7 +10,6 @@ $ui->assign('_title', Lang::T('Recharge Account'));
 $ui->assign('_system_menu', 'prepaid');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 $select2_customer = <<<EOT

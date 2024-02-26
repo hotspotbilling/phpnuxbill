@@ -10,7 +10,6 @@ $ui->assign('_title', Lang::T('Reports'));
 $ui->assign('_sysfrm_menu', 'reports');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 $mdate = date('Y-m-d');

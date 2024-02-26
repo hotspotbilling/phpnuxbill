@@ -171,8 +171,8 @@
                             </ul>
                         </li>
                     {/if}
+                    {$_MENU_AFTER_PREPAID}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        {$_MENU_AFTER_PREPAID}
                         <li class="{if $_system_menu eq 'services'}active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-cube"></i> <span>{Lang::T('Services')}</span>
@@ -192,8 +192,8 @@
                                 {$_MENU_SERVICES}
                             </ul>
                         </li>
-                        {$_MENU_AFTER_SERVICES}
                     {/if}
+                    {$_MENU_AFTER_SERVICES}
                     <li class="{if $_system_menu eq 'reports'}active{/if} treeview">
                         <a href="#">
                             <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
@@ -268,8 +268,8 @@
                                 {$_MENU_PAGES}
                             </ul>
                         </li>
-                        {$_MENU_AFTER_PAGES}
                     {/if}
+                    {$_MENU_AFTER_PAGES}
                     <li
                         class="{if $_system_menu eq 'settings' || $_system_menu eq 'paymentgateway' }active{/if} treeview">
                         <a href="#">
@@ -311,8 +311,8 @@
                             {/if}
                         </ul>
                     </li>
+                    {$_MENU_AFTER_SETTINGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        {$_MENU_AFTER_SETTINGS}
                         <li class="{if $_system_menu eq 'logs' }active{/if} treeview">
                             <a href="#">
                                 <i class="ion ion-clock"></i> <span>{Lang::T('Logs')}</span>
@@ -338,6 +338,7 @@
                             <span class="text">{Lang::T('Community')}</span>
                         </a>
                     </li>
+                    {$_MENU_AFTER_COMMUNITY}
                 </ul>
             </section>
         </aside>

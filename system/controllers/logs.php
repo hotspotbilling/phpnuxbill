@@ -10,7 +10,6 @@ $ui->assign('_title', 'PHPNuxBill Logs');
 $ui->assign('_system_menu', 'logs');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
