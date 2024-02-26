@@ -47,6 +47,13 @@
                             <br>
                             {$error_message}
                             <br>
+                            Mikrotik troubleshooting: <br>
+                            <ul>
+                                <li>Make sure you use API Port, Default 8728</li>
+                                <li>Make sure Username and Password are correct</li>
+                                <li>Make sure your hosting not blocking port to external</li>
+                                <li>Make sure your Mikrotik accessible from PHPNuxBill</li>
+                            </ul>
                         </div>
                         <div class="box-footer">
                             <div class="btn-group btn-group-justified" role="group" aria-label="...">

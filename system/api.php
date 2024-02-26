@@ -46,9 +46,6 @@ $req = _get('r');
 $token = _get('token');
 $routes = explode('/', $req);
 $handler = $routes[0];
-if ($handler == '') {
-    $handler = 'default';
-}
 
 if(empty($token)){
     showResult(false, Lang::T("Token is invalid"));
