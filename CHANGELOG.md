@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.2.26
+
+- Clean Unused JS and CSS
+- Add some Authorization check
+- Custom Path for folder
+- fix some bugs
+
 ## 2024.2.23
 
 - Integrate with PhpNuxBill Printer
