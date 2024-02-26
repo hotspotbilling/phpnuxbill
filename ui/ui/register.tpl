@@ -105,7 +105,7 @@
                                         <a href="{$_url}login" class="btn btn-warning">{Lang::T('Cancel')}</a>
                                     </div>
                                     <div class="btn-group">
-                                        <button class="btn btn-success waves-effect waves-light"
+                                        <button class="btn btn-success"
                                             type="submit">{Lang::T('Register')}</button>
                                     </div>
                                 </div>

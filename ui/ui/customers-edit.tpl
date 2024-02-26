@@ -108,14 +108,14 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Attributes')}</label>
                         <div id="custom-fields-container" class="col-md-6">
-                            <button class="btn btn-success btn-sm waves-effect waves-light" type="button"
+                            <button class="btn btn-success btn-sm" type="button"
                                 id="add-custom-field">+</button>
                         </div>
                     </div>
                     <!--Customers Attributes add end -->
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-primary waves-effect waves-light" type="submit">
+                            <button class="btn btn-primary" type="submit">
                                 {Lang::T('Save Changes')}
                             </button>
                             Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
@@ -148,7 +148,7 @@
                     <input type="text" class="form-control" name="custom_field_value[]" placeholder="Value">
                 </div>
                 <div class="col-md-2">
-                    <button type="button" class="remove-custom-field btn btn-danger btn-sm waves-effect waves-light">-</button>
+                    <button type="button" class="remove-custom-field btn btn-danger btn-sm">-</button>
                 </div>
             `;
             customFieldsContainer.appendChild(newField);

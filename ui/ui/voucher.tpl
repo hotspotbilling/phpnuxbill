@@ -32,7 +32,7 @@
                     <div class="col-md-4">
                         <div class="btn-group btn-group-justified" role="group">
                             <div class="btn-group" role="group">
-                                <a href="{$_url}prepaid/add-voucher" class="btn btn-primary btn-block waves-effect"><i
+                                <a href="{$_url}prepaid/add-voucher" class="btn btn-primary btn-block"><i
                                         class="ion ion-android-add"> </i> {Lang::T('Add Vouchers')}</a>
                             </div>
                             <div class="btn-group" role="group">

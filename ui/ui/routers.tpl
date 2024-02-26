@@ -23,7 +23,7 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}routers/add" class="btn btn-primary btn-block waves-effect"><i
+                        <a href="{$_url}routers/add" class="btn btn-primary btn-block"><i
                                 class="ion ion-android-add"> </i> {Lang::T('New Router')}</a>
                     </div>&nbsp;
                 </div>

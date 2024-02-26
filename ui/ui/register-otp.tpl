@@ -111,7 +111,7 @@
                                 </div>
                                 <div class="btn-group btn-group-justified mb15">
                                     <div class="btn-group">
-                                        <button class="btn btn-primary waves-effect waves-light"
+                                        <button class="btn btn-primary"
                                             type="submit">{Lang::T('Register')}</button>
                                     </div>
                                     <div class="btn-group">

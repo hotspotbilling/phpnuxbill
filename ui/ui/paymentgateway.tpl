@@ -24,7 +24,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button class="btn btn-block btn-primary waves-effect waves-light" type="submit">{Lang::T('Save Changes')}</button>
+                        <button class="btn btn-block btn-primary" type="submit">{Lang::T('Save Changes')}</button>
                     </div>
                 </div>
                 </div>

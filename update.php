@@ -189,7 +189,6 @@ function deleteFolder($path)
 
     <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
 
     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
 

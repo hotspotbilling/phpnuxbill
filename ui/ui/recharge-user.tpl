@@ -48,7 +48,7 @@
 
 							<div class="form-group">
 								<div class="col-lg-offset-2 col-lg-10">
-									<button class="btn btn-success waves-effect waves-light" type="submit">{Lang::T('Recharge')}</button>
+									<button class="btn btn-success" type="submit">{Lang::T('Recharge')}</button>
 									Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
 								</div>
 							</div>

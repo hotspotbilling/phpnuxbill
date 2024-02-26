@@ -149,7 +149,7 @@
 
             <div class="panel-body">
                 <div class="form-group">
-                    <button class="btn btn-success btn-block waves-effect waves-light"
+                    <button class="btn btn-success btn-block"
                         type="submit">{Lang::T('Save Changes')}</button>
                 </div>
             </div>

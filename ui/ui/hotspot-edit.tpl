@@ -174,7 +174,7 @@
                     </div> *}
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
-                            <button class="btn btn-success waves-effect waves-light"
+                            <button class="btn btn-success"
                                 type="submit">{Lang::T('Save Changes')}</button>
                             Or <a href="{$_url}services/hotspot">{Lang::T('Cancel')}</a>
                         </div>

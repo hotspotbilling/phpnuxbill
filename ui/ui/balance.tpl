@@ -20,7 +20,7 @@
 											</form>
 										</div>
 										<div class="col-md-4">
-											<a href="{$_url}services/balance-add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {Lang::T('New Service Plan')}</a>
+											<a href="{$_url}services/balance-add" class="btn btn-primary btn-block"><i class="ion ion-android-add"> </i> {Lang::T('New Service Plan')}</a>
 										</div>&nbsp;
 									</div>
                                     <div class="table-responsive">

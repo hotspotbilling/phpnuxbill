@@ -28,7 +28,7 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}customers/add" class="btn btn-primary btn-block waves-effect"><i
+                        <a href="{$_url}customers/add" class="btn btn-primary btn-block"><i
                                 class="ion ion-android-add"> </i> {Lang::T('Add New Contact')}</a>
                     </div>&nbsp;
                 </div>

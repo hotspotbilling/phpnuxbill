@@ -48,7 +48,7 @@
 
                 <div class="form-group">
                     <div class="col-lg-offset-2 col-lg-10">
-                        <button class="btn btn-success waves-effect waves-light" type="submit"
+                        <button class="btn btn-success" type="submit"
                             onclick="return validateForm()">{Lang::T('Update')}</button>
                         Or <a href="{$_url}home">{Lang::T('Cancel')}</a>
                     </div>
