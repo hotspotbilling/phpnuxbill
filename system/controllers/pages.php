@@ -13,6 +13,9 @@ $admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 if(strpos($action,"-reset")!==false){
+    if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    }
     $action = str_replace("-reset","",$action);
     $path = "pages/".str_replace(".","",$action).".html";
     $temp = "pages_template/".str_replace(".","",$action).".html";
@@ -25,6 +28,9 @@ if(strpos($action,"-reset")!==false){
     }
     r2(U . 'pages/'.$action);
 }else if(strpos($action,"-post")===false){
+    if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    }
     $path = "pages/".str_replace(".","",$action).".html";
     //echo $path;
     run_hook('view_edit_pages'); #HOOK
@@ -48,6 +54,9 @@ if(strpos($action,"-reset")!==false){
     }else
         $ui->display('a404.tpl');
 }else{
+    if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+        _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    }
     $action = str_replace("-post","",$action);
     $path = "pages/".str_replace(".","",$action).".html";
     if(file_exists($path)){

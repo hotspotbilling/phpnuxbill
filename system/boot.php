@@ -5,24 +5,6 @@
 
  **/
 
-function r2($to, $ntype = 'e', $msg = '')
-{
-    if ($msg == '') {
-        header("location: $to");
-        exit;
-    }
-    $_SESSION['ntype'] = $ntype;
-    $_SESSION['notify'] = $msg;
-    header("location: $to");
-    exit;
-}
-
-if (file_exists('config.php')) {
-    require('config.php');
-} else {
-    r2('install');
-}
-
 try {
     require_once 'init.php';
 } catch (Throwable $e) {

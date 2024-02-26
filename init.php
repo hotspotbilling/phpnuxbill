@@ -41,7 +41,7 @@ spl_autoload_register('_autoloader');
 if (!file_exists($root_path . 'config.php')) {
     $root_path .= '..' . DIRECTORY_SEPARATOR;
     if (!file_exists($root_path . 'config.php')) {
-        die("config.php file not found");
+        r2('install');
     }
 }
 
@@ -53,6 +53,10 @@ if (!file_exists($root_path .  File::pathFixer('system/orm.php'))) {
 if (!file_exists($root_path . File::pathFixer('system/uploads/notifications.default.json'))) {
     die($root_path . File::pathFixer("system/uploads/notifications.default.json file not found"));
 }
+
+$UPLOAD_PATH = $root_path . File::pathFixer('system/uploads');
+$CACHE_PATH = $root_path . File::pathFixer('system/cache');
+$PAGES_PATH = $root_path . File::pathFixer('pages');
 
 require_once $root_path . 'config.php';
 require_once $root_path . File::pathFixer('system/orm.php');
@@ -110,7 +114,7 @@ if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')
 if (empty($config['language'])) {
     $config['language'] = 'english';
 }
-$lan_file = $root_path .File::pathFixer('system/lan/' . $config['language'] . '.json');
+$lan_file = $root_path . File::pathFixer('system/lan/' . $config['language'] . '.json');
 if (file_exists($lan_file)) {
     $_L = json_decode(file_get_contents($lan_file), true);
     $_SESSION['Lang'] = $_L;
@@ -219,16 +223,28 @@ function sendWhatsapp($phone, $txt)
     Message::sendWhatsapp($phone, $txt);
 }
 
+function r2($to, $ntype = 'e', $msg = '')
+{
+    if ($msg == '') {
+        header("location: $to");
+        exit;
+    }
+    $_SESSION['ntype'] = $ntype;
+    $_SESSION['notify'] = $msg;
+    header("location: $to");
+    exit;
+}
+
 function _alert($text, $type = 'success', $url = "home")
 {
     global $ui;
-    if(!isset($ui)) return;
-    if(strlen($url)>4){
-        if(substr($url,0,4)!="http"){
-            $url = U.$url;
+    if (!isset($ui)) return;
+    if (strlen($url) > 4) {
+        if (substr($url, 0, 4) != "http") {
+            $url = U . $url;
         }
-    }else{
-        $url = U.$url;
+    } else {
+        $url = U . $url;
     }
     $ui->assign('text', $text);
     $ui->assign('type', $type);
@@ -237,6 +253,6 @@ function _alert($text, $type = 'success', $url = "home")
 }
 
 
-if(!isset($api_secret)){
+if (!isset($api_secret)) {
     $api_secret = $db_password;
 }

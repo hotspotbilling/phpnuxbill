@@ -46,7 +46,7 @@ switch ($action) {
 
     case 'csv':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $cs = ORM::for_table('tbl_customers')
             ->select('tbl_customers.id', 'id')
@@ -84,10 +84,16 @@ switch ($action) {
         }
         break;
     case 'add':
+		if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');
         break;
     case 'recharge':
+		if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
         if ($b) {
@@ -100,7 +106,7 @@ switch ($action) {
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
     case 'deactivate':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
@@ -207,6 +213,9 @@ switch ($action) {
         }
         break;
     case 'edit':
+		if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $id  = $routes['2'];
         run_hook('edit_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
@@ -225,7 +234,7 @@ switch ($action) {
 
     case 'delete':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $id  = $routes['2'];
         run_hook('delete_customer'); #HOOK

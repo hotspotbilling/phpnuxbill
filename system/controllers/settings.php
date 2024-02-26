@@ -15,7 +15,7 @@ $ui->assign('_admin', $admin);
 switch ($action) {
     case 'app':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
 
         if (!empty(_get('testWa'))) {
@@ -84,6 +84,9 @@ switch ($action) {
         break;
 
     case 'app-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $company = _post('CompanyName');
         run_hook('save_settings'); #HOOK
 
@@ -151,7 +154,7 @@ switch ($action) {
 
     case 'localisation':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $folders = [];
         $files = scandir('system/lan/');
@@ -177,6 +180,9 @@ switch ($action) {
         break;
 
     case 'localisation-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $tzone = _post('tzone');
         $date_format = _post('date_format');
         $country_code_phone = _post('country_code_phone');
@@ -265,7 +271,7 @@ switch ($action) {
 
     case 'users':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $search = _req('search');
         if ($search != '') {
@@ -355,7 +361,7 @@ switch ($action) {
 
     case 'users-add':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $ui->assign('_title', Lang::T('Add User'));
         $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
@@ -402,7 +408,7 @@ switch ($action) {
         break;
     case 'users-edit':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $ui->assign('_title', Lang::T('Edit User'));
         $id  = $routes['2'];
@@ -440,7 +446,7 @@ switch ($action) {
 
     case 'users-delete':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
 
         $id  = $routes['2'];
@@ -458,6 +464,9 @@ switch ($action) {
         break;
 
     case 'users-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $username = _post('username');
         $fullname = _post('fullname');
         $password = _post('password');
@@ -657,7 +666,7 @@ switch ($action) {
 
     case 'notifications':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         run_hook('view_notifications'); #HOOK
         if (file_exists("system/uploads/notifications.json")) {
@@ -669,12 +678,15 @@ switch ($action) {
         $ui->display('app-notifications.tpl');
         break;
     case 'notifications-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         file_put_contents("system/uploads/notifications.json", json_encode($_POST));
         r2(U . 'settings/notifications', 's', Lang::T('Settings Saved Successfully'));
         break;
     case 'dbstatus':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
 
         $dbc = new mysqli($db_host, $db_user, $db_password, $db_name);
@@ -691,8 +703,8 @@ switch ($action) {
         break;
 
     case 'dbbackup':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        if (!in_array($admin['user_type'], ['SuperAdmin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         $tables = $_POST['tables'];
         set_time_limit(-1);
@@ -711,8 +723,8 @@ switch ($action) {
         echo json_encode($array);
         break;
     case 'dbrestore':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+        if (!in_array($admin['user_type'], ['SuperAdmin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         if (file_exists($_FILES['json']['tmp_name'])) {
             $suc = 0;
@@ -742,7 +754,7 @@ switch ($action) {
         break;
     case 'language':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
         }
         run_hook('view_add_language'); #HOOK
         if (file_exists($lan_file)) {

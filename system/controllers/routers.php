@@ -18,7 +18,7 @@ use PEAR2\Net\RouterOS;
 require_once 'system/autoload/PEAR2/Autoload.php';
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
+    _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
 }
 
 switch ($action) {

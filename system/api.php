@@ -83,6 +83,11 @@ if($token == $config['api_key']){
     }
 }
 
+if(!isset($handler) || empty($handler)){
+    showResult(true, Lang::T("Token is valid"));
+}
+
+
 if($handler == 'isValid'){
     showResult(true, Lang::T("Token is valid"));
 }

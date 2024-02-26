@@ -35,11 +35,17 @@ switch ($action) {
         break;
 
     case 'add':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         run_hook('view_add_bandwidth'); #HOOK
         $ui->display('bandwidth-add.tpl');
         break;
 
     case 'edit':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $id  = $routes['2'];
         run_hook('view_edit_bandwith'); #HOOK
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
@@ -53,6 +59,9 @@ switch ($action) {
         break;
 
     case 'delete':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $id  = $routes['2'];
         run_hook('delete_bandwidth'); #HOOK
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
@@ -63,6 +72,9 @@ switch ($action) {
         break;
 
     case 'add-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $name = _post('name');
         $rate_down = _post('rate_down');
         $rate_down_unit = _post('rate_down_unit');
@@ -111,6 +123,9 @@ switch ($action) {
         break;
 
     case 'edit-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        }
         $name = _post('name');
         $rate_down = _post('rate_down');
         $rate_down_unit = _post('rate_down_unit');
