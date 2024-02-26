@@ -45,18 +45,20 @@ if (!file_exists($root_path . 'config.php')) {
     }
 }
 
-
 if (!file_exists($root_path .  File::pathFixer('system/orm.php'))) {
     die($root_path . "orm.php file not found");
-}
-
-if (!file_exists($root_path . File::pathFixer('system/uploads/notifications.default.json'))) {
-    die($root_path . File::pathFixer("system/uploads/notifications.default.json file not found"));
 }
 
 $UPLOAD_PATH = $root_path . File::pathFixer('system/uploads');
 $CACHE_PATH = $root_path . File::pathFixer('system/cache');
 $PAGES_PATH = $root_path . File::pathFixer('pages');
+$PLUGIN_PATH = $root_path . File::pathFixer('system/plugin');
+$PAYMENTGATEWAY_PATH = $root_path . File::pathFixer('system/paymentgateway');
+$UI_PATH = 'ui';
+
+if (!file_exists($UPLOAD_PATH . File::pathFixer('/notifications.default.json'))) {
+    die($UPLOAD_PATH . File::pathFixer("/notifications.default.json file not found"));
+}
 
 require_once $root_path . 'config.php';
 require_once $root_path . File::pathFixer('system/orm.php');
@@ -74,13 +76,13 @@ if ($_app_stage != 'Live') {
 define('U', APP_URL . '/index.php?_route=');
 
 // notification message
-if (file_exists($root_path . File::pathFixer("system/uploads/notifications.json"))) {
-    $_notifmsg = json_decode(file_get_contents($root_path . File::pathFixer('system/uploads/notifications.json')), true);
+if (file_exists($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.json'), true);
 }
-$_notifmsg_default = json_decode(file_get_contents($root_path . File::pathFixer('system/uploads/notifications.default.json')), true);
+$_notifmsg_default = json_decode(file_get_contents($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true);
 
 //register all plugin
-foreach (glob(File::pathFixer($root_path . File::pathFixer("system/plugin/*.php"))) as $filename) {
+foreach (glob(File::pathFixer($PLUGIN_PATH . DIRECTORY_SEPARATOR . '*.php')) as $filename) {
     try {
         include $filename;
     } catch (Throwable $e) {

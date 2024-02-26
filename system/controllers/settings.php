@@ -14,7 +14,7 @@ $ui->assign('_admin', $admin);
 switch ($action) {
     case 'app':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
         if (!empty(_get('testWa'))) {
@@ -30,10 +30,10 @@ switch ($action) {
             r2(U . "settings/app", 's', 'Test Telegram has been send<br>Result: ' . $result);
         }
 
-        if (file_exists('system/uploads/logo.png')) {
-            $logo = 'system/uploads/logo.png?' . time();
+        if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
+            $logo = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
         } else {
-            $logo = 'system/uploads/logo.default.png';
+            $logo = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
         }
         $ui->assign('logo', $logo);
         if ($_c['radius_enable'] && empty($_c['radius_client'])) {
@@ -84,7 +84,7 @@ switch ($action) {
 
     case 'app-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $company = _post('CompanyName');
         run_hook('save_settings'); #HOOK
@@ -92,8 +92,8 @@ switch ($action) {
 
         if (!empty($_FILES['logo']['name'])) {
             if (function_exists('imagecreatetruecolor')) {
-                if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
-                File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
+                if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) unlink($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png');
+                File::resizeCropImage($_FILES['logo']['tmp_name'], $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png', 1078, 200, 100);
                 if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
             } else {
                 r2(U . 'settings/app', 'e', 'PHP GD is not installed');
@@ -153,7 +153,7 @@ switch ($action) {
 
     case 'localisation':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $folders = [];
         $files = scandir('system/lan/');
@@ -180,7 +180,7 @@ switch ($action) {
 
     case 'localisation-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $tzone = _post('tzone');
         $date_format = _post('date_format');
@@ -270,7 +270,7 @@ switch ($action) {
 
     case 'users':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $search = _req('search');
         if ($search != '') {
@@ -360,7 +360,7 @@ switch ($action) {
 
     case 'users-add':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $ui->assign('_title', Lang::T('Add User'));
         $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
@@ -392,7 +392,7 @@ switch ($action) {
             if ($isApi) {
                 unset($d['password']);
                 $agent = $ui->get('agent');
-                if($agent) unset($agent['password']);
+                if ($agent) unset($agent['password']);
                 showResult(true, $action, [
                     'admin' => $d,
                     'agent' => $agent
@@ -407,7 +407,7 @@ switch ($action) {
         break;
     case 'users-edit':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $ui->assign('_title', Lang::T('Edit User'));
         $id  = $routes['2'];
@@ -445,7 +445,7 @@ switch ($action) {
 
     case 'users-delete':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
         $id  = $routes['2'];
@@ -464,7 +464,7 @@ switch ($action) {
 
     case 'users-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $username = _post('username');
         $fullname = _post('fullname');
@@ -602,7 +602,7 @@ switch ($action) {
             $d->city = $city;
             $d->subdistrict = $subdistrict;
             $d->ward = $ward;
-            if(isset($_POST['status'])){
+            if (isset($_POST['status'])) {
                 $d->status = $status;
             }
 
@@ -665,27 +665,27 @@ switch ($action) {
 
     case 'notifications':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         run_hook('view_notifications'); #HOOK
-        if (file_exists("system/uploads/notifications.json")) {
-            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.json'), true));
+        if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
+            $ui->assign('_json', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.json'), true));
         } else {
-            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
+            $ui->assign('_json', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true));
         }
-        $ui->assign('_default', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
+        $ui->assign('_default', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true));
         $ui->display('app-notifications.tpl');
         break;
     case 'notifications-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        file_put_contents("system/uploads/notifications.json", json_encode($_POST));
+        file_put_contents($UPLOAD_PATH . "/notifications.json", json_encode($_POST));
         r2(U . 'settings/notifications', 's', Lang::T('Settings Saved Successfully'));
         break;
     case 'dbstatus':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
         $dbc = new mysqli($db_host, $db_user, $db_password, $db_name);
@@ -703,7 +703,7 @@ switch ($action) {
 
     case 'dbbackup':
         if (!in_array($admin['user_type'], ['SuperAdmin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $tables = $_POST['tables'];
         set_time_limit(-1);
@@ -723,7 +723,7 @@ switch ($action) {
         break;
     case 'dbrestore':
         if (!in_array($admin['user_type'], ['SuperAdmin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         if (file_exists($_FILES['json']['tmp_name'])) {
             $suc = 0;
@@ -753,7 +753,7 @@ switch ($action) {
         break;
     case 'language':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         run_hook('view_add_language'); #HOOK
         if (file_exists($lan_file)) {

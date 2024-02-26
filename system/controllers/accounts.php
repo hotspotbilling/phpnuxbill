@@ -138,7 +138,7 @@ switch ($action) {
     case 'phone-update-otp':
         $phone = _post('phone');
         $username = $user['username'];
-        $otpPath = 'system/cache/sms/';
+        $otpPath = $CACHE_PATH . '/sms/';
 
         // Validate the phone number format
         if (!preg_match('/^[0-9]{10,}$/', $phone)) {
@@ -178,7 +178,7 @@ switch ($action) {
                         Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
                         Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
                     }
-                    //redirect after sending OTP  
+                    //redirect after sending OTP
                     r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code has been sent to your phone'));
                 }
             }
@@ -190,7 +190,7 @@ switch ($action) {
         $phone = _post('phone');
         $otp_code = _post('otp');
         $username = $user['username'];
-        $otpPath = 'system/cache/sms/';
+        $otpPath = $CACHE_PATH . '/sms/';
 
         // Validate the phone number format
         if (!preg_match('/^[0-9]{10,}$/', $phone)) {

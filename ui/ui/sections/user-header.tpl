@@ -66,13 +66,13 @@
                                     <span>{$_user['fullname']}</span>
                                 {/if}
                                 <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
-                                    onerror="this.src='system/uploads/user.default.jpg'" class="user-image"
+                                    onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="user-image"
                                     alt="User Image">
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
-                                        onerror="this.src='system/uploads/user.default.jpg'" class="img-circle"
+                                        onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="img-circle"
                                         alt="User Image">
 
                                     <p>

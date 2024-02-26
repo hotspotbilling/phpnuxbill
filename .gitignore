@@ -1,6 +1,7 @@
 config.php
 .DS_Store
 .vscode/
+ui/ui/compiled
 ui/compiled/*.php
 ui/cache/*.php
 test.php

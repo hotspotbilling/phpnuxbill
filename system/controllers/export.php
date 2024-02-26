@@ -62,10 +62,10 @@ switch ($action) {
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
 
-        if(file_exists('system/uploads/logo.png')){
-            $logo = 'system/uploads/logo.png';
-        }else{
-            $logo = 'system/uploads/logo.default.png';
+        if (file_exists($UPLOAD_PATH . '/logo.png')) {
+            $logo = $UPLOAD_PATH . '/logo.png';
+        } else {
+            $logo = $UPLOAD_PATH . '/logo.default.png';
         }
 
         if ($x) {
@@ -76,7 +76,7 @@ switch ($action) {
 					' . $config['address'] . '<br>
 					' . Lang::T('Phone Number') . ': ' . $config['phone'] . '<br>
 				</div>
-				<div id="logo"><img id="image" src="'.$logo.'" alt="logo" /></div>
+				<div id="logo"><img id="image" src="' . $logo . '" alt="logo" /></div>
 			</div>
 			<div id="header">' . Lang::T('All Transactions at Date') . ': ' . date($config['date_format'], strtotime($mdate)) . '</div>
 			<table id="customers">
@@ -234,10 +234,10 @@ EOF;
 
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
-        if(file_exists('system/uploads/logo.png')){
-            $logo = 'system/uploads/logo.png';
-        }else{
-            $logo = 'system/uploads/logo.default.png';
+        if (file_exists($UPLOAD_PATH . '/logo.png')) {
+            $logo = $UPLOAD_PATH . '/logo.png';
+        } else {
+            $logo = $UPLOAD_PATH . '/logo.default.png';
         }
 
         if ($x) {
@@ -248,7 +248,7 @@ EOF;
 					' . $config['address'] . '<br>
 					' . Lang::T('Phone Number') . ': ' . $config['phone'] . '<br>
 				</div>
-				<div id="logo"><img id="image" src="'.$logo.'" alt="logo" /></div>
+				<div id="logo"><img id="image" src="' . $logo . '" alt="logo" /></div>
 			</div>
 			<div id="header">' . Lang::T('All Transactions at Date') . ': ' . date($config['date_format'], strtotime($fdate)) . ' - ' . date($config['date_format'], strtotime($tdate)) . '</div>
 			<table id="customers">

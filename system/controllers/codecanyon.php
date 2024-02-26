@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -12,10 +13,10 @@ $plugin_repository = 'https://hotspotbilling.github.io/Plugin-Repository/reposit
 
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
-$cache = File::pathFixer('system/cache/codecanyon.json');
+$cache = File::pathFixer($CACHE_PATH . '/codecanyon.json');
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 if (empty($config['envato_token'])) {
     r2(U . 'settings/app', 'w', '<a href="' . U . 'settings/app#envato' . '">Envato Personal Access Token</a> is not set');
@@ -24,14 +25,14 @@ if (empty($config['envato_token'])) {
 switch ($action) {
 
     case 'install':
-        if (!is_writeable(File::pathFixer('system/cache/'))) {
+        if (!is_writeable(File::pathFixer($CACHE_PATH . '/'))) {
             r2(U . "codecanyon", 'e', 'Folder system/cache/ is not writable');
         }
-        if (!is_writeable(File::pathFixer('system/plugin/'))) {
-            r2(U . "codecanyon", 'e', 'Folder system/plugin/ is not writable');
+        if (!is_writeable($PLUGIN_PATH)) {
+            r2(U . "codecanyon", 'e', 'Folder plugin/ is not writable');
         }
-        if (!is_writeable(File::pathFixer('system/paymentgateway/'))) {
-            r2(U . "codecanyon", 'e', 'Folder system/paymentgateway/ is not writable');
+        if (!is_writeable($PAYMENTGATEWAY_PATH)) {
+            r2(U . "codecanyon", 'e', 'Folder paymentgateway/ is not writable');
         }
         set_time_limit(-1);
         $item_id = $routes['2'];
@@ -41,7 +42,7 @@ switch ($action) {
         if (!isset($json['download_url'])) {
             r2(U . 'codecanyon', 'e', 'Failed to get download url. ' . $json['description']);
         }
-        $file = File::pathFixer('system/cache/codecanyon/');
+        $file = File::pathFixer($CACHE_PATH . '/codecanyon/');
         if (!file_exists($file)) {
             mkdir($file);
         }
@@ -61,16 +62,16 @@ switch ($action) {
         curl_close($ch);
         fclose($fp);
         //extract
-        $target = File::pathFixer('system/cache/codecanyon/' . $item_id . '/');
+        $target = File::pathFixer($CACHE_PATH . '/codecanyon/' . $item_id . '/');
         $zip = new ZipArchive();
         $zip->open($file);
         $zip->extractTo($target);
         $zip->close();
         //moving
         if (file_exists($target . 'plugin')) {
-            File::copyFolder($target . 'plugin', File::pathFixer('system/plugin/'));
+            File::copyFolder($target . 'plugin', $PLUGIN_PATH . DIRECTORY_SEPARATOR);
         } else if (file_exists($target . 'paymentgateway')) {
-            File::copyFolder($target . 'paymentgateway', File::pathFixer('system/paymentgateway/'));
+            File::copyFolder($target . 'paymentgateway', $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR);
         } else if (file_exists($target . 'theme')) {
             File::copyFolder($target . 'theme', File::pathFixer('ui/themes/'));
         }

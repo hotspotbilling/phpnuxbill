@@ -47,7 +47,7 @@ if (empty($c_all)) {
 }
 $ui->assign('c_all', $c_all);
 
-if($config['hide_uet'] != 'yes'){
+if ($config['hide_uet'] != 'yes') {
     //user expire
     $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'));
     $expire = ORM::for_table('tbl_user_recharges')
@@ -77,14 +77,14 @@ $log = ORM::for_table('tbl_logs')->count();
 $ui->assign('log', $log);
 
 
-if($config['hide_vs'] != 'yes'){
-    $cacheStocksfile = File::pathFixer('system/cache/VoucherStocks.temp');
-    $cachePlanfile = File::pathFixer('system/cache/VoucherPlans.temp');
+if ($config['hide_vs'] != 'yes') {
+    $cacheStocksfile = $CACHE_PATH . File::pathFixer('/VoucherStocks.temp');
+    $cachePlanfile = $CACHE_PATH . File::pathFixer('/VoucherPlans.temp');
     //Cache for 5 minutes
-    if(file_exists($cacheStocksfile) && time()- filemtime($cacheStocksfile) < 600){
+    if (file_exists($cacheStocksfile) && time() - filemtime($cacheStocksfile) < 600) {
         $stocks = json_decode(file_get_contents($cacheStocksfile), true);
         $plans = json_decode(file_get_contents($cachePlanfile), true);
-    }else{
+    } else {
         // Count stock
         $tmp = $v = ORM::for_table('tbl_plans')->select('id')->select('name_plan')->find_many();
         $plans = array();
@@ -111,11 +111,11 @@ if($config['hide_vs'] != 'yes'){
     }
 }
 
-$cacheMRfile = File::pathFixer('system/cache/monthlyRegistered.temp');
+$cacheMRfile = File::pathFixer('/monthlyRegistered.temp');
 //Cache for 1 hour
-if(file_exists($cacheMRfile) && time()- filemtime($cacheMRfile) < 3600){
+if (file_exists($cacheMRfile) && time() - filemtime($cacheMRfile) < 3600) {
     $monthlyRegistered = json_decode(file_get_contents($cacheMRfile), true);
-}else{
+} else {
     //Monthly Registered Customers
     $result = ORM::for_table('tbl_customers')
         ->select_expr('MONTH(created_at)', 'month')
@@ -134,11 +134,11 @@ if(file_exists($cacheMRfile) && time()- filemtime($cacheMRfile) < 3600){
     file_put_contents($cacheMRfile, json_encode($monthlyRegistered));
 }
 
-$cacheMSfile = File::pathFixer('system/cache/monthlySales.temp');
+$cacheMSfile = $CACHE_PATH . File::pathFixer('/monthlySales.temp');
 //Cache for 12 hours
-if(file_exists($cacheMSfile) && time()- filemtime($cacheMSfile) < 43200){
+if (file_exists($cacheMSfile) && time() - filemtime($cacheMSfile) < 43200) {
     $monthlySales = json_decode(file_get_contents($cacheMSfile), true);
-}else{
+} else {
     // Query to retrieve monthly data
     $results = ORM::for_table('tbl_transactions')
         ->select_expr('MONTH(recharged_on)', 'month')

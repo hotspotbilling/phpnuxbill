@@ -10,13 +10,13 @@ class User
 {
     public static function getID(){
         global $db_password;
-        if(isset($_SESSION['uid'])){
+        if(isset($_SESSION['uid']) && !empty($_SESSION['uid'])){
             return $_SESSION['uid'];
         }else if(isset($_COOKIE['uid'])){
             // id.time.sha1
             $tmp = explode('.',$_COOKIE['uid']);
-            if(sha1($tmp[0].$tmp[1].$db_password)==$tmp[2]){
-                if($tmp[1] < 86400*30){
+            if(sha1($tmp[0].'.'.$tmp[1].'.'.$db_password)==$tmp[2]){
+                if(time()-$tmp[1] < 86400*30){
                     $_SESSION['uid'] = $tmp[0];
                     return $tmp[0];
                 }
