@@ -201,9 +201,9 @@ class Package
                 $d->routers = $router_name;
                 $d->type = "Hotspot";
                 if ($admin) {
-                    $b->admin_id = $admin['id'];
+                    $d->admin_id = $admin['id'];
                 }else{
-                    $b->admin_id = '0';
+                    $d->admin_id = '0';
                 }
                 $d->save();
 
