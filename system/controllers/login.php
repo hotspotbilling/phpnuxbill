@@ -5,6 +5,10 @@
  *  by https://t.me/ibnux
  **/
 
+if(User::getID()){
+    r2(U.'home');
+}
+
 if (isset($routes['1'])) {
     $do = $routes['1'];
 } else {
