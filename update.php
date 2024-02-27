@@ -77,6 +77,9 @@ if (empty($step)) {
     // remove downloaded zip
     if (file_exists($file)) unlink($file);
 } else if ($step == 3) {
+    deleteFolder('system/autoload/');
+    deleteFolder('system/vendor/');
+    deleteFolder('ui/ui/');
     copyFolder($folder, pathFixer('./'));
     deleteFolder('install/');
     deleteFolder($folder);
