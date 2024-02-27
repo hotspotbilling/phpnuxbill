@@ -111,7 +111,7 @@
                         <div class="box-header">
                             <h3 class="box-title">{$_bill['routers']}</h3>
                             <div class="btn-group pull-right">
-                                {if $_bill['type'] != 'Hotspot'}
+                                {if $_bill['type'] == 'Hotspot'}
                                     {if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}
                                 {else}
                                     {if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}
