@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.2.27
+
+- fix path notification
+- redirect to dashboard if already login
+
 ## 2024.2.26
 
 - Clean Unused JS and CSS
