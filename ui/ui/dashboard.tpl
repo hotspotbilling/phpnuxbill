@@ -60,49 +60,52 @@
         </div>
     </div>
 </div>
-<!-- solid sales graph -->
-{if $_c['hide_mrc'] != 'yes'}
-    <div class="box box-solid ">
-        <div class="box-header">
-            <i class="fa fa-th"></i>
-
-            <h3 class="box-title">{Lang::T('Monthly Registered Customers')}</h3>
-
-            <div class="box-tools pull-right">
-                <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
-                <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm" ><i class="fa fa-times"></i>
-                </a>
-            </div>
-        </div>
-        <div class="box-body border-radius-none">
-            <canvas class="chart" id="chart" style="height: 250px;"></canvas>
-        </div>
-    </div>
-{/if}
-
-<!-- solid sales graph -->
-{if $_c['hide_tms'] != 'yes'}
-    <div class="box box-solid ">
-        <div class="box-header">
-            <i class="fa fa-inbox"></i>
-
-            <h3 class="box-title">{Lang::T('Total Monthly Sales')}</h3>
-
-            <div class="box-tools pull-right">
-                <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
-                <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm" ><i class="fa fa-times"></i>
-                </a>
-            </div>
-        </div>
-        <div class="box-body border-radius-none">
-            <canvas class="chart" id="salesChart" style="height: 250px;"></canvas>
-        </div>
-    </div>
-{/if}
 <div class="row">
     <div class="col-md-7">
+
+        <!-- solid sales graph -->
+        {if $_c['hide_mrc'] != 'yes'}
+            <div class="box box-solid ">
+                <div class="box-header">
+                    <i class="fa fa-th"></i>
+
+                    <h3 class="box-title">{Lang::T('Monthly Registered Customers')}</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
+                        </button>
+                        <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm"><i
+                                class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="box-body border-radius-none">
+                    <canvas class="chart" id="chart" style="height: 250px;"></canvas>
+                </div>
+            </div>
+        {/if}
+
+        <!-- solid sales graph -->
+        {if $_c['hide_tms'] != 'yes'}
+            <div class="box box-solid ">
+                <div class="box-header">
+                    <i class="fa fa-inbox"></i>
+
+                    <h3 class="box-title">{Lang::T('Total Monthly Sales')}</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
+                        </button>
+                        <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm"><i
+                                class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="box-body border-radius-none">
+                    <canvas class="chart" id="salesChart" style="height: 250px;"></canvas>
+                </div>
+            </div>
+        {/if}
         {if $_c['disable_voucher'] != 'yes' && $stocks['unused']>0 || $stocks['used']>0}
             {if $_c['hide_vs'] != 'yes'}
                 <div class="panel panel-primary mb20 panel-hovered project-stats table-responsive">
