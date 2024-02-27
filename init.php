@@ -76,10 +76,10 @@ if ($_app_stage != 'Live') {
 define('U', APP_URL . '/index.php?_route=');
 
 // notification message
-if (file_exists($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
-    $_notifmsg = json_decode(file_get_contents($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.json'), true);
+if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.json'), true);
 }
-$_notifmsg_default = json_decode(file_get_contents($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true);
+$_notifmsg_default = json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true);
 
 //register all plugin
 foreach (glob(File::pathFixer($PLUGIN_PATH . DIRECTORY_SEPARATOR . '*.php')) as $filename) {

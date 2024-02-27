@@ -274,7 +274,7 @@ switch ($action) {
                 } catch (Throwable $e) {
                 }
                 try {
-                    $c->delete();
+                    if($c) $c->delete();
                 } catch (Exception $e) {
                 } catch (Throwable $e) {
                 }
