@@ -48,8 +48,8 @@ class Package
             $t->routers = $router_name;
             $t->type = "Balance";
             if ($admin) {
-                $t->admin_id = $admin['id'];
-            }else{
+                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
                 $t->admin_id = '0';
             }
             $t->save();
@@ -152,8 +152,8 @@ class Package
                 $b->routers = $router_name;
                 $b->type = "Hotspot";
                 if ($admin) {
-                    $b->admin_id = $admin['id'];
-                }else{
+                    $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $b->admin_id = '0';
                 }
                 $b->save();
@@ -172,8 +172,8 @@ class Package
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->save();
@@ -201,9 +201,9 @@ class Package
                 $d->routers = $router_name;
                 $d->type = "Hotspot";
                 if ($admin) {
-                    $b->admin_id = $admin['id'];
-                }else{
-                    $b->admin_id = '0';
+                    $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
+                    $d->admin_id = '0';
                 }
                 $d->save();
 
@@ -221,8 +221,8 @@ class Package
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->save();
@@ -276,8 +276,8 @@ class Package
                 $b->routers = $router_name;
                 $b->type = "PPPOE";
                 if ($admin) {
-                    $b->admin_id = $admin['id'];
-                }else{
+                    $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $b->admin_id = '0';
                 }
                 $b->save();
@@ -296,8 +296,8 @@ class Package
                 $t->routers = $router_name;
                 $t->type = "PPPOE";
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->save();
@@ -325,8 +325,8 @@ class Package
                 $d->routers = $router_name;
                 $d->type = "PPPOE";
                 if ($admin) {
-                    $d->admin_id = $admin['id'];
-                }else{
+                    $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $d->admin_id = '0';
                 }
                 $d->save();
@@ -344,8 +344,8 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->type = "PPPOE";
@@ -511,6 +511,6 @@ class Package
         $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
         $ui->assign('whatsapp', urlencode("```$invoice```"));
-        $ui->assign('in',$in);
+        $ui->assign('in', $in);
     }
 }
