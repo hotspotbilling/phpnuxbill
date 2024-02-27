@@ -51,7 +51,7 @@ class Admin
         if ($id) {
             return ORM::for_table('tbl_users')->find_one($id);
         } else {
-            return [];
+            return null;
         }
     }
 }
