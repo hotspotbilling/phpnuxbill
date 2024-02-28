@@ -68,9 +68,13 @@ class Message
 
     public static function sendPackageNotification($phone, $name, $package, $price, $message, $via)
     {
+        global $u;
         $msg = str_replace('[[name]]', $name, $message);
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', $price, $msg);
+        if($u){
+            $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($u['expiration'], $u['time']), $msg);
+        }
         if (
             !empty($phone) && strlen($phone) > 5
             && !empty($message) && in_array($via, ['sms', 'wa'])

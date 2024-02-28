@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.2.28
+
+- Fix Buy Plan with Balance
+- Add Expired date for reminder
+
 ## 2024.2.27
 
 - fix path notification

@@ -15,13 +15,14 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Expired Notification Message')}</label>
                         <div class="col-md-6">
-                            <textarea class="form-control" id="expired"
-                                name="expired"
+                            <textarea class="form-control" id="expired" name="expired"
                                 placeholder="Hello [[name]], your internet package [[package]] has been expired"
                                 rows="3">{if $_json['expired']!=''}{Lang::htmlspecialchars($_json['expired'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[name]]</b> will be replaced with Customer Name.
+                            <b>[[package]]</b> will be replaced with Package name.
+                            <b>[[price]]</b> will be replaced with Package price.
                         </p>
                     </div>
                 </div>
@@ -33,7 +34,10 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_7_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[name]]</b> will be replaced with Customer Name.
+                            <b>[[package]]</b> will be replaced with Package name.
+                            <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[expired_date]]</b> will be replaced with Expiration date.
                         </p>
                     </div>
                 </div>
@@ -45,7 +49,10 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_3_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[name]]</b> will be replaced with Customer Name.
+                            <b>[[package]]</b> will be replaced with Package name.
+                            <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[expired_date]]</b> will be replaced with Expiration date.
                         </p>
                     </div>
                 </div>
@@ -57,7 +64,10 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_1_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name. <b>[[package]]</b> will be replaced with Package name. <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[name]]</b> will be replaced with Customer Name.
+                            <b>[[package]]</b> will be replaced with Package name.
+                            <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[expired_date]]</b> will be replaced with Expiration date.
                         </p>
                     </div>
                 </div>
@@ -149,8 +159,7 @@
 
             <div class="panel-body">
                 <div class="form-group">
-                    <button class="btn btn-success btn-block"
-                        type="submit">{Lang::T('Save Changes')}</button>
+                    <button class="btn btn-success btn-block" type="submit">{Lang::T('Save Changes')}</button>
                 </div>
             </div>
         </div>
