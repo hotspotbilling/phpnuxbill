@@ -96,6 +96,7 @@ $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
+$_c =  $config;
 if (empty($http_proxy) && !empty($config['http_proxy'])) {
     $http_proxy = $config['http_proxy'];
     if (empty($http_proxyauth) && !empty($config['http_proxyauth'])) {
