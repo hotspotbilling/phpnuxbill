@@ -36,9 +36,9 @@ switch ($action) {
             $logo = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
         }
         $ui->assign('logo', $logo);
-        if ($_c['radius_enable'] && empty($_c['radius_client'])) {
+        if ($config['radius_enable'] && empty($config['radius_client'])) {
             try {
-                $_c['radius_client'] = Radius::getClient();
+                $config['radius_client'] = Radius::getClient();
                 $ui->assign('_c', $_c);
             } catch (Exception $e) {
                 //ignore
