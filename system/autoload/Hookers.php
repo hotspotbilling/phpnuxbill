@@ -38,6 +38,7 @@ function register_menu($name, $admin, $function, $position, $icon = '', $label =
 $hook_registered = array();
 
 function register_hook($action, $function){
+    global $hook_registered;
     $hook_registered[] = [
         'action' => $action,
         'function' => $function

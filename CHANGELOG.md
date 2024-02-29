@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.2.29
+
+- Fix Hook Functionality
+- Change Customer Menu
+
 ## 2024.2.28
 
 - Fix Buy Plan with Balance
