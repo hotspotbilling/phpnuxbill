@@ -12,6 +12,9 @@ $ui->assign('_system_menu', 'customers');
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
+if(empty($action)){
+    $action = 'list';
+}
 
 switch ($action) {
     case 'list':

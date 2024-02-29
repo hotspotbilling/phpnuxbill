@@ -130,20 +130,11 @@
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
                     {if !in_array($_admin['user_type'],['Report'])}
-                        <li class="{if $_system_menu eq 'customers'}active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-android-contacts"></i> <span>{Lang::T('Customer')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
+                        <li {if $_system_menu eq 'customers'}class="active" {/if}>
+                            <a href="{$_url}customers">
+                                <i class="fa fa-users"></i>
+                                <span>{Lang::T('Customer')}</span>
                             </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'add'}class="active" {/if}><a href="{$_url}customers/add"><i
-                                            class="fa fa-user-plus"></i> {Lang::T('Add New Contact')}</a></li>
-                                <li {if $_routes[1] eq 'list'}class="active" {/if}><a href="{$_url}customers/list"><i
-                                            class="fa fa-users"></i> {Lang::T('List Contact')}</a></li>
-                                {$_MENU_CUSTOMERS}
-                            </ul>
                         </li>
                         {$_MENU_AFTER_CUSTOMERS}
                         <li class="{if $_system_menu eq 'prepaid'}active{/if} treeview">
