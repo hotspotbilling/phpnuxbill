@@ -30,10 +30,12 @@ switch ($action) {
             r2(U . "settings/app", 's', 'Test Telegram has been send<br>Result: ' . $result);
         }
 
+        $UPLOAD_URL_PATH = str_replace($root_path,'',  $UPLOAD_PATH);
+
         if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
-            $logo = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
+            $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
         } else {
-            $logo = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
+            $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
         }
         $ui->assign('logo', $logo);
         if ($config['radius_enable'] && empty($config['radius_client'])) {

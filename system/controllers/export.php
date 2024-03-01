@@ -62,10 +62,11 @@ switch ($action) {
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
 
+        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
         if (file_exists($UPLOAD_PATH . '/logo.png')) {
-            $logo = $UPLOAD_PATH . '/logo.png';
+            $logo = $UPLOAD_URL_PATH . '/logo.png';
         } else {
-            $logo = $UPLOAD_PATH . '/logo.default.png';
+            $logo = $UPLOAD_URL_PATH . '/logo.default.png';
         }
 
         if ($x) {
@@ -234,10 +235,12 @@ EOF;
 
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
+
+        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
         if (file_exists($UPLOAD_PATH . '/logo.png')) {
-            $logo = $UPLOAD_PATH . '/logo.png';
+            $logo = $UPLOAD_URL_PATH . '/logo.png';
         } else {
-            $logo = $UPLOAD_PATH . '/logo.default.png';
+            $logo = $UPLOAD_URL_PATH . '/logo.default.png';
         }
 
         if ($x) {
