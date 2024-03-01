@@ -31,7 +31,6 @@ switch ($action) {
         }
 
         $UPLOAD_URL_PATH = str_replace($root_path,'',  $UPLOAD_PATH);
-
         if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
             $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
         } else {
