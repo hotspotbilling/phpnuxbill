@@ -360,8 +360,8 @@ class Package
                 "\nChannel: " . $channel .
                 "\nPrice: " . Lang::moneyFormat($p['price']));
         }
-        Message::sendInvoice($c, $t);
         run_hook("recharge_user_finish");
+        Message::sendInvoice($c, $t);
         return true;
     }
 
