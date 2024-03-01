@@ -99,8 +99,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             if(!$plan['enabled']){
                 r2(U . "home", 'e', 'Plan is not exists');
             }
-            if($plan['allow_purchase'] != 'yes'){
-                r2(U . "home", 'e', 'Cannot recharge this plan');
+            
             }
             if ($user['balance'] > $plan['price']) {
                 r2(U . "order/pay/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
