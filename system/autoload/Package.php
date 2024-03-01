@@ -19,7 +19,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
     {
-        global $config, $admin;
+        global $config, $admin, $c, $p, $b, $t, $d;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
