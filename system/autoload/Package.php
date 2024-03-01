@@ -94,6 +94,9 @@ class Package
             ->where('Type', $p['type'])
             ->find_one();
 
+        run_hook("recharge_user");
+
+
         $mikrotik = Mikrotik::info($router_name);
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
@@ -357,8 +360,8 @@ class Package
                 "\nChannel: " . $channel .
                 "\nPrice: " . Lang::moneyFormat($p['price']));
         }
-
         Message::sendInvoice($c, $t);
+        run_hook("recharge_user_finish");
         return true;
     }
 

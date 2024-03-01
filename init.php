@@ -238,7 +238,7 @@ function r2($to, $ntype = 'e', $msg = '')
     exit;
 }
 
-function _alert($text, $type = 'success', $url = "home")
+function _alert($text, $type = 'success', $url = "home", $time = 3)
 {
     global $ui;
     if (!isset($ui)) return;
@@ -251,8 +251,10 @@ function _alert($text, $type = 'success', $url = "home")
     }
     $ui->assign('text', $text);
     $ui->assign('type', $type);
+    $ui->assign('time', $time);
     $ui->assign('url', $url);
     $ui->display('alert.tpl');
+    die();
 }
 
 

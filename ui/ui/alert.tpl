@@ -9,7 +9,7 @@
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
     <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
-    <meta http-equiv="refresh" content="3; url={$url}">
+    <meta http-equiv="refresh" content="{$time}; url={$url}">
 </head>
 
 <body class="hold-transition lockscreen">
@@ -20,7 +20,7 @@
                 {$text}
             </div>
             <div class="panel-footer">
-                <a href="{$url}" id="button" class="btn btn-{$type} btn-block btn-block">{Lang::T('Click Here')} (3)</a>
+                <a href="{$url}" id="button" class="btn btn-{$type} btn-block btn-block">{Lang::T('Click Here')} ({$time})</a>
             </div>
         </div>
         <div class="lockscreen-footer text-center">
@@ -29,7 +29,7 @@
     </div>
 
     <script>
-        var time = 3;
+        var time = {$time};
         timer();
 
         function timer() {
