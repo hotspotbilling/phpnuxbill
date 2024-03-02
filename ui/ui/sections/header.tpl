@@ -57,8 +57,36 @@
             max-height: 1em;
             line-height: 1em;
         }
-    </style>
-
+   
+        
+        .loading {
+          pointer-events: none;
+          opacity: 0.7;
+        }
+    
+        .loading::after {
+          content: "";
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          vertical-align: middle;
+          margin-left: 10px;
+          border: 2px solid #fff;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: spin 0.8s infinite linear;
+        }
+    
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+    
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      </style>
     {if isset($xheader)}
         {$xheader}
     {/if}
