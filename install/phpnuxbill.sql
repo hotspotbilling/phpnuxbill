@@ -91,7 +91,7 @@ CREATE TABLE `tbl_plans` (
   `data_limit` int(10) UNSIGNED DEFAULT NULL,
   `data_unit` enum('MB','GB') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `validity` int(10) NOT NULL,
-  `validity_unit` enum('Mins','Hrs','Days','Months') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `validity_unit` enum('Mins','Hrs','Days','Months','Period') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `shared_users` int(10) DEFAULT NULL,
   `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `is_radius` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 is radius',

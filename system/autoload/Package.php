@@ -100,6 +100,18 @@ class Package
         $mikrotik = Mikrotik::info($router_name);
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
+		} else if ($p['validity_unit'] == 'Period') {
+			$date_tmp = date("Y-m-20", strtotime('+' . $p['validity'] . ' month'));
+			$dt1 = new DateTime("$date_only");
+			$dt2 = new DateTime("$date_tmp");
+			$diff = $dt2->diff($dt1);
+			$sum =  $diff->format("%a");// => 453
+			if ($sum >= 35) {
+				$date_exp = date("Y-m-20", strtotime('+0 month'));
+			} else {
+				$date_exp = date("Y-m-20", strtotime('+' . $p['validity'] . ' month'));
+				};
+			$time = date("23:59:00");
         } else if ($p['validity_unit'] == 'Days') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' day'));
         } else if ($p['validity_unit'] == 'Hrs') {
@@ -119,6 +131,9 @@ class Package
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
+					} else if ($p['validity_unit'] == 'Period') {
+						$date_exp = date("Y-m-20", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+						$time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
                         $time = $b['time'];
@@ -180,6 +195,12 @@ class Package
                     $t->admin_id = '0';
                 }
                 $t->save();
+				
+				Message::sendTelegram("#u$c[username] #recharge #Hotspot \n" . $p['name_plan'] .
+                "\nRouter: " . $router_name .
+                "\nGateway: " . $gateway .
+                "\nChannel: " . $channel .
+                "\nPrice: " . Lang::moneyFormat($p['price']));
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
@@ -229,12 +250,14 @@ class Package
                     $t->admin_id = '0';
                 }
                 $t->save();
-            }
-            Message::sendTelegram("#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+				
+				Message::sendTelegram("#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
                 "\nPrice: " . Lang::moneyFormat($p['price']));
+            }
+            
         } else {
 
             if ($b) {
@@ -243,6 +266,9 @@ class Package
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
+					} else if ($p['validity_unit'] == 'Period') {
+						$date_exp = date("Y-m-20", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+						$time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
                         $time = $b['time'];
@@ -304,6 +330,12 @@ class Package
                     $t->admin_id = '0';
                 }
                 $t->save();
+				
+				Message::sendTelegram("#u$c[username] #recharge #PPPOE \n" . $p['name_plan'] .
+                "\nRouter: " . $router_name .
+                "\nGateway: " . $gateway .
+                "\nChannel: " . $channel .
+                "\nPrice: " . Lang::moneyFormat($p['price']));
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
@@ -353,12 +385,14 @@ class Package
                 }
                 $t->type = "PPPOE";
                 $t->save();
-            }
-            Message::sendTelegram("#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
+				
+				Message::sendTelegram("#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
                 "\nPrice: " . Lang::moneyFormat($p['price']));
+            }
+            
         }
         run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);
