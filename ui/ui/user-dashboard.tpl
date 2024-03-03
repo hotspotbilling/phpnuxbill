@@ -53,7 +53,10 @@
                 <h3 class="box-title">{Lang::T('Announcement')}</h3>
             </div>
             <div class="box-body">
-                {include file="$_path/../pages/Announcement_Customer.html"}
+            {$Announcement_Customer = "{$PAGES_PATH}/Announcement_Customer.html"}
+            {if file_exists($Announcement_Customer)}
+                {include file=$Announcement_Customer}
+            {/if}
             </div>
         </div>
     </div>
