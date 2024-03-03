@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.3.3
+
+- Change loading button by @Focuslinkstech
+- Add Customer Announcements by @Gerandonk
+- Add PPPOE Period Validity by @Gerandonk
+
 ## 2024.2.29
 
 - Fix Hook Functionality
