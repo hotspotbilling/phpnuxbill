@@ -53,7 +53,7 @@
                 <h3 class="box-title">{Lang::T('Announcement')}</h3>
             </div>
             <div class="box-body">
-                {include file="$_path/../pages/Announcement_Users.html"}
+                {include file="$_path/../pages/Announcement_Customer.html"}
             </div>
         </div>
     </div>

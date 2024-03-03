@@ -456,5 +456,7 @@
     "Click_Here": "Click Here",
     "danger": "danger",
     "Logout_Successful": "Logout Successful",
-    "warning": "warning"
+    "warning": "warning",
+    "Users_Announcement": "Users Announcement",
+    "Customer_Announcement": "Customer Announcement"
 }
