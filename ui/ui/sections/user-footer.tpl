@@ -85,7 +85,7 @@
                         if (el.addEventListener) { // all browsers except IE before version 9
                             el.addEventListener("click", function() {
                                 $(this).html(
-                                    `<span class="glyphicon glyphicon-refresh" role="status" aria-hidden="true"></span>`
+                                    `<span class="loading"></span>`
                                 );
                                 setTimeout(() => {
                                     $(this).prop("disabled", true);
@@ -95,7 +95,7 @@
                             if (el.attachEvent) { // IE before version 9
                                 el.attachEvent("click", function() {
                                     $(this).html(
-                                        `<span class="glyphicon glyphicon-refresh" role="status" aria-hidden="true"></span>`
+                                        `<span class="loading"></span>`
                                     );
                                     setTimeout(() => {
                                         $(this).prop("disabled", true);
