@@ -62,6 +62,7 @@
                         <div class="col-md-4">
                             <input type="text" class="form-control" id="validity" name="validity"
                                 value="{$d['validity']}">
+							<p class="help-block">{Lang::T('1 Period = 30 Month, Expires the 20th of each month')}</p>
                         </div>
                         <div class="col-md-2">
                             <select class="form-control" id="validity_unit" name="validity_unit">
@@ -73,6 +74,7 @@
                                 </option>
                                 <option value="Months" {if $d['validity_unit'] eq 'Months'} selected {/if}>
                                     {Lang::T('Months')}</option>
+								<option value="Period" {if $d['validity_unit'] eq 'Period'} selected {/if}>{Lang::T('Period')}</option>
                             </select>
                         </div>
                     </div>

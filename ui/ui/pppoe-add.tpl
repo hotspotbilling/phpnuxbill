@@ -60,6 +60,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Plan Validity')}</label>
                         <div class="col-md-4">
                             <input type="text" class="form-control" id="validity" name="validity">
+							<p class="help-block">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                         </div>
                         <div class="col-md-2">
                             <select class="form-control" id="validity_unit" name="validity_unit">
@@ -67,6 +68,7 @@
                                 <option value="Hrs">{Lang::T('Hrs')}</option>
                                 <option value="Days">{Lang::T('Days')}</option>
                                 <option value="Months">{Lang::T('Months')}</option>
+								<option value="Period">{Lang::T('Period')}</option>
                             </select>
                         </div>
                     </div>
