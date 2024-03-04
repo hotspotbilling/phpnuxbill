@@ -195,8 +195,8 @@ class Package
                     $t->admin_id = '0';
                 }
                 $t->save();
-				
-				Message::sendTelegram("#u$c[username] #recharge #Hotspot \n" . $p['name_plan'] .
+
+				Message::sendTelegram("#u$c[username] $c[fullname] #recharge #Hotspot \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
@@ -250,14 +250,14 @@ class Package
                     $t->admin_id = '0';
                 }
                 $t->save();
-				
-				Message::sendTelegram("#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
+
+				Message::sendTelegram("#u$c[username] $c[fullname] #buy #Hotspot \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
                 "\nPrice: " . Lang::moneyFormat($p['price']));
             }
-            
+
         } else {
 
             if ($b) {
@@ -330,8 +330,8 @@ class Package
                     $t->admin_id = '0';
                 }
                 $t->save();
-				
-				Message::sendTelegram("#u$c[username] #recharge #PPPOE \n" . $p['name_plan'] .
+
+				Message::sendTelegram("#u$c[username] $c[fullname] #recharge #PPPOE \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
@@ -385,14 +385,14 @@ class Package
                 }
                 $t->type = "PPPOE";
                 $t->save();
-				
-				Message::sendTelegram("#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
+
+				Message::sendTelegram("#u$c[username] $c[fullname] #buy #PPPOE \n" . $p['name_plan'] .
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
                 "\nPrice: " . Lang::moneyFormat($p['price']));
             }
-            
+
         }
         run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);
