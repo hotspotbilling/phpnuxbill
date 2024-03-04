@@ -60,7 +60,7 @@ class Message
         global $config;
         run_hook('send_whatsapp'); #HOOK
         if (!empty($config['wa_url'])) {
-            $waurl = str_replace('[number]', urlencode($phone), $config['wa_url']);
+            $waurl = str_replace('[number]', urlencode(Lang::phoneFormat($phone)), $config['wa_url']);
             $waurl = str_replace('[text]', urlencode($txt), $waurl);
             return Http::getData($waurl);
         }
@@ -70,20 +70,20 @@ class Message
     {
         global $u;
         $msg = str_replace('[[name]]', $customer['fullname'], $message);
-        $msg = str_replace('[[username]]', $customer['username'], $message);
+        $msg = str_replace('[[username]]', $customer['username'], $msg);
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', $price, $msg);
         if($u){
             $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($u['expiration'], $u['time']), $msg);
         }
         if (
-            !empty($phone) && strlen($phone) > 5
+            !empty($customer['phonenumber']) && strlen($customer['phonenumber']) > 5
             && !empty($message) && in_array($via, ['sms', 'wa'])
         ) {
             if ($via == 'sms') {
-                Message::sendSMS($phone, $msg);
+                Message::sendSMS($customer['phonenumber'], $msg);
             } else if ($via == 'wa') {
-                Message::sendWhatsapp($phone, $msg);
+                Message::sendWhatsapp($customer['phonenumber'], $msg);
             }
         }
         return "$via: $msg";

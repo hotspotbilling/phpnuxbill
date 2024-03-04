@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.3.4
+
+- add [[username]] for reminder
+- fix agent show when editing
+- fix password admin when sending notification
+- add file exists for pages
+
 ## 2024.3.3
 
 - Change loading button by @Focuslinkstech
