@@ -496,11 +496,11 @@ switch ($action) {
         $date_now = date("Y-m-d H:i:s");
         run_hook('add_admin'); #HOOK
         if ($msg == '') {
-            $password = Password::_crypt($password);
+            $passwordC = Password::_crypt($password);
             $d = ORM::for_table('tbl_users')->create();
             $d->username = $username;
             $d->fullname = $fullname;
-            $d->password = $password;
+            $d->password = $passwordC;
             $d->user_type = $user_type;
             $d->phone = $phone;
             $d->email = $email;
