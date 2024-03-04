@@ -54,7 +54,7 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
             //update database user dengan status off
             $u->status = 'off';
             $u->save();
@@ -109,7 +109,7 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removePpoeActive($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
 
             $u->status = 'off';
             $u->save();

@@ -66,10 +66,11 @@ class Message
         }
     }
 
-    public static function sendPackageNotification($phone, $name, $package, $price, $message, $via)
+    public static function sendPackageNotification($customer, $package, $price, $message, $via)
     {
         global $u;
-        $msg = str_replace('[[name]]', $name, $message);
+        $msg = str_replace('[[name]]', $customer['fullname'], $message);
+        $msg = str_replace('[[username]]', $customer['username'], $message);
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', $price, $msg);
         if($u){
