@@ -29,9 +29,9 @@
                                 $(this).html(
                                     `<span class="loading"></span>`
                                 );
-                                setTimeout(() => {
-                                    $(this).prop("disabled", true);
-                                }, 100);
+                                // setTimeout(() => {
+                                //     $(this).prop("disabled", true);
+                                // }, 100);
                             }, false);
                         } else {
                             if (el.attachEvent) { // IE before version 9
@@ -39,9 +39,9 @@
                                     $(this).html(
                                         `<span class="loading"></span>`
                                     );
-                                    setTimeout(() => {
-                                        $(this).prop("disabled", true);
-                                    }, 100);
+                                    // setTimeout(() => {
+                                    //     $(this).prop("disabled", true);
+                                    // }, 100);
                                 });
                             }
                         }

@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.3.6
+
+- change attributes view
+
 ## 2024.3.4
 
 - add [[username]] for reminder
