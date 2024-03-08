@@ -24,7 +24,7 @@ echo "Found " . count($d) . " user(s)\n";
 run_hook('cronjob'); #HOOK
 
 foreach ($d as $ds) {
-    if ($ds['type'] == 'Hotspot') {
+    if ($ds['type'] == 'Hotspot') { # HOTSPOT
         $date_now = strtotime(date("Y-m-d H:i:s"));
         $expiration = strtotime($ds['expiration'] . ' ' . $ds['time']);
         echo $ds['expiration'] . " : " . (($isCli) ? $ds['username'] : Lang::maskText($ds['username']));
@@ -54,7 +54,7 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
             //update database user dengan status off
             $u->status = 'off';
             $u->save();
@@ -82,7 +82,7 @@ foreach ($d as $ds) {
             }
         } else
             echo " : ACTIVE \r\n";
-    } else {
+    } else { # PPPOE
         $date_now = strtotime(date("Y-m-d H:i:s"));
         $expiration = strtotime($ds['expiration'] . ' ' . $ds['time']);
         echo $ds['expiration'] . " : " . (($isCli) ? $ds['username'] : Lang::maskText($ds['username']));
@@ -109,7 +109,7 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removePpoeActive($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c['phonenumber'], $c['fullname'], $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
 
             $u->status = 'off';
             $u->save();

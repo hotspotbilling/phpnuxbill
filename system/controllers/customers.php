@@ -12,6 +12,9 @@ $ui->assign('_system_menu', 'customers');
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
+if(empty($action)){
+    $action = 'list';
+}
 
 switch ($action) {
     case 'list':
@@ -274,7 +277,7 @@ switch ($action) {
                 } catch (Throwable $e) {
                 }
                 try {
-                    $c->delete();
+                    if($c) $c->delete();
                 } catch (Exception $e) {
                 } catch (Throwable $e) {
                 }

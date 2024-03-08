@@ -2,6 +2,38 @@
 
 # CHANGELOG
 
+## 2024.3.6
+
+- change attributes view
+
+## 2024.3.4
+
+- add [[username]] for reminder
+- fix agent show when editing
+- fix password admin when sending notification
+- add file exists for pages
+
+## 2024.3.3
+
+- Change loading button by @Focuslinkstech
+- Add Customer Announcements by @Gerandonk
+- Add PPPOE Period Validity by @Gerandonk
+
+## 2024.2.29
+
+- Fix Hook Functionality
+- Change Customer Menu
+
+## 2024.2.28
+
+- Fix Buy Plan with Balance
+- Add Expired date for reminder
+
+## 2024.2.27
+
+- fix path notification
+- redirect to dashboard if already login
+
 ## 2024.2.26
 
 - Clean Unused JS and CSS

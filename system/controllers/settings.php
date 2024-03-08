@@ -30,15 +30,16 @@ switch ($action) {
             r2(U . "settings/app", 's', 'Test Telegram has been send<br>Result: ' . $result);
         }
 
+        $UPLOAD_URL_PATH = str_replace($root_path,'',  $UPLOAD_PATH);
         if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
-            $logo = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
+            $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
         } else {
-            $logo = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
+            $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
         }
         $ui->assign('logo', $logo);
-        if ($_c['radius_enable'] && empty($_c['radius_client'])) {
+        if ($config['radius_enable'] && empty($config['radius_client'])) {
             try {
-                $_c['radius_client'] = Radius::getClient();
+                $config['radius_client'] = Radius::getClient();
                 $ui->assign('_c', $_c);
             } catch (Exception $e) {
                 //ignore
@@ -495,11 +496,11 @@ switch ($action) {
         $date_now = date("Y-m-d H:i:s");
         run_hook('add_admin'); #HOOK
         if ($msg == '') {
-            $password = Password::_crypt($password);
+            $passwordC = Password::_crypt($password);
             $d = ORM::for_table('tbl_users')->create();
             $d->username = $username;
             $d->fullname = $fullname;
-            $d->password = $password;
+            $d->password = $passwordC;
             $d->user_type = $user_type;
             $d->phone = $phone;
             $d->email = $email;

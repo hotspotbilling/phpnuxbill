@@ -57,8 +57,36 @@
             max-height: 1em;
             line-height: 1em;
         }
-    </style>
 
+
+        .loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin-left: 10px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s infinite linear;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
     {if isset($xheader)}
         {$xheader}
     {/if}
@@ -130,20 +158,11 @@
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
                     {if !in_array($_admin['user_type'],['Report'])}
-                        <li class="{if $_system_menu eq 'customers'}active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-android-contacts"></i> <span>{Lang::T('Customer')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
+                        <li {if $_system_menu eq 'customers'}class="active" {/if}>
+                            <a href="{$_url}customers">
+                                <i class="fa fa-users"></i>
+                                <span>{Lang::T('Customer')}</span>
                             </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'add'}class="active" {/if}><a href="{$_url}customers/add"><i
-                                            class="fa fa-user-plus"></i> {Lang::T('Add New Contact')}</a></li>
-                                <li {if $_routes[1] eq 'list'}class="active" {/if}><a href="{$_url}customers/list"><i
-                                            class="fa fa-users"></i> {Lang::T('List Contact')}</a></li>
-                                {$_MENU_CUSTOMERS}
-                            </ul>
                         </li>
                         {$_MENU_AFTER_CUSTOMERS}
                         <li class="{if $_system_menu eq 'prepaid'}active{/if} treeview">
@@ -164,8 +183,10 @@
                                 {/if}
                                 <li {if $_routes[1] eq 'recharge'}class="active" {/if}><a
                                         href="{$_url}prepaid/recharge">{Lang::T('Recharge Account')}</a></li>
-                                <li {if $_routes[1] eq 'deposit'}class="active" {/if}><a
-                                        href="{$_url}prepaid/deposit">{Lang::T('Refill Balance')}</a></li>
+                                {if $_c['enable_balance'] == 'yes'}
+                                    <li {if $_routes[1] eq 'deposit'}class="active" {/if}><a
+                                            href="{$_url}prepaid/deposit">{Lang::T('Refill Balance')}</a></li>
+                                {/if}
                                 {$_MENU_PREPAID}
                             </ul>
                         </li>
@@ -186,8 +207,10 @@
                                         href="{$_url}services/pppoe">{Lang::T('PPPOE Plans')}</a></li>
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
                                         href="{$_url}bandwidth/list">{Lang::T('Bandwidth Plans')}</a></li>
-                                <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
-                                        href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></li>
+                                {if $_c['enable_balance'] == 'yes'}
+                                    <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
+                                            href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></li>
+                                {/if}
                                 {$_MENU_SERVICES}
                             </ul>
                         </li>
@@ -258,6 +281,9 @@
                                         href="{$_url}pages/Voucher">{Lang::T('Voucher')} Template</a></li>
                                 <li {if $_routes[1] eq 'Announcement'}class="active" {/if}><a
                                         href="{$_url}pages/Announcement">{Lang::T('Announcement')}</a></li>
+                                <li {if $_routes[1] eq 'Announcement_Customer'}class="active" {/if}><a
+                                        href="{$_url}pages/Announcement_Customer">{Lang::T('Customer Announcement')}</a>
+                                </li>
                                 <li {if $_routes[1] eq 'Registration_Info'}class="active" {/if}><a
                                         href="{$_url}pages/Registration_Info">{Lang::T('Registration Info')}</a></li>
                                 <li {if $_routes[1] eq 'Privacy_Policy'}class="active" {/if}><a

@@ -53,7 +53,10 @@
                 <h3 class="box-title">{Lang::T('Announcement')}</h3>
             </div>
             <div class="box-body">
-                {include file="$_path/../pages/Announcement.html"}
+            {$Announcement_Customer = "{$PAGES_PATH}/Announcement_Customer.html"}
+            {if file_exists($Announcement_Customer)}
+                {include file=$Announcement_Customer}
+            {/if}
             </div>
         </div>
     </div>
@@ -111,7 +114,7 @@
                         <div class="box-header">
                             <h3 class="box-title">{$_bill['routers']}</h3>
                             <div class="btn-group pull-right">
-                                {if $_bill['type'] != 'Hotspot'}
+                                {if $_bill['type'] == 'Hotspot'}
                                     {if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}
                                 {else}
                                     {if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}

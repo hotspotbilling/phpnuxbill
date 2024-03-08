@@ -142,7 +142,7 @@ switch ($action) {
         $ui->display('user-orderView.tpl');
         break;
     case 'pay':
-        if ($_c['enable_balance'] != 'yes' && $config['allow_balance_transfer'] != 'yes') {
+        if ($config['enable_balance'] != 'yes') {
             r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
         }
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
@@ -176,7 +176,7 @@ switch ($action) {
         }
         break;
     case 'send':
-        if ($_c['enable_balance'] != 'yes') {
+        if ($config['enable_balance'] != 'yes') {
             r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
         }
         $ui->assign('_title', Lang::T('Buy for friend'));

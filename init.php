@@ -76,10 +76,10 @@ if ($_app_stage != 'Live') {
 define('U', APP_URL . '/index.php?_route=');
 
 // notification message
-if (file_exists($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
-    $_notifmsg = json_decode(file_get_contents($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.json'), true);
+if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
+    $_notifmsg = json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.json'), true);
 }
-$_notifmsg_default = json_decode(file_get_contents($root_path . $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true);
+$_notifmsg_default = json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true);
 
 //register all plugin
 foreach (glob(File::pathFixer($PLUGIN_PATH . DIRECTORY_SEPARATOR . '*.php')) as $filename) {
@@ -96,6 +96,7 @@ $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
+$_c =  $config;
 if (empty($http_proxy) && !empty($config['http_proxy'])) {
     $http_proxy = $config['http_proxy'];
     if (empty($http_proxyauth) && !empty($config['http_proxyauth'])) {
@@ -237,7 +238,7 @@ function r2($to, $ntype = 'e', $msg = '')
     exit;
 }
 
-function _alert($text, $type = 'success', $url = "home")
+function _alert($text, $type = 'success', $url = "home", $time = 3)
 {
     global $ui;
     if (!isset($ui)) return;
@@ -250,8 +251,10 @@ function _alert($text, $type = 'success', $url = "home")
     }
     $ui->assign('text', $text);
     $ui->assign('type', $type);
+    $ui->assign('time', $time);
     $ui->assign('url', $url);
     $ui->display('alert.tpl');
+    die();
 }
 
 

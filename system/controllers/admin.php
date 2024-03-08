@@ -5,6 +5,10 @@
  *  by https://t.me/ibnux
  **/
 
+if(Admin::getID()){
+    r2(U.'dashboard');
+}
+
 if (isset($routes['1'])) {
     $do = $routes['1'];
 } else {

@@ -19,7 +19,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
     {
-        global $config, $admin;
+        global $config, $admin, $c, $p, $b, $t, $d;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
@@ -31,6 +31,16 @@ class Package
 
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
+        if ($p['validity_unit'] == 'Period') {
+            $f = ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
+            if (!$f) {
+                $f = ORM::for_table('tbl_customers_fields')->create();
+                $f->customer_id = $c['id'];
+                $f->field_name = 'Expired Date';
+                $f->field_value = 20;
+                $f->save();
+            }
+        }
 
         if ($router_name == 'balance') {
             // insert table transactions
@@ -48,8 +58,8 @@ class Package
             $t->routers = $router_name;
             $t->type = "Balance";
             if ($admin) {
-                $t->admin_id = $admin['id'];
-            }else{
+                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
                 $t->admin_id = '0';
             }
             $t->save();
@@ -94,9 +104,24 @@ class Package
             ->where('Type', $p['type'])
             ->find_one();
 
+        run_hook("recharge_user");
+
+
         $mikrotik = Mikrotik::info($router_name);
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
+        } else if ($p['validity_unit'] == 'Period') {
+            $date_tmp = date("Y-m-{$f['field_value']}", strtotime('+' . $p['validity'] . ' month'));
+            $dt1 = new DateTime("$date_only");
+            $dt2 = new DateTime("$date_tmp");
+            $diff = $dt2->diff($dt1);
+            $sum =  $diff->format("%a"); // => 453
+            if ($sum >= 35) {
+                $date_exp = date("Y-m-{$f['field_value']}", strtotime('+0 month'));
+            } else {
+                $date_exp = date("Y-m-{$f['field_value']}", strtotime('+' . $p['validity'] . ' month'));
+            };
+            $time = date("23:59:00");
         } else if ($p['validity_unit'] == 'Days') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' day'));
         } else if ($p['validity_unit'] == 'Hrs') {
@@ -116,6 +141,9 @@ class Package
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
+                    } else if ($p['validity_unit'] == 'Period') {
+                        $date_exp = date("Y-m-{$f['field_value']}", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
                         $time = $b['time'];
@@ -152,8 +180,8 @@ class Package
                 $b->routers = $router_name;
                 $b->type = "Hotspot";
                 if ($admin) {
-                    $b->admin_id = $admin['id'];
-                }else{
+                    $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $b->admin_id = '0';
                 }
                 $b->save();
@@ -172,11 +200,32 @@ class Package
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->save();
+
+                // insert to fields
+                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                if (!$fl) {
+                    $fl = ORM::for_table('tbl_customers_fields')->create();
+                    $fl->customer_id = $c['id'];
+                    $fl->field_name = 'Invoice';
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                } else {
+                    $fl->customer_id = $c['id'];
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                }
+
+
+                Message::sendTelegram("#u$c[username] $c[fullname] #recharge #Hotspot \n" . $p['name_plan'] .
+                    "\nRouter: " . $router_name .
+                    "\nGateway: " . $gateway .
+                    "\nChannel: " . $channel .
+                    "\nPrice: " . Lang::moneyFormat($p['price']));
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
@@ -201,18 +250,29 @@ class Package
                 $d->routers = $router_name;
                 $d->type = "Hotspot";
                 if ($admin) {
-                    $d->admin_id = $admin['id'];
-                }else{
+                    $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $d->admin_id = '0';
                 }
                 $d->save();
+
+                // Calculating Price
+                $sd = new DateTime("$date_only");
+                $ed = new DateTime("$date_exp");
+                $td = $ed->diff($sd);
+                $fd = $td->format("%a");
+                $gi = ($p['price'] / 30) * $fd;
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
                 $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'];
+                if ($gi > $p['price']) {
+                    $t->price = $p['price'];
+                } else {
+                    $t->price = $gi;
+                }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -221,17 +281,36 @@ class Package
                 $t->routers = $router_name;
                 $t->type = "Hotspot";
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->save();
+
+                // insert to fields
+                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                if (!$fl) {
+                    $fl = ORM::for_table('tbl_customers_fields')->create();
+                    $fl->customer_id = $c['id'];
+                    $fl->field_name = 'Invoice';
+                    if ($gi > $p['price']) {
+                        $fl->field_value = $p['price'];
+                    } else {
+                        $fl->field_value = $gi;
+                    }
+                    $fl->save();
+                } else {
+                    $fl->customer_id = $c['id'];
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                }
+
+                Message::sendTelegram("#u$c[username] $c[fullname] #buy #Hotspot \n" . $p['name_plan'] .
+                    "\nRouter: " . $router_name .
+                    "\nGateway: " . $gateway .
+                    "\nChannel: " . $channel .
+                    "\nPrice: " . Lang::moneyFormat($p['price']));
             }
-            Message::sendTelegram("#u$c[username] #buy #Hotspot \n" . $p['name_plan'] .
-                "\nRouter: " . $router_name .
-                "\nGateway: " . $gateway .
-                "\nChannel: " . $channel .
-                "\nPrice: " . Lang::moneyFormat($p['price']));
         } else {
 
             if ($b) {
@@ -240,6 +319,9 @@ class Package
                     if ($p['validity_unit'] == 'Months') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
+                    } else if ($p['validity_unit'] == 'Period') {
+                        $date_exp = date("Y-m-{$f['field_value']}", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
                         $time = $b['time'];
@@ -276,8 +358,8 @@ class Package
                 $b->routers = $router_name;
                 $b->type = "PPPOE";
                 if ($admin) {
-                    $b->admin_id = $admin['id'];
-                }else{
+                    $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $b->admin_id = '0';
                 }
                 $b->save();
@@ -296,11 +378,32 @@ class Package
                 $t->routers = $router_name;
                 $t->type = "PPPOE";
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->save();
+
+                // insert to fields
+                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                $gp = $gi;
+                if (!$fl) {
+                    $fl = ORM::for_table('tbl_customers_fields')->create();
+                    $fl->customer_id = $c['id'];
+                    $fl->field_name = 'Invoice';
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                } else {
+                    $fl->customer_id = $c['id'];
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                }
+
+                Message::sendTelegram("#u$c[username] $c[fullname] #recharge #PPPOE \n" . $p['name_plan'] .
+                    "\nRouter: " . $router_name .
+                    "\nGateway: " . $gateway .
+                    "\nChannel: " . $channel .
+                    "\nPrice: " . Lang::moneyFormat($p['price']));
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
@@ -325,18 +428,29 @@ class Package
                 $d->routers = $router_name;
                 $d->type = "PPPOE";
                 if ($admin) {
-                    $d->admin_id = $admin['id'];
-                }else{
+                    $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $d->admin_id = '0';
                 }
                 $d->save();
+
+                // Calculating Price
+                $sd = new DateTime("$date_only");
+                $ed = new DateTime("$date_exp");
+                $td = $ed->diff($sd);
+                $fd = $td->format("%a");
+                $gi = ($p['price'] / 30) * $fd;
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
                 $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'];
+                if ($gi > $p['price']) {
+                    $t->price = $p['price'];
+                } else {
+                    $t->price = $gi;
+                }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -344,20 +458,39 @@ class Package
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
                 if ($admin) {
-                    $t->admin_id = $admin['id'];
-                }else{
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
                     $t->admin_id = '0';
                 }
                 $t->type = "PPPOE";
                 $t->save();
-            }
-            Message::sendTelegram("#u$c[username] #buy #PPPOE \n" . $p['name_plan'] .
-                "\nRouter: " . $router_name .
-                "\nGateway: " . $gateway .
-                "\nChannel: " . $channel .
-                "\nPrice: " . Lang::moneyFormat($p['price']));
-        }
 
+                // insert to fields
+                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                if (!$fl) {
+                    $fl = ORM::for_table('tbl_customers_fields')->create();
+                    $fl->customer_id = $c['id'];
+                    $fl->field_name = 'Invoice';
+                    if ($gi > $p['price']) {
+                        $fl->field_value = $p['price'];
+                    } else {
+                        $fl->field_value = $gi;
+                    }
+                    $fl->save();
+                } else {
+                    $fl->customer_id = $c['id'];
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                }
+
+                Message::sendTelegram("#u$c[username] $c[fullname] #buy #PPPOE \n" . $p['name_plan'] .
+                    "\nRouter: " . $router_name .
+                    "\nGateway: " . $gateway .
+                    "\nChannel: " . $channel .
+                    "\nPrice: " . Lang::moneyFormat($p['price']));
+            }
+        }
+        run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);
         return true;
     }
@@ -511,6 +644,6 @@ class Package
         $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
         $ui->assign('whatsapp', urlencode("```$invoice```"));
-        $ui->assign('in',$in);
+        $ui->assign('in', $in);
     }
 }

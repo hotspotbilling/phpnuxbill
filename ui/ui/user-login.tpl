@@ -32,7 +32,10 @@
                 <div class="panel panel-info">
                     <div class="panel-heading">{Lang::T('Announcement')}</div>
                     <div class="panel-body">
-                        {include file="$_path/../pages/Announcement.html"}
+                    {$Announcement = "{$PAGES_PATH}/Announcement.html"}
+                    {if file_exists($Announcement)}
+                        {include file=$Announcement}
+                    {/if}
                     </div>
                 </div>
             </div>

@@ -65,7 +65,7 @@
                         <div class="form-group">
                             <label class="col-md-3 control-label">{Lang::T('User Type')}</label>
                             <div class="col-md-9">
-                                <select name="user_type" id="user_type" class="form-control">
+                                <select name="user_type" id="user_type" class="form-control" onchange="checkUserType(this)">
                                     {if $_admin['user_type'] eq 'Agent'}
                                         <option value="Sales" {if $d['user_type'] eq 'Sales'}selected="selected" {/if}>Sales
                                         </option>
@@ -87,7 +87,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group {if $d['user_type'] eq 'Sales'}hidden{/if}" id="agentChooser">
+                        <div class="form-group {if $d['user_type'] neq 'Sales'}hidden{/if}" id="agentChooser">
                             <label class="col-md-3 control-label">{Lang::T('Agent')}</label>
                             <div class="col-md-9">
                                 <select name="root" id="root" class="form-control">
