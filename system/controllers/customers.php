@@ -465,6 +465,7 @@ switch ($action) {
                     // Delete the Customers Attributes with the given field name
                     ORM::for_table('tbl_customers_fields')
                         ->where('field_name', $fieldName)
+                        ->where('customer_id', $id)
                         ->delete_many();
                 }
             }
