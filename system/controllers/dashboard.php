@@ -16,13 +16,17 @@ $first_day_month = date('Y-m-01');
 $mdate = date('Y-m-d');
 $month_n = date('n');
 
-$iday = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->sum('price');
+$iday = ORM::for_table('tbl_transactions')
+    ->where('recharged_on', $mdate)
+    ->where_not_equal('method', 'Customer - Balance')
+    ->sum('price');
+
 if ($iday == '') {
     $iday = '0.00';
 }
 $ui->assign('iday', $iday);
 
-$imonth = ORM::for_table('tbl_transactions')->where_gte('recharged_on', $first_day_month)->where_lte('recharged_on', $mdate)->sum('price');
+$imonth = ORM::for_table('tbl_transactions')->where_not_equal('method', 'Customer - Balance')->where_gte('recharged_on', $first_day_month)->where_lte('recharged_on', $mdate)->sum('price');
 if ($imonth == '') {
     $imonth = '0.00';
 }
@@ -144,6 +148,7 @@ if (file_exists($cacheMSfile) && time() - filemtime($cacheMSfile) < 43200) {
         ->select_expr('MONTH(recharged_on)', 'month')
         ->select_expr('SUM(price)', 'total')
         ->where_raw("YEAR(recharged_on) = YEAR(CURRENT_DATE())") // Filter by the current year
+        ->where_not_equal('method', 'Customer - Balance')
         ->group_by_expr('MONTH(recharged_on)')
         ->find_many();
 
