@@ -1,17 +1,16 @@
 {include file="sections/header.tpl"}
 <div class="row">
     <div class="col-sm-12">
-            <div class="panel panel-info panel-hovered">
+        <div class="panel panel-info panel-hovered">
             <div class="panel-heading">{Lang::T('Payment Gateway')}</div>
             <div class="panel-body row">
                 {foreach $pgs as $pg}
-                    <div class="col-sm-4 mb20">
-                        <a href="{$_url}paymentgateway/{$pg}"
-                        class="btn btn-block btn-{if $pg==$_c['payment_gateway']}success{else}default{/if}">{ucwords($pg)}</a>
-                    </div>
+                <div class="col-sm-4 mb20">
+                    <a href="{$_url}paymentgateway/{$pg}" class="btn btn-block btn-default">{ucwords($pg)}</a>
+                </div>
                 {/foreach}
             </div>
-            <div class="panel-footer">
+            <!-- <div class="panel-footer">
                 <form method="post">
                 <div class="form-group row">
                     <label class="col-md-2 control-label">Payment Gateway</label>
@@ -28,7 +27,7 @@
                     </div>
                 </div>
                 </div>
-            </div>
+            </div> -->
+        </div>
     </div>
-</div>
-{include file="sections/footer.tpl"}
+    {include file="sections/footer.tpl"}

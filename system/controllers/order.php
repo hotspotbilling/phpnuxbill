@@ -267,18 +267,39 @@ switch ($action) {
         $ui->display('user-sendPlan.tpl');
         break;
     case 'buy':
+        $ui->assign('_title', Lang::T('Select Payment Gateway'));
+        $ui->assign('_system_menu', 'package');
         if (strpos($user['email'], '@') === false) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
-        }
-        if ($config['payment_gateway'] == 'none') {
-            r2(U . 'home', 'e', Lang::T("No Payment Gateway Available"));
         }
         if (!file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $config['payment_gateway'] . '.php')) {
             r2(U . 'home', 'e', Lang::T("No Payment Gateway Available"));
         }
+        require_once $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $config['payment_gateway'] . '.php';
+        $files = scandir($PAYMENTGATEWAY_PATH);
+        foreach ($files as $file) {
+            if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
+                $pgs[] = str_replace('.php', '', $file);
+            }
+        }
+        $ui->assign('pgs', $pgs);
+        $ui->assign('route2', $routes[2]);
+        $ui->assign('route3', $routes[3]);
+
+        //$ui->assign('plan', $plan);
+        $ui->display('user-selectGateway.tpl');
+        break;
+
+    case 'pay_now':
+        $gateway = $_POST['gateway'];
+        //$routes[2] = $_GET['route2'];
+        //$routes[3] = $_GET['route3'];
+        if ($gateway == 'none') {
+            r2(U . 'order/buy/' . $routes[2] . '/' . $routes[3], 'e', Lang::T("No Payment Gateway Selected"));
+        }
         run_hook('customer_buy_plan'); #HOOK
-        include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $config['payment_gateway'] . '.php';
-        call_user_func($config['payment_gateway'] . '_validate_config');
+        include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $gateway . '.php';
+        call_user_func($gateway . '_validate_config');
 
         if ($routes['2'] == 'radius') {
             $router['id'] = 0;
