@@ -468,5 +468,8 @@
     "Payment_Gateway_Deleted": "Payment Gateway Deleted",
     "Payment_Gateway_not_set__please_set_it_in_Settings": "Payment Gateway not set, please set it in Settings",
     "Failed_to_create_Transaction__": "Failed to create Transaction..",
-    "Show_To_Customer": "Show To Customer"
+    "Show_To_Customer": "Show To Customer",
+    "Using": "Using",
+    "Default": "Default",
+    "Customer_Balance": "Customer Balance"
 }

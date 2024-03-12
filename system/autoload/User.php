@@ -39,9 +39,11 @@ class User
         }
     }
 
-    public static function _info()
+    public static function _info($id = 0)
     {
-        $id = User::getID();
+        if(!$id){
+            $id = User::getID();
+        }
         $d = ORM::for_table('tbl_customers')->find_one($id);
 
         if(empty($d['username'])){

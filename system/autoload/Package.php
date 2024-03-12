@@ -19,7 +19,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
     {
-        global $config, $admin, $c, $p, $b, $t, $d;
+        global $config, $admin, $c, $p, $b, $t, $d, $zero;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
@@ -31,6 +31,20 @@ class Package
 
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
+
+        if(isset($zero) && $zero==1){
+            $p['price'] = 0;
+        }
+
+        if(!$p['enabled']){
+            if(!isset($admin) || !isset($admin['id']) || empty($admin['id'])){
+                r2(U . 'home', 'e', Lang::T('Plan Not found'));
+            }
+            if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+                r2(U . 'dashboard', 'e', Lang::T('Plan Not found'));
+            }
+        }
+
         if ($p['validity_unit'] == 'Period') {
             $f = ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
             if (!$f) {
