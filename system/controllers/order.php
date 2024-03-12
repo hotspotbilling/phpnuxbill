@@ -152,9 +152,6 @@ switch ($action) {
         if (!$plan['enabled']) {
             r2(U . "home", 'e', 'Plan is not exists');
         }
-        if ($plan['allow_purchase'] != 'yes') {
-            r2(U . "home", 'e', 'Cannot recharge this plan');
-        }
         if ($routes['2'] == 'radius') {
             $router_name = 'radius';
         } else {
@@ -187,9 +184,6 @@ switch ($action) {
         }
         if (!$plan['enabled']) {
             r2(U . "home", 'e', 'Plan is not exists');
-        }
-        if ($plan['allow_purchase'] != 'yes') {
-            r2(U . "home", 'e', 'Cannot recharge this plan');
         }
         if ($routes['2'] == 'radius') {
             $router_name = 'radius';
@@ -319,7 +313,7 @@ switch ($action) {
             $router['id'] = 0;
             $router['name'] = 'balance';
         }
-        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->where('allow_purchase', 'yes')->find_one($routes['3']);
+        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
         if (empty($router) || empty($plan)) {
             r2(U . "order/package", 'e', Lang::T("Plan Not found"));
         }

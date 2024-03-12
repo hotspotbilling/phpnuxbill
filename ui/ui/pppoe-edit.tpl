@@ -15,7 +15,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Client Can Purchase')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Show To Customer')}</label>
                         <div class="col-md-10">
                             <input type="radio" name="allow_purchase" value="yes" {if $d['allow_purchase'] == yes}checked{/if}> Yes
                             <input type="radio" name="allow_purchase" value="no" {if $d['allow_purchase'] == no}checked{/if}> No
