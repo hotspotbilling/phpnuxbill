@@ -62,7 +62,7 @@
                         <div class="col-md-4">
                             <input type="text" class="form-control" id="validity" name="validity"
                                 value="{$d['validity']}">
-							<p class="help-block">{Lang::T('1 Period = 30 Month, Expires the 20th of each month')}</p>
+							<p class="help-block">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                         </div>
                         <div class="col-md-2">
                             <select class="form-control" id="validity_unit" name="validity_unit">
