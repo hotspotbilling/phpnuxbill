@@ -384,7 +384,6 @@
     "After_Customer_activate_voucher_or_login__customer_will_be_redirected_to_this_url": "After Customer activate voucher or login, customer will be redirected to this url",
     "Voucher_Prefix": "Voucher Prefix",
     "Voucher_activation_success__now_you_can_login": "Voucher activation success, now you can login",
-    "Client_Can_Purchase": "Client Can Purchase",
     "Buy_this__your_active_package_will_be_overwritten": "Buy this? your active package will be overwritten",
     "Pay_this_with_Balance__your_active_package_will_be_overwritten": "Pay this with Balance? your active package will be overwritten",
     "Buy_this__your_active_package_will_be_overwrite": "Buy this? your active package will be overwrite",
@@ -468,5 +467,6 @@
     "Please_select_Payment_Gateway": "Please select Payment Gateway",
     "Payment_Gateway_Deleted": "Payment Gateway Deleted",
     "Payment_Gateway_not_set__please_set_it_in_Settings": "Payment Gateway not set, please set it in Settings",
-    "Failed_to_create_Transaction__": "Failed to create Transaction.."
+    "Failed_to_create_Transaction__": "Failed to create Transaction..",
+    "Show_To_Customer": "Show To Customer"
 }
