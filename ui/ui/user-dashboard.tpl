@@ -53,10 +53,10 @@
                 <h3 class="box-title">{Lang::T('Announcement')}</h3>
             </div>
             <div class="box-body">
-            {$Announcement_Customer = "{$PAGES_PATH}/Announcement_Customer.html"}
-            {if file_exists($Announcement_Customer)}
-                {include file=$Announcement_Customer}
-            {/if}
+                {$Announcement_Customer = "{$PAGES_PATH}/Announcement_Customer.html"}
+                {if file_exists($Announcement_Customer)}
+                    {include file=$Announcement_Customer}
+                {/if}
             </div>
         </div>
     </div>
@@ -131,11 +131,8 @@
                             <td class="small text-primary text-uppercase text-normal">{Lang::T('Plan Name')}</td>
                             <td class="small mb15">
                                 {$_bill['namebp']}
-                                {if $_bill['status'] == 'on'}
-                                    <a class="label label-danger pull-right" href="{$_url}home&deactivate={$_bill['id']}"
-                                        onclick="return confirm('{Lang::T('Deactivate')}?')">{Lang::T('Deactivate')}</a>
-                                {else}
-                                    <a class="label label-warning pull-right" href="{$_url}order/package">{Lang::T('expired')}</a>
+                                {if $_bill['status'] != 'on'}
+                                    <a class="label label-danger pull-right" href="{$_url}order/package">{Lang::T('expired')}</a>
                                 {/if}
                             </td>
                         </tr>
@@ -149,8 +146,6 @@
                             <td class="small text-danger text-uppercase text-normal">{Lang::T('Expires On')}</td>
                             <td class="small mb15 text-danger">
                                 {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
-                                <a class="label label-primary pull-right" href="{$_url}home&recharge={$_bill['id']}"
-                                    onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
                             </td>
                         </tr>
                         {if $nux_ip}
@@ -173,6 +168,18 @@
                                 </td>
                             </tr>
                         {/if}
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">
+                                {if $_bill['status'] == 'on'}
+                                    <a href="{$_url}home&deactivate={$_bill['id']}" onclick="return confirm('{Lang::T('Deactivate')}?')"
+                                        class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
+                                {/if}
+                            </td>
+                            <td class="small row">
+                                <a class="btn btn-primary pull-right  btn-sm" href="{$_url}home&recharge={$_bill['id']}"
+                                    onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
+                            </td>
+                        </tr>
                     </table>
                 {/foreach}
             </div>
