@@ -206,18 +206,20 @@ class Package
                 }
                 $t->save();
 
-                // insert to fields
-                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                if (!$fl) {
-                    $fl = ORM::for_table('tbl_customers_fields')->create();
-                    $fl->customer_id = $c['id'];
-                    $fl->field_name = 'Invoice';
-                    $fl->field_value = $p['price'];
-                    $fl->save();
-                } else {
-                    $fl->customer_id = $c['id'];
-                    $fl->field_value = $p['price'];
-                    $fl->save();
+                if ($p['validity_unit'] == 'Period') {
+                    // insert to fields
+                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                    if (!$fl) {
+                        $fl = ORM::for_table('tbl_customers_fields')->create();
+                        $fl->customer_id = $c['id'];
+                        $fl->field_name = 'Invoice';
+                        $fl->field_value = $p['price'];
+                        $fl->save();
+                    } else {
+                        $fl->customer_id = $c['id'];
+                        $fl->field_value = $p['price'];
+                        $fl->save();
+                    }
                 }
 
 
@@ -256,22 +258,25 @@ class Package
                 }
                 $d->save();
 
-                // Calculating Price
-                $sd = new DateTime("$date_only");
-                $ed = new DateTime("$date_exp");
-                $td = $ed->diff($sd);
-                $fd = $td->format("%a");
-                $gi = ($p['price'] / 30) * $fd;
-
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
                 $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                if ($gi > $p['price']) {
-                    $t->price = $p['price'];
+                if ($p['validity_unit'] == 'Period') {
+                    // Calculating Price
+                    $sd = new DateTime("$date_only");
+                    $ed = new DateTime("$date_exp");
+                    $td = $ed->diff($sd);
+                    $fd = $td->format("%a");
+                    $gi = ($p['price'] / 30) * $fd;
+                    if ($gi > $p['price']) {
+                        $t->price = $p['price'];
+                    } else {
+                        $t->price = $gi;
+                    }
                 } else {
-                    $t->price = $gi;
+                    $t->price = $p['price'];
                 }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
@@ -287,22 +292,24 @@ class Package
                 }
                 $t->save();
 
-                // insert to fields
-                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                if (!$fl) {
-                    $fl = ORM::for_table('tbl_customers_fields')->create();
-                    $fl->customer_id = $c['id'];
-                    $fl->field_name = 'Invoice';
-                    if ($gi > $p['price']) {
-                        $fl->field_value = $p['price'];
+                if ($p['validity_unit'] == 'Period') {
+                    // insert to fields
+                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                    if (!$fl) {
+                        $fl = ORM::for_table('tbl_customers_fields')->create();
+                        $fl->customer_id = $c['id'];
+                        $fl->field_name = 'Invoice';
+                        if ($gi > $p['price']) {
+                            $fl->field_value = $p['price'];
+                        } else {
+                            $fl->field_value = $gi;
+                        }
+                        $fl->save();
                     } else {
-                        $fl->field_value = $gi;
+                        $fl->customer_id = $c['id'];
+                        $fl->field_value = $p['price'];
+                        $fl->save();
                     }
-                    $fl->save();
-                } else {
-                    $fl->customer_id = $c['id'];
-                    $fl->field_value = $p['price'];
-                    $fl->save();
                 }
 
                 Message::sendTelegram("#u$c[username] $c[fullname] #buy #Hotspot \n" . $p['name_plan'] .
@@ -384,19 +391,20 @@ class Package
                 }
                 $t->save();
 
-                // insert to fields
-                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                $gp = $gi;
-                if (!$fl) {
-                    $fl = ORM::for_table('tbl_customers_fields')->create();
-                    $fl->customer_id = $c['id'];
-                    $fl->field_name = 'Invoice';
-                    $fl->field_value = $p['price'];
-                    $fl->save();
-                } else {
-                    $fl->customer_id = $c['id'];
-                    $fl->field_value = $p['price'];
-                    $fl->save();
+                if ($p['validity_unit'] == 'Period') {
+                    // insert to fields
+                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                    if (!$fl) {
+                        $fl = ORM::for_table('tbl_customers_fields')->create();
+                        $fl->customer_id = $c['id'];
+                        $fl->field_name = 'Invoice';
+                        $fl->field_value = $p['price'];
+                        $fl->save();
+                    } else {
+                        $fl->customer_id = $c['id'];
+                        $fl->field_value = $p['price'];
+                        $fl->save();
+                    }
                 }
 
                 Message::sendTelegram("#u$c[username] $c[fullname] #recharge #PPPOE \n" . $p['name_plan'] .
@@ -434,22 +442,25 @@ class Package
                 }
                 $d->save();
 
-                // Calculating Price
-                $sd = new DateTime("$date_only");
-                $ed = new DateTime("$date_exp");
-                $td = $ed->diff($sd);
-                $fd = $td->format("%a");
-                $gi = ($p['price'] / 30) * $fd;
-
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
                 $t->invoice = "INV-" . Package::_raid(5);
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                if ($gi > $p['price']) {
-                    $t->price = $p['price'];
+                if ($p['validity_unit'] == 'Period') {
+                    // Calculating Price
+                    $sd = new DateTime("$date_only");
+                    $ed = new DateTime("$date_exp");
+                    $td = $ed->diff($sd);
+                    $fd = $td->format("%a");
+                    $gi = ($p['price'] / 30) * $fd;
+                    if ($gi > $p['price']) {
+                        $t->price = $p['price'];
+                    } else {
+                        $t->price = $gi;
+                    }
                 } else {
-                    $t->price = $gi;
+                    $t->price = $p['price'];
                 }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
@@ -465,22 +476,24 @@ class Package
                 $t->type = "PPPOE";
                 $t->save();
 
-                // insert to fields
-                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                if (!$fl) {
-                    $fl = ORM::for_table('tbl_customers_fields')->create();
-                    $fl->customer_id = $c['id'];
-                    $fl->field_name = 'Invoice';
-                    if ($gi > $p['price']) {
-                        $fl->field_value = $p['price'];
+                if ($p['validity_unit'] == 'Period') {
+                    // insert to fields
+                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                    if (!$fl) {
+                        $fl = ORM::for_table('tbl_customers_fields')->create();
+                        $fl->customer_id = $c['id'];
+                        $fl->field_name = 'Invoice';
+                        if ($gi > $p['price']) {
+                            $fl->field_value = $p['price'];
+                        } else {
+                            $fl->field_value = $gi;
+                        }
+                        $fl->save();
                     } else {
-                        $fl->field_value = $gi;
+                        $fl->customer_id = $c['id'];
+                        $fl->field_value = $p['price'];
+                        $fl->save();
                     }
-                    $fl->save();
-                } else {
-                    $fl->customer_id = $c['id'];
-                    $fl->field_value = $p['price'];
-                    $fl->save();
                 }
 
                 Message::sendTelegram("#u$c[username] $c[fullname] #buy #PPPOE \n" . $p['name_plan'] .
