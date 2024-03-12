@@ -27,7 +27,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Routers')}</label>
                         <div class="col-md-6">
-                            <select id="server" name="server" class="form-control select2">
+                            <select id="server" data-type="server" name="server" class="form-control select2">
                                 <option value=''>{Lang::T('Select Routers')}</option>
                             </select>
                         </div>
@@ -41,7 +41,18 @@
                             </select>
                         </div>
                     </div>
-
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Using')}</label>
+                        <div class="col-md-6">
+                            <select name="using" class="form-control">
+                                <option value="default">{Lang::T('Default')}</option>
+                                {if $_c['enable_balance'] eq 'yes'}
+                                    <option value="balance">{Lang::T('Customer Balance')}</option>
+                                {/if}
+                                <option value="zero">{$_c['currency_code']} 0</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success"

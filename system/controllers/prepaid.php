@@ -120,22 +120,45 @@ switch ($action) {
         $id_customer = _post('id_customer');
         $type = _post('type');
         $server = _post('server');
-        $plan = _post('plan');
+        $planId = _post('plan');
+        $using = _post('using');
         $date_only = date("Y-m-d");
         $time = date("H:i:s");
 
         $msg = '';
-        if ($id_customer == '' or $type == '' or $server == '' or $plan == '') {
-            $msg .= 'All field is required' . '<br>';
+        if ($id_customer == '' or $type == '' or $server == '' or $planId == '') {
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         if ($msg == '') {
-            if (Package::rechargeUser($id_customer, $server, $plan, "Recharge", $admin['fullname'])) {
-                $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
-                $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+            $gateway = 'Recharge';
+            $channel = $admin['fullname'];
+            $cust = User::_info($id_customer);
+            if ($using == 'balance' && $config['enable_balance'] == 'yes') {
+                $plan = ORM::for_table('tbl_plans')->find_one($planId);
+                if (!$cust) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
+                }
+                if (!$plan) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('Plan not found'));
+                }
+                if ($cust['balance'] < $plan['price']) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('insufficient balance'));
+                }
+                $gateway = 'Recharge Balance';
+            }
+            if ($using == 'zero') {
+                $zero = 1;
+                $gateway = 'Recharge Zero';
+            }
+            if (Package::rechargeUser($id_customer, $server, $planId, $gateway, $channel)) {
+                if ($using == 'balance') {
+                    Balance::min($cust['id'], $plan['price']);
+                }
+                $in = ORM::for_table('tbl_transactions')->where('username', $cust['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
                 $ui->display('invoice.tpl');
-                _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $c['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
+                _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $cust['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
             } else {
                 r2(U . 'prepaid/recharge', 'e', "Failed to recharge account");
             }
@@ -189,9 +212,9 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
-            if(in_array($admin['user_type'], array('SuperAdmin', 'Admin'))){
+            if (in_array($admin['user_type'], array('SuperAdmin', 'Admin'))) {
                 $p = ORM::for_table('tbl_plans')->where_not_equal('type', 'Balance')->find_many();
-            }else{
+            } else {
                 $p = ORM::for_table('tbl_plans')->where('enabled', '1')->where_not_equal('type', 'Balance')->find_many();
             }
             $ui->assign('p', $p);
