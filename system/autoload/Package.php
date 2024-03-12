@@ -30,7 +30,7 @@ class Package
         }
 
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
-        $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
+        $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
         if ($p['validity_unit'] == 'Period') {
             $f = ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
             if (!$f) {
@@ -511,7 +511,7 @@ class Package
     public static function changeTo($username, $plan_id, $from_id)
     {
         $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
-        $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->where('enabled', '1')->find_one();
+        $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
         $b = ORM::for_table('tbl_user_recharges')->find_one($from_id);
         if ($p['routers'] == $b['routers'] && $b['routers'] != 'radius') {
             $mikrotik = Mikrotik::info($p['routers']);
