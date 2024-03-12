@@ -461,5 +461,12 @@
     "Customer_Announcement": "Customer Announcement",
     "1_Period___1_Month__Expires_the_20th_of_each_month": "1 Period = 1 Month, Expires the 20th of each month",
     "Period": "Period",
-    "Add": "Add"
+    "Add": "Add",
+    "Select_Payment_Gateway": "Select Payment Gateway",
+    "Available_Payment_Gateway": "Available Payment Gateway",
+    "Pay_Now": "Pay Now",
+    "Please_select_Payment_Gateway": "Please select Payment Gateway",
+    "Payment_Gateway_Deleted": "Payment Gateway Deleted",
+    "Payment_Gateway_not_set__please_set_it_in_Settings": "Payment Gateway not set, please set it in Settings",
+    "Failed_to_create_Transaction__": "Failed to create Transaction.."
 }

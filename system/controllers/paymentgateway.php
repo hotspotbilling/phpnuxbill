@@ -19,6 +19,24 @@ if ($action == 'delete') {
     r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway Deleted'));
 }
 
+if (_post('save') == 'actives') {
+    $pgs = '';
+    if(is_array($_POST['pgs'])){
+        $pgs = implode(',', $_POST['pgs']);
+    }
+    $d = ORM::for_table('tbl_appconfig')->where('setting', 'payment_gateway')->find_one();
+    if ($d) {
+        $d->value = $pgs;
+        $d->save();
+    } else {
+        $d = ORM::for_table('tbl_appconfig')->create();
+        $d->setting = 'payment_gateway';
+        $d->value = $pgs;
+        $d->save();
+    }
+    r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway saved successfully'));
+}
+
 if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) {
     include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php';
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -44,22 +62,9 @@ if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) 
                 $pgs[] = str_replace('.php', '', $file);
             }
         }
-        if (isset($_POST['payment_gateway'])) {
-            $payment_gateway = _post('payment_gateway');
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'payment_gateway')->find_one();
-            if ($d) {
-                $d->value = $payment_gateway;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'payment_gateway';
-                $d->value = $payment_gateway;
-                $d->save();
-            }
-            r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway saved successfully'));
-        }
         $ui->assign('_title', 'Payment Gateway Settings');
         $ui->assign('pgs', $pgs);
+        $ui->assign('actives', explode(',', $config['payment_gateway']));
         $ui->display('paymentgateway.tpl');
     }
 }
