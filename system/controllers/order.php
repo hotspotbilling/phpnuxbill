@@ -114,7 +114,7 @@ switch ($action) {
             run_hook('customer_check_payment_status'); #HOOK
             include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $trx['gateway'] . '.php';
             call_user_func($trx['gateway'] . '_validate_config');
-            call_user_func($config['payment_gateway'] . '_get_status', $trx, $user);
+            call_user_func($trx['gateway'] . '_get_status', $trx, $user);
         } else if ($routes['3'] == 'cancel') {
             run_hook('customer_cancel_payment'); #HOOK
             $trx->pg_paid_response = '{}';
@@ -266,16 +266,12 @@ switch ($action) {
         $ui->assign('plan', $plan);
         $ui->display('user-sendPlan.tpl');
         break;
-    case 'buy':
+    case 'gateway':
         $ui->assign('_title', Lang::T('Select Payment Gateway'));
         $ui->assign('_system_menu', 'package');
         if (strpos($user['email'], '@') === false) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
         }
-        if (!file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $config['payment_gateway'] . '.php')) {
-            r2(U . 'home', 'e', Lang::T("No Payment Gateway Available"));
-        }
-        require_once $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $config['payment_gateway'] . '.php';
         $files = scandir($PAYMENTGATEWAY_PATH);
         foreach ($files as $file) {
             if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
@@ -290,12 +286,15 @@ switch ($action) {
         $ui->display('user-selectGateway.tpl');
         break;
 
-    case 'pay_now':
-        $gateway = $_POST['gateway'];
-        //$routes[2] = $_GET['route2'];
-        //$routes[3] = $_GET['route3'];
-        if ($gateway == 'none') {
-            r2(U . 'order/buy/' . $routes[2] . '/' . $routes[3], 'e', Lang::T("No Payment Gateway Selected"));
+    case 'buy':
+        $gateway = _post('gateway');
+        if (empty($gateway) && !empty($_SESSION['gateway'])) {
+            $gateway = $_SESSION['gateway'];
+        } else if (!empty($gateway)) {
+            $_SESSION['gateway'] = $gateway;
+        }
+        if (empty($gateway)) {
+            r2(U . 'order/gateway/' . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please select Payment Gateway"));
         }
         run_hook('customer_buy_plan'); #HOOK
         include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $gateway . '.php';
@@ -322,7 +321,7 @@ switch ($action) {
             if ($d['pg_url_payment']) {
                 r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
             } else {
-                if ($config['payment_gateway'] == $d['gateway']) {
+                if ($gateway == $d['gateway']) {
                     $id = $d['id'];
                 } else {
                     $d->status = 4;
@@ -333,7 +332,7 @@ switch ($action) {
         if (empty($id)) {
             $d = ORM::for_table('tbl_payment_gateway')->create();
             $d->username = $user['username'];
-            $d->gateway = $config['payment_gateway'];
+            $d->gateway = $gateway;
             $d->plan_id = $plan['id'];
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
@@ -345,7 +344,7 @@ switch ($action) {
             $id = $d->id();
         } else {
             $d->username = $user['username'];
-            $d->gateway = $config['payment_gateway'];
+            $d->gateway = $gateway;
             $d->plan_id = $plan['id'];
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
@@ -358,7 +357,7 @@ switch ($action) {
         if (!$id) {
             r2(U . "order/package/" . $d['id'], 'e', Lang::T("Failed to create Transaction.."));
         } else {
-            call_user_func($config['payment_gateway'] . '_create_transaction', $d, $user);
+            call_user_func($gateway . '_create_transaction', $d, $user);
         }
         break;
     default:
