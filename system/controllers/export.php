@@ -170,7 +170,7 @@ $style
 $html
 EOF;
             $mpdf->WriteHTML($nhtml);
-            $mpdf->Output(date('Y-m-d') . Package::_raid(4) . '.pdf', 'D');
+            $mpdf->Output(date('Ymd_His') . '.pdf', 'D');
         } else {
             echo 'No Data';
         }
@@ -344,7 +344,7 @@ $style
 $html
 EOF;
             $mpdf->WriteHTML($nhtml);
-            $mpdf->Output(date('Y-m-d') . Package::_raid(4) . '.pdf', 'D');
+            $mpdf->Output(date('Ymd_His') . '.pdf', 'D');
         } else {
             echo 'No Data';
         }
