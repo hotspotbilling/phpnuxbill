@@ -37,7 +37,7 @@
                                     </div>
                                     <div class="box-body">
                                         <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                            <a href="{$_url}order/buy/radius/{$plan['id']}"
+                                            <a href="{$_url}order/gateway/radius/{$plan['id']}"
                                                 onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
                                                 class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                             {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -88,7 +88,7 @@
                                     </div>
                                     <div class="box-body">
                                         <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                            <a href="{$_url}order/buy/radius/{$plan['id']}"
+                                            <a href="{$_url}order/gateway/radius/{$plan['id']}"
                                                 onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
                                                 class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                             {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -139,7 +139,7 @@
                                     </div>
                                     <div class="box-body">
                                         <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                            <a href="{$_url}order/buy/pppoe/{$plan['id']}"
+                                            <a href="{$_url}order/gateway/pppoe/{$plan['id']}"
                                                 onclick="return confirm('{Lang::T('Buy this? your active package will be overwritten')}')"
                                                 class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                             {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -188,7 +188,7 @@
                                     </div>
                                     <div class="box-body">
                                         <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                            <a href="{$_url}order/buy/hotspot/{$plan['id']}"
+                                            <a href="{$_url}order/gateway/hotspot/{$plan['id']}"
                                                 onclick="return confirm('{Lang::T('Buy this? your active package will be overwritten')}')"
                                                 class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                             {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -248,7 +248,7 @@
                                             </div>
                                             <div class="box-body">
                                                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                                    <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
+                                                    <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}"
                                                         onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
                                                         class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                                     {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -297,7 +297,7 @@
                                             </div>
                                             <div class="box-body">
                                                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                                    <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
+                                                    <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}"
                                                         onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
                                                         class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                                     {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -347,7 +347,7 @@
                                             </div>
                                             <div class="box-body">
                                                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                                    <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
+                                                    <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}"
                                                         onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
                                                         class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                                     {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -394,7 +394,7 @@
                                             </div>
                                             <div class="box-body">
                                                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                                    <a href="{$_url}order/buy/{$router['id']}/{$plan['id']}"
+                                                    <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}"
                                                         onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
                                                         class="btn btn-sm btn-block btn-warning text-black">Buy</a>
                                                     {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
