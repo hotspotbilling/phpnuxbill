@@ -48,10 +48,14 @@ class Package
         if ($p['validity_unit'] == 'Period') {
             $f = ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
             if (!$f) {
+                $day = date('d', strtotime($c['created_at']));
+                if ($day > 28) {
+                    $day = 1;
+                }
                 $f = ORM::for_table('tbl_customers_fields')->create();
                 $f->customer_id = $c['id'];
                 $f->field_name = 'Expired Date';
-                $f->field_value = 20;
+                $f->field_value = $day;
                 $f->save();
             }
         }
