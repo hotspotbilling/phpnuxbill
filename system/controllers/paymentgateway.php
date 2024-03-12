@@ -8,8 +8,16 @@
 _admin();
 $ui->assign('_system_menu', 'paymentgateway');
 
-$action = alphanumeric($routes['1']);
+$action = alphanumeric($routes[1]);
 $ui->assign('_admin', $admin);
+
+if ($action == 'delete') {
+    $pg = alphanumeric($routes[2]);
+    if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $pg . '.php')) {
+        deleteFile($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR, $pg);
+    }
+    r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway Deleted'));
+}
 
 if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) {
     include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php';
@@ -53,5 +61,18 @@ if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) 
         $ui->assign('_title', 'Payment Gateway Settings');
         $ui->assign('pgs', $pgs);
         $ui->display('paymentgateway.tpl');
+    }
+}
+
+
+function deleteFile($path, $name)
+{
+    $files = scandir($path);
+    foreach ($files as $file) {
+        if (is_file($path . $file) && strpos($file, $name) !== false) {
+            unlink($path . $file);
+        } else if (is_dir($path . $file) && !in_array($file, ['.', '..'])) {
+            deleteFile($path . $file . DIRECTORY_SEPARATOR, $name);
+        }
     }
 }
