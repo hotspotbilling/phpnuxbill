@@ -23,7 +23,8 @@
                             <select id="id_plan" name="id_plan" class="form-control select2">
                                 {foreach $p as $ps}
                                     <option value="{$ps['id']}" {if $d['plan_id'] eq $ps['id']} selected {/if}>
-                                    {if $ps['is_radius']=='1'}Radius{else}{$ps['routers']}{/if} - {$ps['name_plan']}</option>
+                                    {if $ps['enabled'] neq 1}DISABLED PLAN &bull; {/if}
+                                    {if $ps['is_radius']=='1'}Radius{else}{$ps['routers']}{/if} &bull; {$ps['name_plan']}</option>
                                 {/foreach}
                             </select>
                         </div>

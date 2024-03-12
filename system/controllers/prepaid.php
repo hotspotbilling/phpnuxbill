@@ -89,10 +89,6 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $ui->assign('xfooter', $select2_customer);
-        $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
-        $ui->assign('p', $p);
-        $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
-        $ui->assign('r', $r);
         if (isset($routes['2']) && !empty($routes['2'])) {
             $ui->assign('cust', ORM::for_table('tbl_customers')->find_one($routes['2']));
         }
@@ -193,7 +189,11 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
-            $p = ORM::for_table('tbl_plans')->where('enabled', '1')->where_not_equal('type', 'Balance')->find_many();
+            if(in_array($admin['user_type'], array('SuperAdmin', 'Admin'))){
+                $p = ORM::for_table('tbl_plans')->where_not_equal('type', 'Balance')->find_many();
+            }else{
+                $p = ORM::for_table('tbl_plans')->where('enabled', '1')->where_not_equal('type', 'Balance')->find_many();
+            }
             $ui->assign('p', $p);
             run_hook('view_edit_customer_plan'); #HOOK
             $ui->assign('_title', 'Edit Plan');

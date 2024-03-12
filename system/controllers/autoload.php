@@ -38,10 +38,18 @@ switch ($action) {
     case 'plan':
         $server = _post('server');
         $jenis = _post('jenis');
-        if($server=='radius'){
-            $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->where('enabled', '1')->find_many();
+        if(in_array($admin['user_type'], array('SuperAdmin', 'Admin'))){
+            if($server=='radius'){
+                $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->find_many();
+            }else{
+                $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->find_many();
+            }
         }else{
-            $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->where('enabled', '1')->find_many();
+            if($server=='radius'){
+                $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->where('enabled', '1')->find_many();
+            }else{
+                $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->where('enabled', '1')->find_many();
+            }
         }
         $ui->assign('d', $d);
 
