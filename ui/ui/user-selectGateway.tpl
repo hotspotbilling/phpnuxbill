@@ -10,7 +10,6 @@
                         <label class="col-md-2 control-label">Payment Gateway</label>
                         <div class="col-md-8">
                             <select name="gateway" id="gateway" class="form-control">
-                                <option value="none" selected="selected">None</option>
                                 {foreach $pgs as $pg}
                                 <option value="{$pg}">
                                     {ucwords($pg)}</option>
