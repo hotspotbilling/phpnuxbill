@@ -5,7 +5,7 @@
         <div class="panel panel-info panel-hovered">
             <div class="panel-heading">{Lang::T('Available Payment Gateway')}</div>
             <div class="panel-footer">
-                <form method="post" action="{$_url}order/pay_now/{$route2}/{$route3}">
+                <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
                     <div class="form-group row">
                         <label class="col-md-2 control-label">Payment Gateway</label>
                         <div class="col-md-8">
