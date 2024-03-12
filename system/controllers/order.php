@@ -272,20 +272,30 @@ switch ($action) {
         if (strpos($user['email'], '@') === false) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
         }
-        $files = scandir($PAYMENTGATEWAY_PATH);
-        foreach ($files as $file) {
-            if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
-                $pgs[] = str_replace('.php', '', $file);
+        $pgs = array_values(explode(',', $config['payment_gateway']));
+        if(count($pgs)==0){
+            sendTelegram("Payment Gateway not set, please set it in Settings");
+            _log(Lang::T("Payment Gateway not set, please set it in Settings"));
+            r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
+        }
+        if(count($pgs)>1){
+            $ui->assign('pgs',$pgs );
+            //$ui->assign('pgs', $pgs);
+            $ui->assign('route2', $routes[2]);
+            $ui->assign('route3', $routes[3]);
+
+            //$ui->assign('plan', $plan);
+            $ui->display('user-selectGateway.tpl');
+            break;
+        }else{
+            if(empty($pgs[0])){
+                sendTelegram("Payment Gateway not set, please set it in Settings");
+                _log(Lang::T("Payment Gateway not set, please set it in Settings"));
+                r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
+            }else{
+                $_POST['gateway'] = $pgs[0];
             }
         }
-        $ui->assign('pgs', $pgs);
-        $ui->assign('route2', $routes[2]);
-        $ui->assign('route3', $routes[3]);
-
-        //$ui->assign('plan', $plan);
-        $ui->display('user-selectGateway.tpl');
-        break;
-
     case 'buy':
         $gateway = _post('gateway');
         if (empty($gateway) && !empty($_SESSION['gateway'])) {

@@ -11,8 +11,8 @@
                         <div class="col-md-8">
                             <select name="gateway" id="gateway" class="form-control">
                                 {foreach $pgs as $pg}
-                                <option value="{$pg}">
-                                    {ucwords($pg)}</option>
+                                    <option value="{$pg}">
+                                        {ucwords($pg)}</option>
                                 {/foreach}
                             </select>
                         </div>

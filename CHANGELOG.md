@@ -2,6 +2,16 @@
 
 # CHANGELOG
 
+## 2024.3.12
+
+- Check if Validity Period, so calculate price will not affected other validity
+- Add firewall using .htaccess for apache only
+- Multiple Payment Gateway by @Focuslinkstech
+- Fix Logic Multiple Payment gateway
+- Fix delete Attribute
+- Allow Delete Payment Gateway
+- Allow Delete Plugin
+
 ## 2024.3.6
 
 - change attributes view
