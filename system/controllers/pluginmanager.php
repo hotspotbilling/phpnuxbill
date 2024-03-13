@@ -32,7 +32,6 @@ if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
     file_put_contents($cache, $data);
     $json = json_decode($data, true);
 }
-
 switch ($action) {
     case 'delete':
         if (!is_writeable($CACHE_PATH)) {
@@ -89,7 +88,9 @@ switch ($action) {
         if (!is_writeable($PLUGIN_PATH)) {
             r2(U . "pluginmanager", 'e', 'Folder plugin/ is not writable');
         }
-
+        set_time_limit(-1);
+        $tipe = $routes['2'];
+        $plugin = $routes['3'];
         $file = $CACHE_PATH . DIRECTORY_SEPARATOR . $plugin . '.zip';
         if (file_exists($file)) unlink($file);
         if ($tipe == 'plugin') {
@@ -121,7 +122,7 @@ switch ($action) {
                     File::copyFolder($folder, $PLUGIN_PATH . DIRECTORY_SEPARATOR, ['README.md', 'LICENSE']);
                     File::deleteFolder($folder);
                     unlink($file);
-                    r2(U . "pluginmanager", 's', 'Plugin ' . $plugin . ' has been deleted');
+                    r2(U . "pluginmanager", 's', 'Plugin ' . $plugin . ' has been installed');
                     break;
                 }
             }
