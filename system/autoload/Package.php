@@ -46,16 +46,16 @@ class Package
         }
 
         if ($p['validity_unit'] == 'Period') {
-            $f = ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
-            if (!$f) {
-                $day = date('d', strtotime($c['created_at']));
-                if ($day > 28) {
-                    $day = 1;
+            $day_exp = User::getAttribute("Expired Date", $c['id']); //ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
+            if (!$day_exp) {
+                $day_exp = date('d', strtotime($c['created_at']));
+                if (empty($day_exp) || $day_exp > 28) {
+                    $day_exp = 1;
                 }
                 $f = ORM::for_table('tbl_customers_fields')->create();
                 $f->customer_id = $c['id'];
                 $f->field_name = 'Expired Date';
-                $f->field_value = $day;
+                $f->field_value = $day_exp;
                 $f->save();
             }
         }
@@ -146,15 +146,15 @@ class Package
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
         } else if ($p['validity_unit'] == 'Period') {
-            $date_tmp = date("Y-m-{$f['field_value']}", strtotime('+' . $p['validity'] . ' month'));
+            $date_tmp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
             $dt1 = new DateTime("$date_only");
             $dt2 = new DateTime("$date_tmp");
             $diff = $dt2->diff($dt1);
             $sum =  $diff->format("%a"); // => 453
             if ($sum >= 35) {
-                $date_exp = date("Y-m-{$f['field_value']}", strtotime('+0 month'));
+                $date_exp = date("Y-m-$day_exp", strtotime('+0 month'));
             } else {
-                $date_exp = date("Y-m-{$f['field_value']}", strtotime('+' . $p['validity'] . ' month'));
+                $date_exp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
             };
             $time = date("23:59:00");
         } else if ($p['validity_unit'] == 'Days') {
@@ -177,7 +177,7 @@ class Package
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Period') {
-                        $date_exp = date("Y-m-{$f['field_value']}", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
@@ -362,7 +362,7 @@ class Package
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Period') {
-                        $date_exp = date("Y-m-{$f['field_value']}", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
