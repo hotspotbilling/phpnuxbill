@@ -15,10 +15,11 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Show To Customer')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-10">
-                            <input type="radio" name="allow_purchase" value="yes" {if $d['allow_purchase'] == yes}checked{/if}> Yes
-                            <input type="radio" name="allow_purchase" value="no" {if $d['allow_purchase'] == no}checked{/if}> No
+                            <input type="radio" name="prepaid" value="yes" {if $d['prepaid'] == yes}checked{/if}>
+                            Prepaid
+                            <input type="radio" name="prepaid" value="no" {if $d['prepaid'] == no}checked{/if}> Postpaid
                         </div>
                     </div>
                     {if $_c['radius_enable'] and $d['is_radius']}
@@ -62,20 +63,25 @@
                         <div class="col-md-4">
                             <input type="text" class="form-control" id="validity" name="validity"
                                 value="{$d['validity']}">
-							<p class="help-block">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                         </div>
                         <div class="col-md-2">
                             <select class="form-control" id="validity_unit" name="validity_unit">
-                                <option value="Mins" {if $d['validity_unit'] eq 'Mins'} selected {/if}>{Lang::T('Mins')}
-                                </option>
-                                <option value="Hrs" {if $d['validity_unit'] eq 'Hrs'} selected {/if}>{Lang::T('Hrs')}
-                                </option>
-                                <option value="Days" {if $d['validity_unit'] eq 'Days'} selected {/if}>{Lang::T('Days')}
-                                </option>
-                                <option value="Months" {if $d['validity_unit'] eq 'Months'} selected {/if}>
-                                    {Lang::T('Months')}</option>
-								<option value="Period" {if $d['validity_unit'] eq 'Period'} selected {/if}>{Lang::T('Period')}</option>
+                                {if $d['prepaid'] == yes}
+                                    <option value="Mins" {if $d['validity_unit'] eq 'Mins'} selected {/if}>{Lang::T('Mins')}
+                                    </option>
+                                    <option value="Hrs" {if $d['validity_unit'] eq 'Hrs'} selected {/if}>{Lang::T('Hrs')}
+                                    </option>
+                                    <option value="Days" {if $d['validity_unit'] eq 'Days'} selected {/if}>{Lang::T('Days')}
+                                    </option>
+                                    <option value="Months" {if $d['validity_unit'] eq 'Months'} selected {/if}>
+                                        {Lang::T('Months')}</option>
+                                {else}
+                                    <option value="Period" {if $d['validity_unit'] eq 'Period'} selected {/if}>
+                                        {Lang::T('Period')}</option>
+                                {/if}
                             </select>
+                            <p class="help-block col-md-4">
+                                {Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                         </div>
                     </div>
                     <div class="form-group">
@@ -118,8 +124,7 @@
                     </div> *}
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success"
-                                type="submit">{Lang::T('Save Changes')}</button>
+                            <button class="btn btn-success" type="submit">{Lang::T('Save Changes')}</button>
                             Or <a href="{$_url}services/pppoe">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
@@ -129,6 +134,21 @@
     </div>
 </div>
 
+
+<script>
+    var preOpt = `<option value="Mins">{Lang::T('Mins')}</option>
+    <option value="Hrs">{Lang::T('Hrs')}</option>
+    <option value="Days">{Lang::T('Days')}</option>
+    <option value="Months">{Lang::T('Months')}</option>`;
+    var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
+    function prepaid() {
+        $("#validity_unit").html(preOpt);
+    }
+
+    function postpaid() {
+        $("#validity_unit").html(postOpt);
+    }
+</script>
 {if $_c['radius_enable'] && $d['is_radius']}
     {literal}
         <script>

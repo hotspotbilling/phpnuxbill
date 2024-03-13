@@ -692,7 +692,11 @@ switch ($action) {
         }
         $ui->assign('_title', Lang::T('Refill Balance'));
         $ui->assign('xfooter', $select2_customer);
-        $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
+        if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            $ui->assign('p', ORM::for_table('tbl_plans')->where('type', 'Balance')->find_many());
+        }else{
+            $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
+        }
         run_hook('view_deposit'); #HOOK
         $ui->display('deposit.tpl');
         break;

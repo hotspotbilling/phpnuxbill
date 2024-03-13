@@ -52,6 +52,7 @@
                                 <option value="zero">{$_c['currency_code']} 0</option>
                             </select>
                         </div>
+                        <p class="help-block col-md-4">Postpaid Recharge for the first time use {$_c['currency_code']} 0</p>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">

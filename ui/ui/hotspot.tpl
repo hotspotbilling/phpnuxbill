@@ -51,7 +51,7 @@
                         <tbody>
                             {foreach $d as $ds}
                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled"
-                                {elseif $ds['allow_purchase'] != 'yes'}class="warning" title="Customer can't purchase" {/if}>
+                                {elseif $ds['prepaid'] != 'yes'}class="warning" title="Postpaid" {/if}>
                                     <td class="headcol">{$ds['name_plan']}</td>
                                     <td>{$ds['typebp']}</td>
                                     <td>{$ds['name_bw']}</td>

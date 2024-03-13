@@ -18,17 +18,6 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('')}</label>
-                        <div class="col-md-10">
-                            <label class="radio-inline warning">
-                                <input type="radio" checked name="allow_purchase" value="yes"> Yes
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="allow_purchase" value="no"> No
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Plan Name')}</label>
                         <div class="col-md-6">
                             <input type="text" required class="form-control" id="name" name="name" maxlength="40"

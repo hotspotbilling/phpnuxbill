@@ -32,12 +32,12 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
-        if(isset($zero) && $zero==1){
+        if (isset($zero) && $zero == 1) {
             $p['price'] = 0;
         }
 
-        if(!$p['enabled']){
-            if(!isset($admin) || !isset($admin['id']) || empty($admin['id'])){
+        if (!$p['enabled']) {
+            if (!isset($admin) || !isset($admin['id']) || empty($admin['id'])) {
                 r2(U . 'home', 'e', Lang::T('Plan Not found'));
             }
             if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
@@ -114,12 +114,29 @@ class Package
         }
 
         /**
-         * 1 Customer only can have 1 PPPOE and 1 Hotspot Plan
+         * 1 Customer only can have 1 PPPOE and 1 Hotspot Plan, 1 prepaid and 1 postpaid
          */
         $b = ORM::for_table('tbl_user_recharges')
+            ->select('tbl_user_recharges.id', 'id')
+            ->select('customer_id')
+            ->select('username')
+            ->select('plan_id')
+            ->select('namebp')
+            ->select('recharged_on')
+            ->select('recharged_time')
+            ->select('expiration')
+            ->select('time')
+            ->select('status')
+            ->select('method')
+            ->select('tbl_user_recharges.routers', 'routers')
+            ->select('tbl_user_recharges.type', 'type')
+            ->select('admin_id')
+            ->select('prepaid')
             ->where('customer_id', $id_customer)
-            ->where('routers', $router_name)
-            ->where('Type', $p['type'])
+            ->where('tbl_user_recharges.routers', $router_name)
+            ->where('tbl_user_recharges.Type', $p['type'])
+            ->where('prepaid', $p['prepaid'])
+            ->join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'))
             ->find_one();
 
         run_hook("recharge_user");
@@ -608,7 +625,7 @@ class Package
 
     public static function _raid()
     {
-        return ORM::for_table('tbl_transactions')->max('id')+1;
+        return ORM::for_table('tbl_transactions')->max('id') + 1;
     }
 
     /**

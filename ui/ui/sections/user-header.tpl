@@ -37,36 +37,36 @@
                 margin-top: 100px;
             }
         }
-    
-        
+
+
         .loading {
-          pointer-events: none;
-          opacity: 0.7;
+            pointer-events: none;
+            opacity: 0.7;
         }
-    
+
         .loading::after {
-          content: "";
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          vertical-align: middle;
-          margin-left: 10px;
-          border: 2px solid #fff;
-          border-top-color: transparent;
-          border-radius: 50%;
-          animation: spin 0.8s infinite linear;
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin-left: 10px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s infinite linear;
         }
-    
+
         @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-    
-          100% {
-            transform: rotate(360deg);
-          }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-      </style>
+    </style>
 
     {if isset($xheader)}
         {$xheader}
@@ -90,7 +90,8 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 {if $_c['enable_balance'] == 'yes'}
-                                    <span style="color: whitesmoke;">&nbsp;{Lang::moneyFormat($_user['balance'])}&nbsp;</span>
+                                    <span
+                                        style="color: whitesmoke;">&nbsp;{Lang::moneyFormat($_user['balance'])}&nbsp;</span>
                                 {else}
                                     <span>{$_user['fullname']}</span>
                                 {/if}
@@ -107,7 +108,7 @@
                                     <p>
                                         {$_user['fullname']}
                                         <small>{$_user['phonenumber']}<br>
-                                        {$_user['email']}</small>
+                                            {$_user['email']}</small>
                                     </p>
                                 </li>
                                 <li class="user-body">
@@ -197,20 +198,20 @@
 
 
                 {if isset($notify)}
-                <script>
-                    // Display SweetAlert toast notification
-                    Swal.fire({
-                        icon: '{if $notify_t == "s"}success{else}warning{/if}',
-                        title: '{$notify}',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                        }
-                    });
-                </script>
-                {/if}
+                    <script>
+                        // Display SweetAlert toast notification
+                        Swal.fire({
+                            icon: '{if $notify_t == "s"}success{else}warning{/if}',
+                            title: '{$notify}',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        });
+                    </script>
+{/if}
