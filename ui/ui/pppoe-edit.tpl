@@ -17,9 +17,9 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-10">
-                            <input type="radio" name="prepaid" value="yes" {if $d['prepaid'] == yes}checked{/if}>
+                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes" {if $d['prepaid'] == yes}checked{/if}>
                             Prepaid
-                            <input type="radio" name="prepaid" value="no" {if $d['prepaid'] == no}checked{/if}> Postpaid
+                            <input type="radio" name="prepaid" onclick="postPaid()" value="no" {if $d['prepaid'] == no}checked{/if}> Postpaid
                         </div>
                     </div>
                     {if $_c['radius_enable'] and $d['is_radius']}
@@ -80,9 +80,9 @@
                                         {Lang::T('Period')}</option>
                                 {/if}
                             </select>
-                            <p class="help-block col-md-4">
-                                {Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                         </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label"><a href="{$_url}pool/add">{Lang::T('IP Pool')}</a></label>
@@ -141,11 +141,11 @@
     <option value="Days">{Lang::T('Days')}</option>
     <option value="Months">{Lang::T('Months')}</option>`;
     var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
-    function prepaid() {
+    function prePaid() {
         $("#validity_unit").html(preOpt);
     }
 
-    function postpaid() {
+    function postPaid() {
         $("#validity_unit").html(postOpt);
     }
 </script>
