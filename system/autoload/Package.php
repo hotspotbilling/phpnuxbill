@@ -32,8 +32,16 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
+        // Additional cost
+        $add_cost = User::getAttribute("Additional Cost", $id_customer);
+        if(empty($add_cost)){
+            $add_cost = 0;
+        }
+
+        // Zero cost recharge
         if (isset($zero) && $zero == 1) {
             $p['price'] = 0;
+            $add_cost = 0;
         }
 
         if (!$p['enabled']) {
@@ -226,7 +234,7 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'];
+                $t->price = $p['price'] + $add_cost;
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -306,12 +314,12 @@ class Package
                     $fd = $td->format("%a");
                     $gi = ($p['price'] / 30) * $fd;
                     if ($gi > $p['price']) {
-                        $t->price = $p['price'];
+                        $t->price = $p['price'] + $add_cost;
                     } else {
-                        $t->price = $gi;
+                        $t->price = $gi + $add_cost;
                     }
                 } else {
-                    $t->price = $p['price'];
+                    $t->price = $p['price'] + $add_cost;
                 }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
@@ -411,7 +419,7 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'];
+                $t->price = $p['price'] + $add_cost;
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -490,12 +498,12 @@ class Package
                     $fd = $td->format("%a");
                     $gi = ($p['price'] / 30) * $fd;
                     if ($gi > $p['price']) {
-                        $t->price = $p['price'];
+                        $t->price = $p['price'] + $add_cost;
                     } else {
-                        $t->price = $gi;
+                        $t->price = $gi + $add_cost;
                     }
                 } else {
-                    $t->price = $p['price'];
+                    $t->price = $p['price'] + $add_cost;
                 }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
