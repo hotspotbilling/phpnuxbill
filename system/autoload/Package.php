@@ -56,10 +56,11 @@ class Package
         if ($p['validity_unit'] == 'Period') {
             $day_exp = User::getAttribute("Expired Date", $c['id']); //ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
             if (!$day_exp) {
-                $day_exp = date('d', strtotime($c['created_at']));
-                if (empty($day_exp) || $day_exp > 28) {
-                    $day_exp = 1;
-                }
+                $day_exp = 20;
+                // $day_exp = date('d', strtotime($c['created_at']));
+                // if (empty($day_exp) || $day_exp > 28) {
+                //     $day_exp = 1;
+                // }
                 $f = ORM::for_table('tbl_customers_fields')->create();
                 $f->customer_id = $c['id'];
                 $f->field_name = 'Expired Date';
