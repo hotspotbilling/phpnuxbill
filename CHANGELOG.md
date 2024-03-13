@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.3.13
+
+- Postpaid System
+- Additional Cost
+
 ## 2024.3.12
 
 - Check if Validity Period, so calculate price will not affected other validity

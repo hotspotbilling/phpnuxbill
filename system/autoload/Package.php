@@ -32,12 +32,20 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
-        if(isset($zero) && $zero==1){
-            $p['price'] = 0;
+        // Additional cost
+        $add_cost = User::getAttribute("Additional Cost", $id_customer);
+        if(empty($add_cost)){
+            $add_cost = 0;
         }
 
-        if(!$p['enabled']){
-            if(!isset($admin) || !isset($admin['id']) || empty($admin['id'])){
+        // Zero cost recharge
+        if (isset($zero) && $zero == 1) {
+            $p['price'] = 0;
+            $add_cost = 0;
+        }
+
+        if (!$p['enabled']) {
+            if (!isset($admin) || !isset($admin['id']) || empty($admin['id'])) {
                 r2(U . 'home', 'e', Lang::T('Plan Not found'));
             }
             if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
@@ -46,16 +54,16 @@ class Package
         }
 
         if ($p['validity_unit'] == 'Period') {
-            $f = ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
-            if (!$f) {
-                $day = date('d', strtotime($c['created_at']));
-                if ($day > 28) {
-                    $day = 1;
+            $day_exp = User::getAttribute("Expired Date", $c['id']); //ORM::for_table('tbl_customers_fields')->where('field_name', 'Expired Date')->where('customer_id', $c['id'])->find_one();
+            if (!$day_exp) {
+                $day_exp = date('d', strtotime($c['created_at']));
+                if (empty($day_exp) || $day_exp > 28) {
+                    $day_exp = 1;
                 }
                 $f = ORM::for_table('tbl_customers_fields')->create();
                 $f->customer_id = $c['id'];
                 $f->field_name = 'Expired Date';
-                $f->field_value = $day;
+                $f->field_value = $day_exp;
                 $f->save();
             }
         }
@@ -114,12 +122,29 @@ class Package
         }
 
         /**
-         * 1 Customer only can have 1 PPPOE and 1 Hotspot Plan
+         * 1 Customer only can have 1 PPPOE and 1 Hotspot Plan, 1 prepaid and 1 postpaid
          */
         $b = ORM::for_table('tbl_user_recharges')
+            ->select('tbl_user_recharges.id', 'id')
+            ->select('customer_id')
+            ->select('username')
+            ->select('plan_id')
+            ->select('namebp')
+            ->select('recharged_on')
+            ->select('recharged_time')
+            ->select('expiration')
+            ->select('time')
+            ->select('status')
+            ->select('method')
+            ->select('tbl_user_recharges.routers', 'routers')
+            ->select('tbl_user_recharges.type', 'type')
+            ->select('admin_id')
+            ->select('prepaid')
             ->where('customer_id', $id_customer)
-            ->where('routers', $router_name)
-            ->where('Type', $p['type'])
+            ->where('tbl_user_recharges.routers', $router_name)
+            ->where('tbl_user_recharges.Type', $p['type'])
+            ->where('prepaid', $p['prepaid'])
+            ->join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'))
             ->find_one();
 
         run_hook("recharge_user");
@@ -129,15 +154,15 @@ class Package
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
         } else if ($p['validity_unit'] == 'Period') {
-            $date_tmp = date("Y-m-{$f['field_value']}", strtotime('+' . $p['validity'] . ' month'));
+            $date_tmp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
             $dt1 = new DateTime("$date_only");
             $dt2 = new DateTime("$date_tmp");
             $diff = $dt2->diff($dt1);
             $sum =  $diff->format("%a"); // => 453
             if ($sum >= 35) {
-                $date_exp = date("Y-m-{$f['field_value']}", strtotime('+0 month'));
+                $date_exp = date("Y-m-$day_exp", strtotime('+0 month'));
             } else {
-                $date_exp = date("Y-m-{$f['field_value']}", strtotime('+' . $p['validity'] . ' month'));
+                $date_exp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
             };
             $time = date("23:59:00");
         } else if ($p['validity_unit'] == 'Days') {
@@ -160,7 +185,7 @@ class Package
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Period') {
-                        $date_exp = date("Y-m-{$f['field_value']}", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
@@ -209,7 +234,7 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'];
+                $t->price = $p['price'] + $add_cost;
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -289,12 +314,12 @@ class Package
                     $fd = $td->format("%a");
                     $gi = ($p['price'] / 30) * $fd;
                     if ($gi > $p['price']) {
-                        $t->price = $p['price'];
+                        $t->price = $p['price'] + $add_cost;
                     } else {
-                        $t->price = $gi;
+                        $t->price = $gi + $add_cost;
                     }
                 } else {
-                    $t->price = $p['price'];
+                    $t->price = $p['price'] + $add_cost;
                 }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
@@ -345,7 +370,7 @@ class Package
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
                     } else if ($p['validity_unit'] == 'Period') {
-                        $date_exp = date("Y-m-{$f['field_value']}", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = date("23:59:00");
                     } else if ($p['validity_unit'] == 'Days') {
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
@@ -394,7 +419,7 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'];
+                $t->price = $p['price'] + $add_cost;
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -473,12 +498,12 @@ class Package
                     $fd = $td->format("%a");
                     $gi = ($p['price'] / 30) * $fd;
                     if ($gi > $p['price']) {
-                        $t->price = $p['price'];
+                        $t->price = $p['price'] + $add_cost;
                     } else {
-                        $t->price = $gi;
+                        $t->price = $gi + $add_cost;
                     }
                 } else {
-                    $t->price = $p['price'];
+                    $t->price = $p['price'] + $add_cost;
                 }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
@@ -608,7 +633,7 @@ class Package
 
     public static function _raid()
     {
-        return ORM::for_table('tbl_transactions')->max('id')+1;
+        return ORM::for_table('tbl_transactions')->max('id') + 1;
     }
 
     /**

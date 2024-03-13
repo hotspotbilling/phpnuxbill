@@ -14,10 +14,10 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Show To Customer')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-10">
-                            <input type="radio" checked name="allow_purchase" value="yes"> Yes
-                            <input type="radio" name="allow_purchase" value="no"> No
+                            <input type="radio" name="prepaid" onclick="prepaid()" value="yes" checked> Prepaid
+                            <input type="radio" name="prepaid" onclick="postpaid()" value="no"> Postpaid
                         </div>
                     </div>
                     {if $_c['radius_enable']}
@@ -60,17 +60,12 @@
                         <label class="col-md-2 control-label">{Lang::T('Plan Validity')}</label>
                         <div class="col-md-4">
                             <input type="text" class="form-control" id="validity" name="validity">
-							<p class="help-block">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                         </div>
                         <div class="col-md-2">
                             <select class="form-control" id="validity_unit" name="validity_unit">
-                                <option value="Mins">{Lang::T('Mins')}</option>
-                                <option value="Hrs">{Lang::T('Hrs')}</option>
-                                <option value="Days">{Lang::T('Days')}</option>
-                                <option value="Months">{Lang::T('Months')}</option>
-								<option value="Period">{Lang::T('Period')}</option>
                             </select>
                         </div>
+                        <p class="help-block col-md-4">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label"><a
@@ -121,6 +116,23 @@
         </div>
     </div>
 </div>
+<script>
+    var preOpt = `<option value="Mins">{Lang::T('Mins')}</option>
+<option value="Hrs">{Lang::T('Hrs')}</option>
+<option value="Days">{Lang::T('Days')}</option>
+<option value="Months">{Lang::T('Months')}</option>`;
+    var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
+    function prepaid() {
+        $("#validity_unit").html(preOpt);
+    }
+
+    function postpaid() {
+        $("#validity_unit").html(postOpt);
+    }
+    document.addEventListener("DOMContentLoaded", function(event) {
+        prepaid()
+    })
+</script>
 {if $_c['radius_enable']}
     {literal}
         <script>

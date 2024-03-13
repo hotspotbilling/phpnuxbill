@@ -148,13 +148,19 @@
                                 {if $_bill['time'] ne ''}{Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}{/if}&nbsp;
                             </td>
                         </tr>
-                        {if $nux_ip}
+                        <tr>
+                            <td class="small text-success text-uppercase text-normal">{Lang::T('Type')}</td>
+                            <td class="small mb15 text-success">
+                                <b>{if $_bill['prepaid'] eq yes}Prepaid{else}Postpaid{/if}</b>
+                            </td>
+                        </tr>
+                        {if $nux_ip neq ''}
                             <tr>
                                 <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>
                                 <td class="small mb15">{$nux_ip}</td>
                             </tr>
                         {/if}
-                        {if $nux_mac}
+                        {if $nux_mac neq ''}
                             <tr>
                                 <td class="small text-primary text-uppercase text-normal">{Lang::T('Current MAC')}</td>
                                 <td class="small mb15">{$nux_mac}</td>

@@ -316,3 +316,4 @@ ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMME
 ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;
 ALTER TABLE `tbl_transactions` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;
 ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;
+ALTER TABLE `tbl_plans` CHANGE `allow_purchase` `prepaid` ENUM('yes','no') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'yes' COMMENT 'is prepaid';

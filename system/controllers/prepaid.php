@@ -135,6 +135,10 @@ switch ($action) {
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
+                $add_cost = User::getAttribute("Additional Cost", $id_customer);
+                if(empty($add_cost)){
+                    $add_cost = 0;
+                }
                 $plan = ORM::for_table('tbl_plans')->find_one($planId);
                 if (!$cust) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
@@ -142,7 +146,7 @@ switch ($action) {
                 if (!$plan) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('Plan not found'));
                 }
-                if ($cust['balance'] < $plan['price']) {
+                if ($cust['balance'] < ($plan['price']+$add_cost)) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('insufficient balance'));
                 }
                 $gateway = 'Recharge Balance';
@@ -153,7 +157,7 @@ switch ($action) {
             }
             if (Package::rechargeUser($id_customer, $server, $planId, $gateway, $channel)) {
                 if ($using == 'balance') {
-                    Balance::min($cust['id'], $plan['price']);
+                    Balance::min($cust['id'], $plan['price']+$add_cost);
                 }
                 $in = ORM::for_table('tbl_transactions')->where('username', $cust['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
@@ -692,7 +696,11 @@ switch ($action) {
         }
         $ui->assign('_title', Lang::T('Refill Balance'));
         $ui->assign('xfooter', $select2_customer);
-        $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
+        if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            $ui->assign('p', ORM::for_table('tbl_plans')->where('type', 'Balance')->find_many());
+        }else{
+            $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
+        }
         run_hook('view_deposit'); #HOOK
         $ui->display('deposit.tpl');
         break;

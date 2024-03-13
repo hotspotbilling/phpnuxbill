@@ -21,7 +21,7 @@
                                 data-placeholder="{Lang::T('Select Plans')}...">
                                 <option></option>
                                 {foreach $p as $pl}
-                                    <option value="{$pl['id']}">{$pl['name_plan']} - {Lang::moneyFormat($pl['price'])}</option>
+                                    <option value="{$pl['id']}">{if $pl['enabled'] neq 1}DISABLED PLAN &bull; {/if}{$pl['name_plan']} - {Lang::moneyFormat($pl['price'])}</option>
                                 {/foreach}
                             </select>
                         </div>

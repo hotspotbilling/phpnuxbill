@@ -201,7 +201,7 @@ switch ($action) {
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
         $enabled = _post('enabled');
-        $allow_purchase = _post('allow_purchase');
+        $prepaid = _post('prepaid');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -269,7 +269,7 @@ switch ($action) {
             $d->pool_expired = $pool_expired;
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
-            $d->allow_purchase = $allow_purchase;
+            $d->prepaid = $prepaid;
             $d->save();
             $plan_id = $d->id();
 
@@ -309,7 +309,7 @@ switch ($action) {
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
         $enabled = _post('enabled');
-        $allow_purchase = _post('allow_purchase');
+        $prepaid = _post('prepaid');
         $routers = _post('routers');
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -374,7 +374,7 @@ switch ($action) {
             $d->pool_expired = $pool_expired;
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
-            $d->allow_purchase = $allow_purchase;
+            $d->prepaid = $prepaid;
             $d->save();
 
             r2(U . 'services/hotspot', 's', Lang::T('Data Updated Successfully'));
@@ -471,7 +471,7 @@ switch ($action) {
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
         $enabled = _post('enabled');
-        $allow_purchase = _post('allow_purchase');
+        $prepaid = _post('prepaid');
 
 
         $msg = '';
@@ -533,7 +533,7 @@ switch ($action) {
             $d->pool_expired = $pool_expired;
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
-            $d->allow_purchase = $allow_purchase;
+            $d->prepaid = $prepaid;
             $d->save();
             $plan_id = $d->id();
 
@@ -566,7 +566,7 @@ switch ($action) {
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
         $enabled = _post('enabled');
-        $allow_purchase = _post('allow_purchase');
+        $prepaid = _post('prepaid');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -626,7 +626,7 @@ switch ($action) {
             $d->pool_expired = $pool_expired;
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
-            $d->allow_purchase = $allow_purchase;
+            $d->prepaid = $prepaid;
             $d->save();
 
             r2(U . 'services/pppoe', 's', Lang::T('Data Updated Successfully'));
@@ -678,7 +678,7 @@ switch ($action) {
         $name = _post('name');
         $price = _post('price');
         $enabled = _post('enabled');
-        $allow_purchase = _post('allow_purchase');
+        $prepaid = _post('prepaid');
 
         $msg = '';
         if (Validator::UnsignedNumber($price) == false) {
@@ -698,7 +698,7 @@ switch ($action) {
             $d->name_plan = $name;
             $d->price = $price;
             $d->enabled = $enabled;
-            $d->allow_purchase = $allow_purchase;
+            $d->prepaid = 'yes';
             $d->save();
 
             r2(U . 'services/balance', 's', Lang::T('Data Updated Successfully'));
@@ -710,7 +710,6 @@ switch ($action) {
         $name = _post('name');
         $price = _post('price');
         $enabled = _post('enabled');
-        $allow_purchase = _post('allow_purchase');
 
         $msg = '';
         if (Validator::UnsignedNumber($price) == false) {
@@ -736,7 +735,7 @@ switch ($action) {
             $d->routers = '';
             $d->pool = '';
             $d->enabled = $enabled;
-            $d->allow_purchase = $allow_purchase;
+            $d->prepaid = 'yes';
             $d->save();
 
             r2(U . 'services/balance', 's', Lang::T('Data Created Successfully'));

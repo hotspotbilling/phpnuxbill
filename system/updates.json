@@ -72,5 +72,8 @@
     ],
     "2024.3.3" : [
 		"ALTER TABLE `tbl_plans` CHANGE `validity_unit` `validity_unit` ENUM('Mins','Hrs','Days','Months','Period') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+    ],
+    "2024.3.12" : [
+        "ALTER TABLE `tbl_plans` CHANGE `allow_purchase` `prepaid` ENUM('yes','no') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'yes' COMMENT 'is prepaid';"
     ]
 }
