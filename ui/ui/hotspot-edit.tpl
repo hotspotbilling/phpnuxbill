@@ -17,10 +17,10 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-10">
-                            <input type="radio" name="prepaid" onclick="prepaid()" value="yes"
+                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes"
                                 {if $d['prepaid'] == yes}checked{/if}>
                             Prepaid
-                            <input type="radio" name="prepaid" onclick="postpaid()" value="no"
+                            <input type="radio" name="prepaid" onclick="postPaid()" value="no"
                                 {if $d['prepaid'] == no}checked{/if}> Postpaid
                         </div>
                     </div>
@@ -201,11 +201,11 @@
     <option value="Days">{Lang::T('Days')}</option>
     <option value="Months">{Lang::T('Months')}</option>`;
     var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
-    function prepaid() {
+    function prePaid() {
         $("#validity_unit").html(preOpt);
     }
 
-    function postpaid() {
+    function postPaid() {
         $("#validity_unit").html(postOpt);
     }
 </script>

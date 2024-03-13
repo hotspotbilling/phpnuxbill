@@ -16,8 +16,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-10">
-                            <input type="radio" name="prepaid" onclick="prepaid()" value="yes" checked> Prepaid
-                            <input type="radio" name="prepaid" onclick="postpaid()" value="no"> Postpaid
+                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes" checked> Prepaid
+                            <input type="radio" name="prepaid" onclick="postPaid()" value="no"> Postpaid
                         </div>
                     </div>
                     {if $_c['radius_enable']}
@@ -122,15 +122,15 @@
 <option value="Days">{Lang::T('Days')}</option>
 <option value="Months">{Lang::T('Months')}</option>`;
     var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
-    function prepaid() {
+    function prePaid() {
         $("#validity_unit").html(preOpt);
     }
 
-    function postpaid() {
+    function postPaid() {
         $("#validity_unit").html(postOpt);
     }
     document.addEventListener("DOMContentLoaded", function(event) {
-        prepaid()
+        prePaid()
     })
 </script>
 {if $_c['radius_enable']}
