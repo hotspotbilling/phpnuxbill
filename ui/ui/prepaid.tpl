@@ -16,7 +16,7 @@
                                 aria-hidden="true"></span> CSV</a>
                     </div>
                 {/if}
-                {Lang::T('Prepaid Users')}
+                &nbsp;
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">

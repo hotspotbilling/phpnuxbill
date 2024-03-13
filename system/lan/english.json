@@ -471,5 +471,13 @@
     "Show_To_Customer": "Type",
     "Using": "Using",
     "Default": "Default",
-    "Customer_Balance": "Customer Balance"
+    "Customer_Balance": "Customer Balance",
+    "Vouchers": "Vouchers",
+    "Refill_Customer": "Refill Customer",
+    "Recharge_Customer": "Recharge Customer",
+    "Plans": "Plans",
+    "PPPOE": "PPPOE",
+    "Bandwidth": "Bandwidth",
+    "Customers": "Customers",
+    "Actives": "Actives"
 }

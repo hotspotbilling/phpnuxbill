@@ -11,7 +11,7 @@
                                 class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete All</a>
                     </div>
                 {/if}
-                {Lang::T('Prepaid Vouchers')}
+                &nbsp;
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">

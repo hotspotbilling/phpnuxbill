@@ -310,7 +310,7 @@ switch ($action) {
         break;
 
     case 'voucher':
-        $ui->assign('_title', Lang::T('Prepaid Vouchers'));
+        $ui->assign('_title', Lang::T('Vouchers'));
         $limit = 10;
         $page = _get('p', 0);
         $pageNow = $page * $limit;

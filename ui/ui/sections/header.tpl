@@ -167,55 +167,55 @@
                         {$_MENU_AFTER_CUSTOMERS}
                         <li class="{if $_system_menu eq 'prepaid'}active{/if} treeview">
                             <a href="#">
-                                <i class="fa fa-ticket"></i> <span>{Lang::T('Prepaid')}</span>
+                                <i class="fa fa-ticket"></i> <span>{Lang::T('Services')}</span>
                                 <span class="pull-right-container">
                                     <i class="fa fa-angle-left pull-right"></i>
                                 </span>
                             </a>
                             <ul class="treeview-menu">
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
-                                        href="{$_url}prepaid/list">{Lang::T('Prepaid Users')}</a></li>
+                                        href="{$_url}prepaid/list">{Lang::T('Active Users')}</a></li>
                                 {if $_c['disable_voucher'] != 'yes'}
                                     <li {if $_routes[1] eq 'voucher'}class="active" {/if}><a
-                                            href="{$_url}prepaid/voucher">{Lang::T('Prepaid Vouchers')}</a></li>
+                                            href="{$_url}prepaid/voucher">{Lang::T('Vouchers')}</a></li>
                                     <li {if $_routes[1] eq 'refill'}class="active" {/if}><a
-                                            href="{$_url}prepaid/refill">{Lang::T('Refill Account')}</a></li>
+                                            href="{$_url}prepaid/refill">{Lang::T('Refill Customer')}</a></li>
                                 {/if}
                                 <li {if $_routes[1] eq 'recharge'}class="active" {/if}><a
-                                        href="{$_url}prepaid/recharge">{Lang::T('Recharge Account')}</a></li>
+                                        href="{$_url}prepaid/recharge">{Lang::T('Recharge Customer')}</a></li>
                                 {if $_c['enable_balance'] == 'yes'}
                                     <li {if $_routes[1] eq 'deposit'}class="active" {/if}><a
                                             href="{$_url}prepaid/deposit">{Lang::T('Refill Balance')}</a></li>
-                                {/if}
-                                {$_MENU_PREPAID}
-                            </ul>
-                        </li>
-                    {/if}
-                    {$_MENU_AFTER_PREPAID}
-                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        <li class="{if $_system_menu eq 'services'}active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-cube"></i> <span>{Lang::T('Services')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'hotspot'}class="active" {/if}><a
-                                        href="{$_url}services/hotspot">{Lang::T('Hotspot Plans')}</a></li>
-                                <li {if $_routes[1] eq 'pppoe'}class="active" {/if}><a
-                                        href="{$_url}services/pppoe">{Lang::T('PPPOE Plans')}</a></li>
-                                <li {if $_routes[1] eq 'list'}class="active" {/if}><a
-                                        href="{$_url}bandwidth/list">{Lang::T('Bandwidth Plans')}</a></li>
-                                {if $_c['enable_balance'] == 'yes'}
-                                    <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
-                                            href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></li>
                                 {/if}
                                 {$_MENU_SERVICES}
                             </ul>
                         </li>
                     {/if}
                     {$_MENU_AFTER_SERVICES}
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                        <li class="{if $_system_menu eq 'services'}active{/if} treeview">
+                            <a href="#">
+                                <i class="ion ion-cube"></i> <span>{Lang::T('Plans')}</span>
+                                <span class="pull-right-container">
+                                    <i class="fa fa-angle-left pull-right"></i>
+                                </span>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li {if $_routes[1] eq 'hotspot'}class="active" {/if}><a
+                                        href="{$_url}services/hotspot">{Lang::T('Hotspot')}</a></li>
+                                <li {if $_routes[1] eq 'pppoe'}class="active" {/if}><a
+                                        href="{$_url}services/pppoe">{Lang::T('PPPOE')}</a></li>
+                                <li {if $_routes[1] eq 'list'}class="active" {/if}><a
+                                        href="{$_url}bandwidth/list">{Lang::T('Bandwidth')}</a></li>
+                                {if $_c['enable_balance'] == 'yes'}
+                                    <li {if $_routes[1] eq 'balance'}class="active" {/if}><a
+                                            href="{$_url}services/balance">{Lang::T('Balance')}</a></li>
+                                {/if}
+                                {$_MENU_PLANS}
+                            </ul>
+                        </li>
+                    {/if}
+                    {$_MENU_AFTER_PLANS}
                     <li class="{if $_system_menu eq 'reports'}active{/if} treeview">
                         <a href="#">
                             <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
