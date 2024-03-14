@@ -135,7 +135,7 @@ switch ($action) {
             $ui->assign('gateway', $gateway);
             $ui->assign('channel', $channel);
             $ui->assign('server', $b['routers']);
-            $ui->assign('using', 'default');
+            $ui->assign('using', 'cash');
             $ui->assign('plan', $plan);
             $ui->display('recharge-confirm.tpl');
         }

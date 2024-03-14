@@ -45,7 +45,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Using')}</label>
                         <div class="col-md-6">
                             <select name="using" class="form-control">
-                                <option value="default">{Lang::T('Default')}</option>
+                                <option value="cash">{Lang::T('Cash')}</option>
                                 {if $_c['enable_balance'] eq 'yes'}
                                     <option value="balance">{Lang::T('Customer Balance')}</option>
                                 {/if}

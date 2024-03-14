@@ -10,7 +10,7 @@
                     <table id="datatable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Invoice')}</th>
                                 <th>{Lang::T('Plan Name')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
                                 <th>{Lang::T('Type')}</th>
@@ -21,8 +21,8 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr>
-                                    <td>{$ds['username']}</td>
+                                <tr onclick="window.location.href = '{$_url}voucher/invoice/{$ds['id']}'" style="cursor: pointer;">
+                                    <td>{$ds['invoice']}</td>
                                     <td>{$ds['plan_name']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['type']}</td>

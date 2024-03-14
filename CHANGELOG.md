@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.3.14
+
+- Add Note to Invoices
+- Add Additional Bill
+- View Invoice from Customer side
+
 ## 2024.3.13
 
 - Postpaid System

@@ -49,7 +49,11 @@ switch ($action) {
         $ui->display('user-activation-list.tpl');
 
         break;
-
+    case 'invoice':
+        $id = $routes[2];
+        $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->where('id', $id)->find_one();
+        Package::createInvoice($in);
+        $ui->display('invoice-customer.tpl');
     default:
         $ui->display('a404.tpl');
 }

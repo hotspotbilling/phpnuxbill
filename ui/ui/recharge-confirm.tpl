@@ -50,7 +50,7 @@
                             {$plan['validity_unit']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('Using')}</b> <span class="pull-right">{$using}</span>
+                        <b>{Lang::T('Using')}</b> <span class="pull-right">{ucwords($using)}</span>
                     </li>
                 </ul>
                 <center><b>{Lang::T('Total')}</b></center>
