@@ -26,13 +26,40 @@ class User
         return 0;
     }
 
+    public static function setAttribute($name, $value, $id = 0)
+    {
+        if (!$id) {
+            $id = User::getID();
+            if (!$id) {
+                return '';
+            }
+        }
+        $f = ORM::for_table('tbl_customers_fields')->where('field_name', $name)->where('customer_id', $id)->find_one();
+        if(!$f){
+            $f = ORM::for_table('tbl_customers_fields')->create();
+            $f->customer_id = $id;
+            $f->field_name = $name;
+            $f->field_value = $value;
+            $f->save();
+            $result = $f->id();
+            if ($result) {
+                return $result;
+            }
+        }else{
+            $f->field_value = $value;
+            $f->save();
+            return $f['id'];
+        }
+        return 0;
+    }
+
     public static function getAttribute($name, $id = 0)
     {
         if (!$id) {
             $id = User::getID();
-        }
-        if (!$id) {
-            return '';
+            if (!$id) {
+                return [];
+            }
         }
         $f = ORM::for_table('tbl_customers_fields')->where('field_name', $name)->where('customer_id', $id)->find_one();
         if ($f) {
@@ -45,12 +72,12 @@ class User
     {
         if (!$id) {
             $id = User::getID();
-        }
-        if (!$id) {
-            return [];
+            if (!$id) {
+                return [];
+            }
         }
         $attrs = [];
-        $f = ORM::for_table('tbl_customers_fields')->where_like('field_name', $endWith)->where('customer_id', $id)->find_one();
+        $f = ORM::for_table('tbl_customers_fields')->where_like('field_name', "%$endWith")->where('customer_id', $id)->find_many();
         if ($f) {
             foreach ($f as $k) {
                 $attrs[$k['field_name']] = $k['field_value'];
