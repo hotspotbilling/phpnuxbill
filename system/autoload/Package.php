@@ -33,9 +33,14 @@ class Package
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
         // Additional cost
-        $add_cost = User::getAttribute("Additional Cost", $id_customer);
-        if(empty($add_cost)){
-            $add_cost = 0;
+        $add_cost = 0;
+        $add_cycle = User::getAttribute("Additional Cycle", $id_customer);
+        // if empty then it doesnt have cycle, if zero then it finish
+        if ($add_cycle != 0) {
+            $add_cost = User::getAttribute("Additional Cost", $id_customer);
+            if (empty($add_cost)) {
+                $add_cost = 0;
+            }
         }
 
         // Zero cost recharge
@@ -307,7 +312,7 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period') {
+                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                     // Calculating Price
                     $sd = new DateTime("$date_only");
                     $ed = new DateTime("$date_exp");
@@ -336,7 +341,7 @@ class Package
                 }
                 $t->save();
 
-                if ($p['validity_unit'] == 'Period') {
+                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                     // insert to fields
                     $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
                     if (!$fl) {
@@ -435,7 +440,7 @@ class Package
                 }
                 $t->save();
 
-                if ($p['validity_unit'] == 'Period') {
+                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                     // insert to fields
                     $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
                     if (!$fl) {
@@ -491,7 +496,7 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period') {
+                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                     // Calculating Price
                     $sd = new DateTime("$date_only");
                     $ed = new DateTime("$date_exp");
@@ -520,7 +525,7 @@ class Package
                 $t->type = "PPPOE";
                 $t->save();
 
-                if ($p['validity_unit'] == 'Period') {
+                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                     // insert to fields
                     $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
                     if (!$fl) {
@@ -546,6 +551,9 @@ class Package
                     "\nChannel: " . $channel .
                     "\nPrice: " . Lang::moneyFormat($p['price']));
             }
+        }
+        if ($add_cycle > 0) {
+            User::setAttribute('Additional Cycle', ($add_cycle - 1), $id_customer);
         }
         run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);
