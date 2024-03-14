@@ -113,8 +113,8 @@
                     <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
                     <li>{if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}</li>
                 </ol>
-                <div class="row">
-                    {if Lang::arrayCount($radius_pppoe)>0}
+                {if Lang::arrayCount($radius_pppoe)>0}
+                    <div class="row">
                         {foreach $radius_pppoe as $plan}
                             <div class="col col-md-4">
                                 <div class="box box-primary">
@@ -157,13 +157,14 @@
                                 </div>
                             </div>
                         {/foreach}
-                    {/if}
-
-                    {if Lang::arrayCount($radius_hotspot)>0}
-                        <ol class="breadcrumb">
-                            <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
-                            <li>{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}</li>
-                        </ol>
+                    </div>
+                {/if}
+                {if Lang::arrayCount($radius_hotspot)>0}
+                    <ol class="breadcrumb">
+                        <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
+                        <li>{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}</li>
+                    </ol>
+                    <div class="row">
                         {foreach $radius_hotspot as $plan}
                             <div class="col col-md-4">
                                 <div class="box box-primary">
@@ -206,8 +207,8 @@
                                 </div>
                             </div>
                         {/foreach}
-                    {/if}
-                </div>
+                    </div>
+                {/if}
             {/if}
         {/if}
         {foreach $routers as $router}

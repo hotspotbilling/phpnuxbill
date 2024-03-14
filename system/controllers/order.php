@@ -208,18 +208,18 @@ switch ($action) {
         } else {
             $router_name = $plan['routers'];
         }
-        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-        if ($add_rem != 0) {
-            $add_cost = User::getAttribute("Additional Cost", $id_customer);
-            if (!empty($add_cost)) {
-                $bills = User::getAttributes("Bill", $id_customer);
-                $ui->assign('bills', $bills);
-                $ui->assign('add_cost', $add_cost);
-                $plan['price'] += $add_cost;
-            }
-        }
         if (isset($_POST['send']) && $_POST['send'] == 'plan') {
             $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
+            $add_rem = User::getAttribute("Additional Remaining", $target['id']);
+            if ($add_rem != 0) {
+                $add_cost = User::getAttribute("Additional Cost", $target['id']);
+                if (!empty($add_cost)) {
+                    $bills = User::getAttributes("Bill", $target['id']);
+                    $ui->assign('bills', $bills);
+                    $ui->assign('add_cost', $add_cost);
+                    $plan['price'] += $add_cost;
+                }
+            }
             if (!$target) {
                 r2(U . 'home', 'd', Lang::T('Username not found'));
             }

@@ -47,6 +47,7 @@
                                 value="plan"><i class="glyphicon glyphicon-send"></i></button>
                         </div>
                     </div>
+                    <p class="help-block text-center">{Lang::T('If your friend have Additional Cost, you will pay for that too')}</p>
                 </form>
             </div>
         </div>
