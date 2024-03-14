@@ -123,8 +123,11 @@ class Message
         $textInvoice = str_replace('[[plan_name]]', $trx['plan_name'], $textInvoice);
         $textInvoice = str_replace('[[plan_price]]',  Lang::moneyFormat($trx['price']), $textInvoice);
         $textInvoice = str_replace('[[name]]', $cust['fullname'], $textInvoice);
+        $textInvoice = str_replace('[[note]]', $cust['note'], $textInvoice);
         $textInvoice = str_replace('[[user_name]]', $trx['username'], $textInvoice);
         $textInvoice = str_replace('[[user_password]]', $cust['password'], $textInvoice);
+        $textInvoice = str_replace('[[username]]', $trx['username'], $textInvoice);
+        $textInvoice = str_replace('[[password]]', $cust['password'], $textInvoice);
         $textInvoice = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($trx['expiration'], $trx['time']), $textInvoice);
         $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
 

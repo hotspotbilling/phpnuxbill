@@ -17,7 +17,7 @@ class Package
      * @param string $channel channel payment gateway
      * @return boolean
      */
-    public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel)
+    public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel, $note = '')
     {
         global $config, $admin, $c, $p, $b, $t, $d, $zero;
         $date_now = date("Y-m-d H:i:s");
@@ -34,12 +34,18 @@ class Package
 
         // Additional cost
         $add_cost = 0;
-        $add_cycle = User::getAttribute("Additional Cycle", $id_customer);
+        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
         // if empty then it doesnt have cycle, if zero then it finish
-        if ($add_cycle != 0) {
+        if ($add_rem != 0) {
             $add_cost = User::getAttribute("Additional Cost", $id_customer);
             if (empty($add_cost)) {
                 $add_cost = 0;
+            }
+        }
+        if ($add_cost > 0 && $router_name != 'balance') {
+            $bills = User::getAttributes("Bill", $id_customer);
+            foreach ($bills as $k => $v) {
+                $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
             }
         }
 
@@ -247,6 +253,7 @@ class Package
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
+                $t->note = $note;
                 $t->type = "Hotspot";
                 if ($admin) {
                     $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
@@ -333,6 +340,7 @@ class Package
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
+                $t->note = $note;
                 $t->type = "Hotspot";
                 if ($admin) {
                     $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
@@ -432,6 +440,7 @@ class Package
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
                 $t->routers = $router_name;
+                $t->note = $note;
                 $t->type = "PPPOE";
                 if ($admin) {
                     $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
@@ -516,6 +525,7 @@ class Package
                 $t->expiration = $date_exp;
                 $t->time = $time;
                 $t->method = "$gateway - $channel";
+                $t->note = $note;
                 $t->routers = $router_name;
                 if ($admin) {
                     $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
@@ -552,8 +562,8 @@ class Package
                     "\nPrice: " . Lang::moneyFormat($p['price']));
             }
         }
-        if ($add_cycle > 0) {
-            User::setAttribute('Additional Cycle', ($add_cycle - 1), $id_customer);
+        if ($add_rem > 0) {
+            User::setAttribute('Additional Remaining', ($add_rem - 1), $id_customer);
         }
         run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);
@@ -675,7 +685,11 @@ class Package
         $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
         $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
-
+        if(!empty($in['note'])){
+            $invoice .= Lang::pad("", '=') . "\n";
+            $invoice .= Lang::pad($in['note'], ' ', 2);
+        }
+        $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
         if ($in['type'] != 'Balance') {
@@ -699,7 +713,11 @@ class Package
         $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
         $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
-
+        if(!empty($in['note'])){
+            $invoice .= Lang::pad("", '=') . "\n";
+            $invoice .= Lang::pad($in['note'], ' ', 2);
+        }
+        $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
         if ($in['type'] != 'Balance') {

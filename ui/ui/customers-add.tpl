@@ -92,7 +92,6 @@
                 <div class="panel-body">
                     <!-- Customers Attributes add start -->
                     <div id="custom-fields-container">
-
                     </div>
                     <!-- Customers Attributes add end -->
                 </div>

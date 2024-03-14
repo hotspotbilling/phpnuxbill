@@ -12,7 +12,7 @@ $ui->assign('_system_menu', 'customers');
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
-if(empty($action)){
+if (empty($action)) {
     $action = 'list';
 }
 
@@ -48,7 +48,7 @@ switch ($action) {
 
     case 'csv':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $cs = ORM::for_table('tbl_customers')
             ->select('tbl_customers.id', 'id')
@@ -86,29 +86,63 @@ switch ($action) {
         }
         break;
     case 'add':
-		if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');
         break;
     case 'recharge':
-		if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
         if ($b) {
-            if (Package::rechargeUser($id_customer, $b['routers'], $b['plan_id'], "Recharge", $admin['fullname'])) {
-                r2(U . 'customers/view/' . $id_customer, 's', 'Success Recharge Customer');
-            } else {
-                r2(U . 'customers/view/' . $id_customer, 'e', 'Customer plan is inactive');
+            $gateway = 'Recharge';
+            $channel = $admin['fullname'];
+            $cust = User::_info($id_customer);
+            $plan = ORM::for_table('tbl_plans')->find_one($b['plan_id']);
+            $add_cost = 0;
+            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
+            if($add_rem != 0){
+                $add_cost = User::getAttribute("Additional Cost", $id_customer);
+                if (empty($add_cost)) {
+                    $add_cost = 0;
+                }
             }
+            if ($using == 'balance' && $config['enable_balance'] == 'yes') {
+                if (!$cust) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
+                }
+                if (!$plan) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('Plan not found'));
+                }
+                if ($cust['balance'] < ($plan['price'] + $add_cost)) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('insufficient balance'));
+                }
+                $gateway = 'Recharge Balance';
+            }
+            if ($using == 'zero') {
+                $zero = 1;
+                $gateway = 'Recharge Zero';
+            }
+            $bills = User::getAttributes("Bill", $id_customer);
+            $ui->assign('bills', $bills);
+            $ui->assign('add_cost', $add_cost);
+            $ui->assign('add_rem', $add_rem);
+            $ui->assign('cust', $cust);
+            $ui->assign('gateway', $gateway);
+            $ui->assign('channel', $channel);
+            $ui->assign('server', $b['routers']);
+            $ui->assign('using', 'default');
+            $ui->assign('plan', $plan);
+            $ui->display('recharge-confirm.tpl');
         }
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
     case 'deactivate':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id_customer  = $routes['2'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
@@ -215,8 +249,8 @@ switch ($action) {
         }
         break;
     case 'edit':
-		if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id  = $routes['2'];
         run_hook('edit_customer'); #HOOK
@@ -236,7 +270,7 @@ switch ($action) {
 
     case 'delete':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-            _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id  = $routes['2'];
         run_hook('delete_customer'); #HOOK
@@ -277,7 +311,7 @@ switch ($action) {
                 } catch (Throwable $e) {
                 }
                 try {
-                    if($c) $c->delete();
+                    if ($c) $c->delete();
                 } catch (Exception $e) {
                 } catch (Throwable $e) {
                 }
@@ -499,7 +533,7 @@ switch ($action) {
                     }
                 }
             }
-            r2(U . 'customers/list', 's', 'User Updated Successfully');
+            r2(U . 'customers/view/' . $id, 's', 'User Updated Successfully');
         } else {
             r2(U . 'customers/edit/' . $id, 'e', $msg);
         }

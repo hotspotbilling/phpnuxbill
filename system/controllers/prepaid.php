@@ -96,37 +96,17 @@ switch ($action) {
         $ui->display('recharge.tpl');
         break;
 
-    case 'recharge-user':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
-            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
-        }
-        $id = $routes['2'];
-        $ui->assign('id', $id);
-
-        $c = ORM::for_table('tbl_customers')->find_many();
-        $ui->assign('c', $c);
-        $p = ORM::for_table('tbl_plans')->where('enabled', '1')->find_many();
-        $ui->assign('p', $p);
-        $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
-        $ui->assign('r', $r);
-        run_hook('view_recharge_customer'); #HOOK
-        $ui->display('recharge-user.tpl');
-        break;
-
-    case 'recharge-post':
+    case 'recharge-confirm':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id_customer = _post('id_customer');
-        $type = _post('type');
         $server = _post('server');
         $planId = _post('plan');
         $using = _post('using');
-        $date_only = date("Y-m-d");
-        $time = date("H:i:s");
 
         $msg = '';
-        if ($id_customer == '' or $type == '' or $server == '' or $planId == '') {
+        if ($id_customer == '' or $server == '' or $planId == '' or $using == '') {
             $msg .= Lang::T('All field is required') . '<br>';
         }
 
@@ -134,19 +114,23 @@ switch ($action) {
             $gateway = 'Recharge';
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
-            if ($using == 'balance' && $config['enable_balance'] == 'yes') {
+            $plan = ORM::for_table('tbl_plans')->find_one($planId);
+            $add_cost = 0;
+            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
+            if($add_rem != 0){
                 $add_cost = User::getAttribute("Additional Cost", $id_customer);
-                if(empty($add_cost)){
+                if (empty($add_cost)) {
                     $add_cost = 0;
                 }
-                $plan = ORM::for_table('tbl_plans')->find_one($planId);
+            }
+            if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
                 }
                 if (!$plan) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('Plan not found'));
                 }
-                if ($cust['balance'] < ($plan['price']+$add_cost)) {
+                if ($cust['balance'] < ($plan['price'] + $add_cost)) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('insufficient balance'));
                 }
                 $gateway = 'Recharge Balance';
@@ -155,9 +139,69 @@ switch ($action) {
                 $zero = 1;
                 $gateway = 'Recharge Zero';
             }
+            $bills = User::getAttributes("Bill", $id_customer);
+            $ui->assign('bills', $bills);
+            $ui->assign('add_cost', $add_cost);
+            $ui->assign('add_rem', $add_rem);
+            $ui->assign('cust', $cust);
+            $ui->assign('gateway', $gateway);
+            $ui->assign('channel', $channel);
+            $ui->assign('server', $server);
+            $ui->assign('using', $using);
+            $ui->assign('plan', $plan);
+            $ui->display('recharge-confirm.tpl');
+        } else {
+            r2(U . 'prepaid/recharge', 'e', $msg);
+        }
+        break;
+
+    case 'recharge-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $id_customer = _post('id_customer');
+        $server = _post('server');
+        $planId = _post('plan');
+        $using = _post('using');
+
+        $msg = '';
+        if ($id_customer == '' or $server == '' or $planId == '' or $using == '') {
+            $msg .= Lang::T('All field is required') . '<br>';
+        }
+
+        if ($msg == '') {
+            $gateway = 'Recharge';
+            $channel = $admin['fullname'];
+            $cust = User::_info($id_customer);
+            $add_cost = 0;
+            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
+            if($add_rem != 0){
+                $add_cost = User::getAttribute("Additional Cost", $id_customer);
+                if (empty($add_cost)) {
+                    $add_cost = 0;
+                }
+            }
+            if ($using == 'balance' && $config['enable_balance'] == 'yes') {
+                $plan = ORM::for_table('tbl_plans')->find_one($planId);
+                if (!$cust) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
+                }
+                if (!$plan) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('Plan not found'));
+                }
+                if ($cust['balance'] < ($plan['price'] + $add_cost)) {
+                    r2(U . 'prepaid/recharge', 'e', Lang::T('insufficient balance'));
+                }
+                $gateway = 'Recharge Balance';
+            }
+            if ($using == 'zero') {
+                $add_cost = 0;
+                $zero = 1;
+                $gateway = 'Recharge Zero';
+            }
             if (Package::rechargeUser($id_customer, $server, $planId, $gateway, $channel)) {
                 if ($using == 'balance') {
-                    Balance::min($cust['id'], $plan['price']+$add_cost);
+                    Balance::min($cust['id'], $plan['price'] + $add_cost);
                 }
                 $in = ORM::for_table('tbl_transactions')->where('username', $cust['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
@@ -698,7 +742,7 @@ switch ($action) {
         $ui->assign('xfooter', $select2_customer);
         if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             $ui->assign('p', ORM::for_table('tbl_plans')->where('type', 'Balance')->find_many());
-        }else{
+        } else {
             $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
         }
         run_hook('view_deposit'); #HOOK
