@@ -671,6 +671,8 @@ class Package
             $_admin = Admin::_info($in['admin_id']);
             // if admin not deleted
             if ($_admin) $admin = $_admin;
+        }else{
+            $admin['fullname'] = 'Customer';
         }
         //print
         $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";

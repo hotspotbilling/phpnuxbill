@@ -124,16 +124,26 @@ switch ($action) {
             $trx = ORM::for_table('tbl_payment_gateway')
                 ->where('username', $user['username'])
                 ->find_one($trxid);
-            if ('midtrans' == $trx['gateway']) {
-                //Hapus invoice link
-            }
         }
         if (empty($trx)) {
             r2(U . "order/package", 'e', Lang::T("Transaction Not found"));
         }
-        $router = ORM::for_table('tbl_routers')->find_one($trx['routers_id']);
+        $router = Mikrotik::info($trx['routers']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
         $bandw = ORM::for_table('tbl_bandwidth')->find_one($plan['id_bw']);
+
+        $add_cost = 0;
+        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
+        if ($add_rem != 0) {
+            $add_cost = User::getAttribute("Additional Cost", $id_customer);
+            if (empty($add_cost)) {
+                $add_cost = 0;
+            }else{
+                $bills = User::getAttributes("Bill", $id_customer);
+                $ui->assign('bills', $bills);
+            }
+        }
+        $ui->assign('add_cost', $add_cost);
         $ui->assign('trx', $trx);
         $ui->assign('router', $router);
         $ui->assign('plan', $plan);
@@ -157,11 +167,19 @@ switch ($action) {
         } else {
             $router_name = $plan['routers'];
         }
+        $add_cost = 0;
+        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
+        if ($add_rem != 0) {
+            $add_cost = User::getAttribute("Additional Cost", $id_customer);
+            if (empty($add_cost)) {
+                $add_cost = 0;
+            }
+        }
         if ($plan && $plan['enabled'] && $user['balance'] >= $plan['price']) {
             if (Package::rechargeUser($user['id'], $router_name, $plan['id'], 'Customer', 'Balance')) {
                 // if success, then get the balance
-                Balance::min($user['id'], $plan['price']);
-                r2(U . "home", 's', Lang::T("Success to buy package"));
+                Balance::min($user['id'], $plan['price'] + $add_cost);
+                r2(U . "voucher/invoice/", 's', Lang::T("Success to buy package"));
             } else {
                 r2(U . "order/package", 'e', Lang::T("Failed to buy package"));
                 Message::sendTelegram("Buy Package with Balance Failed\n\n#u$c[username] #buy \n" . $plan['name_plan'] .
@@ -189,6 +207,16 @@ switch ($action) {
             $router_name = 'radius';
         } else {
             $router_name = $plan['routers'];
+        }
+        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
+        if ($add_rem != 0) {
+            $add_cost = User::getAttribute("Additional Cost", $id_customer);
+            if (!empty($add_cost)) {
+                $bills = User::getAttributes("Bill", $id_customer);
+                $ui->assign('bills', $bills);
+                $ui->assign('add_cost', $add_cost);
+                $plan['price'] += $add_cost;
+            }
         }
         if (isset($_POST['send']) && $_POST['send'] == 'plan') {
             $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
@@ -267,13 +295,13 @@ switch ($action) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
         }
         $pgs = array_values(explode(',', $config['payment_gateway']));
-        if(count($pgs)==0){
+        if (count($pgs) == 0) {
             sendTelegram("Payment Gateway not set, please set it in Settings");
             _log(Lang::T("Payment Gateway not set, please set it in Settings"));
             r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
         }
-        if(count($pgs)>1){
-            $ui->assign('pgs',$pgs );
+        if (count($pgs) > 1) {
+            $ui->assign('pgs', $pgs);
             //$ui->assign('pgs', $pgs);
             $ui->assign('route2', $routes[2]);
             $ui->assign('route3', $routes[3]);
@@ -281,12 +309,12 @@ switch ($action) {
             //$ui->assign('plan', $plan);
             $ui->display('user-selectGateway.tpl');
             break;
-        }else{
-            if(empty($pgs[0])){
+        } else {
+            if (empty($pgs[0])) {
                 sendTelegram("Payment Gateway not set, please set it in Settings");
                 _log(Lang::T("Payment Gateway not set, please set it in Settings"));
                 r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
-            }else{
+            } else {
                 $_POST['gateway'] = $pgs[0];
             }
         }
@@ -333,6 +361,16 @@ switch ($action) {
                 }
             }
         }
+        $add_cost = 0;
+        if ($router['name'] != 'balance') {
+            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
+            if ($add_rem != 0) {
+                $add_cost = User::getAttribute("Additional Cost", $id_customer);
+                if (empty($add_cost)) {
+                    $add_cost = 0;
+                }
+            }
+        }
         if (empty($id)) {
             $d = ORM::for_table('tbl_payment_gateway')->create();
             $d->username = $user['username'];
@@ -341,7 +379,7 @@ switch ($action) {
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
             $d->routers = $router['name'];
-            $d->price = $plan['price'];
+            $d->price = ($plan['price'] + $add_cost);
             $d->created_date = date('Y-m-d H:i:s');
             $d->status = 1;
             $d->save();
@@ -353,7 +391,7 @@ switch ($action) {
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
             $d->routers = $router['name'];
-            $d->price = $plan['price'];
+            $d->price = ($plan['price'] + $add_cost);
             $d->created_date = date('Y-m-d H:i:s');
             $d->status = 1;
             $d->save();

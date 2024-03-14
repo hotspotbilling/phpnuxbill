@@ -51,9 +51,17 @@ switch ($action) {
         break;
     case 'invoice':
         $id = $routes[2];
-        $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->where('id', $id)->find_one();
-        Package::createInvoice($in);
-        $ui->display('invoice-customer.tpl');
+        if(empty($id)){
+            $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id')->find_one();
+        }else{
+            $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->where('id', $id)->find_one();
+        }
+        if($in){
+            Package::createInvoice($in);
+            $ui->display('invoice-customer.tpl');
+        }else{
+            r2(U . 'voucher/list-activated', 'e', Lang::T('Not Found'));
+        }
     default:
         $ui->display('a404.tpl');
 }

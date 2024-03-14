@@ -487,5 +487,7 @@
     "Current_Cycle": "Current Cycle",
     "Additional_Cost": "Additional Cost",
     "Remaining": "Remaining",
-    "": ""
+    "": "",
+    "Not_Found": "Not Found",
+    "Cash": "Cash"
 }
