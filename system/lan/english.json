@@ -492,5 +492,6 @@
     "Cash": "Cash",
     "Payment_not_found": "Payment not found",
     "If_your_friend_have_Additional_Cost__you_will_pay_for_that_too": "If your friend have Additional Cost, you will pay for that too",
-    "Cache_cleared_successfully_": "Cache cleared successfully!"
+    "Cache_cleared_successfully_": "Cache cleared successfully!",
+    "Paid": "Paid"
 }

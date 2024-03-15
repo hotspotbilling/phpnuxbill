@@ -41,7 +41,13 @@
                     {if $customFields}
                         {foreach $customFields as $customField}
                             <li class="list-group-item">
-                                <b>{$customField.field_name}</b> <span class="pull-right">{$customField.field_value}</span>
+                                <b>{$customField.field_name}</b> <span class="pull-right">
+                                    {if strpos($customField.field_value, ':0') === false}
+                                        {$customField.field_value}
+                                    {else}
+                                        <b>{Lang::T('Paid')}</b>
+                                    {/if}
+                                </span>
                             </li>
                         {/foreach}
                     {/if}
