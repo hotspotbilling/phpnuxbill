@@ -216,7 +216,10 @@ switch ($action) {
                 ->find_many();
 
             $v  = $routes['3'];
-            if (empty($v) || $v == 'order') {
+            if(empty($v)){
+                $v = 'activation';
+            }
+            if ($v == 'order') {
                 $v = 'order';
                 $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'), ['username' => $customer['username']]);
                 $order = ORM::for_table('tbl_payment_gateway')
@@ -238,8 +241,7 @@ switch ($action) {
                 $ui->assign('paginator', $paginator);
                 $ui->assign('activation', $activation);
             }
-            $package = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->find_one();
-            $ui->assign('package', $package);
+            $ui->assign('packages', User::_billing($customer['id']));
             $ui->assign('v', $v);
             $ui->assign('d', $customer);
             $ui->assign('customFields', $customFields);
