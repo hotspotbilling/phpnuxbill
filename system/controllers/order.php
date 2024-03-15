@@ -379,7 +379,18 @@ switch ($action) {
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
             $d->routers = $router['name'];
-            $d->price = ($plan['price'] + $add_cost);
+			if ($plan['validity_unit'] == 'Period') {
+				// Postpaid price from field
+				$add_inv = User::getAttribute("Invoice", $id_customer);
+				if (empty ($add_inv) or $add_inv == 0) {
+					$d->price = ($plan['price'] + $add_cost);
+				} else {
+					$d->price = ($add_inv + $add_cost);
+				}
+            } else {
+                    $d->price = ($plan['price'] + $add_cost);
+            }
+            //$d->price = ($plan['price'] + $add_cost);
             $d->created_date = date('Y-m-d H:i:s');
             $d->status = 1;
             $d->save();
@@ -391,7 +402,18 @@ switch ($action) {
             $d->plan_name = $plan['name_plan'];
             $d->routers_id = $router['id'];
             $d->routers = $router['name'];
-            $d->price = ($plan['price'] + $add_cost);
+			if ($plan['validity_unit'] == 'Period') {
+				// Postpaid price from field
+				$add_inv = User::getAttribute("Invoice", $id_customer);
+				if (empty ($add_inv) or $add_inv == 0) {
+					$d->price = ($plan['price'] + $add_cost);
+				} else {
+					$d->price = ($add_inv + $add_cost);
+				}
+            } else {
+                    $d->price = ($plan['price'] + $add_cost);
+            }
+            //$d->price = ($plan['price'] + $add_cost);
             $d->created_date = date('Y-m-d H:i:s');
             $d->status = 1;
             $d->save();

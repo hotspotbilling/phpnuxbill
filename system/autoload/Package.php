@@ -246,7 +246,17 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'] + $add_cost;
+                if ($p['validity_unit'] == 'Period') {
+					// Postpaid price from field
+					$add_inv = User::getAttribute("Invoice", $id_customer);
+					if (empty ($add_inv) or $add_inv == 0) {
+						$t->price = $p['price'] + $add_cost;
+					} else {
+						$t->price = $add_inv + $add_cost;
+					}
+                } else {
+                    $t->price = $p['price'] + $add_cost;
+                }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -263,7 +273,7 @@ class Package
                 $t->save();
 
                 if ($p['validity_unit'] == 'Period') {
-                    // insert to fields
+                    // insert price to fields for invoice next month
                     $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
                     if (!$fl) {
                         $fl = ORM::for_table('tbl_customers_fields')->create();
@@ -319,18 +329,9 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // Calculating Price
-                    $sd = new DateTime("$date_only");
-                    $ed = new DateTime("$date_exp");
-                    $td = $ed->diff($sd);
-                    $fd = $td->format("%a");
-                    $gi = ($p['price'] / 30) * $fd;
-                    if ($gi > $p['price']) {
-                        $t->price = $p['price'] + $add_cost;
-                    } else {
-                        $t->price = $gi + $add_cost;
-                    }
+                if ($p['validity_unit'] == 'Period') {
+					// Postpaid price always zero for first time
+                    $t->price = 0 + $add_cost;
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }
@@ -350,12 +351,18 @@ class Package
                 $t->save();
 
                 if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // insert to fields
+                    // insert price to fields for invoice next month
                     $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
                     if (!$fl) {
                         $fl = ORM::for_table('tbl_customers_fields')->create();
                         $fl->customer_id = $c['id'];
                         $fl->field_name = 'Invoice';
+						// Calculating Price
+						$sd = new DateTime("$date_only");
+						$ed = new DateTime("$date_exp");
+						$td = $ed->diff($sd);
+						$fd = $td->format("%a");
+						$gi = ($p['price'] / 30) * $fd;
                         if ($gi > $p['price']) {
                             $fl->field_value = $p['price'];
                         } else {
@@ -433,7 +440,17 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                $t->price = $p['price'] + $add_cost;
+                if ($p['validity_unit'] == 'Period') {
+					// Postpaid price from field
+					$add_inv = User::getAttribute("Invoice", $id_customer);
+					if (empty ($add_inv) or $add_inv == 0) {
+						$t->price = $p['price'] + $add_cost;
+					} else {
+						$t->price = $add_inv + $add_cost;
+					}
+                } else {
+                    $t->price = $p['price'] + $add_cost;
+                }
                 $t->recharged_on = $date_only;
                 $t->recharged_time = $time_only;
                 $t->expiration = $date_exp;
@@ -450,7 +467,7 @@ class Package
                 $t->save();
 
                 if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // insert to fields
+                    // insert price to fields for invoice next month
                     $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
                     if (!$fl) {
                         $fl = ORM::for_table('tbl_customers_fields')->create();
@@ -505,18 +522,9 @@ class Package
                 $t->invoice = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // Calculating Price
-                    $sd = new DateTime("$date_only");
-                    $ed = new DateTime("$date_exp");
-                    $td = $ed->diff($sd);
-                    $fd = $td->format("%a");
-                    $gi = ($p['price'] / 30) * $fd;
-                    if ($gi > $p['price']) {
-                        $t->price = $p['price'] + $add_cost;
-                    } else {
-                        $t->price = $gi + $add_cost;
-                    }
+                if ($p['validity_unit'] == 'Period') {
+					// Postpaid price always zero for first time
+                    $t->price = 0 + $add_cost;
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }
@@ -536,12 +544,18 @@ class Package
                 $t->save();
 
                 if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // insert to fields
+                    // insert price to fields for invoice next month
                     $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
                     if (!$fl) {
                         $fl = ORM::for_table('tbl_customers_fields')->create();
                         $fl->customer_id = $c['id'];
                         $fl->field_name = 'Invoice';
+						// Calculating Price
+						$sd = new DateTime("$date_only");
+						$ed = new DateTime("$date_exp");
+						$td = $ed->diff($sd);
+						$fd = $td->format("%a");
+						$gi = ($p['price'] / 30) * $fd;
                         if ($gi > $p['price']) {
                             $fl->field_value = $p['price'];
                         } else {
