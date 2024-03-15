@@ -61,6 +61,13 @@ foreach ($d as $ds) {
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
+                $add_rem = User::getAttribute("Additional Remaining", $ds['customer_id']);
+                if ($add_rem != 0) {
+                    $add_cost = User::getAttribute("Additional Cost", $ds['customer_id']);
+                    if (!empty($add_cost)) {
+                        $p['price'] += $add_cost;
+                    }
+                }
                 if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
@@ -116,6 +123,13 @@ foreach ($d as $ds) {
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
+                $add_rem = User::getAttribute("Additional Remaining", $ds['customer_id']);
+                if ($add_rem != 0) {
+                    $add_cost = User::getAttribute("Additional Cost", $ds['customer_id']);
+                    if (!empty($add_cost)) {
+                        $p['price'] += $add_cost;
+                    }
+                }
                 if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
                     if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
