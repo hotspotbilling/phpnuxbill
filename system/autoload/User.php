@@ -47,7 +47,7 @@ class User
                 // installment
                 list($cost, $rem) = explode(":", $v);
                 // :0 installment is done
-                if ($rem != 0) {
+                if (!empty($rem)) {
                     $bills[$k] = $cost;
                     $addcost += $cost;
                 }
