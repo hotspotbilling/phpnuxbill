@@ -54,17 +54,18 @@
                                 <li>Make sure your hosting not blocking port to external</li>
                                 <li>Make sure your Mikrotik accessible from PHPNuxBill</li>
                             </ul>
+                            If you just update PHPNuxBill from upload files, try click Update Database
                         </div>
                         <div class="box-footer">
                             <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                <a href="./update.php?step=4" class="btn btn-info btn-sm btn-block">Update Database</a>
-                                <a href="{$_url}community#update" class="btn btn-success btn-sm btn-block">Update
+                                <a href="./update.php?step=4" style="color: black;" class="btn btn-info btn-sm btn-block">Update Database</a>
+                                <a href="{$_url}community#update" style="color: black;" class="btn btn-success btn-sm btn-block">Update
                                     PHPNuxBill</a>
                             </div>
                             <br>
                             <div class="btn-group btn-group-justified" role="group" aria-label="...">
                             <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
-                            class="btn btn-success btn-sm btn-block">Ask Github Community</a>
+                            class="btn btn-success btn-sm btn-block" style="color: black;">Ask Github Community</a>
                                 <a href="https://t.me/phpnuxbill" target="_blank"
                                     class="btn btn-primary btn-sm btn-block">Ask Telegram Community</a>
                             </div>

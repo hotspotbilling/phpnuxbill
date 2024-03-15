@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.3.15
+
+- Fix Customer View to list active Plan
+- Additional Bill using Customer Attributes
+
 ## 2024.3.14
 
 - Add Note to Invoices
