@@ -115,14 +115,7 @@ switch ($action) {
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
             $plan = ORM::for_table('tbl_plans')->find_one($planId);
-            $add_cost = 0;
-            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-            if($add_rem != 0){
-                $add_cost = User::getAttribute("Additional Cost", $id_customer);
-                if (empty($add_cost)) {
-                    $add_cost = 0;
-                }
-            }
+            list($bills, $add_cost) = User::getBills($id_customer);
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
@@ -139,10 +132,8 @@ switch ($action) {
                 $zero = 1;
                 $gateway = 'Recharge Zero';
             }
-            $bills = User::getAttributes("Bill", $id_customer);
             $ui->assign('bills', $bills);
             $ui->assign('add_cost', $add_cost);
-            $ui->assign('add_rem', $add_rem);
             $ui->assign('cust', $cust);
             $ui->assign('gateway', $gateway);
             $ui->assign('channel', $channel);
@@ -173,14 +164,7 @@ switch ($action) {
             $gateway = 'Recharge';
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
-            $add_cost = 0;
-            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-            if($add_rem != 0){
-                $add_cost = User::getAttribute("Additional Cost", $id_customer);
-                if (empty($add_cost)) {
-                    $add_cost = 0;
-                }
-            }
+            list($bills, $add_cost) = User::getBills($id_customer);
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 $plan = ORM::for_table('tbl_plans')->find_one($planId);
                 if (!$cust) {

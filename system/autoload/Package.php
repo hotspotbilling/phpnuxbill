@@ -32,28 +32,20 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
-        // Additional cost
         $add_cost = 0;
-        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-        // if empty then it doesnt have cycle, if zero then it finish
-        if ($add_rem != 0) {
-            $add_cost = User::getAttribute("Additional Cost", $id_customer);
-            if (empty($add_cost)) {
-                $add_cost = 0;
-            }
-        }
-        if ($add_cost > 0 && $router_name != 'balance') {
-            $bills = User::getAttributes("Bill", $id_customer);
-            foreach ($bills as $k => $v) {
-                $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
-            }
-        }
-
         // Zero cost recharge
         if (isset($zero) && $zero == 1) {
             $p['price'] = 0;
-            $add_cost = 0;
+        }else{
+            // Additional cost
+            list($bills, $add_cost) = User::getBills($id_customer);
+            if ($add_cost > 0 && $router_name != 'balance') {
+                foreach ($bills as $k => $v) {
+                    $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
+                }
+            }
         }
+
 
         if (!$p['enabled']) {
             if (!isset($admin) || !isset($admin['id']) || empty($admin['id'])) {
@@ -576,8 +568,8 @@ class Package
                     "\nPrice: " . Lang::moneyFormat($p['price']));
             }
         }
-        if ($add_rem > 0) {
-            User::setAttribute('Additional Remaining', ($add_rem - 1), $id_customer);
+        if (count($bills) > 0) {
+            User::billsPaid($bills, $id_customer);
         }
         run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);

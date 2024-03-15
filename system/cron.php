@@ -46,24 +46,23 @@ foreach ($d as $ds) {
                 $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
                 if (!empty($p['pool_expired'])) {
                     Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL ' . $p['pool_expired']);
-                // }if (!empty($p['list_expired'])) {
-                //     $ip = Mikrotik::getIpHotspotUser($client, $ds['username']);
-                //     Mikrotik::addIpToAddressList($client, $ip, $p['list_expired'], $c['username']);
+                    // }if (!empty($p['list_expired'])) {
+                    //     $ip = Mikrotik::getIpHotspotUser($client, $ds['username']);
+                    //     Mikrotik::addIpToAddressList($client, $ip, $p['list_expired'], $c['username']);
                 } else {
                     Mikrotik::removeHotspotUser($client, $c['username']);
                 }
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired']) . "\n";
             //update database user dengan status off
             $u->status = 'off';
             $u->save();
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                $add_rem = User::getAttribute("Additional Remaining", $ds['customer_id']);
-                if ($add_rem != 0) {
-                    $add_cost = User::getAttribute("Additional Cost", $ds['customer_id']);
+                list($bills, $add_cost) = User::getBills($ds['customer_id']);
+                if ($add_cost > 0) {
                     if (!empty($add_cost)) {
                         $p['price'] += $add_cost;
                     }
@@ -116,16 +115,15 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removePpoeActive($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired'])."\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired']) . "\n";
 
             $u->status = 'off';
             $u->save();
 
             // autorenewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
-                $add_rem = User::getAttribute("Additional Remaining", $ds['customer_id']);
-                if ($add_rem != 0) {
-                    $add_cost = User::getAttribute("Additional Cost", $ds['customer_id']);
+                list($bills, $add_cost) = User::getBills($ds['customer_id']);
+                if ($add_cost > 0) {
                     if (!empty($add_cost)) {
                         $p['price'] += $add_cost;
                     }

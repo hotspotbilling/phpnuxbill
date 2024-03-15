@@ -55,7 +55,7 @@
                 </ul>
                 <center><b>{Lang::T('Total')}</b></center>
                 <ul class="list-group list-group-unbordered">
-                    {if $add_rem != 0 and $using neq 'zero' and $add_cost>0}
+                    {if $using neq 'zero' and $add_cost>0}
                         {foreach $bills as $k => $v}
                             <li class="list-group-item">
                                 <b>{$k}</b> <span class="pull-right">{Lang::moneyFormat($v)}</span>
@@ -65,11 +65,6 @@
                             <b>{Lang::T('Additional Cost')}</b> <span
                                 class="pull-right">{Lang::moneyFormat($add_cost)}</span>
                         </li>
-                        {if $add_rem != ''}
-                            <li class="list-group-item">
-                                <b>{Lang::T('Remaining')}</b> <span class="pull-right">{$add_rem}</span>
-                            </li>
-                        {/if}
                         <li class="list-group-item">
                             <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')} +{Lang::T('Additional Cost')})</small><span class="pull-right"
                                 style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price']+$add_cost)}</span>

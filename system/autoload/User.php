@@ -26,6 +26,60 @@ class User
         return 0;
     }
 
+    public static function getBills($id = 0)
+    {
+        if (!$id) {
+            $id = User::getID();
+            if (!$id) {
+                return [];
+            }
+        }
+        $addcost = 0;
+        $bills = [];
+        $attrs = User::getAttributes('Bill', $id);
+        foreach ($attrs as $k => $v) {
+            // if has : then its an installment
+            if (strpos($v, ":") === false) {
+                // Not installment
+                $bills[$k] = $v;
+                $addcost += $v;
+            } else {
+                // installment
+                list($cost, $rem) = explode(":", $v);
+                // :0 installment is done
+                if ($rem != 0) {
+                    $bills[$k] = $cost;
+                    $addcost += $cost;
+                }
+            }
+        }
+        return [$bills, $addcost];
+    }
+
+    public static function billsPaid($bills, $id = 0)
+    {
+        if (!$id) {
+            $id = User::getID();
+            if (!$id) {
+                return [];
+            }
+        }
+        foreach ($bills as $k => $v) {
+            // if has : then its an installment
+            $v = User::getAttribute($k, $id);
+            if (strpos($v, ":") === false) {
+                // Not installment, no need decrement
+            } else {
+                // installment
+                list($cost, $rem) = explode(":", $v);
+                // :0 installment is done
+                if ($rem != 0) {
+                    User::setAttribute($k, "$cost:".($rem - 1), $id);
+                }
+            }
+        }
+    }
+
     public static function setAttribute($name, $value, $id = 0)
     {
         if (!$id) {
@@ -35,7 +89,7 @@ class User
             }
         }
         $f = ORM::for_table('tbl_customers_fields')->where('field_name', $name)->where('customer_id', $id)->find_one();
-        if(!$f){
+        if (!$f) {
             $f = ORM::for_table('tbl_customers_fields')->create();
             $f->customer_id = $id;
             $f->field_name = $name;
@@ -45,7 +99,7 @@ class User
             if ($result) {
                 return $result;
             }
-        }else{
+        } else {
             $f->field_value = $value;
             $f->save();
             return $f['id'];

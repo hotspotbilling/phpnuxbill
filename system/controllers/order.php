@@ -131,18 +131,8 @@ switch ($action) {
         $router = Mikrotik::info($trx['routers']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
         $bandw = ORM::for_table('tbl_bandwidth')->find_one($plan['id_bw']);
-
-        $add_cost = 0;
-        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-        if ($add_rem != 0) {
-            $add_cost = User::getAttribute("Additional Cost", $id_customer);
-            if (empty($add_cost)) {
-                $add_cost = 0;
-            }else{
-                $bills = User::getAttributes("Bill", $id_customer);
-                $ui->assign('bills', $bills);
-            }
-        }
+        list($bills, $add_cost) = User::getBills($id_customer);
+        $ui->assign('bills', $bills);
         $ui->assign('add_cost', $add_cost);
         $ui->assign('trx', $trx);
         $ui->assign('router', $router);
@@ -167,14 +157,7 @@ switch ($action) {
         } else {
             $router_name = $plan['routers'];
         }
-        $add_cost = 0;
-        $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-        if ($add_rem != 0) {
-            $add_cost = User::getAttribute("Additional Cost", $id_customer);
-            if (empty($add_cost)) {
-                $add_cost = 0;
-            }
-        }
+        list($bills, $add_cost) = User::getBills($id_customer);
         if ($plan && $plan['enabled'] && $user['balance'] >= $plan['price']) {
             if (Package::rechargeUser($user['id'], $router_name, $plan['id'], 'Customer', 'Balance')) {
                 // if success, then get the balance
@@ -210,15 +193,11 @@ switch ($action) {
         }
         if (isset($_POST['send']) && $_POST['send'] == 'plan') {
             $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
-            $add_rem = User::getAttribute("Additional Remaining", $target['id']);
-            if ($add_rem != 0) {
-                $add_cost = User::getAttribute("Additional Cost", $target['id']);
-                if (!empty($add_cost)) {
-                    $bills = User::getAttributes("Bill", $target['id']);
-                    $ui->assign('bills', $bills);
-                    $ui->assign('add_cost', $add_cost);
-                    $plan['price'] += $add_cost;
-                }
+            list($bills, $add_cost) = User::getBills($target['id']);
+            if (!empty($add_cost)) {
+                $ui->assign('bills', $bills);
+                $ui->assign('add_cost', $add_cost);
+                $plan['price'] += $add_cost;
             }
             if (!$target) {
                 r2(U . 'home', 'd', Lang::T('Username not found'));
@@ -363,13 +342,7 @@ switch ($action) {
         }
         $add_cost = 0;
         if ($router['name'] != 'balance') {
-            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-            if ($add_rem != 0) {
-                $add_cost = User::getAttribute("Additional Cost", $id_customer);
-                if (empty($add_cost)) {
-                    $add_cost = 0;
-                }
-            }
+            list($bills, $add_cost) = User::getBills($id_customer);
         }
         if (empty($id)) {
             $d = ORM::for_table('tbl_payment_gateway')->create();

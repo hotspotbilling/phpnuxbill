@@ -97,20 +97,14 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id_customer  = $routes['2'];
-        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
+        $plan_id  = $routes['3'];
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
             $gateway = 'Recharge';
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
             $plan = ORM::for_table('tbl_plans')->find_one($b['plan_id']);
-            $add_cost = 0;
-            $add_rem = User::getAttribute("Additional Remaining", $id_customer);
-            if($add_rem != 0){
-                $add_cost = User::getAttribute("Additional Cost", $id_customer);
-                if (empty($add_cost)) {
-                    $add_cost = 0;
-                }
-            }
+            list($bills, $add_cost) = User::getBills($id_customer);
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
                     r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
@@ -127,10 +121,8 @@ switch ($action) {
                 $zero = 1;
                 $gateway = 'Recharge Zero';
             }
-            $bills = User::getAttributes("Bill", $id_customer);
             $ui->assign('bills', $bills);
             $ui->assign('add_cost', $add_cost);
-            $ui->assign('add_rem', $add_rem);
             $ui->assign('cust', $cust);
             $ui->assign('gateway', $gateway);
             $ui->assign('channel', $channel);
@@ -138,16 +130,19 @@ switch ($action) {
             $ui->assign('using', 'cash');
             $ui->assign('plan', $plan);
             $ui->display('recharge-confirm.tpl');
+        }else{
+            r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
         }
-        r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
+        break;
     case 'deactivate':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id_customer  = $routes['2'];
-        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->find_one();
+        $plan_id  = $routes['3'];
+        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
-            $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
+            $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
             if ($p) {
                 if ($p['is_radius']) {
                     Radius::customerDeactivate($b['username']);
@@ -175,27 +170,28 @@ switch ($action) {
         break;
     case 'sync':
         $id_customer  = $routes['2'];
-        $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->find_one();
-        if ($b) {
-            $c = ORM::for_table('tbl_customers')->find_one($id_customer);
-            $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
-            if ($p) {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, $p['expiration'] . ' ' . $p['time']);
-                    r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Radius');
-                } else {
-                    $mikrotik = Mikrotik::info($b['routers']);
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    if ($b['type'] == 'Hotspot') {
-                        Mikrotik::addHotspotUser($client, $p, $c);
-                    } else if ($b['type'] == 'PPPOE') {
-                        Mikrotik::addPpoeUser($client, $p, $c);
+        $bs = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->findMany();
+        if ($bs) {
+            $routers = [];
+            foreach ($bs as $b) {
+                $c = ORM::for_table('tbl_customers')->find_one($id_customer);
+                $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
+                if ($p) {
+                    $routers[] = $b['routers'];
+                    if ($p['is_radius']) {
+                        Radius::customerAddPlan($c, $p, $p['expiration'] . ' ' . $p['time']);
+                    } else {
+                        $mikrotik = Mikrotik::info($b['routers']);
+                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        if ($b['type'] == 'Hotspot') {
+                            Mikrotik::addHotspotUser($client, $p, $c);
+                        } else if ($b['type'] == 'PPPOE') {
+                            Mikrotik::addPpoeUser($client, $p, $c);
+                        }
                     }
-                    r2(U . 'customers/view/' . $id_customer, 's', 'Success sync customer to Mikrotik');
                 }
-            } else {
-                r2(U . 'customers/view/' . $id_customer, 'e', 'Customer plan is inactive');
             }
+            r2(U . 'customers/view/' . $id_customer, 's', 'Sync success to '.implode(", ",$routers));
         }
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
         break;
