@@ -33,6 +33,7 @@ class Package
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
         $add_cost = 0;
+        $bills = [];
         // Zero cost recharge
         if (isset($zero) && $zero == 1) {
             $p['price'] = 0;
@@ -568,7 +569,7 @@ class Package
                     "\nPrice: " . Lang::moneyFormat($p['price']));
             }
         }
-        if (count($bills) > 0) {
+        if (is_array($bills) && count($bills) > 0) {
             User::billsPaid($bills, $id_customer);
         }
         run_hook("recharge_user_finish");
