@@ -41,7 +41,7 @@
             <div class="icon">
                 <i class="ion ion-person"></i>
             </div>
-            <a href="{$_url}prepaid/list" class="small-box-footer">{Lang::T('View All')} <i
+            <a href="{$_url}plan/list" class="small-box-footer">{Lang::T('View All')} <i
                     class="fa fa-arrow-circle-right"></i></a>
         </div>
     </div>

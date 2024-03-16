@@ -6,7 +6,7 @@
             <div class="panel-heading">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}prepaid/sync"
+                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}plan/sync"
                             onclick="return confirm('This will sync/send Caustomer active plan to Mikrotik?')"><span
                                 class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                     </div>
@@ -21,7 +21,7 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-                        <form id="site-search" method="post" action="{$_url}prepaid/list/">
+                        <form id="site-search" method="post" action="{$_url}plan/list/">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -35,7 +35,7 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}prepaid/recharge" class="btn btn-primary btn-block"><i
+                        <a href="{$_url}plan/recharge" class="btn btn-primary btn-block"><i
                                 class="ion ion-android-add"> </i> {Lang::T('Recharge Account')}</a>
                     </div>&nbsp;
                 </div>
@@ -64,10 +64,10 @@
                                     <td>{$ds['method']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td>
-                                        <a href="{$_url}prepaid/edit/{$ds['id']}"
+                                        <a href="{$_url}plan/edit/{$ds['id']}"
                                             class="btn btn-warning btn-xs">{Lang::T('Edit')}</a>
                                         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                                            <a href="{$_url}prepaid/delete/{$ds['id']}" id="{$ds['id']}"
+                                            <a href="{$_url}plan/delete/{$ds['id']}" id="{$ds['id']}"
                                                 onclick="return confirm('{Lang::T('Delete')}?')"
                                                 class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}

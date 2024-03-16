@@ -7,7 +7,7 @@
                 <h3 class="panel-title">Edit Plan</h3>
             </div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/edit-post">
+                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/edit-post">
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Select Account')}</label>
@@ -56,7 +56,7 @@
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success"
                                 type="submit">{Lang::T('Edit')}</button>
-                            Or <a href="{$_url}prepaid/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{$_url}plan/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

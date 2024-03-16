@@ -165,7 +165,7 @@
                             </a>
                         </li>
                         {$_MENU_AFTER_CUSTOMERS}
-                        <li class="{if $_system_menu eq 'prepaid'}active{/if} treeview">
+                        <li class="{if $_system_menu eq 'plan'}active{/if} treeview">
                             <a href="#">
                                 <i class="fa fa-ticket"></i> <span>{Lang::T('Services')}</span>
                                 <span class="pull-right-container">
@@ -174,18 +174,18 @@
                             </a>
                             <ul class="treeview-menu">
                                 <li {if $_routes[1] eq 'list'}class="active" {/if}><a
-                                        href="{$_url}prepaid/list">{Lang::T('Active Users')}</a></li>
+                                        href="{$_url}plan/list">{Lang::T('Active Users')}</a></li>
                                 {if $_c['disable_voucher'] != 'yes'}
                                     <li {if $_routes[1] eq 'voucher'}class="active" {/if}><a
-                                            href="{$_url}prepaid/voucher">{Lang::T('Vouchers')}</a></li>
+                                            href="{$_url}plan/voucher">{Lang::T('Vouchers')}</a></li>
                                     <li {if $_routes[1] eq 'refill'}class="active" {/if}><a
-                                            href="{$_url}prepaid/refill">{Lang::T('Refill Customer')}</a></li>
+                                            href="{$_url}plan/refill">{Lang::T('Refill Customer')}</a></li>
                                 {/if}
                                 <li {if $_routes[1] eq 'recharge'}class="active" {/if}><a
-                                        href="{$_url}prepaid/recharge">{Lang::T('Recharge Customer')}</a></li>
+                                        href="{$_url}plan/recharge">{Lang::T('Recharge Customer')}</a></li>
                                 {if $_c['enable_balance'] == 'yes'}
                                     <li {if $_routes[1] eq 'deposit'}class="active" {/if}><a
-                                            href="{$_url}prepaid/deposit">{Lang::T('Refill Balance')}</a></li>
+                                            href="{$_url}plan/deposit">{Lang::T('Refill Balance')}</a></li>
                                 {/if}
                                 {$_MENU_SERVICES}
                             </ul>

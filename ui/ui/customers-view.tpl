@@ -160,7 +160,7 @@
                     </thead>
                     <tbody>
                         {foreach $activation as $ds}
-                            <tr onclick="window.location.href = '{$_url}prepaid/view/{$ds['id']}'" style="cursor:pointer;">
+                            <tr onclick="window.location.href = '{$_url}plan/view/{$ds['id']}'" style="cursor:pointer;">
                                 <td>{$ds['invoice']}</td>
                                 <td>{$ds['username']}</td>
                                 <td>{$ds['plan_name']}</td>

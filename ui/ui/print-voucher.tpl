@@ -60,7 +60,7 @@
 
 <body>
     <page size="A4">
-        <form method="post" action="{$_url}prepaid/print-voucher/" class="no-print">
+        <form method="post" action="{$_url}plan/print-voucher/" class="no-print">
             <table width="100%" border="0" cellspacing="0" cellpadding="1" class="btn btn-default btn-sm">
                 <tr>
                     <td>From ID &gt; <input type="text" name="from_id" style="width:40px" value="{$from_id}"> limit

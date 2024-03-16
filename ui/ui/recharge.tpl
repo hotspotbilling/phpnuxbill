@@ -5,7 +5,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Recharge Account')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/recharge-confirm">
+                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/recharge-confirm">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Select Account')}</label>
                         <div class="col-md-6">

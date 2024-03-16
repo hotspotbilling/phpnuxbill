@@ -7,7 +7,7 @@
             <div class="panel-heading">{Lang::T('Add Vouchers')}</div>
             <div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/voucher-post">
+                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/voucher-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-6">

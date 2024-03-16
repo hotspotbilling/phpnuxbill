@@ -5,16 +5,16 @@
         <div class="panel panel-hovered panel-primary panel-stacked mb30">
             <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
+                <form class="form-horizontal" method="post" action="{$_url}plan/print" target="_blank">
                     <pre id="content"></pre>
                     <textarea class="hidden" id="formcontent" name="content">{$invoice}</textarea>
                     <input type="hidden" name="id" value="{$in['id']}">
-                    <a href="{$_url}prepaid/list" class="btn btn-default btn-sm"><i
+                    <a href="{$_url}plan/list" class="btn btn-default btn-sm"><i
                             class="ion-reply-all"></i>{Lang::T('Finish')}</a>
                     <a href="https://api.whatsapp.com/send/?text={$whatsapp}" target="_blank"
                     class="btn btn-primary btn-sm">
                     <i class="glyphicon glyphicon-share"></i> WhatsApp</a>
-                    <a href="{$_url}prepaid/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
+                    <a href="{$_url}plan/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
                             class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend")}</a>
                         <button type="submit" class="btn btn-info text-black btn-sm"><i class="glyphicon glyphicon-print"></i>
                         Print</button>

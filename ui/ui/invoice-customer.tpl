@@ -5,7 +5,7 @@
         <div class="panel panel-hovered panel-primary panel-stacked mb30">
             <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" action="{$_url}prepaid/print" target="_blank">
+                <form class="form-horizontal" method="post" action="{$_url}plan/print" target="_blank">
                     <pre id="content">{$invoice}</pre>
                     <input type="hidden" name="id" value="{$in['id']}">
                     <a href="{$_url}voucher/list-activated" class="btn btn-default btn-sm"><i

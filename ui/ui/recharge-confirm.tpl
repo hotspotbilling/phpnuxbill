@@ -76,14 +76,14 @@
                         </li>
                     {/if}
                 </ul>
-                <form class="form-horizontal" method="post" role="form" action="{$_url}prepaid/recharge-post">
+                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/recharge-post">
                     <input type="hidden" name="id_customer" value="{$cust['id']}">
                     <input type="hidden" name="plan" value="{$plan['id']}">
                     <input type="hidden" name="server" value="{$server}">
                     <input type="hidden" name="using" value="{$using}">
                     <center>
                         <button class="btn btn-success" type="submit">{Lang::T('Recharge')}</button><br>
-                        <a class="btn btn-link" href="{$_url}prepaid/recharge">{Lang::T('Cancel')}</a>
+                        <a class="btn btn-link" href="{$_url}plan/recharge">{Lang::T('Cancel')}</a>
                     </center>
                 </form>
             </div>

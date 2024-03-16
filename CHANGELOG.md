@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.3.16
+
+- Fix Zero Charging
+- Fix Disconnect Customer from Radius without loop by @Gerandonk
+
 ## 2024.3.15
 
 - Fix Customer View to list active Plan

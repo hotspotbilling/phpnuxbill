@@ -6,7 +6,7 @@
             <div class="panel-heading">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{$_url}prepaid/remove-voucher"
+                        <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{$_url}plan/remove-voucher"
                             onclick="return confirm('Delete all used voucher code?')"><span
                                 class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete All</a>
                     </div>
@@ -16,7 +16,7 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-                        <form id="site-search" method="post" action="{$_url}prepaid/voucher/">
+                        <form id="site-search" method="post" action="{$_url}plan/voucher/">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -32,11 +32,11 @@
                     <div class="col-md-4">
                         <div class="btn-group btn-group-justified" role="group">
                             <div class="btn-group" role="group">
-                                <a href="{$_url}prepaid/add-voucher" class="btn btn-primary btn-block"><i
+                                <a href="{$_url}plan/add-voucher" class="btn btn-primary btn-block"><i
                                         class="ion ion-android-add"> </i> {Lang::T('Add Vouchers')}</a>
                             </div>
                             <div class="btn-group" role="group">
-                                <a href="{$_url}prepaid/print-voucher" target="print_voucher" class="btn btn-info"><i
+                                <a href="{$_url}plan/print-voucher" target="print_voucher" class="btn btn-info"><i
                                         class="ion ion-android-print"> </i> Print</a>
                             </div>
                         </div>
@@ -82,12 +82,12 @@
                                     </td>
                                     <td>
                                         {if $ds['status'] neq '1'}
-                                            <a href="{$_url}prepaid/voucher-view/{$ds['id']}" id="{$ds['id']}"
+                                            <a href="{$_url}plan/voucher-view/{$ds['id']}" id="{$ds['id']}"
                                                 style="margin: 0px;"
                                                 class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
                                         {/if}
                                         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                                            <a href="{$_url}prepaid/voucher-delete/{$ds['id']}" id="{$ds['id']}"
+                                            <a href="{$_url}plan/voucher-delete/{$ds['id']}" id="{$ds['id']}"
                                                 class="btn btn-danger btn-xs"
                                                 onclick="return confirm('{Lang::T('Delete')}?')"><i
                                                     class="glyphicon glyphicon-trash"></i></a>
@@ -101,10 +101,10 @@
 
                 <ul class="pagination pagination-sm">
                     {if $page>0}
-                        <li><a href="{$_url}prepaid/voucher&p={$page-1}&code={$_code}">{Lang::T('Prev')}</a></li>
+                        <li><a href="{$_url}plan/voucher&p={$page-1}&code={$_code}">{Lang::T('Prev')}</a></li>
                     {/if}
                     {if $d}
-                        <li><a href="{$_url}prepaid/voucher&p={$page+1}&code={$_code}">{Lang::T('Next')}</a></li>
+                        <li><a href="{$_url}plan/voucher&p={$page+1}&code={$_code}">{Lang::T('Next')}</a></li>
                     {/if}
                 </ul>
             </div>

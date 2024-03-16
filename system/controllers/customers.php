@@ -107,13 +107,13 @@ switch ($action) {
             list($bills, $add_cost) = User::getBills($id_customer);
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
-                    r2(U . 'prepaid/recharge', 'e', Lang::T('Customer not found'));
+                    r2(U . 'plan/recharge', 'e', Lang::T('Customer not found'));
                 }
                 if (!$plan) {
-                    r2(U . 'prepaid/recharge', 'e', Lang::T('Plan not found'));
+                    r2(U . 'plan/recharge', 'e', Lang::T('Plan not found'));
                 }
                 if ($cust['balance'] < ($plan['price'] + $add_cost)) {
-                    r2(U . 'prepaid/recharge', 'e', Lang::T('insufficient balance'));
+                    r2(U . 'plan/recharge', 'e', Lang::T('insufficient balance'));
                 }
                 $gateway = 'Recharge Balance';
             }
