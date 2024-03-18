@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.3.18
+
+- Add Broadcasting SMS by @Focuslinkstech
+- Fix Notification with Bills
+
 ## 2024.3.16
 
 - Fix Zero Charging

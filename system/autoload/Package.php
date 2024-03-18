@@ -37,7 +37,7 @@ class Package
         // Zero cost recharge
         if (isset($zero) && $zero == 1) {
             $p['price'] = 0;
-        }else{
+        } else {
             // Additional cost
             list($bills, $add_cost) = User::getBills($id_customer);
             if ($add_cost > 0 && $router_name != 'balance') {
@@ -240,13 +240,13 @@ class Package
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
-					// Postpaid price from field
-					$add_inv = User::getAttribute("Invoice", $id_customer);
-					if (empty ($add_inv) or $add_inv == 0) {
-						$t->price = $p['price'] + $add_cost;
-					} else {
-						$t->price = $add_inv + $add_cost;
-					}
+                    // Postpaid price from field
+                    $add_inv = User::getAttribute("Invoice", $id_customer);
+                    if (empty($add_inv) or $add_inv == 0) {
+                        $t->price = $p['price'] + $add_cost;
+                    } else {
+                        $t->price = $add_inv + $add_cost;
+                    }
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }
@@ -286,7 +286,8 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']));
+                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nNote:\n" . $note);
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
@@ -323,7 +324,7 @@ class Package
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
-					// Postpaid price always zero for first time
+                    // Postpaid price always zero for first time
                     $t->price = 0 + $add_cost;
                 } else {
                     $t->price = $p['price'] + $add_cost;
@@ -350,12 +351,12 @@ class Package
                         $fl = ORM::for_table('tbl_customers_fields')->create();
                         $fl->customer_id = $c['id'];
                         $fl->field_name = 'Invoice';
-						// Calculating Price
-						$sd = new DateTime("$date_only");
-						$ed = new DateTime("$date_exp");
-						$td = $ed->diff($sd);
-						$fd = $td->format("%a");
-						$gi = ($p['price'] / 30) * $fd;
+                        // Calculating Price
+                        $sd = new DateTime("$date_only");
+                        $ed = new DateTime("$date_exp");
+                        $td = $ed->diff($sd);
+                        $fd = $td->format("%a");
+                        $gi = ($p['price'] / 30) * $fd;
                         if ($gi > $p['price']) {
                             $fl->field_value = $p['price'];
                         } else {
@@ -373,7 +374,8 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']));
+                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nNote:\n" . $note);
             }
         } else {
 
@@ -434,13 +436,13 @@ class Package
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
-					// Postpaid price from field
-					$add_inv = User::getAttribute("Invoice", $id_customer);
-					if (empty ($add_inv) or $add_inv == 0) {
-						$t->price = $p['price'] + $add_cost;
-					} else {
-						$t->price = $add_inv + $add_cost;
-					}
+                    // Postpaid price from field
+                    $add_inv = User::getAttribute("Invoice", $id_customer);
+                    if (empty($add_inv) or $add_inv == 0) {
+                        $t->price = $p['price'] + $add_cost;
+                    } else {
+                        $t->price = $add_inv + $add_cost;
+                    }
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }
@@ -479,7 +481,8 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']));
+                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nNote:\n" . $note);
             } else {
                 if ($p['is_radius']) {
                     Radius::customerAddPlan($c, $p, "$date_exp $time");
@@ -516,7 +519,7 @@ class Package
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
-					// Postpaid price always zero for first time
+                    // Postpaid price always zero for first time
                     $t->price = 0 + $add_cost;
                 } else {
                     $t->price = $p['price'] + $add_cost;
@@ -543,12 +546,12 @@ class Package
                         $fl = ORM::for_table('tbl_customers_fields')->create();
                         $fl->customer_id = $c['id'];
                         $fl->field_name = 'Invoice';
-						// Calculating Price
-						$sd = new DateTime("$date_only");
-						$ed = new DateTime("$date_exp");
-						$td = $ed->diff($sd);
-						$fd = $td->format("%a");
-						$gi = ($p['price'] / 30) * $fd;
+                        // Calculating Price
+                        $sd = new DateTime("$date_only");
+                        $ed = new DateTime("$date_exp");
+                        $td = $ed->diff($sd);
+                        $fd = $td->format("%a");
+                        $gi = ($p['price'] / 30) * $fd;
                         if ($gi > $p['price']) {
                             $fl->field_value = $p['price'];
                         } else {
@@ -566,7 +569,8 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']));
+                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nNote:\n" . $note);
             }
         }
         if (is_array($bills) && count($bills) > 0) {
@@ -678,9 +682,10 @@ class Package
             $_admin = Admin::_info($in['admin_id']);
             // if admin not deleted
             if ($_admin) $admin = $_admin;
-        }else{
+        } else {
             $admin['fullname'] = 'Customer';
         }
+        $note = '';
         //print
         $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
         $invoice .= Lang::pad($config['address'], ' ', 2) . "\n";
@@ -692,11 +697,26 @@ class Package
         $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
-        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
-        if(!empty($in['note'])){
+        if (!empty($in['note'])) {
+            $in['note'] = str_replace("\r", "", $in['note']);
+            $tmp = explode("\n", $in['note']);
+            foreach ($tmp as $t) {
+                if (strpos($t, " : ") === false) {
+                    if (!empty($t)) {
+                        $note .= "$t\n";
+                    }
+                } else {
+                    $tmp2 = explode(" : ", $t);
+                    $invoice .= Lang::pads($tmp2[0], $tmp2[1], ' ') . "\n";
+                }
+            }
+        }
+        $invoice .= Lang::pads(Lang::T('Total'), Lang::moneyFormat($in['price']), ' ') . "\n";
+        $method = explode("-", $in['method']);
+        $invoice .= Lang::pads($method[0], $method[1], ' ') . "\n";
+        if (!empty($note)) {
             $invoice .= Lang::pad("", '=') . "\n";
-            $invoice .= Lang::pad($in['note'], ' ', 2);
+            $invoice .= Lang::pad($note, ' ', 2) . "\n";
         }
         $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
@@ -720,11 +740,24 @@ class Package
         $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pads(Lang::T('Type'), $in['type'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ') . "\n";
-        $invoice .= Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ') . "\n";
-        $invoice .= Lang::pad($in['method'], ' ', 2) . "\n";
-        if(!empty($in['note'])){
+        if (!empty($in['note'])) {
             $invoice .= Lang::pad("", '=') . "\n";
-            $invoice .= Lang::pad($in['note'], ' ', 2);
+            foreach ($tmp as $t) {
+                if (strpos($t, " : ") === false) {
+                    if (!empty($t)) {
+                        $invoice .= Lang::pad($t, ' ', 2) . "\n";
+                    }
+                } else {
+                    $tmp2 = explode(" : ", $t);
+                    $invoice .= Lang::pads($tmp2[0], $tmp2[1], ' ') . "\n";
+                }
+            }
+        }
+        $invoice .= Lang::pads(Lang::T('Total'), Lang::moneyFormat($in['price']), ' ') . "\n";
+        $invoice .= Lang::pads($method[0], $method[1], ' ') . "\n";
+        if (!empty($note)) {
+            $invoice .= Lang::pad("", '=') . "\n";
+            $invoice .= Lang::pad($note, ' ', 2) . "\n";
         }
         $invoice .= Lang::pad("", '=') . "\n";
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
