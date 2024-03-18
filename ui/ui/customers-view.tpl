@@ -37,6 +37,9 @@
                             onclick="this.select()">
                     </li>
                     {/if}
+                    <li class="list-group-item">
+                        <b>{Lang::T('Coordinates')}</b> <span class="pull-right">{Lang::T($d['coordinates'])}</span>
+                    </li>
                     <!--Customers Attributes view start -->
                     {if $customFields}
                     {foreach $customFields as $customField}
@@ -74,16 +77,13 @@
                 </ul>
                 <div class="row">
                     <div class="col-xs-4">
-                        <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block">{Lang::T('Back')}</a>
+                        <a href="{$_url}customers/delete/{$d['id']}" id="{$d['id']}"
+                            class="btn btn-danger btn-block btn-sm"
+                            onclick="return confirm('{Lang::T('Delete')}?')"><span class="fa fa-trash"></span></a>
                     </div>
-                    <div class="col-xs-4">
-                        <a href="{$_url}customers/sync/{$d['id']}"
-                            onclick="return confirm('This will sync Customer to Mikrotik?')"
-                            class="btn btn-info btn-sm btn-block">{Lang::T('Sync')}</a>
-                    </div>
-                    <div class="col-xs-4">
-                        <a href="{$_url}message/send/{$d['id']}" class="btn btn-success btn-sm btn-block">{Lang::T('Send
-                            Message')}</a>
+                    <div class="col-xs-8">
+                        <a href="{$_url}customers/edit/{$d['id']}"
+                            class="btn btn-warning btn-sm btn-block">{Lang::T('Edit')}</a>
                     </div>
                 </div>
             </div>

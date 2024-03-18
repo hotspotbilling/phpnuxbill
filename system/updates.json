@@ -78,5 +78,10 @@
     ],
     "2024.3.14" : [
         "ALTER TABLE `tbl_transactions` ADD `note` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'for note' AFTER `type`;"
+    ],
+    "2024.3.19" : [
+        "ALTER TABLE `tbl_customers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '6.465422, 3.406448' COMMENT 'Latitude and Longitude coordinates' AFTER `email`;"
     ]
+    
+   
 }

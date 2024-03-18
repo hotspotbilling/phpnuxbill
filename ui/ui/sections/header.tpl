@@ -234,6 +234,20 @@
                         </ul>
                     </li>
                     {$_MENU_AFTER_REPORTS}
+                    <li class="{if $_system_menu eq 'map'}active{/if} treeview">
+                        <a href="#">
+                            <i class="ion ion-ios-location"></i> <span>{Lang::T('Map')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[1] eq 'customer' }class="active" {/if}><a
+                                    href="{$_url}map/customer">{Lang::T('Customer Location')}</a></li>
+                            {$_MENU_MAP}
+                        </ul>
+                    </li>
+                    {$_MENU_AFTER_MAP}
                     <li class="{if $_system_menu eq 'message'}active{/if} treeview">
                         <a href="#">
                             <i class="ion ion-android-chat"></i> <span>{Lang::T('Send Message')}</span>
