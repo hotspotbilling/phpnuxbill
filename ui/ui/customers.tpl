@@ -18,7 +18,7 @@
                     <div class="col-md-8">
                         <form id="site-search" method="post" action="{$_url}customers/list/">
                             <div class="input-group">
-                                <input type="text" name="search" value="{$search}" class="form-control"
+                                <input type="text" id="search-input" name="search" value="{$search}" class="form-control"
                                     placeholder="{Lang::T('Search')}...">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit"><span
@@ -79,4 +79,25 @@
     </div>
 </div>
 
+<script>
+    // Functionality to filter table rows based on admin input
+    document.addEventListener('DOMContentLoaded', function () {
+            var searchInput = document.getElementById('search-input');
+            var tableRows = document.querySelectorAll('tbody tr');
+
+            searchInput.addEventListener('input', function () {
+                var searchText = this.value.toLowerCase();
+
+                tableRows.forEach(function (row) {
+                    var rowData = row.textContent.toLowerCase();
+
+                    if (rowData.includes(searchText)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+</script>
 {include file="sections/footer.tpl"}
