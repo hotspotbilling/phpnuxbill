@@ -38,13 +38,13 @@
 						<p class="help-block col-md-4">
 							{Lang::T('Use placeholders:')}
 							<br>
-							<b>{Lang::T('[[name]]')}</b> - {Lang::T('Customer Name')}
+							<b>[[name]]</b> - {Lang::T('Customer Name')}
 							<br>
-							<b>{Lang::T('[[user_name]]')}</b> - {Lang::T('Customer Username')}
+							<b>[[user_name]]</b> - {Lang::T('Customer Username')}
 							<br>
-							<b>{Lang::T('[[phone]]')}</b> - {Lang::T('Customer Phone')}
+							<b>[[phone]]</b> - {Lang::T('Customer Phone')}
 							<br>
-							<b>{Lang::T('[[company_name]]')}</b> - {Lang::T('Your Company Name')}
+							<b>[[company_name]]</b> - {Lang::T('Your Company Name')}
 						</p>
 					</div>
 
