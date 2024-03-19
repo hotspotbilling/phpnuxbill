@@ -45,6 +45,7 @@
                             <tr>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Plan Type')}</th>
                                 <th>{Lang::T('Type')}</th>
                                 <th>{Lang::T('Created On')}</th>
                                 <th>{Lang::T('Expires On')}</th>
@@ -59,6 +60,7 @@
                                     <td><a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a></td>
                                     <td>{$ds['namebp']}</td>
                                     <td>{$ds['type']}</td>
+                                     <td>{$ds['plan_type']}</td>
                                     <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
                                     <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
                                     <td>{$ds['method']}</td>

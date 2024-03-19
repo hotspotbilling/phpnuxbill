@@ -39,3 +39,4 @@ system/lan/**
 !system/lan/turkish.json
 !system/lan/english.json
 !system/lan/country.json
+*.zip

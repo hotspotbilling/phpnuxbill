@@ -26,8 +26,10 @@ CREATE TABLE `tbl_customers` (
   `address` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `phonenumber` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0',
   `email` varchar(128) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1',
+  `coordinates` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates',
   `balance` decimal(15,2) NOT NULL DEFAULT '0.00' COMMENT 'For Money Deposit',
   `service_type` ENUM('Hotspot','PPPoE','Others') DEFAULT 'Others' COMMENT 'For selecting user type',
+  `account_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type',
   `auto_renewal` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Auto renewall using balance',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `last_login` datetime DEFAULT NULL
@@ -79,26 +81,27 @@ CREATE TABLE `tbl_payment_gateway` (
 
 DROP TABLE IF EXISTS `tbl_plans`;
 CREATE TABLE `tbl_plans` (
-  `id` int(10) NOT NULL,
-  `name_plan` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `id_bw` int(10) NOT NULL,
-  `price` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `type` enum('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `typebp` enum('Unlimited','Limited') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `limit_type` enum('Time_Limit','Data_Limit','Both_Limit') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `time_limit` int(10) UNSIGNED DEFAULT NULL,
-  `time_unit` enum('Mins','Hrs') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `data_limit` int(10) UNSIGNED DEFAULT NULL,
-  `data_unit` enum('MB','GB') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `validity` int(10) NOT NULL,
-  `validity_unit` enum('Mins','Hrs','Days','Months','Period') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `shared_users` int(10) DEFAULT NULL,
-  `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `is_radius` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 is radius',
-  `pool` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `pool_expired` varchar(40) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
-  `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled\r\n',
-  `allow_purchase` enum('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page'
+    `id` int(10) NOT NULL,
+    `name_plan` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    `id_bw` int(10) NOT NULL,
+    `price` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    `type` enum('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    `typebp` enum('Unlimited','Limited') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `limit_type` enum('Time_Limit','Data_Limit','Both_Limit') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `time_limit` int(10) UNSIGNED DEFAULT NULL,
+    `time_unit` enum('Mins','Hrs') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `data_limit` int(10) UNSIGNED DEFAULT NULL,
+    `data_unit` enum('MB','GB') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `validity` int(10) NOT NULL,
+    `validity_unit` enum('Mins','Hrs','Days','Months','Period') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    `shared_users` int(10) DEFAULT NULL,
+    `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    `is_radius` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 is radius',
+    `pool` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+    `pool_expired` varchar(40) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+    `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled',
+    `allow_purchase` enum('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page',
+    `plan_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For switching plan according to user type'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `tbl_pool`;

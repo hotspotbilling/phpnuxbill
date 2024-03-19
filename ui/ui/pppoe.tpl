@@ -36,6 +36,7 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Plan Name')}</th>
+                                  <th>{Lang::T('Plan Type')}</th>
                                 <th>{Lang::T('Bandwidth Plans')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
                                 <th>{Lang::T('Plan Validity')}</th>
@@ -51,6 +52,7 @@
                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled"
                                     {elseif $ds['prepaid'] != 'yes'}class="warning" title="Postpaid" {/if}>
                                     <td>{$ds['name_plan']}</td>
+                                     <td>{$ds['plan_type']}</td>
                                     <td>{$ds['name_bw']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>

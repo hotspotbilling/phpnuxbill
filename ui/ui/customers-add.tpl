@@ -11,10 +11,10 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                <span class="input-group-addon" id="basic-addon1">+</span>
                                 {else}
-                                    <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-phone-alt"></i></span>
+                                <span class="input-group-addon" id="basic-addon1"><i
+                                        class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="username" required
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
@@ -38,10 +38,10 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                <span class="input-group-addon" id="basic-addon1">+</span>
                                 {else}
-                                    <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-phone-alt"></i></span>
+                                <span class="input-group-addon" id="basic-addon1"><i
+                                        class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="phonenumber"
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
@@ -51,8 +51,9 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Password')}</label>
                         <div class="col-md-9">
-                            <input type="password" class="form-control" autocomplete="off" required id="password" value="{rand(000000,999999)}"
-                                name="password" onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
+                            <input type="password" class="form-control" autocomplete="off" required id="password"
+                                value="{rand(000000,999999)}" name="password" onmouseleave="this.type = 'password'"
+                                onmouseenter="this.type = 'text'">
                         </div>
                     </div>
                     <div class="form-group">
@@ -73,6 +74,17 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Coordinates')}</label>
+                        <div class="col-md-9">
+                            <input name="coordinates" id="coordinates" class="form-control" value=""
+                                placeholder="6.465422, 3.406448">
+                            <span class="help-block">
+                                <small>{Lang::T('Latitude and Longitude coordinates for map must be separate with comma
+                                    ","')}</small>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Service Type')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="service_type" name="service_type">
@@ -81,6 +93,16 @@
                                 <option value="PPPoE" {if $d['service_type'] eq 'PPPoE' }selected{/if}>PPPoE</option>
                                 <option value="Others" {if $d['service_type'] eq 'Others' }selected{/if}>Others</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
+                        <div class="col-md-9">
+                            <select class="form-control" id="service_type" name="service_type">
+                                <option value="Personal" {if $d['account_type'] eq 'Personal' }selected{/if}>Personal
+                                </option>
+                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>Business</option>
+                             </select>
                         </div>
                     </div>
                 </div>
@@ -110,16 +132,16 @@
     </center>
 </form>
 {literal}
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            var customFieldsContainer = document.getElementById('custom-fields-container');
-            var addCustomFieldButton = document.getElementById('add-custom-field');
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        var customFieldsContainer = document.getElementById('custom-fields-container');
+        var addCustomFieldButton = document.getElementById('add-custom-field');
 
-            addCustomFieldButton.addEventListener('click', function() {
-                var fieldIndex = customFieldsContainer.children.length;
-                var newField = document.createElement('div');
-                newField.className = 'form-group';
-                newField.innerHTML = `
+        addCustomFieldButton.addEventListener('click', function () {
+            var fieldIndex = customFieldsContainer.children.length;
+            var newField = document.createElement('div');
+            newField.className = 'form-group';
+            newField.innerHTML = `
                 <div class="col-md-4">
                     <input type="text" class="form-control" name="custom_field_name[]" placeholder="Name">
                 </div>
@@ -130,17 +152,17 @@
                     <button type="button" class="remove-custom-field btn btn-danger btn-sm">-</button>
                 </div>
             `;
-                customFieldsContainer.appendChild(newField);
-            });
-
-            customFieldsContainer.addEventListener('click', function(event) {
-                if (event.target.classList.contains('remove-custom-field')) {
-                    var fieldContainer = event.target.parentNode.parentNode;
-                    fieldContainer.parentNode.removeChild(fieldContainer);
-                }
-            });
+            customFieldsContainer.appendChild(newField);
         });
-    </script>
+
+        customFieldsContainer.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-custom-field')) {
+                var fieldContainer = event.target.parentNode.parentNode;
+                fieldContainer.parentNode.removeChild(fieldContainer);
+            }
+        });
+    });
+</script>
 {/literal}
 
 

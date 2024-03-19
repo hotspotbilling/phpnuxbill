@@ -22,6 +22,17 @@
                             <input type="radio" name="prepaid" onclick="postPaid()" value="no" {if $d['prepaid'] == no}checked{/if}> Postpaid
                         </div>
                     </div>
+                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}</label>
+                        <div class="col-md-10">
+                            <input type="radio" name="plan_type"   value="Personal"
+                                {if $d['plan_type'] == 'Personal'}checked{/if}>
+                            Personal
+                            <input type="radio" name="plan_type"   value="Business"
+                                {if $d['plan_type'] == 'Business'}checked{/if}> Business
+                        </div>
+                    </div>
+                    
                     {if $_c['radius_enable'] and $d['is_radius']}
                         <div class="form-group">
                             <label class="col-md-2 control-label">Radius</label>

@@ -512,5 +512,14 @@
     "All_Customers": "All Customers",
     "New_Customers": "New Customers",
     "Expired_Customers": "Expired Customers",
-    "Active_Customers": "Active Customers"
+    "Active_Customers": "Active Customers",
+    "Map": "Map",
+    "Customer_Location": "Customer Location",
+    "Account_Type": "Account Type",
+    "Coordinates": "Coordinates",
+    "Latitude_and_Longitude_coordinates_for_map_must_be_separate_with_comma____": "Latitude and Longitude coordinates for map must be separate with comma &quot;,&quot;",
+    "6_465422__3_406448": "6.465422, 3.406448",
+    "Customer_Geo_Location_Information": "Customer Geo Location Information",
+    "List": "List",
+    "Lists": "Lists"
 }

@@ -14,6 +14,8 @@
                             <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> Disable
                         </div>
                     </div>
+ 
+
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-10">
@@ -24,6 +26,19 @@
                                 {if $d['prepaid'] == no}checked{/if}> Postpaid
                         </div>
                     </div>
+
+                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}</label>
+                        <div class="col-md-10">
+                            <input type="radio" name="plan_type"   value="Personal"
+                                {if $d['plan_type'] == 'Personal'}checked{/if}>
+                            Personal
+                            <input type="radio" name="plan_type"   value="Business"
+                                {if $d['plan_type'] == 'Business'}checked{/if}> Business
+                        </div>
+                    </div>
+
+
                     {if $_c['radius_enable'] and $d['is_radius']}
                         <div class="form-group">
                             <label class="col-md-2 control-label">Radius</label>

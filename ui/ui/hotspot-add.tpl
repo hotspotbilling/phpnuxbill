@@ -20,6 +20,14 @@
                             <input type="radio" name="prepaid" onclick="postPaid()" value="no"> Postpaid
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}</label>
+                        <div class="col-md-10">
+                            <input type="radio" name="plan_type"  value="Personal" checked> Personal
+                            <input type="radio" name="plan_type"   value="Business"> Business
+                        </div>
+                    </div>
                     {if $_c['radius_enable']}
                         <div class="form-group">
                             <label class="col-md-2 control-label">Radius</label>
