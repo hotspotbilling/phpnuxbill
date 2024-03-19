@@ -84,5 +84,8 @@
     ],
     "2024.3.19.1" : [
         "ALTER TABLE `tbl_customers` ADD `account_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' AFTER `coordinates`;"
+    ],
+    "2024.3.19.2" : [
+        "ALTER TABLE `tbl_plans` ADD `plan_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' ;"
     ]
 }
