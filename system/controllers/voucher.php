@@ -62,6 +62,7 @@ switch ($action) {
         }else{
             r2(U . 'voucher/list-activated', 'e', Lang::T('Not Found'));
         }
+        break;
     default:
         $ui->display('a404.tpl');
 }

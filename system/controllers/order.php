@@ -297,6 +297,7 @@ switch ($action) {
                 $_POST['gateway'] = $pgs[0];
             }
         }
+        break;
     case 'buy':
         $gateway = _post('gateway');
         if (empty($gateway) && !empty($_SESSION['gateway'])) {
