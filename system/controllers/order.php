@@ -47,8 +47,11 @@ switch ($action) {
         }
         $ui->assign('_title', 'Order Plan');
         $ui->assign('_system_menu', 'package');
+        $account_type = $user['account_type'];
+        if(empty($account_type)){
+            $account_type = 'Personal';
+        }
         if (!empty ($_SESSION['nux-router'])) {
-            $account_type = $user['account_type'];
             if ($_SESSION['nux-router'] == 'radius') {
                 $radius_pppoe = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->where('prepaid', 'yes')->find_many();
                 $radius_hotspot = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->where('prepaid', 'yes')->find_many();
@@ -298,7 +301,6 @@ switch ($action) {
                 $_POST['gateway'] = $pgs[0];
             }
         }
-        break;
     case 'buy':
         $gateway = _post('gateway');
         if (empty ($gateway) && !empty ($_SESSION['gateway'])) {
