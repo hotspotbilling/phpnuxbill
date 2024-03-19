@@ -88,20 +88,20 @@
                         <label class="col-md-3 control-label">{Lang::T('Service Type')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="service_type" name="service_type">
-                                <option value="Hotspot" {if $d['service_type'] eq 'Hotspot' }selected{/if}>Hotspot
+                                <option value="Hotspot">Hotspot
                                 </option>
-                                <option value="PPPoE" {if $d['service_type'] eq 'PPPoE' }selected{/if}>PPPoE</option>
-                                <option value="Others" {if $d['service_type'] eq 'Others' }selected{/if}>Others</option>
+                                <option value="PPPoE">PPPoE</option>
+                                <option value="Others">Others</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
                         <div class="col-md-9">
-                            <select class="form-control" id="service_type" name="service_type">
-                                <option value="Personal" {if $d['account_type'] eq 'Personal' }selected{/if}>Personal
+                            <select class="form-control" id="account_type" name="account_type">
+                                <option value="Personal">Personal
                                 </option>
-                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>Business</option>
+                                <option value="Business">Business</option>
                              </select>
                         </div>
                     </div>
