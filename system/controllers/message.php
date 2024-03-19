@@ -144,15 +144,18 @@ EOT;
 
             // Loop through customers and send messages
             foreach ($customers as $customer) {
+                // Create a copy of the original message for each customer and save it as currentMessage
+                $currentMessage = $message;
+
                 // Replace placeholders in the message with actual values for each customer
-                $message = str_replace('[[name]]', $customer['fullname'], $message);
-                $message = str_replace('[[user_name]]', $customer['username'], $message);
-                $message = str_replace('[[phone]]', $customer['phonenumber'], $message);
-                $message = str_replace('[[company_name]]', $config['CompanyName'], $message);
+                $currentMessage = str_replace('[[name]]', $customer['fullname'], $currentMessage);
+                $currentMessage = str_replace('[[user_name]]', $customer['username'], $currentMessage);
+                $currentMessage = str_replace('[[phone]]', $customer['phonenumber'], $currentMessage);
+                $currentMessage = str_replace('[[company_name]]', $config['CompanyName'], $currentMessage);
 
                 // Send the message based on the selected method
                 if ($via == 'sms' || $via == 'both') {
-                    $smsSent = Message::sendSMS($customer['phonenumber'], $message);
+                    $smsSent = Message::sendSMS($customer['phonenumber'], $currentMessage);
                     if ($smsSent) {
                         $successCount++;
                         $successMessages[] = "SMS sent to {$customer['fullname']}: {$customer['phonenumber']}";
@@ -165,7 +168,7 @@ EOT;
                 }
 
                 if ($via == 'wa' || $via == 'both') {
-                    $waSent = Message::sendWhatsapp($customer['phonenumber'], $message);
+                    $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentMessage);
                     if ($waSent) {
                         $successCount++;
                         $successMessages[] = "WhatsApp message sent to {$customer['fullname']}: {$customer['phonenumber']}";
