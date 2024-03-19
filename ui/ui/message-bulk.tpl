@@ -30,7 +30,8 @@
 					<div class="form-group">
 						<label class="col-md-2 control-label">{Lang::T('Message')}</label>
 						<div class="col-md-6">
-							<textarea class="form-control" id="message" name="message" placeholder="{Lang::T('Compose your message...')}" rows="5"></textarea>
+							<textarea class="form-control" id="message" name="message"
+								placeholder="{Lang::T('Compose your message...')}" rows="5"></textarea>
 						</div>
 						<p class="help-block col-md-4">
 							{Lang::T('Use placeholders:')}
@@ -44,7 +45,7 @@
 							<b>[[company_name]]</b> - {Lang::T('Your Company Name')}
 						</p>
 					</div>
-				
+
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-success" type="submit">{Lang::T('Send Message')}</button>
@@ -52,7 +53,7 @@
 						</div>
 					</div>
 				</form>
-				
+
 			</div>
 		</div>
 	</div>

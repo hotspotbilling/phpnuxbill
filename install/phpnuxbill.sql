@@ -26,7 +26,7 @@ CREATE TABLE `tbl_customers` (
   `address` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `phonenumber` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0',
   `email` varchar(128) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1',
-  `coordinates` VARCHAR(50) NOT NULL DEFAULT '6.465422, 3.406448' COMMENT 'Latitude and Longitude coordinates',
+  `coordinates` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates',
   `balance` decimal(15,2) NOT NULL DEFAULT '0.00' COMMENT 'For Money Deposit',
   `service_type` ENUM('Hotspot','PPPoE','Others') DEFAULT 'Others' COMMENT 'For selecting user type',
   `account_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type',

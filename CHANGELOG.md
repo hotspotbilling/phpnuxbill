@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.3.19
+
+- Add Customer Type Personal or Bussiness by @pro-cms
+- Fix Broadcast Message by @Focuslinkstech
+- Add Customer Geolocation by @Focuslinkstech
+- Change Customer Menu
+
 ## 2024.3.18
 
 - Add Broadcasting SMS by @Focuslinkstech
