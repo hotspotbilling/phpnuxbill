@@ -40,8 +40,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 });
 </script>
 EOT;
-        $c = ORM::for_table('tbl_customers')->find_many();
-        $ui->assign('c', $c);
+        if (isset($routes['2']) && !empty($routes['2'])) {
+            $ui->assign('cust', ORM::for_table('tbl_customers')->find_one($routes['2']));
+        }
+        $id = $routes['2'];
+        $ui->assign('id', $id);
         $ui->assign('xfooter', $select2_customer);
         $ui->display('message.tpl');
         break;

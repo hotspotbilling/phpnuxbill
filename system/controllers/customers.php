@@ -130,7 +130,7 @@ switch ($action) {
             $ui->assign('using', 'cash');
             $ui->assign('plan', $plan);
             $ui->display('recharge-confirm.tpl');
-        }else{
+        } else {
             r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
         }
         break;
@@ -191,7 +191,7 @@ switch ($action) {
                     }
                 }
             }
-            r2(U . 'customers/view/' . $id_customer, 's', 'Sync success to '.implode(", ",$routers));
+            r2(U . 'customers/view/' . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
         }
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
         break;
@@ -212,7 +212,7 @@ switch ($action) {
                 ->find_many();
 
             $v  = $routes['3'];
-            if(empty($v)){
+            if (empty($v)) {
                 $v = 'activation';
             }
             if ($v == 'order') {
@@ -328,6 +328,7 @@ switch ($action) {
         $address = _post('address');
         $phonenumber = _post('phonenumber');
         $service_type = _post('service_type');
+        $coordinates = _post('coordinates');
         //post Customers Attributes
         $custom_field_names = (array) $_POST['custom_field_name'];
         $custom_field_values = (array) $_POST['custom_field_value'];
@@ -360,6 +361,7 @@ switch ($action) {
             $d->created_by = $admin['id'];
             $d->phonenumber = Lang::phoneFormat($phonenumber);
             $d->service_type = $service_type;
+            $d->coordinates = $coordinates;
             $d->save();
 
             // Retrieve the customer ID of the newly created customer
@@ -395,6 +397,7 @@ switch ($action) {
         $address = _post('address');
         $phonenumber = Lang::phoneFormat(_post('phonenumber'));
         $service_type = _post('service_type');
+        $coordinates = _post('coordinates');
         run_hook('edit_customer'); #HOOK
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
@@ -454,6 +457,7 @@ switch ($action) {
             $d->address = $address;
             $d->phonenumber = $phonenumber;
             $d->service_type = $service_type;
+            $d->coordinates = $coordinates;
             $d->save();
 
 
