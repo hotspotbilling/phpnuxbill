@@ -55,7 +55,6 @@ foreach ($d as $ds) {
         } else {
                 $price = Lang::moneyFormat($p['price']);
         }
-        //$price = Lang::moneyFormat($p['price']);
         if ($ds['expiration'] == $day7) {
             echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_7_day'), $config['user_notification_reminder']) . "\n";
         } else if ($ds['expiration'] == $day3) {

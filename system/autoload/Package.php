@@ -41,6 +41,7 @@ class Package
             // Additional cost
             list($bills, $add_cost) = User::getBills($id_customer);
             if ($add_cost > 0 && $router_name != 'balance') {
+                $note .= "Plan Price : " . Lang::moneyFormat($p['price']) . "\n";
                 foreach ($bills as $k => $v) {
                     $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
                 }
