@@ -12,10 +12,10 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                <span class="input-group-addon" id="basic-addon1">+</span>
                                 {else}
-                                    <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-phone-alt"></i></span>
+                                <span class="input-group-addon" id="basic-addon1"><i
+                                        class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="username" value="{$d['username']}"
                                     required
@@ -41,10 +41,10 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                <span class="input-group-addon" id="basic-addon1">+</span>
                                 {else}
-                                    <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-phone-alt"></i></span>
+                                <span class="input-group-addon" id="basic-addon1"><i
+                                        class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="phonenumber" value="{$d['phonenumber']}"
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
@@ -78,6 +78,16 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Coordinates')}</label>
+                        <div class="col-md-9">
+                            <input name="coordinates" id="coordinates" class="form-control" value="{$d['coordinates']}">
+                            <span class="help-block">
+                                <small>{Lang::T('Latitude and Longitude coordinates for map must be separate with comma
+                                    ","')}</small>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Service Type')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="service_type" name="service_type">
@@ -108,19 +118,20 @@
                 <div class="panel-body">
                     <!--Customers Attributes edit start -->
                     {if $customFields}
-                        {foreach $customFields as $customField}
-                            <div class="form-group">
-                                <label class="col-md-4 control-label"
-                                    for="{$customField.field_name}">{$customField.field_name}</label>
-                                <div class="col-md-6">
-                                    <input class="form-control" type="text" name="custom_fields[{$customField.field_name}]"
-                                        id="{$customField.field_name}" value="{$customField.field_value}">
-                                </div>
-                                <label class="col-md-2">
-                                <input type="checkbox" name="delete_custom_fields[]" value="{$customField.field_name}"> Delete
-                                </label>
-                            </div>
-                        {/foreach}
+                    {foreach $customFields as $customField}
+                    <div class="form-group">
+                        <label class="col-md-4 control-label"
+                            for="{$customField.field_name}">{$customField.field_name}</label>
+                        <div class="col-md-6">
+                            <input class="form-control" type="text" name="custom_fields[{$customField.field_name}]"
+                                id="{$customField.field_name}" value="{$customField.field_value}">
+                        </div>
+                        <label class="col-md-2">
+                            <input type="checkbox" name="delete_custom_fields[]" value="{$customField.field_name}">
+                            Delete
+                        </label>
+                    </div>
+                    {/foreach}
                     {/if}
                     <!--Customers Attributes edit end -->
                     <!-- Customers Attributes add start -->
@@ -144,16 +155,16 @@
 </form>
 
 {literal}
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            var customFieldsContainer = document.getElementById('custom-fields-container');
-            var addCustomFieldButton = document.getElementById('add-custom-field');
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        var customFieldsContainer = document.getElementById('custom-fields-container');
+        var addCustomFieldButton = document.getElementById('add-custom-field');
 
-            addCustomFieldButton.addEventListener('click', function() {
-                var fieldIndex = customFieldsContainer.children.length;
-                var newField = document.createElement('div');
-                newField.className = 'form-group';
-                newField.innerHTML = `
+        addCustomFieldButton.addEventListener('click', function () {
+            var fieldIndex = customFieldsContainer.children.length;
+            var newField = document.createElement('div');
+            newField.className = 'form-group';
+            newField.innerHTML = `
                 <div class="col-md-4">
                     <input type="text" class="form-control" name="custom_field_name[]" placeholder="Name">
                 </div>
@@ -164,17 +175,17 @@
                     <button type="button" class="remove-custom-field btn btn-danger btn-sm">-</button>
                 </div>
             `;
-                customFieldsContainer.appendChild(newField);
-            });
-
-            customFieldsContainer.addEventListener('click', function(event) {
-                if (event.target.classList.contains('remove-custom-field')) {
-                    var fieldContainer = event.target.parentNode.parentNode;
-                    fieldContainer.parentNode.removeChild(fieldContainer);
-                }
-            });
+            customFieldsContainer.appendChild(newField);
         });
-    </script>
+
+        customFieldsContainer.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-custom-field')) {
+                var fieldContainer = event.target.parentNode.parentNode;
+                fieldContainer.parentNode.removeChild(fieldContainer);
+            }
+        });
+    });
+</script>
 {/literal}
 
 {include file="sections/footer.tpl"}
