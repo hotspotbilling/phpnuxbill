@@ -95,6 +95,16 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
+                        <div class="col-md-9">
+                            <select class="form-control" id="service_type" name="service_type">
+                                <option value="Personal" {if $d['account_type'] eq 'Personal' }selected{/if}>Personal
+                                </option>
+                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>Business</option>
+                             </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

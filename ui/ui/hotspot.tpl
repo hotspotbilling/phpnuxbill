@@ -53,7 +53,8 @@
                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled"
                                 {elseif $ds['prepaid'] != 'yes'}class="warning" title="Postpaid" {/if}>
                                     <td class="headcol">{$ds['name_plan']}</td>
-                                    <td>{$ds['typebp']}</td>
+                                    <td>{$ds['plan_type']}</td>
+                                     <td>{$ds['typebp']}</td>
                                     <td>{$ds['name_bw']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['time_limit']} {$ds['time_unit']}</td>

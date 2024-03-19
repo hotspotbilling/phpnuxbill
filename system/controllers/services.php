@@ -12,7 +12,7 @@ $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
 use PEAR2\Net\RouterOS;
@@ -60,7 +60,7 @@ switch ($action) {
                     $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
                     Mikrotik::addHotspotPlan($client, $plan['name_plan'], $plan['shared_users'], $rate);
                     $log .= "DONE : $plan[name_plan], $plan[shared_users], $rate<br>";
-                    if (!empty($plan['pool_expired'])) {
+                    if (!empty ($plan['pool_expired'])) {
                         Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired']);
                         $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
                     }
@@ -105,7 +105,7 @@ switch ($action) {
                     $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
                     Mikrotik::addPpoePlan($client, $plan['name_plan'], $plan['pool'], $rate);
                     $log .= "DONE : $plan[name_plan], $plan[pool], $rate<br>";
-                    if (!empty($plan['pool_expired'])) {
+                    if (!empty ($plan['pool_expired'])) {
                         Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired'], '512K/512K');
                         $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
                     }
@@ -142,7 +142,7 @@ switch ($action) {
         break;
 
     case 'edit':
-        $id  = $routes['2'];
+        $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
@@ -158,7 +158,7 @@ switch ($action) {
         break;
 
     case 'delete':
-        $id  = $routes['2'];
+        $id = $routes['2'];
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
@@ -185,6 +185,7 @@ switch ($action) {
 
     case 'add-post':
         $name = _post('name');
+        $plan_type = _post('plan_type'); //Personal / Business
         $radius = _post('radius');
         $typebp = _post('typebp');
         $limit_type = _post('limit_type');
@@ -213,7 +214,7 @@ switch ($action) {
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '') {
             $msg .= Lang::T('All field is required') . '<br>';
         }
-        if (empty($radius)) {
+        if (empty ($radius)) {
             if ($routers == '') {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
@@ -251,6 +252,7 @@ switch ($action) {
             $d->price = $price;
             $d->type = 'Hotspot';
             $d->typebp = $typebp;
+            $d->plan_type = $plan_type;
             $d->limit_type = $limit_type;
             $d->time_limit = $time_limit;
             $d->time_unit = $time_unit;
@@ -259,7 +261,7 @@ switch ($action) {
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
-            if (!empty($radius)) {
+            if (!empty ($radius)) {
                 $d->is_radius = 1;
                 $d->routers = '';
             } else {
@@ -279,7 +281,7 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
                 }
             }
@@ -295,6 +297,7 @@ switch ($action) {
     case 'edit-post':
         $id = _post('id');
         $name = _post('name');
+        $plan_type = _post('plan_type');
         $id_bw = _post('id_bw');
         $typebp = _post('typebp');
         $price = _post('price');
@@ -354,7 +357,7 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
                 }
             }
@@ -367,6 +370,7 @@ switch ($action) {
             $d->time_limit = $time_limit;
             $d->time_unit = $time_unit;
             $d->data_limit = $data_limit;
+            $d->plan_type = $plan_type;
             $d->data_unit = $data_unit;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
@@ -414,7 +418,7 @@ switch ($action) {
 
     case 'pppoe-edit':
         $ui->assign('_title', Lang::T('PPPOE Plans'));
-        $id  = $routes['2'];
+        $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
@@ -435,7 +439,7 @@ switch ($action) {
         break;
 
     case 'pppoe-delete':
-        $id  = $routes['2'];
+        $id = $routes['2'];
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
@@ -461,6 +465,7 @@ switch ($action) {
 
     case 'pppoe-add-post':
         $name = _post('name_plan');
+        $plan_type = _post('plan_type');
         $radius = _post('radius');
         $id_bw = _post('id_bw');
         $price = _post('price');
@@ -484,7 +489,7 @@ switch ($action) {
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '' or $pool == '') {
             $msg .= Lang::T('All field is required') . '<br>';
         }
-        if (empty($radius)) {
+        if (empty ($radius)) {
             if ($routers == '') {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
@@ -520,10 +525,11 @@ switch ($action) {
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
             $d->price = $price;
+            $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->pool = $pool;
-            if (!empty($radius)) {
+            if (!empty ($radius)) {
                 $d->is_radius = 1;
                 $d->routers = '';
             } else {
@@ -543,7 +549,7 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addPpoePlan($client, $name, $pool, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
                 }
             }
@@ -556,6 +562,7 @@ switch ($action) {
 
     case 'edit-pppoe-post':
         $id = _post('id');
+        $plan_type = _post('plan_type');
         $name = _post('name_plan');
         $id_bw = _post('id_bw');
         $price = _post('price');
@@ -611,7 +618,7 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPpoePlan($client, $name, $pool, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
                 }
             }
@@ -619,6 +626,7 @@ switch ($action) {
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
             $d->price = $price;
+            $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->routers = $routers;
@@ -657,14 +665,14 @@ switch ($action) {
         break;
     case 'balance-edit':
         $ui->assign('_title', Lang::T('Balance Plans'));
-        $id  = $routes['2'];
+        $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         $ui->assign('d', $d);
         run_hook('view_edit_balance'); #HOOK
         $ui->display('balance-edit.tpl');
         break;
     case 'balance-delete':
-        $id  = $routes['2'];
+        $id = $routes['2'];
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {

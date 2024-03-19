@@ -37,6 +37,7 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Account Type')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Balance')}</th>
                                 <th>{Lang::T('Phone Number')}</th>
@@ -52,6 +53,7 @@
                                 <tr>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
+                                          <td>{$ds['account_type']}</td>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor: pointer;">{$ds['fullname']}</td>
                                     <td>{Lang::moneyFormat($ds['balance'])}</td>

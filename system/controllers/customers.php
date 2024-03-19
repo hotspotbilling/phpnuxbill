@@ -12,7 +12,7 @@ $ui->assign('_system_menu', 'customers');
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
-if (empty($action)) {
+if (empty ($action)) {
     $action = 'list';
 }
 
@@ -96,8 +96,8 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $id_customer  = $routes['2'];
-        $plan_id  = $routes['3'];
+        $id_customer = $routes['2'];
+        $plan_id = $routes['3'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
             $gateway = 'Recharge';
@@ -138,8 +138,8 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $id_customer  = $routes['2'];
-        $plan_id  = $routes['3'];
+        $id_customer = $routes['2'];
+        $plan_id = $routes['3'];
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
@@ -169,7 +169,7 @@ switch ($action) {
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
         break;
     case 'sync':
-        $id_customer  = $routes['2'];
+        $id_customer = $routes['2'];
         $bs = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->findMany();
         if ($bs) {
             $routers = [];
@@ -198,7 +198,7 @@ switch ($action) {
     case 'viewu':
         $customer = ORM::for_table('tbl_customers')->where('username', $routes['2'])->find_one();
     case 'view':
-        $id  = $routes['2'];
+        $id = $routes['2'];
         run_hook('view_customer'); #HOOK
         if (!$customer) {
             $customer = ORM::for_table('tbl_customers')->find_one($id);
@@ -210,9 +210,9 @@ switch ($action) {
             $customFields = ORM::for_table('tbl_customers_fields')
                 ->where('customer_id', $customer['id'])
                 ->find_many();
-
-            $v  = $routes['3'];
-            if (empty($v)) {
+          
+            $v = $routes['3'];
+            if (empty ($v)) {
                 $v = 'activation';
             }
             if ($v == 'order') {
@@ -250,7 +250,7 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $id  = $routes['2'];
+        $id = $routes['2'];
         run_hook('edit_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
         // Fetch the Customers Attributes values from the tbl_customers_fields table
@@ -270,7 +270,7 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $id  = $routes['2'];
+        $id = $routes['2'];
         run_hook('delete_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
         if ($d) {
@@ -309,7 +309,8 @@ switch ($action) {
                 } catch (Throwable $e) {
                 }
                 try {
-                    if ($c) $c->delete();
+                    if ($c)
+                        $c->delete();
                 } catch (Exception $e) {
                 } catch (Throwable $e) {
                 }
@@ -328,6 +329,7 @@ switch ($action) {
         $address = _post('address');
         $phonenumber = _post('phonenumber');
         $service_type = _post('service_type');
+        $account_type = _post('account_type');
         $coordinates = _post('coordinates');
         //post Customers Attributes
         $custom_field_names = (array) $_POST['custom_field_name'];
@@ -356,6 +358,7 @@ switch ($action) {
             $d->password = $password;
             $d->pppoe_password = $pppoe_password;
             $d->email = $email;
+            $d->account_type = $account_type;
             $d->fullname = $fullname;
             $d->address = $address;
             $d->created_by = $admin['id'];
@@ -367,13 +370,13 @@ switch ($action) {
             // Retrieve the customer ID of the newly created customer
             $customerId = $d->id();
             // Save Customers Attributes details
-            if (!empty($custom_field_names) && !empty($custom_field_values)) {
+            if (!empty ($custom_field_names) && !empty ($custom_field_values)) {
                 $totalFields = min(count($custom_field_names), count($custom_field_values));
                 for ($i = 0; $i < $totalFields; $i++) {
                     $name = $custom_field_names[$i];
                     $value = $custom_field_values[$i];
 
-                    if (!empty($name)) {
+                    if (!empty ($name)) {
                         $customField = ORM::for_table('tbl_customers_fields')->create();
                         $customField->customer_id = $customerId;
                         $customField->field_name = $name;
@@ -391,6 +394,7 @@ switch ($action) {
     case 'edit-post':
         $username = Lang::phoneFormat(_post('username'));
         $fullname = _post('fullname');
+        $account_type = _post('account_type');
         $password = _post('password');
         $pppoe_password = _post('pppoe_password');
         $email = _post('email');
@@ -425,8 +429,8 @@ switch ($action) {
         }
 
         $oldusername = $d['username'];
-        $oldPppoePassword =  $d['password'];
-        $oldPassPassword =  $d['pppoe_password'];
+        $oldPppoePassword = $d['password'];
+        $oldPassPassword = $d['pppoe_password'];
         $userDiff = false;
         $pppoeDiff = false;
         $passDiff = false;
@@ -454,6 +458,7 @@ switch ($action) {
             $d->pppoe_password = $pppoe_password;
             $d->fullname = $fullname;
             $d->email = $email;
+            $d->account_type = $account_type;
             $d->address = $address;
             $d->phonenumber = $phonenumber;
             $d->service_type = $service_type;
@@ -464,7 +469,7 @@ switch ($action) {
             // Update Customers Attributes values in tbl_customers_fields table
             foreach ($customFields as $customField) {
                 $fieldName = $customField['field_name'];
-                if (isset($_POST['custom_fields'][$fieldName])) {
+                if (isset ($_POST['custom_fields'][$fieldName])) {
                     $customFieldValue = $_POST['custom_fields'][$fieldName];
                     $customField->set('field_value', $customFieldValue);
                     $customField->save();
@@ -472,7 +477,7 @@ switch ($action) {
             }
 
             // Add new Customers Attributess
-            if (isset($_POST['custom_field_name']) && isset($_POST['custom_field_value'])) {
+            if (isset ($_POST['custom_field_name']) && isset ($_POST['custom_field_value'])) {
                 $newCustomFieldNames = $_POST['custom_field_name'];
                 $newCustomFieldValues = $_POST['custom_field_value'];
 
@@ -495,7 +500,7 @@ switch ($action) {
             }
 
             // Delete Customers Attributess
-            if (isset($_POST['delete_custom_fields'])) {
+            if (isset ($_POST['delete_custom_fields'])) {
                 $fieldsToDelete = $_POST['delete_custom_fields'];
                 foreach ($fieldsToDelete as $fieldName) {
                     // Delete the Customers Attributes with the given field name
@@ -525,7 +530,7 @@ switch ($action) {
                             Mikrotik::removeHotspotActiveUser($client, $d['username']);
                         } else {
                             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                            if (!empty($d['pppoe_password'])) {
+                            if (!empty ($d['pppoe_password'])) {
                                 Mikrotik::setPpoeUser($client, $c['username'], $d['pppoe_password']);
                             } else {
                                 Mikrotik::setPpoeUser($client, $c['username'], $password);
