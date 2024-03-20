@@ -41,7 +41,6 @@ class Package
             // Additional cost
             list($bills, $add_cost) = User::getBills($id_customer);
             if ($add_cost > 0 && $router_name != 'balance') {
-                $note .= "Plan Price : " . Lang::moneyFormat($p['price']) . "\n";
                 foreach ($bills as $k => $v) {
                     $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
                 }
@@ -165,7 +164,7 @@ class Package
             $dt2 = new DateTime("$date_tmp");
             $diff = $dt2->diff($dt1);
             $sum =  $diff->format("%a"); // => 453
-            if ($sum >= 35) {
+            if ($sum >= 35 * $p['validity']) {
                 $date_exp = date("Y-m-$day_exp", strtotime('+0 month'));
             } else {
                 $date_exp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
@@ -357,7 +356,7 @@ class Package
                         $ed = new DateTime("$date_exp");
                         $td = $ed->diff($sd);
                         $fd = $td->format("%a");
-                        $gi = ($p['price'] / 30) * $fd;
+                        $gi = ($p['price'] / (30 * $p['validity'])) * $fd;
                         if ($gi > $p['price']) {
                             $fl->field_value = $p['price'];
                         } else {
@@ -552,7 +551,7 @@ class Package
                         $ed = new DateTime("$date_exp");
                         $td = $ed->diff($sd);
                         $fd = $td->format("%a");
-                        $gi = ($p['price'] / 30) * $fd;
+                        $gi = ($p['price'] / (30 * $p['validity'])) * $fd;
                         if ($gi > $p['price']) {
                             $fl->field_value = $p['price'];
                         } else {
