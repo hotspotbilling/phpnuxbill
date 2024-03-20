@@ -252,9 +252,9 @@
                         </a>
                         <ul class="treeview-menu">
                             <li {if $_routes[1] eq 'send' }class="active" {/if}><a
-                                    href="{$_url}message/send">{Lang::T('Send SMS/WA Message')}</a></li>
+                                    href="{$_url}message/send">{Lang::T('Single Customer')}</a></li>
                             <li {if $_routes[1] eq 'send_bulk' }class="active" {/if}><a
-                                    href="{$_url}message/send_bulk">{Lang::T('Send Bulk SMS/WA Message')}</a></li>
+                                    href="{$_url}message/send_bulk">{Lang::T('Bulk Customers')}</a></li>
                             {$_MENU_MESSAGE}
                         </ul>
                     </li>

@@ -36,7 +36,7 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Plan Name')}</th>
-                                  <th>{Lang::T('Plan Type')}</th>
+                                <th>{Lang::T('Plan Type')}</th>
                                 <th>{Lang::T('Bandwidth Plans')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
                                 <th>{Lang::T('Plan Validity')}</th>
@@ -49,23 +49,26 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled"
-                                    {elseif $ds['prepaid'] != 'yes'}class="warning" title="Postpaid" {/if}>
+                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
                                     <td>{$ds['name_plan']}</td>
-                                     <td>{$ds['plan_type']}</td>
+                                    <td>{$ds['plan_type']} {if $ds['prepaid'] != 'yes'}<b>Postpaid</b>{else}Prepaid{/if}</td>
                                     <td>{$ds['name_bw']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                     <td>{$ds['pool']}</td>
-                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}{if $ds['pool_expired']} | {/if}{$ds['list_expired']}{/if}</td>
+                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}
+                                        {if $ds['pool_expired']} |
+                                            {/if}{$ds['list_expired']}
+                                        {/if}</td>
                                     <td>
-                                    {if $ds['is_radius']}
-                                        <span class="label label-primary">RADIUS</span>
-                                    {else}
-                                        {if $ds['routers']!=''}
-                                            <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
+                                        {if $ds['is_radius']}
+                                            <span class="label label-primary">RADIUS</span>
+                                        {else}
+                                            {if $ds['routers']!=''}
+                                                <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
+                                            {/if}
                                         {/if}
-                                    {/if}</td>
+                                    </td>
                                     <td>
                                         <a href="{$_url}services/pppoe-edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>

@@ -27,8 +27,8 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}services/add" class="btn btn-primary btn-block"><i
-                                class="ion ion-android-add"> </i> {Lang::T('New Service Plan')}</a>
+                        <a href="{$_url}services/add" class="btn btn-primary btn-block"><i class="ion ion-android-add">
+                            </i> {Lang::T('New Service Plan')}</a>
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
@@ -50,11 +50,10 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled"
-                                {elseif $ds['prepaid'] != 'yes'}class="warning" title="Postpaid" {/if}>
+                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
                                     <td class="headcol">{$ds['name_plan']}</td>
-                                    <td>{$ds['plan_type']}</td>
-                                     <td>{$ds['typebp']}</td>
+                                <td>{$ds['plan_type']} {if $ds['prepaid'] != 'yes'}<b>Postpaid</b>{else}Prepaid{/if}</td>
+                                    <td>{$ds['typebp']}</td>
                                     <td>{$ds['name_bw']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['time_limit']} {$ds['time_unit']}</td>
@@ -69,7 +68,10 @@
                                             {/if}
                                         {/if}
                                     </td>
-                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}{if $ds['pool_expired']} | {/if}{$ds['list_expired']}{/if}</td>
+                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}
+                                        {if $ds['pool_expired']} |
+                                            {/if}{$ds['list_expired']}
+                                        {/if}</td>
                                     <td>
                                         <a href="{$_url}services/edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
