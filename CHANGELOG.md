@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.3.20
+
+- Fixing some bugs
+
 ## 2024.3.19
 
 - Add Customer Type Personal or Bussiness by @pro-cms
