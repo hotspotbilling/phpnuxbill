@@ -16,6 +16,10 @@ if (empty ($action)) {
     $action = 'list';
 }
 
+$leafletpickerHeader = <<<EOT
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+EOT;
+
 switch ($action) {
     case 'list':
         $search = _post('search');
@@ -89,6 +93,7 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        $ui->assign('xheader', $leafletpickerHeader);
         run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');
         break;
@@ -210,7 +215,6 @@ switch ($action) {
             $customFields = ORM::for_table('tbl_customers_fields')
                 ->where('customer_id', $customer['id'])
                 ->find_many();
-          
             $v = $routes['3'];
             if (empty ($v)) {
                 $v = 'activation';
@@ -260,6 +264,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('d', $d);
             $ui->assign('customFields', $customFields);
+            $ui->assign('xheader', $leafletpickerHeader);
             $ui->display('customers-edit.tpl');
         } else {
             r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);

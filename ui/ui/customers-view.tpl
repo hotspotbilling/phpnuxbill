@@ -38,7 +38,7 @@
                     </li>
                     {/if}
                     <li class="list-group-item">
-                        <b>{Lang::T('Coordinates')}</b> <span class="pull-right">{Lang::T($d['coordinates'])}</span>
+                        <b>{Lang::T('Coordinates')}</b> <span class="pull-right">{$d['coordinates']}</span>
                     </li>
                     <!--Customers Attributes view start -->
                     {if $customFields}

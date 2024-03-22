@@ -5,6 +5,7 @@
 ## 2024.3.22
 
 - Fix Broadcast Message by @Focuslinkstech
+- Add Location Picker
 
 ## 2024.3.20
 
