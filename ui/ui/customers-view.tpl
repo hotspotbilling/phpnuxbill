@@ -82,7 +82,7 @@
                     <div class="col-xs-4">
                         <a href="{$_url}customers/delete/{$d['id']}" id="{$d['id']}"
                             class="btn btn-danger btn-block btn-sm"
-                            onclick="return confirm('{Lang::T('Delete')}?')"><span class="fa fa-trash"></span></a>
+                            onclick="return confirm('{Lang::T('Deleting Account')}?')"><span class="fa fa-trash"></span></a>
                     </div>
                     <div class="col-xs-8">
                         <a href="{$_url}customers/edit/{$d['id']}"
