@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.3.22
+
+- Fix Broadcast Message by @Focuslinkstech
+
 ## 2024.3.20
 
 - Fixing some bugs
