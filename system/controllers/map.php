@@ -28,6 +28,7 @@ switch ($action) {
                     'name' => $customer->fullname,
                     'balance' => $customer->balance,
                     'address' => $customer->address,
+                    'direction' => $customer->coordinates,
                     'info' => Lang::T("Username") . ": " . $customer->username .  " - "  . Lang::T("Full Name") . ": " . $customer->fullname . " - "  . Lang::T("Email") . ": " . $customer->email . " - "  . Lang::T("Phone") . ": " . $customer->phonenumber . " - "  . Lang::T("Service Type") . ": " . $customer->service_type,
                     'coordinates' => '[' . $customer->coordinates . ']',
                 ];
