@@ -40,8 +40,7 @@
                                 <th>{Lang::T('Account Type')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Balance')}</th>
-                                <th>{Lang::T('Phone Number')}</th>
-                                <th>{Lang::T('Email')}</th>
+                                <th width="120px"></th>
                                 <th>{Lang::T('Package')}</th>
                                 <th>{Lang::T('Service Type')}</th>
                                 <th>{Lang::T('Created On')}</th>
@@ -57,16 +56,32 @@
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor: pointer;">{$ds['fullname']}</td>
                                     <td>{Lang::moneyFormat($ds['balance'])}</td>
-                                    <td>{$ds['phonenumber']}</td>
-                                    <td>{$ds['email']}</td>
+                                    <td align="center">
+                                        {if $ds['phonenumber']}
+                                            <a href="tel:{$ds['phonenumber']}" class="btn btn-default btn-xs"
+                                                title="{$ds['phonenumber']}"><i class="glyphicon glyphicon-earphone"></i></a>
+                                        {/if}
+                                        {if $ds['email']}
+                                            <a href="mailto:{$ds['email']}" class="btn btn-default btn-xs"
+                                                title="{$ds['email']}"><i class="glyphicon glyphicon-envelope"></i></a>
+                                        {/if}
+                                        {if $ds['coordinates']}
+                                            <a href="{$_url}customers/view/{$ds['id']}" class="btn btn-default btn-xs"
+                                                title="{$ds['coordinates']}"><i class="glyphicon glyphicon-map-marker"></i></a>
+                                        {/if}
+                                    </td>
                                     <td align="center" api-get-text="{$_url}autoload/customer_is_active/{$ds['id']}">
                                         <span class="label label-default">&bull;</span>
                                     </td>
                                     <td>{$ds['service_type']}</td>
                                     <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
                                     <td align="center">
-                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}"
+                                            style="margin: 0px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
+                                        <a href="{$_url}customers/edit/{$ds['id']}" id="{$ds['id']}"
+                                            style="margin: 0px; color:black"
+                                            class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Edit')}&nbsp;&nbsp;</a>
                                         <a href="{$_url}plan/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
                                             class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
                                     </td>
