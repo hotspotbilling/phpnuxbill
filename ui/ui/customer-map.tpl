@@ -1,7 +1,8 @@
 {include file="sections/header.tpl"}
 
 <!-- Map container div -->
-<div id="map" style="width: '100%'; height: 600px; margin: 20px auto"></div>
+
+<div id="map" class="well" style="width: '100%'; height: 78vh; margin: 20px auto"></div>
 
 {literal}
     <script>
