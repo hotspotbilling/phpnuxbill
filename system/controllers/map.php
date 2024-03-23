@@ -38,7 +38,7 @@ switch ($action) {
         $ui->assign('xheader', '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">');
         $ui->assign('_title', Lang::T('Customer Geo Location Information'));
         $ui->assign('xfooter', '<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>');
-        $ui->display('map-customer.tpl');
+        $ui->display('customer-map.tpl');
         break;
 
     default:
