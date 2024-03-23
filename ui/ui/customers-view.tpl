@@ -37,14 +37,6 @@
                                 onclick="this.select()">
                         </li>
                     {/if}
-                    {if $d['coordinates']}
-                        <li class="list-group-item">
-                            <b>{Lang::T('Coordinates')}</b> <span class="pull-right">
-                                <a href="https://www.google.com/maps/dir//{$d['coordinates']}/" target="_blank">Get
-                                    Directions</a>
-                            </span>
-                        </li>
-                    {/if}
                     <!--Customers Attributes view start -->
                     {if $customFields}
                         {foreach $customFields as $customField}
@@ -82,6 +74,16 @@
                         <b>{Lang::T('Last Login')}</b> <span
                             class="pull-right">{Lang::dateTimeFormat($d['last_login'])}</span>
                     </li>
+                    {if $d['coordinates']}
+                        <li class="list-group-item">
+                            <b>{Lang::T('Coordinates')}</b> <span class="pull-right">
+                                <i class="glyphicon glyphicon-road"></i> <a style="color: black;"
+                                    href="https://www.google.com/maps/dir//{$d['coordinates']}/" target="_blank">Get
+                                    Directions</a>
+                            </span>
+                            <div id="map" style="width: '100%'; height: 100px;"></div>
+                        </li>
+                    {/if}
                 </ul>
                 <div class="row">
                     <div class="col-xs-4">
@@ -230,4 +232,24 @@
     </div>
 </div>
 
+{if $d['coordinates']}
+{literal}
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script>
+    function setupMap(lat, lon) {
+        var map = L.map('map').setView([lat, lon], 17);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+        }).addTo(map);
+        var marker = L.marker([lat, lon]).addTo(map);
+    }
+    window.onload = function() {
+        {/literal}setupMap({$d['coordinates']});{literal}
+    }
+</script>
+{/literal}
+{/if}
 {include file="sections/footer.tpl"}

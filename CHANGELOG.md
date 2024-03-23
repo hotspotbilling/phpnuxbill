@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.3.23
+
+- Maps full height
+- Show Get Directions instead Coordinates
+- Maps Label always show
+
 ## 2024.3.22
 
 - Fix Broadcast Message by @Focuslinkstech

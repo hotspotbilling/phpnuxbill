@@ -245,6 +245,7 @@ switch ($action) {
             $ui->assign('v', $v);
             $ui->assign('d', $customer);
             $ui->assign('customFields', $customFields);
+            $ui->assign('xheader', $leafletpickerHeader);
             $ui->display('customers-view.tpl');
         } else {
             r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);
