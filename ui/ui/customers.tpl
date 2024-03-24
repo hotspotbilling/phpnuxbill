@@ -66,7 +66,7 @@
                                                 title="{$ds['email']}"><i class="glyphicon glyphicon-envelope"></i></a>
                                         {/if}
                                         {if $ds['coordinates']}
-                                            <a href="{$_url}customers/view/{$ds['id']}" class="btn btn-default btn-xs"
+                                            <a href="https://www.google.com/maps/dir//{$ds['coordinates']}/" target="_blank" class="btn btn-default btn-xs"
                                                 title="{$ds['coordinates']}"><i class="glyphicon glyphicon-map-marker"></i></a>
                                         {/if}
                                     </td>

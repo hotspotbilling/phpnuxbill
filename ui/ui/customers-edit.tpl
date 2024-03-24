@@ -188,7 +188,7 @@
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script>
         function getLocation() {
-            if (navigator.geolocation) {
+            if (window.location.protocol == "https:" && navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition);
             } else {
                 setupMap(51.505, -0.09);
