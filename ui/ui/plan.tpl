@@ -60,7 +60,7 @@
                                     <td><a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a></td>
                                     <td>{$ds['namebp']}</td>
                                     <td>{$ds['type']}</td>
-                                     <td>{$ds['plan_type']}</td>
+                                    <td>{$ds['plan_type']}</td>
                                     <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
                                     <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
                                     <td>{$ds['method']}</td>

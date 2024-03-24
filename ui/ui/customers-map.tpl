@@ -7,7 +7,7 @@
 {literal}
     <script>
         function getLocation() {
-            if (navigator.geolocation) {
+            if (window.location.protocol == "https:" && navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(showPosition);
             } else {
                 setupMap(51.505, -0.09);
