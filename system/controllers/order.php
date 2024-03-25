@@ -107,8 +107,8 @@ switch ($action) {
         if (empty ($trx)) {
             r2(U . "order/package", 'w', Lang::T("Payment not found"));
         }
-        // jika url kosong, balikin ke buy
-        if (empty ($trx['pg_url_payment'])) {
+        // jika url kosong, balikin ke buy, kecuali cancel
+        if (empty ($trx['pg_url_payment']) && $routes['3'] != 'cancel') {
             r2(U . "order/buy/" . (($trx['routers_id'] == 0) ? $trx['routers'] : $trx['routers_id']) . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
         }
         if ($routes['3'] == 'check') {
