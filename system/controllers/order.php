@@ -19,9 +19,9 @@ switch ($action) {
         break;
     case 'history':
         $ui->assign('_system_menu', 'history');
-        $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'), ['username' => $user['username']]);
-        $d = ORM::for_table('tbl_payment_gateway')
-            ->where('username', $user['username'])
+        $query = ORM::for_table('tbl_payment_gateway')->where('username', $user['username']);
+        $paginator = Paginator::generate($query);
+        $d = $query
             ->order_by_desc('id')
             ->offset($paginator['startpoint'])->limit($paginator['limit'])
             ->find_many();

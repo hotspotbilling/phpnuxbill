@@ -23,11 +23,13 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_pool'), ['pool_name' => '%' . $name . '%'], $name);
-            $d = ORM::for_table('tbl_pool')->where_like('pool_name', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_pool')->where_like('pool_name', '%' . $name . '%');
+            $paginator = Paginator::generate($query, ['name' => $name]);
+            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_pool'));
-            $d = ORM::for_table('tbl_pool')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_pool');
+            $paginator = Paginator::generate($query);
+            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 
         $ui->assign('d', $d);

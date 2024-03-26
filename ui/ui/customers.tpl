@@ -16,7 +16,7 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-                        <form id="site-search" method="post" action="{$_url}customers/list/">
+                        <form id="site-search" method="post" action="{$_url}customers/">
                             <div class="input-group">
                                 <input type="text" id="search-input" name="search" value="{$search}"
                                     class="form-control" placeholder="{Lang::T('Search')}...">
@@ -90,7 +90,7 @@
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>

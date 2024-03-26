@@ -19,7 +19,7 @@ $month_n = date('n');
 $iday = ORM::for_table('tbl_transactions')
     ->where('recharged_on', $mdate)
     ->where_not_equal('method', 'Customer - Balance')
-    ->where_not_equal('method', 'Recharge Balance - Administrator') 
+    ->where_not_equal('method', 'Recharge Balance - Administrator')
     ->sum('price');
 
 if ($iday == '') {
@@ -54,9 +54,10 @@ $ui->assign('c_all', $c_all);
 
 if ($config['hide_uet'] != 'yes') {
     //user expire
-    $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'));
-    $expire = ORM::for_table('tbl_user_recharges')
-        ->where_lte('expiration', $mdate)
+    $query = ORM::for_table('tbl_user_recharges')
+    ->where_lte('expiration', $mdate);
+    $paginator = Paginator::generate($query);
+    $expire = $query
         ->offset($paginator['startpoint'])
         ->limit($paginator['limit'])
         ->order_by_desc('expiration')
@@ -150,7 +151,7 @@ if (file_exists($cacheMSfile) && time() - filemtime($cacheMSfile) < 43200) {
         ->select_expr('SUM(price)', 'total')
         ->where_raw("YEAR(recharged_on) = YEAR(CURRENT_DATE())") // Filter by the current year
         ->where_not_equal('method', 'Customer - Balance')
-        ->where_not_equal('method', 'Recharge Balance - Administrator') 
+        ->where_not_equal('method', 'Recharge Balance - Administrator')
         ->group_by_expr('MONTH(recharged_on)')
         ->find_many();
 

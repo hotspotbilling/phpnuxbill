@@ -30,7 +30,7 @@ switch ($action) {
             r2(U . "settings/app", 's', 'Test Telegram has been send<br>Result: ' . $result);
         }
 
-        $UPLOAD_URL_PATH = str_replace($root_path,'',  $UPLOAD_PATH);
+        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
         if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
             $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
         } else {
@@ -276,59 +276,58 @@ switch ($action) {
         $search = _req('search');
         if ($search != '') {
             if ($admin['user_type'] == 'SuperAdmin') {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $search . '%'], $search);
-                $d = ORM::for_table('tbl_users')
-                    ->where_like('username', '%' . $search . '%')
+                $query = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $search . '%');
+                $paginator = Paginator::generate($query, ['search' => $search]);
+                $d = $query
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else if ($admin['user_type'] == 'Admin') {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'), [
-                    'username' => '%' . $search . '%',
-                    ['user_type' => 'Report'],
-                    ['user_type' => 'Agent'],
-                    ['user_type' => 'Sales'],
-                    ['id' => $admin['id']]
-                ], $search);
-                $d = ORM::for_table('tbl_users')
-                    ->where_like('username', '%' . $search . '%')
-                    ->where_any_is([
+                $query = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $search . '%')->where_any_is([
                         ['user_type' => 'Report'],
                         ['user_type' => 'Agent'],
                         ['user_type' => 'Sales'],
                         ['id' => $admin['id']]
-                    ])
+                    ]);
+                $paginator = Paginator::generate($query, ['search' => $search]);
+                $d = $query
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $search . '%'], $search);
-                $d = ORM::for_table('tbl_users')
+                $query = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $search . '%')
                     ->where_any_is([
                         ['id' => $admin['id']],
                         ['root' => $admin['id']]
-                    ])
+                    ]);
+                $paginator = Paginator::generate($query, ['search' => $search]);
+                $d = $query
                     ->offset($paginator['startpoint'])
                     ->limit($paginator['limit'])->order_by_asc('id')->findArray();
             }
         } else {
             if ($admin['user_type'] == 'SuperAdmin') {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'));
-                $d = ORM::for_table('tbl_users')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                $query = ORM::for_table('tbl_users');
+                $paginator = Paginator::generate($query);
+                $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else if ($admin['user_type'] == 'Admin') {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'));
-                $d = ORM::for_table('tbl_users')->where_any_is([
+                $query = ORM::for_table('tbl_users')->where_any_is([
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
                     ['user_type' => 'Sales'],
                     ['id' => $admin['id']]
-                ])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                ]);
+                $paginator = Paginator::generate($query);
+                $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
             } else {
-                $paginator = Paginator::build(ORM::for_table('tbl_users'));
-                $d = ORM::for_table('tbl_users')
+                $query = ORM::for_table('tbl_users')
                     ->where_any_is([
                         ['id' => $admin['id']],
                         ['root' => $admin['id']]
-                    ])
+                    ]);
+                $paginator = Paginator::generate($query);
+                $d = $query
                     ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
             }
         }

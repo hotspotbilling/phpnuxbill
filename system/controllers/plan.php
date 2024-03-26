@@ -68,11 +68,13 @@ switch ($action) {
         $ui->assign('_title', Lang::T('Customer'));
         $search = _post('search');
         if ($search != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'), ['username' => '%' . $search . '%'], $search);
-            $d = ORM::for_table('tbl_user_recharges')->where_like('username', '%' . $search . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_user_recharges')->where_like('username', '%' . $search . '%');
+            $paginator = Paginator::generate($query, ['search' => $search]);
+            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_user_recharges'));
-            $d = ORM::for_table('tbl_user_recharges')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_array();
+            $query = ORM::for_table('tbl_user_recharges');
+            $paginator = Paginator::generate($query);
+            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_array();
         }
         run_hook('view_list_billing'); #HOOK
         if ($isApi) {

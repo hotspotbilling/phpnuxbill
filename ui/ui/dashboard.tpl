@@ -163,7 +163,7 @@
                         {/foreach}
                     </table>
                 </div>
-                &nbsp; {$paginator['contents']}
+                &nbsp; {include file="pagination.tpl"}
             </div>
         {/if}
     </div>

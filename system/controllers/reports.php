@@ -30,11 +30,13 @@ switch ($action) {
             r2(U . "logs/list/", 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['invoice' => '%' . $q . '%'], $q);
-            $d = ORM::for_table('tbl_transactions')->where_like('invoice', '%' . $q . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_transactions')->where_like('invoice', '%' . $q . '%');
+            $paginator = Paginator::generate($query, ['q' => $q]);
+            $d = $where->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_transactions'));
-            $d = ORM::for_table('tbl_transactions')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_transactions');
+            $paginator = Paginator::generate($query);
+            $d = $where->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
         }
 
         $ui->assign('activation', $d);
@@ -43,9 +45,10 @@ switch ($action) {
         $ui->display('reports-activation.tpl');
         break;
     case 'daily-report':
-        $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['recharged_on' => $mdate]);
-        $d = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
-        $dr = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->sum('price');
+        $query = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate);
+        $paginator = Paginator::generate($query);
+        $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+        $dr = $query->sum('price');
 
         $ui->assign('d', $d);
         $ui->assign('dr', $dr);

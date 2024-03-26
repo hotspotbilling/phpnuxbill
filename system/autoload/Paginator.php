@@ -8,22 +8,86 @@
 
 class Paginator
 {
-    public static function build($table, $colVal = [], $query='', $per_page = '10')
+    public static function generate($query, $search = [], $per_page = '10')
     {
         global $routes;
-        global $_L;
+        $adjacents = "2";
+        $page = _get('p', 1);
+        $page = (empty($page) ? 1 : $page);
+        $url = U . implode('/', $routes);
+        if (count($search) > 0) {
+            $url .= '&' . http_build_query($search);
+        }
+        $url .= '&p=';
+        $totalReq = $query->count();
+        $next = $page + 1;
+        $lastpage = ceil($totalReq / $per_page);
+        $lpm1 = $lastpage - 1;
+        $limit = $per_page;
+        $startpoint = ($page * $limit) - $limit;
+        if ($lastpage >= 1) {
+            $pages = [];
+            if ($lastpage < 7 + ($adjacents * 2)) {
+                for ($counter = 1; $counter <= $lastpage; $counter++) {
+                    $pages[] = $counter;
+                }
+            } elseif ($lastpage > 5 + ($adjacents * 2)) {
+                if ($page < 1 + ($adjacents * 2)) {
+                    for ($counter = 1; $counter < 4 + ($adjacents * 2); $counter++) {
+                        $pages[] = $counter;
+                    }
+                    $pages[] = "...";
+                    $pages[] = $lpm1;
+                    $pages[] = $lastpage;
+                } elseif ($lastpage - ($adjacents * 2) > $page && $page > ($adjacents * 2)) {
+                    $pages[] = "1";
+                    $pages[] = "2";
+                    $pages[] = "...";
+                    for ($counter = $page - $adjacents; $counter <= $page + $adjacents; $counter++) {
+                        $pages[] = $counter;
+                    }
+                    $pages[] = "...";
+                    $pages[] = $lpm1;
+                    $pages[] = $lastpage;
+                } else {
+                    $pages[] = "1";
+                    $pages[] = "2";
+                    $pages[] = "...";
+                    for ($counter = $lastpage - (2 + ($adjacents * 2)); $counter <= $lastpage; $counter++) {
+                        $pages[] = $counter;
+                    }
+                }
+            }
+
+            $result = [
+                'count' => $lastpage,
+                'limit' => $per_page,
+                'startpoint' => $startpoint,
+                'url' => $url,
+                'page' => $page,
+                'pages' => $pages,
+                'prev' => ($page>0) ? ($page-1): "0",
+                'next' => ($page>= $lastpage) ? $lastpage : $page+1
+            ];
+            print_r($result);
+            return $result;
+        }
+    }
+    public static function build($table, $colVal = [], $query = '', $per_page = '10')
+    {
+        global $routes;
         $url = U . implode('/', $routes);
         $query = urlencode($query);
         $adjacents = "2";
         $page = (int)(empty(_get('p')) ? 1 : _get('p'));
         $pagination = "";
-        foreach($colVal as $k=>$v) {
-            if(!is_array($v) && strpos($v,'%') === false) {
+        foreach ($colVal as $k => $v) {
+            if (!is_array($v) && strpos($v, '%') === false) {
                 $table = $table->where($k, $v);
-            }else{
-                if(is_array($v)){
+            } else {
+                if (is_array($v)) {
                     $table = $table->where_in($k, $v);
-                }else{
+                } else {
                     $table = $table->where_like($k, $v);
                 }
             }
@@ -103,7 +167,7 @@ class Paginator
         $page = (int)(!isset($routes['2']) ? 1 : $routes['2']);
         $pagination = "";
 
-        if(is_object($table)){
+        if (is_object($table)) {
             if ($w1 != '') {
                 $totalReq = $table->where($w1, $c1)->count();
             } elseif ($w2 != '') {
@@ -115,7 +179,7 @@ class Paginator
             } else {
                 $totalReq = $table->count();
             }
-        }else{
+        } else {
             if ($w1 != '') {
                 $totalReq = ORM::for_table($table)->where($w1, $c1)->count();
             } elseif ($w2 != '') {
@@ -209,13 +273,13 @@ class Paginator
         $adjacents = "2";
         $page = (int)(!isset($routes['2']) ? 1 : $routes['2']);
         $pagination = "";
-        if(is_object($table)){
+        if (is_object($table)) {
             if ($w1 != '') {
                 $totalReq = $table->where_raw($w1, $c1)->count();
             } else {
                 $totalReq = $table->count();
             }
-        }else{
+        } else {
             if ($w1 != '') {
                 $totalReq = ORM::for_table($table)->where_raw($w1, $c1)->count();
             } else {

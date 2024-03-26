@@ -119,11 +119,13 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['name_plan' => '%' . $name . '%', 'type' => 'Hotspot'], $name);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where_like('tbl_plans.name_plan', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where_like('tbl_plans.name_plan', '%' . $name . '%');
+            $paginator = Paginator::generate($query, ['name'=> $name]);
+            $d =  $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['type' => 'Hotspot']);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot');
+            $paginator = Paginator::generate($query);
+            $d =  $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
         }
 
         $ui->assign('d', $d);
@@ -393,11 +395,13 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['name_plan' => '%' . $name . '%', 'type' => 'PPPOE'], $name);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->where_like('tbl_plans.name_plan', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->where_like('tbl_plans.name_plan', '%' . $name . '%');
+            $paginator = Paginator::generate($query, ['name' => $name]);
+            $d =$query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['type' => 'PPPOE'], $name);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE');
+            $paginator = Paginator::generate($query);
+            $d =$query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
         }
 
         $ui->assign('d', $d);
@@ -646,11 +650,13 @@ switch ($action) {
         $ui->assign('_title', Lang::T('Balance Plans'));
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['name_plan' => '%' . $name . '%', 'type' => 'Balance'], $name);
-            $d = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->where_like('tbl_plans.name_plan', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->where_like('tbl_plans.name_plan', '%' . $name . '%');
+            $paginator = Paginator::generate($query, ['name' => $name]);
+            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['type' => 'Balance'], $name);
-            $d = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance');
+            $paginator = Paginator::generate($query);
+            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
         }
 
         $ui->assign('d', $d);
