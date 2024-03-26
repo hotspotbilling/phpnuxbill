@@ -69,7 +69,6 @@ class Paginator
                 'prev' => ($page>0) ? ($page-1): "0",
                 'next' => ($page>= $lastpage) ? $lastpage : $page+1
             ];
-            print_r($result);
             return $result;
         }
     }
