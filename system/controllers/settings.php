@@ -25,6 +25,10 @@ switch ($action) {
             $result = Message::sendSMS(_get('testSms'), 'PHPNuxBill Test SMS');
             r2(U . "settings/app", 's', 'Test SMS has been send<br>Result: ' . $result);
         }
+        if (!empty(_get('testEmail'))) {
+            Message::sendEmail(_get('testEmail'), 'PHPNuxBill Test Email', 'PHPNuxBill Test Email Body');
+            r2(U . "settings/app", 's', 'Test Email has been send');
+        }
         if (!empty(_get('testTg'))) {
             $result = Message::sendTelegram('PHPNuxBill Test Telegram');
             r2(U . "settings/app", 's', 'Test Telegram has been send<br>Result: ' . $result);

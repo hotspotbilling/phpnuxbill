@@ -535,5 +535,6 @@
     "Use_at_least_5_secs_if_you_are_sending_to_all_customers_to_avoid_being_banned_by_your_message_provider": "Use at least 5 secs if you are sending to all customers to avoid being banned by your message provider",
     "Testing__if_checked_no_real_message_is_sent_": "Testing [if checked no real message is sent]",
     "All_fields_are_required": "All fields are required",
-    "Personal": "Personal"
+    "Personal": "Personal",
+    "Email_Notification": "Email Notification"
 }

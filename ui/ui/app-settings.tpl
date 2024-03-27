@@ -342,6 +342,68 @@
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test Email</a>
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
+                    {Lang::T('Email Notification')}
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">SMTP Host : port</label>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="smtp_host" name="smtp_host" value="{$_c['smtp_host']}"
+                                placeholder="smtp.host.tld">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" class="form-control" id="smtp_port" name="smtp_port" value="{$_c['smtp_port']}"
+                                placeholder="465 587 port">
+                        </div>
+                        <p class="help-block col-md-4">Empty this to use internal mail() PHP</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">SMTP username</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="smtp_user" name="smtp_user" value="{$_c['smtp_user']}"
+                                placeholder="user@host.tld">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">SMTP Password</label>
+                        <div class="col-md-6">
+                            <input type="password" class="form-control" id="smtp_pass" name="smtp_pass" value="{$_c['smtp_pass']}"
+                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">SMTP Security</label>
+                        <div class="col-md-6">
+                            <select name="smtp_ssltls" id="smtp_ssltls" class="form-control">
+                                <option value="" {if $_c['smtp_ssltls']=='' }selected="selected" {/if}>Not Secure</option>
+                                <option value="ssl" {if $_c['smtp_ssltls']=='ssl' }selected="selected" {/if}>SSL</option>
+                                <option value="tls" {if $_c['smtp_ssltls']=='tls' }selected="selected" {/if}>TLS</option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Mail From</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="mail_from" name="mail_from" value="{$_c['mail_from']}"
+                                placeholder="noreply@host.tld">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">Mail Reply To</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="mail_reply_to" name="mail_reply_to" value="{$_c['mail_reply_to']}"
+                                placeholder="support@host.tld">
+                        </div>
+                        <p class="help-block col-md-4">Customer will reply email to this address, empty if you want to use From Address</p>
+                    </div>
+                </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
@@ -558,6 +620,14 @@ add dst-host=*.{$_domain}</pre>
         var target = prompt("Phone number\nSave First before Test", "");
         if (target != null) {
             window.location.href = '{$_url}settings/app&testSms=' + target;
+        }
+    }
+
+
+    function testEmail() {
+        var target = prompt("Email\nSave First before Test", "");
+        if (target != null) {
+            window.location.href = '{$_url}settings/app&testEmail=' + target;
         }
     }
 

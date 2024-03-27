@@ -5,6 +5,12 @@
  *  by https://t.me/ibnux
  **/
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+require $root_path . 'system/autoload/mail/Exception.php';
+require $root_path . 'system/autoload/mail/PHPMailer.php';
+require $root_path . 'system/autoload/mail/SMTP.php';
 
 class Message
 {
@@ -66,6 +72,44 @@ class Message
         }
     }
 
+    public static function sendEmail($to, $subject, $body)
+    {
+        global $config;
+        run_hook('send_email'); #HOOK
+        if (empty($config['smtp_host'])) {
+            $attr = "";
+            if (!empty($config['mail_from'])) {
+                $attr .= "From: " . $config['mail_from'] . "\r\n";
+            }
+            if (!empty($config['mail_reply_to'])) {
+                $attr .= "Reply-To: " . $config['mail_reply_to'] . "\r\n";
+            }
+            mail($to, $subject, $body, $attr);
+        } else {
+            $mail = new PHPMailer();
+            $mail->isSMTP();
+            $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+            $mail->Host       = $config['smtp_host'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $config['smtp_user'];
+            $mail->Password   = $config['smtp_pass'];
+            $mail->SMTPSecure = $config['smtp_ssltls'];
+            $mail->Port       = $config['smtp_port'];
+            if (!empty($config['mail_from'])) {
+                $mail->setFrom($config['mail_from']);
+            }
+            if (!empty($config['mail_reply_to'])) {
+                $mail->addReplyTo($config['mail_reply_to']);
+            }
+            $mail->isHTML(false);
+            $mail->addAddress($to);
+            $mail->Subject = $subject;
+            $mail->Body    = $body;
+            $mail->send();
+            die();
+        }
+    }
+
     public static function sendPackageNotification($customer, $package, $price, $message, $via)
     {
         global $u;
@@ -73,7 +117,7 @@ class Message
         $msg = str_replace('[[username]]', $customer['username'], $msg);
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', $price, $msg);
-        if($u){
+        if ($u) {
             $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($u['expiration'], $u['time']), $msg);
         }
         if (
