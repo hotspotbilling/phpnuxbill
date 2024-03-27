@@ -287,7 +287,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             } else {
                 if ($p['is_radius']) {
@@ -375,7 +375,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             }
         } else {
@@ -482,7 +482,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             } else {
                 if ($p['is_radius']) {
@@ -572,7 +572,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             }
         }
