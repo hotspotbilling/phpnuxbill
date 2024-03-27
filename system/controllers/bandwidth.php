@@ -22,17 +22,14 @@ switch ($action) {
         run_hook('view_list_bandwidth'); #HOOK
         $name = _post('name');
         if ($name != '') {
-            $query = ORM::for_table('tbl_bandwidth')->where_like('name_bw', '%' . $name . '%');
-            $paginator = Paginator::generate($query, ['name' => $name]);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->where_like('name_bw', '%' . $name . '%')->order_by_desc('id');
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
-            $query = ORM::for_table('tbl_bandwidth');
-            $paginator = Paginator::generate($query);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->order_by_desc('id');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         $ui->display('bandwidth.tpl');
         break;
 

@@ -277,11 +277,9 @@ switch ($action) {
         if ($search != '') {
             if ($admin['user_type'] == 'SuperAdmin') {
                 $query = ORM::for_table('tbl_users')
-                    ->where_like('username', '%' . $search . '%');
-                $paginator = Paginator::generate($query, ['search' => $search]);
-                $d = $query
-                    ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                    ->where_like('username', '%' . $search . '%')
+                    ->order_by_asc('id');
+                $d = Paginator::findMany($query, ['search' => $search]);
             } else if ($admin['user_type'] == 'Admin') {
                 $query = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $search . '%')->where_any_is([
@@ -289,46 +287,36 @@ switch ($action) {
                         ['user_type' => 'Agent'],
                         ['user_type' => 'Sales'],
                         ['id' => $admin['id']]
-                    ]);
-                $paginator = Paginator::generate($query, ['search' => $search]);
-                $d = $query
-                    ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                    ])->order_by_asc('id');
+                $d = Paginator::findMany($query, ['search' => $search]);
             } else {
                 $query = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $search . '%')
                     ->where_any_is([
                         ['id' => $admin['id']],
                         ['root' => $admin['id']]
-                    ]);
-                $paginator = Paginator::generate($query, ['search' => $search]);
-                $d = $query
-                    ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                    ])->order_by_asc('id');
+                $d = Paginator::findMany($query, ['search' => $search]);
             }
         } else {
             if ($admin['user_type'] == 'SuperAdmin') {
-                $query = ORM::for_table('tbl_users');
-                $paginator = Paginator::generate($query);
-                $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                $query = ORM::for_table('tbl_users')->order_by_asc('id');
+                $d = Paginator::findMany($query);
             } else if ($admin['user_type'] == 'Admin') {
                 $query = ORM::for_table('tbl_users')->where_any_is([
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
                     ['user_type' => 'Sales'],
                     ['id' => $admin['id']]
-                ]);
-                $paginator = Paginator::generate($query);
-                $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                ])->order_by_asc('id');
+                $d = Paginator::findMany($query);
             } else {
                 $query = ORM::for_table('tbl_users')
                     ->where_any_is([
                         ['id' => $admin['id']],
                         ['root' => $admin['id']]
-                    ]);
-                $paginator = Paginator::generate($query);
-                $d = $query
-                    ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->findArray();
+                    ])->order_by_asc('id');
+                $d = Paginator::findMany($query);
             }
         }
         $admins = [];
@@ -353,7 +341,6 @@ switch ($action) {
         $ui->assign('admins', $admins);
         $ui->assign('d', $d);
         $ui->assign('search', $search);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_admin'); #HOOK
         $ui->display('users.tpl');
         break;

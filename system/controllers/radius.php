@@ -136,19 +136,14 @@ switch ($action) {
         $name = _post('name');
         if (empty($name)) {
             $query = ORM::for_table('nas', 'radius');
-            $paginator = Paginator::generate($query);
-            $nas = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $nas = Paginator::findMany($query);
         } else {
             $query = ORM::for_table('nas', 'radius')
                 ->where_like('nasname', $search)
                 ->where_like('shortname', $search)
                 ->where_like('description', $search);
-            $paginator = Paginator::generate($query, ['name' => $name]);
-            $nas = $query
-                ->offset($paginator['startpoint'])->limit($paginator['limit'])
-                ->find_many();
+            $nas = Paginator::findMany($query, ['name' => $name]);
         }
-        $ui->assign('paginator', $paginator);
         $ui->assign('name', $name);
         $ui->assign('nas', $nas);
         $ui->display('radius-nas.tpl');

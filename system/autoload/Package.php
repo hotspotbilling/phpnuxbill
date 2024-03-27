@@ -44,6 +44,7 @@ class Package
                 foreach ($bills as $k => $v) {
                     $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
                 }
+                $note .= $p['name_plan'] . " : " . Lang::moneyFormat($p['price']) . "\n";
             }
         }
 
@@ -520,7 +521,9 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
                     // Postpaid price always zero for first time
-                    $t->price = 0 + $add_cost;
+                    $note = '';
+                    $bills = [];
+                    $t->price = 0;
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }

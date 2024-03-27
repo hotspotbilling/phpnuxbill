@@ -192,23 +192,12 @@ switch ($action) {
             }
             if ($v == 'order') {
                 $v = 'order';
-                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username']);
-                $paginator = Paginator::generate($query);
-                $order = $query
-                    ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])
-                    ->order_by_desc('id')
-                    ->find_many();
-                $ui->assign('paginator', $paginator);
+                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username'])->order_by_desc('id');
+                $order = Paginator::findMany($query);
                 $ui->assign('order', $order);
             } else if ($v == 'activation') {
-                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username']);
-                $paginator = Paginator::generate($query);
-                $activation = $query->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])
-                    ->order_by_desc('id')
-                    ->find_many();
-                $ui->assign('paginator', $paginator);
+                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username'])->order_by_desc('id');
+                $activation = Paginator::findMany($query);
                 $ui->assign('activation', $activation);
             }
             $ui->assign('packages', User::_billing($customer['id']));
@@ -526,22 +515,17 @@ switch ($action) {
         $search = _post('search');
         run_hook('list_customers'); #HOOK
         if ($search != '') {
-            $query = ORM::for_table('tbl_customers')->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')");
-            $paginator = Paginator::generate($query, ['search' => $search]);
-            $d = $query->offset($paginator['startpoint'])
-                ->limit($paginator['limit'])
-                ->order_by_asc('username')
-                ->find_many();
+            $query = ORM::for_table('tbl_customers')
+            ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')")
+            ->order_by_asc('username');
+            $d = Paginator::findMany($query, ['search' => $search]);
         } else {
-            $query = ORM::for_table('tbl_customers');
-            $paginator = Paginator::generate($query);
-            $d = ORM::for_table('tbl_customers')
-                ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_customers')->order_by_asc('username');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('search', htmlspecialchars($search));
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         $ui->display('customers.tpl');
         break;
 }

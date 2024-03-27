@@ -120,16 +120,13 @@ switch ($action) {
         $name = _post('name');
         if ($name != '') {
             $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where_like('tbl_plans.name_plan', '%' . $name . '%');
-            $paginator = Paginator::generate($query, ['name'=> $name]);
-            $d =  $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $d = Paginator::findMany($query, ['name'=> $name]);
         } else {
             $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot');
-            $paginator = Paginator::generate($query);
-            $d =  $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_plans'); #HOOK
         $ui->display('hotspot.tpl');
         break;
@@ -396,16 +393,13 @@ switch ($action) {
         $name = _post('name');
         if ($name != '') {
             $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->where_like('tbl_plans.name_plan', '%' . $name . '%');
-            $paginator = Paginator::generate($query, ['name' => $name]);
-            $d =$query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
             $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE');
-            $paginator = Paginator::generate($query);
-            $d =$query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_ppoe'); #HOOK
         $ui->display('pppoe.tpl');
         break;
@@ -651,16 +645,13 @@ switch ($action) {
         $name = _post('name');
         if ($name != '') {
             $query = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->where_like('tbl_plans.name_plan', '%' . $name . '%');
-            $paginator = Paginator::generate($query, ['name' => $name]);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
             $query = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance');
-            $paginator = Paginator::generate($query);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_balance'); #HOOK
         $ui->display('balance.tpl');
         break;

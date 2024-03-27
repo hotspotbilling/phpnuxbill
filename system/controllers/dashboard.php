@@ -55,13 +55,9 @@ $ui->assign('c_all', $c_all);
 if ($config['hide_uet'] != 'yes') {
     //user expire
     $query = ORM::for_table('tbl_user_recharges')
-    ->where_lte('expiration', $mdate);
-    $paginator = Paginator::generate($query);
-    $expire = $query
-        ->offset($paginator['startpoint'])
-        ->limit($paginator['limit'])
-        ->order_by_desc('expiration')
-        ->find_many();
+        ->where_lte('expiration', $mdate)
+        ->order_by_desc('expiration');
+    $expire = Paginator::findMany($query);
 
     // Get the total count of expired records for pagination
     $totalCount = ORM::for_table('tbl_user_recharges')
@@ -72,7 +68,6 @@ if ($config['hide_uet'] != 'yes') {
     $paginator['total_count'] = $totalCount;
 
     // Assign the pagination HTML to the template variable
-    $ui->assign('paginator', $paginator);
     $ui->assign('expire', $expire);
 }
 

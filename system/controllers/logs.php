@@ -26,18 +26,15 @@ switch ($action) {
             r2(U . "logs/list/", 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
-            $query = ORM::for_table('tbl_logs')->where_like('description', '%' . $q . '%');
-            $paginator = Paginator::generate($query, ['q' => $q]);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_logs')->where_like('description', '%' . $q . '%')->order_by_desc('id');
+            $d = Paginator::findMany($query, ['q' => $q]);
         } else {
-            $query = ORM::for_table('tbl_logs');
-            $paginator = Paginator::generate($query);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_logs')->order_by_desc('id');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
         $ui->assign('q', $q);
-        $ui->assign('paginator', $paginator);
         $ui->display('logs.tpl');
         break;
     case 'radius':
@@ -48,18 +45,15 @@ switch ($action) {
             r2(U . "logs/radius/", 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
-            $query = ORM::for_table('radpostauth', 'radius')->where_like('username', '%' . $q . '%');
-            $paginator = Paginator::generate($query, ['q' => $q]);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('radpostauth', 'radius')->where_like('username', '%' . $q . '%')->order_by_desc('id');
+            $d = Paginator::findMany($query, ['q' => $q]);
         } else {
-            $query = ORM::for_table('radpostauth', 'radius');
-            $paginator = Paginator::generate($query);
-            $d = $query->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('radpostauth', 'radius')->order_by_desc('id');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
         $ui->assign('q', $q);
-        $ui->assign('paginator', $paginator);
         $ui->display('logs-radius.tpl');
         break;
 

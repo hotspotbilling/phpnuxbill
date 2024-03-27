@@ -19,13 +19,8 @@ switch ($action) {
         break;
     case 'history':
         $ui->assign('_system_menu', 'history');
-        $query = ORM::for_table('tbl_payment_gateway')->where('username', $user['username']);
-        $paginator = Paginator::generate($query);
-        $d = $query
-            ->order_by_desc('id')
-            ->offset($paginator['startpoint'])->limit($paginator['limit'])
-            ->find_many();
-        $ui->assign('paginator', $paginator);
+        $query = ORM::for_table('tbl_payment_gateway')->where('username', $user['username'])->order_by_desc('id');
+        $d = Paginator::findMany($query);
         $ui->assign('d', $d);
         $ui->assign('_title', Lang::T('Order History'));
         run_hook('customer_view_order_history'); #HOOK
