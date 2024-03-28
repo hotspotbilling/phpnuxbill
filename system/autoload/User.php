@@ -187,6 +187,7 @@ class User
             ->select('time')
             ->select('status')
             ->select('method')
+            ->select('plan_type')
             ->select('tbl_user_recharges.routers', 'routers')
             ->select('tbl_user_recharges.type', 'type')
             ->select('admin_id')

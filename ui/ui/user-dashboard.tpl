@@ -152,6 +152,7 @@
                             <td class="small text-success text-uppercase text-normal">{Lang::T('Type')}</td>
                             <td class="small mb15 text-success">
                                 <b>{if $_bill['prepaid'] eq yes}Prepaid{else}Postpaid{/if}</b>
+                                {Lang::T($_bill['plan_type'])}
                             </td>
                         </tr>
                         {if $nux_ip neq ''}
