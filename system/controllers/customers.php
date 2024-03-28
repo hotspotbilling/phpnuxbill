@@ -12,40 +12,15 @@ $ui->assign('_system_menu', 'customers');
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
-if (empty ($action)) {
+if (empty($action)) {
     $action = 'list';
 }
 
+$leafletpickerHeader = <<<EOT
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+EOT;
+
 switch ($action) {
-    case 'list':
-        $search = _post('search');
-        run_hook('list_customers'); #HOOK
-        if ($search != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_customers'), [
-                'username' => '%' . $search . '%',
-                'fullname' => '%' . $search . '%',
-                'phonenumber' => '%' . $search . '%',
-                'email' => '%' . $search . '%',
-                'service_type' => '%' . $search . '%'
-            ], $search);
-            $d = ORM::for_table('tbl_customers')
-                ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')")
-                ->offset($paginator['startpoint'])
-                ->limit($paginator['limit'])
-                ->order_by_asc('username')
-                ->find_many();
-        } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_customers'));
-            $d = ORM::for_table('tbl_customers')
-                ->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
-        }
-
-        $ui->assign('search', htmlspecialchars($search));
-        $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
-        $ui->display('customers.tpl');
-        break;
-
     case 'csv':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
@@ -89,6 +64,7 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        $ui->assign('xheader', $leafletpickerHeader);
         run_hook('view_add_customer'); #HOOK
         $ui->display('customers-add.tpl');
         break;
@@ -210,37 +186,25 @@ switch ($action) {
             $customFields = ORM::for_table('tbl_customers_fields')
                 ->where('customer_id', $customer['id'])
                 ->find_many();
-          
             $v = $routes['3'];
-            if (empty ($v)) {
+            if (empty($v)) {
                 $v = 'activation';
             }
             if ($v == 'order') {
                 $v = 'order';
-                $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'), ['username' => $customer['username']]);
-                $order = ORM::for_table('tbl_payment_gateway')
-                    ->where('username', $customer['username'])
-                    ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])
-                    ->order_by_desc('id')
-                    ->find_many();
-                $ui->assign('paginator', $paginator);
+                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username'])->order_by_desc('id');
+                $order = Paginator::findMany($query);
                 $ui->assign('order', $order);
             } else if ($v == 'activation') {
-                $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['username' => $customer['username']]);
-                $activation = ORM::for_table('tbl_transactions')
-                    ->where('username', $customer['username'])
-                    ->offset($paginator['startpoint'])
-                    ->limit($paginator['limit'])
-                    ->order_by_desc('id')
-                    ->find_many();
-                $ui->assign('paginator', $paginator);
+                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username'])->order_by_desc('id');
+                $activation = Paginator::findMany($query);
                 $ui->assign('activation', $activation);
             }
             $ui->assign('packages', User::_billing($customer['id']));
             $ui->assign('v', $v);
             $ui->assign('d', $customer);
             $ui->assign('customFields', $customFields);
+            $ui->assign('xheader', $leafletpickerHeader);
             $ui->display('customers-view.tpl');
         } else {
             r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);
@@ -260,6 +224,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('d', $d);
             $ui->assign('customFields', $customFields);
+            $ui->assign('xheader', $leafletpickerHeader);
             $ui->display('customers-edit.tpl');
         } else {
             r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);
@@ -370,13 +335,13 @@ switch ($action) {
             // Retrieve the customer ID of the newly created customer
             $customerId = $d->id();
             // Save Customers Attributes details
-            if (!empty ($custom_field_names) && !empty ($custom_field_values)) {
+            if (!empty($custom_field_names) && !empty($custom_field_values)) {
                 $totalFields = min(count($custom_field_names), count($custom_field_values));
                 for ($i = 0; $i < $totalFields; $i++) {
                     $name = $custom_field_names[$i];
                     $value = $custom_field_values[$i];
 
-                    if (!empty ($name)) {
+                    if (!empty($name)) {
                         $customField = ORM::for_table('tbl_customers_fields')->create();
                         $customField->customer_id = $customerId;
                         $customField->field_name = $name;
@@ -469,7 +434,7 @@ switch ($action) {
             // Update Customers Attributes values in tbl_customers_fields table
             foreach ($customFields as $customField) {
                 $fieldName = $customField['field_name'];
-                if (isset ($_POST['custom_fields'][$fieldName])) {
+                if (isset($_POST['custom_fields'][$fieldName])) {
                     $customFieldValue = $_POST['custom_fields'][$fieldName];
                     $customField->set('field_value', $customFieldValue);
                     $customField->save();
@@ -477,7 +442,7 @@ switch ($action) {
             }
 
             // Add new Customers Attributess
-            if (isset ($_POST['custom_field_name']) && isset ($_POST['custom_field_value'])) {
+            if (isset($_POST['custom_field_name']) && isset($_POST['custom_field_value'])) {
                 $newCustomFieldNames = $_POST['custom_field_name'];
                 $newCustomFieldValues = $_POST['custom_field_value'];
 
@@ -500,7 +465,7 @@ switch ($action) {
             }
 
             // Delete Customers Attributess
-            if (isset ($_POST['delete_custom_fields'])) {
+            if (isset($_POST['delete_custom_fields'])) {
                 $fieldsToDelete = $_POST['delete_custom_fields'];
                 foreach ($fieldsToDelete as $fieldName) {
                     // Delete the Customers Attributes with the given field name
@@ -530,7 +495,7 @@ switch ($action) {
                             Mikrotik::removeHotspotActiveUser($client, $d['username']);
                         } else {
                             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                            if (!empty ($d['pppoe_password'])) {
+                            if (!empty($d['pppoe_password'])) {
                                 Mikrotik::setPpoeUser($client, $c['username'], $d['pppoe_password']);
                             } else {
                                 Mikrotik::setPpoeUser($client, $c['username'], $password);
@@ -547,5 +512,20 @@ switch ($action) {
         break;
 
     default:
-        r2(U . 'customers/list', 'e', 'action not defined');
+        $search = _post('search');
+        run_hook('list_customers'); #HOOK
+        if ($search != '') {
+            $query = ORM::for_table('tbl_customers')
+            ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')")
+            ->order_by_asc('username');
+            $d = Paginator::findMany($query, ['search' => $search]);
+        } else {
+            $query = ORM::for_table('tbl_customers')->order_by_asc('username');
+            $d = Paginator::findMany($query);
+        }
+
+        $ui->assign('search', htmlspecialchars($search));
+        $ui->assign('d', $d);
+        $ui->display('customers.tpl');
+        break;
 }

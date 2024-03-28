@@ -17,7 +17,7 @@ use PEAR2\Net\RouterOS;
 require_once 'system/autoload/PEAR2/Autoload.php';
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
 switch ($action) {
@@ -26,15 +26,14 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_routers'), ['name' => '%' . $name . '%'], $name);
-            $d = ORM::for_table('tbl_routers')->where_like('name', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_routers')->where_like('name', '%' . $name . '%')->order_by_desc('id');
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_routers'));
-            $d = ORM::for_table('tbl_routers')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_routers')->order_by_desc('id');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_routers'); #HOOK
         $ui->display('routers.tpl');
         break;

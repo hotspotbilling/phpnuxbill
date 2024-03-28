@@ -64,7 +64,7 @@
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>

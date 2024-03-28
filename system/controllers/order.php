@@ -19,13 +19,8 @@ switch ($action) {
         break;
     case 'history':
         $ui->assign('_system_menu', 'history');
-        $paginator = Paginator::build(ORM::for_table('tbl_payment_gateway'), ['username' => $user['username']]);
-        $d = ORM::for_table('tbl_payment_gateway')
-            ->where('username', $user['username'])
-            ->order_by_desc('id')
-            ->offset($paginator['startpoint'])->limit($paginator['limit'])
-            ->find_many();
-        $ui->assign('paginator', $paginator);
+        $query = ORM::for_table('tbl_payment_gateway')->where('username', $user['username'])->order_by_desc('id');
+        $d = Paginator::findMany($query);
         $ui->assign('d', $d);
         $ui->assign('_title', Lang::T('Order History'));
         run_hook('customer_view_order_history'); #HOOK
@@ -107,8 +102,8 @@ switch ($action) {
         if (empty ($trx)) {
             r2(U . "order/package", 'w', Lang::T("Payment not found"));
         }
-        // jika url kosong, balikin ke buy
-        if (empty ($trx['pg_url_payment'])) {
+        // jika url kosong, balikin ke buy, kecuali cancel
+        if (empty ($trx['pg_url_payment']) && $routes['3'] != 'cancel') {
             r2(U . "order/buy/" . (($trx['routers_id'] == 0) ? $trx['routers'] : $trx['routers_id']) . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
         }
         if ($routes['3'] == 'check') {

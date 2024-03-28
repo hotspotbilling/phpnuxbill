@@ -2,6 +2,26 @@
 
 # CHANGELOG
 
+## 2024.3.26
+
+- Change paginator, to make easy customization using pagination.tpl
+
+## 2024.3.25
+
+- Fix maps on HTTP
+- Fix Cancel payment
+
+## 2024.3.23
+
+- Maps full height
+- Show Get Directions instead Coordinates
+- Maps Label always show
+
+## 2024.3.22
+
+- Fix Broadcast Message by @Focuslinkstech
+- Add Location Picker
+
 ## 2024.3.20
 
 - Fixing some bugs

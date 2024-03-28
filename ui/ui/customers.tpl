@@ -16,10 +16,10 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-                        <form id="site-search" method="post" action="{$_url}customers/list/">
+                        <form id="site-search" method="post" action="{$_url}customers/">
                             <div class="input-group">
-                                <input type="text" id="search-input" name="search" value="{$search}" class="form-control"
-                                    placeholder="{Lang::T('Search')}...">
+                                <input type="text" id="search-input" name="search" value="{$search}"
+                                    class="form-control" placeholder="{Lang::T('Search')}...">
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit"><span
                                             class="fa fa-search"></span></button>
@@ -28,8 +28,8 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}customers/add" class="btn btn-primary btn-block"><i
-                                class="ion ion-android-add"> </i> {Lang::T('Add New Contact')}</a>
+                        <a href="{$_url}customers/add" class="btn btn-primary btn-block"><i class="ion ion-android-add">
+                            </i> {Lang::T('Add New Contact')}</a>
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive table_mobile">
@@ -40,8 +40,7 @@
                                 <th>{Lang::T('Account Type')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Balance')}</th>
-                                <th>{Lang::T('Phone Number')}</th>
-                                <th>{Lang::T('Email')}</th>
+                                <th width="120px"></th>
                                 <th>{Lang::T('Package')}</th>
                                 <th>{Lang::T('Service Type')}</th>
                                 <th>{Lang::T('Created On')}</th>
@@ -53,20 +52,36 @@
                                 <tr>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
-                                          <td>{$ds['account_type']}</td>
+                                    <td>{$ds['account_type']}</td>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor: pointer;">{$ds['fullname']}</td>
                                     <td>{Lang::moneyFormat($ds['balance'])}</td>
-                                    <td>{$ds['phonenumber']}</td>
-                                    <td>{$ds['email']}</td>
+                                    <td align="center">
+                                        {if $ds['phonenumber']}
+                                            <a href="tel:{$ds['phonenumber']}" class="btn btn-default btn-xs"
+                                                title="{$ds['phonenumber']}"><i class="glyphicon glyphicon-earphone"></i></a>
+                                        {/if}
+                                        {if $ds['email']}
+                                            <a href="mailto:{$ds['email']}" class="btn btn-default btn-xs"
+                                                title="{$ds['email']}"><i class="glyphicon glyphicon-envelope"></i></a>
+                                        {/if}
+                                        {if $ds['coordinates']}
+                                            <a href="https://www.google.com/maps/dir//{$ds['coordinates']}/" target="_blank" class="btn btn-default btn-xs"
+                                                title="{$ds['coordinates']}"><i class="glyphicon glyphicon-map-marker"></i></a>
+                                        {/if}
+                                    </td>
                                     <td align="center" api-get-text="{$_url}autoload/customer_is_active/{$ds['id']}">
                                         <span class="label label-default">&bull;</span>
                                     </td>
                                     <td>{$ds['service_type']}</td>
                                     <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
                                     <td align="center">
-                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}"
+                                            style="margin: 0px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
+                                        <a href="{$_url}customers/edit/{$ds['id']}" id="{$ds['id']}"
+                                            style="margin: 0px; color:black"
+                                            class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Edit')}&nbsp;&nbsp;</a>
                                         <a href="{$_url}plan/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
                                             class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
                                     </td>
@@ -75,7 +90,7 @@
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>
@@ -83,23 +98,23 @@
 
 <script>
     // Functionality to filter table rows based on admin input
-    document.addEventListener('DOMContentLoaded', function () {
-            var searchInput = document.getElementById('search-input');
-            var tableRows = document.querySelectorAll('tbody tr');
+    document.addEventListener('DOMContentLoaded', function() {
+        var searchInput = document.getElementById('search-input');
+        var tableRows = document.querySelectorAll('tbody tr');
 
-            searchInput.addEventListener('input', function () {
-                var searchText = this.value.toLowerCase();
+        searchInput.addEventListener('input', function() {
+            var searchText = this.value.toLowerCase();
 
-                tableRows.forEach(function (row) {
-                    var rowData = row.textContent.toLowerCase();
+            tableRows.forEach(function(row) {
+                var rowData = row.textContent.toLowerCase();
 
-                    if (rowData.includes(searchText)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+                if (rowData.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             });
         });
+    });
 </script>
 {include file="sections/footer.tpl"}

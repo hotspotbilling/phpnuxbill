@@ -40,11 +40,10 @@ switch ($action) {
 
     case 'list-activated':
         $ui->assign('_system_menu', 'list-activated');
-        $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['username' => $user['username']]);
-        $d = ORM::for_table('tbl_transactions')->where('username', $user['username'])->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+        $query = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_asc('id');
+        $d = Paginator::findMany($query);
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('customer_view_activation_list'); #HOOK
         $ui->display('user-activation-list.tpl');
 

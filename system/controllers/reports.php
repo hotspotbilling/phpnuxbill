@@ -30,28 +30,26 @@ switch ($action) {
             r2(U . "logs/list/", 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['invoice' => '%' . $q . '%'], $q);
-            $d = ORM::for_table('tbl_transactions')->where_like('invoice', '%' . $q . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_transactions')->where_like('invoice', '%' . $q . '%')->order_by_desc('id');
+            $d = Paginator::findMany($query, ['q' => $q]);
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_transactions'));
-            $d = ORM::for_table('tbl_transactions')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_transactions')->order_by_desc('id');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('activation', $d);
         $ui->assign('q', $q);
-        $ui->assign('paginator', $paginator);
         $ui->display('reports-activation.tpl');
         break;
     case 'daily-report':
-        $paginator = Paginator::build(ORM::for_table('tbl_transactions'), ['recharged_on' => $mdate]);
-        $d = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
-        $dr = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->sum('price');
+        $query = ORM::for_table('tbl_transactions')->where('recharged_on', $mdate)->order_by_desc('id');
+        $d = Paginator::findMany($query);
+        $dr = $query->sum('price');
 
         $ui->assign('d', $d);
         $ui->assign('dr', $dr);
         $ui->assign('mdate', $mdate);
         $ui->assign('mtime', $mtime);
-        $ui->assign('paginator', $paginator);
         run_hook('view_daily_reports'); #HOOK
         $ui->display('reports-daily.tpl');
         break;

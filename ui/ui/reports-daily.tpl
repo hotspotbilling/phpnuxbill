@@ -51,7 +51,7 @@
                     </tbody>
                 </table>
             </div>
-            {$paginator['contents']}
+            {include file="pagination.tpl"}
 
             <div class="clearfix text-right total-sum mb10">
                 <h4 class="text-uppercase text-bold">{Lang::T('Total Income')}:</h4>

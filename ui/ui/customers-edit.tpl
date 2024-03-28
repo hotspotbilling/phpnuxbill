@@ -12,10 +12,10 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <span class="input-group-addon" id="basic-addon1">+</span>
                                 {else}
-                                <span class="input-group-addon" id="basic-addon1"><i
-                                        class="glyphicon glyphicon-phone-alt"></i></span>
+                                    <span class="input-group-addon" id="basic-addon1"><i
+                                            class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="username" value="{$d['username']}"
                                     required
@@ -41,10 +41,10 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <span class="input-group-addon" id="basic-addon1">+</span>
                                 {else}
-                                <span class="input-group-addon" id="basic-addon1"><i
-                                        class="glyphicon glyphicon-phone-alt"></i></span>
+                                    <span class="input-group-addon" id="basic-addon1"><i
+                                            class="glyphicon glyphicon-phone-alt"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="phonenumber" value="{$d['phonenumber']}"
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
@@ -78,16 +78,6 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Coordinates')}</label>
-                        <div class="col-md-9">
-                            <input name="coordinates" id="coordinates" class="form-control" value="{$d['coordinates']}">
-                            <span class="help-block">
-                                <small>{Lang::T('Latitude and Longitude coordinates for map must be separate with comma
-                                    ","')}</small>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Service Type')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="service_type" name="service_type">
@@ -98,15 +88,23 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="account_type" name="account_type">
                                 <option value="Personal" {if $d['account_type'] eq 'Personal' }selected{/if}>Personal
                                 </option>
-                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>Business</option>
-                             </select>
+                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>Business
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Coordinates')}</label>
+                        <div class="col-md-9">
+                            <input name="coordinates" id="coordinates" class="form-control" value="{$d['coordinates']}"
+                                placeholder="6.465422, 3.406448">
+                            <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
                         </div>
                     </div>
                 </div>
@@ -118,20 +116,20 @@
                 <div class="panel-body">
                     <!--Customers Attributes edit start -->
                     {if $customFields}
-                    {foreach $customFields as $customField}
-                    <div class="form-group">
-                        <label class="col-md-4 control-label"
-                            for="{$customField.field_name}">{$customField.field_name}</label>
-                        <div class="col-md-6">
-                            <input class="form-control" type="text" name="custom_fields[{$customField.field_name}]"
-                                id="{$customField.field_name}" value="{$customField.field_value}">
-                        </div>
-                        <label class="col-md-2">
-                            <input type="checkbox" name="delete_custom_fields[]" value="{$customField.field_name}">
-                            Delete
-                        </label>
-                    </div>
-                    {/foreach}
+                        {foreach $customFields as $customField}
+                            <div class="form-group">
+                                <label class="col-md-4 control-label"
+                                    for="{$customField.field_name}">{$customField.field_name}</label>
+                                <div class="col-md-6">
+                                    <input class="form-control" type="text" name="custom_fields[{$customField.field_name}]"
+                                        id="{$customField.field_name}" value="{$customField.field_value}">
+                                </div>
+                                <label class="col-md-2">
+                                    <input type="checkbox" name="delete_custom_fields[]" value="{$customField.field_name}">
+                                    Delete
+                                </label>
+                            </div>
+                        {/foreach}
                     {/if}
                     <!--Customers Attributes edit end -->
                     <!-- Customers Attributes add start -->
@@ -155,16 +153,16 @@
 </form>
 
 {literal}
-<script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function () {
-        var customFieldsContainer = document.getElementById('custom-fields-container');
-        var addCustomFieldButton = document.getElementById('add-custom-field');
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            var customFieldsContainer = document.getElementById('custom-fields-container');
+            var addCustomFieldButton = document.getElementById('add-custom-field');
 
-        addCustomFieldButton.addEventListener('click', function () {
-            var fieldIndex = customFieldsContainer.children.length;
-            var newField = document.createElement('div');
-            newField.className = 'form-group';
-            newField.innerHTML = `
+            addCustomFieldButton.addEventListener('click', function() {
+                var fieldIndex = customFieldsContainer.children.length;
+                var newField = document.createElement('div');
+                newField.className = 'form-group';
+                newField.innerHTML = `
                 <div class="col-md-4">
                     <input type="text" class="form-control" name="custom_field_name[]" placeholder="Name">
                 </div>
@@ -175,17 +173,58 @@
                     <button type="button" class="remove-custom-field btn btn-danger btn-sm">-</button>
                 </div>
             `;
-            customFieldsContainer.appendChild(newField);
-        });
+                customFieldsContainer.appendChild(newField);
+            });
 
-        customFieldsContainer.addEventListener('click', function (event) {
-            if (event.target.classList.contains('remove-custom-field')) {
-                var fieldContainer = event.target.parentNode.parentNode;
-                fieldContainer.parentNode.removeChild(fieldContainer);
-            }
+            customFieldsContainer.addEventListener('click', function(event) {
+                if (event.target.classList.contains('remove-custom-field')) {
+                    var fieldContainer = event.target.parentNode.parentNode;
+                    fieldContainer.parentNode.removeChild(fieldContainer);
+                }
+            });
         });
-    });
-</script>
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        function getLocation() {
+            if (window.location.protocol == "https:" && navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                setupMap(51.505, -0.09);
+            }
+        }
+
+        function showPosition(position) {
+            setupMap(position.coords.latitude, position.coords.longitude);
+        }
+
+        function setupMap(lat, lon) {
+            var map = L.map('map').setView([lat, lon], 13);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+        }).addTo(map);
+        var marker = L.marker([lat, lon]).addTo(map);
+        map.on('click', function(e) {
+            var coord = e.latlng;
+            var lat = coord.lat;
+            var lng = coord.lng;
+            var newLatLng = new L.LatLng(lat, lng);
+            marker.setLatLng(newLatLng);
+            $('#coordinates').val(lat + ',' + lng);
+        });
+        }
+        window.onload = function() {
+            {/literal}{if $d['coordinates']}
+                setupMap({$d['coordinates']});
+            {else}
+                getLocation();
+            {/if}{literal}
+        }
+    </script>
 {/literal}
 
 {include file="sections/footer.tpl"}

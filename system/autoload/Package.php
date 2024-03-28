@@ -44,6 +44,7 @@ class Package
                 foreach ($bills as $k => $v) {
                     $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
                 }
+                $note .= $p['name_plan'] . " : " . Lang::moneyFormat($p['price']) . "\n";
             }
         }
 
@@ -286,7 +287,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             } else {
                 if ($p['is_radius']) {
@@ -374,7 +375,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             }
         } else {
@@ -481,7 +482,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             } else {
                 if ($p['is_radius']) {
@@ -520,7 +521,9 @@ class Package
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
                     // Postpaid price always zero for first time
-                    $t->price = 0 + $add_cost;
+                    $note = '';
+                    $bills = [];
+                    $t->price = 0;
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }
@@ -569,7 +572,7 @@ class Package
                     "\nRouter: " . $router_name .
                     "\nGateway: " . $gateway .
                     "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price']) .
+                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                     "\nNote:\n" . $note);
             }
         }
