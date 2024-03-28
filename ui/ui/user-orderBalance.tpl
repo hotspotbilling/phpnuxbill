@@ -21,7 +21,7 @@
                                     </table>
                                 </div>
                                 <div class="box-body">
-                                    <a href="{$_url}order/buy/0/{$plan['id']}"
+                                    <a href="{$_url}order/gateway/0/{$plan['id']}"
                                         onclick="return confirm('{Lang::T('Buy Balance')}?')"
                                         class="btn btn-sm btn-block btn-primary">Buy</a>
                                 </div>

@@ -11,10 +11,9 @@
 
     <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="ui/ui/fonts/MaterialDesign/css/materialdesignicons.min.css">
 
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/skin-blue.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
+
     <style>
         ::-moz-selection {
             /* Code for Firefox */
@@ -35,30 +34,40 @@
 
         <section class="content">
             <div class="row">
-                <div class="col-md-3">
-                    <img src="./ui/ui/images/error.png" class="img-responsive hidden-sm hidden-xs">
-                </div>
-                <div class="col-md-6">
-                    <div class="box box-danger box-solid text-center">
-
+                <div class="col-md-10 col-md-offset-1">
+                    <div class="box box-danger box-solid">
                         <section class="content-header">
                             <h1 class="text-center">
                                 {$error_title}
                             </h1>
                         </section>
-                        <div class="box-title" style="font-size:xx-large; color:red">
-                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        </div>
                         <div class="box-body" style="font-size: larger;">
-                            <br><br>
+                            <center>
+                            <img src="./ui/ui/images/error.png" class="img-responsive hidden-sm hidden-xs"></center>
+                            <br>
                             {$error_message}
-                            <br><br><br>
+                            <br>
+                            Mikrotik troubleshooting: <br>
+                            <ul>
+                                <li>Make sure you use API Port, Default 8728</li>
+                                <li>Make sure Username and Password are correct</li>
+                                <li>Make sure your hosting not blocking port to external</li>
+                                <li>Make sure your Mikrotik accessible from PHPNuxBill</li>
+                            </ul>
+                            If you just update PHPNuxBill from upload files, try click Update Database
                         </div>
                         <div class="box-footer">
                             <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                <a href="./update.php?step=4" class="btn btn-info btn-sm btn-block">Update Database</a>
-                                <a href="{$_url}community#update" class="btn btn-primary btn-sm btn-block">Update
+                                <a href="./update.php?step=4" style="color: black;" class="btn btn-info btn-sm btn-block">Update Database</a>
+                                <a href="{$_url}community#update" style="color: black;" class="btn btn-success btn-sm btn-block">Update
                                     PHPNuxBill</a>
+                            </div>
+                            <br>
+                            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                            <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
+                            class="btn btn-success btn-sm btn-block" style="color: black;">Ask Github Community</a>
+                                <a href="https://t.me/phpnuxbill" target="_blank"
+                                    class="btn btn-primary btn-sm btn-block">Ask Telegram Community</a>
                             </div>
                             <br><br>
                             <a href="javascript::history.back()" onclick="history.back()"

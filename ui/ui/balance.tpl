@@ -12,24 +12,24 @@
 												<div class="input-group-addon">
 													<span class="fa fa-search"></span>
 												</div>
-												<input type="text" name="name" class="form-control" placeholder="{$_L['Search_by_Name']}...">
+												<input type="text" name="name" class="form-control" placeholder="{Lang::T('Search by Name')}...">
 												<div class="input-group-btn">
-													<button class="btn btn-success" type="submit">{$_L['Search']}</button>
+													<button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
 												</div>
 											</div>
 											</form>
 										</div>
 										<div class="col-md-4">
-											<a href="{$_url}services/balance-add" class="btn btn-primary btn-block waves-effect"><i class="ion ion-android-add"> </i> {$_L['New_Plan']}</a>
+											<a href="{$_url}services/balance-add" class="btn btn-primary btn-block"><i class="ion ion-android-add"> </i> {Lang::T('New Service Plan')}</a>
 										</div>&nbsp;
 									</div>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped table-condensed">
                                             <thead>
                                                 <tr>
-                                                    <th>{$_L['Plan_Name']}</th>
-                                                    <th>{$_L['Plan_Price']}</th>
-                                                    <th>{$_L['Manage']}</th>
+                                                    <th>{Lang::T('Plan Name')}</th>
+                                                    <th>{Lang::T('Plan Price')}</th>
+                                                    <th>{Lang::T('Manage')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -38,15 +38,15 @@
                                                     <td>{$ds['name_plan']}</td>
                                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                                     <td>
-                                                        <a href="{$_url}services/balance-edit/{$ds['id']}" class="btn btn-info btn-xs">{$_L['Edit']}</a>
-                                                        <a href="{$_url}services/balance-delete/{$ds['id']}" onclick="return confirm('{$_L['Delete']}?')" id="{$ds['id']}" class="btn btn-danger btn-xs">{$_L['Delete']}</a>
+                                                        <a href="{$_url}services/balance-edit/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
+                                                        <a href="{$_url}services/balance-delete/{$ds['id']}" onclick="return confirm('{Lang::T('Delete')}?')" id="{$ds['id']}" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                                     </td>
                                                 </tr>
                                             {/foreach}
                                             </tbody>
                                         </table>
                                     </div>
-                                    {$paginator['contents']}
+                                    {include file="pagination.tpl"}
 
 								</div>
 							</div>

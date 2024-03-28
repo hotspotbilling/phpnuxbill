@@ -3,7 +3,7 @@
 		<div class="row">
 			<div class="col-sm-12 col-md-12">
 				<div class="panel panel-primary panel-hovered panel-stacked mb30">
-					<div class="panel-heading">{$_L['Edit_Plan']}</div>
+					<div class="panel-heading">{Lang::T('Edit Service Plan')}</div>
 						<div class="panel-body">
                         <form class="form-horizontal" method="post" role="form" action="{$_url}services/balance-edit-post">
                         <input type="hidden" name="id" value="{$d['id']}">
@@ -19,13 +19,13 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-md-2 control-label">{$_L['Plan_Name']}</label>
+                                <label class="col-md-2 control-label">{Lang::T('Plan Name')}</label>
                                 <div class="col-md-6">
                                     <input type="text" required class="form-control" id="name" value="{$d['name_plan']}" name="name" maxlength="40" placeholder="Topup 100">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-md-2 control-label">{$_L['Plan_Price']}</label>
+                                <label class="col-md-2 control-label">{Lang::T('Plan Price')}</label>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-addon">{$_c['currency_code']}</span>
@@ -36,8 +36,8 @@
 
                             <div class="form-group">
                                 <div class="col-lg-offset-2 col-lg-10">
-                                    <button class="btn btn-success waves-effect waves-light" type="submit">{$_L['Save']}</button>
-                                    Or <a href="{$_url}services/balance">{$_L['Cancel']}</a>
+                                    <button class="btn btn-success" type="submit">{Lang::T('Save Changes')}</button>
+                                    Or <a href="{$_url}services/balance">{Lang::T('Cancel')}</a>
                                 </div>
                             </div>
                         </form>

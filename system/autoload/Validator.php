@@ -20,7 +20,7 @@ class Validator
      * @param array $hits
      * @return void
      */
-    private static function textHit($string, $exclude = "")
+    public static function textHit($string, $exclude = "")
     {
         if (empty($exclude)) return false;
         if (is_array($exclude)) {

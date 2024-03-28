@@ -2,6 +2,259 @@
 
 # CHANGELOG
 
+## 2024.3.26
+
+- Change paginator, to make easy customization using pagination.tpl
+
+## 2024.3.25
+
+- Fix maps on HTTP
+- Fix Cancel payment
+
+## 2024.3.23
+
+- Maps full height
+- Show Get Directions instead Coordinates
+- Maps Label always show
+
+## 2024.3.22
+
+- Fix Broadcast Message by @Focuslinkstech
+- Add Location Picker
+
+## 2024.3.20
+
+- Fixing some bugs
+
+## 2024.3.19
+
+- Add Customer Type Personal or Bussiness by @pro-cms
+- Fix Broadcast Message by @Focuslinkstech
+- Add Customer Geolocation by @Focuslinkstech
+- Change Customer Menu
+
+## 2024.3.18
+
+- Add Broadcasting SMS by @Focuslinkstech
+- Fix Notification with Bills
+
+## 2024.3.16
+
+- Fix Zero Charging
+- Fix Disconnect Customer from Radius without loop by @Gerandonk
+
+## 2024.3.15
+
+- Fix Customer View to list active Plan
+- Additional Bill using Customer Attributes
+
+## 2024.3.14
+
+- Add Note to Invoices
+- Add Additional Bill
+- View Invoice from Customer side
+
+## 2024.3.13
+
+- Postpaid System
+- Additional Cost
+
+## 2024.3.12
+
+- Check if Validity Period, so calculate price will not affected other validity
+- Add firewall using .htaccess for apache only
+- Multiple Payment Gateway by @Focuslinkstech
+- Fix Logic Multiple Payment gateway
+- Fix delete Attribute
+- Allow Delete Payment Gateway
+- Allow Delete Plugin
+
+## 2024.3.6
+
+- change attributes view
+
+## 2024.3.4
+
+- add [[username]] for reminder
+- fix agent show when editing
+- fix password admin when sending notification
+- add file exists for pages
+
+## 2024.3.3
+
+- Change loading button by @Focuslinkstech
+- Add Customer Announcements by @Gerandonk
+- Add PPPOE Period Validity by @Gerandonk
+
+## 2024.2.29
+
+- Fix Hook Functionality
+- Change Customer Menu
+
+## 2024.2.28
+
+- Fix Buy Plan with Balance
+- Add Expired date for reminder
+
+## 2024.2.27
+
+- fix path notification
+- redirect to dashboard if already login
+
+## 2024.2.26
+
+- Clean Unused JS and CSS
+- Add some Authorization check
+- Custom Path for folder
+- fix some bugs
+
+## 2024.2.23
+
+- Integrate with PhpNuxBill Printer
+- Fix Invoice
+- add admin ID in transaction
+
+## 2024.2.22
+
+- Add Loading when click submit
+- link to settings when hide widget
+
+## 2024.2.21
+
+- Fix SQL Installer
+- remove multiple space in language
+- Change Phone Number require OTP by @Focuslinkstech
+- Change burst Form
+- Delete Table Responsive, first Column Freeze
+
+## 2024.2.20
+
+- Fix list admin
+- Burst Limit
+- Pace Loading by @Focuslinkstech
+
+## 2024.2.19
+
+- Start API Development
+- Multiple Admin Level
+- Customer Attributes by @Focuslinkstech
+- Radius Menu
+
+## 2024.2.13
+
+- Auto translate language
+- change language structur to json
+- save collapse menu
+
+## 2024.2.12
+
+- Admin Level : SuperAdmin,Admin,Report,Agent,Sales
+- Export Customers to CSV
+- Session using Cookie
+
+## 2024.2.7
+
+- Hide Dashboard content
+
+## 2024.2.6
+
+- Cache graph for faster opening graph
+
+## 2024.2.5
+
+- Admin Dashboard Update
+  - Add Monthly Registered Customers
+  - Total Monthly Sales
+  - Active Users
+
+## 2024.2.2
+
+- Fix edit plan for user
+
+## 2024.1.24
+
+- Add Send test for SMS, Whatsapp and Telegram
+
+## 2024.1.19
+
+- Paid Plugin, Theme, and payment gateway marketplace using codecanyon.net
+- Fix Plugin manager List
+
+## 2024.1.18
+
+- fix(mikrotik): set pool $poolId always empty
+
+## 2024.1.17
+
+- Add minor change, for plugin, menu can have notifications by @Focuslinkstech
+
+## 2024.1.16
+
+- Add yellow color to table for plan not allowed to purchase
+- Fix Radius pool select
+- add price to reminder notification
+- Support thermal printer for invoice
+
+## 2024.1.15
+
+- Fix cron job for Plan only for admin by @Focuslinkstech
+
+## 2024.1.11
+
+- Add Plan only for admin by @Focuslinkstech
+- Fix Plugin Manager
+
+## 2024.1.9
+
+- Add Prefix when generate Voucher
+
+## 2024.1.8
+
+- User Expired Order by Expired Date
+
+## 2024.1.2
+
+- Pagination User Expired by @Focuslinkstech
+
+## 2023.12.21
+
+- Modern AdminLTE by @sabtech254
+- Update user-dashboard.tpl by @Focuslinkstech
+
+## 2023.12.19
+
+- Fix Search Customer
+- Disable Registration, Customer just activate voucher Code, and the voucher will be their password
+- Remove all used voucher codes
+
+## 2023.12.18
+
+- Split sms to 160 characters only for Mikrotik Modem
+
+## 2023.12.14
+
+- Can send SMS using Mikrotik with Modem Installed
+- Add Customer Type, so Customer can only show their PPPOE or Hotspot Package or both
+
+## 2023.11.17
+
+- Error details not show in Customer
+
+## 2023.11.15
+
+- Customer Multi Router package
+- Fix edit package, Admin can change Customer to another router
+
+## 2023.11.9
+
+- fix bug variable in cron
+- fix update plan
+
+## 2023.10.27
+
+- Backup and restore database
+- Fix checking radius client
+
 ## 2023.10.25
 
 - fix wrong file check in cron, error only for newly installed
@@ -115,7 +368,7 @@ Customer can be move to expired pool after plan expired by cron
 - Fix PDF Export by Period
 - Add pppoe_password for Customer, this pppoe_password only admin can change
 - Country Code Number Settings
-- Customer Meta Table for Custom Fields
+- Customer Meta Table for Customers Attributess
 - Fix Add and Edit Customer Form for admin
 - add Notification Message Editor
 - cron reminder

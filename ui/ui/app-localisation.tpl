@@ -3,12 +3,12 @@
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
-            <div class="panel-heading">{$_L['Localisation']}</div>
+            <div class="panel-heading">{Lang::T('Localisation')}</div>
             <div class="panel-body">
 
                 <form class="form-horizontal" method="post" role="form" action="{$_url}settings/localisation-post">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Timezone']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Timezone')}</label>
                         <div class="col-md-6">
                             <select name="tzone" id="tzone" class="form-control">
                                 {foreach $tlist as $value => $label}
@@ -19,7 +19,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Date_Format']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Date Format')}</label>
                         <div class="col-md-6">
                             <select class="form-control" name="date_format" id="date_format">
                                 <option value="d/m/Y" {if $_c['date_format'] eq 'd/m/Y'} selected="selected" {/if}>
@@ -44,40 +44,48 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Default_Language']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Default Language')}</label>
                         <div class="col-md-6">
                             <select class="form-control" name="lan" id="lan">
+                                {foreach $lani as $lanis}
+                                    <option value="{$lanis@key}" {if $_c['language'] eq $lanis@key} selected="selected" {/if}>
+                                        {$lanis@key}
+                                    </option>
+                                {/foreach}
+                                <option disabled>_________</option>
                                 {foreach $lan as $lans}
-                                    <option value="{$lans}" {if $_c['language'] eq $lans} selected="selected" {/if}>{$lans}
+                                    <option value="{$lans@key}" {if $_c['language'] eq $lans@key} selected="selected" {/if}>
+                                        {$lans@key}
                                     </option>
                                 {/foreach}
                             </select>
                         </div>
                         <div class="col-md-4 help-block">
-                            To add new Language, just add the folder, it will automatically detected
+                            <a href="{$_url}settings/language">{Lang::T('Language Editor')}</a>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Decimal_Point']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Decimal Point')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="dec_point" name="dec_point"
                                 value="{$_c['dec_point']}">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Thousands_Separator']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Thousands Separator')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="thousands_sep" name="thousands_sep"
                                 value="{$_c['thousands_sep']}">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{$_L['Currency_Code']}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Currency Code')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="currency_code" name="currency_code"
                                 value="{$_c['currency_code']}">
                         </div>
-                        <span class="help-block col-md-4">{$_L['currency_help']}</span>
+                        <span
+                            class="help-block col-md-4">{Lang::T('Keep it blank if you do not want to show currency code')}</span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Country Code Phone')}</label>
@@ -116,8 +124,8 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-primary waves-effect waves-light"
-                                type="submit">{$_L['Save']}</button>
+                            <button class="btn btn-primary"
+                                type="submit">{Lang::T('Save Changes')}</button>
                         </div>
                     </div>
                 </form>

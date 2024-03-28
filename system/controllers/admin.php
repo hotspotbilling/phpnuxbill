@@ -5,6 +5,10 @@
  *  by https://t.me/ibnux
  **/
 
+if(Admin::getID()){
+    r2(U.'dashboard');
+}
+
 if (isset($routes['1'])) {
     $do = $routes['1'];
 } else {
@@ -22,22 +26,20 @@ switch ($do) {
                 $d_pass = $d['password'];
                 if (Password::_verify($password, $d_pass) == true) {
                     $_SESSION['aid'] = $d['id'];
+                    Admin::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
-                    _log($username . ' ' . $_L['Login_Successful'], 'Admin', $d['id']);
-                    r2(U . 'dashboard');
+                    _log($username . ' ' . Lang::T('Login Successful'), $d['user_type'], $d['id']);
+                    _alert(Lang::T('Login Successful'),'success', "dashboard");
                 } else {
-                    _msglog('e', $_L['Invalid_Username_or_Password']);
-                    _log($username . ' ' . $_L['Failed_Login'], 'Admin');
-                    r2(U . 'admin');
+                    _log($username . ' ' . Lang::T('Failed Login'), $d['user_type']);
+                    _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
                 }
             } else {
-                _msglog('e', $_L['Invalid_Username_or_Password']);
-                r2(U . 'admin');
+                _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
             }
         } else {
-            _msglog('e', $_L['Invalid_Username_or_Password']);
-            r2(U . 'admin');
+            _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
         }
 
         break;

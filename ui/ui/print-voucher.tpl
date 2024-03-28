@@ -60,7 +60,7 @@
 
 <body>
     <page size="A4">
-        <form method="post" action="{$_url}prepaid/print-voucher/" class="no-print">
+        <form method="post" action="{$_url}plan/print-voucher/" class="no-print">
             <table width="100%" border="0" cellspacing="0" cellpadding="1" class="btn btn-default btn-sm">
                 <tr>
                     <td>From ID &gt; <input type="text" name="from_id" style="width:40px" value="{$from_id}"> limit
@@ -81,8 +81,8 @@
             </table>
             <hr>
             <center><button type="button" onclick="window.print()"
-                    class="btn btn-default btn-sm no-print">{$_L['Click_Here_to_Print']}</button><br>
-                {$_L['Print_Info']}<br>
+                    class="btn btn-default btn-sm no-print">{Lang::T('Click Here to Print')}</button><br>
+                {Lang::T('Print side by side, it will easy to cut')}<br>
                 show {$v|@count} vouchers from {$vc} vouchers<br>
                 from ID {$v[0]['id']} limit {$limit} vouchers
             </center>

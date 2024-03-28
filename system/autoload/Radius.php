@@ -15,7 +15,15 @@ class Radius
     public static function getClient()
     {
         global $config;
-        return (empty($config['radius_client'])) ? shell_exec('which radclient') : $config['radius_client'];
+        if(empty($config['radius_client'])){
+            if(function_exists("shell_exec")){
+                shell_exec('which radclient');
+            }else{
+                return "";
+            }
+        }else{
+            $config['radius_client'];
+        }
     }
 
     public static function getTableNas()
@@ -289,7 +297,15 @@ class Radius
 
     public static function disconnectCustomer($username)
     {
-        $nas = Radius::getTableNas()->findMany();
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+		/**
+		* Fix loop to all Nas but still detecting Hotspot Multylogin from other Nas
+		*/
+		$act = ORM::for_table('radacct')->where_raw("acctstoptime IS NULL")->where('username', $username)->find_one();
+        $nas = Radius::getTableNas()->where('nasname', $act['nasipaddress'])->find_many();
         $count = count($nas) * 15;
         set_time_limit($count);
         $result = [];
@@ -298,7 +314,7 @@ class Radius
             if (!empty($n['ports'])) {
                 $port = $n['ports'];
             }
-            $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username' | " . Radius::getClient() . " " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
+            $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username,Framed-IP-Address = " . $act['framedipaddress'] . "' | radclient -x " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
         }
         return $result;
     }

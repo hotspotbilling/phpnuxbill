@@ -6,11 +6,10 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Reports']);
+$ui->assign('_title', Lang::T('Reports'));
 $ui->assign('_sysfrm_menu', 'reports');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 $mdate = date('Y-m-d');
@@ -63,10 +62,11 @@ switch ($action) {
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
 
-        if(file_exists('system/uploads/logo.png')){
-            $logo = 'system/uploads/logo.png';
-        }else{
-            $logo = 'system/uploads/logo.default.png';
+        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
+        if (file_exists($UPLOAD_PATH . '/logo.png')) {
+            $logo = $UPLOAD_URL_PATH . '/logo.png';
+        } else {
+            $logo = $UPLOAD_URL_PATH . '/logo.default.png';
         }
 
         if ($x) {
@@ -75,21 +75,21 @@ switch ($action) {
 				<div id="address">
 					<h3>' . $config['CompanyName'] . '</h3>
 					' . $config['address'] . '<br>
-					' . $_L['Phone_Number'] . ': ' . $config['phone'] . '<br>
+					' . Lang::T('Phone Number') . ': ' . $config['phone'] . '<br>
 				</div>
-				<div id="logo"><img id="image" src="'.$logo.'" alt="logo" /></div>
+				<div id="logo"><img id="image" src="' . $logo . '" alt="logo" /></div>
 			</div>
-			<div id="header">' . $_L['All_Transactions_at_Date'] . ': ' . date($config['date_format'], strtotime($mdate)) . '</div>
+			<div id="header">' . Lang::T('All Transactions at Date') . ': ' . date($config['date_format'], strtotime($mdate)) . '</div>
 			<table id="customers">
 				<tr>
-				<th>' . $_L['Username'] . '</th>
-				<th>' . $_L['Plan_Name'] . '</th>
-				<th>' . $_L['Type'] . '</th>
-				<th>' . $_L['Plan_Price'] . '</th>
-				<th>' . $_L['Created_On'] . '</th>
-				<th>' . $_L['Expires_On'] . '</th>
-				<th>' . $_L['Method'] . '</th>
-				<th>' . $_L['Routers'] . '</th>
+				<th>' . Lang::T('Username') . '</th>
+				<th>' . Lang::T('Plan Name') . '</th>
+				<th>' . Lang::T('Type') . '</th>
+				<th>' . Lang::T('Plan Price') . '</th>
+				<th>' . Lang::T('Created On') . '</th>
+				<th>' . Lang::T('Expires On') . '</th>
+				<th>' . Lang::T('Method') . '</th>
+				<th>' . Lang::T('Routers') . '</th>
 				</tr>';
             $c = true;
             foreach ($x as $value) {
@@ -116,7 +116,7 @@ switch ($action) {
 				</tr>";
             }
             $html .= '</table>
-			<h4 class="text-uppercase text-bold">' . $_L['Total_Income'] . ':</h4>
+			<h4 class="text-uppercase text-bold">' . Lang::T('Total Income') . ':</h4>
 			<h3 class="sum">' . $config['currency_code'] . ' ' . number_format($xy, 2, $config['dec_point'], $config['thousands_sep']) . '</h3>';
             run_hook('print_pdf_by_date'); #HOOK
 
@@ -170,7 +170,7 @@ $style
 $html
 EOF;
             $mpdf->WriteHTML($nhtml);
-            $mpdf->Output(date('Y-m-d') . Package::_raid(4) . '.pdf', 'D');
+            $mpdf->Output(date('Ymd_His') . '.pdf', 'D');
         } else {
             echo 'No Data';
         }
@@ -235,10 +235,12 @@ EOF;
 
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
-        if(file_exists('system/uploads/logo.png')){
-            $logo = 'system/uploads/logo.png';
-        }else{
-            $logo = 'system/uploads/logo.default.png';
+
+        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
+        if (file_exists($UPLOAD_PATH . '/logo.png')) {
+            $logo = $UPLOAD_URL_PATH . '/logo.png';
+        } else {
+            $logo = $UPLOAD_URL_PATH . '/logo.default.png';
         }
 
         if ($x) {
@@ -247,21 +249,21 @@ EOF;
 				<div id="address">
 					<h3>' . $config['CompanyName'] . '</h3>
 					' . $config['address'] . '<br>
-					' . $_L['Phone_Number'] . ': ' . $config['phone'] . '<br>
+					' . Lang::T('Phone Number') . ': ' . $config['phone'] . '<br>
 				</div>
-				<div id="logo"><img id="image" src="'.$logo.'" alt="logo" /></div>
+				<div id="logo"><img id="image" src="' . $logo . '" alt="logo" /></div>
 			</div>
-			<div id="header">' . $_L['All_Transactions_at_Date'] . ': ' . date($config['date_format'], strtotime($fdate)) . ' - ' . date($config['date_format'], strtotime($tdate)) . '</div>
+			<div id="header">' . Lang::T('All Transactions at Date') . ': ' . date($config['date_format'], strtotime($fdate)) . ' - ' . date($config['date_format'], strtotime($tdate)) . '</div>
 			<table id="customers">
 				<tr>
-				<th>' . $_L['Username'] . '</th>
-				<th>' . $_L['Plan_Name'] . '</th>
-				<th>' . $_L['Type'] . '</th>
-				<th>' . $_L['Plan_Price'] . '</th>
-				<th>' . $_L['Created_On'] . '</th>
-				<th>' . $_L['Expires_On'] . '</th>
-				<th>' . $_L['Method'] . '</th>
-				<th>' . $_L['Routers'] . '</th>
+				<th>' . Lang::T('Username') . '</th>
+				<th>' . Lang::T('Plan Name') . '</th>
+				<th>' . Lang::T('Type') . '</th>
+				<th>' . Lang::T('Plan Price') . '</th>
+				<th>' . Lang::T('Created On') . '</th>
+				<th>' . Lang::T('Expires On') . '</th>
+				<th>' . Lang::T('Method') . '</th>
+				<th>' . Lang::T('Routers') . '</th>
 				</tr>';
             $c = true;
             foreach ($x as $value) {
@@ -288,7 +290,7 @@ EOF;
 				</tr>";
             }
             $html .= '</table>
-			<h4 class="text-uppercase text-bold">' . $_L['Total_Income'] . ':</h4>
+			<h4 class="text-uppercase text-bold">' . Lang::T('Total Income') . ':</h4>
 			<h3 class="sum">' . $config['currency_code'] . ' ' . number_format($xy, 2, $config['dec_point'], $config['thousands_sep']) . '</h3>';
 
             run_hook('pdf_by_period'); #HOOK
@@ -342,7 +344,7 @@ $style
 $html
 EOF;
             $mpdf->WriteHTML($nhtml);
-            $mpdf->Output(date('Y-m-d') . Package::_raid(4) . '.pdf', 'D');
+            $mpdf->Output(date('Ymd_His') . '.pdf', 'D');
         } else {
             echo 'No Data';
         }

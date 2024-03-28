@@ -5,15 +5,14 @@
  *  by https://t.me/ibnux
  **/
 _admin();
-$ui->assign('_title', $_L['Hotspot_Plans']);
+$ui->assign('_title', Lang::T('Hotspot Plans'));
 $ui->assign('_system_menu', 'services');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
-if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
 use PEAR2\Net\RouterOS;
@@ -61,7 +60,7 @@ switch ($action) {
                     $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
                     Mikrotik::addHotspotPlan($client, $plan['name_plan'], $plan['shared_users'], $rate);
                     $log .= "DONE : $plan[name_plan], $plan[shared_users], $rate<br>";
-                    if (!empty($plan['pool_expired'])) {
+                    if (!empty ($plan['pool_expired'])) {
                         Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired']);
                         $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
                     }
@@ -106,7 +105,7 @@ switch ($action) {
                     $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
                     Mikrotik::addPpoePlan($client, $plan['name_plan'], $plan['pool'], $rate);
                     $log .= "DONE : $plan[name_plan], $plan[pool], $rate<br>";
-                    if (!empty($plan['pool_expired'])) {
+                    if (!empty ($plan['pool_expired'])) {
                         Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired'], '512K/512K');
                         $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
                     }
@@ -120,15 +119,14 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['name_plan' => '%' . $name . '%', 'type' => 'Hotspot'], $name);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where_like('tbl_plans.name_plan', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where_like('tbl_plans.name_plan', '%' . $name . '%');
+            $d = Paginator::findMany($query, ['name'=> $name]);
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['type' => 'Hotspot']);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_plans'); #HOOK
         $ui->display('hotspot.tpl');
         break;
@@ -143,7 +141,7 @@ switch ($action) {
         break;
 
     case 'edit':
-        $id  = $routes['2'];
+        $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
@@ -159,7 +157,7 @@ switch ($action) {
         break;
 
     case 'delete':
-        $id  = $routes['2'];
+        $id = $routes['2'];
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
@@ -173,17 +171,20 @@ switch ($action) {
                     Mikrotik::removeHotspotPlan($client, $d['name_plan']);
                 } catch (Exception $e) {
                     //ignore exception, it means router has already deleted
+                } catch (Throwable $e) {
+                    //ignore exception, it means router has already deleted
                 }
             }
 
             $d->delete();
 
-            r2(U . 'services/hotspot', 's', $_L['Delete_Successfully']);
+            r2(U . 'services/hotspot', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
     case 'add-post':
         $name = _post('name');
+        $plan_type = _post('plan_type'); //Personal / Business
         $radius = _post('radius');
         $typebp = _post('typebp');
         $limit_type = _post('limit_type');
@@ -198,7 +199,9 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
+        $prepaid = _post('prepaid');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -208,16 +211,16 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
-        if (empty($radius)) {
+        if (empty ($radius)) {
             if ($routers == '') {
-                $msg .= $_L['All_field_is_required'] . '<br>';
+                $msg .= Lang::T('All field is required') . '<br>';
             }
         }
         $d = ORM::for_table('tbl_plans')->where('name_plan', $name)->where('type', 'Hotspot')->find_one();
         if ($d) {
-            $msg .= $_L['Plan_already_exist'] . '<br>';
+            $msg .= Lang::T('Name Plan Already Exist') . '<br>';
         }
 
         run_hook('add_plan'); #HOOK
@@ -240,6 +243,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $rate = trim($rate . " " . $b['burst']);
 
             $d = ORM::for_table('tbl_plans')->create();
             $d->name_plan = $name;
@@ -247,6 +251,7 @@ switch ($action) {
             $d->price = $price;
             $d->type = 'Hotspot';
             $d->typebp = $typebp;
+            $d->plan_type = $plan_type;
             $d->limit_type = $limit_type;
             $d->time_limit = $time_limit;
             $d->time_unit = $time_unit;
@@ -255,15 +260,17 @@ switch ($action) {
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
-            if (!empty($radius)) {
+            if (!empty ($radius)) {
                 $d->is_radius = 1;
                 $d->routers = '';
             } else {
                 $d->is_radius = 0;
                 $d->routers = $routers;
-                $d->pool_expired = $pool_expired;
             }
+            $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
+            $d->prepaid = $prepaid;
             $d->save();
             $plan_id = $d->id();
 
@@ -273,13 +280,13 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
                 }
             }
 
 
-            r2(U . 'services/hotspot', 's', $_L['Created_Successfully']);
+            r2(U . 'services/hotspot', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/add', 'e', $msg);
         }
@@ -289,6 +296,7 @@ switch ($action) {
     case 'edit-post':
         $id = _post('id');
         $name = _post('name');
+        $plan_type = _post('plan_type');
         $id_bw = _post('id_bw');
         $typebp = _post('typebp');
         $price = _post('price');
@@ -301,8 +309,10 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
-
+        $prepaid = _post('prepaid');
+        $routers = _post('routers');
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
             $msg .= 'The validity must be a number' . '<br>';
@@ -311,12 +321,12 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
         run_hook('edit_plan'); #HOOK
         if ($msg == '') {
@@ -338,13 +348,15 @@ switch ($action) {
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
 
+            $rate = trim($rate . " " . $b['burst']);
+
             if ($d['is_radius']) {
                 Radius::planUpSert($id, $radiusRate);
             } else {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
                 }
             }
@@ -357,41 +369,43 @@ switch ($action) {
             $d->time_limit = $time_limit;
             $d->time_unit = $time_unit;
             $d->data_limit = $data_limit;
+            $d->plan_type = $plan_type;
             $d->data_unit = $data_unit;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
             $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
+            $d->prepaid = $prepaid;
             $d->save();
 
-            r2(U . 'services/hotspot', 's', $_L['Updated_Successfully']);
+            r2(U . 'services/hotspot', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/edit/' . $id, 'e', $msg);
         }
         break;
 
     case 'pppoe':
-        $ui->assign('_title', $_L['PPPOE_Plans']);
+        $ui->assign('_title', Lang::T('PPPOE Plans'));
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pppoe.js"></script>');
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['name_plan' => '%' . $name . '%', 'type' => 'PPPOE'], $name);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->where_like('tbl_plans.name_plan', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->where_like('tbl_plans.name_plan', '%' . $name . '%');
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['type' => 'PPPOE'], $name);
-            $d = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_ppoe'); #HOOK
         $ui->display('pppoe.tpl');
         break;
 
     case 'pppoe-add':
-        $ui->assign('_title', $_L['PPPOE_Plans']);
+        $ui->assign('_title', Lang::T('PPPOE Plans'));
         $d = ORM::for_table('tbl_bandwidth')->find_many();
         $ui->assign('d', $d);
         $r = ORM::for_table('tbl_routers')->find_many();
@@ -401,8 +415,8 @@ switch ($action) {
         break;
 
     case 'pppoe-edit':
-        $ui->assign('_title', $_L['PPPOE_Plans']);
-        $id  = $routes['2'];
+        $ui->assign('_title', Lang::T('PPPOE Plans'));
+        $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
@@ -423,7 +437,7 @@ switch ($action) {
         break;
 
     case 'pppoe-delete':
-        $id  = $routes['2'];
+        $id = $routes['2'];
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
@@ -437,16 +451,19 @@ switch ($action) {
                     Mikrotik::removePpoePlan($client, $d['name_plan']);
                 } catch (Exception $e) {
                     //ignore exception, it means router has already deleted
+                } catch (Throwable $e) {
+                    //ignore exception, it means router has already deleted
                 }
             }
             $d->delete();
 
-            r2(U . 'services/pppoe', 's', $_L['Delete_Successfully']);
+            r2(U . 'services/pppoe', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
     case 'pppoe-add-post':
         $name = _post('name_plan');
+        $plan_type = _post('plan_type');
         $radius = _post('radius');
         $id_bw = _post('id_bw');
         $price = _post('price');
@@ -455,7 +472,10 @@ switch ($action) {
         $routers = _post('routers');
         $pool = _post('pool_name');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
+        $prepaid = _post('prepaid');
+
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -465,17 +485,17 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '' or $pool == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
-        if (empty($radius)) {
+        if (empty ($radius)) {
             if ($routers == '') {
-                $msg .= $_L['All_field_is_required'] . '<br>';
+                $msg .= Lang::T('All field is required') . '<br>';
             }
         }
 
         $d = ORM::for_table('tbl_plans')->where('name_plan', $name)->find_one();
         if ($d) {
-            $msg .= $_L['Plan_already_exist'] . '<br>';
+            $msg .= Lang::T('Name Plan Already Exist') . '<br>';
         }
         run_hook('add_ppoe'); #HOOK
         if ($msg == '') {
@@ -496,24 +516,28 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $rate = trim($rate . " " . $b['burst']);
 
             $d = ORM::for_table('tbl_plans')->create();
             $d->type = 'PPPOE';
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
             $d->price = $price;
+            $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->pool = $pool;
-            if (!empty($radius)) {
+            if (!empty ($radius)) {
                 $d->is_radius = 1;
                 $d->routers = '';
             } else {
                 $d->is_radius = 0;
                 $d->routers = $routers;
-                $d->pool_expired = $pool_expired;
             }
+            $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
+            $d->prepaid = $prepaid;
             $d->save();
             $plan_id = $d->id();
 
@@ -523,12 +547,12 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addPpoePlan($client, $name, $pool, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
                 }
             }
 
-            r2(U . 'services/pppoe', 's', $_L['Created_Successfully']);
+            r2(U . 'services/pppoe', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/pppoe-add', 'e', $msg);
         }
@@ -536,6 +560,7 @@ switch ($action) {
 
     case 'edit-pppoe-post':
         $id = _post('id');
+        $plan_type = _post('plan_type');
         $name = _post('name_plan');
         $id_bw = _post('id_bw');
         $price = _post('price');
@@ -544,7 +569,9 @@ switch ($action) {
         $routers = _post('routers');
         $pool = _post('pool_name');
         $pool_expired = _post('pool_expired');
+        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
+        $prepaid = _post('prepaid');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -554,13 +581,13 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '' or $pool == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
         run_hook('edit_ppoe'); #HOOK
         if ($msg == '') {
@@ -581,6 +608,7 @@ switch ($action) {
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $rate = trim($rate . " " . $b['burst']);
 
             if ($d['is_radius']) {
                 Radius::planUpSert($id, $radiusRate, $pool);
@@ -588,7 +616,7 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPpoePlan($client, $name, $pool, $rate);
-                if (!empty($pool_expired)) {
+                if (!empty ($pool_expired)) {
                     Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
                 }
             }
@@ -596,15 +624,18 @@ switch ($action) {
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
             $d->price = $price;
+            $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->routers = $routers;
             $d->pool = $pool;
             $d->pool_expired = $pool_expired;
+            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
+            $d->prepaid = $prepaid;
             $d->save();
 
-            r2(U . 'services/pppoe', 's', $_L['Updated_Successfully']);
+            r2(U . 'services/pppoe', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/pppoe-edit/' . $id, 'e', $msg);
         }
@@ -613,15 +644,14 @@ switch ($action) {
         $ui->assign('_title', Lang::T('Balance Plans'));
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['name_plan' => '%' . $name . '%', 'type' => 'Balance'], $name);
-            $d = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->where_like('tbl_plans.name_plan', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->where_like('tbl_plans.name_plan', '%' . $name . '%');
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_plans'), ['type' => 'Balance'], $name);
-            $d = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('tbl_plans')->where('tbl_plans.type', 'Balance');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_balance'); #HOOK
         $ui->display('balance.tpl');
         break;
@@ -632,20 +662,20 @@ switch ($action) {
         break;
     case 'balance-edit':
         $ui->assign('_title', Lang::T('Balance Plans'));
-        $id  = $routes['2'];
+        $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         $ui->assign('d', $d);
         run_hook('view_edit_balance'); #HOOK
         $ui->display('balance-edit.tpl');
         break;
     case 'balance-delete':
-        $id  = $routes['2'];
+        $id = $routes['2'];
 
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_balance'); #HOOK
             $d->delete();
-            r2(U . 'services/balance', 's', $_L['Delete_Successfully']);
+            r2(U . 'services/balance', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
     case 'balance-edit-post':
@@ -653,28 +683,30 @@ switch ($action) {
         $name = _post('name');
         $price = _post('price');
         $enabled = _post('enabled');
+        $prepaid = _post('prepaid');
 
         $msg = '';
         if (Validator::UnsignedNumber($price) == false) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
         run_hook('edit_ppoe'); #HOOK
         if ($msg == '') {
             $d->name_plan = $name;
             $d->price = $price;
             $d->enabled = $enabled;
+            $d->prepaid = 'yes';
             $d->save();
 
-            r2(U . 'services/balance', 's', $_L['Updated_Successfully']);
+            r2(U . 'services/balance', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/balance-edit/' . $id, 'e', $msg);
         }
@@ -689,12 +721,12 @@ switch ($action) {
             $msg .= 'The price must be a number' . '<br>';
         }
         if ($name == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_plans')->where('name_plan', $name)->find_one();
         if ($d) {
-            $msg .= $_L['Plan_already_exist'] . '<br>';
+            $msg .= Lang::T('Name Plan Already Exist') . '<br>';
         }
         run_hook('add_ppoe'); #HOOK
         if ($msg == '') {
@@ -708,9 +740,10 @@ switch ($action) {
             $d->routers = '';
             $d->pool = '';
             $d->enabled = $enabled;
+            $d->prepaid = 'yes';
             $d->save();
 
-            r2(U . 'services/balance', 's', $_L['Created_Successfully']);
+            r2(U . 'services/balance', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/balance-add', 'e', $msg);
         }

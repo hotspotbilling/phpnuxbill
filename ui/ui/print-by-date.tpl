@@ -22,17 +22,17 @@
 <div class="row">
     <div class="col-md-12">
         <div id="printable">
-            <h4>{$_L['All_Transactions_at_Date']}: {date($_c['date_format'], strtotime($mdate))}</h4>
+            <h4>{Lang::T('All Transactions at Date')}: {date($_c['date_format'], strtotime($mdate))}</h4>
             <div class="table-responsive">
                 <table class="table table-bordered table-condensed table-bordered" style="background: #ffffff">
-                    <th class="text-center">{$_L['Username']}</th>
-                    <th class="text-center">{$_L['Plan_Name']}</th>
-                    <th class="text-center">{$_L['Type']}</th>
-                    <th class="text-center">{$_L['Plan_Price']}</th>
-                    <th class="text-center">{$_L['Created_On']}</th>
-                    <th class="text-center">{$_L['Expires_On']}</th>
-                    <th class="text-center">{$_L['Method']}</th>
-                    <th class="text-center">{$_L['Routers']}</th>
+                    <th class="text-center">{Lang::T('Username')}</th>
+                    <th class="text-center">{Lang::T('Plan Name')}</th>
+                    <th class="text-center">{Lang::T('Type')}</th>
+                    <th class="text-center">{Lang::T('Plan Price')}</th>
+                    <th class="text-center">{Lang::T('Created On')}</th>
+                    <th class="text-center">{Lang::T('Expires On')}</th>
+                    <th class="text-center">{Lang::T('Method')}</th>
+                    <th class="text-center">{Lang::T('Routers')}</th>
                     {foreach $d as $ds}
                         <tr>
                             <td>{$ds['username']}</td>
@@ -48,11 +48,11 @@
                 </table>
             </div>
 			<div class="clearfix text-right total-sum mb10">
-				<h4 class="text-uppercase text-bold">{$_L['Total_Income']}:</h4>
+				<h4 class="text-uppercase text-bold">{Lang::T('Total Income')}:</h4>
 				<h3 class="sum">{$_c['currency_code']} {number_format($dr,2,$_c['dec_point'],$_c['thousands_sep'])}</h3>
 			</div>
         </div>
-        <button type="button" id="actprint" class="btn btn-default btn-sm no-print">{$_L['Click_Here_to_Print']}</button>
+        <button type="button" id="actprint" class="btn btn-default btn-sm no-print">{Lang::T('Click Here to Print')}</button>
     </div>
 </div>
 <script src="ui/ui/scripts/jquery-1.10.2.js"></script>

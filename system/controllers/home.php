@@ -6,7 +6,7 @@
  **/
 
 _auth();
-$ui->assign('_title', $_L['Dashboard']);
+$ui->assign('_title', Lang::T('Dashboard'));
 
 $user = User::_info();
 $ui->assign('_user', $user);
@@ -84,33 +84,38 @@ if (_post('send') == 'balance') {
     if ($router) {
         r2(U . "order/send/$router[id]/$active[plan_id]&u=" . trim(_post('username')), 's', Lang::T('Review package before recharge'));
     } else {
-        r2(U . 'package/order', 'w', Lang::T('Your friend do not have active package'));
+        r2(U . 'home', 'w', Lang::T('Your friend do not have active package'));
     }
 }
 
-//Client Page
-$bill = User::_billing();
-$ui->assign('_bill', $bill);
+$ui->assign('_bills', User::_billing());
 
-if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
-    $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
-    if ($config['enable_balance'] == 'yes') {
-        $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
-        if($user['balance']>$plan['price']){
-            r2(U . "order/pay/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
-        }else{
+if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['recharge'])->where('username', $user['username'])->findOne();
+    if ($bill) {
+        $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
+        if ($config['enable_balance'] == 'yes') {
+            $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
+            if(!$plan['enabled']){
+                r2(U . "home", 'e', 'Plan is not exists');
+            }
+            if ($user['balance'] > $plan['price']) {
+                r2(U . "order/pay/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+            } else {
+                r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+            }
+        } else {
             r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
         }
-    }else{
-        r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
     }
-}else if(isset($_GET['deactivate']) && $_GET['deactivate'] == 1){
+} else if (isset($_GET['deactivate']) && !empty($_GET['deactivate'])) {
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['deactivate'])->where('username', $user['username'])->findOne();
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
-        if($p['is_radius']){
+        if ($p['is_radius']) {
             Radius::customerDeactivate($user['username']);
-        }else{
-            try{
+        } else {
+            try {
                 $mikrotik = Mikrotik::info($bill['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 if ($bill['type'] == 'Hotspot') {
@@ -120,7 +125,7 @@ if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
                     Mikrotik::removePpoeUser($client, $bill['username']);
                     Mikrotik::removePpoeActive($client, $bill['username']);
                 }
-            }catch(Exception $e){
+            } catch (Exception $e) {
                 //ignore it maybe mikrotik has been deleted
             }
         }
@@ -128,10 +133,10 @@ if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
         $bill->expiration = date('Y-m-d');
         $bill->time = date('H:i:s');
         $bill->save();
-        _log('User ' . $bill['username'] . ' Deactivate '.$bill['namebp'], 'User', $bill['customer_id']);
-        Message::sendTelegram('User u' . $bill['username'] . ' Deactivate '.$bill['namebp']);
-        r2(U . 'home', 's', 'Success deactivate '.$bill['namebp']);
-    }else{
+        _log('User ' . $bill['username'] . ' Deactivate ' . $bill['namebp'], 'User', $bill['customer_id']);
+        Message::sendTelegram('User u' . $bill['username'] . ' Deactivate ' . $bill['namebp']);
+        r2(U . 'home', 's', 'Success deactivate ' . $bill['namebp']);
+    } else {
         r2(U . 'home', 'e', 'No Active Plan');
     }
 }
@@ -139,6 +144,7 @@ if(isset($_GET['recharge']) && $_GET['recharge'] == 1){
 if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
     if ($_GET['mikrotik'] == 'login') {
         $m = Mikrotik::info($bill['routers']);
         $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);

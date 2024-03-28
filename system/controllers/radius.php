@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -8,18 +9,17 @@ $ui->assign('_title', $_L['Plugin Manager']);
 $ui->assign('_system_menu', 'settings');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 
-if ($admin['user_type'] != 'Admin') {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
 switch ($action) {
 
     case 'nas-add':
-        $ui->assign('_system_menu', 'network');
+        $ui->assign('_system_menu', 'radius');
         $ui->assign('_title', "Network Access Server");
         $ui->assign('routers', ORM::for_table('tbl_routers')->find_many());
         $ui->display('radius-nas-add.tpl');
@@ -67,7 +67,7 @@ switch ($action) {
         }
         break;
     case 'nas-edit':
-        $ui->assign('_system_menu', 'network');
+        $ui->assign('_system_menu', 'radius');
         $ui->assign('_title', "Network Access Server");
 
         $id  = $routes['2'];
@@ -131,26 +131,19 @@ switch ($action) {
             r2(U . 'radius/nas-list', 'e', 'NAS Not found');
         }
     default:
-        $ui->assign('_system_menu', 'network');
+        $ui->assign('_system_menu', 'radius');
         $ui->assign('_title', "Network Access Server");
         $name = _post('name');
         if (empty($name)) {
-            $paginator = Paginator::build(ORM::for_table('nas', 'radius'));
-            $nas = ORM::for_table('nas', 'radius')->offset($paginator['startpoint'])->limit($paginator['limit'])->find_many();
+            $query = ORM::for_table('nas', 'radius');
+            $nas = Paginator::findMany($query);
         } else {
-            $paginator = Paginator::build(ORM::for_table('nas', 'radius'), [
-                'nasname' => '%'.$search.'%',
-                'shortname' => '%'.$search.'%',
-                'description' => '%'.$search.'%'
-            ]);
-            $nas = ORM::for_table('nas', 'radius')
-            ->where_like('nasname', $search)
-            ->where_like('shortname', $search)
-            ->where_like('description', $search)
-            ->offset($paginator['startpoint'])->limit($paginator['limit'])
-            ->find_many();
+            $query = ORM::for_table('nas', 'radius')
+                ->where_like('nasname', $search)
+                ->where_like('shortname', $search)
+                ->where_like('description', $search);
+            $nas = Paginator::findMany($query, ['name' => $name]);
         }
-        $ui->assign('paginator', $paginator);
         $ui->assign('name', $name);
         $ui->assign('nas', $nas);
         $ui->display('radius-nas.tpl');

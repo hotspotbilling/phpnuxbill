@@ -25,7 +25,7 @@ try {
 }
 
 if ($cn == '1') {
-    if ($_POST['radius'] == 'yes') {
+    if (isset($_POST['radius']) && $_POST['radius'] == 'yes') {
         $input = '<?php
 
 define(\'APP_URL\', \'' . $appurl . '\');
@@ -83,7 +83,7 @@ if($_app_stage!=\'Live\'){
     fclose($fh);
     $sql = file_get_contents('phpnuxbill.sql');
     $qr = $dbh->exec($sql);
-    if ($_POST['radius'] == 'yes') {
+    if (isset($_POST['radius']) && $_POST['radius'] == 'yes') {
         $sql = file_get_contents('radius.sql');
         $qrs = $dbh->exec($sql);
     }

@@ -6,19 +6,18 @@
  **/
 
 _admin();
-$ui->assign('_title', $_L['Network']);
+$ui->assign('_title', Lang::T('Network'));
 $ui->assign('_system_menu', 'network');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 use PEAR2\Net\RouterOS;
 
 require_once 'system/autoload/PEAR2/Autoload.php';
 
-if ($admin['user_type'] != 'Admin') {
-    r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
 switch ($action) {
@@ -27,15 +26,14 @@ switch ($action) {
 
         $name = _post('name');
         if ($name != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_routers'), ['name' => '%' . $name . '%'], $name);
-            $d = ORM::for_table('tbl_routers')->where_like('name', '%' . $name . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_routers')->where_like('name', '%' . $name . '%')->order_by_desc('id');
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_routers'));
-            $d = ORM::for_table('tbl_routers')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_routers')->order_by_desc('id');
+            $d = Paginator::findMany($query);
         }
 
         $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
         run_hook('view_list_routers'); #HOOK
         $ui->display('routers.tpl');
         break;
@@ -66,7 +64,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_routers')->find_one($id);
         if ($d) {
             $d->delete();
-            r2(U . 'routers/list', 's', $_L['Delete_Successfully']);
+            r2(U . 'routers/list', 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -83,12 +81,12 @@ switch ($action) {
             $msg .= 'Name should be between 5 to 30 characters' . '<br>';
         }
         if ($ip_address == '' or $username == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $d = ORM::for_table('tbl_routers')->where('ip_address', $ip_address)->find_one();
         if ($d) {
-            $msg .= $_L['Router_already_exist'] . '<br>';
+            $msg .= Lang::T('IP Router Already Exist') . '<br>';
         }
         if (strtolower($name) == 'radius') {
             $msg .= '<b>Radius</b> name is reserved<br>';
@@ -106,7 +104,7 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->save();
 
-            r2(U . 'routers/list', 's', $_L['Created_Successfully']);
+            r2(U . 'routers/list', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'routers/add', 'e', $msg);
         }
@@ -125,14 +123,14 @@ switch ($action) {
             $msg .= 'Name should be between 5 to 30 characters' . '<br>';
         }
         if ($ip_address == '' or $username == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
+            $msg .= Lang::T('All field is required') . '<br>';
         }
 
         $id = _post('id');
         $d = ORM::for_table('tbl_routers')->find_one($id);
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         if ($d['name'] != $name) {
@@ -185,7 +183,7 @@ switch ($action) {
                 $p->set('routers', $name);
                 $p->save();
             }
-            r2(U . 'routers/list', 's', $_L['Updated_Successfully']);
+            r2(U . 'routers/list', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'routers/edit/' . $id, 'e', $msg);
         }

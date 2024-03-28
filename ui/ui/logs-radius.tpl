@@ -15,9 +15,9 @@
                                     <span class="fa fa-search"></span>
                                 </div>
                                 <input type="text" name="q" class="form-control" value="{$q}"
-                                    placeholder="{$_L['Search_by_Name']}...">
+                                    placeholder="{Lang::T('Search by Name')}...">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success" type="submit">{$_L['Search']}</button>
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>
                             </div>
                         </form>
@@ -53,7 +53,7 @@
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>

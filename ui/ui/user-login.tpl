@@ -4,12 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>{$_title} - {$_L['Login']}</title>
+    <title>{Lang::T('Login')} - {$_c['CompanyName']}</title>
     <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/adminlte.min.css">
-
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
 </head>
 
 <body>
@@ -31,19 +30,22 @@
         <div class="row">
             <div class="col-sm-6 col-sm-offset-1">
                 <div class="panel panel-info">
-                    <div class="panel-heading">{$_L['Announcement']}</div>
+                    <div class="panel-heading">{Lang::T('Announcement')}</div>
                     <div class="panel-body">
-                        {include file="$_path/../pages/Announcement.html"}
+                    {$Announcement = "{$PAGES_PATH}/Announcement.html"}
+                    {if file_exists($Announcement)}
+                        {include file=$Announcement}
+                    {/if}
                     </div>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="panel panel-primary">
-                    <div class="panel-heading">{$_L['Sign_In_Member']}</div>
+                    <div class="panel-heading">{Lang::T('Log in to Member Panel')}</div>
                     <div class="panel-body">
                         <form action="{$_url}login/post" method="post">
                             <div class="form-group">
-                                <label>{$_L['Phone_Number']}</label>
+                                <label>{Lang::T('Phone Number')}</label>
                                 <div class="input-group">
                                     {if $_c['country_code_phone']!= ''}
                                         <span class="input-group-addon" id="basic-addon1">+</span>
@@ -52,14 +54,14 @@
                                                 class="glyphicon glyphicon-phone-alt"></i></span>
                                     {/if}
                                     <input type="text" class="form-control" name="username"
-                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {$_L['Phone_Number']}">
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
                                 </div>
 
                             </div>
                             <div class="form-group">
-                                <label>{$_L['Password']}</label>
+                                <label>{Lang::T('Password')}</label>
                                 <input type="password" class="form-control" name="password"
-                                    placeholder="{$_L['Password']}">
+                                    placeholder="{Lang::T('Password')}">
                             </div>
 
                             <div class="clearfix hidden">
@@ -72,10 +74,10 @@
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">
-                                    <a href="{$_url}register" class="btn btn-success">{$_L['Register']}</a>
+                                    <a href="{$_url}register" class="btn btn-success">{Lang::T('Register')}</a>
                                 </div>
                                 <div class="btn-group">
-                                    <button type="submit" class="btn btn-primary">{$_L['Login']}</button>
+                                    <button type="submit" class="btn btn-primary">{Lang::T('Login')}</button>
                                 </div>
                             </div>
                             <br>

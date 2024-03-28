@@ -7,7 +7,7 @@
 
 
 _auth();
-$ui->assign('_title', $_L['My_Account']);
+$ui->assign('_title', Lang::T('My Account'));
 $ui->assign('_system_menu', 'accounts');
 
 $action = $routes['1'];
@@ -42,17 +42,17 @@ switch ($action) {
                     $c = ORM::for_table('tbl_user_recharges')->where('username', $user['username'])->find_one();
                     if ($c) {
                         $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
-                        if($p['is_radius']){
-                            if($c['type'] == 'Hotspot' || ($c['type'] == 'PPPOE' && empty($d['pppoe_password']))){
+                        if ($p['is_radius']) {
+                            if ($c['type'] == 'Hotspot' || ($c['type'] == 'PPPOE' && empty($d['pppoe_password']))) {
                                 Radius::customerUpsert($d, $p);
                             }
-                        }else{
+                        } else {
                             $mikrotik = Mikrotik::info($c['routers']);
                             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                             if ($c['type'] == 'Hotspot') {
-                                    Mikrotik::setHotspotUser($client, $c['username'], $npass);
-                                    Mikrotik::removeHotspotActiveUser($client, $user['username']);
-                            } else if(empty($d['pppoe_password'])){
+                                Mikrotik::setHotspotUser($client, $c['username'], $npass);
+                                Mikrotik::removeHotspotActiveUser($client, $user['username']);
+                            } else if (empty($d['pppoe_password'])) {
                                 // only change when pppoe_password empty
                                 Mikrotik::setPpoeUser($client, $c['username'], $npass);
                                 Mikrotik::removePpoeActive($client, $user['username']);
@@ -62,18 +62,18 @@ switch ($action) {
                     $d->password = $npass;
                     $d->save();
 
-                    _msglog('s', $_L['Password_Changed_Successfully']);
+                    _msglog('s', Lang::T('Password changed successfully, Please login again'));
                     _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
 
                     r2(U . 'login');
                 } else {
-                    r2(U . 'accounts/change-password', 'e', $_L['Incorrect_Current_Password']);
+                    r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
                 }
             } else {
-                r2(U . 'accounts/change-password', 'e', $_L['Incorrect_Current_Password']);
+                r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
             }
         } else {
-            r2(U . 'accounts/change-password', 'e', $_L['Incorrect_Current_Password']);
+            r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
         }
         break;
 
@@ -84,7 +84,7 @@ switch ($action) {
             $ui->assign('d', $d);
             $ui->display('user-profile.tpl');
         } else {
-            r2(U . 'home', 'e', $_L['Account_Not_Found']);
+            r2(U . 'home', 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -105,7 +105,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_customers')->find_one($user['id']);
         if ($d) {
         } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
+            $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         if ($msg == '') {
@@ -115,11 +115,138 @@ switch ($action) {
             $d->phonenumber = $phonenumber;
             $d->save();
 
-            _log('[' . $user['username'] . ']: ' . $_L['User_Updated_Successfully'], 'User', $user['id']);
-            r2(U . 'accounts/profile', 's', $_L['User_Updated_Successfully']);
+            _log('[' . $user['username'] . ']: ' . Lang::T('User Updated Successfully'), 'User', $user['id']);
+            r2(U . 'accounts/profile', 's', Lang::T('User Updated Successfully'));
         } else {
             r2(U . 'accounts/profile', 'e', $msg);
         }
+        break;
+
+
+    case 'phone-update':
+
+        $d = ORM::for_table('tbl_customers')->find_one($user['id']);
+        if ($d) {
+            //run_hook('customer_view_edit_profile'); #HOOK
+            $ui->assign('d', $d);
+            $ui->display('user-phone-update.tpl');
+        } else {
+            r2(U . 'home', 'e', Lang::T('Account Not Found'));
+        }
+        break;
+
+    case 'phone-update-otp':
+        $phone = _post('phone');
+        $username = $user['username'];
+        $otpPath = $CACHE_PATH . '/sms/';
+
+        // Validate the phone number format
+        if (!preg_match('/^[0-9]{10,}$/', $phone)) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid phone number format'));
+        }
+
+        if (empty($config['sms_url'])) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('SMS server not Available, Please try again later'));
+        }
+
+        if (!empty($config['sms_url'])) {
+            if (!empty($phone)) {
+                $d = ORM::for_table('tbl_customers')->where('username', $username)->where('phonenumber', $phone)->find_one();
+                if ($d) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('You cannot use your current phone number'));
+                }
+                if (!file_exists($otpPath)) {
+                    mkdir($otpPath);
+                    touch($otpPath . 'index.html');
+                }
+                $otpFile = $otpPath . sha1($username . $db_password) . ".txt";
+                $phoneFile = $otpPath . sha1($username . $db_password) . "_phone.txt";
+
+                // expired 10 minutes
+                if (file_exists($otpFile) && time() - filemtime($otpFile) < 1200) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('Please wait ' . (1200 - (time() - filemtime($otpFile))) . ' seconds before sending another SMS'));
+                } else {
+                    $otp = rand(100000, 999999);
+                    file_put_contents($otpFile, $otp);
+                    file_put_contents($phoneFile, $phone);
+                    // send send OTP to user
+                    if ($config['phone_otp_type'] === 'sms') {
+                        Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    } elseif ($config['phone_otp_type'] === 'whatsapp') {
+                        Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    } elseif ($config['phone_otp_type'] === 'both') {
+                        Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                        Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                    }
+                    //redirect after sending OTP
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code has been sent to your phone'));
+                }
+            }
+        }
+
+        break;
+
+    case 'phone-update-post':
+        $phone = _post('phone');
+        $otp_code = _post('otp');
+        $username = $user['username'];
+        $otpPath = $CACHE_PATH . '/sms/';
+
+        // Validate the phone number format
+        if (!preg_match('/^[0-9]{10,}$/', $phone)) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid phone number format'));
+            exit();
+        }
+
+        if (!empty($config['sms_url'])) {
+            $otpFile = $otpPath . sha1($username . $db_password) . ".txt";
+            $phoneFile = $otpPath . sha1($username . $db_password) . "_phone.txt";
+
+            // Check if OTP file exists
+            if (!file_exists($otpFile)) {
+                r2(U . 'accounts/phone-update', 'e', Lang::T('Please request OTP first'));
+                exit();
+            }
+
+            // expired 10 minutes
+            if (time() - filemtime($otpFile) > 1200) {
+                unlink($otpFile);
+                unlink($phoneFile);
+                r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code expired'));
+                exit();
+            } else {
+                $code = file_get_contents($otpFile);
+
+                // Check if OTP code matches
+                if ($code != $otp_code) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('Wrong Verification code'));
+                    exit();
+                }
+
+                // Check if the phone number matches the one that requested the OTP
+                $savedPhone = file_get_contents($phoneFile);
+                if ($savedPhone !== $phone) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('The phone number does not match the one that requested the OTP'));
+                    exit();
+                }
+
+                // OTP verification successful, delete OTP and phone number files
+                unlink($otpFile);
+                unlink($phoneFile);
+            }
+        } else {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('SMS server not available'));
+            exit();
+        }
+
+        // Update the phone number in the database
+        $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+        if ($d) {
+            $d->phonenumber = Lang::phoneFormat($phone);
+            $d->save();
+        }
+
+        r2(U . 'accounts/profile', 's', Lang::T('Phone number updated successfully'));
         break;
 
     default:

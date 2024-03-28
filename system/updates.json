@@ -6,34 +6,89 @@
         "ALTER TABLE `tbl_customers_meta` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;"
     ],
     "2023.8.14": [
-        "ALTER TABLE `tbl_customers` ADD `pppoe_password` varchar(45) NOT NULL DEFAULT '1' COMMENT 'For PPPOE Login' AFTER `password`;",
+        "ALTER TABLE `tbl_customers` ADD `pppoe_password` varchar(45) NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `password`;",
         "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
         "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
         "ALTER TABLE `tbl_customers` ADD `auto_renewal` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Auto renewall using balance' AFTER `balance`;"
     ],
-    "2023.8.23" : [
-        "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT 'For PPPOE Login';"
+    "2023.8.23": [
+        "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login';"
     ],
-    "2023.8.28" : [
+    "2023.8.28": [
         "ALTER TABLE `tbl_user_recharges` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;",
         "ALTER TABLE `tbl_transactions` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;"
     ],
-    "2023.9.5" : [
+    "2023.9.5": [
         "DROP TABLE `tbl_language`;",
         "ALTER TABLE `tbl_plans` ADD `pool_expired`  varchar(40) NOT NULL DEFAULT '' AFTER `pool`;"
     ],
-    "2023.9.27" : [
+    "2023.9.27": [
         "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
         "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
     ],
-    "2023.9.28" : [
+    "2023.9.28": [
         "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
         "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
     ],
-    "2023.10.1" : [
+    "2023.10.1": [
         "ALTER TABLE `tbl_plans` ADD `is_radius` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '1 is radius' AFTER `routers`; "
     ],
-    "2023.10.24" : [
+    "2023.10.24": [
         "ALTER TABLE `nas` ADD `routers` VARCHAR(32) NOT NULL DEFAULT '' AFTER `description`;"
+    ],
+    "2023.12.15": [
+        "ALTER TABLE `tbl_customers` ADD `service_type` ENUM('Hotspot','PPPoE','Others') DEFAULT 'Others' COMMENT 'For selecting user type' AFTER `balance`;"
+    ],
+    "2024.1.11": [
+        "ALTER TABLE `tbl_plans` ADD `allow_purchase` ENUM('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page' AFTER `enabled`;"
+    ],
+    "2024.2.7": [
+        "ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;",
+        "ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;"
+    ],
+    "2024.2.12": [
+        "ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+    ],
+    "2024.2.15": [
+        "ALTER TABLE `tbl_users` CHANGE `password` `password` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+        "ALTER TABLE `tbl_users` ADD `phone` VARCHAR(32) NOT NULL DEFAULT '' AFTER `password`, ADD `email` VARCHAR(128) NOT NULL DEFAULT '' AFTER `phone`, ADD `city` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kota' AFTER `email`, ADD `subdistrict` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kecamatan' AFTER `city`, ADD `ward` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kelurahan' AFTER `subdistrict`;"
+    ],
+    "2024.2.16": [
+        "ALTER TABLE `tbl_customers` ADD `created_by` INT NOT NULL DEFAULT '0' AFTER `auto_renewal`;"
+    ],
+    "2024.2.19": [
+        "CREATE TABLE `tbl_customers_fields` (`id` INT PRIMARY KEY AUTO_INCREMENT, `customer_id` INT NOT NULL, `field_name` VARCHAR(255) NOT NULL, `field_value` VARCHAR(255) NOT NULL, FOREIGN KEY (customer_id) REFERENCES tbl_customers(id));"
+    ],
+    "2024.2.20" : [
+        "ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'address list' AFTER `pool_expired`;",
+        "ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;"
+    ],
+    "2024.2.20.1" : [
+        "DROP TABLE IF EXISTS `tbl_customers_meta`;"
+    ],
+    "2024.2.23" : [
+        "ALTER TABLE `tbl_transactions` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;",
+        "ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;"
+    ],
+    "2024.3.3" : [
+		"ALTER TABLE `tbl_plans` CHANGE `validity_unit` `validity_unit` ENUM('Mins','Hrs','Days','Months','Period') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+    ],
+    "2024.3.12" : [
+        "ALTER TABLE `tbl_plans` CHANGE `allow_purchase` `prepaid` ENUM('yes','no') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'yes' COMMENT 'is prepaid';"
+    ],
+    "2024.3.14" : [
+        "ALTER TABLE `tbl_transactions` ADD `note` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'for note' AFTER `type`;"
+    ],
+    "2024.3.19" : [
+        "ALTER TABLE `tbl_customers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates' AFTER `email`;"
+    ],
+    "2024.3.19.1" : [
+        "ALTER TABLE `tbl_customers` ADD `account_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' AFTER `coordinates`;"
+    ],
+    "2024.3.19.2" : [
+        "ALTER TABLE `tbl_plans` ADD `plan_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' ;"
+    ],
+    "2023.3.20": [
+        "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login';"
     ]
 }

@@ -5,27 +5,45 @@
  *  by https://t.me/ibnux
  **/
 _admin();
-$ui->assign('_title', $_L['Settings']);
+$ui->assign('_title', Lang::T('Settings'));
 $ui->assign('_system_menu', 'settings');
 
 $action = $routes['1'];
-$admin = Admin::_info();
 $ui->assign('_admin', $admin);
 
 switch ($action) {
     case 'app':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        if (file_exists('system/uploads/logo.png')) {
-            $logo = 'system/uploads/logo.png?' . time();
+
+        if (!empty(_get('testWa'))) {
+            $result = Message::sendWhatsapp(_get('testWa'), 'PHPNuxBill Test Whatsapp');
+            r2(U . "settings/app", 's', 'Test Whatsapp has been send<br>Result: ' . $result);
+        }
+        if (!empty(_get('testSms'))) {
+            $result = Message::sendSMS(_get('testSms'), 'PHPNuxBill Test SMS');
+            r2(U . "settings/app", 's', 'Test SMS has been send<br>Result: ' . $result);
+        }
+        if (!empty(_get('testEmail'))) {
+            Message::sendEmail(_get('testEmail'), 'PHPNuxBill Test Email', 'PHPNuxBill Test Email Body');
+            r2(U . "settings/app", 's', 'Test Email has been send');
+        }
+        if (!empty(_get('testTg'))) {
+            $result = Message::sendTelegram('PHPNuxBill Test Telegram');
+            r2(U . "settings/app", 's', 'Test Telegram has been send<br>Result: ' . $result);
+        }
+
+        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
+        if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
+            $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
         } else {
-            $logo = 'system/uploads/logo.default.png';
+            $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
         }
         $ui->assign('logo', $logo);
-        if (empty($_c['radius_client'])) {
+        if ($config['radius_enable'] && empty($config['radius_client'])) {
             try {
-                $_c['radius_client'] = Radius::getClient();
+                $config['radius_client'] = Radius::getClient();
                 $ui->assign('_c', $_c);
             } catch (Exception $e) {
                 //ignore
@@ -38,10 +56,30 @@ switch ($action) {
                 $themes[] = $file;
             }
         }
-        $php = trim(shell_exec('which php'));
-        if (empty($php)) {
+        $r = ORM::for_table('tbl_routers')->find_many();
+        $ui->assign('r', $r);
+        if (function_exists("shell_exec")) {
+            $php = trim(shell_exec('which php'));
+            if (empty($php)) {
+                $php = 'php';
+            }
+        } else {
             $php = 'php';
         }
+        if (empty($config['api_key'])) {
+            $config['api_key'] = sha1(uniqid(rand(), true));
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'api_key')->find_one();
+            if ($d) {
+                $d->value = $config['api_key'];
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'api_key';
+                $d->value = $config['api_key'];
+                $d->save();
+            }
+        }
+        $ui->assign('_c', $config);
         $ui->assign('php', $php);
         $ui->assign('dir', str_replace('controllers', '', __DIR__));
         $ui->assign('themes', $themes);
@@ -49,434 +87,29 @@ switch ($action) {
         $ui->display('app-settings.tpl');
         break;
 
-    case 'localisation':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
-        }
-        $folders = [];
-        $files = scandir('system/lan/');
-        foreach ($files as $file) {
-            if (is_dir('system/lan/' . $file) && !in_array($file, ['.', '..'])) {
-                $folders[] = $file;
-            }
-        }
-        $ui->assign('lan', $folders);
-        $timezonelist = Timezone::timezoneList();
-        $ui->assign('tlist', $timezonelist);
-        $ui->assign('xjq', ' $("#tzone").select2(); ');
-        run_hook('view_localisation'); #HOOK
-        $ui->display('app-localisation.tpl');
-        break;
-
-    case 'users':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
-        }
-
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/users.js"></script>');
-
-        $username = _post('username');
-        if ($username != '') {
-            $paginator = Paginator::build(ORM::for_table('tbl_users'), ['username' => '%' . $username . '%'], $username);
-            $d = ORM::for_table('tbl_users')->where_like('username', '%' . $username . '%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
-        } else {
-            $paginator = Paginator::build(ORM::for_table('tbl_users'));
-            $d = ORM::for_table('tbl_users')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_asc('id')->find_many();
-        }
-
-        $ui->assign('d', $d);
-        $ui->assign('paginator', $paginator);
-        run_hook('view_list_admin'); #HOOK
-        $ui->display('users.tpl');
-        break;
-
-    case 'users-add':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
-        }
-        run_hook('view_add_admin'); #HOOK
-        $ui->display('users-add.tpl');
-        break;
-
-    case 'users-edit':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
-        }
-
-        $id  = $routes['2'];
-        $d = ORM::for_table('tbl_users')->find_one($id);
-        if ($d) {
-            $ui->assign('d', $d);
-            run_hook('view_edit_admin'); #HOOK
-            $ui->display('users-edit.tpl');
-        } else {
-            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
-        }
-        break;
-
-    case 'users-delete':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
-        }
-
-        $id  = $routes['2'];
-        if (($admin['id']) == $id) {
-            r2(U . 'settings/users', 'e', 'Sorry You can\'t delete yourself');
-        }
-        $d = ORM::for_table('tbl_users')->find_one($id);
-        if ($d) {
-            run_hook('delete_admin'); #HOOK
-            $d->delete();
-            r2(U . 'settings/users', 's', $_L['User_Delete_Ok']);
-        } else {
-            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
-        }
-        break;
-
-    case 'users-post':
-        $username = _post('username');
-        $fullname = _post('fullname');
-        $password = _post('password');
-        $cpassword = _post('cpassword');
-        $user_type = _post('user_type');
-        $msg = '';
-        if (Validator::Length($username, 16, 2) == false) {
-            $msg .= 'Username should be between 3 to 15 characters' . '<br>';
-        }
-        if (Validator::Length($fullname, 26, 2) == false) {
-            $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
-        }
-        if (!Validator::Length($password, 15, 5)) {
-            $msg .= 'Password should be between 6 to 15 characters' . '<br>';
-        }
-        if ($password != $cpassword) {
-            $msg .= 'Passwords does not match' . '<br>';
-        }
-
-        $d = ORM::for_table('tbl_users')->where('username', $username)->find_one();
-        if ($d) {
-            $msg .= $_L['account_already_exist'] . '<br>';
-        }
-        $date_now = date("Y-m-d H:i:s");
-        run_hook('add_admin'); #HOOK
-        if ($msg == '') {
-            $password = Password::_crypt($password);
-            $d = ORM::for_table('tbl_users')->create();
-            $d->username = $username;
-            $d->fullname = $fullname;
-            $d->password = $password;
-            $d->user_type = $user_type;
-            $d->status = 'Active';
-            $d->creationdate = $date_now;
-
-            $d->save();
-
-            _log('[' . $admin['username'] . ']: ' . $_L['account_created_successfully'], 'Admin', $admin['id']);
-            r2(U . 'settings/users', 's', $_L['account_created_successfully']);
-        } else {
-            r2(U . 'settings/users-add', 'e', $msg);
-        }
-        break;
-
-    case 'users-edit-post':
-        $username = _post('username');
-        $fullname = _post('fullname');
-        $password = _post('password');
-        $cpassword = _post('cpassword');
-
-        $msg = '';
-        if (Validator::Length($username, 16, 2) == false) {
-            $msg .= 'Username should be between 3 to 15 characters' . '<br>';
-        }
-        if (Validator::Length($fullname, 26, 2) == false) {
-            $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
-        }
-        if ($password != '') {
-            if (!Validator::Length($password, 15, 5)) {
-                $msg .= 'Password should be between 6 to 15 characters' . '<br>';
-            }
-            if ($password != $cpassword) {
-                $msg .= 'Passwords does not match' . '<br>';
-            }
-        }
-
-        $id = _post('id');
-        $d = ORM::for_table('tbl_users')->find_one($id);
-        if ($d) {
-        } else {
-            $msg .= $_L['Data_Not_Found'] . '<br>';
-        }
-
-        if ($d['username'] != $username) {
-            $c = ORM::for_table('tbl_users')->where('username', $username)->find_one();
-            if ($c) {
-                $msg .= $_L['account_already_exist'] . '<br>';
-            }
-        }
-        run_hook('edit_admin'); #HOOK
-        if ($msg == '') {
-            $d->username = $username;
-            if ($password != '') {
-                $password = Password::_crypt($password);
-                $d->password = $password;
-            }
-
-            $d->fullname = $fullname;
-            if (($admin['id']) != $id) {
-                $user_type = _post('user_type');
-                $d->user_type = $user_type;
-            }
-
-            $d->save();
-
-            _log('[' . $admin['username'] . ']: ' . $_L['User_Updated_Successfully'], 'Admin', $admin['id']);
-            r2(U . 'settings/users', 's', 'User Updated Successfully');
-        } else {
-            r2(U . 'settings/users-edit/' . $id, 'e', $msg);
-        }
-        break;
-
     case 'app-post':
-        $company = _post('company');
-        $footer = _post('footer');
-        $enable_balance = _post('enable_balance');
-        $allow_balance_transfer = _post('allow_balance_transfer');
-        $disable_voucher = _post('disable_voucher');
-        $telegram_bot = _post('telegram_bot');
-        $telegram_target_id = _post('telegram_target_id');
-        $sms_url = _post('sms_url');
-        $wa_url = _post('wa_url');
-        $minimum_transfer = _post('minimum_transfer');
-        $user_notification_expired = _post('user_notification_expired');
-        $user_notification_reminder = _post('user_notification_reminder');
-        $user_notification_payment = _post('user_notification_payment');
-        $address = _post('address');
-        $tawkto = _post('tawkto');
-        $http_proxy = _post('http_proxy');
-        $http_proxyauth = _post('http_proxyauth');
-        $radius_enable = _post('radius_enable');
-        $radius_client = _post('radius_client');
-        $theme = _post('theme');
-        $voucher_format = _post('voucher_format');
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $company = _post('CompanyName');
         run_hook('save_settings'); #HOOK
 
 
         if (!empty($_FILES['logo']['name'])) {
             if (function_exists('imagecreatetruecolor')) {
-                if (file_exists('system/uploads/logo.png')) unlink('system/uploads/logo.png');
-                File::resizeCropImage($_FILES['logo']['tmp_name'], 'system/uploads/logo.png', 1078, 200, 100);
+                if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) unlink($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png');
+                File::resizeCropImage($_FILES['logo']['tmp_name'], $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png', 1078, 200, 100);
                 if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
             } else {
                 r2(U . 'settings/app', 'e', 'PHP GD is not installed');
             }
         }
         if ($company == '') {
-            r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
+            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
         } else {
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'CompanyName')->find_one();
-            $d->value = $company;
-            $d->save();
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'address')->find_one();
-            $d->value = $address;
-            $d->save();
-
-            $phone = _post('phone');
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'phone')->find_one();
-            $d->value = $phone;
-            $d->save();
-
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'http_proxy')->find_one();
-            if ($d) {
-                $d->value = $http_proxy;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'http_proxy';
-                $d->value = $http_proxy;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'http_proxyauth')->find_one();
-            if ($d) {
-                $d->value = $http_proxyauth;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'http_proxyauth';
-                $d->value = $http_proxyauth;
-                $d->save();
-            }
-
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'theme')->find_one();
-            if ($d) {
-                $d->value = $theme;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'theme';
-                $d->value = $theme;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'CompanyFooter')->find_one();
-            if ($d) {
-                $d->value = $footer;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'CompanyFooter';
-                $d->value = $footer;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_format')->find_one();
-            if ($d) {
-                $d->value = $voucher_format;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'voucher_format';
-                $d->value = $voucher_format;
-                $d->save();
-            }
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'disable_voucher')->find_one();
-            if ($d) {
-                $d->value = $disable_voucher;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'disable_voucher';
-                $d->value = $disable_voucher;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'enable_balance')->find_one();
-            if ($d) {
-                $d->value = $enable_balance;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'enable_balance';
-                $d->value = $enable_balance;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'allow_balance_transfer')->find_one();
-            if ($d) {
-                $d->value = $allow_balance_transfer;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'allow_balance_transfer';
-                $d->value = $allow_balance_transfer;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'minimum_transfer')->find_one();
-            if ($d) {
-                $d->value = $minimum_transfer;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'minimum_transfer';
-                $d->value = $minimum_transfer;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'telegram_bot')->find_one();
-            if ($d) {
-                $d->value = $telegram_bot;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'telegram_bot';
-                $d->value = $telegram_bot;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'telegram_target_id')->find_one();
-            if ($d) {
-                $d->value = $telegram_target_id;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'telegram_target_id';
-                $d->value = $telegram_target_id;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'sms_url')->find_one();
-            if ($d) {
-                $d->value = $sms_url;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'sms_url';
-                $d->value = $sms_url;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'wa_url')->find_one();
-            if ($d) {
-                $d->value = $wa_url;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'wa_url';
-                $d->value = $wa_url;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_expired')->find_one();
-            if ($d) {
-                $d->value = $user_notification_expired;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_expired';
-                $d->value = $user_notification_expired;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_reminder')->find_one();
-            if ($d) {
-                $d->value = $user_notification_reminder;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_reminder';
-                $d->value = $user_notification_reminder;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'user_notification_payment')->find_one();
-            if ($d) {
-                $d->value = $user_notification_payment;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'user_notification_payment';
-                $d->value = $user_notification_payment;
-                $d->save();
-            }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'tawkto')->find_one();
-            if ($d) {
-                $d->value = $tawkto;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'tawkto';
-                $d->value = $tawkto;
-                $d->save();
-            }
-
             if ($radius_enable) {
                 try {
-                    Radius::getTableNas()->find_one(1);
+                    Radius::getTableNas()->find_many();
                 } catch (Exception $e) {
                     $ui->assign("error_title", "RADIUS Error");
                     $ui->assign("error_message", "Radius table not found.<br><br>" .
@@ -486,48 +119,81 @@ switch ($action) {
                     die();
                 }
             }
-
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_enable')->find_one();
-            if ($d) {
-                $d->value = $radius_enable;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'radius_enable';
-                $d->value = $radius_enable;
-                $d->save();
+            // save all settings
+            foreach ($_POST as $key => $value) {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+                if ($d) {
+                    $d->value = $value;
+                    $d->save();
+                } else {
+                    $d = ORM::for_table('tbl_appconfig')->create();
+                    $d->setting = $key;
+                    $d->value = $value;
+                    $d->save();
+                }
             }
 
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'radius_client')->find_one();
-            if ($d) {
-                $d->value = $radius_client;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = 'radius_client';
-                $d->value = $radius_client;
-                $d->save();
+            //checkbox
+            $checks = ['hide_mrc', 'hide_tms', 'hide_aui', 'hide_al', 'hide_uet', 'hide_vs', 'hide_pg'];
+            foreach ($checks as $check) {
+                if (!isset($_POST[$check])) {
+                    $d = ORM::for_table('tbl_appconfig')->where('setting', $check)->find_one();
+                    if ($d) {
+                        $d->value = 'no';
+                        $d->save();
+                    } else {
+                        $d = ORM::for_table('tbl_appconfig')->create();
+                        $d->setting = $check;
+                        $d->value = 'no';
+                        $d->save();
+                    }
+                }
             }
 
-            $note = _post('note');
-            $d = ORM::for_table('tbl_appconfig')->where('setting', 'note')->find_one();
-            $d->value = $note;
-            $d->save();
+            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
 
-            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
-
-            r2(U . 'settings/app', 's', $_L['Settings_Saved_Successfully']);
+            r2(U . 'settings/app', 's', Lang::T('Settings Saved Successfully'));
         }
         break;
 
+    case 'localisation':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $folders = [];
+        $files = scandir('system/lan/');
+        foreach ($files as $file) {
+            if (is_file('system/lan/' . $file) && !in_array($file, ['index.html', 'country.json', '.DS_Store'])) {
+                $file = str_replace(".json", "", $file);
+                $folders[$file] = '';
+            }
+        }
+        $ui->assign('lani', $folders);
+        $lans = Lang::getIsoLang();
+        foreach ($lans as $lan => $val) {
+            if (isset($folders[$lan])) {
+                unset($lans[$lan]);
+            }
+        }
+        $ui->assign('lan', $lans);
+        $timezonelist = Timezone::timezoneList();
+        $ui->assign('tlist', $timezonelist);
+        $ui->assign('xjq', ' $("#tzone").select2(); ');
+        run_hook('view_localisation'); #HOOK
+        $ui->display('app-localisation.tpl');
+        break;
+
     case 'localisation-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
         $tzone = _post('tzone');
         $date_format = _post('date_format');
         $country_code_phone = _post('country_code_phone');
         $lan = _post('lan');
         run_hook('save_localisation'); #HOOK
         if ($tzone == '' or $date_format == '' or $lan == '') {
-            r2(U . 'settings/app', 'e', $_L['All_field_is_required']);
+            r2(U . 'settings/app', 'e', Lang::T('All field is required'));
         } else {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'timezone')->find_one();
             $d->value = $tzone;
@@ -601,16 +267,353 @@ switch ($action) {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'language')->find_one();
             $d->value = $lan;
             $d->save();
+            unset($_SESSION['Lang']);
+            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
+            r2(U . 'settings/localisation', 's', Lang::T('Settings Saved Successfully'));
+        }
+        break;
 
-            _log('[' . $admin['username'] . ']: ' . $_L['Settings_Saved_Successfully'], 'Admin', $admin['id']);
-            r2(U . 'settings/localisation', 's', $_L['Settings_Saved_Successfully']);
+    case 'users':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $search = _req('search');
+        if ($search != '') {
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $query = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $search . '%')
+                    ->order_by_asc('id');
+                $d = Paginator::findMany($query, ['search' => $search]);
+            } else if ($admin['user_type'] == 'Admin') {
+                $query = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $search . '%')->where_any_is([
+                        ['user_type' => 'Report'],
+                        ['user_type' => 'Agent'],
+                        ['user_type' => 'Sales'],
+                        ['id' => $admin['id']]
+                    ])->order_by_asc('id');
+                $d = Paginator::findMany($query, ['search' => $search]);
+            } else {
+                $query = ORM::for_table('tbl_users')
+                    ->where_like('username', '%' . $search . '%')
+                    ->where_any_is([
+                        ['id' => $admin['id']],
+                        ['root' => $admin['id']]
+                    ])->order_by_asc('id');
+                $d = Paginator::findMany($query, ['search' => $search]);
+            }
+        } else {
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $query = ORM::for_table('tbl_users')->order_by_asc('id');
+                $d = Paginator::findMany($query);
+            } else if ($admin['user_type'] == 'Admin') {
+                $query = ORM::for_table('tbl_users')->where_any_is([
+                    ['user_type' => 'Report'],
+                    ['user_type' => 'Agent'],
+                    ['user_type' => 'Sales'],
+                    ['id' => $admin['id']]
+                ])->order_by_asc('id');
+                $d = Paginator::findMany($query);
+            } else {
+                $query = ORM::for_table('tbl_users')
+                    ->where_any_is([
+                        ['id' => $admin['id']],
+                        ['root' => $admin['id']]
+                    ])->order_by_asc('id');
+                $d = Paginator::findMany($query);
+            }
+        }
+        $admins = [];
+        foreach ($d as $k) {
+            if (!empty($k['root'])) {
+                $admins[] = $k['root'];
+            }
+        }
+        if (count($admins) > 0) {
+            $adms = ORM::for_table('tbl_users')->where_in('id', $admins)->findArray();
+            unset($admins);
+            foreach ($adms as $adm) {
+                $admins[$adm['id']] = $adm['fullname'];
+            }
+        }
+        if ($isApi) {
+            showResult(true, $action, [
+                'admins' => $d,
+                'roots' => $admins
+            ], ['search' => $search]);
+        }
+        $ui->assign('admins', $admins);
+        $ui->assign('d', $d);
+        $ui->assign('search', $search);
+        run_hook('view_list_admin'); #HOOK
+        $ui->display('users.tpl');
+        break;
+
+    case 'users-add':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $ui->assign('_title', Lang::T('Add User'));
+        $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
+        $ui->display('users-add.tpl');
+        break;
+    case 'users-view':
+        $ui->assign('_title', Lang::T('Edit User'));
+        $id  = $routes['2'];
+        if (empty($id)) {
+            $id = $admin['id'];
+        }
+        //allow see himself
+        if ($admin['id'] == $id) {
+            $d = ORM::for_table('tbl_users')->where('id', $id)->find_array($id)[0];
+        } else {
+            if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+                // Super Admin can see anyone
+                $d = ORM::for_table('tbl_users')->where('id', $id)->find_array()[0];
+            } else if ($admin['user_type'] == 'Agent') {
+                // Agent can see Sales
+                $d = ORM::for_table('tbl_users')->where_any_is([['root' => $admin['id']], ['id' => $id]])->find_array()[0];
+            }
+        }
+        if ($d) {
+            run_hook('view_edit_admin'); #HOOK
+            if ($d['user_type'] == 'Sales') {
+                $ui->assign('agent', ORM::for_table('tbl_users')->where('id', $d['root'])->find_array()[0]);
+            }
+            if ($isApi) {
+                unset($d['password']);
+                $agent = $ui->get('agent');
+                if ($agent) unset($agent['password']);
+                showResult(true, $action, [
+                    'admin' => $d,
+                    'agent' => $agent
+                ], ['search' => $search]);
+            }
+            $ui->assign('d', $d);
+            $ui->assign('_title', $d['username']);
+            $ui->display('users-view.tpl');
+        } else {
+            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
+        }
+        break;
+    case 'users-edit':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $ui->assign('_title', Lang::T('Edit User'));
+        $id  = $routes['2'];
+        if (empty($id)) {
+            $id = $admin['id'];
+        }
+        if ($admin['id'] == $id) {
+            $d = ORM::for_table('tbl_users')->find_one($id);
+        } else {
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $d = ORM::for_table('tbl_users')->find_one($id);
+                $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
+            } else if ($admin['user_type'] == 'Admin') {
+                $d = ORM::for_table('tbl_users')->where_any_is([
+                    ['user_type' => 'Report'],
+                    ['user_type' => 'Agent'],
+                    ['user_type' => 'Sales']
+                ])->find_one($id);
+                $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
+            } else {
+                // Agent cannot move Sales to other Agent
+                $ui->assign('agents', ORM::for_table('tbl_users')->where('id', $admin['id'])->find_many());
+                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);
+            }
+        }
+        if ($d) {
+            $ui->assign('id', $id);
+            $ui->assign('d', $d);
+            run_hook('view_edit_admin'); #HOOK
+            $ui->display('users-edit.tpl');
+        } else {
+            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
+        }
+        break;
+
+    case 'users-delete':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+
+        $id  = $routes['2'];
+        if (($admin['id']) == $id) {
+            r2(U . 'settings/users', 'e', 'Sorry You can\'t delete yourself');
+        }
+        $d = ORM::for_table('tbl_users')->find_one($id);
+        if ($d) {
+            run_hook('delete_admin'); #HOOK
+            $d->delete();
+            r2(U . 'settings/users', 's', Lang::T('User deleted Successfully'));
+        } else {
+            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
+        }
+        break;
+
+    case 'users-post':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $username = _post('username');
+        $fullname = _post('fullname');
+        $password = _post('password');
+        $user_type = _post('user_type');
+        $phone = _post('phone');
+        $email = _post('email');
+        $city = _post('city');
+        $subdistrict = _post('subdistrict');
+        $ward = _post('ward');
+        $send_notif = _post('send_notif');
+        $root = _post('root');
+        $msg = '';
+        if (Validator::Length($username, 45, 2) == false) {
+            $msg .= Lang::T('Username should be between 3 to 45 characters') . '<br>';
+        }
+        if (Validator::Length($fullname, 45, 2) == false) {
+            $msg .= Lang::T('Full Name should be between 3 to 45 characters') . '<br>';
+        }
+        if (!Validator::Length($password, 1000, 5)) {
+            $msg .= Lang::T('Password should be minimum 6 characters') . '<br>';
+        }
+
+        $d = ORM::for_table('tbl_users')->where('username', $username)->find_one();
+        if ($d) {
+            $msg .= Lang::T('Account already axist') . '<br>';
+        }
+        $date_now = date("Y-m-d H:i:s");
+        run_hook('add_admin'); #HOOK
+        if ($msg == '') {
+            $passwordC = Password::_crypt($password);
+            $d = ORM::for_table('tbl_users')->create();
+            $d->username = $username;
+            $d->fullname = $fullname;
+            $d->password = $passwordC;
+            $d->user_type = $user_type;
+            $d->phone = $phone;
+            $d->email = $email;
+            $d->city = $city;
+            $d->subdistrict = $subdistrict;
+            $d->ward = $ward;
+            $d->status = 'Active';
+            $d->creationdate = $date_now;
+            if ($admin['user_type'] == 'Agent') {
+                // Prevent hacking from form
+                $d->root = $admin['id'];
+            } else if ($user_type == 'Sales') {
+                $d->root = $root;
+            }
+            $d->save();
+
+            if ($send_notif == 'wa') {
+                Message::sendWhatsapp(Lang::phoneFormat($phone), Lang::T('Hello, Your account has been created successfully.') . "\nUsername: $username\nPassword: $password\n\n" . $config['CompanyName']);
+            } else if ($send_notif == 'sms') {
+                Message::sendSMS($phone, Lang::T('Hello, Your account has been created successfully.') . "\nUsername: $username\nPassword: $password\n\n" . $config['CompanyName']);
+            }
+
+            _log('[' . $admin['username'] . ']: ' . "Created $user_type <b>$username</b>", $admin['user_type'], $admin['id']);
+            r2(U . 'settings/users', 's', Lang::T('Account Created Successfully'));
+        } else {
+            r2(U . 'settings/users-add', 'e', $msg);
+        }
+        break;
+
+    case 'users-edit-post':
+        $username = _post('username');
+        $fullname = _post('fullname');
+        $password = _post('password');
+        $cpassword = _post('cpassword');
+        $user_type = _post('user_type');
+        $phone = _post('phone');
+        $email = _post('email');
+        $city = _post('city');
+        $subdistrict = _post('subdistrict');
+        $ward = _post('ward');
+        $status = _post('status');
+        $root = _post('root');
+        $msg = '';
+        if (Validator::Length($username, 45, 2) == false) {
+            $msg .= Lang::T('Username should be between 3 to 45 characters') . '<br>';
+        }
+        if (Validator::Length($fullname, 45, 2) == false) {
+            $msg .= Lang::T('Full Name should be between 3 to 45 characters') . '<br>';
+        }
+        if ($password != '') {
+            if (!Validator::Length($password, 1000, 5)) {
+                $msg .= Lang::T('Password should be minimum 6 characters') . '<br>';
+            }
+            if ($password != $cpassword) {
+                $msg .= Lang::T('Passwords does not match') . '<br>';
+            }
+        }
+
+        $id = _post('id');
+        if ($admin['id'] == $id) {
+            $d = ORM::for_table('tbl_users')->find_one($id);
+        } else {
+            if ($admin['user_type'] == 'SuperAdmin') {
+                $d = ORM::for_table('tbl_users')->find_one($id);
+            } else if ($admin['user_type'] == 'Admin') {
+                $d = ORM::for_table('tbl_users')->where_any_is([
+                    ['user_type' => 'Report'],
+                    ['user_type' => 'Agent'],
+                    ['user_type' => 'Sales']
+                ])->find_one($id);
+            } else {
+                $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);
+            }
+        }
+        if (!$d) {
+            $msg .= Lang::T('Data Not Found') . '<br>';
+        }
+
+        if ($d['username'] != $username) {
+            $c = ORM::for_table('tbl_users')->where('username', $username)->find_one();
+            if ($c) {
+                $msg .= "<b>$username</b> " . Lang::T('Account already axist') . '<br>';
+            }
+        }
+        run_hook('edit_admin'); #HOOK
+        if ($msg == '') {
+            $d->username = $username;
+            if ($password != '') {
+                $password = Password::_crypt($password);
+                $d->password = $password;
+            }
+
+            $d->fullname = $fullname;
+            if (($admin['id']) != $id) {
+                $user_type = _post('user_type');
+                $d->user_type = $user_type;
+            }
+            $d->phone = $phone;
+            $d->email = $email;
+            $d->city = $city;
+            $d->subdistrict = $subdistrict;
+            $d->ward = $ward;
+            if (isset($_POST['status'])) {
+                $d->status = $status;
+            }
+
+            if ($admin['user_type'] == 'Agent') {
+                // Prevent hacking from form
+                $d->root = $admin['id'];
+            } else if ($user_type == 'Sales') {
+                $d->root = $root;
+            }
+
+            $d->save();
+
+            _log('[' . $admin['username'] . ']: $username ' . Lang::T('User Updated Successfully'), $admin['user_type'], $admin['id']);
+            r2(U . 'settings/users', 's', 'User Updated Successfully');
+        } else {
+            r2(U . 'settings/users-edit/' . $id, 'e', $msg);
         }
         break;
 
     case 'change-password':
-        if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
-        }
         run_hook('view_change_password'); #HOOK
         $ui->display('change-password.tpl');
         break;
@@ -636,187 +639,125 @@ switch ($action) {
                     $d->password = $npass;
                     $d->save();
 
-                    _msglog('s', $_L['Password_Changed_Successfully']);
-                    _log('[' . $admin['username'] . ']: Password changed successfully', 'Admin', $admin['id']);
+                    _msglog('s', Lang::T('Password changed successfully, Please login again'));
+                    _log('[' . $admin['username'] . ']: Password changed successfully', $admin['user_type'], $admin['id']);
 
                     r2(U . 'admin');
                 } else {
-                    r2(U . 'settings/change-password', 'e', $_L['Incorrect_Current_Password']);
+                    r2(U . 'settings/change-password', 'e', Lang::T('Incorrect Current Password'));
                 }
             } else {
-                r2(U . 'settings/change-password', 'e', $_L['Incorrect_Current_Password']);
+                r2(U . 'settings/change-password', 'e', Lang::T('Incorrect Current Password'));
             }
         } else {
-            r2(U . 'settings/change-password', 'e', $_L['Incorrect_Current_Password']);
+            r2(U . 'settings/change-password', 'e', Lang::T('Incorrect Current Password'));
         }
         break;
 
     case 'notifications':
-        if ($admin['user_type'] != 'Admin' and $admin['user_type'] != 'Sales') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         run_hook('view_notifications'); #HOOK
-        if (file_exists("system/uploads/notifications.json")) {
-            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.json'), true));
+        if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
+            $ui->assign('_json', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.json'), true));
         } else {
-            $ui->assign('_json', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
+            $ui->assign('_json', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true));
         }
-        $ui->assign('_default', json_decode(file_get_contents('system/uploads/notifications.default.json'), true));
+        $ui->assign('_default', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true));
         $ui->display('app-notifications.tpl');
         break;
     case 'notifications-post':
-        file_put_contents("system/uploads/notifications.json", json_encode($_POST));
-        r2(U . 'settings/notifications', 's', $_L['Settings_Saved_Successfully']);
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        file_put_contents($UPLOAD_PATH . "/notifications.json", json_encode($_POST));
+        r2(U . 'settings/notifications', 's', Lang::T('Settings Saved Successfully'));
         break;
     case 'dbstatus':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
         $dbc = new mysqli($db_host, $db_user, $db_password, $db_name);
         if ($result = $dbc->query('SHOW TABLE STATUS')) {
-            $size = 0;
-            $decimals = 2;
             $tables = array();
             while ($row = $result->fetch_array()) {
-                $size += $row["Data_length"] + $row["Index_length"];
-                $total_size = ($row["Data_length"] + $row["Index_length"]) / 1024;
-                $tables[$row['Name']]['size'] = number_format($total_size, '0');
-                $tables[$row['Name']]['rows'] = $row["Rows"];
+                $tables[$row['Name']]['rows'] = ORM::for_table($row["Name"])->count();
                 $tables[$row['Name']]['name'] = $row["Name"];
             }
-            $mbytes = number_format($size / (1024 * 1024), $decimals, $config['dec_point'], $config['thousands_sep']);
-
             $ui->assign('tables', $tables);
-            $ui->assign('dbsize', $mbytes);
             run_hook('view_database'); #HOOK
             $ui->display('dbstatus.tpl');
         }
         break;
 
     case 'dbbackup':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        if (!in_array($admin['user_type'], ['SuperAdmin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-
-        try {
-            run_hook('backup_database'); #HOOK
-            $mysqli = new mysqli($db_host, $db_user, $db_password, $db_name);
-            if ($mysqli->connect_errno) {
-                throw new Exception("Failed to connect to MySQL: " . $mysqli->connect_error);
-            }
-
-            header('Pragma: public');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Content-Type: application/force-download');
-            header('Content-Type: application/octet-stream');
-            header('Content-Type: application/download');
-            header('Content-Disposition: attachment;filename="backup_' . date('Y-m-d_h_i_s') . '.sql"');
-            header('Content-Transfer-Encoding: binary');
-
-            ob_start();
-            $f_output = fopen("php://output", 'w');
-
-            print("-- pjl SQL Dump\n");
-            print("-- Server version:" . $mysqli->server_info . "\n");
-            print("-- Generated: " . date('Y-m-d h:i:s') . "\n");
-            print('-- Current PHP version: ' . phpversion() . "\n");
-            print('-- Host: ' . $db_host . "\n");
-            print('-- Database:' . $db_name . "\n");
-
-            $aTables = array();
-            $strSQL = 'SHOW TABLES';
-            if (!$res_tables = $mysqli->query($strSQL))
-                throw new Exception("MySQL Error: " . $mysqli->error . 'SQL: ' . $strSQL);
-
-            while ($row = $res_tables->fetch_array()) {
-                $aTables[] = $row[0];
-            }
-
-            $res_tables->free();
-
-            foreach ($aTables as $table) {
-                print("-- --------------------------------------------------------\n");
-                print("-- Structure for '" . $table . "'\n");
-                print("--\n\n");
-
-                $strSQL = 'SHOW CREATE TABLE ' . $table;
-                if (!$res_create = $mysqli->query($strSQL))
-                    throw new Exception("MySQL Error: " . $mysqli->error . 'SQL: ' . $strSQL);
-                $row_create = $res_create->fetch_assoc();
-
-                print("\n" . $row_create['Create Table'] . ";\n");
-                print("-- --------------------------------------------------------\n");
-                print('-- Dump Data for `' . $table . "`\n");
-                print("--\n\n");
-                $res_create->free();
-
-                $strSQL = 'SELECT * FROM ' . $table;
-                if (!$res_select = $mysqli->query($strSQL))
-                    throw new Exception("MySQL Error: " . $mysqli->error . 'SQL: ' . $strSQL);
-
-                $fields_info = $res_select->fetch_fields();
-
-                while ($values = $res_select->fetch_assoc()) {
-                    $strFields = '';
-                    $strValues = '';
-                    foreach ($fields_info as $field) {
-                        if ($strFields != '') $strFields .= ',';
-                        $strFields .= "`" . $field->name . "`";
-
-                        if ($strValues != '') $strValues .= ',';
-                        $strValues .= '"' . preg_replace('/[^(\x20-\x7F)\x0A]*/', '', $values[$field->name] . '"');
-                    }
-                    print("INSERT INTO " . $table . " (" . $strFields . ") VALUES (" . $strValues . ");\n");
-                }
-                print("\n\n\n");
-                $res_select->free();
-            }
-            _log('[' . $admin['username'] . ']: ' . $_L['Download_Database_Backup'], 'Admin', $admin['id']);
-        } catch (Exception $e) {
-            print($e->getMessage());
+        $tables = $_POST['tables'];
+        set_time_limit(-1);
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Content-Type: application/force-download');
+        header('Content-Type: application/octet-stream');
+        header('Content-Type: application/download');
+        header('Content-Disposition: attachment;filename="phpnuxbill_' . count($tables) . '_tables_' . date('Y-m-d_H_i') . '.json"');
+        header('Content-Transfer-Encoding: binary');
+        $array = [];
+        foreach ($tables as $table) {
+            $array[$table] = ORM::for_table($table)->find_array();
         }
-
-        fclose($f_output);
-        print(ob_get_clean());
-        $mysqli->close();
-
+        echo json_encode($array);
         break;
-
+    case 'dbrestore':
+        if (!in_array($admin['user_type'], ['SuperAdmin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        if (file_exists($_FILES['json']['tmp_name'])) {
+            $suc = 0;
+            $fal = 0;
+            $json = json_decode(file_get_contents($_FILES['json']['tmp_name']), true);
+            foreach ($json as $table => $records) {
+                ORM::raw_execute("TRUNCATE $table;");
+                foreach ($records as $rec) {
+                    $t = ORM::for_table($table)->create();
+                    foreach ($rec as $k => $v) {
+                        if ($k != 'id') {
+                            $t->set($k, $v);
+                        }
+                    }
+                    if ($t->save()) {
+                        $suc++;
+                    } else {
+                        $fal++;
+                    }
+                }
+            }
+            if (file_exists($_FILES['json']['tmp_name'])) unlink($_FILES['json']['tmp_name']);
+            r2(U . "settings/dbstatus", 's', "Restored $suc success $fal failed");
+        } else {
+            r2(U . "settings/dbstatus", 'e', 'Upload failed');
+        }
+        break;
     case 'language':
-        if ($admin['user_type'] != 'Admin') {
-            r2(U . "dashboard", 'e', $_L['Do_Not_Access']);
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         run_hook('view_add_language'); #HOOK
+        if (file_exists($lan_file)) {
+            $ui->assign('langs', json_decode(file_get_contents($lan_file), true));
+        } else {
+            $ui->assign('langs', []);
+        }
         $ui->display('language-add.tpl');
         break;
 
     case 'lang-post':
-        $name = _post('name');
-        $folder = _post('folder');
-        $translator = _post('translator');
-
-        if ($name == '' or $folder == '') {
-            $msg .= $_L['All_field_is_required'] . '<br>';
-        }
-
-        $d = ORM::for_table('tbl_language')->where('name', $name)->find_one();
-        if ($d) {
-            $msg .= $_L['Lang_already_exist'] . '<br>';
-        }
-        run_hook('save_language'); #HOOK
-        if ($msg == '') {
-            $b = ORM::for_table('tbl_language')->create();
-            $b->name = $name;
-            $b->folder = $folder;
-            $b->author = $translator;
-            $b->save();
-
-            r2(U . 'settings/localisation', 's', $_L['Created_Successfully']);
-        } else {
-            r2(U . 'settings/language', 'e', $msg);
-        }
+        file_put_contents($lan_file, json_encode($_POST, JSON_PRETTY_PRINT));
+        r2(U . 'settings/language', 's', Lang::T('Translation saved Successfully'));
         break;
 
     default:

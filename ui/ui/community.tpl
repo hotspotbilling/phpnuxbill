@@ -1,5 +1,8 @@
 {include file="sections/header.tpl"}
 
+<center><a href="https://s.id/standwithpalestine" target="_blank"><img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/banner-support.svg" class="img-responsive"></a></center>
+<br><br>
+
 <div class="row">
     <div class="col-sm-6">
         <div class="box box-hovered mb20 box-primary">
@@ -101,7 +104,12 @@
                 </table>
             </div>
             <div class="box-footer">
-                <a href="https://paypal.me/ibnux" target="_blank" class="btn btn-primary btn-sm btn-block">Paypal</a>
+                <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                    <a href="https://paypal.me/ibnux" target="_blank"
+                        class="btn btn-primary btn-sm btn-block">Paypal</a>
+                    <a href="https://wise.com/pay/me/ibnum37" target="_blank"
+                        class="btn btn-primary btn-sm btn-block">Wise</a>
+                </div>
             </div>
         </div>
     </div>
@@ -136,7 +144,7 @@
                 <h3 class="box-title">PHPNUXBILL</h3>
             </div>
             <div class="box-body">
-                {$_L['Welcome_Text_Admin']}
+                <b>PHPNuxBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate with router. If you get more profit with this application, please donate us.<br>Watch project <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">in here</a>
             </div>
             <div class="box-footer" id="currentVersion">ver</div>
             <div class="box-footer" id="latestVersion">ver</div>

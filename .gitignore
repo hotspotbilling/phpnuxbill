@@ -1,9 +1,11 @@
 config.php
 .DS_Store
 .vscode/
+ui/ui/compiled
 ui/compiled/*.php
 ui/cache/*.php
 test.php
+sms.php
 pages/
 system/cache/**
 system/plugin/*
@@ -29,3 +31,12 @@ system/uploads/system/**
 ui/themes/**
 !ui/themes/index.html
 !ui/themes/README.md
+scanLang.php
+system/lan/**
+!system/lan/index.html
+!system/lan/indonesia.json
+!system/lan/spanish.json
+!system/lan/turkish.json
+!system/lan/english.json
+!system/lan/country.json
+*.zip

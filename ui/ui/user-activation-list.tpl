@@ -4,25 +4,25 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-hovered panel-primary">
-            <div class="panel-heading">{$_L['List_Activated_Voucher']}</div>
+            <div class="panel-heading">{Lang::T('List Activated Voucher')}</div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-bordered table-striped">
+                    <table id="datatable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>{$_L['Username']}</th>
-                                <th>{$_L['Plan_Name']}</th>
-                                <th>{$_L['Plan_Price']}</th>
-                                <th>{$_L['Type']}</th>
-                                <th>{$_L['Created_On']}</th>
-                                <th>{$_L['Expires_On']}</th>
-                                <th>{$_L['Method']}</th>
+                                <th>{Lang::T('Invoice')}</th>
+                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Created On')}</th>
+                                <th>{Lang::T('Expires On')}</th>
+                                <th>{Lang::T('Method')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr>
-                                    <td>{$ds['username']}</td>
+                                <tr onclick="window.location.href = '{$_url}voucher/invoice/{$ds['id']}'" style="cursor: pointer;">
+                                    <td>{$ds['invoice']}</td>
                                     <td>{$ds['plan_name']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['type']}</td>
@@ -34,7 +34,7 @@
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>

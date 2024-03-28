@@ -4,21 +4,21 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-hovered panel-primary">
-            <div class="panel-heading">{$_L['Order_History']}</div>
+            <div class="panel-heading">{Lang::T('Order History')}</div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-bordered table-striped">
+                    <table id="datatable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>{$_L['Plan_Name']}</th>
+                                <th>{Lang::T('Plan Name')}</th>
                                 <th>{Lang::T('Gateway')}</th>
                                 <th>{Lang::T('Routers')}</th>
-                                <th>{$_L['Type']}</th>
-                                <th>{$_L['Plan_Price']}</th>
-                                <th>{$_L['Created_On']}</th>
-                                <th>{$_L['Expires_On']}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Created On')}</th>
+                                <th>{Lang::T('Expires On')}</th>
                                 <th>{Lang::T('Date Done')}</th>
-                                <th>{$_L['Method']}</th>
+                                <th>{Lang::T('Method')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -35,18 +35,18 @@
                                         strtotime($ds['expired_date']))}</td>
                                     <td class="text-success">{if $ds['status']!=1}{date("{$_c['date_format']} H:i",
                                         strtotime($ds['paid_date']))}{/if}</td>
-                                    <td>{if $ds['status']==1}{$_L['UNPAID']}
-                                        {elseif $ds['status']==2}{$_L['PAID']}
+                                    <td>{if $ds['status']==1}{Lang::T('UNPAID')}
+                                        {elseif $ds['status']==2}{Lang::T('PAID')}
                                         {elseif $ds['status']==3}{$_L['FAILED']}
-                                        {elseif $ds['status']==4}{$_L['CANCELED']}
-                                        {elseif $ds['status']==5}{$_L['UNKNOWN']}
+                                        {elseif $ds['status']==4}{Lang::T('CANCELED')}
+                                        {elseif $ds['status']==5}{Lang::T('UNKNOWN')}
                                         {/if}</td>
                                 </tr>
                             {/foreach}
                         </tbody>
                     </table>
                 </div>
-                {$paginator['contents']}
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>

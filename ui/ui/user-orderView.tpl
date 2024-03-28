@@ -6,7 +6,7 @@
         <div
             class="panel mb20 {if $trx['status']==1}panel-warning{elseif $trx['status']==2}panel-success{elseif $trx['status']==3}panel-danger{elseif $trx['status']==4}panel-danger{else}panel-primary{/if} panel-hovered">
             <div class="panel-footer">Transaction #{$trx['id']}</div>
-            {if $trx['routers']!='balance'}
+            {if !in_array($trx['routers'],['balance','radius'])}
                 <div class="panel-body">
                     <div class="panel panel-primary panel-hovered">
                         <div class="panel-heading">{$router['name']}</div>
@@ -30,15 +30,15 @@
                                     {date('H:i', strtotime($trx['paid_date']))} </td>
                             </tr>
                             <tr>
-                            {if $trx['plan_name'] == 'Receive Balance'}
-                                <td>{Lang::T('From')}</td>
+                                {if $trx['plan_name'] == 'Receive Balance'}
+                                    <td>{Lang::T('From')}</td>
                                 {else}
                                     <td>{Lang::T('To')}</td>
                                 {/if}
                                 <td>{$trx['gateway']}</td>
                             </tr>
                             <tr>
-                                <td>{$_L['Balance']}</td>
+                                <td>{Lang::T('Balance')}</td>
                                 <td>{Lang::moneyFormat($trx['price'])}</td>
                             </tr>
                         </tbody>
@@ -64,12 +64,24 @@
                                 </tr>
                             {/if}
                             <tr>
-                                <td>{$_L['Plan_Name']}</td>
+                                <td>{Lang::T('Plan Name')}</td>
                                 <td>{$plan['name_plan']}</td>
                             </tr>
+                            {if $add_cost>0}
+                                {foreach $bills as $k => $v}
+                                    <tr>
+                                        <td>{$k}</td>
+                                        <td>{Lang::moneyFormat($v)}</td>
+                                    </tr>
+                                {/foreach}
+                                <tr>
+                                    <td>{Lang::T('Additional Cost')}</td>
+                                    <td>{Lang::moneyFormat($add_cost)}</td>
+                                </tr>
+                            {/if}
                             <tr>
-                                <td>{$_L['Plan_Price']}</td>
-                                <td>{Lang::moneyFormat($plan['price'])}</td>
+                                <td>{Lang::T('Plan Price')}{if $add_cost>0}<small> + {Lang::T('Additional Cost')}{/if}</small></td>
+                                <td style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($trx['price'])}</td>
                             </tr>
                             <tr>
                                 <td>{Lang::T('Type')}</td>
@@ -97,11 +109,11 @@
                                     {/if}
                                 {/if}
                                 <tr>
-                                    <td>{$_L['Plan_Validity']}</td>
+                                    <td>{Lang::T('Plan Validity')}</td>
                                     <td>{$plan['validity']} {$plan['validity_unit']}</td>
                                 </tr>
                                 <tr>
-                                    <td>{$_L['Bandwidth_Plans']}</td>
+                                    <td>{Lang::T('Bandwidth Plans')}</td>
                                     <td>{$bandw['name_bw']}<br>{$bandw['rate_down']}{$bandw['rate_down_unit']}/{$bandw['rate_up']}{$bandw['rate_up_unit']}
                                     </td>
                                 </tr>
