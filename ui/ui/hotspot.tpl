@@ -38,49 +38,49 @@
                                 <th>{Lang::T('Plan Name')}</th>
                                 <th>{Lang::T('Plan Type')}</th>
                                 <th>{Lang::T('Bandwidth Plans')}</th>
+                                <th>{Lang::T('Plan Category')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
                                 <th>{Lang::T('Time Limit')}</th>
                                 <th>{Lang::T('Data Limit')}</th>
                                 <th>{Lang::T('Plan Validity')}</th>
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Expired IP Pool')}</th>
+                                <th>{Lang::T('ID')}</th>
                                 <th>{Lang::T('Manage')}</th>
-                                <th>ID</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
-                                    <td class="headcol">{$ds['name_plan']}</td>
-                                <td>{$ds['plan_type']} {if $ds['prepaid'] != 'yes'}<b>Postpaid</b>{else}Prepaid{/if}</td>
-                                    <td>{$ds['typebp']}</td>
-                                    <td>{$ds['name_bw']}</td>
-                                    <td>{Lang::moneyFormat($ds['price'])}</td>
-                                    <td>{$ds['time_limit']} {$ds['time_unit']}</td>
-                                    <td>{$ds['data_limit']} {$ds['data_unit']}</td>
-                                    <td>{$ds['validity']} {$ds['validity_unit']}</td>
-                                    <td>
-                                        {if $ds['is_radius']}
-                                            <span class="label label-primary">RADIUS</span>
-                                        {else}
-                                            {if $ds['routers']!=''}
-                                                <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
-                                            {/if}
-                                        {/if}
-                                    </td>
-                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}
-                                        {if $ds['pool_expired']} |
-                                            {/if}{$ds['list_expired']}
-                                        {/if}</td>
-                                    <td>
-                                        <a href="{$_url}services/edit/{$ds['id']}"
-                                            class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                        <a href="{$_url}services/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{Lang::T('Delete')}?')"
-                                            class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
-                                    </td>
-                                    <td>{$ds['id']}</td>
-                                </tr>
+                            <tr {if $ds['enabled'] !=1}class="danger" title="disabled" {elseif $ds['prepaid'] !='yes'
+                                }class="warning" title="Postpaid" {/if}>
+                                <td class="headcol">{$ds['name_plan']}</td>
+                                <td>{$ds['plan_type']}</td>
+                                <td>{$ds['name_bw']}</td>
+                                <td>{$ds['typebp']}</td>
+                                <td>{Lang::moneyFormat($ds['price'])}</td>
+                                <td>{$ds['time_limit']} {$ds['time_unit']}</td>
+                                <td>{$ds['data_limit']} {$ds['data_unit']}</td>
+                                <td>{$ds['validity']} {$ds['validity_unit']}</td>
+                                <td>
+                                    {if $ds['is_radius']}
+                                    <span class="label label-primary">RADIUS</span>
+                                    {else}
+                                    {if $ds['routers']!=''}
+                                    <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
+                                    {/if}
+                                    {/if}
+                                </td>
+                                <td>{$ds['pool_expired']}{if $ds['list_expired']}{if $ds['pool_expired']} |
+                                    {/if}{$ds['list_expired']}{/if}</td>
+                                <td>{$ds['id']}</td>
+                                <td>
+                                    <a href="{$_url}services/edit/{$ds['id']}"
+                                        class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
+                                    <a href="{$_url}services/delete/{$ds['id']}" id="{$ds['id']}"
+                                        onclick="return confirm('{Lang::T('Delete')}?')"
+                                        class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
+                                </td>
+                            </tr>
                             {/foreach}
                         </tbody>
                     </table>
