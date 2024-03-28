@@ -195,7 +195,22 @@ function _log($description, $type = '', $userid = '0')
     $d->type = $type;
     $d->description = $description;
     $d->userid = $userid;
-    $d->ip = $_SERVER["REMOTE_ADDR"];
+    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP']))   //to check ip is pass from cloudflare tunnel
+    {
+      $d->ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    }
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+    {
+      $d->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+	elseif (!empty($_SERVER['HTTP_CLIENT_IP']))   //to check ip from share internet
+    {
+      $d->ip = $_SERVER['HTTP_CLIENT_IP'];
+    }
+    else
+    {
+      $d->ip = $_SERVER["REMOTE_ADDR"];
+    }
     $d->save();
 }
 
