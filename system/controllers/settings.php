@@ -393,7 +393,7 @@ switch ($action) {
             $ui->assign('_title', $d['username']);
             $ui->display('users-view.tpl');
         } else {
-            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
+            r2(U . 'settings/users', 'e', Lang::T('Account Not Found'));
         }
         break;
     case 'users-edit':
@@ -430,7 +430,7 @@ switch ($action) {
             run_hook('view_edit_admin'); #HOOK
             $ui->display('users-edit.tpl');
         } else {
-            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
+            r2(U . 'settings/users', 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -449,7 +449,7 @@ switch ($action) {
             $d->delete();
             r2(U . 'settings/users', 's', Lang::T('User deleted Successfully'));
         } else {
-            r2(U . 'settings/users', 'e', $_L['Account_Not_Found']);
+            r2(U . 'settings/users', 'e', Lang::T('Account Not Found'));
         }
         break;
 

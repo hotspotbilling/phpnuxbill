@@ -536,5 +536,6 @@
     "Testing__if_checked_no_real_message_is_sent_": "Testing [if checked no real message is sent]",
     "All_fields_are_required": "All fields are required",
     "Personal": "Personal",
-    "Email_Notification": "Email Notification"
+    "Email_Notification": "Email Notification",
+    "Router_Name___Location": "Router Name \/ Location"
 }

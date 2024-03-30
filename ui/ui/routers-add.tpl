@@ -20,7 +20,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Router Name')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Router Name / Location')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="name" name="name" maxlength="32">
                             <p class="help-block">{Lang::T('Name of Area that router operated')}</p>

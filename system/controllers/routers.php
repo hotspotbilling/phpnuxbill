@@ -54,7 +54,7 @@ switch ($action) {
             run_hook('view_router_edit'); #HOOK
             $ui->display('routers-edit.tpl');
         } else {
-            r2(U . 'routers/list', 'e', $_L['Account_Not_Found']);
+            r2(U . 'routers/list', 'e', Lang::T('Account Not Found'));
         }
         break;
 

@@ -50,7 +50,7 @@ switch ($action) {
             run_hook('view_edit_pool'); #HOOK
             $ui->display('pool-edit.tpl');
         } else {
-            r2(U . 'pool/list', 'e', $_L['Account_Not_Found']);
+            r2(U . 'pool/list', 'e', Lang::T('Account Not Found'));
         }
         break;
 

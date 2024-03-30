@@ -253,7 +253,7 @@ switch ($action) {
             $ui->assign('_title', 'Edit Plan');
             $ui->display('plan-edit.tpl');
         } else {
-            r2(U . 'plan/list', 'e', $_L['Account_Not_Found']);
+            r2(U . 'plan/list', 'e', Lang::T('Account Not Found'));
         }
         break;
 

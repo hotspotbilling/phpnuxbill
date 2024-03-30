@@ -152,7 +152,7 @@ switch ($action) {
             run_hook('view_edit_plan'); #HOOK
             $ui->display('hotspot-edit.tpl');
         } else {
-            r2(U . 'services/hotspot', 'e', $_L['Account_Not_Found']);
+            r2(U . 'services/hotspot', 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -432,7 +432,7 @@ switch ($action) {
             run_hook('view_edit_ppoe'); #HOOK
             $ui->display('pppoe-edit.tpl');
         } else {
-            r2(U . 'services/pppoe', 'e', $_L['Account_Not_Found']);
+            r2(U . 'services/pppoe', 'e', Lang::T('Account Not Found'));
         }
         break;
 

@@ -5,7 +5,7 @@
  *  by https://t.me/ibnux
  **/
 _admin();
-$ui->assign('_title', $_L['Plugin Manager']);
+$ui->assign('_title', Lang::T('Plugin Manager'));
 $ui->assign('_system_menu', 'settings');
 
 $action = $routes['1'];
@@ -80,7 +80,7 @@ switch ($action) {
             $ui->assign('d', $d);
             $ui->display('radius-nas-edit.tpl');
         } else {
-            r2(U . 'radius/list', 'e', $_L['Account_Not_Found']);
+            r2(U . 'radius/list', 'e', Lang::T('Account Not Found'));
         }
 
         break;

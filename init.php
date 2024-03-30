@@ -254,7 +254,13 @@ function r2($to, $ntype = 'e', $msg = '')
 
 function _alert($text, $type = 'success', $url = "home", $time = 3)
 {
-    global $ui;
+    global $ui, $isApi;
+    if ($isApi) {
+        showResult(
+            ($type=='success')? true : false,
+            $text
+        );
+    }
     if (!isset($ui)) return;
     if (strlen($url) > 4) {
         if (substr($url, 0, 4) != "http") {

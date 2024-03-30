@@ -207,7 +207,7 @@ switch ($action) {
             $ui->assign('xheader', $leafletpickerHeader);
             $ui->display('customers-view.tpl');
         } else {
-            r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);
+            r2(U . 'customers/list', 'e', Lang::T('Account Not Found'));
         }
         break;
     case 'edit':
@@ -227,7 +227,7 @@ switch ($action) {
             $ui->assign('xheader', $leafletpickerHeader);
             $ui->display('customers-edit.tpl');
         } else {
-            r2(U . 'customers/list', 'e', $_L['Account_Not_Found']);
+            r2(U . 'customers/list', 'e', Lang::T('Account Not Found'));
         }
         break;
 

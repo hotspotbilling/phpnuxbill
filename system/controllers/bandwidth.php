@@ -53,7 +53,7 @@ switch ($action) {
             $ui->assign('d', $d);
             $ui->display('bandwidth-edit.tpl');
         } else {
-            r2(U . 'bandwidth/list', 'e', $_L['Account_Not_Found']);
+            r2(U . 'bandwidth/list', 'e', Lang::T('Account Not Found'));
         }
         break;
 
