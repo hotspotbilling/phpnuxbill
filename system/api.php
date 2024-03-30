@@ -31,9 +31,9 @@ $ui = new class($key)
         $this->assign[$key] = $value;
     }
 
-    function get($key, )
+    function get($key,)
     {
-        if(isset($this->assign[$key])){
+        if (isset($this->assign[$key])) {
             return $this->assign[$key];
         }
         return '';
@@ -47,59 +47,52 @@ $token = _get('token');
 $routes = explode('/', $req);
 $handler = $routes[0];
 
-if(empty($token)){
-    showResult(false, Lang::T("Token is invalid"));
-}
+if (!empty($token)) {
 
-if($token == $config['api_key']){
-    $admin = ORM::for_table('tbl_users')->where('user_type','SuperAdmin')->find_one($id);
-    if(empty($admin)){
-        $admin = ORM::for_table('tbl_users')->where('user_type','Admin')->find_one($id);
-        if(empty($admin)){
+    if ($token == $config['api_key']) {
+        $admin = ORM::for_table('tbl_users')->where('user_type', 'SuperAdmin')->find_one($id);
+        if (empty($admin)) {
+            $admin = ORM::for_table('tbl_users')->where('user_type', 'Admin')->find_one($id);
+            if (empty($admin)) {
+                showResult(false, Lang::T("Token is invalid"));
+            }
+        }
+    } else {
+        # validate token
+        list($tipe, $uid, $time, $md5) = explode('.', $token);
+        if ($md5 != md5($uid . '.' . $time . '.' . $api_secret)) {
             showResult(false, Lang::T("Token is invalid"));
         }
+
+        #cek token expiration
+        if ($time != 0 && time() > $time) {
+            showResult(false, Lang::T("Token Expired"), [], ['login' => true]);
+        }
+
+        if ($tipe == 'a') {
+            $_SESSION['aid'] = $uid;
+        } else if ($tipe == 'c') {
+            $_SESSION['uid'] = $uid;
+        } else {
+            showResult(false, Lang::T("Unknown Token"), [], ['login' => true]);
+        }
     }
-}else{
-    # validate token
-    list($tipe, $uid, $time, $md5) = explode('.', $token);
-    if ($md5 != md5($uid . '.' . $time . '.' . $api_secret)) {
-        showResult(false, Lang::T("Token is invalid"));
+
+    if (!isset($handler) || empty($handler)) {
+        showResult(true, Lang::T("Token is valid"));
     }
 
-    #cek token expiration
-    if ($time != 0 && time() > $time) {
-        showResult(false, Lang::T("Token Expired"), [], ['login' => true]);
+
+    if ($handler == 'isValid') {
+        showResult(true, Lang::T("Token is valid"));
     }
-
-    if($tipe=='a'){
-        $_SESSION['aid'] = $uid;
-    }else if($tipe=='c'){
-        $_SESSION['uid'] = $uid;
-    }else{
-        showResult(false, Lang::T("Unknown Token"), [], ['login' => true]);
-    }
-}
-
-if(!isset($handler) || empty($handler)){
-    showResult(true, Lang::T("Token is valid"));
-}
-
-
-if($handler == 'isValid'){
-    showResult(true, Lang::T("Token is valid"));
-}
-
-function showResult($success, $message = '', $result = [], $meta = [])
-{
-    header("Content-Type: Application/json; charset=utf-8");
-    die(json_encode(array('success' => $success, 'message' => $message, 'result' => $result, 'meta' => $meta)));
 }
 
 try {
-    $sys_render = File::pathFixer($root_path.'system/controllers/' . $handler . '.php');
+    $sys_render = File::pathFixer($root_path . 'system/controllers/' . $handler . '.php');
     if (file_exists($sys_render)) {
         include($sys_render);
-    }else{
+    } else {
         showResult(false, Lang::T('Command not found'));
     }
 } catch (Exception $e) {

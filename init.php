@@ -197,19 +197,15 @@ function _log($description, $type = '', $userid = '0')
     $d->userid = $userid;
     if (!empty($_SERVER['HTTP_CF_CONNECTING_IP']))   //to check ip is pass from cloudflare tunnel
     {
-      $d->ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
-    }
-    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+        $d->ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
     {
-      $d->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    }
-	elseif (!empty($_SERVER['HTTP_CLIENT_IP']))   //to check ip from share internet
+        $d->ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } elseif (!empty($_SERVER['HTTP_CLIENT_IP']))   //to check ip from share internet
     {
-      $d->ip = $_SERVER['HTTP_CLIENT_IP'];
-    }
-    else
-    {
-      $d->ip = $_SERVER["REMOTE_ADDR"];
+        $d->ip = $_SERVER['HTTP_CLIENT_IP'];
+    } else {
+        $d->ip = $_SERVER["REMOTE_ADDR"];
     }
     $d->save();
 }
@@ -224,6 +220,11 @@ function alphanumeric($str, $tambahan = "")
     return preg_replace("/[^a-zA-Z0-9" . $tambahan . "]+/", "", $str);
 }
 
+function showResult($success, $message = '', $result = [], $meta = [])
+{
+    header("Content-Type: Application/json; charset=utf-8");
+    die(json_encode(array('success' => $success, 'message' => $message, 'result' => $result, 'meta' => $meta)));
+}
 
 function sendTelegram($txt)
 {
@@ -257,7 +258,7 @@ function _alert($text, $type = 'success', $url = "home", $time = 3)
     global $ui, $isApi;
     if ($isApi) {
         showResult(
-            ($type=='success')? true : false,
+            ($type == 'success') ? true : false,
             $text
         );
     }
