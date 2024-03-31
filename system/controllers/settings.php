@@ -336,12 +336,6 @@ switch ($action) {
                 $admins[$adm['id']] = $adm['fullname'];
             }
         }
-        if ($isApi) {
-            showResult(true, $action, [
-                'admins' => $d,
-                'roots' => $admins
-            ], ['search' => $search]);
-        }
         $ui->assign('admins', $admins);
         $ui->assign('d', $d);
         $ui->assign('search', $search);
@@ -379,15 +373,6 @@ switch ($action) {
             run_hook('view_edit_admin'); #HOOK
             if ($d['user_type'] == 'Sales') {
                 $ui->assign('agent', ORM::for_table('tbl_users')->where('id', $d['root'])->find_array()[0]);
-            }
-            if ($isApi) {
-                unset($d['password']);
-                $agent = $ui->get('agent');
-                if ($agent) unset($agent['password']);
-                showResult(true, $action, [
-                    'admin' => $d,
-                    'agent' => $agent
-                ], ['search' => $search]);
             }
             $ui->assign('d', $d);
             $ui->assign('_title', $d['username']);

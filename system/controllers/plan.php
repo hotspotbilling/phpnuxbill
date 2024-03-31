@@ -59,9 +59,6 @@ switch ($action) {
             }
             $log .= "DONE : $plan[username], $plan[namebp], $plan[type], $plan[routers]<br>";
         }
-        if ($isApi) {
-            showResult(true, $log);
-        }
         r2(U . 'plan/list', 's', $log);
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/plan.js"></script>');
@@ -75,9 +72,6 @@ switch ($action) {
             $d = Paginator::findMany($query);
         }
         run_hook('view_list_billing'); #HOOK
-        if ($isApi) {
-            showResult(true, $action, $d, ['search' => $search]);
-        }
         $ui->assign('d', $d);
         $ui->assign('search', $search);
         $ui->display('plan.tpl');

@@ -11,7 +11,9 @@ if (realpath(__FILE__) == realpath($_SERVER['SCRIPT_FILENAME'])) {
     die();
 }
 $root_path = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
-$isApi = false;
+if(!isset($isApi)){
+    $isApi = false;
+}
 // on some server, it getting error because of slash is backwards
 function _autoloader($class)
 {
@@ -243,6 +245,13 @@ function sendWhatsapp($phone, $txt)
 
 function r2($to, $ntype = 'e', $msg = '')
 {
+    global $isApi;
+    if ($isApi) {
+        showResult(
+            ($ntype=='s')? true : false,
+            $msg
+        );
+    }
     if ($msg == '') {
         header("location: $to");
         exit;

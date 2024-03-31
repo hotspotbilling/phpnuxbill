@@ -30,6 +30,13 @@ switch ($do) {
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . Lang::T('Login Successful'), $d['user_type'], $d['id']);
+                    if ($isApi) {
+                        if ($token) {
+                            showResult(true, Lang::T('Login Successful'), ['token' => "a.".$token]);
+                        } else {
+                            showResult(false, Lang::T('Invalid Username or Password'));
+                        }
+                    }
                     _alert(Lang::T('Login Successful'),'success', "dashboard");
                 } else {
                     _log($username . ' ' . Lang::T('Failed Login'), $d['user_type']);
