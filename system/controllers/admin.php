@@ -6,7 +6,7 @@
  **/
 
 if(Admin::getID()){
-    r2(U.'dashboard');
+    r2(U.'dashboard', "s", Lang::T("You are already logged in"));
 }
 
 if (isset($routes['1'])) {
@@ -26,7 +26,7 @@ switch ($do) {
                 $d_pass = $d['password'];
                 if (Password::_verify($password, $d_pass) == true) {
                     $_SESSION['aid'] = $d['id'];
-                    Admin::setCookie($d['id']);
+                    $token = Admin::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . Lang::T('Login Successful'), $d['user_type'], $d['id']);
@@ -40,13 +40,13 @@ switch ($do) {
                     _alert(Lang::T('Login Successful'),'success', "dashboard");
                 } else {
                     _log($username . ' ' . Lang::T('Failed Login'), $d['user_type']);
-                    _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
+                    _alert(Lang::T('Invalid Username or Password').".",'danger', "admin");
                 }
             } else {
-                _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
+                _alert(Lang::T('Invalid Username or Password')."..",'danger', "admin");
             }
         } else {
-            _alert(Lang::T('Invalid Username or Password'),'danger', "admin");
+            _alert(Lang::T('Invalid Username or Password')."...",'danger', "admin");
         }
 
         break;

@@ -32,9 +32,13 @@ class Admin
         global $db_password;
         if (isset($aid)) {
             $time = time();
-            setcookie('aid', $aid . '.' . $time . '.' . sha1($aid . '.' . $time . '.' . $db_password), time() + 86400 * 7);
+            $token = $aid . '.' . $time . '.' . sha1($aid . '.' . $time . '.' . $db_password);
+            setcookie('aid', $token, time() + 86400 * 7);
+            return $token;
         }
+        return '';
     }
+
 
     public static function removeCookie()
     {

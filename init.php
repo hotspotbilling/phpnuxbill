@@ -73,8 +73,11 @@ ORM::configure('return_result_sets', true);
 if ($_app_stage != 'Live') {
     ORM::configure('logging', true);
 }
-
-define('U', APP_URL . '/index.php?_route=');
+if($isApi){
+    define('U', APP_URL . '/system/api.php?r=');
+}else{
+    define('U', APP_URL . '/index.php?_route=');
+}
 
 // notification message
 if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . "notifications.json")) {
@@ -224,8 +227,10 @@ function alphanumeric($str, $tambahan = "")
 
 function showResult($success, $message = '', $result = [], $meta = [])
 {
-    header("Content-Type: Application/json; charset=utf-8");
-    die(json_encode(array('success' => $success, 'message' => $message, 'result' => $result, 'meta' => $meta)));
+    header("Content-Type: Application/json");
+    $json = json_encode(['success' => $success, 'message' => $message, 'result' => $result, 'meta' => $meta]);
+    echo $json;
+    die();
 }
 
 function sendTelegram($txt)

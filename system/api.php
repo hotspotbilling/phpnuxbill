@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  PHP Mikrotik Billing (https://github.com/SiberTech/)
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
  *
  * This File is for API Access
@@ -18,8 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === "OPTIONS" || $_SERVER['REQUEST_METHOD'] === "
 $isApi = true;
 
 include "../init.php";
-
-unset($_COOKIE['aid']);
 
 // Dummy Class
 $ui = new class($key)
@@ -71,14 +69,14 @@ if (!empty($token)) {
     } else {
         # validate token
         list($tipe, $uid, $time, $sha1) = explode('.', $token);
-        if (trim($sha1) != sha1($uid . '.' . $time . '.' . $db_password)) {
+        if (trim($sha1) != sha1($uid . '.' . $time . '.' . $api_secret)) {
             showResult(false, Lang::T("Token is invalid"));
         }
 
         #cek token expiration
         // 3 bulan
-        if ($time != 0 && time()-$time > 7776000) {
-            die("$time != ". (time()-$time));
+        if ($time != 0 && time() - $time > 7776000) {
+            die("$time != " . (time() - $time));
             showResult(false, Lang::T("Token Expired"), [], ['login' => true]);
         }
 
@@ -109,6 +107,9 @@ if (!empty($token)) {
             showResult(false, Lang::T("Token is invalid"));
         }
     }
+}else{
+    unset($_COOKIE);
+    unset($_SESSION);
 }
 
 try {
