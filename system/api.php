@@ -25,6 +25,8 @@ $ui = new class($key)
     var $assign = [];
     function display($key)
     {
+        global $req;
+        showResult(true, $req, $this->getAll());
     }
     function assign($key, $value)
     {
