@@ -149,7 +149,9 @@ class Package
             ->where('customer_id', $id_customer)
             ->where('tbl_user_recharges.routers', $router_name)
             ->where('tbl_user_recharges.Type', $p['type'])
-            ->where('prepaid', $p['prepaid'])
+            # PPPOE or Hotspot only can have 1 per customer prepaid or postpaid
+            # because 1 customer can have 1 PPPOE and 1 Hotspot Plan in mikrotik
+            //->where('prepaid', $p['prepaid'])
             ->join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'))
             ->find_one();
 
