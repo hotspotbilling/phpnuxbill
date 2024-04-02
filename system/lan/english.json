@@ -537,5 +537,7 @@
     "All_fields_are_required": "All fields are required",
     "Personal": "Personal",
     "Email_Notification": "Email Notification",
-    "Router_Name___Location": "Router Name \/ Location"
+    "Router_Name___Location": "Router Name \/ Location",
+    "Plan_Category": "Plan Category",
+    "ID": "ID"
 }

@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.4.2
+
+- Fix REST API
+- Fix Log IP Cloudflare by @Gerandonk
+- Show Personal or Business in customer dashboard
+
 ## 2024.3.26
 
 - Change paginator, to make easy customization using pagination.tpl
