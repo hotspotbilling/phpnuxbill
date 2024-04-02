@@ -4,6 +4,13 @@
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
+				{if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                    <div class="btn-group pull-right">
+                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}logs/radius-csv"
+                            onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                                aria-hidden="true"></span> CSV</a>
+                    </div>
+                {/if}
                 Radius
             </div>
             <div class="panel-body">
