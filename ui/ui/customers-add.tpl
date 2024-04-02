@@ -11,26 +11,33 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <span class="input-group-addon" id="basic-addon1"><i
+                                            class="glyphicon ion-pound"></i></span>
                                 {else}
                                     <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-phone-alt"></i></span>
+                                            class="glyphicon ion-pound"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="username" required
-                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
+                                    placeholder="{Lang::T('Username')}">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Full Name')}</label>
                         <div class="col-md-9">
+							<div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-card"></i></span>
                             <input type="text" required class="form-control" id="fullname" name="fullname">
+							</div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Email')}</label>
                         <div class="col-md-9">
+						 <div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-at"></i></span>
                             <input type="email" class="form-control" id="email" name="email">
+						 </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -38,7 +45,7 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-phone-alt"></i></span>
                                 {else}
                                     <span class="input-group-addon" id="basic-addon1"><i
                                             class="glyphicon glyphicon-phone-alt"></i></span>
@@ -51,54 +58,72 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Password')}</label>
                         <div class="col-md-9">
+						 <div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-key"></i></span>
                             <input type="password" class="form-control" autocomplete="off" required id="password"
                                 value="{rand(000000,999999)}" name="password" onmouseleave="this.type = 'password'"
                                 onmouseenter="this.type = 'text'">
+						 </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('PPPOE Password')}</label>
                         <div class="col-md-9">
+						 <div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-key"></i></span>
                             <input type="password" class="form-control" id="pppoe_password" name="pppoe_password"
                                 value="{$d['pppoe_password']}" onmouseleave="this.type = 'password'"
-                                onmouseenter="this.type = 'text'">
+                                onmouseenter="this.type = 'text'"></div>
                             <span class="help-block">
                                 {Lang::T('User Cannot change this, only admin. if it Empty it will use user password')}
                             </span>
+						
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Address')}</label>
                         <div class="col-md-9">
+							<div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-android-home"></i></span>
                             <textarea name="address" id="address" class="form-control"></textarea>
+							</div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Service Type')}</label>
                         <div class="col-md-9">
+							<div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-wifi"></i></span>
                             <select class="form-control" id="service_type" name="service_type">
                                 <option value="Hotspot">Hotspot
                                 </option>
                                 <option value="PPPoE">PPPoE</option>
                                 <option value="Others">Others</option>
                             </select>
+							</div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
                         <div class="col-md-9">
+							<div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-person-stalker"></i></span>
                             <select class="form-control" id="account_type" name="account_type">
                                 <option value="Personal">Personal
                                 </option>
                                 <option value="Business">Business</option>
                             </select>
+							</div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Coordinates')}</label>
                         <div class="col-md-9">
+							<div class="input-group">
+							<span class="input-group-addon" id="basic-addon1"><i class="glyphicon ion-location"></i></span>
                             <input name="coordinates" id="coordinates" class="form-control" value=""
                                 placeholder="6.465422, 3.406448">
+							</div>
                                 <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
                         </div>
                     </div>
