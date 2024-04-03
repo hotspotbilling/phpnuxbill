@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.4.3
+
+- Export logs to CSV by @agstrxyz
+- Change to Username if Country code empty
+
 ## 2024.4.2
 
 - Fix REST API

@@ -13,13 +13,12 @@ $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
 
 switch ($action) {
-	    case 'list-csv':
-		
+    case 'list-csv':
         $logs = ORM::for_table('tbl_logs')
             ->select('id')
             ->select('date')
@@ -28,7 +27,6 @@ switch ($action) {
             ->select('userid')
             ->select('ip')
             ->order_by_asc('id')->find_array();
-			
         $h = false;
         set_time_limit(-1);
         header('Pragma: public');
@@ -51,10 +49,7 @@ switch ($action) {
             echo '"' . implode('";"', $vs) . "\"\n";
         }
         break;
-		
-		
-		case 'radius-csv':
-		
+    case 'radius-csv':
         $logs = ORM::for_table('radpostauth')
             ->select('id')
             ->select('username')
@@ -62,7 +57,6 @@ switch ($action) {
             ->select('reply')
             ->select('authdate')
             ->order_by_asc('id')->find_array();
-			
         $h = false;
         set_time_limit(-1);
         header('Pragma: public');
@@ -85,7 +79,7 @@ switch ($action) {
             echo '"' . implode('";"', $vs) . "\"\n";
         }
         break;
-		
+
     case 'list':
         $q = (_post('q') ? _post('q') : _get('q'));
         $keep = _post('keep');

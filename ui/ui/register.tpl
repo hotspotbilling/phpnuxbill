@@ -26,22 +26,22 @@
             <hr>
         </div>
         {if isset($notify)}
-        <script>
-            // Display SweetAlert toast notification
-            Swal.fire({
-                icon: '{if $notify_t == "s"}success{else}warning{/if}',
-                title: '{$notify}',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 5000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
-            });
-        </script>
+            <script>
+                // Display SweetAlert toast notification
+                Swal.fire({
+                    icon: '{if $notify_t == "s"}success{else}warning{/if}',
+                    title: '{$notify}',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            </script>
         {/if}
         <div class="row">
             <div class="col-md-4">
@@ -61,9 +61,15 @@
                                 <div class="md-input-container">
                                     <label>{Lang::T('Phone Number')}</label>
                                     <div class="input-group">
-                                        <span class="input-group-addon" id="basic-addon1">+</span>
+                                        {if $_c['country_code_phone']!= ''}
+                                            <span class="input-group-addon" id="basic-addon1"><i
+                                                    class="glyphicon glyphicon-phone-alt"></i></span>
+                                        {else}
+                                            <span class="input-group-addon" id="basic-addon1"><i
+                                                    class="glyphicon glyphicon-user"></i></span>
+                                        {/if}
                                         <input type="text" class="form-control" name="username"
-                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
+                                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
                                     </div>
                                 </div>
                                 <div class="md-input-container md-float-label">
@@ -73,8 +79,8 @@
                                 </div>
                                 <div class="md-input-container md-float-label">
                                     <label>{Lang::T('Email')}</label>
-                                    <input type="text" required class="form-control" id="email"
-                                        placeholder="xxxxxxx@xxxx.xx" value="{$email}" name="email">
+                                    <input type="text" class="form-control" id="email" placeholder="xxxxxxx@xxxx.xx"
+                                        value="{$email}" name="email">
                                 </div>
                                 <div class="md-input-container md-float-label">
                                     <label>{Lang::T('Address')}</label>
@@ -105,8 +111,7 @@
                                         <a href="{$_url}login" class="btn btn-warning">{Lang::T('Cancel')}</a>
                                     </div>
                                     <div class="btn-group">
-                                        <button class="btn btn-success"
-                                            type="submit">{Lang::T('Register')}</button>
+                                        <button class="btn btn-success" type="submit">{Lang::T('Register')}</button>
                                     </div>
                                 </div>
                                 <br>
