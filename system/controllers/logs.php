@@ -18,6 +18,74 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
 
 
 switch ($action) {
+	    case 'list-csv':
+		
+        $logs = ORM::for_table('tbl_logs')
+            ->select('id')
+            ->select('date')
+            ->select('type')
+            ->select('description')
+            ->select('userid')
+            ->select('ip')
+            ->order_by_asc('id')->find_array();
+			
+        $h = false;
+        set_time_limit(-1);
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header("Content-type: text/csv");
+        header('Content-Disposition: attachment;filename="activity-logs_' . date('Y-m-d_H_i') . '.csv"');
+        header('Content-Transfer-Encoding: binary');
+        foreach ($logs as $log) {
+            $ks = [];
+            $vs = [];
+            foreach ($log as $k => $v) {
+                $ks[] = $k;
+                $vs[] = $v;
+            }
+            if (!$h) {
+                echo '"' . implode('";"', $ks) . "\"\n";
+                $h = true;
+            }
+            echo '"' . implode('";"', $vs) . "\"\n";
+        }
+        break;
+		
+		
+		case 'radius-csv':
+		
+        $logs = ORM::for_table('radpostauth')
+            ->select('id')
+            ->select('username')
+            ->select('pass')
+            ->select('reply')
+            ->select('authdate')
+            ->order_by_asc('id')->find_array();
+			
+        $h = false;
+        set_time_limit(-1);
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header("Content-type: text/csv");
+        header('Content-Disposition: attachment;filename="radius-logs_' . date('Y-m-d_H_i') . '.csv"');
+        header('Content-Transfer-Encoding: binary');
+        foreach ($logs as $log) {
+            $ks = [];
+            $vs = [];
+            foreach ($log as $k => $v) {
+                $ks[] = $k;
+                $vs[] = $v;
+            }
+            if (!$h) {
+                echo '"' . implode('";"', $ks) . "\"\n";
+                $h = true;
+            }
+            echo '"' . implode('";"', $vs) . "\"\n";
+        }
+        break;
+		
     case 'list':
         $q = (_post('q') ? _post('q') : _get('q'));
         $keep = _post('keep');
