@@ -81,6 +81,7 @@
                     <input type="hidden" name="plan" value="{$plan['id']}">
                     <input type="hidden" name="server" value="{$server}">
                     <input type="hidden" name="using" value="{$using}">
+                    <input type="hidden" name="stoken" value="{App::getToken()}">
                     <center>
                         <button class="btn btn-success" type="submit">{Lang::T('Recharge')}</button><br>
                         <a class="btn btn-link" href="{$_url}plan/recharge">{Lang::T('Cancel')}</a>

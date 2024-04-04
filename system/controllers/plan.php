@@ -147,6 +147,15 @@ switch ($action) {
         $server = _post('server');
         $planId = _post('plan');
         $using = _post('using');
+        $stoken = _post('stoken');
+
+        if(!empty(App::getTokenValue($stoken))){
+            $username = App::getTokenValue($stoken);
+            $in = ORM::for_table('tbl_transactions')->where('username', $username)->order_by_desc('id')->find_one();
+            Package::createInvoice($in);
+            $ui->display('invoice.tpl');
+            die();
+        }
 
         $msg = '';
         if ($id_customer == '' or $server == '' or $planId == '' or $using == '') {
@@ -182,6 +191,7 @@ switch ($action) {
                 }
                 $in = ORM::for_table('tbl_transactions')->where('username', $cust['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
+                App::setToken($stoken, $cust['username']);
                 $ui->display('invoice.tpl');
                 _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $cust['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
             } else {

@@ -6,6 +6,7 @@
 
 - Data Tables for Customers List by @Focuslinkstech
 - Add Bills to Reminder
+- Prevent double submit for recharge and renew
 
 ## 2024.4.3
 

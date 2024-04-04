@@ -10,4 +10,20 @@ class App{
         return true;
     }
 
+    public static function getToken(){
+        return md5(microtime());
+    }
+
+    public static function setToken($token, $value){
+        $_SESSION[$token] = $value;
+    }
+
+    public static function getTokenValue($key){
+        if(isset($_SESSION[$key])){
+            return $_SESSION[$key];
+        }else{
+            return "";
+        }
+    }
+
 }

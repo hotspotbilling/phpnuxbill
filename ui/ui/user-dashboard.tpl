@@ -183,7 +183,7 @@
                                 {/if}
                             </td>
                             <td class="small row">
-                                <a class="btn btn-primary pull-right  btn-sm" href="{$_url}home&recharge={$_bill['id']}"
+                                <a class="btn btn-primary pull-right  btn-sm" href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
                                     onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
                             </td>
                         </tr>
