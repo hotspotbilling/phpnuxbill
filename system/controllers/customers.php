@@ -512,19 +512,11 @@ switch ($action) {
         break;
 
     default:
-        $search = _post('search');
         run_hook('list_customers'); #HOOK
-        if ($search != '') {
-            $query = ORM::for_table('tbl_customers')
-            ->where_raw("(`username` LIKE '%$search%' OR `fullname` LIKE '%$search%' OR `phonenumber` LIKE '%$search%' OR `email` LIKE '%$search%')")
-            ->order_by_asc('username');
-            $d = Paginator::findMany($query, ['search' => $search]);
-        } else {
-            $query = ORM::for_table('tbl_customers')->order_by_asc('username');
-            $d = Paginator::findMany($query);
-        }
 
-        $ui->assign('search', htmlspecialchars($search));
+        $query = ORM::for_table('tbl_customers')->order_by_asc('username');
+        $d = $query->findMany();
+        $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('d', $d);
         $ui->display('customers.tpl');
         break;
