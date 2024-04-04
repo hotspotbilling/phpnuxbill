@@ -204,7 +204,7 @@
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li class="{if $_system_menu eq 'services'}active{/if} treeview">
                             <a href="#">
-                                <i class="ion ion-cube"></i> <span>{Lang::T('Plans')}</span>
+                                <i class="ion ion-cube"></i> <span>{Lang::T('Internet Plan')}</span>
                                 <span class="pull-right-container">
                                     <i class="fa fa-angle-left pull-right"></i>
                                 </span>
