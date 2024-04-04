@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.4.4
+
+-Data Tables for Customers List by @Focuslinkstech
+
 ## 2024.4.3
 
 - Export logs to CSV by @agstrxyz

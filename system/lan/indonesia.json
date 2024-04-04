@@ -405,5 +405,10 @@
     "day": "hari",
     "hour": "jam",
     "minute": "menit",
-    "second": "Kedua"
+    "second": "Kedua",
+    "Account_Type": "Jenis akun",
+    "Contact": "Kontak",
+    "Paid": "Dibayar",
+    "Personal": "Pribadi",
+    "Coordinates": "Koordinat"
 }

@@ -117,6 +117,15 @@ class Message
         $msg = str_replace('[[username]]', $customer['username'], $msg);
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', $price, $msg);
+        list($bills, $add_cost) = User::getBills($customer['id']);
+        if(count($bills)>0){
+            $note = "";
+            foreach ($bills as $k => $v) {
+                $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
+            }
+            $note .= Lang::T("Total")." : " . Lang::moneyFormat($add_cost+$price) . "\n";
+            $msg = str_replace('[[bills]]', $note, $msg);
+        }
         if ($u) {
             $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($u['expiration'], $u['time']), $msg);
         }
