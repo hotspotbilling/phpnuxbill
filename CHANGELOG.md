@@ -4,7 +4,8 @@
 
 ## 2024.4.4
 
--Data Tables for Customers List by @Focuslinkstech
+- Data Tables for Customers List by @Focuslinkstech
+- Add Bills to Reminder
 
 ## 2024.4.3
 
