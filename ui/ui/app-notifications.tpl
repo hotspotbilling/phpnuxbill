@@ -20,9 +20,11 @@
                                 rows="3">{if $_json['expired']!=''}{Lang::htmlspecialchars($_json['expired'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name.
-                            <b>[[package]]</b> will be replaced with Package name.
-                            <b>[[price]]</b> will be replaced with Package price.
+                            <b>[[name]]</b> will be replaced with Customer Name.<br>
+                            <b>[[username]]</b> will be replaced with Customer username.<br>
+                            <b>[[package]]</b> will be replaced with Package name.<br>
+                            <b>[[price]]</b> will be replaced with Package price.<br>
+                            <b>[[bills]]</b> aditional bills for customers
                         </p>
                     </div>
                 </div>
@@ -34,10 +36,12 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_7_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name.
-                            <b>[[package]]</b> will be replaced with Package name.
-                            <b>[[price]]</b> will be replaced with Package price.
-                            <b>[[expired_date]]</b> will be replaced with Expiration date.
+                            <b>[[name]]</b> will be replaced with Customer Name.<br>
+                            <b>[[username]]</b> will be replaced with Customer username.<br>
+                            <b>[[package]]</b> will be replaced with Package name.<br>
+                            <b>[[price]]</b> will be replaced with Package price.<br>
+                            <b>[[expired_date]]</b> will be replaced with Expiration date.<br>
+                            <b>[[bills]]</b> aditional bills for customers
                         </p>
                     </div>
                 </div>
@@ -49,10 +53,12 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_3_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name.
-                            <b>[[package]]</b> will be replaced with Package name.
-                            <b>[[price]]</b> will be replaced with Package price.
-                            <b>[[expired_date]]</b> will be replaced with Expiration date.
+                            <b>[[name]]</b> will be replaced with Customer Name.<br>
+                            <b>[[username]]</b> will be replaced with Customer username.<br>
+                            <b>[[package]]</b> will be replaced with Package name.<br>
+                            <b>[[price]]</b> will be replaced with Package price.<br>
+                            <b>[[expired_date]]</b> will be replaced with Expiration date.<br>
+                            <b>[[bills]]</b> aditional bills for customers
                         </p>
                     </div>
                 </div>
@@ -64,10 +70,12 @@
                                 rows="3">{Lang::htmlspecialchars($_json['reminder_1_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> will be replaced with Customer Name.
-                            <b>[[package]]</b> will be replaced with Package name.
-                            <b>[[price]]</b> will be replaced with Package price.
-                            <b>[[expired_date]]</b> will be replaced with Expiration date.
+                            <b>[[name]]</b> will be replaced with Customer Name.<br>
+                            <b>[[username]]</b> will be replaced with Customer username.<br>
+                            <b>[[package]]</b> will be replaced with Package name.<br>
+                            <b>[[price]]</b> will be replaced with Package price.<br>
+                            <b>[[expired_date]]</b> will be replaced with Expiration date.<br>
+                            <b>[[bills]]</b> aditional bills for customers
                         </p>
                     </div>
                 </div>
@@ -94,7 +102,8 @@
                             <b>[[user_name]]</b> Username internet.<br>
                             <b>[[user_password]]</b> User password.<br>
                             <b>[[expired_date]]</b> Expired datetime.<br>
-                            <b>[[footer]]</b> Invoice Footer.
+                            <b>[[footer]]</b> Invoice Footer.<br>
+                            <b>[[note]]</b> For Notes by admin.<br>
                         </p>
                     </div>
                 </div>
