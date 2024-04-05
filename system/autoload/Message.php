@@ -115,6 +115,7 @@ class Message
         global $u;
         $msg = str_replace('[[name]]', $customer['fullname'], $message);
         $msg = str_replace('[[username]]', $customer['username'], $msg);
+        $msg = str_replace('[[plan]]', $package, $msg);
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', Lang::moneyFormat($price), $msg);
         list($bills, $add_cost) = User::getBills($customer['id']);
