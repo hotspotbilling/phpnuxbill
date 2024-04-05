@@ -59,7 +59,7 @@
                         <div class="panel-heading">1. {Lang::T('Register as Member')}</div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <label>{Lang::T('Phone Number')}</label>
+                                <label>{if $_c['country_code_phone']!= ''}{Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}</label>
                                 <div class="input-group">
                                     {if $_c['country_code_phone']!= ''}
                                         <span class="input-group-addon" id="basic-addon1"><i
