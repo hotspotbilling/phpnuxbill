@@ -41,6 +41,10 @@
                                 <td>{Lang::T('Balance')}</td>
                                 <td>{Lang::moneyFormat($trx['price'])}</td>
                             </tr>
+                            <tr>
+                                <td>{Lang::T('Balance')}</td>
+                                <td>{$trx['note']}</td>
+                            </tr>
                         </tbody>
                     </table>
                 {else}

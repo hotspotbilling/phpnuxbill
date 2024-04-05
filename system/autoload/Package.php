@@ -690,6 +690,8 @@ class Package
         } else {
             $admin['fullname'] = 'Customer';
         }
+        $cust = ORM::for_table('tbl_customers')->where('username', $in['username'])->findOne();
+
         $note = '';
         //print
         $invoice = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
@@ -724,6 +726,9 @@ class Package
             $invoice .= Lang::pad($note, ' ', 2) . "\n";
         }
         $invoice .= Lang::pad("", '=') . "\n";
+        if($cust){
+            $invoice .= Lang::pads(Lang::T('Full Name'), $cust['fullname'], ' ') . "\n";
+        }
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
         if ($in['type'] != 'Balance') {
@@ -765,6 +770,9 @@ class Package
             $invoice .= Lang::pad($note, ' ', 2) . "\n";
         }
         $invoice .= Lang::pad("", '=') . "\n";
+        if($cust){
+            $invoice .= Lang::pads(Lang::T('Full Name'), $cust['fullname'], ' ') . "\n";
+        }
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
         $invoice .= Lang::pads(Lang::T('Password'), '**********', ' ') . "\n";
         if ($in['type'] != 'Balance') {

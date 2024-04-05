@@ -420,5 +420,7 @@
     "Resend": "Kirim ulang",
     "Login": "Masuk",
     "success": "Sukses",
-    "Click_Here": "Klik disini"
+    "Click_Here": "Klik disini",
+    "Your_friend_do_not_have_active_package": "Teman Anda tidak memiliki paket aktif",
+    "If_your_friend_have_Additional_Cost__you_will_pay_for_that_too": "Jika teman Anda memiliki Biaya Tambahan, Anda juga akan membayarnya"
 }

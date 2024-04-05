@@ -127,6 +127,7 @@ switch ($action) {
         if (empty($trx)) {
             r2(U . "order/package", 'e', Lang::T("Transaction Not found"));
         }
+
         $router = Mikrotik::info($trx['routers']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
         $bandw = ORM::for_table('tbl_bandwidth')->find_one($plan['id_bw']);
@@ -220,7 +221,7 @@ switch ($action) {
             if ($active && $active['plan_id'] != $plan['id']) {
                 r2(U . "order/package", 'e', Lang::T("Target has active plan, different with current plant.") . " [ <b>$active[namebp]</b> ]");
             }
-            if (Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['fullname'], 'Balance')) {
+            if (Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['username'], 'Balance')) {
                 // if success, then get the balance
                 Balance::min($user['id'], $plan['price']);
                 //sender
