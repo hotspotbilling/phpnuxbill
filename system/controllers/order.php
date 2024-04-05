@@ -221,7 +221,8 @@ switch ($action) {
             if ($active && $active['plan_id'] != $plan['id']) {
                 r2(U . "order/package", 'e', Lang::T("Target has active plan, different with current plant.") . " [ <b>$active[namebp]</b> ]");
             }
-            if (Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['username'], 'Balance')) {
+            $result = Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['username'], 'Balance');
+            if (!empty($result)) {
                 // if success, then get the balance
                 Balance::min($user['id'], $plan['price']);
                 //sender
@@ -239,6 +240,7 @@ switch ($action) {
                 $d->paid_date = date('Y-m-d H:i:s');
                 $d->expired_date = date('Y-m-d H:i:s');
                 $d->pg_url_payment = 'balance';
+                $d->trx_invoice = $result;
                 $d->status = 2;
                 $d->save();
                 $trx_id = $d->id();
@@ -257,6 +259,7 @@ switch ($action) {
                 $d->paid_date = date('Y-m-d H:i:s');
                 $d->expired_date = date('Y-m-d H:i:s');
                 $d->pg_url_payment = 'balance';
+                $d->trx_invoice = $result;
                 $d->status = 2;
                 $d->save();
                 r2(U . "order/view/$trx_id", 's', Lang::T("Success to send package"));

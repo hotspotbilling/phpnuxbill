@@ -15,15 +15,17 @@ class Package
      * @param int   $plan_id plan id for this package
      * @param string $gateway payment gateway name
      * @param string $channel channel payment gateway
+     * @param array $pgids payment gateway ids
      * @return boolean
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel, $note = '')
     {
-        global $config, $admin, $c, $p, $b, $t, $d, $zero;
+        global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
         $time = date("H:i:s");
+        $inv = "";
 
         if ($id_customer == '' or $router_name == '' or $plan_id == '') {
             return false;
@@ -76,9 +78,8 @@ class Package
 
         if ($router_name == 'balance') {
             // insert table transactions
-            $inv = "INV-" . Package::_raid();
             $t = ORM::for_table('tbl_transactions')->create();
-            $t->invoice = $inv;
+            $t->invoice = $inv = "INV-" . Package::_raid();
             $t->username = $c['username'];
             $t->plan_name = $p['name_plan'];
             $t->price = $p['price'];
@@ -239,7 +240,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . Package::_raid();
+                $t->invoice = $inv = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
@@ -323,7 +324,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . Package::_raid();
+                $t->invoice = $inv = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
@@ -435,7 +436,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . Package::_raid();
+                $t->invoice = $inv = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
@@ -518,7 +519,7 @@ class Package
 
                 // insert table transactions
                 $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = "INV-" . Package::_raid();
+                $t->invoice = $inv = "INV-" . Package::_raid();
                 $t->username = $c['username'];
                 $t->plan_name = $p['name_plan'];
                 if ($p['validity_unit'] == 'Period') {
@@ -583,7 +584,10 @@ class Package
         }
         run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);
-        return true;
+        if($trx){
+            $trx->trx_invoice = $inv;
+        }
+        return $inv;
     }
 
     public static function changeTo($username, $plan_id, $from_id)

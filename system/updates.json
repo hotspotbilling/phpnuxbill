@@ -90,5 +90,8 @@
     ],
     "2023.3.20": [
         "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login';"
+    ],
+    "2024.4.5" : [
+        "ALTER TABLE `tbl_payment_gateway` ADD `trx_invoice` VARCHAR(25) NOT NULL DEFAULT '' COMMENT 'from tbl_transactions' AFTER `paid_date`;"
     ]
 }
