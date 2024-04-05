@@ -312,9 +312,9 @@
                                 <li {if $_routes[1] eq 'Registration_Info' }class="active" {/if}><a
                                         href="{$_url}pages/Registration_Info">{Lang::T('Registration Info')}</a></li>
                                 <li {if $_routes[1] eq 'Privacy_Policy' }class="active" {/if}><a
-                                        href="{$_url}pages/Privacy_Policy">Privacy Policy</a></li>
+                                        href="{$_url}pages/Privacy_Policy">{Lang::T('Privacy Policy')}</a></li>
                                 <li {if $_routes[1] eq 'Terms_and_Conditions' }class="active" {/if}><a
-                                        href="{$_url}pages/Terms_and_Conditions">Terms and Conditions</a></li>
+                                        href="{$_url}pages/Terms_and_Conditions">{Lang::T('Terms and Conditions')}</a></li>
                                 {$_MENU_PAGES}
                             </ul>
                         </li>
