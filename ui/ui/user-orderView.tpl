@@ -38,13 +38,17 @@
                                 <td>{$trx['gateway']}</td>
                             </tr>
                             <tr>
-                                <td>{Lang::T('Balance')}</td>
+                                <td>{Lang::T('Total')}</td>
                                 <td>{Lang::moneyFormat($trx['price'])}</td>
                             </tr>
-                            <tr>
-                                <td>{Lang::T('Balance')}</td>
-                                <td>{$trx['note']}</td>
-                            </tr>
+                            {if $invoice['note']}
+                                <tr>
+                                    <td>{Lang::T('Notes')}</td>
+                                    <td>
+                                        {nl2br($invoice['note'])}
+                                    </td>
+                                </tr>
+                            {/if}
                         </tbody>
                     </table>
                 {else}
@@ -84,8 +88,11 @@
                                 </tr>
                             {/if}
                             <tr>
-                                <td>{Lang::T('Plan Price')}{if $add_cost>0}<small> + {Lang::T('Additional Cost')}{/if}</small></td>
-                                <td style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($trx['price'])}</td>
+                                <td>{Lang::T('Plan Price')}{if $add_cost>0}<small> +
+                                        {Lang::T('Additional Cost')}{/if}</small></td>
+                                <td
+                                    style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">
+                                    {Lang::moneyFormat($trx['price'])}</td>
                             </tr>
                             <tr>
                                 <td>{Lang::T('Type')}</td>

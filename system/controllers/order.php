@@ -131,9 +131,8 @@ switch ($action) {
         $router = Mikrotik::info($trx['routers']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
         $bandw = ORM::for_table('tbl_bandwidth')->find_one($plan['id_bw']);
-        list($bills, $add_cost) = User::getBills($id_customer);
-        $ui->assign('bills', $bills);
-        $ui->assign('add_cost', $add_cost);
+        $invoice = ORM::for_table('tbl_transactions')->where("invoice",$trx['trx_invoice'])->find_one();
+        $ui->assign('invoice', $invoice);
         $ui->assign('trx', $trx);
         $ui->assign('router', $router);
         $ui->assign('plan', $plan);
