@@ -60,10 +60,12 @@
 
                             </div>
                             <div class="form-group">
-                                <label>{Lang::T('Password')}</label>
-                                <input type="password" class="form-control" name="password"
-                                    placeholder="{Lang::T('Password')}">
-                            </div>
+    <label>{Lang::T('Password')}</label>
+    <div class="input-group">
+        <span class="input-group-addon" id="basic-addon2"><i class="glyphicon glyphicon-lock"></i></span>
+        <input type="password" class="form-control" name="password" placeholder="{Lang::T('Password')}">
+    </div>
+</div>
 
                             <div class="clearfix hidden">
                                 <div class="ui-checkbox ui-checkbox-primary right">
