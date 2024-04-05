@@ -42,12 +42,12 @@ foreach ($d as $ds) {
 			// Postpaid price from field
 			$add_inv = User::getAttribute("Invoice", $ds['customer_id']);
 			if (empty ($add_inv) or $add_inv == 0) {
-				$price = Lang::moneyFormat($p['price']);
+				$price = $p['price'];
 			} else {
-				$price = Lang::moneyFormat($add_inv);
+				$price = $add_inv;
 			}
         } else {
-                $price = Lang::moneyFormat($p['price']);
+                $price = $p['price'];
         }
         if ($ds['expiration'] == $day7) {
             echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_7_day'), $config['user_notification_reminder']) . "\n";

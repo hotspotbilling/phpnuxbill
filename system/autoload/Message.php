@@ -116,13 +116,14 @@ class Message
         $msg = str_replace('[[name]]', $customer['fullname'], $message);
         $msg = str_replace('[[username]]', $customer['username'], $msg);
         $msg = str_replace('[[package]]', $package, $msg);
-        $msg = str_replace('[[price]]', $price, $msg);
+        $msg = str_replace('[[price]]', Lang::moneyFormat($price), $msg);
         list($bills, $add_cost) = User::getBills($customer['id']);
         if($add_cost>0){
             $note = "";
             foreach ($bills as $k => $v) {
                 $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
             }
+            $note .= "Total : " . Lang::moneyFormat($add_cost+$price) . "\n";
             $msg = str_replace('[[bills]]', $note, $msg);
         }
         if ($u) {
