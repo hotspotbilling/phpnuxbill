@@ -125,6 +125,8 @@ class Message
             }
             $note .= "Total : " . Lang::moneyFormat($add_cost+$price) . "\n";
             $msg = str_replace('[[bills]]', $note, $msg);
+        }else{
+            $msg = str_replace('[[bills]]', '', $msg);
         }
         if ($u) {
             $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($u['expiration'], $u['time']), $msg);
@@ -134,9 +136,9 @@ class Message
             && !empty($message) && in_array($via, ['sms', 'wa'])
         ) {
             if ($via == 'sms') {
-                Message::sendSMS($customer['phonenumber'], $msg);
+                echo Message::sendSMS($customer['phonenumber'], $msg);
             } else if ($via == 'wa') {
-                Message::sendWhatsapp($customer['phonenumber'], $msg);
+                echo Message::sendWhatsapp($customer['phonenumber'], $msg);
             }
         }
         return "$via: $msg";
