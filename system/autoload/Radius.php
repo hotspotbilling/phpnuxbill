@@ -30,7 +30,10 @@ class Radius
     {
         return ORM::for_table('nas', 'radius');
     }
-
+    public static function getTableAcct()
+    {
+        return ORM::for_table('radacct', 'radius');
+    }
     public static function getTableCustomer()
     {
         return ORM::for_table('radcheck', 'radius');
@@ -176,7 +179,7 @@ class Radius
                         $timelimit = $plan['time_limit'] * 60 * 60;
                     else
                         $timelimit = $plan['time_limit'] * 60;
-                    Radius::upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
                 } else if ($plan['limit_type'] == "Data_Limit") {
                     if ($plan['data_unit'] == 'GB')
                         $datalimit = $plan['data_limit'] . "000000000";
@@ -184,29 +187,33 @@ class Radius
                         $datalimit = $plan['data_limit'] . "000000";
                     //Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
                     // Mikrotik Spesific
-                    Radius::upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-Data', $datalimit);
                 } else if ($plan['limit_type'] == "Both_Limit") {
                     if ($plan['time_unit'] == 'Hrs')
                         $timelimit = $plan['time_limit'] * 60 * 60;
                     else
-                        $timelimit = $plan['time_limit'] . ":00";
+                        $timelimit = $plan['time_limit'] * 60;
                     if ($plan['data_unit'] == 'GB')
                         $datalimit = $plan['data_limit'] . "000000000";
                     else
                         $datalimit = $plan['data_limit'] . "000000";
                     //Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
-                    Radius::upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
                     // Mikrotik Spesific
-                    Radius::upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-Data', $datalimit);
+					// remove user from radacct table
+					Radius::getTableAcct()->where_equal('username', $customer['username'])->delete_many();
+				
+				
                 }
             } else {
                 //Radius::delAtribute(Radius::getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
-                Radius::delAtribute(Radius::getTableCustomer(), 'Expire-After', 'username', $customer['username']);
-                Radius::delAtribute(Radius::getTableCustomer(), 'Mikrotik-Total-Limit', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'Max-Data', 'username', $customer['username']);
             }
             // expired user
             if ($expired != null) {
-                //Radius::upsertCustomer($customer['username'], 'access-period', strtotime($expired) - time());
+                //Radius::upsertCustomer($customer['username'], 'Max-All-Session', strtotime($expired) - time());
                 Radius::upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
                 // Mikrotik Spesific
                 Radius::upsertCustomer(
@@ -215,13 +222,15 @@ class Radius
                     date('Y-m-d', strtotime($expired)) . 'T' . date('H:i:s', strtotime($expired)) . Timezone::getTimeOffset($config['timezone'])
                 );
             } else {
-                //Radius::delAtribute(Radius::getTableCustomer(), 'access-period', 'username', $customer['username']);
+                //Radius::delAtribute(Radius::getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
                 Radius::delAtribute(Radius::getTableCustomer(), 'expiration', 'username', $customer['username']);
             }
 
             if ($plan['type'] == 'PPPOE') {
                 Radius::upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
             }
+			
+			
             return true;
         }
         return false;
