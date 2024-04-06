@@ -450,5 +450,10 @@
 "Transaction_datetime": Tanggal waktu transaksi",
 "Balance_Before": "Saldo Sebelumnya",
 "Balance_After": "Saldo Setelahnya",
-"Invoice_Footer": Catatan Kaki Faktur"
+"Invoice_Footer": Catatan Kaki Faktur",
+"For_Notes_by_admin": "Untuk Catatan oleh admin",
+"Receiver_name": "Nama Penerima",
+"how_much_balance_have_been_send": "berapa banyak saldo yang telah dikirim",
+"Current_Balance": "Saldo saat ini",
+"Sender_name": "Nama pengirim"
 }
