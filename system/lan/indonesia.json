@@ -141,7 +141,7 @@
     "Manage_Administrator": "Kelola Administrator",
     "Add_New_Administrator": "Tambahkan Administrator Baru",
     "Localisation": "Lokalisasi",
-    "Backup_Restore": "Cadangkan\/Pulihkan",
+    "Backup/Restore": "Cadangkan\/Pulihkan",
     "General_Settings": "Pengaturan Umum",
     "Date": "Tanggal",
     "Login_Successful": "Berhasil Masuk",
@@ -426,5 +426,8 @@
     "Select_Payment_Gateway": "Pilih Gerbang Pembayaran",
     "Available_Payment_Gateway": "Gerbang Pembayaran yang Tersedia",
     "Pay_Now": "Bayar sekarang",
-    "Notes": "Catatan"
+    "Notes": "Catatan",
+    "Clear Cache": "Bersihkan Sampah"
+    "Privacy Policy": "Kebijakan Privasi"
+    "Terms and Conditions": "Syarat dan Ketentuan"
 }
