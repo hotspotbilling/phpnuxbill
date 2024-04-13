@@ -67,7 +67,7 @@ foreach ($d as $ds) {
                     }
                 }
                 if ($p && $p['enabled'] && $c['balance'] >= $p['price']) {
-                    if (Package::rechargeUser($ds['customer_id'], $p['routers'], $p['id'], 'Customer', 'Balance')) {
+                    if (Package::rechargeUser($ds['customer_id'], $ds['routers'], $p['id'], 'Customer', 'Balance')) {
                         // if success, then get the balance
                         Balance::min($ds['customer_id'], $p['price']);
                         echo "plan enabled: $p[enabled] | User balance: $c[balance] | price $p[price]\n";
