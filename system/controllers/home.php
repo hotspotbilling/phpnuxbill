@@ -98,7 +98,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             $router = 'radius';
         } else {
             $routers = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
-            $router = $router['id'];
+            $router = $routers['id'];
         }
         if ($config['enable_balance'] == 'yes') {
             $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
