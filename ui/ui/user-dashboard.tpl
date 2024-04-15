@@ -178,12 +178,19 @@
                         <tr>
                             <td class="small text-primary text-uppercase text-normal">
                                 {if $_bill['status'] == 'on'}
-                                    <a href="{$_url}home&deactivate={$_bill['id']}" onclick="return confirm('{Lang::T('Deactivate')}?')"
-                                        class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
+                                    <a href="{$_url}home&deactivate={$_bill['id']}"
+                                        onclick="return confirm('{Lang::T('Deactivate')}?')" class="btn btn-danger btn-xs"><i
+                                            class="glyphicon glyphicon-trash"></i></a>
                                 {/if}
                             </td>
                             <td class="small row">
-                                <a class="btn btn-primary pull-right  btn-sm" href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
+                                {if $_bill['status'] != 'on' && $_bill['prepaid'] != 'yes' && $_c['extend_expired']}
+                                    <a class="btn btn-warning text-black btn-sm"
+                                        href="{$_url}home&extend={$_bill['id']}&stoken={App::getToken()}"
+                                        onclick="return confirm('{str_replace("\n","\\n",str_replace("\r","",$_c['extend_confirmation']))}?')">{Lang::T('Extend')}</a>
+                                {/if}
+                                <a class="btn btn-primary pull-right  btn-sm"
+                                    href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
                                     onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
                             </td>
                         </tr>

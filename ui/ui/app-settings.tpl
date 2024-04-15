@@ -218,6 +218,37 @@
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
+                    {Lang::T('Extend Postpaid Expiration')}
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Allow Extend')}</label>
+                        <div class="col-md-6">
+                            <select name="extend_expired" id="extend_expired" class="form-control text-muted">
+                                <option value="0">No</option>
+                                <option value="1" {if $_c['extend_expired']}selected="selected" {/if}>Yes</option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">Customer can request to extend expirations</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Extend Days')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="extend_days" placeholder="3" value="{$_c['extend_days']}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Confirmation Message')}</label>
+                        <div class="col-md-6">
+                            <textarea type="text" rows="4" class="form-control" name="extend_confirmation" placeholder="i agree to extends and will paid full after this">{$_c['extend_confirmation']}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    </div>
                     {Lang::T('Balance System')}
                 </div>
                 <div class="panel-body">

@@ -67,12 +67,14 @@
                                     <td>{$ds['routers']}</td>
                                     <td>
                                         <a href="{$_url}plan/edit/{$ds['id']}"
-                                            class="btn btn-warning btn-xs">{Lang::T('Edit')}</a>
+                                            class="btn btn-warning btn-xs" style="color: black;">{Lang::T('Edit')}</a>
                                         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                                             <a href="{$_url}plan/delete/{$ds['id']}" id="{$ds['id']}"
                                                 onclick="return confirm('{Lang::T('Delete')}?')"
                                                 class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}
+                                        <a href="javascript:extend('{$ds['id']}')"
+                                            class="btn btn-info btn-xs">{Lang::T('extend')}</a>
                                     </td>
                                 </tr>
                             {/foreach}
@@ -85,5 +87,15 @@
     </div>
 </div>
 
+<script>
+function extend(idP){
+    var res = prompt("Extend for many days?", "3");
+    if(res){
+        if(confirm("Extend for "+res+" days?")){
+            window.location.href = "{$_url}plan/extend/"+idP+"/"+res+"&stoken={App::getToken()}";
+        }
+    }
+}
+</script>
 
 {include file="sections/footer.tpl"}

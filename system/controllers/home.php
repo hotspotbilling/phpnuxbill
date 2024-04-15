@@ -80,8 +80,8 @@ if (_post('send') == 'balance') {
     $actives = ORM::for_table('tbl_user_recharges')
         ->where('username', _post('username'))
         ->find_many();
-    foreach($actives as $active){
-    $router = ORM::for_table('tbl_routers')->where('name', $active['routers'])->find_one();
+    foreach ($actives as $active) {
+        $router = ORM::for_table('tbl_routers')->where('name', $active['routers'])->find_one();
         if ($router) {
             r2(U . "order/send/$router[id]/$active[plan_id]&u=" . trim(_post('username')), 's', Lang::T('Review package before recharge'));
         }
@@ -92,13 +92,13 @@ if (_post('send') == 'balance') {
 $ui->assign('_bills', User::_billing());
 
 if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
-    if(!empty(App::getTokenValue($_GET['stoken']))){
+    if (!empty(App::getTokenValue(_get('stoken')))) {
         r2(U . "voucher/invoice/");
         die();
     }
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['recharge'])->where('username', $user['username'])->findOne();
     if ($bill) {
-        if ($bill['routers'] == 'radius') { 
+        if ($bill['routers'] == 'radius') {
             $router = 'radius';
         } else {
             $routers = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
@@ -106,17 +106,72 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         }
         if ($config['enable_balance'] == 'yes') {
             $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
-            if(!$plan['enabled']){
+            if (!$plan['enabled']) {
                 r2(U . "home", 'e', 'Plan is not exists');
             }
             if ($user['balance'] > $plan['price']) {
-                r2(U . "order/pay/$router/$bill[plan_id]&stoken=".$_GET['stoken'], 'e', 'Order Plan');
+                r2(U . "order/pay/$router/$bill[plan_id]&stoken=" . _get('stoken'), 'e', 'Order Plan');
             } else {
                 r2(U . "order/buy/$router/$bill[plan_id]", 'e', 'Order Plan');
             }
         } else {
             r2(U . "order/buy/$router/$bill[plan_id]", 'e', 'Order Plan');
         }
+    }
+} else if (!empty(_get('extend'))) {
+    if(!$config['extend_expired']){
+        r2(U . 'home', 'e', "cannot extend");
+    }
+    if (!empty(App::getTokenValue(_get('stoken')))) {
+        r2(U . 'home', 'e', "You already extend");
+    }
+    $id = _get('extend');
+    $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->where('id', $id)->find_one();
+    if ($tur) {
+        $m = date("m");
+        $path = $CACHE_PATH . DIRECTORY_SEPARATOR . "extends" . DIRECTORY_SEPARATOR;
+        if(!file_exists($path)){
+            mkdir($path);
+        }
+        $path .= $user['id'] . ".txt";
+        if (file_exists($path)) {
+            // is already extend
+            $last = file_get_contents($path);
+            if ($last == $m) {
+                r2(U . 'home', 'e', "You already extend for this month");
+            }
+        }
+        if ($tur['status'] != 'on') {
+            $days = $config['extend_days'];
+            $expiration = date('Y-m-d', strtotime(" +$days day"));
+            $tur->expiration = $expiration;
+            $tur->status = "on";
+            $tur->save();
+            App::setToken(_get('stoken'), $id);
+            if ($tur['routers'] != 'radius') {
+                $mikrotik = Mikrotik::info($tur['routers']);
+                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                $router = $tur['routers'];
+            }
+            $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
+            $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
+            if ($tur['routers'] == 'radius') {
+                Radius::customerAddPlan($c, $p, $tur['expiration'] . ' ' . $tur['time']);
+            } else {
+                if ($tur['type'] == 'Hotspot') {
+                    Mikrotik::addHotspotUser($client, $p, $c);
+                } else if ($tur['type'] == 'PPPOE') {
+                    Mikrotik::addPpoeUser($client, $p, $c);
+                }
+            }
+            // make customer cannot extend again
+            file_put_contents($path, $m);
+            r2(U . 'home', 's', "Extend until $expiration");
+        }else{
+            r2(U . 'home', 'e', "Plan is not expired");
+        }
+    } else {
+        r2(U . 'home', 'e', "Plan Not Found or Not Active");
     }
 } else if (isset($_GET['deactivate']) && !empty($_GET['deactivate'])) {
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['deactivate'])->where('username', $user['username'])->findOne();
