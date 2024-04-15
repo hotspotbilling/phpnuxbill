@@ -777,6 +777,7 @@ switch ($action) {
                 }
             }
         }
+        _log("$admin[fullname] extend Customer $tur[customer_id] $tur[username] for $days days", $admin['user_type'], $admin['id']);
         r2(U . 'plan', 's', "Extend until $expiration");
         break;
     default:

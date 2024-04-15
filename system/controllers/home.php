@@ -166,6 +166,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             }
             // make customer cannot extend again
             file_put_contents($path, $m);
+            _log("Customer $tur[customer_id] $tur[username] extend for $days days", "Customer", $user['id']);
             r2(U . 'home', 's', "Extend until $expiration");
         }else{
             r2(U . 'home', 'e', "Plan is not expired");
@@ -198,7 +199,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         $bill->expiration = date('Y-m-d');
         $bill->time = date('H:i:s');
         $bill->save();
-        _log('User ' . $bill['username'] . ' Deactivate ' . $bill['namebp'], 'User', $bill['customer_id']);
+        _log('User ' . $bill['username'] . ' Deactivate ' . $bill['namebp'], 'Customer', $bill['customer_id']);
         Message::sendTelegram('User u' . $bill['username'] . ' Deactivate ' . $bill['namebp']);
         r2(U . 'home', 's', 'Success deactivate ' . $bill['namebp']);
     } else {

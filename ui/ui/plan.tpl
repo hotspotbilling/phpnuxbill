@@ -73,8 +73,10 @@
                                                 onclick="return confirm('{Lang::T('Delete')}?')"
                                                 class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}
-                                        <a href="javascript:extend('{$ds['id']}')"
-                                            class="btn btn-info btn-xs">{Lang::T('extend')}</a>
+                                        {if $ds['status']=='off' && $_c['extend_expired']}
+                                            <a href="javascript:extend('{$ds['id']}')"
+                                                class="btn btn-info btn-xs">{Lang::T('extend')}</a>
+                                        {/if}
                                     </td>
                                 </tr>
                             {/foreach}
