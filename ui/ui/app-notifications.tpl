@@ -17,14 +17,14 @@
                         <div class="col-md-6">
                             <textarea class="form-control" id="expired" name="expired"
                                 placeholder="Hello [[name]], your internet package [[package]] has been expired"
-                                rows="3">{if $_json['expired']!=''}{Lang::htmlspecialchars($_json['expired'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
+                                rows="4">{if $_json['expired']!=''}{Lang::htmlspecialchars($_json['expired'])}{else}Hello [[name]], your internet package [[package]] has been expired.{/if}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name)}.<br>
-                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username)}.<br>
-                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name)}.<br>
-                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price)}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers)}.
+                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name')}.<br>
+                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
+                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
+                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
                         </p>
                     </div>
                 </div>
@@ -33,15 +33,15 @@
                         <label class="col-md-2 control-label">{Lang::T('Reminder 7 days')}</label>
                         <div class="col-md-6">
                             <textarea class="form-control" id="reminder_7_day" name="reminder_7_day"
-                                rows="3">{Lang::htmlspecialchars($_json['reminder_7_day'])}</textarea>
+                                rows="4">{Lang::htmlspecialchars($_json['reminder_7_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name)}.<br>
-                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username)}.<br>
-                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name)}.<br>
-                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price)}.<br>
-                            <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date)}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers)}.
+                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name')}.<br>
+                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
+                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
+                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
+                            <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
                         </p>
                     </div>
                 </div>
@@ -50,15 +50,15 @@
                         <label class="col-md-2 control-label">{Lang::T('Reminder 3 days')}</label>
                         <div class="col-md-6">
                             <textarea class="form-control" id="reminder_3_day" name="reminder_3_day"
-                                rows="3">{Lang::htmlspecialchars($_json['reminder_3_day'])}</textarea>
+                                rows="4">{Lang::htmlspecialchars($_json['reminder_3_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name)}.<br>
-                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username)}.<br>
-                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name)}.<br>
-                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price)}.<br>
-                            <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date)}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers)}.
+                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name')}.<br>
+                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
+                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
+                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
+                            <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
                         </p>
                     </div>
                 </div>
@@ -67,15 +67,15 @@
                         <label class="col-md-2 control-label">{Lang::T('Reminder 1 day')}</label>
                         <div class="col-md-6">
                             <textarea class="form-control" id="reminder_1_day" name="reminder_1_day"
-                                rows="3">{Lang::htmlspecialchars($_json['reminder_1_day'])}</textarea>
+                                rows="4">{Lang::htmlspecialchars($_json['reminder_1_day'])}</textarea>
                         </div>
                         <p class="help-block col-md-4">
-                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name)}.<br>
-                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username)}.<br>
-                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name)}.<br>
-                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price)}.<br>
-                            <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date)}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers)}.
+                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name')}.<br>
+                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
+                            <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
+                            <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
+                            <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
                         </p>
                     </div>
                 </div>
@@ -88,22 +88,22 @@
                                 rows="20">{Lang::htmlspecialchars($_json['invoice_paid'])}</textarea>
                         </div>
                         <p class="col-md-4 help-block">
-                            <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings)}.<br>
-                            <b>[[address]]</b> {Lang::T('Your Company Address at Settings)}.<br>
-                            <b>[[phone]]</b> - {Lang::T('Your Company Phone at Settings)}.<br>
-                            <b>[[invoice]]</b> - {Lang::T('Invoice number)}.<br>
-                            <b>[[date]]</b> - {Lang::T('Date invoice created)}.<br>
-                            <b>[[payment_gateway]]</b> - {Lang::T('Payment gateway user paid from)}.<br>
-                            <b>[[payment_channel]]</b> - {Lang::T('Payment channel user paid from)}.<br>
-                            <b>[[type]]</b> - {Lang::T('is Hotspot or PPPOE)}.<br>
-                            <b>[[plan_name]]</b> - {Lang::T('Internet Package)}.<br>
-                            <b>[[plan_price]]</b> - {Lang::T('Internet Package Prices)}.<br>
-                            <b>[[name]]</b> - {Lang::T('Receiver name)}.<br>
-                            <b>[[user_name]]</b> - {Lang::T('Username internet)}.<br>
-                            <b>[[user_password]]</b> - {Lang::T('User password)}.<br>
-                            <b>[[expired_date]]</b> - {Lang::T('Expired datetime)}.<br>
-                            <b>[[footer]]</b> - {Lang::T('Invoice Footer)}.<br>
-                            <b>[[note]]</b> - {Lang::T('For Notes by admin)}.<br>
+                            <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings')}.<br>
+                            <b>[[address]]</b> {Lang::T('Your Company Address at Settings')}.<br>
+                            <b>[[phone]]</b> - {Lang::T('Your Company Phone at Settings')}.<br>
+                            <b>[[invoice]]</b> - {Lang::T('Invoice number')}.<br>
+                            <b>[[date]]</b> - {Lang::T('Date invoice created')}.<br>
+                            <b>[[payment_gateway]]</b> - {Lang::T('Payment gateway user paid from')}.<br>
+                            <b>[[payment_channel]]</b> - {Lang::T('Payment channel user paid from')}.<br>
+                            <b>[[type]]</b> - {Lang::T('is Hotspot or PPPOE')}.<br>
+                            <b>[[plan_name]]</b> - {Lang::T('Internet Package')}.<br>
+                            <b>[[plan_price]]</b> - {Lang::T('Internet Package Prices')}.<br>
+                            <b>[[name]]</b> - {Lang::T('Receiver name')}.<br>
+                            <b>[[user_name]]</b> - {Lang::T('Username internet')}.<br>
+                            <b>[[user_password]]</b> - {Lang::T('User password')}.<br>
+                            <b>[[expired_date]]</b> - {Lang::T('Expired datetime')}.<br>
+                            <b>[[footer]]</b> - {Lang::T('Invoice Footer')}.<br>
+                            <b>[[note]]</b> - {Lang::T('For Notes by admin')}.<br>
                         </p>
                     </div>
                 </div>
@@ -116,23 +116,23 @@
                                 rows="20">{Lang::htmlspecialchars($_json['invoice_balance'])}</textarea>
                         </div>
                         <p class="col-md-4 help-block">
-                            <b>[[company_name]]</b> - {Lang::T('Your Company Name at Settings)}.<br>
-                            <b>[[address]]</b> - {Lang::T('Your Company Address at Settings)}.<br>
-                            <b>[[phone]]</b> - {Lang::T('Your Company Phone at Settings)}.<br>
-                            <b>[[invoice]]</b> - {Lang::T('Invoice number)}.<br>
-                            <b>[[date]]</b> - {Lang::T('Date invoice created)}.<br>
-                            <b>[[payment_gateway]]</b> - {Lang::T('Payment gateway user paid from)}.<br>
-                            <b>[[payment_channel]]</b> - {Lang::T('Payment channel user paid from)}.<br>
-                            <b>[[type]]</b> - {Lang::T('is Hotspot or PPPOE)}.<br>
-                            <b>[[plan_name]]</b> - {Lang::T('Internet Package)}.<br>
-                            <b>[[plan_price]]</b> - {Lang::T('Internet Package Prices)}.<br>
-                            <b>[[name]]</b> - {Lang::T('Receiver name)}.<br>
-                            <b>[[user_name]]</b> - {Lang::T('Username internet)}.<br>
-                            <b>[[user_password]]</b> - {Lang::T('User password)}.<br>
-                            <b>[[trx_date]]</b> - {Lang::T('Transaction datetime)}.<br>
-                            <b>[[balance_before]]</b> - {Lang::T('Balance Before)}.<br>
-                            <b>[[balance]]</b> - {Lang::T('Balance After)}.<br>
-                            <b>[[footer]]</b> - {Lang::T('Invoice Footer)}.
+                            <b>[[company_name]]</b> - {Lang::T('Your Company Name at Settings')}.<br>
+                            <b>[[address]]</b> - {Lang::T('Your Company Address at Settings')}.<br>
+                            <b>[[phone]]</b> - {Lang::T('Your Company Phone at Settings')}.<br>
+                            <b>[[invoice]]</b> - {Lang::T('Invoice number')}.<br>
+                            <b>[[date]]</b> - {Lang::T('Date invoice created')}.<br>
+                            <b>[[payment_gateway]]</b> - {Lang::T('Payment gateway user paid from')}.<br>
+                            <b>[[payment_channel]]</b> - {Lang::T('Payment channel user paid from')}.<br>
+                            <b>[[type]]</b> - {Lang::T('is Hotspot or PPPOE')}.<br>
+                            <b>[[plan_name]]</b> - {Lang::T('Internet Package')}.<br>
+                            <b>[[plan_price]]</b> - {Lang::T('Internet Package Prices')}.<br>
+                            <b>[[name]]</b> - {Lang::T('Receiver name')}.<br>
+                            <b>[[user_name]]</b> - {Lang::T('Username internet')}.<br>
+                            <b>[[user_password]]</b> - {Lang::T('User password')}.<br>
+                            <b>[[trx_date]]</b> - {Lang::T('Transaction datetime')}.<br>
+                            <b>[[balance_before]]</b> - {Lang::T('Balance Before')}.<br>
+                            <b>[[balance]]</b> - {Lang::T('Balance After')}.<br>
+                            <b>[[footer]]</b> - {Lang::T('Invoice Footer')}.
                         </p>
                     </div>
                 </div>
@@ -142,12 +142,12 @@
                             <label class="col-md-2 control-label">{Lang::T('Send Balance')}</label>
                             <div class="col-md-6">
                                 <textarea class="form-control" id="balance_send" name="balance_send"
-                                    rows="3">{if $_json['balance_send']}{Lang::htmlspecialchars($_json['balance_send'])}{else}{Lang::htmlspecialchars($_default['balance_send'])}{/if}</textarea>
+                                    rows="4">{if $_json['balance_send']}{Lang::htmlspecialchars($_json['balance_send'])}{else}{Lang::htmlspecialchars($_default['balance_send'])}{/if}</textarea>
                             </div>
                             <p class="col-md-4 help-block">
-                                <b>[[name]]</b> - {Lang::T('Receiver name)}.<br>
-                                <b>[[balance]]</b> - {Lang::T('how much balance have been send)}.<br>
-                                <b>[[current_balance]]</b> - {Lang::T('Current Balance)}.
+                                <b>[[name]]</b> - {Lang::T('Receiver name')}.<br>
+                                <b>[[balance]]</b> - {Lang::T('how much balance have been send')}.<br>
+                                <b>[[current_balance]]</b> - {Lang::T('Current Balance')}.
                             </p>
                         </div>
                     </div>
@@ -156,12 +156,12 @@
                             <label class="col-md-2 control-label">{Lang::T('Received Balance')}</label>
                             <div class="col-md-6">
                                 <textarea class="form-control" id="balance_received" name="balance_received"
-                                    rows="3">{if $_json['balance_received']}{Lang::htmlspecialchars($_json['balance_received'])}{else}{Lang::htmlspecialchars($_default['balance_received'])}{/if}</textarea>
+                                    rows="4">{if $_json['balance_received']}{Lang::htmlspecialchars($_json['balance_received'])}{else}{Lang::htmlspecialchars($_default['balance_received'])}{/if}</textarea>
                             </div>
                             <p class="col-md-4 help-block">
-                                <b>[[name]]</b> - {Lang::T('Sender name)}.<br>
-                                <b>[[balance]]</b> - {Lang::T('how much balance have been received)}.<br>
-                                <b>[[current_balance]]</b> - {Lang::T('Current Balance)}.
+                                <b>[[name]]</b> - {Lang::T('Sender name')}.<br>
+                                <b>[[balance]]</b> - {Lang::T('how much balance have been received')}.<br>
+                                <b>[[current_balance]]</b> - {Lang::T('Current Balance')}.
                             </p>
                         </div>
                     </div>
