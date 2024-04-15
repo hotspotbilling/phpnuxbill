@@ -211,14 +211,14 @@
                             </a>
                             <ul class="treeview-menu">
                                 <li {if $_routes[1] eq 'hotspot' }class="active" {/if}><a
-                                        href="{$_url}services/hotspot">{Lang::T('Hotspot')}</a></li>
+                                        href="{$_url}services/hotspot">Hotspot</a></li>
                                 <li {if $_routes[1] eq 'pppoe' }class="active" {/if}><a
-                                        href="{$_url}services/pppoe">{Lang::T('PPPOE')}</a></li>
+                                        href="{$_url}services/pppoe">PPPOE</a></li>
                                 <li {if $_routes[1] eq 'list' }class="active" {/if}><a
                                         href="{$_url}bandwidth/list">{Lang::T('Bandwidth')}</a></li>
                                 {if $_c['enable_balance'] == 'yes'}
                                     <li {if $_routes[1] eq 'balance' }class="active" {/if}><a
-                                            href="{$_url}services/balance">{Lang::T('Balance')}</a></li>
+                                            href="{$_url}services/balance">{Lang::T('Customer Balance')}</a></li>
                                 {/if}
                                 {$_MENU_PLANS}
                             </ul>

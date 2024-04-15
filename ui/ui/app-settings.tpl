@@ -77,8 +77,8 @@
                                 <option value="default" {if $_c['theme'] eq 'default' }selected="selected" {/if}>Default
                                 </option>
                                 {foreach $themes as $theme}
-                                <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
-                                    {Lang::ucWords($theme)}</option>
+                                    <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
+                                        {Lang::ucWords($theme)}</option>
                                 {/foreach}
                             </select>
                         </div>
@@ -157,33 +157,33 @@
                         <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
                     </div>
                     {if $_c['disable_voucher'] != 'yes'}
-                    <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
-                        <div class="col-md-6">
-                            <select name="disable_registration" id="disable_registration" class="form-control">
-                                <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>No
-                                </option>
-                                <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
-                                    Yes
-                                </option>
-                            </select>
-                        </div>
-                        <p class="help-block col-md-4">
-                            {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
+                            <div class="col-md-6">
+                                <select name="disable_registration" id="disable_registration" class="form-control">
+                                    <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>No
+                                    </option>
+                                    <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
+                                        Yes
+                                    </option>
+                                </select>
+                            </div>
+                            <p class="help-block col-md-4">
+                                {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be
                             password')}
-                        </p>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-2 control-label">Redirect after Activation</label>
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
-                                placeholder="https://192.168.88.1/status" value="{$voucher_redirect}">
+                            </p>
                         </div>
-                        <p class="help-block col-md-4">
-                            {Lang::T('After Customer activate voucher or login, customer will be redirected to this
+                        <div class="form-group">
+                            <label class="col-md-2 control-label">Redirect after Activation</label>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
+                                    placeholder="https://192.168.88.1/status" value="{$voucher_redirect}">
+                            </div>
+                            <p class="help-block col-md-4">
+                                {Lang::T('After Customer activate voucher or login, customer will be redirected to this
                             url')}
-                        </p>
-                    </div>
+                            </p>
+                        </div>
                     {/if}
                 </div>
                 <div class="panel-heading">
@@ -306,8 +306,8 @@
                                 onchange="document.getElementById('sms_url').value = this.value">
                                 <option value="">Select Router</option>
                                 {foreach $r as $rs}
-                                <option value="{$rs['name']}" {if $rs['name']==$_c['sms_url']}selected{/if}>
-                                    {$rs['name']}</option>
+                                    <option value="{$rs['name']}" {if $rs['name']==$_c['sms_url']}selected{/if}>
+                                        {$rs['name']}</option>
                                 {/foreach}
                             </select>
                         </div>
@@ -342,7 +342,8 @@
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
-                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test Email</a>
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test
+                            Email</a>
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
@@ -352,36 +353,40 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">SMTP Host : port</label>
                         <div class="col-md-4">
-                            <input type="text" class="form-control" id="smtp_host" name="smtp_host" value="{$_c['smtp_host']}"
-                                placeholder="smtp.host.tld">
+                            <input type="text" class="form-control" id="smtp_host" name="smtp_host"
+                                value="{$_c['smtp_host']}" placeholder="smtp.host.tld">
                         </div>
                         <div class="col-md-2">
-                            <input type="number" class="form-control" id="smtp_port" name="smtp_port" value="{$_c['smtp_port']}"
-                                placeholder="465 587 port">
+                            <input type="number" class="form-control" id="smtp_port" name="smtp_port"
+                                value="{$_c['smtp_port']}" placeholder="465 587 port">
                         </div>
                         <p class="help-block col-md-4">Empty this to use internal mail() PHP</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">SMTP username</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="smtp_user" name="smtp_user" value="{$_c['smtp_user']}"
-                                placeholder="user@host.tld">
+                            <input type="text" class="form-control" id="smtp_user" name="smtp_user"
+                                value="{$_c['smtp_user']}" placeholder="user@host.tld">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">SMTP Password</label>
                         <div class="col-md-6">
-                            <input type="password" class="form-control" id="smtp_pass" name="smtp_pass" value="{$_c['smtp_pass']}"
-                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
+                            <input type="password" class="form-control" id="smtp_pass" name="smtp_pass"
+                                value="{$_c['smtp_pass']}" onmouseleave="this.type = 'password'"
+                                onmouseenter="this.type = 'text'">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">SMTP Security</label>
                         <div class="col-md-6">
                             <select name="smtp_ssltls" id="smtp_ssltls" class="form-control">
-                                <option value="" {if $_c['smtp_ssltls']=='' }selected="selected" {/if}>Not Secure</option>
-                                <option value="ssl" {if $_c['smtp_ssltls']=='ssl' }selected="selected" {/if}>SSL</option>
-                                <option value="tls" {if $_c['smtp_ssltls']=='tls' }selected="selected" {/if}>TLS</option>
+                                <option value="" {if $_c['smtp_ssltls']=='' }selected="selected" {/if}>Not Secure
+                                </option>
+                                <option value="ssl" {if $_c['smtp_ssltls']=='ssl' }selected="selected" {/if}>SSL
+                                </option>
+                                <option value="tls" {if $_c['smtp_ssltls']=='tls' }selected="selected" {/if}>TLS
+                                </option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
@@ -389,17 +394,18 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Mail From</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="mail_from" name="mail_from" value="{$_c['mail_from']}"
-                                placeholder="noreply@host.tld">
+                            <input type="text" class="form-control" id="mail_from" name="mail_from"
+                                value="{$_c['mail_from']}" placeholder="noreply@host.tld">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">Mail Reply To</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="mail_reply_to" name="mail_reply_to" value="{$_c['mail_reply_to']}"
-                                placeholder="support@host.tld">
+                            <input type="text" class="form-control" id="mail_reply_to" name="mail_reply_to"
+                                value="{$_c['mail_reply_to']}" placeholder="support@host.tld">
                         </div>
-                        <p class="help-block col-md-4">Customer will reply email to this address, empty if you want to use From Address</p>
+                        <p class="help-block col-md-4">Customer will reply email to this address, empty if you want to
+                            use From Address</p>
                     </div>
                 </div>
                 <div class="panel-heading">
@@ -554,7 +560,7 @@
                     </div>
                 </div>
 
-                <div class="panel-heading">
+                {* <div class="panel-heading">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit">
                             <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
@@ -600,7 +606,8 @@
                                     {Lang::T('10%')}
                                 </option>
                                 <!-- Custom tax rate option -->
-                                <option value="custom" {if $_c['tax_rate']=='custom' }selected="selected" {/if}>{Lang::T('Custom')}</option>
+                                <option value="custom" {if $_c['tax_rate']=='custom' }selected="selected" {/if}>
+                                    {Lang::T('Custom')}</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Tax Rates in percentage')}</p>
@@ -609,13 +616,14 @@
                     <div class="form-group" id="customTaxRate" style="display: none;">
                         <label class="col-md-2 control-label">{Lang::T('Custom Tax Rate')}</label>
                         <div class="col-md-6">
-                            <input type="text" value="{$_c['custom_tax_rate']}" class="form-control" name="custom_tax_rate" id="custom_tax_rate"
-                                   placeholder="{Lang::T('Enter Custom Tax Rate')}">
+                            <input type="text" value="{$_c['custom_tax_rate']}" class="form-control"
+                                name="custom_tax_rate" id="custom_tax_rate"
+                                placeholder="{Lang::T('Enter Custom Tax Rate')}">
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Enter the custom tax rate (e.g., 3.75 for 3.75%)')}</p>
                     </div>
-                </div>
-                
+                </div> *}
+
                 {* <div class="panel-heading" id="envato">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
