@@ -92,6 +92,10 @@ if (_post('send') == 'balance') {
 $ui->assign('_bills', User::_billing());
 
 if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
+    if(!empty(App::getTokenValue($_GET['stoken']))){
+        r2(U . "voucher/invoice/");
+        die();
+    }
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['recharge'])->where('username', $user['username'])->findOne();
     if ($bill) {
         if ($bill['routers'] == 'radius') { 
@@ -106,7 +110,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 r2(U . "home", 'e', 'Plan is not exists');
             }
             if ($user['balance'] > $plan['price']) {
-                r2(U . "order/pay/$router/$bill[plan_id]", 'e', 'Order Plan');
+                r2(U . "order/pay/$router/$bill[plan_id]&stoken=".$_GET['stoken'], 'e', 'Order Plan');
             } else {
                 r2(U . "order/buy/$router/$bill[plan_id]", 'e', 'Order Plan');
             }
