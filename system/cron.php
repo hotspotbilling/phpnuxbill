@@ -15,8 +15,6 @@ while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
     echo "MYSQL Time\t" . $row['WAKTU'] . "\n";
 }
 
-$_c = $config;
-
 $textExpired = Lang::getNotifText('expired');
 
 $recharges = ORM::for_table('tbl_user_recharges')
