@@ -28,6 +28,9 @@ class Message
     public static function sendSMS($phone, $txt)
     {
         global $config;
+        if(empty($txt)){
+            return "";
+        }
         run_hook('send_sms'); #HOOK
         if (!empty($config['sms_url'])) {
             if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
@@ -64,6 +67,9 @@ class Message
     public static function sendWhatsapp($phone, $txt)
     {
         global $config;
+        if(empty($txt)){
+            return "";
+        }
         run_hook('send_whatsapp'); #HOOK
         if (!empty($config['wa_url'])) {
             $waurl = str_replace('[number]', urlencode(Lang::phoneFormat($phone)), $config['wa_url']);
@@ -75,6 +81,9 @@ class Message
     public static function sendEmail($to, $subject, $body)
     {
         global $config;
+        if(empty($body)){
+            return "";
+        }
         run_hook('send_email'); #HOOK
         if (empty($config['smtp_host'])) {
             $attr = "";
@@ -113,6 +122,9 @@ class Message
     public static function sendPackageNotification($customer, $package, $price, $message, $via)
     {
         global $u;
+        if(empty($message)){
+            return "";
+        }
         $msg = str_replace('[[name]]', $customer['fullname'], $message);
         $msg = str_replace('[[username]]', $customer['username'], $msg);
         $msg = str_replace('[[plan]]', $package, $msg);
