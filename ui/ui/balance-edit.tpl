@@ -32,6 +32,16 @@
                                         <input type="number" class="form-control" name="price" value="{$d['price']}" required>
                                     </div>
                                 </div>
+                                {if $_c['enable_tax'] == 'yes'}
+                                {if $_c['tax_rate'] == 'custom'}
+                                <p class="help-block col-md-4">{number_format($_c['custom_tax_rate'], 2)} % {Lang::T('Tax Rates
+                                    will be added')}</p>
+                                {else}
+                                <p class="help-block col-md-4">{number_format($_c['tax_rate'] * 100, 2)} % {Lang::T('Tax Rates
+                                    will be added')}</p>
+                                {/if}
+                                {/if}
+        
                             </div>
 
                             <div class="form-group">

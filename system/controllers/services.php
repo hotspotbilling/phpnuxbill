@@ -60,7 +60,7 @@ switch ($action) {
                     $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
                     Mikrotik::addHotspotPlan($client, $plan['name_plan'], $plan['shared_users'], $rate);
                     $log .= "DONE : $plan[name_plan], $plan[shared_users], $rate<br>";
-                    if (!empty ($plan['pool_expired'])) {
+                    if (!empty($plan['pool_expired'])) {
                         Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired']);
                         $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
                     }
@@ -105,7 +105,7 @@ switch ($action) {
                     $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
                     Mikrotik::addPpoePlan($client, $plan['name_plan'], $plan['pool'], $rate);
                     $log .= "DONE : $plan[name_plan], $plan[pool], $rate<br>";
-                    if (!empty ($plan['pool_expired'])) {
+                    if (!empty($plan['pool_expired'])) {
                         Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired'], '512K/512K');
                         $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
                     }
@@ -120,7 +120,7 @@ switch ($action) {
         $name = _post('name');
         if ($name != '') {
             $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where_like('tbl_plans.name_plan', '%' . $name . '%');
-            $d = Paginator::findMany($query, ['name'=> $name]);
+            $d = Paginator::findMany($query, ['name' => $name]);
         } else {
             $query = ORM::for_table('tbl_bandwidth')->join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot');
             $d = Paginator::findMany($query);
@@ -213,7 +213,7 @@ switch ($action) {
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '') {
             $msg .= Lang::T('All field is required') . '<br>';
         }
-        if (empty ($radius)) {
+        if (empty($radius)) {
             if ($routers == '') {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
@@ -245,10 +245,41 @@ switch ($action) {
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
             $rate = trim($rate . " " . $b['burst']);
 
+            // Check if tax is enabled in config
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+
+            // Default tax rate
+            $default_tax_rate = 0.01; // Default tax rate 1%
+
+            // Check if tax rate is set to custom in config
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : $default_tax_rate;
+
+            // Check if tax rate is custom
+            if ($tax_rate_setting === 'custom') {
+                // Check if custom tax rate is set in config
+                $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : $default_tax_rate;
+                // Convert custom tax rate to decimal
+                $custom_tax_rate_decimal = $custom_tax_rate / 100;
+                $tax_rate = $custom_tax_rate_decimal;
+            } else {
+                // Use tax rate
+                $tax_rate = $tax_rate_setting;
+            }
+
+
+            // Calculate the new price with tax if tax is enabled
+            if ($tax_enable === 'yes') {
+                $price_with_tax = $price + ($price * $tax_rate);
+            } else {
+                // If tax is not enabled, use the original price
+                $price_with_tax = $price;
+            }
+
+            // Create new plan
             $d = ORM::for_table('tbl_plans')->create();
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price;
+            $d->price = $price_with_tax; // Set price with or without tax based on configuration
             $d->type = 'Hotspot';
             $d->typebp = $typebp;
             $d->plan_type = $plan_type;
@@ -260,7 +291,7 @@ switch ($action) {
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
-            if (!empty ($radius)) {
+            if (!empty($radius)) {
                 $d->is_radius = 1;
                 $d->routers = '';
             } else {
@@ -280,7 +311,7 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
-                if (!empty ($pool_expired)) {
+                if (!empty($pool_expired)) {
                     Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
                 }
             }
@@ -356,14 +387,44 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
-                if (!empty ($pool_expired)) {
+                if (!empty($pool_expired)) {
                     Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
                 }
             }
 
+            // Check if tax is enabled in config
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+
+            // Default tax rate
+            $default_tax_rate = 0.01; // Default tax rate 1%
+
+            // Check if tax rate is set to custom in config
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : $default_tax_rate;
+
+            // Check if tax rate is custom
+            if ($tax_rate_setting === 'custom') {
+                // Check if custom tax rate is set in config
+                $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : $default_tax_rate;
+                // Convert custom tax rate to decimal
+                $custom_tax_rate_decimal = $custom_tax_rate / 100;
+                $tax_rate = $custom_tax_rate_decimal;
+            } else {
+                // Use tax rate
+                $tax_rate = $tax_rate_setting;
+            }
+
+
+            // Calculate the new price with tax if tax is enabled
+            if ($tax_enable === 'yes') {
+                $price_with_tax = $price + ($price * $tax_rate);
+            } else {
+                // If tax is not enabled, use the original price
+                $price_with_tax = $price;
+            }
+
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price;
+            $d->price = $price_with_tax; // Set price with or without tax based on configuration
             $d->typebp = $typebp;
             $d->limit_type = $limit_type;
             $d->time_limit = $time_limit;
@@ -487,7 +548,7 @@ switch ($action) {
         if ($name == '' or $id_bw == '' or $price == '' or $validity == '' or $pool == '') {
             $msg .= Lang::T('All field is required') . '<br>';
         }
-        if (empty ($radius)) {
+        if (empty($radius)) {
             if ($routers == '') {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
@@ -518,16 +579,47 @@ switch ($action) {
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
             $rate = trim($rate . " " . $b['burst']);
 
+            // Check if tax is enabled in config
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+
+            // Default tax rate
+            $default_tax_rate = 0.01; // Default tax rate 1%
+
+            // Check if tax rate is set to custom in config
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : $default_tax_rate;
+
+            // Check if tax rate is custom
+            if ($tax_rate_setting === 'custom') {
+                // Check if custom tax rate is set in config
+                $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : $default_tax_rate;
+                // Convert custom tax rate to decimal
+                $custom_tax_rate_decimal = $custom_tax_rate / 100;
+                $tax_rate = $custom_tax_rate_decimal;
+            } else {
+                // Use tax rate
+                $tax_rate = $tax_rate_setting;
+            }
+
+
+            // Calculate the new price with tax if tax is enabled
+            if ($tax_enable === 'yes') {
+                $price_with_tax = $price + ($price * $tax_rate);
+            } else {
+                // If tax is not enabled, use the original price
+                $price_with_tax = $price;
+            }
+
+
             $d = ORM::for_table('tbl_plans')->create();
             $d->type = 'PPPOE';
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price;
+            $d->price = $price_with_tax;
             $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->pool = $pool;
-            if (!empty ($radius)) {
+            if (!empty($radius)) {
                 $d->is_radius = 1;
                 $d->routers = '';
             } else {
@@ -547,7 +639,7 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::addPpoePlan($client, $name, $pool, $rate);
-                if (!empty ($pool_expired)) {
+                if (!empty($pool_expired)) {
                     Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
                 }
             }
@@ -616,14 +708,44 @@ switch ($action) {
                 $mikrotik = Mikrotik::info($routers);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
                 Mikrotik::setPpoePlan($client, $name, $pool, $rate);
-                if (!empty ($pool_expired)) {
+                if (!empty($pool_expired)) {
                     Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
                 }
             }
 
+            // Check if tax is enabled in config
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+
+            // Default tax rate
+            $default_tax_rate = 0.01; // Default tax rate 1%
+
+            // Check if tax rate is set to custom in config
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : $default_tax_rate;
+
+            // Check if tax rate is custom
+            if ($tax_rate_setting === 'custom') {
+                // Check if custom tax rate is set in config
+                $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : $default_tax_rate;
+                // Convert custom tax rate to decimal
+                $custom_tax_rate_decimal = $custom_tax_rate / 100;
+                $tax_rate = $custom_tax_rate_decimal;
+            } else {
+                // Use tax rate
+                $tax_rate = $tax_rate_setting;
+            }
+
+
+            // Calculate the new price with tax if tax is enabled
+            if ($tax_enable === 'yes') {
+                $price_with_tax = $price + ($price * $tax_rate);
+            } else {
+                // If tax is not enabled, use the original price
+                $price_with_tax = $price;
+            }
+
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price;
+            $d->price = $price_with_tax;
             $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
@@ -700,8 +822,37 @@ switch ($action) {
         }
         run_hook('edit_ppoe'); #HOOK
         if ($msg == '') {
+            // Check if tax is enabled in config
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+
+            // Default tax rate
+            $default_tax_rate = 0.01; // Default tax rate 1%
+
+            // Check if tax rate is set to custom in config
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : $default_tax_rate;
+
+            // Check if tax rate is custom
+            if ($tax_rate_setting === 'custom') {
+                // Check if custom tax rate is set in config
+                $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : $default_tax_rate;
+                // Convert custom tax rate to decimal
+                $custom_tax_rate_decimal = $custom_tax_rate / 100;
+                $tax_rate = $custom_tax_rate_decimal;
+            } else {
+                // Use tax rate
+                $tax_rate = $tax_rate_setting;
+            }
+
+
+            // Calculate the new price with tax if tax is enabled
+            if ($tax_enable === 'yes') {
+                $price_with_tax = $price + ($price * $tax_rate);
+            } else {
+                // If tax is not enabled, use the original price
+                $price_with_tax = $price;
+            }
             $d->name_plan = $name;
-            $d->price = $price;
+            $d->price = $price_with_tax;
             $d->enabled = $enabled;
             $d->prepaid = 'yes';
             $d->save();
@@ -730,11 +881,43 @@ switch ($action) {
         }
         run_hook('add_ppoe'); #HOOK
         if ($msg == '') {
+
+            // Check if tax is enabled in config
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+
+            // Default tax rate
+            $default_tax_rate = 0.01; // Default tax rate 1%
+
+            // Check if tax rate is set to custom in config
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : $default_tax_rate;
+
+            // Check if tax rate is custom
+            if ($tax_rate_setting === 'custom') {
+                // Check if custom tax rate is set in config
+                $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : $default_tax_rate;
+                // Convert custom tax rate to decimal
+                $custom_tax_rate_decimal = $custom_tax_rate / 100;
+                $tax_rate = $custom_tax_rate_decimal;
+            } else {
+                // Use tax rate
+                $tax_rate = $tax_rate_setting;
+            }
+
+
+            // Calculate the new price with tax if tax is enabled
+            if ($tax_enable === 'yes') {
+                $price_with_tax = $price + ($price * $tax_rate);
+            } else {
+                // If tax is not enabled, use the original price
+                $price_with_tax = $price;
+            }
+
+
             $d = ORM::for_table('tbl_plans')->create();
             $d->type = 'Balance';
             $d->name_plan = $name;
             $d->id_bw = 0;
-            $d->price = $price;
+            $d->price = $price_with_tax;
             $d->validity = 0;
             $d->validity_unit = 'Months';
             $d->routers = '';

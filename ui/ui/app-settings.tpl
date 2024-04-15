@@ -553,6 +553,69 @@
                         <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}</p>
                     </div>
                 </div>
+
+                <div class="panel-heading">
+                    <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit">
+                            <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    {Lang::T('Tax System')}
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Enable Tax System')}</label>
+                        <div class="col-md-6">
+                            <select name="enable_tax" id="enable_tax" class="form-control">
+                                <option value="no" {if $_c['enable_tax']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}
+                                </option>
+                                <option value="yes" {if $_c['enable_tax']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Tax will be calculated in Internet Plan Price')}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Tax Rate')}</label>
+                        <div class="col-md-6">
+                            <select name="tax_rate" id="tax_rate" class="form-control">
+                                <option value="0.005" {if $_c['tax_rate']=='0.005' }selected="selected" {/if}>
+                                    {Lang::T('0.5%')}
+                                </option>
+                                <option value="0.01" {if $_c['tax_rate']=='0.01' }selected="selected" {/if}>
+                                    {Lang::T('1%')}
+                                </option>
+                                <option value="0.015" {if $_c['tax_rate']=='0.015' }selected="selected" {/if}>
+                                    {Lang::T('1.5%')}
+                                </option>
+                                <option value="0.02" {if $_c['tax_rate']=='0.02' }selected="selected" {/if}>
+                                    {Lang::T('2%')}
+                                </option>
+                                <option value="0.05" {if $_c['tax_rate']=='0.05' }selected="selected" {/if}>
+                                    {Lang::T('5%')}
+                                </option>
+                                <option value="0.1" {if $_c['tax_rate']=='0.1' }selected="selected" {/if}>
+                                    {Lang::T('10%')}
+                                </option>
+                                <!-- Custom tax rate option -->
+                                <option value="custom" {if $_c['tax_rate']=='custom' }selected="selected" {/if}>{Lang::T('Custom')}</option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Tax Rates in percentage')}</p>
+                    </div>
+                    <!-- Custom tax rate input field (initially hidden) -->
+                    <div class="form-group" id="customTaxRate" style="display: none;">
+                        <label class="col-md-2 control-label">{Lang::T('Custom Tax Rate')}</label>
+                        <div class="col-md-6">
+                            <input type="text" value="{$_c['custom_tax_rate']}" class="form-control" name="custom_tax_rate" id="custom_tax_rate"
+                                   placeholder="{Lang::T('Enter Custom Tax Rate')}">
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Enter the custom tax rate (e.g., 3.75 for 3.75%)')}</p>
+                    </div>
+                </div>
+                
                 {* <div class="panel-heading" id="envato">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
@@ -634,5 +697,27 @@ add dst-host=*.{$_domain}</pre>
     function testTg() {
         window.location.href = '{$_url}settings/app&testTg=test';
     }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Function to toggle visibility of custom tax rate input field
+        function toggleCustomTaxRate() {
+            var taxRateSelect = document.getElementById("tax_rate");
+            var customTaxRateInput = document.getElementById("customTaxRate");
+
+            if (taxRateSelect.value === "custom") {
+                customTaxRateInput.style.display = "block";
+            } else {
+                customTaxRateInput.style.display = "none";
+            }
+        }
+
+        // Call the function when the page loads
+        toggleCustomTaxRate();
+
+        // Call the function whenever the tax rate dropdown value changes
+        document.getElementById("tax_rate").addEventListener("change", toggleCustomTaxRate);
+    });
 </script>
 {include file="sections/footer.tpl"}

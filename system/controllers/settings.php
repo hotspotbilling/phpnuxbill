@@ -119,7 +119,7 @@ switch ($action) {
                     die();
                 }
             }
-            // save all settings
+            // Save all settings including tax system
             foreach ($_POST as $key => $value) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
@@ -131,6 +131,33 @@ switch ($action) {
                     $d->value = $value;
                     $d->save();
                 }
+            }
+
+            // Handle tax system separately
+            $enable_tax = isset($_POST['enable_tax']) ? $_POST['enable_tax'] : 'no';
+            $tax_rate = isset($_POST['tax_rate']) ? $_POST['tax_rate'] : '0.01'; // Default tax rate 1%
+
+            // Save or update tax system settings
+            $d_tax_enable = ORM::for_table('tbl_appconfig')->where('setting', 'enable_tax')->find_one();
+            if ($d_tax_enable) {
+                $d_tax_enable->value = $enable_tax;
+                $d_tax_enable->save();
+            } else {
+                $d_tax_enable = ORM::for_table('tbl_appconfig')->create();
+                $d_tax_enable->setting = 'enable_tax';
+                $d_tax_enable->value = $enable_tax;
+                $d_tax_enable->save();
+            }
+
+            $d_tax_rate = ORM::for_table('tbl_appconfig')->where('setting', 'tax_rate')->find_one();
+            if ($d_tax_rate) {
+                $d_tax_rate->value = $tax_rate;
+                $d_tax_rate->save();
+            } else {
+                $d_tax_rate = ORM::for_table('tbl_appconfig')->create();
+                $d_tax_rate->setting = 'tax_rate';
+                $d_tax_rate->value = $tax_rate;
+                $d_tax_rate->save();
             }
 
             //checkbox
