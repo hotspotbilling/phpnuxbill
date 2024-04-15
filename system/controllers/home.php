@@ -98,19 +98,24 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     }
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['recharge'])->where('username', $user['username'])->findOne();
     if ($bill) {
-        $router = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
+        if ($bill['routers'] == 'radius') { 
+            $router = 'radius';
+        } else {
+            $routers = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
+            $router = $routers['id'];
+        }
         if ($config['enable_balance'] == 'yes') {
             $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
             if(!$plan['enabled']){
                 r2(U . "home", 'e', 'Plan is not exists');
             }
             if ($user['balance'] > $plan['price']) {
-                r2(U . "order/pay/$router[id]/$bill[plan_id]&stoken=".$_GET['stoken']);
+                r2(U . "order/pay/$router/$bill[plan_id]&stoken=".$_GET['stoken'], 'e', 'Order Plan');
             } else {
-                r2(U . "order/buy/$router[id]/$bill[plan_id]");
+                r2(U . "order/buy/$router/$bill[plan_id]", 'e', 'Order Plan');
             }
         } else {
-            r2(U . "order/buy/$router[id]/$bill[plan_id]", 'e', 'Order Plan');
+            r2(U . "order/buy/$router/$bill[plan_id]", 'e', 'Order Plan');
         }
     }
 } else if (isset($_GET['deactivate']) && !empty($_GET['deactivate'])) {
