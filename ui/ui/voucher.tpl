@@ -98,15 +98,7 @@
                         </tbody>
                     </table>
                 </div>
-
-                <ul class="pagination pagination-sm">
-                    {if $page>0}
-                        <li><a href="{$_url}plan/voucher&p={$page-1}&code={$_code}">{Lang::T('Prev')}</a></li>
-                    {/if}
-                    {if $d}
-                        <li><a href="{$_url}plan/voucher&p={$page+1}&code={$_code}">{Lang::T('Next')}</a></li>
-                    {/if}
-                </ul>
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>
