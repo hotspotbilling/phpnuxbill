@@ -33,9 +33,9 @@ foreach ($recharges as $recharge) {
 
     if ($dateNow >= $expiration) {
         echo " : EXPIRED \r\n";
-        $userRecharge = ORM::for_table('tbl_user_recharges')->where('id', $recharge['id'])->find_one();
+        $user_recharge = ORM::for_table('tbl_user_recharges')->where('id', $recharge['id'])->find_one();
         $customer = ORM::for_table('tbl_customers')->where('id', $recharge['customer_id'])->find_one();
-        $plan = ORM::for_table('tbl_plans')->where('id', $userRecharge['plan_id'])->find_one();
+        $plan = ORM::for_table('tbl_plans')->where('id', $user_recharge['plan_id'])->find_one();
         $router = ($recharge['type'] == 'Hotspot') ? Mikrotik::info($recharge['routers']) : ORM::for_table('tbl_routers')->where('name', $recharge['routers'])->find_one();
 
         if ($plan['is_radius']) {
@@ -65,10 +65,10 @@ foreach ($recharges as $recharge) {
             }
         }
 
-        echo Message::sendPackageNotification($customer, $userRecharge['namebp'], $plan['price'], $textExpired, $config['user_notification_expired']) . "\n";
+        echo Message::sendPackageNotification($customer, $user_recharge['namebp'], $plan['price'], $textExpired, $config['user_notification_expired']) . "\n";
 
-        $userRecharge->status = 'off';
-        $userRecharge->save();
+        $user_recharge->status = 'off';
+        $user_recharge->save();
 
         if ($config['enable_balance'] == 'yes' && $customer['auto_renewal']) {
             list($bills, $add_cost) = User::getBills($recharge['customer_id']);

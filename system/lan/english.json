@@ -571,5 +571,9 @@
     "how_much_balance_have_been_send": "how much balance have been send",
     "Current_Balance": "Current Balance",
     "Sender_name": "Sender name",
-    "how_much_balance_have_been_received": "how much balance have been received"
+    "how_much_balance_have_been_received": "how much balance have been received",
+    "Extend_Postpaid_Expiration": "Extend Postpaid Expiration",
+    "Allow_Extend": "Allow Extend",
+    "Extend_Days": "Extend Days",
+    "Confirmation_Message": "Confirmation Message"
 }

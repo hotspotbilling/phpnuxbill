@@ -121,7 +121,7 @@ class Message
 
     public static function sendPackageNotification($customer, $package, $price, $message, $via)
     {
-        global $u;
+        global $user_recharge;
         if(empty($message)){
             return "";
         }
@@ -141,8 +141,8 @@ class Message
         }else{
             $msg = str_replace('[[bills]]', '', $msg);
         }
-        if ($u) {
-            $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($u['expiration'], $u['time']), $msg);
+        if ($user_recharge) {
+            $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($user_recharge['expiration'], $user_recharge['time']), $msg);
         }
         if (
             !empty($customer['phonenumber']) && strlen($customer['phonenumber']) > 5
