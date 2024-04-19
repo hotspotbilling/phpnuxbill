@@ -40,7 +40,7 @@ switch ($action) {
 
     case 'list-activated':
         $ui->assign('_system_menu', 'list-activated');
-        $query = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_asc('id');
+        $query = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id');
         $d = Paginator::findMany($query);
 
         $ui->assign('d', $d);
