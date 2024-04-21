@@ -34,7 +34,6 @@ foreach ($d as $ds) {
             $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
             $m = Mikrotik::info($ds['routers']);
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
-            $price = Lang::moneyFormat($p['price']);
             if ($p['is_radius']) {
                 if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
@@ -54,7 +53,7 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removeHotspotActiveUser($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired']) . "\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $p['price'], $textExpired, $config['user_notification_expired']) . "\n";
             //update database user dengan status off
             $u->status = 'off';
             $u->save();
@@ -98,7 +97,6 @@ foreach ($d as $ds) {
             $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
             $m = ORM::for_table('tbl_routers')->where('name', $ds['routers'])->find_one();
             $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
-            $price = Lang::moneyFormat($p['price']);
             if ($p['is_radius']) {
                 if (empty($p['pool_expired'])) {
                     print_r(Radius::customerDeactivate($c['username']));
@@ -115,7 +113,7 @@ foreach ($d as $ds) {
                 }
                 Mikrotik::removePpoeActive($client, $c['username']);
             }
-            echo Message::sendPackageNotification($c, $u['namebp'], $price, $textExpired, $config['user_notification_expired']) . "\n";
+            echo Message::sendPackageNotification($c, $u['namebp'], $p['price'], $textExpired, $config['user_notification_expired']) . "\n";
 
             $u->status = 'off';
             $u->save();

@@ -38,22 +38,16 @@ foreach ($d as $ds) {
         $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
-        list($bills, $add_cost) = User::getBills($ds['customer_id']);
-        if ($add_cost > 0) {
-            if (!empty($add_cost)) {
-                $p['price'] += $add_cost;
-            }
-        }
-		if ($p['validity_unit'] == 'Period') {
+        if ($p['validity_unit'] == 'Period') {
 			// Postpaid price from field
 			$add_inv = User::getAttribute("Invoice", $ds['customer_id']);
 			if (empty ($add_inv) or $add_inv == 0) {
-				$price = Lang::moneyFormat($p['price']);
+				$price = $p['price'];
 			} else {
-				$price = Lang::moneyFormat($add_inv);
+				$price = $add_inv;
 			}
         } else {
-                $price = Lang::moneyFormat($p['price']);
+                $price = $p['price'];
         }
         if ($ds['expiration'] == $day7) {
             echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_7_day'), $config['user_notification_reminder']) . "\n";
