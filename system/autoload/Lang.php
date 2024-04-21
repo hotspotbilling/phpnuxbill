@@ -11,7 +11,9 @@ class Lang
     public static function T($key)
     {
         global $_L, $lan_file, $config;
-        $_L = $_SESSION['Lang'];
+        if(is_array($_SESSION['Lang'])){
+            $_L = array_merge($_L, $_SESSION['Lang']);
+        }
         $key = preg_replace('/\s+/', ' ', $key);
         if (!empty($_L[$key])) {
             return $_L[$key];
