@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.4.21
+
+- Restore old cron
+
 ## 2024.4.15
 
 - Postpaid Customer can request extends expiration day if it enabled
