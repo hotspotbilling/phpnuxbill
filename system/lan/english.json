@@ -575,5 +575,7 @@
     "Extend_Postpaid_Expiration": "Extend Postpaid Expiration",
     "Allow_Extend": "Allow Extend",
     "Extend_Days": "Extend Days",
-    "Confirmation_Message": "Confirmation Message"
+    "Confirmation_Message": "Confirmation Message",
+    "You_are_already_logged_in": "You are already logged in",
+    "Extend": "Extend"
 }

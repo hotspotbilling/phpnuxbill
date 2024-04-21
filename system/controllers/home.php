@@ -142,12 +142,6 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             }
         }
         if ($tur['status'] != 'on') {
-            $days = $config['extend_days'];
-            $expiration = date('Y-m-d', strtotime(" +$days day"));
-            $tur->expiration = $expiration;
-            $tur->status = "on";
-            $tur->save();
-            App::setToken(_get('stoken'), $id);
             if ($tur['routers'] != 'radius') {
                 $mikrotik = Mikrotik::info($tur['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
@@ -159,12 +153,20 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 Radius::customerAddPlan($c, $p, $tur['expiration'] . ' ' . $tur['time']);
             } else {
                 if ($tur['type'] == 'Hotspot') {
+                    Mikrotik::removeHotspotUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 } else if ($tur['type'] == 'PPPOE') {
+                    Mikrotik::removePpoeUser($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             }
             // make customer cannot extend again
+            $days = $config['extend_days'];
+            $expiration = date('Y-m-d', strtotime(" +$days day"));
+            $tur->expiration = $expiration;
+            $tur->status = "on";
+            $tur->save();
+            App::setToken(_get('stoken'), $id);
             file_put_contents($path, $m);
             _log("Customer $tur[customer_id] $tur[username] extend for $days days", "Customer", $user['id']);
             r2(U . 'home', 's', "Extend until $expiration");
