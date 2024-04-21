@@ -143,6 +143,8 @@ class Message
         }
         if ($user_recharge) {
             $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($user_recharge['expiration'], $user_recharge['time']), $msg);
+        }else{
+            $msg = str_replace('[[expired_date]]', "", $msg);
         }
         if (
             !empty($customer['phonenumber']) && strlen($customer['phonenumber']) > 5
