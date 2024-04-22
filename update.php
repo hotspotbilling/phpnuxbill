@@ -141,12 +141,12 @@ function r2($to, $ntype = 'e', $msg = '')
 {
     if ($msg == '') {
         header("location: $to");
-        exit;
+        die();
     }
     $_SESSION['ntype'] = $ntype;
     $_SESSION['notify'] = $msg;
     header("location: $to");
-    exit;
+    die();
 }
 
 function copyFolder($from, $to, $exclude = [])
