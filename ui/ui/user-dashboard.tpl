@@ -187,7 +187,7 @@
                                 {if $_bill['status'] != 'on' && $_bill['prepaid'] != 'yes' && $_c['extend_expired']}
                                     <a class="btn btn-warning text-black btn-sm"
                                         href="{$_url}home&extend={$_bill['id']}&stoken={App::getToken()}"
-                                        onclick="return confirm('{str_replace("\n","\\n",str_replace("\r","",$_c['extend_confirmation']))}')">{Lang::T('Extend')}</a>
+                                        onclick="return confirm('{Text::toHex($_c['extend_confirmation'])}')">{Lang::T('Extend')}</a>
                                 {/if}
                                 <a class="btn btn-primary pull-right  btn-sm"
                                     href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
