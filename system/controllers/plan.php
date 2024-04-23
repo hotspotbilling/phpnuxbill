@@ -631,7 +631,7 @@ switch ($action) {
             $content .= Lang::pad($config['address'], ' ', 2) . "\n";
             $content .= Lang::pad($config['phone'], ' ', 2) . "\n";
             $content .= Lang::pad("", '=') . "\n";
-            $content .= Lang::pads('ID', $voucher['id'], ' ') . "\n";
+            $content .= Lang::pads('ID', $voucher['id_plan'], ' ') . "\n";
             $content .= Lang::pads(Lang::T('Code'), $voucher['code'], ' ') . "\n";
             $content .= Lang::pads(Lang::T('Plan Name'), $plan['name_plan'], ' ') . "\n";
             $content .= Lang::pads(Lang::T('Type'), $voucher['type'], ' ') . "\n";
