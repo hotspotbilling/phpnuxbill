@@ -222,7 +222,7 @@ function Lang($key)
 
 function alphanumeric($str, $tambahan = "")
 {
-    return preg_replace("/[^a-zA-Z0-9" . $tambahan . "]+/", "", $str);
+    return Text::alphanumeric($str, $tambahan);
 }
 
 function showResult($success, $message = '', $result = [], $meta = [])

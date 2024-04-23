@@ -132,7 +132,7 @@ switch ($action) {
         $using = _post('using');
         $stoken = _post('stoken');
 
-        if(!empty(App::getTokenValue($stoken))){
+        if (!empty(App::getTokenValue($stoken))) {
             $username = App::getTokenValue($stoken);
             $in = ORM::for_table('tbl_transactions')->where('username', $username)->order_by_desc('id')->find_one();
             Package::createInvoice($in);
@@ -325,18 +325,13 @@ switch ($action) {
 
     case 'voucher':
         $ui->assign('_title', Lang::T('Vouchers'));
-        $limit = 10;
-        $page = _get('p', 0);
-        $pageNow = $page * $limit;
         $search = _req('search');
         if ($search != '') {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                $d = ORM::for_table('tbl_plans')->where('enabled', '1')
+                $query = ORM::for_table('tbl_plans')->where('enabled', '1')
                     ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                    ->where_like('tbl_voucher.code', '%' . $search . '%')
-                    ->offset($pageNow)
-                    ->limit($limit)
-                    ->findArray();
+                    ->where_like('tbl_voucher.code', '%' . $search . '%');
+                $d = Paginator::findMany($query, ["search" => $search]);
             } else if ($admin['user_type'] == 'Agent') {
                 $sales = [];
                 $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
@@ -344,21 +339,17 @@ switch ($action) {
                     $sales[] = $s['id'];
                 }
                 $sales[] = $admin['id'];
-                $d = ORM::for_table('tbl_plans')
+                $query = ORM::for_table('tbl_plans')
                     ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                     ->where_in('generated_by', $sales)
-                    ->where_like('tbl_voucher.code', '%' . $search . '%')
-                    ->offset($pageNow)
-                    ->limit($limit)
-                    ->findArray();
+                    ->where_like('tbl_voucher.code', '%' . $search . '%');
+                $d = Paginator::findMany($query, ["search" => $search]);
             }
         } else {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                $d = ORM::for_table('tbl_plans')->where('enabled', '1')
-                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                    ->offset($pageNow)
-                    ->limit($limit)
-                    ->findArray();
+                $query = ORM::for_table('tbl_plans')->where('enabled', '1')
+                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'));
+                $d = Paginator::findMany($query);
             } else if ($admin['user_type'] == 'Agent') {
                 $sales = [];
                 $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
@@ -366,12 +357,10 @@ switch ($action) {
                     $sales[] = $s['id'];
                 }
                 $sales[] = $admin['id'];
-                $d = ORM::for_table('tbl_plans')
+                $query = ORM::for_table('tbl_plans')
                     ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                    ->where_in('generated_by', $sales)
-                    ->offset($pageNow)
-                    ->limit($limit)
-                    ->findArray();
+                    ->where_in('generated_by', $sales);
+                $d = Paginator::findMany($query);
             }
         }
         // extract admin
@@ -581,6 +570,7 @@ switch ($action) {
                 } else if ($voucher_format == 'rand') {
                     $code = Lang::randomUpLowCase($code);
                 }
+                die($code);
                 $d = ORM::for_table('tbl_voucher')->create();
                 $d->type = $type;
                 $d->routers = $server;
@@ -743,15 +733,15 @@ switch ($action) {
         $id = $routes[2];
         $days = $routes[3];
         $stoken = $_GET['stoken'];
-        if(App::getTokenValue($stoken)){
+        if (App::getTokenValue($stoken)) {
             r2(U . 'plan', 's', "Extend already done");
         }
         $tur = ORM::for_table('tbl_user_recharges')->find_one($id);
         $status = $tur['status'];
-        if(strtotime($tur['expiration'].' '.$tur['time']) > time()){
+        if (strtotime($tur['expiration'] . ' ' . $tur['time']) > time()) {
             // not expired
-            $expiration = date('Y-m-d', strtotime($tur['expiration']." +$days day"));
-        }else{
+            $expiration = date('Y-m-d', strtotime($tur['expiration'] . " +$days day"));
+        } else {
             //expired
             $expiration = date('Y-m-d', strtotime(" +$days day"));
         }
@@ -759,7 +749,7 @@ switch ($action) {
         $tur->status = "on";
         $tur->save();
         App::setToken($stoken, $id);
-        if($status=='off'){
+        if ($status == 'off') {
             if ($tur['routers'] != 'radius') {
                 $mikrotik = Mikrotik::info($tur['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);

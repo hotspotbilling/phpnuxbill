@@ -148,16 +148,18 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 $router = $tur['routers'];
             }
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
-            $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
+            if(!$p){
+                r2(U . 'home', '3', "Plan Not Found");
+            }
             if ($tur['routers'] == 'radius') {
-                Radius::customerAddPlan($c, $p, $tur['expiration'] . ' ' . $tur['time']);
+                Radius::customerAddPlan($user, $p, $tur['expiration'] . ' ' . $tur['time']);
             } else {
                 if ($tur['type'] == 'Hotspot') {
-                    Mikrotik::removeHotspotUser($client, $c['username']);
-                    Mikrotik::addHotspotUser($client, $p, $c);
+                    Mikrotik::removeHotspotUser($client, $user['username']);
+                    Mikrotik::addHotspotUser($client, $p, $user);
                 } else if ($tur['type'] == 'PPPOE') {
-                    Mikrotik::removePpoeUser($client, $c['username']);
-                    Mikrotik::addPpoeUser($client, $p, $c);
+                    Mikrotik::removePpoeUser($client, $user['username']);
+                    Mikrotik::addPpoeUser($client, $p, $user);
                 }
             }
             // make customer cannot extend again
@@ -169,6 +171,10 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             App::setToken(_get('stoken'), $id);
             file_put_contents($path, $m);
             _log("Customer $tur[customer_id] $tur[username] extend for $days days", "Customer", $user['id']);
+            Message::sendTelegram("#u$user[username] #extend #".$p['type']." \n" . $p['name_plan'] .
+                            "\nLocation: " . $p['routers'] .
+                            "\nCustomer: " . $user['fullname'] .
+                            "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
             r2(U . 'home', 's', "Extend until $expiration");
         }else{
             r2(U . 'home', 'e', "Plan is not expired");

@@ -25,19 +25,19 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+
         $cs = ORM::for_table('tbl_customers')
             ->select('tbl_customers.id', 'id')
             ->select('tbl_customers.username', 'username')
             ->select('fullname')
+            ->select('address')
             ->select('phonenumber')
             ->select('email')
             ->select('balance')
-            ->select('namebp')
-            ->select('routers')
-            ->select('status')
-            ->select('method', 'Payment')
-            ->join('tbl_user_recharges', array('tbl_customers.id', '=', 'tbl_user_recharges.customer_id'))
-            ->order_by_asc('tbl_customers.id')->find_array();
+            ->select('service_type')
+            ->order_by_asc('tbl_customers.id')
+            ->find_array();
+
         $h = false;
         set_time_limit(-1);
         header('Pragma: public');
@@ -46,18 +46,105 @@ switch ($action) {
         header("Content-type: text/csv");
         header('Content-Disposition: attachment;filename="phpnuxbill_customers_' . date('Y-m-d_H_i') . '.csv"');
         header('Content-Transfer-Encoding: binary');
+
+        $headers = [
+            'id',
+            'username',
+            'fullname',
+            'address',
+            'phonenumber',
+            'email',
+            'balance',
+            'service_type',
+        ];
+
+        if (!$h) {
+            echo '"' . implode('","', $headers) . "\"\n";
+            $h = true;
+        }
+
         foreach ($cs as $c) {
-            $ks = [];
-            $vs = [];
-            foreach ($c as $k => $v) {
-                $ks[] = $k;
-                $vs[] = $v;
-            }
-            if (!$h) {
-                echo '"' . implode('";"', $ks) . "\"\n";
-                $h = true;
-            }
-            echo '"' . implode('";"', $vs) . "\"\n";
+            $row = [
+                $c['id'],
+                $c['username'],
+                $c['fullname'],
+                $c['address'],
+                $c['phonenumber'],
+                $c['email'],
+                $c['balance'],
+                $c['service_type'],
+            ];
+            echo '"' . implode('","', $row) . "\"\n";
+        }
+        break;
+        //case csv-prepaid can be moved later to (plan.php)  php file dealing with prepaid users
+    case 'csv-prepaid':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+
+        $cs = ORM::for_table('tbl_customers')
+            ->select('tbl_customers.id', 'id')
+            ->select('tbl_customers.username', 'username')
+            ->select('fullname')
+            ->select('address')
+            ->select('phonenumber')
+            ->select('email')
+            ->select('balance')
+            ->select('service_type')
+            ->select('namebp')
+            ->select('routers')
+            ->select('status')
+            ->select('method', 'Payment')
+            ->join('tbl_user_recharges', array('tbl_customers.id', '=', 'tbl_user_recharges.customer_id'))
+            ->order_by_asc('tbl_customers.id')
+            ->find_array();
+
+        $h = false;
+        set_time_limit(-1);
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header("Content-type: text/csv");
+        header('Content-Disposition: attachment;filename="phpnuxbill_prepaid_users' . date('Y-m-d_H_i') . '.csv"');
+        header('Content-Transfer-Encoding: binary');
+
+        $headers = [
+            'id',
+            'username',
+            'fullname',
+            'address',
+            'phonenumber',
+            'email',
+            'balance',
+            'service_type',
+            'namebp',
+            'routers',
+            'status',
+            'Payment'
+        ];
+
+        if (!$h) {
+            echo '"' . implode('","', $headers) . "\"\n";
+            $h = true;
+        }
+
+        foreach ($cs as $c) {
+            $row = [
+                $c['id'],
+                $c['username'],
+                $c['fullname'],
+                $c['address'],
+                $c['phonenumber'],
+                $c['email'],
+                $c['balance'],
+                $c['service_type'],
+                $c['namebp'],
+                $c['routers'],
+                $c['status'],
+                $c['Payment']
+            ];
+            echo '"' . implode('","', $row) . "\"\n";
         }
         break;
     case 'add':

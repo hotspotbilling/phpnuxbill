@@ -16,31 +16,34 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-    <form id="site-search" method="post" action="{$_url}plan/voucher/">
-        <div class="input-group">
-            <div class="input-group-addon">
-                <span class="fa fa-search"></span>
-            </div>
-            <input type="text" name="search" class="form-control" placeholder="{Lang::T('Search by Code Voucher')}..." value="{$search}">
-            <div class="input-group-btn">
-                <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
-            </div>
-        </div>
-    </form>
-</div>
+                        <form id="site-search" method="post" action="{$_url}plan/voucher/">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <span class="fa fa-search"></span>
+                                </div>
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="{Lang::T('Search by Code Voucher')}..." value="{$search}">
+                                <div class="input-group-btn">
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
 
-<div class="col-md-4">
-    <div class="btn-group btn-group-justified" role="group">
-        <div class="btn-group" role="group">
-            <a href="{$_url}plan/add-voucher" class="btn btn-primary btn-block"><i class="ion ion-android-add"></i> {Lang::T('Add Vouchers')}</a>
-        </div>
-    </div>
-    <div class="btn-group btn-group-justified" role="group">
-        <div class="btn-group" role="group">
-            <a href="{$_url}plan/print-voucher" target="print_voucher" class="btn btn-info btn-block"><i class="ion ion-android-print"></i> Print</a>
-        </div>
-    </div>
-</div>&nbsp;
+                    <div class="col-md-4">
+                        <div class="btn-group btn-group-justified" role="group">
+                            <div class="btn-group" role="group">
+                                <a href="{$_url}plan/add-voucher" class="btn btn-primary btn-block"><i
+                                        class="ion ion-android-add"></i> {Lang::T('Add Vouchers')}</a>
+                            </div>
+                        </div>
+                        <div class="btn-group btn-group-justified" role="group">
+                            <div class="btn-group" role="group">
+                                <a href="{$_url}plan/print-voucher" target="print_voucher"
+                                    class="btn btn-info btn-block"><i class="ion ion-android-print"></i> Print</a>
+                            </div>
+                        </div>
+                    </div>&nbsp;
                 </div>
                 <div class="table-responsive">
                     <table id="datatable" class="table table-bordered table-striped table-condensed">
@@ -82,8 +85,7 @@
                                     </td>
                                     <td>
                                         {if $ds['status'] neq '1'}
-                                            <a href="{$_url}plan/voucher-view/{$ds['id']}" id="{$ds['id']}"
-                                                style="margin: 0px;"
+                                            <a href="{$_url}plan/voucher-view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
                                                 class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
                                         {/if}
                                         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
