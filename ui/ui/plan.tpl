@@ -11,7 +11,7 @@
                                 class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                     </div>
                     <div class="btn-group pull-right">
-                        <a class="btn btn-info btn-xs" title="save" href="{$_url}customers/csv"
+                        <a class="btn btn-info btn-xs" title="save" href="{$_url}customers/csv-prepaid"
                             onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
                                 aria-hidden="true"></span> CSV</a>
                     </div>
