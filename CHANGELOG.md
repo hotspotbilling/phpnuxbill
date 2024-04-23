@@ -2,6 +2,15 @@
 
 # CHANGELOG
 
+## 2024.4.23
+
+- Fix Pagination Voucher
+- Fix Languange Translation
+- Fix Alert Confirmation for requesting Extend
+- Send Telegram Notification when Customer request to extend expiration
+- prepaid users export list by @freeispradius
+- fix show voucher by @agstrxyz
+
 ## 2024.4.21
 
 - Restore old cron

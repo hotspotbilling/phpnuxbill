@@ -75,7 +75,7 @@
                                         {/if}
                                         {if $ds['status']=='off' && $_c['extend_expired']}
                                             <a href="javascript:extend('{$ds['id']}')"
-                                                class="btn btn-info btn-xs">{Lang::T('extend')}</a>
+                                                class="btn btn-info btn-xs">{Lang::T('Extend')}</a>
                                         {/if}
                                     </td>
                                 </tr>
