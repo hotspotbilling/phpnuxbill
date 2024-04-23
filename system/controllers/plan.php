@@ -621,7 +621,7 @@ switch ($action) {
         if (!$voucher) {
             r2(U . 'plan/voucher/', 'e', Lang::T('Voucher Not Found'));
         }
-        $plan = ORM::for_table('tbl_plans')->find_one($d['id_plan']);
+        $plan = ORM::for_table('tbl_plans')->find_one($voucher['id_plan']);
         if ($voucher && $plan) {
             $content = Lang::pad($config['CompanyName'], ' ', 2) . "\n";
             $content .= Lang::pad($config['address'], ' ', 2) . "\n";
