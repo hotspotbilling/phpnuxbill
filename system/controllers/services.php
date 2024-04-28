@@ -57,7 +57,7 @@ switch ($action) {
                     } else {
                         $unitup = 'M';
                     }
-                    $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
+                    $rate = $plan['rate_down'] . $unitup . "/" . $plan['rate_up'] . $unitdown;
                     Mikrotik::addHotspotPlan($client, $plan['name_plan'], $plan['shared_users'], $rate);
                     $log .= "DONE : $plan[name_plan], $plan[shared_users], $rate<br>";
                     if (!empty($plan['pool_expired'])) {
