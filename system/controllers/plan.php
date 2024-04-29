@@ -766,9 +766,11 @@ switch ($action) {
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             }
+            _log("$admin[fullname] extend Customer $tur[customer_id] $tur[username] for $days days", $admin['user_type'], $admin['id']);
+            r2(U . 'plan', 's', "Extend until $expiration");
+        }else{
+            r2(U . 'plan', 's', "Customer is not expired yet");
         }
-        _log("$admin[fullname] extend Customer $tur[customer_id] $tur[username] for $days days", $admin['user_type'], $admin['id']);
-        r2(U . 'plan', 's', "Extend until $expiration");
         break;
     default:
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/plan.js"></script>');
