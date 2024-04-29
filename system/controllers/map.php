@@ -17,8 +17,14 @@ if (empty($action)) {
 
 switch ($action) {
     case 'customer':
-
-        $c = ORM::for_table('tbl_customers')->find_many();
+        if(!empty(_req('search'))){
+            $search = _req('search');
+            $query = ORM::for_table('tbl_customers')->whereRaw("coordinates != '' AND fullname LIKE '%$search%' OR username LIKE '%$search%' OR email LIKE '%$search%' OR phonenumber LIKE '%$search%'")->order_by_desc('fullname');
+            $c = Paginator::findMany($query, ['search' => $search], 50);
+        }else{
+            $query = ORM::for_table('tbl_customers')->where_not_equal('coordinates','');
+            $c = Paginator::findMany($query, ['search'=>''], 50);
+        }
         $customerData = [];
 
         foreach ($c as $customer) {
@@ -34,7 +40,7 @@ switch ($action) {
                 ];
             }
         }
-
+        $ui->assign('search', $search);
         $ui->assign('customers', $customerData);
         $ui->assign('xheader', '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">');
         $ui->assign('_title', Lang::T('Customer Geo Location Information'));

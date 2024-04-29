@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.4.29
+
+- Maps Pagination
+- Maps Search
+- Fix extend logic
+- Fix logic customer recharge to not delete when customer not change the plan
+
 ## 2024.4.23
 
 - Fix Pagination Voucher

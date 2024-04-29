@@ -20,7 +20,6 @@ class Paginator
         }
         $url .= '&p=';
         $totalReq = $query->count();
-        $next = $page + 1;
         $lastpage = ceil($totalReq / $per_page);
         $lpm1 = $lastpage - 1;
         $limit = $per_page;
