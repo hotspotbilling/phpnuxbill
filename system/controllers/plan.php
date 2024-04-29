@@ -738,18 +738,18 @@ switch ($action) {
         }
         $tur = ORM::for_table('tbl_user_recharges')->find_one($id);
         $status = $tur['status'];
-        if (strtotime($tur['expiration'] . ' ' . $tur['time']) > time()) {
-            // not expired
-            $expiration = date('Y-m-d', strtotime($tur['expiration'] . " +$days day"));
-        } else {
-            //expired
-            $expiration = date('Y-m-d', strtotime(" +$days day"));
-        }
-        $tur->expiration = $expiration;
-        $tur->status = "on";
-        $tur->save();
-        App::setToken($stoken, $id);
         if ($status == 'off') {
+            if (strtotime($tur['expiration'] . ' ' . $tur['time']) > time()) {
+                // not expired
+                $expiration = date('Y-m-d', strtotime($tur['expiration'] . " +$days day"));
+            } else {
+                //expired
+                $expiration = date('Y-m-d', strtotime(" +$days day"));
+            }
+            $tur->expiration = $expiration;
+            $tur->status = "on";
+            $tur->save();
+            App::setToken($stoken, $id);
             if ($tur['routers'] != 'radius') {
                 $mikrotik = Mikrotik::info($tur['routers']);
                 $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
