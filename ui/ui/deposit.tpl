@@ -6,6 +6,7 @@
             <div class="panel-heading">{Lang::T('Refill Balance')}</div>
             <div class="panel-body">
                 <form class="form-horizontal" method="post" role="form" action="{$_url}plan/deposit-post">
+                    <input type="hidden" name="stoken" value="{App::getToken()}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Select Account')}</label>
                         <div class="col-md-6">

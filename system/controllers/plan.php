@@ -714,6 +714,14 @@ switch ($action) {
         }
         $user = _post('id_customer');
         $plan = _post('id_plan');
+        $stoken = _req('stoken');
+        if (App::getTokenValue($stoken)) {
+            $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
+            $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+            Package::createInvoice($in);
+            $ui->display('invoice.tpl');
+            die();
+        }
 
         run_hook('deposit_customer'); #HOOK
         if (!empty($user) && !empty($plan)) {
@@ -721,6 +729,9 @@ switch ($action) {
                 $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
                 $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
+                if(!empty($stoken)){
+                    App::setToken($stoken, $in['id']);
+                }
                 $ui->display('invoice.tpl');
             } else {
                 r2(U . 'plan/refill', 'e', "Failed to refill account");
