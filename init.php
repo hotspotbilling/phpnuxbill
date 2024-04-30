@@ -233,6 +233,31 @@ function showResult($success, $message = '', $result = [], $meta = [])
     die();
 }
 
+
+function generateUniqueNumericVouchers($totalVouchers, $length = 8) {
+    // Define characters allowed in the voucher code
+    $characters = '0123456789';
+    $charactersLength = strlen($characters);
+    $vouchers = array();
+    
+    // Attempt to generate unique voucher codes
+    for ($j = 0; $j < $totalVouchers; $j++) {
+        do {
+            $voucherCode = '';
+            // Generate the voucher code
+            for ($i = 0; $i < $length; $i++) {
+                $voucherCode .= $characters[rand(0, $charactersLength - 1)];
+            }
+            // Check if the generated voucher code already exists in the array
+            $isUnique = !in_array($voucherCode, $vouchers);
+        } while (!$isUnique);
+        
+        $vouchers[] = $voucherCode;
+    }
+
+    return $vouchers;
+}
+
 function sendTelegram($txt)
 {
     Message::sendTelegram($txt);
