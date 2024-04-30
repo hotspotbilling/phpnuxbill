@@ -1,6 +1,10 @@
 ![PHPNuxBill](install/img/logo.png)
 
 # CHANGELOG
+## 2024.4.30
+
+- CRITICAL UPDATE: last update Logic recharge not check is status on or off, it make expired customer stay in expired pool
+- Prevent double submit for recharge balance
 
 ## 2024.4.29
 

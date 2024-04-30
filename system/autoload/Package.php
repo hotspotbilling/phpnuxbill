@@ -188,7 +188,7 @@ class Package
         $isChangePlan = false;
         if ($p['type'] == 'Hotspot') {
             if ($b) {
-                if($plan_id!=$b['plan_id']){
+                if ($plan_id != $b['plan_id']) {
                     $isChangePlan = true;
                 }
                 if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
@@ -213,7 +213,7 @@ class Package
                     }
                 }
 
-                if($isChangePlan){
+                if ($isChangePlan || $b['status'] == 'off') {
                     if ($p['is_radius']) {
                         Radius::customerAddPlan($c, $p, "$date_exp $time");
                     } else {
@@ -389,7 +389,7 @@ class Package
         } else {
 
             if ($b) {
-                if($plan_id!=$b['plan_id']){
+                if ($plan_id != $b['plan_id']) {
                     $isChangePlan = true;
                 }
                 if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
@@ -414,7 +414,7 @@ class Package
                     }
                 }
 
-                if($isChangePlan){
+                if ($isChangePlan || $b['status'] == 'off') {
                     if ($p['is_radius']) {
                         Radius::customerAddPlan($c, $p, "$date_exp $time");
                     } else {
@@ -594,7 +594,7 @@ class Package
         }
         run_hook("recharge_user_finish");
         Message::sendInvoice($c, $t);
-        if($trx){
+        if ($trx) {
             $trx->trx_invoice = $inv;
         }
         return $inv;
@@ -740,7 +740,7 @@ class Package
             $invoice .= Lang::pad($note, ' ', 2) . "\n";
         }
         $invoice .= Lang::pad("", '=') . "\n";
-        if($cust){
+        if ($cust) {
             $invoice .= Lang::pads(Lang::T('Full Name'), $cust['fullname'], ' ') . "\n";
         }
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
@@ -784,7 +784,7 @@ class Package
             $invoice .= Lang::pad($note, ' ', 2) . "\n";
         }
         $invoice .= Lang::pad("", '=') . "\n";
-        if($cust){
+        if ($cust) {
             $invoice .= Lang::pads(Lang::T('Full Name'), $cust['fullname'], ' ') . "\n";
         }
         $invoice .= Lang::pads(Lang::T('Username'), $in['username'], ' ') . "\n";
