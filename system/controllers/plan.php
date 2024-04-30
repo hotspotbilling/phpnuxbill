@@ -563,14 +563,27 @@ switch ($action) {
                 }
             }
             run_hook('create_voucher'); #HOOK
-            for ($i = 0; $i < $numbervoucher; $i++) {
-                $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
-                if ($voucher_format == 'low') {
-                    $code = strtolower($code);
-                } else if ($voucher_format == 'rand') {
-                    $code = Lang::randomUpLowCase($code);
+            $vouchers = [];
+            if($voucher_format == 'numbers'){
+                if (strlen($lengthcode)<6) {
+                    $msg .= 'The Length Code must be a more than 6 for numbers' . '<br>';
                 }
-                die($code);
+                $vouchers = generateUniqueNumericVouchers($numbervoucher, $lengthcode);
+            }
+            else {
+                for ($i = 0; $i < $numbervoucher; $i++) {
+                    $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
+                    if ($voucher_format == 'low') {
+                        $code = strtolower($code);
+                    } else if ($voucher_format == 'rand') {
+                        $code = Lang::randomUpLowCase($code);
+                    }
+                    $vouchers[] = $code;
+                    
+                }
+            }
+
+            foreach($vouchers as $code){
                 $d = ORM::for_table('tbl_voucher')->create();
                 $d->type = $type;
                 $d->routers = $server;
