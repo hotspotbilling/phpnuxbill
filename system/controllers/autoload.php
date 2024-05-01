@@ -84,7 +84,6 @@ switch ($action) {
         }
         echo json_encode(['results' => $json]);
         die();
-        break;
     default:
         $ui->display('a404.tpl');
 }

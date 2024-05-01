@@ -570,7 +570,6 @@ switch ($action) {
                 } else if ($voucher_format == 'rand') {
                     $code = Lang::randomUpLowCase($code);
                 }
-                die($code);
                 $d = ORM::for_table('tbl_voucher')->create();
                 $d->type = $type;
                 $d->routers = $server;
