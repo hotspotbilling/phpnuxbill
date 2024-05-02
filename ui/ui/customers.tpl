@@ -27,7 +27,18 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-
+                        <form id="site-search" method="post" action="{$_url}customers">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <span class="fa fa-search"></span>
+                                </div>
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="{Lang::T('Search')}..." value="{$search}">
+                                <div class="input-group-btn">
+                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                     <div class="col-md-4">
                         <a href="{$_url}customers/add" class="btn btn-primary btn-block"><i class="ion ion-android-add">

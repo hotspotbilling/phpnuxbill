@@ -787,7 +787,9 @@ switch ($action) {
         $ui->assign('_title', Lang::T('Customer'));
         $search = _post('search');
         if ($search != '') {
-            $query = ORM::for_table('tbl_user_recharges')->where_like('username', '%' . $search . '%')->order_by_desc('id');
+            $query = ORM::for_table('tbl_user_recharges')
+            ->whereRaw("username LIKE '%$search%' OR namebp LIKE '%$search%' OR method LIKE '%$search%' OR routers LIKE '%$search%' OR type LIKE '%$search%'")
+            ->order_by_desc('id');
             $d = Paginator::findMany($query, ['search' => $search]);
         } else {
             $query = ORM::for_table('tbl_user_recharges')->order_by_desc('id');
