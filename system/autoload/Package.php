@@ -175,7 +175,9 @@ class Package
             };
             $time = date("23:59:00");
         } else if ($p['validity_unit'] == 'Days') {
-            $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' day'));
+            $datetime = date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' day'));
+            $date_exp = $datetime[0];
+            $time = $datetime[1];
         } else if ($p['validity_unit'] == 'Hrs') {
             $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' hour')));
             $date_exp = $datetime[0];
