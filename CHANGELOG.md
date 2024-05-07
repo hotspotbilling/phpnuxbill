@@ -1,6 +1,13 @@
 ![PHPNuxBill](install/img/logo.png)
 
 # CHANGELOG
+
+## 2024.5.7
+
+- Fix time for period Days
+- Fix Free radius attributes by @agstrxyz
+- Add Numeric Voucher Code by @pro-cms
+
 ## 2024.4.30
 
 - CRITICAL UPDATE: last update Logic recharge not check is status on or off, it make expired customer stay in expired pool
