@@ -38,7 +38,7 @@ switch ($action) {
                     } else {
                         $radup = '000000';
                     }
-                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown;
+                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $b['burst'];
                     Radius::planUpSert($plan['id'], $radiusRate);
                     $log .= "DONE : Radius $plan[name_plan], $plan[shared_users], $radiusRate<br>";
                 } else {
@@ -83,7 +83,7 @@ switch ($action) {
                     } else {
                         $radup = '000000';
                     }
-                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown;
+                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $b['burst'];
                     Radius::planUpSert($plan['id'], $radiusRate, $plan['pool']);
                     $log .= "DONE : RADIUS $plan[name_plan], $plan[pool], $rate<br>";
                 } else {
@@ -242,7 +242,7 @@ switch ($action) {
                 $radup = '000000';
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
-            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown . '/' . $b['burst'];
             $rate = trim($rate . " " . $b['burst']);
 
             // Check if tax is enabled in config
@@ -377,7 +377,7 @@ switch ($action) {
                 $radup = '000000';
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
-            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown . '/' . $b['burst'];
 
             $rate = trim($rate . " " . $b['burst']);
 
@@ -576,7 +576,7 @@ switch ($action) {
                 $radup = '000000';
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
-            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown . '/' . $b['burst'];
             $rate = trim($rate . " " . $b['burst']);
 
             // Check if tax is enabled in config
@@ -699,7 +699,7 @@ switch ($action) {
                 $radup = '000000';
             }
             $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
-            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown;
+            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown . '/' . $b['burst'];
             $rate = trim($rate . " " . $b['burst']);
 
             if ($d['is_radius']) {
