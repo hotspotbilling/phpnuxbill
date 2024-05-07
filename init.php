@@ -11,7 +11,7 @@ if (realpath(__FILE__) == realpath($_SERVER['SCRIPT_FILENAME'])) {
     die();
 }
 $root_path = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
-if(!isset($isApi)){
+if (!isset($isApi)) {
     $isApi = false;
 }
 // on some server, it getting error because of slash is backwards
@@ -73,9 +73,9 @@ ORM::configure('return_result_sets', true);
 if ($_app_stage != 'Live') {
     ORM::configure('logging', true);
 }
-if($isApi){
+if ($isApi) {
     define('U', APP_URL . '/system/api.php?r=');
-}else{
+} else {
     define('U', APP_URL . '/index.php?_route=');
 }
 
@@ -234,12 +234,13 @@ function showResult($success, $message = '', $result = [], $meta = [])
 }
 
 
-function generateUniqueNumericVouchers($totalVouchers, $length = 8) {
+function generateUniqueNumericVouchers($totalVouchers, $length = 8)
+{
     // Define characters allowed in the voucher code
     $characters = '0123456789';
     $charactersLength = strlen($characters);
     $vouchers = array();
-    
+
     // Attempt to generate unique voucher codes
     for ($j = 0; $j < $totalVouchers; $j++) {
         do {
@@ -251,7 +252,7 @@ function generateUniqueNumericVouchers($totalVouchers, $length = 8) {
             // Check if the generated voucher code already exists in the array
             $isUnique = !in_array($voucherCode, $vouchers);
         } while (!$isUnique);
-        
+
         $vouchers[] = $voucherCode;
     }
 
@@ -278,7 +279,7 @@ function r2($to, $ntype = 'e', $msg = '')
     global $isApi;
     if ($isApi) {
         showResult(
-            ($ntype=='s')? true : false,
+            ($ntype == 's') ? true : false,
             $msg
         );
     }

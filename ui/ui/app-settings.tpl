@@ -152,6 +152,10 @@
                                 <option value="rand" {if $_c['voucher_format']=='rand' }selected="selected" {/if}>
                                     RaNdoM
                                 </option>
+                                <option value="numbers" {if $_c['voucher_format'] == 'numbers'}selected="selected"
+                                    {/if}>
+                                    Numbers
+                                </option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
@@ -234,13 +238,15 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Extend Days')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="extend_days" placeholder="3" value="{$_c['extend_days']}">
+                            <input type="text" class="form-control" name="extend_days" placeholder="3"
+                                value="{$_c['extend_days']}">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Confirmation Message')}</label>
                         <div class="col-md-6">
-                            <textarea type="text" rows="4" class="form-control" name="extend_confirmation" placeholder="i agree to extends and will paid full after this">{$_c['extend_confirmation']}</textarea>
+                            <textarea type="text" rows="4" class="form-control" name="extend_confirmation"
+                                placeholder="i agree to extends and will paid full after this">{$_c['extend_confirmation']}</textarea>
                         </div>
                     </div>
                 </div>
