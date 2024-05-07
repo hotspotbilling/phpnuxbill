@@ -115,7 +115,6 @@ class Message
             $mail->Subject = $subject;
             $mail->Body    = $body;
             $mail->send();
-            die();
         }
     }
 

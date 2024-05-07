@@ -600,11 +600,20 @@ switch ($action) {
 
     default:
         run_hook('list_customers'); #HOOK
-
-        $query = ORM::for_table('tbl_customers')->order_by_asc('username');
+        $search = _post('search');
+        if ($search != '') {
+            $query = ORM::for_table('tbl_customers')
+                ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' ".
+                "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' ")
+                ->order_by_asc('username');
+            $d = $query->findMany();
+        } else {
+            $query = ORM::for_table('tbl_customers')->order_by_asc('username');
+        }
         $d = $query->findMany();
         $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('d', $d);
+        $ui->assign('search', $search);
         $ui->display('customers.tpl');
         break;
 }
