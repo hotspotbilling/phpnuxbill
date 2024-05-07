@@ -16,6 +16,26 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     r2(U . "dashboard", 'e', Lang::T('You do not have permission to access this page'));
 }
 
+// Create missing columns in tbl_bandwidth table
+$columns = [
+    'burst_limit_up' => 'VARCHAR(50) NULL',
+    'burst_limit_up_unit' => 'VARCHAR(10) NULL',
+    'burst_limit_down' => 'VARCHAR(50) NULL',
+    'burst_limit_down_unit' => 'VARCHAR(10) NULL',
+    'burst_threshold_up' => 'VARCHAR(50) NULL',
+    'burst_threshold_up_unit' => 'VARCHAR(10) NULL',
+    'burst_threshold_down' => 'VARCHAR(50) NULL',
+    'burst_threshold_down_unit' => 'VARCHAR(10) NULL',
+    'burst_time' => 'VARCHAR(50) NULL',
+    'priority' => 'VARCHAR(50) NULL'
+];
+
+foreach ($columns as $column => $dataType) {
+    if (!ORM::for_table('tbl_bandwidth')->raw_query("SHOW COLUMNS FROM `tbl_bandwidth` LIKE '$column'")->find_one()) {
+        ORM::for_table('tbl_bandwidth')->raw_execute("ALTER TABLE `tbl_bandwidth` ADD `$column` $dataType");
+    }
+}
+
 switch ($action) {
     case 'list':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/bandwidth.js"></script>');
@@ -49,7 +69,6 @@ switch ($action) {
         run_hook('view_edit_bandwith'); #HOOK
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
         if ($d) {
-            $ui->assign('burst', explode(" ", $d['burst']));
             $ui->assign('d', $d);
             $ui->display('bandwidth-edit.tpl');
         } else {
@@ -79,19 +98,19 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
         $rate_up = _post('rate_up');
         $rate_up_unit = _post('rate_up_unit');
+        $burst_limit_up = _post('burst_limit_up');
+        $burst_limit_up_unit = _post('burst_limit_up_unit');
+        $burst_limit_down = _post('burst_limit_down');
+        $burst_limit_down_unit = _post('burst_limit_down_unit');
+        $burst_threshold_up = _post('burst_threshold_up');
+        $burst_threshold_up_unit = _post('burst_threshold_up_unit');
+        $burst_threshold_down = _post('burst_threshold_down');
+        $burst_threshold_down_unit = _post('burst_threshold_down_unit');
+        $burst_time = _post('burst_time');
+        $priority = _post('priority');
+        
         run_hook('add_bandwidth'); #HOOK
-        $isBurst = true;
-        $burst = "";
-        if (isset($_POST['burst'])) {
-            foreach ($_POST['burst'] as $b) {
-                if (empty($b)) {
-                    $isBurst = false;
-                }
-            }
-            if ($isBurst) {
-                $burst = implode(' ', $_POST['burst']);
-            };
-        }
+        
         $msg = '';
         if (Validator::Length($name, 16, 4) == false) {
             $msg .= 'Name should be between 5 to 15 characters' . '<br>';
@@ -103,9 +122,9 @@ switch ($action) {
             $unit_rate_down = $rate_down * 1048576;
         }
         if ($rate_up_unit == 'Kbps') {
-            $unit_rate_up = $min_up * 1024;
+            $unit_rate_up = $rate_up * 1024;
         } else {
-            $unit_rate_up = $min_up * 1048576;
+            $unit_rate_up = $rate_up * 1048576;
         }
 
         $d = ORM::for_table('tbl_bandwidth')->where('name_bw', $name)->find_one();
@@ -120,7 +139,16 @@ switch ($action) {
             $d->rate_down_unit = $rate_down_unit;
             $d->rate_up = $rate_up;
             $d->rate_up_unit = $rate_up_unit;
-            $d->burst = $burst;
+            $d->burst_limit_up = $burst_limit_up;
+            $d->burst_limit_up_unit = $burst_limit_up_unit;
+            $d->burst_limit_down = $burst_limit_down;
+            $d->burst_limit_down_unit = $burst_limit_down_unit;
+            $d->burst_threshold_up = $burst_threshold_up;
+            $d->burst_threshold_up_unit = $burst_threshold_up_unit;
+            $d->burst_threshold_down = $burst_threshold_down;
+            $d->burst_threshold_down_unit = $burst_threshold_down_unit;
+            $d->burst_time = $burst_time;
+            $d->priority = $priority;
             $d->save();
 
             r2(U . 'bandwidth/list', 's', Lang::T('Data Created Successfully'));
@@ -138,19 +166,19 @@ switch ($action) {
         $rate_down_unit = _post('rate_down_unit');
         $rate_up = _post('rate_up');
         $rate_up_unit = _post('rate_up_unit');
+        $burst_limit_up = _post('burst_limit_up');
+        $burst_limit_up_unit = _post('burst_limit_up_unit');
+        $burst_limit_down = _post('burst_limit_down');
+        $burst_limit_down_unit = _post('burst_limit_down_unit');
+        $burst_threshold_up = _post('burst_threshold_up');
+        $burst_threshold_up_unit = _post('burst_threshold_up_unit');
+        $burst_threshold_down = _post('burst_threshold_down');
+        $burst_threshold_down_unit = _post('burst_threshold_down_unit');
+        $burst_time = _post('burst_time');
+        $priority = _post('priority');
+        
         run_hook('edit_bandwidth'); #HOOK
-        $isBurst = true;
-        $burst = "";
-        if (isset($_POST['burst'])) {
-            foreach ($_POST['burst'] as $b) {
-                if (empty($b)) {
-                    $isBurst = false;
-                }
-            }
-            if ($isBurst) {
-                $burst = implode(' ', $_POST['burst']);
-            };
-        }
+        
         $msg = '';
         if (Validator::Length($name, 16, 4) == false) {
             $msg .= 'Name should be between 5 to 15 characters' . '<br>';
@@ -176,7 +204,16 @@ switch ($action) {
             $d->rate_down_unit = $rate_down_unit;
             $d->rate_up = $rate_up;
             $d->rate_up_unit = $rate_up_unit;
-            $d->burst = $burst;
+            $d->burst_limit_up = $burst_limit_up;
+            $d->burst_limit_up_unit = $burst_limit_up_unit;
+            $d->burst_limit_down = $burst_limit_down;
+            $d->burst_limit_down_unit = $burst_limit_down_unit;
+            $d->burst_threshold_up = $burst_threshold_up;
+            $d->burst_threshold_up_unit = $burst_threshold_up_unit;
+            $d->burst_threshold_down = $burst_threshold_down;
+            $d->burst_threshold_down_unit = $burst_threshold_down_unit;
+            $d->burst_time = $burst_time;
+            $d->priority = $priority;
             $d->save();
 
             r2(U . 'bandwidth/list', 's', Lang::T('Data Updated Successfully'));
