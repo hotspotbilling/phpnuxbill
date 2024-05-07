@@ -579,7 +579,7 @@ switch ($action) {
                         $code = Lang::randomUpLowCase($code);
                     }
                     $vouchers[] = $code;
-                    
+
                 }
             }
 
@@ -785,8 +785,12 @@ switch ($action) {
                 Radius::customerAddPlan($c, $p, $tur['expiration'] . ' ' . $tur['time']);
             } else {
                 if ($tur['type'] == 'Hotspot') {
+                    Mikrotik::removeHotspotUser($client, $c['username']);
+                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
                     Mikrotik::addHotspotUser($client, $p, $c);
                 } else if ($tur['type'] == 'PPPOE') {
+                    Mikrotik::removePpoeUser($client, $c['username']);
+                    Mikrotik::removePpoeActive($client, $c['username']);
                     Mikrotik::addPpoeUser($client, $p, $c);
                 }
             }
