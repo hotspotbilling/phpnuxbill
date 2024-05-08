@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.5.8
+
+- Fix bugs burst by @Gerandonk
+- Fix sync for burst by @Gerandonk
+
 ## 2024.5.7
 
 - Fix time for period Days
