@@ -59,7 +59,7 @@
                         <div class="col-md-10">
                             <input type="radio" id="Unlimited" name="typebp" value="Unlimited"
                                 {if $d['typebp'] eq 'Unlimited'} checked {/if}> {Lang::T('Unlimited')}
-                            <input type="radio" id="Limited" {if $_c['radius_enable'] and $d['is_radius']}disabled{/if}
+                            <input type="radio" id="Limited"
                                 name="typebp" value="Limited" {if $d['typebp'] eq 'Limited'} checked {/if}>
                             {Lang::T('Limited')}
                         </div>
