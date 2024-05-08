@@ -38,7 +38,7 @@ switch ($action) {
                     } else {
                         $radup = '000000';
                     }
-                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $b['burst'];
+                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $plan['burst'];
                     Radius::planUpSert($plan['id'], $radiusRate);
                     $log .= "DONE : Radius $plan[name_plan], $plan[shared_users], $radiusRate<br>";
                 } else {
@@ -83,7 +83,7 @@ switch ($action) {
                     } else {
                         $radup = '000000';
                     }
-                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $b['burst'];
+                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $plan['burst'];
                     Radius::planUpSert($plan['id'], $radiusRate, $plan['pool']);
                     $log .= "DONE : RADIUS $plan[name_plan], $plan[pool], $rate<br>";
                 } else {
