@@ -74,8 +74,8 @@
                     <div class="box-tools pull-right">
                         <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
                         </button>
-                        <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm"><i
-                                class="fa fa-times"></i>
+                        <a href="{$_url}dashboard&refresh" class="btn bg-teal btn-sm"><i
+                                class="fa fa-refresh"></i>
                         </a>
                     </div>
                 </div>
@@ -96,8 +96,8 @@
                     <div class="box-tools pull-right">
                         <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
                         </button>
-                        <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm"><i
-                                class="fa fa-times"></i>
+                        <a href="{$_url}dashboard&refresh" class="btn bg-teal btn-sm"><i
+                                class="fa fa-refresh"></i>
                         </a>
                     </div>
                 </div>

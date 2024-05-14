@@ -9,6 +9,17 @@ _admin();
 $ui->assign('_title', Lang::T('Dashboard'));
 $ui->assign('_admin', $admin);
 
+if(isset($_GET['refresh'])){
+    $files = scandir($CACHE_PATH);
+    foreach ($files as $file) {
+        $ext = pathinfo($file, PATHINFO_EXTENSION);
+        if (is_file($CACHE_PATH . DIRECTORY_SEPARATOR . $file) && $ext == 'temp') {
+            unlink($CACHE_PATH . DIRECTORY_SEPARATOR . $file);
+        }
+    }
+    r2(U . 'dashboard', 's', 'Data Refreshed');
+}
+
 $fdate = date('Y-m-01');
 $tdate = date('Y-m-t');
 //first day of month
