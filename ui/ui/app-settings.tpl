@@ -87,6 +87,13 @@
                                 info</a></p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Recharge Using')}</label>
+                        <div class="col-md-6">
+                            <input type="text" name="payment_usings" class="form-control" value="{$_c['payment_usings']}" placeholder="{Lang::T('Cash')}, {Lang::T('Bank Transfer')}">
+                        </div>
+                        <p class="help-block col-md-4">This used for admin to select payment in recharge, using comma for every new options</p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">APP URL</label>
                         <div class="col-md-6">
                             <input type="text" readonly class="form-control" value="{$app_url}">
