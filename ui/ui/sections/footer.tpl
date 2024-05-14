@@ -86,6 +86,10 @@
                     }
                     return null;
                 }
+
+                $(function() {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
             </script>
         {/literal}
 

@@ -577,5 +577,7 @@
     "Extend_Days": "Extend Days",
     "Confirmation_Message": "Confirmation Message",
     "You_are_already_logged_in": "You are already logged in",
-    "Extend": "Extend"
+    "Extend": "Extend",
+    "Created___Expires": "Created \/ Expires",
+    "Created___Expired": "Created \/ Expired"
 }
