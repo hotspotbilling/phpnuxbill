@@ -385,6 +385,21 @@
                     var latestVersion = data.version;
                     if (localVersion !== latestVersion) {
                         $('#version').html('Latest Version: ' + latestVersion);
+                        Swal.fire({
+                            icon: 'info',
+                            title: "New Version Available\nVersion: "+latestVersion,
+                            toast: true,
+                            position: 'bottom-right',
+                            showConfirmButton: true,
+                            showCloseButton: true,
+                            timer: 30000,
+                            confirmButtonText: '<a href="{$_url}community#latestVersion" style="color: white;">Update Now</a>',
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        });
                     }
                 });
         });

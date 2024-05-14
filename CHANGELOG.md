@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.5.14
+
+- Show Plan and Location on expired list
+- Customizeable payment for recharge
+
 ## 2024.5.8
 
 - Fix bugs burst by @Gerandonk
