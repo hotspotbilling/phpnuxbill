@@ -732,21 +732,47 @@ switch ($action) {
             $suc = 0;
             $fal = 0;
             $json = json_decode(file_get_contents($_FILES['json']['tmp_name']), true);
+            try{
+                ORM::raw_execute("SET FOREIGN_KEY_CHECKS=0;");
+            } catch (Throwable $e) {
+            } catch (Exception $e) {
+            }
+            try{
+                ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=0;");
+            } catch (Throwable $e) {
+            } catch (Exception $e) {
+            }
             foreach ($json as $table => $records) {
                 ORM::raw_execute("TRUNCATE $table;");
                 foreach ($records as $rec) {
-                    $t = ORM::for_table($table)->create();
-                    foreach ($rec as $k => $v) {
-                        if ($k != 'id') {
-                            $t->set($k, $v);
+                    try{
+                        $t = ORM::for_table($table)->create();
+                        foreach ($rec as $k => $v) {
+                            if ($k != 'id') {
+                                $t->set($k, $v);
+                            }
                         }
-                    }
-                    if ($t->save()) {
-                        $suc++;
-                    } else {
+                        if ($t->save()) {
+                            $suc++;
+                        } else {
+                            $fal++;
+                        }
+                    } catch (Throwable $e) {
+                        $fal++;
+                    } catch (Exception $e) {
                         $fal++;
                     }
                 }
+            }
+            try{
+                ORM::raw_execute("SET FOREIGN_KEY_CHECKS=1;");
+            } catch (Throwable $e) {
+            } catch (Exception $e) {
+            }
+            try{
+                ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=1;");
+            } catch (Throwable $e) {
+            } catch (Exception $e) {
             }
             if (file_exists($_FILES['json']['tmp_name'])) unlink($_FILES['json']['tmp_name']);
             r2(U . "settings/dbstatus", 's', "Restored $suc success $fal failed");
