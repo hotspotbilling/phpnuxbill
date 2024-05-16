@@ -163,8 +163,8 @@
                                     <td>{$expired['namebp']}</td>
                                     <td>{$expired['routers']}</td>
                                 </tr>
-                            </tbody>
-                        {/foreach}
+                            {/foreach}
+                        </tbody>
                     </table>
                 </div>
                 &nbsp; {include file="pagination.tpl"}
