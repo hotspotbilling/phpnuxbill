@@ -127,7 +127,7 @@ class Lang
 
         if (!$full)
             $string = array_slice($string, 0, 1);
-        return $string ? implode(', ', $string) . ' ago' : 'just now';
+            return $string ? implode(', ', $string) .' '. Lang::T('ago') : Lang::T('just now');
     }
 
     public static function nl2br($text)
