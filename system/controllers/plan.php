@@ -114,6 +114,12 @@ switch ($action) {
                 $zero = 1;
                 $gateway = 'Recharge Zero';
             }
+            $usings = explode(',', $config['payment_usings']);
+            $usings = array_filter(array_unique($usings));
+            if(count($usings)==0){
+                $usings[] = Lang::T('Cash');
+            }
+            $ui->assign('usings', $usings);
             $ui->assign('bills', $bills);
             $ui->assign('add_cost', $add_cost);
             $ui->assign('cust', $cust);

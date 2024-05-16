@@ -46,7 +46,7 @@
                         <div class="col-md-6">
                             <select name="using" class="form-control">
                                 {foreach $usings as $using}
-                                    <option value="{trim(ucWords($using))}">{trim(ucWords($using))}</option>
+                                    <option value="{trim($using)}">{trim(ucWords($using))}</option>
                                 {/foreach}
                                 {if $_c['enable_balance'] eq 'yes'}
                                     <option value="balance">{Lang::T('Customer Balance')}</option>
