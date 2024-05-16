@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.5.16
+
+- Confirm can change Using
+
 ## 2024.5.14
 
 - Show Plan and Location on expired list
