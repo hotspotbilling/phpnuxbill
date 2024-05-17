@@ -18,7 +18,7 @@ if (isset($_GET['renewal'])) {
 
 if (_post('send') == 'balance') {
     if ($config['enable_balance'] == 'yes' && $config['allow_balance_transfer'] == 'yes') {
-        if ($user['status'] != 'Active') {
+        if ($user['status'] == 'Disabled') {
             _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
         }
         $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
@@ -80,7 +80,7 @@ if (_post('send') == 'balance') {
         r2(U . 'home', 'd', Lang::T('Failed, balance is not available'));
     }
 } else if (_post('send') == 'plan') {
-    if ($user['status'] != 'Active') {
+    if ($user['status'] == 'Disabled') {
         _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
     }
     $actives = ORM::for_table('tbl_user_recharges')
@@ -98,7 +98,7 @@ if (_post('send') == 'balance') {
 $ui->assign('_bills', User::_billing());
 
 if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
-    if ($user['status'] != 'Active') {
+    if ($user['status'] == 'Disabled') {
         _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
     }
     if (!empty(App::getTokenValue(_get('stoken')))) {
@@ -128,7 +128,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         }
     }
 } else if (!empty(_get('extend'))) {
-    if ($user['status'] != 'Active') {
+    if ($user['status'] == 'Disabled') {
         _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
     }
     if (!$config['extend_expired']) {

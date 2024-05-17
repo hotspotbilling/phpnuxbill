@@ -163,7 +163,7 @@ class User
             $id = User::getID();
         }
         $d = ORM::for_table('tbl_customers')->find_one($id);
-        if ($d['status'] != 'Banned') {
+        if ($d['status'] == 'Banned') {
             _alert(Lang::T('This account status') . ' : ' . Lang::T($d['status']), 'danger', "logout");
         }
         if (empty($d['username'])) {
