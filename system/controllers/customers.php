@@ -613,7 +613,8 @@ switch ($action) {
         $order_pos = [
             'username' => 0,
             'created_at' => 8,
-            'balance' => 3
+            'balance' => 3,
+            'status' => 7
         ];
 
         if ($search != '') {
