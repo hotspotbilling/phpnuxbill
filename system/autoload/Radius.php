@@ -92,7 +92,7 @@ class Radius
     {
         $rates = explode('/', $rate);
  ##burst fixed
-		if (str_contains($rate, ' ')) {
+		if (strpos($rate, ' ')) {
           $ratos = $rates[0].'/'.$rates[1].' '.$rates[2].'/'.$rates[3].'/'.$rates[4].'/'.$rates[5].'/'.$rates[6];
          } else {
 		 $ratos = $rates[0].'/'.$rates[1];

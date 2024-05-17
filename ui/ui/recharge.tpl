@@ -45,7 +45,9 @@
                         <label class="col-md-2 control-label">{Lang::T('Using')}</label>
                         <div class="col-md-6">
                             <select name="using" class="form-control">
-                                <option value="cash">{Lang::T('Cash')}</option>
+                                {foreach $usings as $using}
+                                    <option value="{trim($using)}">{trim(ucWords($using))}</option>
+                                {/foreach}
                                 {if $_c['enable_balance'] eq 'yes'}
                                     <option value="balance">{Lang::T('Customer Balance')}</option>
                                 {/if}

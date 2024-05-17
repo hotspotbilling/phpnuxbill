@@ -74,8 +74,7 @@
                     <div class="box-tools pull-right">
                         <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
                         </button>
-                        <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm"><i
-                                class="fa fa-times"></i>
+                        <a href="{$_url}dashboard&refresh" class="btn bg-teal btn-sm"><i class="fa fa-refresh"></i>
                         </a>
                     </div>
                 </div>
@@ -96,8 +95,7 @@
                     <div class="box-tools pull-right">
                         <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
                         </button>
-                        <a href="{$_url}settings/app#hide_dashboard_content" class="btn bg-teal btn-sm"><i
-                                class="fa fa-times"></i>
+                        <a href="{$_url}dashboard&refresh" class="btn bg-teal btn-sm"><i class="fa fa-refresh"></i>
                         </a>
                     </div>
                 </div>
@@ -146,21 +144,27 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Username')}</th>
-                                <th>{Lang::T('Created On')}</th>
-                                <th>{Lang::T('Expires On')}</th>
+                                <th>{Lang::T('Created / Expired')}</th>
+                                <th>{Lang::T('Internet Plan')}</th>
+                                <th>{Lang::T('Location')}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {foreach $expire as $expired}
+                                {assign var="rem_exp" value="{$expired['expiration']} {$expired['time']}"}
+                                {assign var="rem_started" value="{$expired['recharged_on']} {$expired['recharged_time']}"}
                                 <tr>
                                     <td><a href="{$_url}customers/viewu/{$expired['username']}">{$expired['username']}</a></td>
-                                    <td>{Lang::dateAndTimeFormat($expired['recharged_on'],$expired['recharged_time'])}
+                                    <td><small data-toggle="tooltip" data-placement="top"
+                                    title="{Lang::dateAndTimeFormat($expired['recharged_on'],$expired['recharged_time'])}">{Lang::timeElapsed($rem_started)}</small> /
+                                        <span data-toggle="tooltip" data-placement="top"
+                                            title="{Lang::dateAndTimeFormat($expired['expiration'],$expired['time'])}">{Lang::timeElapsed($rem_exp)}</span>
                                     </td>
-                                    <td>{Lang::dateAndTimeFormat($expired['expiration'],$expired['time'])}
-                                    </td>
+                                    <td>{$expired['namebp']}</td>
+                                    <td>{$expired['routers']}</td>
                                 </tr>
-                            </tbody>
-                        {/foreach}
+                            {/foreach}
+                        </tbody>
                     </table>
                 </div>
                 &nbsp; {include file="pagination.tpl"}
@@ -381,6 +385,21 @@
                     var latestVersion = data.version;
                     if (localVersion !== latestVersion) {
                         $('#version').html('Latest Version: ' + latestVersion);
+                        Swal.fire({
+                            icon: 'info',
+                            title: "New Version Available\nVersion: "+latestVersion,
+                            toast: true,
+                            position: 'bottom-right',
+                            showConfirmButton: true,
+                            showCloseButton: true,
+                            timer: 30000,
+                            confirmButtonText: '<a href="{$_url}community#latestVersion" style="color: white;">Update Now</a>',
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        });
                     }
                 });
         });

@@ -2,6 +2,20 @@
 
 # CHANGELOG
 
+## 2024.5.16
+
+- Confirm can change Using
+
+## 2024.5.14
+
+- Show Plan and Location on expired list
+- Customizeable payment for recharge
+
+## 2024.5.8
+
+- Fix bugs burst by @Gerandonk
+- Fix sync for burst by @Gerandonk
+
 ## 2024.5.7
 
 - Fix time for period Days

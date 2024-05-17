@@ -68,6 +68,12 @@ switch ($action) {
         if (isset($routes['2']) && !empty($routes['2'])) {
             $ui->assign('cust', ORM::for_table('tbl_customers')->find_one($routes['2']));
         }
+        $usings = explode(',', $config['payment_usings']);
+        $usings = array_filter(array_unique($usings));
+        if(count($usings)==0){
+            $usings[] = Lang::T('Cash');
+        }
+        $ui->assign('usings', $usings);
         run_hook('view_recharge'); #HOOK
         $ui->display('recharge.tpl');
         break;
@@ -108,6 +114,12 @@ switch ($action) {
                 $zero = 1;
                 $gateway = 'Recharge Zero';
             }
+            $usings = explode(',', $config['payment_usings']);
+            $usings = array_filter(array_unique($usings));
+            if(count($usings)==0){
+                $usings[] = Lang::T('Cash');
+            }
+            $ui->assign('usings', $usings);
             $ui->assign('bills', $bills);
             $ui->assign('add_cost', $add_cost);
             $ui->assign('cust', $cust);
@@ -146,7 +158,7 @@ switch ($action) {
         }
 
         if ($msg == '') {
-            $gateway = 'Recharge';
+            $gateway = ucwords($using);
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
             list($bills, $add_cost) = User::getBills($id_customer);
