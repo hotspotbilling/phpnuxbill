@@ -322,3 +322,4 @@ ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `
 ALTER TABLE `tbl_plans` CHANGE `allow_purchase` `prepaid` ENUM('yes','no') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'yes' COMMENT 'is prepaid';
 ALTER TABLE `tbl_transactions` ADD `note` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'for note' AFTER `type`;
 ALTER TABLE `tbl_payment_gateway` ADD `trx_invoice` VARCHAR(25) NOT NULL DEFAULT '' COMMENT 'from tbl_transactions' AFTER `paid_date`;
+ALTER TABLE `tbl_customers` ADD `status` ENUM('Active','Banned','Disabled') NOT NULL DEFAULT 'Active' AFTER `auto_renewal`;

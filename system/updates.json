@@ -93,5 +93,8 @@
     ],
     "2024.4.5" : [
         "ALTER TABLE `tbl_payment_gateway` ADD `trx_invoice` VARCHAR(25) NOT NULL DEFAULT '' COMMENT 'from tbl_transactions' AFTER `paid_date`;"
+    ],
+    "2024.5.17" : [
+        "ALTER TABLE `tbl_customers` ADD `status` ENUM('Active','Banned','Disabled') NOT NULL DEFAULT 'Active' AFTER `auto_renewal`;"
     ]
 }
