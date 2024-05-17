@@ -459,6 +459,7 @@ switch ($action) {
         $phonenumber = Lang::phoneFormat(_post('phonenumber'));
         $service_type = _post('service_type');
         $coordinates = _post('coordinates');
+        $status = _post('status');
         run_hook('edit_customer'); #HOOK
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
@@ -517,6 +518,7 @@ switch ($action) {
             $d->email = $email;
             $d->account_type = $account_type;
             $d->address = $address;
+            $d->status = $status;
             $d->phonenumber = $phonenumber;
             $d->service_type = $service_type;
             $d->coordinates = $coordinates;
@@ -606,19 +608,33 @@ switch ($action) {
     default:
         run_hook('list_customers'); #HOOK
         $search = _post('search');
+        $order = _post('order', 'username');
+        $orderby = _post('orderby', 'asc');
+        $order_pos = [
+            'username' => 0,
+            'created_at' => 8,
+            'balance' => 3
+        ];
+
         if ($search != '') {
             $query = ORM::for_table('tbl_customers')
                 ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' ".
-                "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' ")
-                ->order_by_asc('username');
-            $d = $query->findMany();
+                "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' ");
         } else {
-            $query = ORM::for_table('tbl_customers')->order_by_asc('username');
+            $query = ORM::for_table('tbl_customers');
+        }
+        if($orderby=='asc'){
+            $query->order_by_asc($order);
+        }else{
+            $query->order_by_desc($order);
         }
         $d = $query->findMany();
         $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('d', $d);
         $ui->assign('search', $search);
+        $ui->assign('order', $order);
+        $ui->assign('order_pos', $order_pos[$order]);
+        $ui->assign('orderby', $orderby);
         $ui->display('customers.tpl');
         break;
 }

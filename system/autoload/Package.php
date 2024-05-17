@@ -34,6 +34,10 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
+        if($c['status'] != 'Active'){
+            _alert(Lang::T('This account status').' : '.Lang::T($c['status']),'danger', "");
+        }
+
         $add_cost = 0;
         $bills = [];
         // Zero cost recharge

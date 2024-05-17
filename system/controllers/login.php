@@ -5,8 +5,8 @@
  *  by https://t.me/ibnux
  **/
 
-if(User::getID()){
-    r2(U.'home');
+if (User::getID()) {
+    r2(U . 'home');
 }
 
 if (isset($routes['1'])) {
@@ -24,13 +24,16 @@ switch ($do) {
             $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if ($d) {
                 $d_pass = $d['password'];
+                if ($d['status'] != 'Banned') {
+                    _alert(Lang::T('This account status') . ' : ' . Lang::T($d['status']), 'danger', "");
+                }
                 if (Password::_uverify($password, $d_pass) == true) {
                     $_SESSION['uid'] = $d['id'];
                     User::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . Lang::T('Login Successful'), 'User', $d['id']);
-                    _alert(Lang::T('Login Successful'),'success', "home");
+                    _alert(Lang::T('Login Successful'), 'success', "home");
                 } else {
                     _msglog('e', Lang::T('Invalid Username or Password'));
                     _log($username . ' ' . Lang::T('Failed Login'), 'User');
@@ -68,7 +71,7 @@ switch ($do) {
                         r2(U . 'login', 'e', Lang::T('Voucher activation failed'));
                     }
                 } else {
-                    _alert(Lang::T('Login Successful'),'success', "dashboard");
+                    _alert(Lang::T('Login Successful'), 'success', "dashboard");
                     r2(U . 'login', 'e', Lang::T('Voucher activation failed') . '.');
                 }
             }
