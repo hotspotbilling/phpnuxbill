@@ -820,4 +820,11 @@ class Package
         $ui->assign('whatsapp', urlencode("```$invoice```"));
         $ui->assign('in', $in);
     }
+    public static function tax($price, $tax_rate = 1)
+    {
+        // Convert tax rate to decimal
+        $tax_rate_decimal = $tax_rate / 100;
+        $tax = $price * $tax_rate_decimal;
+        return $tax;
+    }
 }

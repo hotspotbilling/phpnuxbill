@@ -631,22 +631,22 @@
                         <label class="col-md-2 control-label">{Lang::T('Tax Rate')}</label>
                         <div class="col-md-6">
                             <select name="tax_rate" id="tax_rate" class="form-control">
-                                <option value="0.005" {if $_c['tax_rate']=='0.005' }selected="selected" {/if}>
+                                <option value="0.5" {if $_c['tax_rate']=='0.5' }selected="selected" {/if}>
                                     {Lang::T('0.5%')}
                                 </option>
-                                <option value="0.01" {if $_c['tax_rate']=='0.01' }selected="selected" {/if}>
+                                <option value="1" {if $_c['tax_rate']=='1' }selected="selected" {/if}>
                                     {Lang::T('1%')}
                                 </option>
-                                <option value="0.015" {if $_c['tax_rate']=='0.015' }selected="selected" {/if}>
+                                <option value="1.5" {if $_c['tax_rate']=='1.5' }selected="selected" {/if}>
                                     {Lang::T('1.5%')}
                                 </option>
-                                <option value="0.02" {if $_c['tax_rate']=='0.02' }selected="selected" {/if}>
+                                <option value="0.20" {if $_c['tax_rate']=='2' }selected="selected" {/if}>
                                     {Lang::T('2%')}
                                 </option>
-                                <option value="0.05" {if $_c['tax_rate']=='0.05' }selected="selected" {/if}>
+                                <option value="0.50" {if $_c['tax_rate']=='5' }selected="selected" {/if}>
                                     {Lang::T('5%')}
                                 </option>
-                                <option value="0.1" {if $_c['tax_rate']=='0.1' }selected="selected" {/if}>
+                                <option value="10" {if $_c['tax_rate']=='10' }selected="selected" {/if}>
                                     {Lang::T('10%')}
                                 </option>
                                 <!-- Custom tax rate option -->

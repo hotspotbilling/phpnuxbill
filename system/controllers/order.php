@@ -131,7 +131,7 @@ switch ($action) {
         $router = Mikrotik::info($trx['routers']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
         $bandw = ORM::for_table('tbl_bandwidth')->find_one($plan['id_bw']);
-        $invoice = ORM::for_table('tbl_transactions')->where("invoice",$trx['trx_invoice'])->find_one();
+        $invoice = ORM::for_table('tbl_transactions')->where("invoice", $trx['trx_invoice'])->find_one();
         $ui->assign('invoice', $invoice);
         $ui->assign('trx', $trx);
         $ui->assign('router', $router);
@@ -280,6 +280,16 @@ switch ($action) {
         if (strpos($user['email'], '@') === false) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
         }
+        $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+        $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+        $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+        if ($tax_rate_setting === 'custom') {
+            $tax_rate = $custom_tax_rate;
+        } else {
+            $tax_rate = $tax_rate_setting;
+        }
+        $plan = ORM::for_table('tbl_plans')->find_one($routes['3']);
+        $tax = Package::tax($plan['price'], $tax_rate);
         $pgs = array_values(explode(',', $config['payment_gateway']));
         if (count($pgs) == 0) {
             sendTelegram("Payment Gateway not set, please set it in Settings");
@@ -288,11 +298,12 @@ switch ($action) {
         }
         if (count($pgs) > 1) {
             $ui->assign('pgs', $pgs);
-            //$ui->assign('pgs', $pgs);
+            if ($tax_enable === 'yes') {
+                $ui->assign('tax', $tax);
+            }
             $ui->assign('route2', $routes[2]);
             $ui->assign('route3', $routes[3]);
-
-            //$ui->assign('plan', $plan);
+            $ui->assign('plan', $plan);
             $ui->display('user-selectGateway.tpl');
             break;
         } else {
