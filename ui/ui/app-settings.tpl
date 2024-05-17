@@ -602,6 +602,18 @@
                         </div>
                         <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}</p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>
+                        <div class="col-md-6">
+                            <select name="extend_expiry" id="extend_expiry" class="form-control">
+                                <option value="no" {if $_c['extend_expiry']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}
+                                <option value="yes" {if $_c['extend_expiry']=='yes' }selected="selected"
+                                    {/if}> {Lang::T('Yes')}
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('If user buy same internet plan, expiry date will extend')}</p>
+                    </div>
                 </div>
 
                  <div class="panel-heading">
