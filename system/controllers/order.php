@@ -148,6 +148,9 @@ switch ($action) {
             r2(U . "voucher/invoice/");
             die();
         }
+        if($user['status'] != 'Active'){
+            _alert(Lang::T('This account status').' : '.Lang::T($user['status']),'danger', "");
+        }
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
         if (empty($plan)) {
             r2(U . "order/package", 'e', Lang::T("Plan Not found"));
@@ -180,6 +183,9 @@ switch ($action) {
     case 'send':
         if ($config['enable_balance'] != 'yes') {
             r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
+        }
+        if($user['status'] != 'Active'){
+            _alert(Lang::T('This account status').' : '.Lang::T($user['status']),'danger', "");
         }
         $ui->assign('_title', Lang::T('Buy for friend'));
         $ui->assign('_system_menu', 'package');
@@ -310,6 +316,9 @@ switch ($action) {
             $gateway = $_SESSION['gateway'];
         } else if (!empty($gateway)) {
             $_SESSION['gateway'] = $gateway;
+        }
+        if($user['status'] != 'Active'){
+            _alert(Lang::T('This account status').' : '.Lang::T($user['status']),'danger', "");
         }
         if (empty($gateway)) {
             r2(U . 'order/gateway/' . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please select Payment Gateway"));
