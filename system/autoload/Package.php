@@ -213,26 +213,6 @@ class Package
                         $date_exp = $datetime[0];
                         $time = $datetime[1];
                     }
-                } elseif ($b['namebp'] == $p['name_plan'] && $b['status'] == 'off') {
-                    // if it same internet plan but has expired, it will not extend expiry date
-                    if ($p['validity_unit'] == 'Months') {
-                        $date_exp = date("Y-m-d", strtotime($p['validity'] . ' months'));
-                        $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Period') {
-                        $date_exp = date("Y-m-$day_exp", strtotime($p['validity'] . ' months'));
-                        $time = date("23:59:00");
-                    } else if ($p['validity_unit'] == 'Days') {
-                        $date_exp = date("Y-m-d", strtotime($p['validity'] . ' days'));
-                        $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Hrs') {
-                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($p['validity'] . ' hours')));
-                        $date_exp = $datetime[0];
-                        $time = $datetime[1];
-                    } else if ($p['validity_unit'] == 'Mins') {
-                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($p['validity'] . ' minutes')));
-                        $date_exp = $datetime[0];
-                        $time = $datetime[1];
-                    }
                 }
 
                 if ($isChangePlan || $b['status'] == 'off') {
