@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.5.17
+
+- Status Customer: Active/Banned/Disabled
+- Add search with order in Customer list
+
 ## 2024.5.16
 
 - Confirm can change Using

@@ -36,6 +36,7 @@
                                             <option value="username" {if $order eq 'username' }selected{/if}>{Lang::T('Username')}</option>
                                             <option value="created_at" {if $order eq 'created_at' }selected{/if}>{Lang::T('Created Date')}</option>
                                             <option value="balance" {if $order eq 'balance' }selected{/if}>{Lang::T('Balance')}</option>
+                                            <option value="status" {if $order eq 'status' }selected{/if}>{Lang::T('Status')}</option>
                                         </select>
                                     </div>
                                     <div class="col-xs-4">
