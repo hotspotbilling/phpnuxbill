@@ -640,10 +640,10 @@
                                 <option value="1.5" {if $_c['tax_rate']=='1.5' }selected="selected" {/if}>
                                     {Lang::T('1.5%')}
                                 </option>
-                                <option value="0.20" {if $_c['tax_rate']=='2' }selected="selected" {/if}>
+                                <option value="2" {if $_c['tax_rate']=='2' }selected="selected" {/if}>
                                     {Lang::T('2%')}
                                 </option>
-                                <option value="0.50" {if $_c['tax_rate']=='5' }selected="selected" {/if}>
+                                <option value="5" {if $_c['tax_rate']=='5' }selected="selected" {/if}>
                                     {Lang::T('5%')}
                                 </option>
                                 <option value="10" {if $_c['tax_rate']=='10' }selected="selected" {/if}>
