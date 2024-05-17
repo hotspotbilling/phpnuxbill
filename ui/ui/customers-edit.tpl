@@ -3,7 +3,7 @@
 <form class="form-horizontal" method="post" role="form" action="{$_url}customers/edit-post">
     <div class="row">
         <div class="col-md-6">
-            <div class="panel panel-primary panel-hovered panel-stacked mb30">
+            <div class="panel panel-{if $d['status']=='Active'}primary{else}danger{/if} panel-hovered panel-stacked mb30">
                 <div class="panel-heading">{Lang::T('Edit Contact')}</div>
                 <div class="panel-body">
                     <input type="hidden" name="id" value="{$d['id']}">
@@ -20,7 +20,7 @@
                                 {/if}
                                 <input type="text" class="form-control" name="username" value="{$d['username']}"
                                     required
-                                placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
                             </div>
                         </div>
                     </div>
@@ -106,6 +106,26 @@
                             <input name="coordinates" id="coordinates" class="form-control" value="{$d['coordinates']}"
                                 placeholder="6.465422, 3.406448">
                             <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Status')}</label>
+                        <div class="col-md-9">
+                            <select class="form-control" id="status" name="status">
+                                <option value="Active" {if $d['status'] eq 'Active' }selected{/if}>{Lang::T('Active')}
+                                </option>
+                                <option value="Disabled" {if $d['status'] eq 'Disabled' }selected{/if}>
+                                    {Lang::T('Disabled')}
+                                </option>
+                                <option value="Banned" {if $d['status'] eq 'Banned' }selected{/if}>
+                                    {Lang::T('Banned')}
+                                </option>
+                            </select>
+                            <span class="help-block">
+                                {Lang::T('Banned')}: {Lang::T('Customer cannot login again')}.<br>
+                                {Lang::T('Disabled')}: {Lang::T('Customer can login but cannot buy internet plan, Admin cannot recharge customer')}.<br>
+                                {Lang::T('Don\'t forget to deactivate all active plan too')}.
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -219,13 +239,15 @@
         });
         }
         window.onload = function() {
-            {/literal}{if $d['coordinates']}
-                setupMap({$d['coordinates']});
-            {else}
-                getLocation();
-            {/if}{literal}
-        }
-    </script>
-{/literal}
+            {/literal}
+                {if $d['coordinates']}
+                    setupMap({$d['coordinates']});
+                {else}
+                    getLocation();
+                    {/if}
+                        {literal}
+                        }
+                    </script>
+                {/literal}
 
-{include file="sections/footer.tpl"}
+                {include file="sections/footer.tpl"}
