@@ -24,6 +24,9 @@ switch ($do) {
             $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if ($d) {
                 $d_pass = $d['password'];
+                if($d['status'] != 'Banned'){
+                    _alert(Lang::T('This account status').' : '.Lang::T($c['status']),'danger', "");
+                }
                 if (Password::_uverify($password, $d_pass) == true) {
                     $_SESSION['uid'] = $d['id'];
                     User::setCookie($d['id']);
