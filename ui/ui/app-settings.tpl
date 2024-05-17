@@ -604,7 +604,7 @@
                     </div>
                 </div>
 
-                {* <div class="panel-heading">
+                 <div class="panel-heading">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit">
                             <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
@@ -666,7 +666,7 @@
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Enter the custom tax rate (e.g., 3.75 for 3.75%)')}</p>
                     </div>
-                </div> *}
+                </div>
 
                 {* <div class="panel-heading" id="envato">
                     <div class="btn-group pull-right">
