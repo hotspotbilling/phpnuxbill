@@ -18,6 +18,9 @@ if (isset($_GET['renewal'])) {
 
 if (_post('send') == 'balance') {
     if ($config['enable_balance'] == 'yes' && $config['allow_balance_transfer'] == 'yes') {
+        if ($user['status'] != 'Active') {
+            _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
+        }
         $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
         if (!$target) {
             r2(U . 'home', 'd', Lang::T('Username not found'));
@@ -77,6 +80,9 @@ if (_post('send') == 'balance') {
         r2(U . 'home', 'd', Lang::T('Failed, balance is not available'));
     }
 } else if (_post('send') == 'plan') {
+    if ($user['status'] != 'Active') {
+        _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
+    }
     $actives = ORM::for_table('tbl_user_recharges')
         ->where('username', _post('username'))
         ->find_many();
@@ -92,6 +98,9 @@ if (_post('send') == 'balance') {
 $ui->assign('_bills', User::_billing());
 
 if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
+    if ($user['status'] != 'Active') {
+        _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
+    }
     if (!empty(App::getTokenValue(_get('stoken')))) {
         r2(U . "voucher/invoice/");
         die();
@@ -119,7 +128,10 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         }
     }
 } else if (!empty(_get('extend'))) {
-    if(!$config['extend_expired']){
+    if ($user['status'] != 'Active') {
+        _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
+    }
+    if (!$config['extend_expired']) {
         r2(U . 'home', 'e', "cannot extend");
     }
     if (!empty(App::getTokenValue(_get('stoken')))) {
@@ -130,7 +142,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     if ($tur) {
         $m = date("m");
         $path = $CACHE_PATH . DIRECTORY_SEPARATOR . "extends" . DIRECTORY_SEPARATOR;
-        if(!file_exists($path)){
+        if (!file_exists($path)) {
             mkdir($path);
         }
         $path .= $user['id'] . ".txt";
@@ -148,7 +160,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 $router = $tur['routers'];
             }
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
-            if(!$p){
+            if (!$p) {
                 r2(U . 'home', '3', "Plan Not Found");
             }
             if ($tur['routers'] == 'radius') {
@@ -171,12 +183,12 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             App::setToken(_get('stoken'), $id);
             file_put_contents($path, $m);
             _log("Customer $tur[customer_id] $tur[username] extend for $days days", "Customer", $user['id']);
-            Message::sendTelegram("#u$user[username] #extend #".$p['type']." \n" . $p['name_plan'] .
-                            "\nLocation: " . $p['routers'] .
-                            "\nCustomer: " . $user['fullname'] .
-                            "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
+            Message::sendTelegram("#u$user[username] #extend #" . $p['type'] . " \n" . $p['name_plan'] .
+                "\nLocation: " . $p['routers'] .
+                "\nCustomer: " . $user['fullname'] .
+                "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
             r2(U . 'home', 's', "Extend until $expiration");
-        }else{
+        } else {
             r2(U . 'home', 'e', "Plan is not expired");
         }
     } else {
