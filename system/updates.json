@@ -96,5 +96,8 @@
     ],
     "2024.5.17" : [
         "ALTER TABLE `tbl_customers` ADD `status` ENUM('Active','Banned','Disabled') NOT NULL DEFAULT 'Active' AFTER `auto_renewal`;"
+    ],
+    "2024.5.18" : [
+        "ALTER TABLE `tbl_customers` CHANGE `status` `status` ENUM('Active','Banned','Disabled','Inactive','Limited','Suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Active';"
     ]
 }
