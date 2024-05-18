@@ -589,5 +589,7 @@
     "Don_t_forget_to_deactivate_all_active_plan_too": "Don&#39;t forget to deactivate all active plan too",
     "Ascending": "Ascending",
     "Descending": "Descending",
-    "Created_Date": "Created Date"
+    "Created_Date": "Created Date",
+    "Inactive": "Inactive",
+    "Suspended": "Suspended"
 }

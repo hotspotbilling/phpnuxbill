@@ -112,14 +112,10 @@
                         <label class="col-md-3 control-label">{Lang::T('Status')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="status" name="status">
-                                <option value="Active" {if $d['status'] eq 'Active' }selected{/if}>{Lang::T('Active')}
+                                {foreach $statuses as $status}
+                                <option value="{$status}" {if $d['status'] eq $status }selected{/if}>{Lang::T($status)}
                                 </option>
-                                <option value="Disabled" {if $d['status'] eq 'Disabled' }selected{/if}>
-                                    {Lang::T('Disabled')}
-                                </option>
-                                <option value="Banned" {if $d['status'] eq 'Banned' }selected{/if}>
-                                    {Lang::T('Banned')}
-                                </option>
+                                {/foreach}
                             </select>
                             <span class="help-block">
                                 {Lang::T('Banned')}: {Lang::T('Customer cannot login again')}.<br>
