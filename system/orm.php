@@ -939,6 +939,8 @@ class ORM implements ArrayAccess
         return $this->_add_result_column($column, $alias);
     }
 
+    ## ibnux add function
+
     /**
      * Add a column to the list of columns returned by the SELECT
      * query. This defaults to '*'. The second optional argument is
@@ -958,6 +960,14 @@ class ORM implements ArrayAccess
         }
         return $this;
     }
+
+    public function getEnum($column){
+        $result = $this->raw_query("SHOW COLUMNS FROM ".$this->_table_name." WHERE Field = '$column'")->findArray();
+        preg_match("/^enum\(\'(.*)\'\)$/", $result[0]['Type'], $matches);
+        return explode("','", $matches[1]);
+    }
+
+    ## END ibnux add function
 
     /**
      * Add an unquoted expression to the list of columns returned
