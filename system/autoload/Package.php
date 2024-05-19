@@ -34,8 +34,8 @@ class Package
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
-        if($c['status'] != 'Active'){
-            _alert(Lang::T('This account status').' : '.Lang::T($c['status']),'danger', "");
+        if ($c['status'] != 'Active') {
+            _alert(Lang::T('This account status') . ' : ' . Lang::T($c['status']), 'danger', "");
         }
 
         $add_cost = 0;
@@ -197,28 +197,29 @@ class Package
                 if ($plan_id != $b['plan_id']) {
                     $isChangePlan = true;
                 }
-                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
-                    // if it same internet plan, expired will extend
-                    if ($p['validity_unit'] == 'Months') {
-                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                        $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Period') {
-                        $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                        $time = date("23:59:00");
-                    } else if ($p['validity_unit'] == 'Days') {
-                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
-                        $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Hrs') {
-                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
-                        $date_exp = $datetime[0];
-                        $time = $datetime[1];
-                    } else if ($p['validity_unit'] == 'Mins') {
-                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
-                        $date_exp = $datetime[0];
-                        $time = $datetime[1];
+                if ($config['extend_expiry'] === 'yes') {
+                    if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
+                        // if it same internet plan, expired will extend
+                        if ($p['validity_unit'] == 'Months') {
+                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                            $time = $b['time'];
+                        } else if ($p['validity_unit'] == 'Period') {
+                            $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                            $time = date("23:59:00");
+                        } else if ($p['validity_unit'] == 'Days') {
+                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                            $time = $b['time'];
+                        } else if ($p['validity_unit'] == 'Hrs') {
+                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
+                            $date_exp = $datetime[0];
+                            $time = $datetime[1];
+                        } else if ($p['validity_unit'] == 'Mins') {
+                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
+                            $date_exp = $datetime[0];
+                            $time = $datetime[1];
+                        }
                     }
                 }
-
                 if ($isChangePlan || $b['status'] == 'off') {
                     if ($p['is_radius']) {
                         Radius::customerAddPlan($c, $p, "$date_exp $time");
@@ -398,25 +399,27 @@ class Package
                 if ($plan_id != $b['plan_id']) {
                     $isChangePlan = true;
                 }
-                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
-                    // if it same internet plan, expired will extend
-                    if ($p['validity_unit'] == 'Months') {
-                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                        $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Period') {
-                        $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                        $time = date("23:59:00");
-                    } else if ($p['validity_unit'] == 'Days') {
-                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
-                        $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Hrs') {
-                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
-                        $date_exp = $datetime[0];
-                        $time = $datetime[1];
-                    } else if ($p['validity_unit'] == 'Mins') {
-                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
-                        $date_exp = $datetime[0];
-                        $time = $datetime[1];
+                if ($config['extend_expiry'] === 'yes') {
+                    if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
+                        // if it same internet plan, expired will extend
+                        if ($p['validity_unit'] == 'Months') {
+                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                            $time = $b['time'];
+                        } else if ($p['validity_unit'] == 'Period') {
+                            $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                            $time = date("23:59:00");
+                        } else if ($p['validity_unit'] == 'Days') {
+                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                            $time = $b['time'];
+                        } else if ($p['validity_unit'] == 'Hrs') {
+                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
+                            $date_exp = $datetime[0];
+                            $time = $datetime[1];
+                        } else if ($p['validity_unit'] == 'Mins') {
+                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
+                            $date_exp = $datetime[0];
+                            $time = $datetime[1];
+                        }
                     }
                 }
 
@@ -803,5 +806,12 @@ class Package
         $invoice .= Lang::pad($config['note'], ' ', 2) . "\n";
         $ui->assign('whatsapp', urlencode("```$invoice```"));
         $ui->assign('in', $in);
+    }
+    public static function tax($price, $tax_rate = 1)
+    {
+        // Convert tax rate to decimal
+        $tax_rate_decimal = $tax_rate / 100;
+        $tax = $price * $tax_rate_decimal;
+        return $tax;
     }
 }

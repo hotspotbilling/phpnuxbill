@@ -131,7 +131,7 @@ switch ($action) {
         $router = Mikrotik::info($trx['routers']);
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
         $bandw = ORM::for_table('tbl_bandwidth')->find_one($plan['id_bw']);
-        $invoice = ORM::for_table('tbl_transactions')->where("invoice",$trx['trx_invoice'])->find_one();
+        $invoice = ORM::for_table('tbl_transactions')->where("invoice", $trx['trx_invoice'])->find_one();
         $ui->assign('invoice', $invoice);
         $ui->assign('trx', $trx);
         $ui->assign('router', $router);
@@ -148,9 +148,6 @@ switch ($action) {
             r2(U . "voucher/invoice/");
             die();
         }
-        if($user['status'] != 'Active'){
-            _alert(Lang::T('This account status').' : '.Lang::T($user['status']),'danger', "");
-        }
         $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
         if (empty($plan)) {
             r2(U . "order/package", 'e', Lang::T("Plan Not found"));
@@ -163,29 +160,47 @@ switch ($action) {
         } else {
             $router_name = $plan['routers'];
         }
+
         list($bills, $add_cost) = User::getBills($id_customer);
-        if ($plan && $plan['enabled'] && $user['balance'] >= $plan['price']) {
+
+        // Tax calculation start
+        $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+        $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+        $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+
+        if ($tax_rate_setting === 'custom') {
+            $tax_rate = $custom_tax_rate;
+        } else {
+            $tax_rate = $tax_rate_setting;
+        }
+
+        if ($tax_enable === 'yes') {
+            $tax = Package::tax($plan['price'], $tax_rate);
+        } else {
+            $tax = 0;
+        }
+        // Tax calculation stop
+
+        if ($plan && $plan['enabled'] && $user['balance'] >= $plan['price'] + $tax) {
             if (Package::rechargeUser($user['id'], $router_name, $plan['id'], 'Customer', 'Balance')) {
                 // if success, then get the balance
-                Balance::min($user['id'], $plan['price'] + $add_cost);
+                Balance::min($user['id'], $plan['price'] + $add_cost + $tax);
                 App::setToken($_GET['stoken'], "success");
                 r2(U . "voucher/invoice/", 's', Lang::T("Success to buy package"));
             } else {
                 r2(U . "order/package", 'e', Lang::T("Failed to buy package"));
                 Message::sendTelegram("Buy Package with Balance Failed\n\n#u$c[username] #buy \n" . $plan['name_plan'] .
                     "\nRouter: " . $router_name .
-                    "\nPrice: " . $p['price']);
+                    "\nPrice: " . $plan['price'] + $tax);
             }
         } else {
             r2(U . "home", 'e', 'Plan is not exists');
         }
         break;
+
     case 'send':
         if ($config['enable_balance'] != 'yes') {
             r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
-        }
-        if($user['status'] != 'Active'){
-            _alert(Lang::T('This account status').' : '.Lang::T($user['status']),'danger', "");
         }
         $ui->assign('_title', Lang::T('Buy for friend'));
         $ui->assign('_system_menu', 'package');
@@ -201,6 +216,27 @@ switch ($action) {
         } else {
             $router_name = $plan['routers'];
         }
+        $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+        $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+
+        if ($tax_rate_setting === 'custom') {
+            $tax_rate = $custom_tax_rate;
+        } else {
+            $tax_rate = $tax_rate_setting;
+        }
+
+        $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+
+        if ($tax_enable === 'yes') {
+            $tax = Package::tax($plan['price'], $tax_rate);
+            $ui->assign('tax', $tax);
+        } else {
+            $tax = 0;
+        }
+
+        // Add tax to plan price
+        $plan['price'] += $tax;
+
         if (isset($_POST['send']) && $_POST['send'] == 'plan') {
             $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
             list($bills, $add_cost) = User::getBills($target['id']);
@@ -209,6 +245,7 @@ switch ($action) {
                 $ui->assign('add_cost', $add_cost);
                 $plan['price'] += $add_cost;
             }
+
             if (!$target) {
                 r2(U . 'home', 'd', Lang::T('Username not found'));
             }
@@ -269,15 +306,22 @@ switch ($action) {
                 $d->save();
                 r2(U . "order/view/$trx_id", 's', Lang::T("Success to send package"));
             } else {
-                r2(U . "order/package", 'e', Lang::T("Failed to Send package"));
-                Message::sendTelegram("Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .
+                $errorMessage = "Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .
                     "\nRouter: " . $router_name .
-                    "\nPrice: " . $plan['price']);
+                    "\nPrice: " . $plan['price'];
+
+                if ($tax_enable === 'yes') {
+                    $errorMessage .= "\nTax: " . $tax;
+                }
+
+                r2(U . "order/package", 'e', Lang::T("Failed to Send package"));
+                Message::sendTelegram($errorMessage);
             }
         }
         $ui->assign('username', $_GET['u']);
         $ui->assign('router', $router_name);
         $ui->assign('plan', $plan);
+        $ui->assign('tax', $tax);
         $ui->display('user-sendPlan.tpl');
         break;
     case 'gateway':
@@ -286,6 +330,16 @@ switch ($action) {
         if (strpos($user['email'], '@') === false) {
             r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
         }
+        $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+        $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+        $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+        if ($tax_rate_setting === 'custom') {
+            $tax_rate = $custom_tax_rate;
+        } else {
+            $tax_rate = $tax_rate_setting;
+        }
+        $plan = ORM::for_table('tbl_plans')->find_one($routes['3']);
+        $tax = Package::tax($plan['price'], $tax_rate);
         $pgs = array_values(explode(',', $config['payment_gateway']));
         if (count($pgs) == 0) {
             sendTelegram("Payment Gateway not set, please set it in Settings");
@@ -294,11 +348,12 @@ switch ($action) {
         }
         if (count($pgs) > 1) {
             $ui->assign('pgs', $pgs);
-            //$ui->assign('pgs', $pgs);
+            if ($tax_enable === 'yes') {
+                $ui->assign('tax', $tax);
+            }
             $ui->assign('route2', $routes[2]);
             $ui->assign('route3', $routes[3]);
-
-            //$ui->assign('plan', $plan);
+            $ui->assign('plan', $plan);
             $ui->display('user-selectGateway.tpl');
             break;
         } else {
@@ -316,9 +371,6 @@ switch ($action) {
             $gateway = $_SESSION['gateway'];
         } else if (!empty($gateway)) {
             $_SESSION['gateway'] = $gateway;
-        }
-        if($user['status'] != 'Active'){
-            _alert(Lang::T('This account status').' : '.Lang::T($user['status']),'danger', "");
         }
         if (empty($gateway)) {
             r2(U . 'order/gateway/' . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please select Payment Gateway"));
@@ -357,9 +409,23 @@ switch ($action) {
             }
         }
         $add_cost = 0;
+        $tax = 0;
         if ($router['name'] != 'balance') {
             list($bills, $add_cost) = User::getBills($id_customer);
         }
+        // Tax calculation start
+        $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+        $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+        $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+        if ($tax_rate_setting === 'custom') {
+            $tax_rate = $custom_tax_rate;
+        } else {
+            $tax_rate = $tax_rate_setting;
+        }
+        if ($tax_enable === 'yes') {
+            $tax = Package::tax($plan['price'], $tax_rate);
+        }
+        // Tax calculation stop
         if (empty($id)) {
             $d = ORM::for_table('tbl_payment_gateway')->create();
             $d->username = $user['username'];
@@ -372,12 +438,12 @@ switch ($action) {
                 // Postpaid price from field
                 $add_inv = User::getAttribute("Invoice", $id_customer);
                 if (empty($add_inv) or $add_inv == 0) {
-                    $d->price = ($plan['price'] + $add_cost);
+                    $d->price = ($plan['price'] + $add_cost + $tax);
                 } else {
-                    $d->price = ($add_inv + $add_cost);
+                    $d->price = ($add_inv + $add_cost + $tax);
                 }
             } else {
-                $d->price = ($plan['price'] + $add_cost);
+                $d->price = ($plan['price'] + $add_cost + $tax);
             }
             //$d->price = ($plan['price'] + $add_cost);
             $d->created_date = date('Y-m-d H:i:s');
@@ -395,12 +461,12 @@ switch ($action) {
                 // Postpaid price from field
                 $add_inv = User::getAttribute("Invoice", $id_customer);
                 if (empty($add_inv) or $add_inv == 0) {
-                    $d->price = ($plan['price'] + $add_cost);
+                    $d->price = ($plan['price'] + $add_cost + $tax);
                 } else {
-                    $d->price = ($add_inv + $add_cost);
+                    $d->price = ($add_inv + $add_cost + $tax);
                 }
             } else {
-                $d->price = ($plan['price'] + $add_cost);
+                $d->price = ($plan['price'] + $add_cost + $tax);
             }
             //$d->price = ($plan['price'] + $add_cost);
             $d->created_date = date('Y-m-d H:i:s');

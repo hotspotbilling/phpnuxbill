@@ -602,9 +602,21 @@
                         </div>
                         <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}</p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>
+                        <div class="col-md-6">
+                            <select name="extend_expiry" id="extend_expiry" class="form-control">
+                                <option value="no" {if $_c['extend_expiry']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}
+                                <option value="yes" {if $_c['extend_expiry']=='yes' }selected="selected"
+                                    {/if}> {Lang::T('Yes')}
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('If user buy same internet plan, expiry date will extend')}</p>
+                    </div>
                 </div>
 
-                {* <div class="panel-heading">
+                 <div class="panel-heading">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit">
                             <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
@@ -631,22 +643,22 @@
                         <label class="col-md-2 control-label">{Lang::T('Tax Rate')}</label>
                         <div class="col-md-6">
                             <select name="tax_rate" id="tax_rate" class="form-control">
-                                <option value="0.005" {if $_c['tax_rate']=='0.005' }selected="selected" {/if}>
+                                <option value="0.5" {if $_c['tax_rate']=='0.5' }selected="selected" {/if}>
                                     {Lang::T('0.5%')}
                                 </option>
-                                <option value="0.01" {if $_c['tax_rate']=='0.01' }selected="selected" {/if}>
+                                <option value="1" {if $_c['tax_rate']=='1' }selected="selected" {/if}>
                                     {Lang::T('1%')}
                                 </option>
-                                <option value="0.015" {if $_c['tax_rate']=='0.015' }selected="selected" {/if}>
+                                <option value="1.5" {if $_c['tax_rate']=='1.5' }selected="selected" {/if}>
                                     {Lang::T('1.5%')}
                                 </option>
-                                <option value="0.02" {if $_c['tax_rate']=='0.02' }selected="selected" {/if}>
+                                <option value="2" {if $_c['tax_rate']=='2' }selected="selected" {/if}>
                                     {Lang::T('2%')}
                                 </option>
-                                <option value="0.05" {if $_c['tax_rate']=='0.05' }selected="selected" {/if}>
+                                <option value="5" {if $_c['tax_rate']=='5' }selected="selected" {/if}>
                                     {Lang::T('5%')}
                                 </option>
-                                <option value="0.1" {if $_c['tax_rate']=='0.1' }selected="selected" {/if}>
+                                <option value="10" {if $_c['tax_rate']=='10' }selected="selected" {/if}>
                                     {Lang::T('10%')}
                                 </option>
                                 <!-- Custom tax rate option -->
@@ -666,7 +678,7 @@
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Enter the custom tax rate (e.g., 3.75 for 3.75%)')}</p>
                     </div>
-                </div> *}
+                </div>
 
                 {* <div class="panel-heading" id="envato">
                     <div class="btn-group pull-right">
