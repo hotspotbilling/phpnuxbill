@@ -101,6 +101,6 @@
         "ALTER TABLE `tbl_customers` CHANGE `status` `status` ENUM('Active','Banned','Disabled','Inactive','Limited','Suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Active';"
     ],
     "2024.5.20" : [
-        "ALTER TABLE `tbl_customers` ADD `city` VARCHAR(255) NULL AFTER `address`, ADD `district` VARCHAR(255) NULL AFTER `city`, ADD `state` VARCHAR(255) NULL AFTER `district`, ADD `zip` VARCHAR(10) NULL AFTER `state`;"
+        "ALTER TABLE `tbl_customers` ADD `city` VARCHAR(255) AFTER `address`, ADD `district` VARCHAR(255) AFTER `city`, ADD `state` VARCHAR(255) AFTER `district`, ADD `zip` VARCHAR(10) AFTER `state`;"
     ]
 }
