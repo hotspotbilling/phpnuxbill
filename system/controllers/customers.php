@@ -610,6 +610,7 @@ switch ($action) {
         run_hook('list_customers'); #HOOK
         $search = _post('search');
         $order = _post('order', 'username');
+        $filter = _post('filter', 'Active');
         $orderby = _post('orderby', 'asc');
         $order_pos = [
             'username' => 0,
@@ -621,9 +622,10 @@ switch ($action) {
         if ($search != '') {
             $query = ORM::for_table('tbl_customers')
                 ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' ".
-                "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' ");
+                "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' AND status='$filter'");
         } else {
             $query = ORM::for_table('tbl_customers');
+            $query->where("status", $filter);
         }
         if($orderby=='asc'){
             $query->order_by_asc($order);
@@ -633,6 +635,8 @@ switch ($action) {
         $d = $query->findMany();
         $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('d', $d);
+        $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
+        $ui->assign('filter', $filter);
         $ui->assign('search', $search);
         $ui->assign('order', $order);
         $ui->assign('order_pos', $order_pos[$order]);
