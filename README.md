@@ -7,7 +7,7 @@
 ## Feature
 
 - Voucher Generator and Print
-- FreeRadius
+- [Freeradius](https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius)
 - Self registration
 - User Balance
 - Auto Renewal Package using Balance
@@ -51,13 +51,10 @@ The problem with windows is hard to set cronjob, better Linux
 ## Changelog
 
 [CHANGELOG.md](CHANGELOG.md)
+
 ## Installation
 
 [Installation instructions](https://github.com/hotspotbilling/phpnuxbill/wiki)
-
-## Docker Version
-
-[Docker Repository](https://github.com/animegasan/phpnuxbill)
 
 ## Freeradius
 
@@ -70,21 +67,24 @@ Support [Freeradius with Database](https://github.com/hotspotbilling/phpnuxbill/
 
 ## Technical Support
 
-Start from Rp 500.000 or $50
+This Software is Free and Open Source, Without any Warranty.
 
-If you chat me for any technical support, you need to pay, except for Donors, ask anything for free in the [discussion](/hotspotbilling/phpnuxbill/discussions) page
+Even if the software is free, but Technical Support is not,
+Technical Support Start from Rp 500.000 or $50
 
-[Telegram](https://t.me/ibnux)
+If you chat me for any technical support,
+you need to pay,
 
-[Website](https://ibnux.net/layanan)
+ask anything for free in the [discussion](/hotspotbilling/phpnuxbill/discussions) page or [Telegram Group](https://t.me/phpnuxbill)
+
+Contact me at [Telegram](https://t.me/ibnux)
 
 ## License
 
 GNU General Public License version 2 or later
 
-see LICENSE file
+see [LICENSE](LICENSE) file
 
-## [CHANGELOG](CHANGELOG.md)
 
 ## Donate to ibnux
 
