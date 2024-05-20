@@ -591,5 +591,6 @@
     "Descending": "Descending",
     "Created_Date": "Created Date",
     "Inactive": "Inactive",
-    "Suspended": "Suspended"
+    "Suspended": "Suspended",
+    "Query": "Query"
 }

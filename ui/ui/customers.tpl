@@ -66,7 +66,11 @@
                                 <input type="text" name="search" class="form-control"
                                     placeholder="{Lang::T('Search')}..." value="{$search}">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-primary" type="submit">{Lang::T('Search')}</button>
+                                    <button class="btn btn-primary" type="submit">{Lang::T('Query')}</button>
+                                    <button class="btn btn-primary" type="submit" name="export" value="csv">
+                                        <span class="glyphicon glyphicon-download"
+                                        aria-hidden="true"></span> CSV
+                                    </button>
                                 </div>
                             </div>
                         </div>
