@@ -186,7 +186,7 @@ switch ($action) {
             }
             $usings = explode(',', $config['payment_usings']);
             $usings = array_filter(array_unique($usings));
-            if(count($usings)==0){
+            if (count($usings) == 0) {
                 $usings[] = Lang::T('Cash');
             }
             $ui->assign('usings', $usings);
@@ -621,18 +621,59 @@ switch ($action) {
 
         if ($search != '') {
             $query = ORM::for_table('tbl_customers')
-                ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' ".
-                "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' AND status='$filter'");
+                ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' " .
+                    "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' AND status='$filter'");
         } else {
             $query = ORM::for_table('tbl_customers');
             $query->where("status", $filter);
         }
-        if($orderby=='asc'){
+        if ($orderby == 'asc') {
             $query->order_by_asc($order);
-        }else{
+        } else {
             $query->order_by_desc($order);
         }
         $d = $query->findMany();
+        if (_post('export', '') == 'csv') {
+            $h = false;
+            set_time_limit(-1);
+            header('Pragma: public');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header("Content-type: text/csv");
+            header('Content-Disposition: attachment;filename="phpnuxbill_customers_' . $filter . '_' . date('Y-m-d_H_i') . '.csv"');
+            header('Content-Transfer-Encoding: binary');
+
+            $headers = [
+                'id',
+                'username',
+                'fullname',
+                'address',
+                'phonenumber',
+                'email',
+                'balance',
+                'service_type',
+            ];
+            $fp = fopen('php://output', 'wb');
+            if (!$h) {
+                fputcsv($fp, $headers, ";");
+                $h = true;
+            }
+            foreach ($d as $c) {
+                $row = [
+                    $c['id'],
+                    $c['username'],
+                    $c['fullname'],
+                    str_replace("\n", " ", $c['address']),
+                    $c['phonenumber'],
+                    $c['email'],
+                    $c['balance'],
+                    $c['service_type'],
+                ];
+                fputcsv($fp, $row, ";");
+            }
+            fclose($fp);
+            die();
+        }
         $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('d', $d);
         $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
