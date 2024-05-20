@@ -48,6 +48,16 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-lg-3">
+                            <div class="input-group">
+                                <span class="input-group-addon">Status</span>
+                                <select class="form-control" id="filter" name="filter">
+                                    {foreach $statuses as $status}
+                                        <option value="{$status}" {if $filter eq $status }selected{/if}>{Lang::T($status)}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
                         <div class="col-lg-4">
                             <div class="input-group">
                                 <div class="input-group-addon">
@@ -56,14 +66,14 @@
                                 <input type="text" name="search" class="form-control"
                                     placeholder="{Lang::T('Search')}..." value="{$search}">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
+                                    <button class="btn btn-primary" type="submit">{Lang::T('Search')}</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-2">
-                            <a href="{$_url}customers/add" class="btn btn-primary btn-block"><i
+                        <div class="col-lg-1">
+                            <a href="{$_url}customers/add" class="btn btn-success text-black btn-block"><i
                                     class="ion ion-android-add">
-                                </i> {Lang::T('Add New Contact')}</a>
+                                </i> {Lang::T('Add')}</a>
                         </div>
                     </div>
                 </form>
