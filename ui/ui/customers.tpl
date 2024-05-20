@@ -86,7 +86,7 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr>
+                                <tr {if $ds['status'] != 'Active'}class="danger"{/if}>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
                                     <td>{$ds['account_type']}</td>

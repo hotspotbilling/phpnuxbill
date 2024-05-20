@@ -474,5 +474,7 @@
     "SMS_and_WhatsApp": "SMS dan WhatsApp",
     "The_method_which_OTP_will_be_sent_to_user": "Metode OTP yang akan dikirimkan ke pengguna",
     "Disabled": "Dinonaktifkan",
-    "Banned": "Banned"
+    "Banned": "Dicekal",
+    "Inactive": "Tidak Aktif",
+    "Suspended": "Disuspend"
 }
