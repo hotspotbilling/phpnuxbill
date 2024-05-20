@@ -22,9 +22,19 @@
                     <li class="list-group-item">
                         <b>{Lang::T('Email')}</b> <span class="pull-right">{$d['email']}</span>
                     </li>
-                </ul>
-                <p class="text-muted">{Lang::nl2br($d['address'])}</p>
-                <ul class="list-group list-group-unbordered">
+                    <li class="list-group-item">{Lang::nl2br($d['address'])}</li>
+                    <li class="list-group-item">
+                        <b>{Lang::T('City')}</b> <span class="pull-right">{Lang::T($d['city'])}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <b>{Lang::T('District')}</b> <span class="pull-right">{Lang::T($d['district'])}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <b>{Lang::T('State')}</b> <span class="pull-right">{Lang::T($d['state'])}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <b>{Lang::T('Zip')}</b> <span class="pull-right">{Lang::T($d['zip'])}</span>
+                    </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Password')}</b> <input type="password" value="{$d['password']}"
                             style=" border: 0px; text-align: right;" class="pull-right"
