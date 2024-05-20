@@ -322,3 +322,16 @@ function _alert($text, $type = 'success', $url = "home", $time = 3)
 if (!isset($api_secret)) {
     $api_secret = $db_password;
 }
+
+function displayMaintenanceMessage(): void
+{
+    global $config, $ui;
+    $date = $config['maintenance_date'];
+    if ($date){
+        $ui->assign('date', $date);
+    }  
+    http_response_code(503);
+    $ui->assign('companyName', $config['CompanyName']);
+    $ui->display('maintenance.tpl');
+    die();
+}
