@@ -315,6 +315,7 @@ switch ($action) {
             ->find_many();
         if ($d) {
             $ui->assign('d', $d);
+            $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
             $ui->assign('customFields', $customFields);
             $ui->assign('xheader', $leafletpickerHeader);
             $ui->display('customers-edit.tpl');
