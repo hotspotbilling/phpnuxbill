@@ -121,6 +121,51 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-6">
+            <div class="box box-primary box-solid collapsed-box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">{Lang::T('Additional Information')}</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="box-body" style="display: none;">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('City')}</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="city" name="city"
+                                value="{$d['city']}">
+                            <small class="form-text text-muted">{Lang::T('City of Resident')}</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('District')}</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="district" name="district"
+                                value="{$d['district']}">
+                            <small class="form-text text-muted">{Lang::T('District')}</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('State')}</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="state" name="state"
+                                value="{$d['state']}">
+                            <small class="form-text text-muted">{Lang::T('State of Resident')}</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Zip')}</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="zip" name="zip"
+                                value="{$d['zip']}">
+                            <small class="form-text text-muted">{Lang::T('Zip Code')}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <center>
         <button class="btn btn-primary" type="submit">
