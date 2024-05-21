@@ -392,6 +392,11 @@ switch ($action) {
         //post Customers Attributes
         $custom_field_names = (array) $_POST['custom_field_name'];
         $custom_field_values = (array) $_POST['custom_field_value'];
+        //additional information
+        $city = _post('city');
+        $district = _post('district');
+        $state = _post('state');
+        $zip = _post('zip');
 
         run_hook('add_customer'); #HOOK
         $msg = '';
@@ -423,6 +428,10 @@ switch ($action) {
             $d->phonenumber = Lang::phoneFormat($phonenumber);
             $d->service_type = $service_type;
             $d->coordinates = $coordinates;
+            $d->city = $city;
+            $d->district = $district;
+            $d->state = $state;
+            $d->zip = $zip;
             $d->save();
 
             // Retrieve the customer ID of the newly created customer
@@ -461,6 +470,11 @@ switch ($action) {
         $service_type = _post('service_type');
         $coordinates = _post('coordinates');
         $status = _post('status');
+        //additional information
+        $city = _post('city');
+        $district = _post('district');
+        $state = _post('state');
+        $zip = _post('zip');
         run_hook('edit_customer'); #HOOK
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
@@ -523,6 +537,10 @@ switch ($action) {
             $d->phonenumber = $phonenumber;
             $d->service_type = $service_type;
             $d->coordinates = $coordinates;
+            $d->city = $city;
+            $d->district = $district;
+            $d->state = $state;
+            $d->zip = $zip;
             $d->save();
 
 

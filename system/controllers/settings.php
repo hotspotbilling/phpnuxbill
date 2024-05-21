@@ -732,12 +732,12 @@ switch ($action) {
             $suc = 0;
             $fal = 0;
             $json = json_decode(file_get_contents($_FILES['json']['tmp_name']), true);
-            try{
+            try {
                 ORM::raw_execute("SET FOREIGN_KEY_CHECKS=0;");
             } catch (Throwable $e) {
             } catch (Exception $e) {
             }
-            try{
+            try {
                 ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=0;");
             } catch (Throwable $e) {
             } catch (Exception $e) {
@@ -745,7 +745,7 @@ switch ($action) {
             foreach ($json as $table => $records) {
                 ORM::raw_execute("TRUNCATE $table;");
                 foreach ($records as $rec) {
-                    try{
+                    try {
                         $t = ORM::for_table($table)->create();
                         foreach ($rec as $k => $v) {
                             if ($k != 'id') {
@@ -764,12 +764,12 @@ switch ($action) {
                     }
                 }
             }
-            try{
+            try {
                 ORM::raw_execute("SET FOREIGN_KEY_CHECKS=1;");
             } catch (Throwable $e) {
             } catch (Exception $e) {
             }
-            try{
+            try {
                 ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=1;");
             } catch (Throwable $e) {
             } catch (Exception $e) {
@@ -796,6 +796,40 @@ switch ($action) {
     case 'lang-post':
         file_put_contents($lan_file, json_encode($_POST, JSON_PRETTY_PRINT));
         r2(U . 'settings/language', 's', Lang::T('Translation saved Successfully'));
+        break;
+
+    case 'maintenance':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+            exit;
+        }
+        if (_post('save') == 'save') {
+            $status = isset($_POST['maintenance_mode']) ? 1 : 0; // Checkbox returns 1 if checked, otherwise 0
+            $date = isset($_POST['maintenance_date']) ? $_POST['maintenance_date'] : null;
+
+            $settings = [
+                'maintenance_mode' => $status,
+                'maintenance_date' => $date
+            ];
+
+            foreach ($settings as $key => $value) {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+                if ($d) {
+                    $d->value = $value;
+                    $d->save();
+                } else {
+                    $d = ORM::for_table('tbl_appconfig')->create();
+                    $d->setting = $key;
+                    $d->value = $value;
+                    $d->save();
+                }
+            }
+
+            r2(U . "settings/maintenance", 's', Lang::T('Settings Saved Successfully'));
+        }
+        $ui->assign('_c', $config);
+        $ui->assign('_title', Lang::T('Maintenance Mode Settings'));
+        $ui->display('maintenance-mode.tpl');
         break;
 
     default:
