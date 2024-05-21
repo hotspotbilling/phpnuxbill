@@ -248,7 +248,7 @@ switch ($action) {
             $d = ORM::for_table('tbl_plans')->create();
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price_with_tax; // Set price with or without tax based on configuration
+            $d->price = $price; // Set price with or without tax based on configuration
             $d->type = 'Hotspot';
             $d->typebp = $typebp;
             $d->plan_type = $plan_type;
@@ -362,7 +362,7 @@ switch ($action) {
             }
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price_with_tax; // Set price with or without tax based on configuration
+            $d->price = $price; // Set price with or without tax based on configuration
             $d->typebp = $typebp;
             $d->limit_type = $limit_type;
             $d->time_limit = $time_limit;
@@ -520,7 +520,7 @@ switch ($action) {
             $d->type = 'PPPOE';
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price_with_tax;
+            $d->price = $price;
             $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
@@ -620,7 +620,7 @@ switch ($action) {
             }
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
-            $d->price = $price_with_tax;
+            $d->price = $price;
             $d->plan_type = $plan_type;
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
@@ -698,7 +698,7 @@ switch ($action) {
         run_hook('edit_ppoe'); #HOOK
         if ($msg == '') {
             $d->name_plan = $name;
-            $d->price = $price_with_tax;
+            $d->price = $price;
             $d->enabled = $enabled;
             $d->prepaid = 'yes';
             $d->save();
@@ -731,7 +731,7 @@ switch ($action) {
             $d->type = 'Balance';
             $d->name_plan = $name;
             $d->id_bw = 0;
-            $d->price = $price_with_tax;
+            $d->price = $price;
             $d->validity = 0;
             $d->validity_unit = 'Months';
             $d->routers = '';
