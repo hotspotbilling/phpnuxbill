@@ -14,6 +14,11 @@ if (empty($update_url)) {
 
 if(isset($_REQUEST['update_url']) && !empty($_REQUEST['update_url'])){
     $update_url = $_REQUEST['update_url'];
+    $_SESSION['update_url'] = $update_url;
+}
+
+if(isset($_SESSION['update_url']) && !empty($_SESSION['update_url']) && $_SESSION['update_url'] != $update_url){
+    $update_url = $_SESSION['update_url'];
 }
 
 if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {

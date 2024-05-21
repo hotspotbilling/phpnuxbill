@@ -152,8 +152,9 @@
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                     <a href="./update.php" class="btn btn-success btn-sm btn-block">Install Latest Version</a>
                     <a href="https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip" target="_blank"
-                        class="btn btn-warning btn-sm btn-block">Download Latest Version</a>
+                        class="btn btn-warning btn-sm btn-block text-black">Download Latest Version</a>
                 </div>
+                <center><a href="{$_url}community/rollback" class="btn btn-link btn-sm btn-block">Select Old Version</a></center>
             </div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
