@@ -86,6 +86,39 @@
                 transform: rotate(360deg);
             }
         }
+
+        /*
+         * maintenance top-bar 
+         */
+
+         .notification-top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 40px;
+            line-height: 40px;
+            width: 100%;
+            background: #ef0404;
+            text-align: center;
+            color: #ffff;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 9999;
+        }
+
+        .notification-top-bar p {
+            padding: 0;
+            margin: 0;
+        }
+
+        .notification-top-bar p a {
+            padding: 5px 10px;
+            border-radius: 3px;
+            background: #FFF;
+            color: #1ABC9C;
+            font-weight: bold;
+            text-decoration: none;
+        }
     </style>
     {if isset($xheader)}
     {$xheader}
@@ -395,6 +428,13 @@
                 </ul>
             </section>
         </aside>
+
+        {if $_c['maintenance_mode'] == 1}
+        <div class="notification-top-bar">
+            <p>{Lang::T('The website is currently in maintenance mode, this means that some or all functionality may be unavailable to regular users during this time.')}<small> &nbsp;<a
+                        href="{$_url}settings/maintenance">{Lang::T('Turn Off Maintenance Mode')}</a></small></p>
+        </div>
+        {/if}
 
         <div class="content-wrapper">
             <section class="content-header">
