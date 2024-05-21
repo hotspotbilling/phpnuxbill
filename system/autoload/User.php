@@ -161,8 +161,8 @@ class User
     {
         global $config;
         if ($config['maintenance_mode'] == true) {
-           // displayMaintenanceMessage();
-            r2(U . 'logout', 'd', '');
+           displayMaintenanceMessage();
+           // r2(U . 'logout', 'd', '');
         }
         if (!$id) {
             $id = User::getID();
