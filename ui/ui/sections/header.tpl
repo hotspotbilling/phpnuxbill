@@ -87,7 +87,7 @@
             }
         }
 
-        /*
+       /*
          * maintenance top-bar 
          */
 
@@ -98,12 +98,15 @@
             height: 40px;
             line-height: 40px;
             width: 100%;
-            background: #ef0404;
+            background: #ec2106;
             text-align: center;
-            color: #ffff;
-            font-weight: bold;
+            color: #FFFFFF;
+            font-family: serif;
+            font-weight: bolder;
             font-size: 14px;
             z-index: 9999;
+            box-sizing: border-box;
+            padding: 0 10px;
         }
 
         .notification-top-bar p {
@@ -118,6 +121,24 @@
             color: #1ABC9C;
             font-weight: bold;
             text-decoration: none;
+            display: inline;
+            font-size: inherit;
+        }
+
+        @media (max-width: 600px) {
+            .notification-top-bar {
+                font-size: 12px;
+                height: auto;
+                line-height: normal;
+                padding: 10px;
+            }
+
+            .notification-top-bar p a {
+                padding: 5px 10px;
+                margin: 5px 0;
+                font-size: 10px;
+                display: inline-block;
+            }
         }
     </style>
     {if isset($xheader)}
@@ -431,8 +452,9 @@
 
         {if $_c['maintenance_mode'] == 1}
         <div class="notification-top-bar">
-            <p>{Lang::T('The website is currently in maintenance mode, this means that some or all functionality may be unavailable to regular users during this time.')}<small> &nbsp;<a
-                        href="{$_url}settings/maintenance">{Lang::T('Turn Off Maintenance Mode')}</a></small></p>
+            <p>{Lang::T('The website is currently in maintenance mode, this means that some or all functionality may be
+                unavailable to regular users during this time.')}<small> &nbsp;&nbsp;<a
+                        href="{$_url}settings/maintenance">{Lang::T('Turn Off')}</a></small></p>
         </div>
         {/if}
 
