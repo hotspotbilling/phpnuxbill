@@ -720,9 +720,7 @@ switch ($action) {
                     try {
                         $t = ORM::for_table($table)->create();
                         foreach ($rec as $k => $v) {
-                            if ($k != 'id') {
-                                $t->set($k, $v);
-                            }
+                            $t->set($k, $v);
                         }
                         if ($t->save()) {
                             $suc++;
