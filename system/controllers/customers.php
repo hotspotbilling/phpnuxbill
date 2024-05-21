@@ -96,7 +96,7 @@ switch ($action) {
             ->select('routers')
             ->select('status')
             ->select('method', 'Payment')
-            ->join('tbl_user_recharges', array('tbl_customers.id', '=', 'tbl_user_recharges.customer_id'))
+            ->left_outer_join('tbl_user_recharges', array('tbl_customers.id', '=', 'tbl_user_recharges.customer_id'))
             ->order_by_asc('tbl_customers.id')
             ->find_array();
 

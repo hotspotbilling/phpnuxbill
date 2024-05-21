@@ -187,7 +187,7 @@ class User
                 'admin_id', 'prepaid'
             ])
             ->where('customer_id', $id)
-            ->join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'))
+            ->left_outer_join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'))
             ->find_many();
         return $d;
     }

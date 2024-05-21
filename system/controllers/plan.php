@@ -341,7 +341,7 @@ switch ($action) {
         if ($search != '') {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
                 $query = ORM::for_table('tbl_plans')->where('enabled', '1')
-                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                     ->where_like('tbl_voucher.code', '%' . $search . '%');
                 $d = Paginator::findMany($query, ["search" => $search]);
             } else if ($admin['user_type'] == 'Agent') {
@@ -352,7 +352,7 @@ switch ($action) {
                 }
                 $sales[] = $admin['id'];
                 $query = ORM::for_table('tbl_plans')
-                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                     ->where_in('generated_by', $sales)
                     ->where_like('tbl_voucher.code', '%' . $search . '%');
                 $d = Paginator::findMany($query, ["search" => $search]);
@@ -360,7 +360,7 @@ switch ($action) {
         } else {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
                 $query = ORM::for_table('tbl_plans')->where('enabled', '1')
-                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'));
+                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'));
                 $d = Paginator::findMany($query);
             } else if ($admin['user_type'] == 'Agent') {
                 $sales = [];
@@ -370,7 +370,7 @@ switch ($action) {
                 }
                 $sales[] = $admin['id'];
                 $query = ORM::for_table('tbl_plans')
-                    ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                     ->where_in('generated_by', $sales);
                 $d = Paginator::findMany($query);
             }
@@ -453,43 +453,43 @@ switch ($action) {
 
         if ($from_id > 0 && $planid > 0) {
             $v = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where('tbl_plans.id', $planid)
                 ->where_gt('tbl_voucher.id', $from_id)
                 ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where('tbl_plans.id', $planid)
                 ->where_gt('tbl_voucher.id', $from_id);
         } else if ($from_id == 0 && $planid > 0) {
             $v = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where('tbl_plans.id', $planid)
                 ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where('tbl_plans.id', $planid);
         } else if ($from_id > 0 && $planid == 0) {
             $v = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where_gt('tbl_voucher.id', $from_id)
                 ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where_gt('tbl_voucher.id', $from_id);
         } else {
             $v = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->limit($limit);
             $vc = ORM::for_table('tbl_plans')
-                ->join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0');
         }
         if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {

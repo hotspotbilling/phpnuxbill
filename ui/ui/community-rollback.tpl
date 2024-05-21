@@ -10,22 +10,24 @@
             <div class="box-header">
                 <h3 class="box-title">Master</h3>
             </div>
-            <table class="table table-bordered table-striped">
-                <tbody>
-                    {foreach $masters as $data}
-                        <tr>
-                            <td>{nl2br($data['commit']['message'])}</td>
-                            <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
-                            <td>
-                                <a href="/update.php?update_url=https://github.com/hotspotbilling/phpnuxbill/archive/{$data['sha']}.zip"
-                                class="btn btn-sm btn-primary">
-                                update
-                                </a>
-                            </td>
-                        </tr>
-                    {/foreach}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        {foreach $masters as $data}
+                            <tr>
+                                <td>{nl2br($data['commit']['message'])}</td>
+                                <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
+                                <td>
+                                    <a href="/update.php?update_url=https://github.com/hotspotbilling/phpnuxbill/archive/{$data['sha']}.zip"
+                                        class="btn btn-sm btn-primary">
+                                        update
+                                    </a>
+                                </td>
+                            </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div class="col-sm-6">
@@ -33,22 +35,24 @@
             <div class="box-header">
                 <h3 class="box-title">Development</h3>
             </div>
-            <table class="table table-bordered table-striped">
-                <tbody>
-                    {foreach $devs as $data}
-                        <tr>
-                            <td>{nl2br($data['commit']['message'])}</td>
-                            <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
-                            <td>
-                                <a href="/update.php?update_url=https://github.com/hotspotbilling/phpnuxbill/archive/{$data['sha']}.zip"
-                                class="btn btn-sm btn-primary">
-                                update
-                                </a>
-                            </td>
-                        </tr>
-                    {/foreach}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        {foreach $devs as $data}
+                            <tr>
+                                <td>{nl2br($data['commit']['message'])}</td>
+                                <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
+                                <td>
+                                    <a href="/update.php?update_url=https://github.com/hotspotbilling/phpnuxbill/archive/{$data['sha']}.zip"
+                                        class="btn btn-sm btn-primary">
+                                        update
+                                    </a>
+                                </td>
+                            </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
