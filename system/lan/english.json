@@ -594,5 +594,15 @@
     "Suspended": "Suspended",
     "Query": "Query",
     "Notes": "Notes",
-    "This_account_status": "This account status"
+    "This_account_status": "This account status",
+    "Maintenance_Mode": "Maintenance Mode",
+    "Maintenance_Mode_Settings": "Maintenance Mode Settings",
+    "Status_": "Status:",
+    "End_Date_": "End Date:",
+    "Save": "Save",
+    "Site_is_temporarily_unavailable_": "Site is temporarily unavailable.",
+    "Scheduled_maintenance_is_currently_in_progress__Please_check_back_soon_": "Scheduled maintenance is currently in progress. Please check back soon.",
+    "We_apologize_for_any_inconvenience_": "We apologize for any inconvenience.",
+    "The": "The",
+    "Team": "Team"
 }
