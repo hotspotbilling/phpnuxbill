@@ -8,6 +8,7 @@
 - Add Tax System by @freeispradius
 - Add Export Customer List to CSV with Filter
 - Fix some Radius Variable by @freeispradius
+- Add Rollback update
 
 ## 2024.5.17
 
