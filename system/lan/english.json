@@ -592,5 +592,7 @@
     "Created_Date": "Created Date",
     "Inactive": "Inactive",
     "Suspended": "Suspended",
-    "Query": "Query"
+    "Query": "Query",
+    "Notes": "Notes",
+    "This_account_status": "This account status"
 }

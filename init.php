@@ -110,6 +110,9 @@ if (empty($http_proxy) && !empty($config['http_proxy'])) {
 date_default_timezone_set($config['timezone']);
 
 if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')) {
+    if(!empty($radius_password)){
+        $radius_pass = $radius_password;
+    }
     ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');
     ORM::configure('username', $radius_user, 'radius');
     ORM::configure('password', $radius_pass, 'radius');
