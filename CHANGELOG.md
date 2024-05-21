@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.5.21
+
+- Add Maintenance Mode by @freeispradius
+- Add Tax System by @freeispradius
+- Add Export Customer List to CSV with Filter
+- Fix some Radius Variable by @freeispradius
+
 ## 2024.5.17
 
 - Status Customer: Active/Banned/Disabled
