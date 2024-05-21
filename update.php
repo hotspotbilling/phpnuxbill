@@ -12,6 +12,9 @@ if (empty($update_url)) {
     $update_url = 'https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip';
 }
 
+if(isset($_REQUEST['update_url']) && !empty($_REQUEST['update_url'])){
+    $update_url = $_REQUEST['update_url'];
+}
 
 if (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) {
     r2("./?_route=login&You_are_not_admin", 'e', 'You are not admin');
