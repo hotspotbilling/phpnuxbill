@@ -75,6 +75,16 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Force Logout:')}</label>
+                        <div class="col-md-6">
+                            <label class="switch">
+                                <input type="checkbox" id="maintenance_mode_logout" value="1"
+                                    name="maintenance_mode_logout" {if $_c['maintenance_mode_logout']==1}checked{/if}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('End Date:')}</label>
                         <div class="col-md-6">
                             <input class="form-control" value="{$_c['maintenance_date']}" type="date" id="start_date"
