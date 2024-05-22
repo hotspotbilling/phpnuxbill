@@ -159,6 +159,11 @@ class User
 
     public static function _info($id = 0)
     {
+        global $config;
+        if ($config['maintenance_mode'] == true) {
+           displayMaintenanceMessage();
+           // r2(U . 'logout', 'd', '');
+        }
         if (!$id) {
             $id = User::getID();
         }
