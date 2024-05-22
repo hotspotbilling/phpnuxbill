@@ -775,10 +775,12 @@ switch ($action) {
         }
         if (_post('save') == 'save') {
             $status = isset($_POST['maintenance_mode']) ? 1 : 0; // Checkbox returns 1 if checked, otherwise 0
+            $force_logout = isset($_POST['maintenance_mode_logout']) ? 1 : 0; // Checkbox returns 1 if checked, otherwise 0
             $date = isset($_POST['maintenance_date']) ? $_POST['maintenance_date'] : null;
 
             $settings = [
                 'maintenance_mode' => $status,
+                'maintenance_mode_logout' => $force_logout,
                 'maintenance_date' => $date
             ];
 
