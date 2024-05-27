@@ -10,38 +10,20 @@
 
 use PEAR2\Net\RouterOS;
 
-class MikrotikHotspot {
+class MikrotikHotspot
+{
 
-    /**
-     * Establishes a connection between a MikroTik router and a customer.
-     *
-     * This function takes two parameters: $routers and $customer.
-     *
-     * @param array $routers An array containing information about the MikroTik routers.
-     *                       This can include IP addresses or connection details.
-     * @param mixed $customer An object or array representing a specific customer.
-     *                        This can contain relevant information about the customer,
-     *                        such as their username or account details.
-     * @return void
-     */
-    function connect_customer($routers, $customer){
-
+    function connect_customer($router, $customer, $plan)
+    {
+        $mikrotik = $this->info($router);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        Mikrotik::removeHotspotUser($client, $customer['username']);
+        Mikrotik::removeHotspotActiveUser($client, $customer['username']);
+        Mikrotik::addHotspotUser($client, $plan, $customer);
     }
 
-    /**
-     * Disconnects a customer from a MikroTik router.
-     *
-     * This function takes two parameters: $routers and $customer.
-     *
-     * @param array $routers An array containing information about the MikroTik routers.
-     *                       This can include IP addresses or connection details.
-     * @param mixed $customer An object or array representing a specific customer.
-     *                        This can contain relevant information about the customer,
-     *                        such as their username or account details.
-     * @return void
-     */
-    function disconnect_customer($routers, $customer){
-
+    function disconnect_customer($routers, $customer)
+    {
     }
 
     function info($name)
@@ -332,211 +314,6 @@ class MikrotikHotspot {
         $client->sendSync($removeRequest);
     }
 
-    function removePpoeUser($client, $username)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request('/ppp/secret/print');
-        //$printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-        $removeRequest = new RouterOS\Request('/ppp/secret/remove');
-        $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
-    }
-
-    function addPpoeUser($client, $plan, $customer)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $addRequest = new RouterOS\Request('/ppp/secret/add');
-        if (!empty($customer['pppoe_password'])) {
-            $pass = $customer['pppoe_password'];
-        } else {
-            $pass = $customer['password'];
-        }
-        $client->sendSync(
-            $addRequest
-                ->setArgument('name', $customer['username'])
-                ->setArgument('service', 'pppoe')
-                ->setArgument('profile', $plan['name_plan'])
-                ->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'])
-                ->setArgument('password', $pass)
-        );
-    }
-
-    function setPpoeUser($client, $user, $pass)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request('/ppp/secret/print');
-        $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $user));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-        $setRequest = new RouterOS\Request('/ppp/secret/set');
-        $setRequest->setArgument('numbers', $id);
-        $setRequest->setArgument('password', $pass);
-        $client->sendSync($setRequest);
-    }
-
-    function setPpoeUserPlan($client, $user, $plan)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request('/ppp/secret/print');
-        $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $user));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-        $setRequest = new RouterOS\Request('/ppp/secret/set');
-        $setRequest->setArgument('numbers', $id);
-        $setRequest->setArgument('profile', $plan);
-        $client->sendSync($setRequest);
-    }
-
-    function removePpoeActive($client, $username)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $onlineRequest = new RouterOS\Request('/ppp/active/print');
-        $onlineRequest->setArgument('.proplist', '.id');
-        $onlineRequest->setQuery(RouterOS\Query::where('name', $username));
-        $id = $client->sendSync($onlineRequest)->getProperty('.id');
-
-        $removeRequest = new RouterOS\Request('/ppp/active/remove');
-        $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
-    }
-
-    function removePool($client, $name)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip pool print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $poolID = $client->sendSync($printRequest)->getProperty('.id');
-
-        $removeRequest = new RouterOS\Request('/ip/pool/remove');
-        $client->sendSync(
-            $removeRequest
-                ->setArgument('numbers', $poolID)
-        );
-    }
-
-    function addPool($client, $name, $ip_address)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $addRequest = new RouterOS\Request('/ip/pool/add');
-        $client->sendSync(
-            $addRequest
-                ->setArgument('name', $name)
-                ->setArgument('ranges', $ip_address)
-        );
-    }
-
-    function setPool($client, $name, $ip_address)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip pool print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $poolID = $client->sendSync($printRequest)->getProperty('.id');
-
-        if (empty($poolID)) {
-            self::addPool($client, $name, $ip_address);
-        } else {
-            $setRequest = new RouterOS\Request('/ip/pool/set');
-            $client->sendSync(
-                $setRequest
-                    ->setArgument('numbers', $poolID)
-                    ->setArgument('ranges', $ip_address)
-            );
-        }
-    }
-
-
-    function addPpoePlan($client, $name, $pool, $rate)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $addRequest = new RouterOS\Request('/ppp/profile/add');
-        $client->sendSync(
-            $addRequest
-                ->setArgument('name', $name)
-                ->setArgument('local-address', $pool)
-                ->setArgument('remote-address', $pool)
-                ->setArgument('rate-limit', $rate)
-        );
-    }
-
-    function setPpoePlan($client, $name, $pool, $rate)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ppp profile print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $profileID = $client->sendSync($printRequest)->getProperty('.id');
-        if (empty($profileID)) {
-            self::addPpoePlan($client, $name, $pool, $rate);
-        } else {
-            $setRequest = new RouterOS\Request('/ppp/profile/set');
-            $client->sendSync(
-                $setRequest
-                    ->setArgument('numbers', $profileID)
-                    ->setArgument('local-address', $pool)
-                    ->setArgument('remote-address', $pool)
-                    ->setArgument('rate-limit', $rate)
-            );
-        }
-    }
-
-    function removePpoePlan($client, $name)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ppp profile print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $profileID = $client->sendSync($printRequest)->getProperty('.id');
-
-        $removeRequest = new RouterOS\Request('/ppp/profile/remove');
-        $client->sendSync(
-            $removeRequest
-                ->setArgument('numbers', $profileID)
-        );
-    }
-
     function sendSMS($client, $to, $message)
     {
         global $_app_stage;
@@ -550,7 +327,8 @@ class MikrotikHotspot {
         $client->sendSync($smsRequest);
     }
 
-    function getIpHotspotUser($client, $username){
+    function getIpHotspotUser($client, $username)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return null;
