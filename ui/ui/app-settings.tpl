@@ -89,9 +89,12 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Recharge Using')}</label>
                         <div class="col-md-6">
-                            <input type="text" name="payment_usings" class="form-control" value="{$_c['payment_usings']}" placeholder="{Lang::T('Cash')}, {Lang::T('Bank Transfer')}">
+                            <input type="text" name="payment_usings" class="form-control"
+                                value="{$_c['payment_usings']}"
+                                placeholder="{Lang::T('Cash')}, {Lang::T('Bank Transfer')}">
                         </div>
-                        <p class="help-block col-md-4">This used for admin to select payment in recharge, using comma for every new options</p>
+                        <p class="help-block col-md-4">This used for admin to select payment in recharge, using comma
+                            for every new options</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">APP URL</label>
@@ -606,17 +609,18 @@
                         <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>
                         <div class="col-md-6">
                             <select name="extend_expiry" id="extend_expiry" class="form-control">
+                                <option value="yes" {if $_c['extend_expiry']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}</option>
                                 <option value="no" {if $_c['extend_expiry']=='no' }selected="selected" {/if}>
-                                    {Lang::T('No')}
-                                <option value="yes" {if $_c['extend_expiry']=='yes' }selected="selected"
-                                    {/if}> {Lang::T('Yes')}
+                                    {Lang::T('No')}</option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('If user buy same internet plan, expiry date will extend')}</p>
+                        <p class="help-block col-md-4">
+                            {Lang::T('If user buy same internet plan, expiry date will extend')}</p>
                     </div>
                 </div>
 
-                 <div class="panel-heading">
+                <div class="panel-heading">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit">
                             <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>

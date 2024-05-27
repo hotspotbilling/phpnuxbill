@@ -197,7 +197,7 @@ class Package
                 if ($plan_id != $b['plan_id']) {
                     $isChangePlan = true;
                 }
-                if ($config['extend_expiry'] === 'yes') {
+                if ($config['extend_expiry'] != 'no') {
                     if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                         // if it same internet plan, expired will extend
                         if ($p['validity_unit'] == 'Months') {
@@ -399,7 +399,7 @@ class Package
                 if ($plan_id != $b['plan_id']) {
                     $isChangePlan = true;
                 }
-                if ($config['extend_expiry'] === 'yes') {
+                if ($config['extend_expiry'] != 'no') {
                     if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                         // if it same internet plan, expired will extend
                         if ($p['validity_unit'] == 'Months') {
