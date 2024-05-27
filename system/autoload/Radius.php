@@ -172,7 +172,8 @@ class Radius
             if ($p) {
                 // if exists
                 Radius::delAtribute(Radius::getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
-                Radius::delAtribute(Radius::getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+                //Radius::delAtribute(Radius::getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+				Radius::delAtribute(Radius::getTableCustomer(), 'Max-Data', 'username', $customer['username']);
                 $p->groupname = "plan_" . $plan['id'];
                 $p->save();
             } else {
@@ -195,9 +196,9 @@ class Radius
                         $datalimit = $plan['data_limit'] . "000000000";
                     else
                         $datalimit = $plan['data_limit'] . "000000";
-                    Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                    //Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
                     // Mikrotik Spesific
-                    //Radius::upsertCustomer($customer['username'], 'Max-Data', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-Data', $datalimit);
                     //Radius::upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
                 } else if ($plan['limit_type'] == "Both_Limit") {
                     if ($plan['time_unit'] == 'Hrs')
@@ -208,10 +209,10 @@ class Radius
                         $datalimit = $plan['data_limit'] . "000000000";
                     else
                         $datalimit = $plan['data_limit'] . "000000";
-                    Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                    //Radius::upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
                     Radius::upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
                     // Mikrotik Spesific
-                    //Radius::upsertCustomer($customer['username'], 'Max-Data', $datalimit);
+                    Radius::upsertCustomer($customer['username'], 'Max-Data', $datalimit);
                     //Radius::upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
 
 
@@ -219,9 +220,9 @@ class Radius
 
                 }
             } else {
-                Radius::delAtribute(Radius::getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+                //Radius::delAtribute(Radius::getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
                 Radius::delAtribute(Radius::getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
-                //Radius::delAtribute(Radius::getTableCustomer(), 'Max-Data', 'username', $customer['username']);
+                Radius::delAtribute(Radius::getTableCustomer(), 'Max-Data', 'username', $customer['username']);
             }
 
             Radius::disconnectCustomer($customer['username']);
