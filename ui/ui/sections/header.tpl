@@ -88,7 +88,7 @@
         }
 
        /*
-         * maintenance top-bar 
+         * maintenance top-bar
          */
 
          .notification-top-bar {
@@ -473,7 +473,7 @@
                         icon: '{if $notify_t == "s"}success{else}error{/if}',
                         title: '{$notify}',
                         toast: true,
-                        position: 'top-end',
+                        position: 'bottom-end',
                         showConfirmButton: false,
                         timer: 5000,
                         timerProgressBar: true,

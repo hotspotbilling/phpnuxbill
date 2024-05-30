@@ -623,5 +623,12 @@
     "Tax_Rates_in_percentage": "Tax Rates in percentage",
     "Custom_Tax_Rate": "Custom Tax Rate",
     "Enter_Custom_Tax_Rate": "Enter Custom Tax Rate",
-    "Enter_the_custom_tax_rate__e_g___3_75_for_3_75__": "Enter the custom tax rate (e.g., 3.75 for 3.75%)"
+    "Enter_the_custom_tax_rate__e_g___3_75_for_3_75__": "Enter the custom tax rate (e.g., 3.75 for 3.75%)",
+    "Additional_Information": "Additional Information",
+    "City_of_Resident": "City of Resident",
+    "District": "District",
+    "State": "State",
+    "State_of_Resident": "State of Resident",
+    "Zip": "Zip",
+    "Zip_Code": "Zip Code"
 }
