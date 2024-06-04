@@ -203,7 +203,6 @@
                         Swal.fire({
                             icon: '{if $notify_t == "s"}success{else}warning{/if}',
                             title: '{$notify}',
-                            toast: true,
                             position: 'top-end',
                             showConfirmButton: false,
                             timer: 5000,

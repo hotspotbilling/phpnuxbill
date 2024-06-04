@@ -156,6 +156,11 @@ try {
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
     $ui->display('router-error.tpl');
+    Message::sendTelegram(
+        "Sistem Error.\n" .
+            $e->getMessage() . "\n" .
+            $e->getTraceAsString()
+    );
     die();
 } catch (Exception $e) {
     if (!Admin::getID()) {
@@ -164,5 +169,10 @@ try {
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
     $ui->display('router-error.tpl');
+    Message::sendTelegram(
+        "Sistem Error.\n" .
+            $e->getMessage() . "\n" .
+            $e->getTraceAsString()
+    );
     die();
 }
