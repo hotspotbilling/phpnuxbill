@@ -50,6 +50,7 @@ if (!file_exists($root_path .  File::pathFixer('system/orm.php'))) {
     die($root_path . "orm.php file not found");
 }
 
+$DEVICE_PATH = $root_path . File::pathFixer('system/devices');
 $UPLOAD_PATH = $root_path . File::pathFixer('system/uploads');
 $CACHE_PATH = $root_path . File::pathFixer('system/cache');
 $PAGES_PATH = $root_path . File::pathFixer('pages');
@@ -332,7 +333,7 @@ function displayMaintenanceMessage(): void
     $date = $config['maintenance_date'];
     if ($date){
         $ui->assign('date', $date);
-    }  
+    }
     http_response_code(503);
     $ui->assign('companyName', $config['CompanyName']);
     $ui->display('maintenance.tpl');

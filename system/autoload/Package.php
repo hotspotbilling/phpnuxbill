@@ -20,7 +20,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel, $note = '')
     {
-        global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx;
+        global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx, $DEVICE_PATH;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
@@ -162,8 +162,6 @@ class Package
 
         run_hook("recharge_user");
 
-
-        $mikrotik = Mikrotik::info($router_name);
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
         } else if ($p['validity_unit'] == 'Period') {
@@ -192,412 +190,210 @@ class Package
             $time = $datetime[1];
         }
         $isChangePlan = false;
-        if ($p['type'] == 'Hotspot') {
-            if ($b) {
-                if ($plan_id != $b['plan_id']) {
-                    $isChangePlan = true;
-                }
-                if ($config['extend_expiry'] != 'no') {
-                    if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
-                        // if it same internet plan, expired will extend
-                        if ($p['validity_unit'] == 'Months') {
-                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                            $time = $b['time'];
-                        } else if ($p['validity_unit'] == 'Period') {
-                            $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                            $time = date("23:59:00");
-                        } else if ($p['validity_unit'] == 'Days') {
-                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
-                            $time = $b['time'];
-                        } else if ($p['validity_unit'] == 'Hrs') {
-                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
-                            $date_exp = $datetime[0];
-                            $time = $datetime[1];
-                        } else if ($p['validity_unit'] == 'Mins') {
-                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
-                            $date_exp = $datetime[0];
-                            $time = $datetime[1];
-                        }
-                    }
-                }
-                if ($isChangePlan || $b['status'] == 'off') {
-                    if ($p['is_radius']) {
-                        Radius::customerAddPlan($c, $p, "$date_exp $time");
-                    } else {
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removeHotspotUser($client, $c['username']);
-                        Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                        Mikrotik::addHotspotUser($client, $p, $c);
-                    }
-                }
 
-                $b->customer_id = $id_customer;
-                $b->username = $c['username'];
-                $b->plan_id = $plan_id;
-                $b->namebp = $p['name_plan'];
-                $b->recharged_on = $date_only;
-                $b->recharged_time = $time_only;
-                $b->expiration = $date_exp;
-                $b->time = $time;
-                $b->status = "on";
-                $b->method = "$gateway - $channel";
-                $b->routers = $router_name;
-                $b->type = "Hotspot";
-                if ($admin) {
-                    $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $b->admin_id = '0';
-                }
-                $b->save();
-
-                // insert table transactions
-                $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = $inv = "INV-" . Package::_raid();
-                $t->username = $c['username'];
-                $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period') {
-                    // Postpaid price from field
-                    $add_inv = User::getAttribute("Invoice", $id_customer);
-                    if (empty($add_inv) or $add_inv == 0) {
-                        $t->price = $p['price'] + $add_cost;
-                    } else {
-                        $t->price = $add_inv + $add_cost;
-                    }
-                } else {
-                    $t->price = $p['price'] + $add_cost;
-                }
-                $t->recharged_on = $date_only;
-                $t->recharged_time = $time_only;
-                $t->expiration = $date_exp;
-                $t->time = $time;
-                $t->method = "$gateway - $channel";
-                $t->routers = $router_name;
-                $t->note = $note;
-                $t->type = "Hotspot";
-                if ($admin) {
-                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $t->admin_id = '0';
-                }
-                $t->save();
-
-                if ($p['validity_unit'] == 'Period') {
-                    // insert price to fields for invoice next month
-                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                    if (!$fl) {
-                        $fl = ORM::for_table('tbl_customers_fields')->create();
-                        $fl->customer_id = $c['id'];
-                        $fl->field_name = 'Invoice';
-                        $fl->field_value = $p['price'];
-                        $fl->save();
-                    } else {
-                        $fl->customer_id = $c['id'];
-                        $fl->field_value = $p['price'];
-                        $fl->save();
-                    }
-                }
-
-
-                Message::sendTelegram("#u$c[username] $c[fullname] #recharge #Hotspot \n" . $p['name_plan'] .
-                    "\nRouter: " . $router_name .
-                    "\nGateway: " . $gateway .
-                    "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
-                    "\nNote:\n" . $note);
-            } else {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, "$date_exp $time");
-                } else {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client, $c['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                    Mikrotik::addHotspotUser($client, $p, $c);
-                }
-
-                $d = ORM::for_table('tbl_user_recharges')->create();
-                $d->customer_id = $id_customer;
-                $d->username = $c['username'];
-                $d->plan_id = $plan_id;
-                $d->namebp = $p['name_plan'];
-                $d->recharged_on = $date_only;
-                $d->recharged_time = $time_only;
-                $d->expiration = $date_exp;
-                $d->time = $time;
-                $d->status = "on";
-                $d->method = "$gateway - $channel";
-                $d->routers = $router_name;
-                $d->type = "Hotspot";
-                if ($admin) {
-                    $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $d->admin_id = '0';
-                }
-                $d->save();
-
-                // insert table transactions
-                $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = $inv = "INV-" . Package::_raid();
-                $t->username = $c['username'];
-                $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period') {
-                    // Postpaid price always zero for first time
-                    $t->price = 0 + $add_cost;
-                } else {
-                    $t->price = $p['price'] + $add_cost;
-                }
-                $t->recharged_on = $date_only;
-                $t->recharged_time = $time_only;
-                $t->expiration = $date_exp;
-                $t->time = $time;
-                $t->method = "$gateway - $channel";
-                $t->routers = $router_name;
-                $t->note = $note;
-                $t->type = "Hotspot";
-                if ($admin) {
-                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $t->admin_id = '0';
-                }
-                $t->save();
-
-                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // insert price to fields for invoice next month
-                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                    if (!$fl) {
-                        $fl = ORM::for_table('tbl_customers_fields')->create();
-                        $fl->customer_id = $c['id'];
-                        $fl->field_name = 'Invoice';
-                        // Calculating Price
-                        $sd = new DateTime("$date_only");
-                        $ed = new DateTime("$date_exp");
-                        $td = $ed->diff($sd);
-                        $fd = $td->format("%a");
-                        $gi = ($p['price'] / (30 * $p['validity'])) * $fd;
-                        if ($gi > $p['price']) {
-                            $fl->field_value = $p['price'];
-                        } else {
-                            $fl->field_value = $gi;
-                        }
-                        $fl->save();
-                    } else {
-                        $fl->customer_id = $c['id'];
-                        $fl->field_value = $p['price'];
-                        $fl->save();
-                    }
-                }
-
-                Message::sendTelegram("#u$c[username] $c[fullname] #buy #Hotspot \n" . $p['name_plan'] .
-                    "\nRouter: " . $router_name .
-                    "\nGateway: " . $gateway .
-                    "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
-                    "\nNote:\n" . $note);
+        if ($b) {
+            // plan exists
+            if ($plan_id != $b['plan_id']) {
+                $isChangePlan = true;
             }
+            if ($config['extend_expiry'] != 'no') {
+                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
+                    // if it same internet plan, expired will extend
+                    if ($p['validity_unit'] == 'Months') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $time = $b['time'];
+                    } else if ($p['validity_unit'] == 'Period') {
+                        $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
+                        $time = date("23:59:00");
+                    } else if ($p['validity_unit'] == 'Days') {
+                        $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
+                        $time = $b['time'];
+                    } else if ($p['validity_unit'] == 'Hrs') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    } else if ($p['validity_unit'] == 'Mins') {
+                        $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
+                        $date_exp = $datetime[0];
+                        $time = $datetime[1];
+                    }
+                }
+            }
+
+            if ($isChangePlan || $b['status'] == 'off') {
+                $dvc = $DEVICE_PATH . DIRECTORY_SEPARATOR . $p['device'] . '.php';
+                if (file_exists($dvc)) {
+                    include $dvc;
+                    new $p['device']->connect_customer($c, $p);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
+            }
+
+            $b->customer_id = $id_customer;
+            $b->username = $c['username'];
+            $b->plan_id = $plan_id;
+            $b->namebp = $p['name_plan'];
+            $b->recharged_on = $date_only;
+            $b->recharged_time = $time_only;
+            $b->expiration = $date_exp;
+            $b->time = $time;
+            $b->status = "on";
+            $b->method = "$gateway - $channel";
+            $b->routers = $router_name;
+            $b->type = $p['type'];
+            if ($admin) {
+                $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
+                $b->admin_id = '0';
+            }
+            $b->save();
+
+            // insert table transactions
+            $t = ORM::for_table('tbl_transactions')->create();
+            $t->invoice = $inv = "INV-" . Package::_raid();
+            $t->username = $c['username'];
+            $t->plan_name = $p['name_plan'];
+            if ($p['validity_unit'] == 'Period') {
+                // Postpaid price from field
+                $add_inv = User::getAttribute("Invoice", $id_customer);
+                if (empty($add_inv) or $add_inv == 0) {
+                    $t->price = $p['price'] + $add_cost;
+                } else {
+                    $t->price = $add_inv + $add_cost;
+                }
+            } else {
+                $t->price = $p['price'] + $add_cost;
+            }
+            $t->recharged_on = $date_only;
+            $t->recharged_time = $time_only;
+            $t->expiration = $date_exp;
+            $t->time = $time;
+            $t->method = "$gateway - $channel";
+            $t->routers = $router_name;
+            $t->note = $note;
+            $t->type = $p['type'];
+            if ($admin) {
+                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
+                $t->admin_id = '0';
+            }
+            $t->save();
+
+            if ($p['validity_unit'] == 'Period') {
+                // insert price to fields for invoice next month
+                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                if (!$fl) {
+                    $fl = ORM::for_table('tbl_customers_fields')->create();
+                    $fl->customer_id = $c['id'];
+                    $fl->field_name = 'Invoice';
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                } else {
+                    $fl->customer_id = $c['id'];
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                }
+            }
+
+            Message::sendTelegram("#u$c[username] $c[fullname] #recharge #$p[type] \n" . $p['name_plan'] .
+                "\nRouter: " . $router_name .
+                "\nGateway: " . $gateway .
+                "\nChannel: " . $channel .
+                "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
+                "\nNote:\n" . $note);
         } else {
-
-            if ($b) {
-                if ($plan_id != $b['plan_id']) {
-                    $isChangePlan = true;
-                }
-                if ($config['extend_expiry'] != 'no') {
-                    if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
-                        // if it same internet plan, expired will extend
-                        if ($p['validity_unit'] == 'Months') {
-                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                            $time = $b['time'];
-                        } else if ($p['validity_unit'] == 'Period') {
-                            $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
-                            $time = date("23:59:00");
-                        } else if ($p['validity_unit'] == 'Days') {
-                            $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
-                            $time = $b['time'];
-                        } else if ($p['validity_unit'] == 'Hrs') {
-                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
-                            $date_exp = $datetime[0];
-                            $time = $datetime[1];
-                        } else if ($p['validity_unit'] == 'Mins') {
-                            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
-                            $date_exp = $datetime[0];
-                            $time = $datetime[1];
-                        }
-                    }
-                }
-
-                if ($isChangePlan || $b['status'] == 'off') {
-                    if ($p['is_radius']) {
-                        Radius::customerAddPlan($c, $p, "$date_exp $time");
-                    } else {
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        Mikrotik::removePpoeUser($client, $c['username']);
-                        Mikrotik::removePpoeActive($client, $c['username']);
-                        Mikrotik::addPpoeUser($client, $p, $c);
-                    }
-                }
-
-                $b->customer_id = $id_customer;
-                $b->username = $c['username'];
-                $b->plan_id = $plan_id;
-                $b->namebp = $p['name_plan'];
-                $b->recharged_on = $date_only;
-                $b->recharged_time = $time_only;
-                $b->expiration = $date_exp;
-                $b->time = $time;
-                $b->status = "on";
-                $b->method = "$gateway - $channel";
-                $b->routers = $router_name;
-                $b->type = "PPPOE";
-                if ($admin) {
-                    $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $b->admin_id = '0';
-                }
-                $b->save();
-
-                // insert table transactions
-                $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = $inv = "INV-" . Package::_raid();
-                $t->username = $c['username'];
-                $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period') {
-                    // Postpaid price from field
-                    $add_inv = User::getAttribute("Invoice", $id_customer);
-                    if (empty($add_inv) or $add_inv == 0) {
-                        $t->price = $p['price'] + $add_cost;
-                    } else {
-                        $t->price = $add_inv + $add_cost;
-                    }
-                } else {
-                    $t->price = $p['price'] + $add_cost;
-                }
-                $t->recharged_on = $date_only;
-                $t->recharged_time = $time_only;
-                $t->expiration = $date_exp;
-                $t->time = $time;
-                $t->method = "$gateway - $channel";
-                $t->routers = $router_name;
-                $t->note = $note;
-                $t->type = "PPPOE";
-                if ($admin) {
-                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $t->admin_id = '0';
-                }
-                $t->save();
-
-                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // insert price to fields for invoice next month
-                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                    if (!$fl) {
-                        $fl = ORM::for_table('tbl_customers_fields')->create();
-                        $fl->customer_id = $c['id'];
-                        $fl->field_name = 'Invoice';
-                        $fl->field_value = $p['price'];
-                        $fl->save();
-                    } else {
-                        $fl->customer_id = $c['id'];
-                        $fl->field_value = $p['price'];
-                        $fl->save();
-                    }
-                }
-
-                Message::sendTelegram("#u$c[username] $c[fullname] #recharge #PPPOE \n" . $p['name_plan'] .
-                    "\nRouter: " . $router_name .
-                    "\nGateway: " . $gateway .
-                    "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
-                    "\nNote:\n" . $note);
+            // plan not exists
+            $dvc = $DEVICE_PATH . DIRECTORY_SEPARATOR . $p['device'] . '.php';
+            if (file_exists($dvc)) {
+                include $dvc;
+                new $p['device']->connect_customer($c, $p);
             } else {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, "$date_exp $time");
-                } else {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoeUser($client, $c['username']);
-                    Mikrotik::removePpoeActive($client, $c['username']);
-                    Mikrotik::addPpoeUser($client, $p, $c);
-                }
-
-                $d = ORM::for_table('tbl_user_recharges')->create();
-                $d->customer_id = $id_customer;
-                $d->username = $c['username'];
-                $d->plan_id = $plan_id;
-                $d->namebp = $p['name_plan'];
-                $d->recharged_on = $date_only;
-                $d->recharged_time = $time_only;
-                $d->expiration = $date_exp;
-                $d->time = $time;
-                $d->status = "on";
-                $d->method = "$gateway - $channel";
-                $d->routers = $router_name;
-                $d->type = "PPPOE";
-                if ($admin) {
-                    $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $d->admin_id = '0';
-                }
-                $d->save();
-
-                // insert table transactions
-                $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = $inv = "INV-" . Package::_raid();
-                $t->username = $c['username'];
-                $t->plan_name = $p['name_plan'];
-                if ($p['validity_unit'] == 'Period') {
-                    // Postpaid price always zero for first time
-                    $note = '';
-                    $bills = [];
-                    $t->price = 0;
-                } else {
-                    $t->price = $p['price'] + $add_cost;
-                }
-                $t->recharged_on = $date_only;
-                $t->recharged_time = $time_only;
-                $t->expiration = $date_exp;
-                $t->time = $time;
-                $t->method = "$gateway - $channel";
-                $t->note = $note;
-                $t->routers = $router_name;
-                if ($admin) {
-                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $t->admin_id = '0';
-                }
-                $t->type = "PPPOE";
-                $t->save();
-
-                if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
-                    // insert price to fields for invoice next month
-                    $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
-                    if (!$fl) {
-                        $fl = ORM::for_table('tbl_customers_fields')->create();
-                        $fl->customer_id = $c['id'];
-                        $fl->field_name = 'Invoice';
-                        // Calculating Price
-                        $sd = new DateTime("$date_only");
-                        $ed = new DateTime("$date_exp");
-                        $td = $ed->diff($sd);
-                        $fd = $td->format("%a");
-                        $gi = ($p['price'] / (30 * $p['validity'])) * $fd;
-                        if ($gi > $p['price']) {
-                            $fl->field_value = $p['price'];
-                        } else {
-                            $fl->field_value = $gi;
-                        }
-                        $fl->save();
-                    } else {
-                        $fl->customer_id = $c['id'];
-                        $fl->field_value = $p['price'];
-                        $fl->save();
-                    }
-                }
-
-                Message::sendTelegram("#u$c[username] $c[fullname] #buy #PPPOE \n" . $p['name_plan'] .
-                    "\nRouter: " . $router_name .
-                    "\nGateway: " . $gateway .
-                    "\nChannel: " . $channel .
-                    "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
-                    "\nNote:\n" . $note);
+                new Exception(Lang::T("Devices Not Found"));
             }
+
+            $d = ORM::for_table('tbl_user_recharges')->create();
+            $d->customer_id = $id_customer;
+            $d->username = $c['username'];
+            $d->plan_id = $plan_id;
+            $d->namebp = $p['name_plan'];
+            $d->recharged_on = $date_only;
+            $d->recharged_time = $time_only;
+            $d->expiration = $date_exp;
+            $d->time = $time;
+            $d->status = "on";
+            $d->method = "$gateway - $channel";
+            $d->routers = $router_name;
+            $d->type = $p['type'];
+            if ($admin) {
+                $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
+                $d->admin_id = '0';
+            }
+            $d->save();
+
+            // insert table transactions
+            $t = ORM::for_table('tbl_transactions')->create();
+            $t->invoice = $inv = "INV-" . Package::_raid();
+            $t->username = $c['username'];
+            $t->plan_name = $p['name_plan'];
+            if ($p['validity_unit'] == 'Period') {
+                // Postpaid price always zero for first time
+                $note = '';
+                $bills = [];
+                $t->price = 0;
+            } else {
+                $t->price = $p['price'] + $add_cost;
+            }
+            $t->recharged_on = $date_only;
+            $t->recharged_time = $time_only;
+            $t->expiration = $date_exp;
+            $t->time = $time;
+            $t->method = "$gateway - $channel";
+            $t->note = $note;
+            $t->routers = $router_name;
+            if ($admin) {
+                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
+                $t->admin_id = '0';
+            }
+            $t->type = $p['type'];
+            $t->save();
+
+            if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
+                // insert price to fields for invoice next month
+                $fl = ORM::for_table('tbl_customers_fields')->where('field_name', 'Invoice')->where('customer_id', $c['id'])->find_one();
+                if (!$fl) {
+                    $fl = ORM::for_table('tbl_customers_fields')->create();
+                    $fl->customer_id = $c['id'];
+                    $fl->field_name = 'Invoice';
+                    // Calculating Price
+                    $sd = new DateTime("$date_only");
+                    $ed = new DateTime("$date_exp");
+                    $td = $ed->diff($sd);
+                    $fd = $td->format("%a");
+                    $gi = ($p['price'] / (30 * $p['validity'])) * $fd;
+                    if ($gi > $p['price']) {
+                        $fl->field_value = $p['price'];
+                    } else {
+                        $fl->field_value = $gi;
+                    }
+                    $fl->save();
+                } else {
+                    $fl->customer_id = $c['id'];
+                    $fl->field_value = $p['price'];
+                    $fl->save();
+                }
+            }
+
+            Message::sendTelegram("#u$c[username] $c[fullname] #buy #$p[type] \n" . $p['name_plan'] .
+                "\nRouter: " . $router_name .
+                "\nGateway: " . $gateway .
+                "\nChannel: " . $channel .
+                "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
+                "\nNote:\n" . $note);
         }
+
         if (is_array($bills) && count($bills) > 0) {
             User::billsPaid($bills, $id_customer);
         }
@@ -611,81 +407,91 @@ class Package
 
     public static function changeTo($username, $plan_id, $from_id)
     {
+        global $DEVICE_PATH;
         $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
         $b = ORM::for_table('tbl_user_recharges')->find_one($from_id);
-        if ($p['routers'] == $b['routers'] && $b['routers'] != 'radius') {
-            $mikrotik = Mikrotik::info($p['routers']);
+
+        $dvc = $DEVICE_PATH . DIRECTORY_SEPARATOR . $p['device'] . '.php';
+        if (file_exists($dvc)) {
+            include $dvc;
+            new $p['device']->change_customer($b, $c, $p);
         } else {
-            $mikrotik = Mikrotik::info($b['routers']);
+            new Exception(Lang::T("Devices Not Found"));
         }
-        // delete first
-        if ($p['type'] == 'Hotspot') {
-            if ($b) {
-                if (!$p['is_radius']) {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client, $c['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                }
-            } else {
-                if (!$p['is_radius']) {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client, $c['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                }
-            }
-        } else {
-            if ($b) {
-                if (!$p['is_radius']) {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoeUser($client, $c['username']);
-                    Mikrotik::removePpoeActive($client, $c['username']);
-                }
-            } else {
-                if (!$p['is_radius']) {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoeUser($client, $c['username']);
-                    Mikrotik::removePpoeActive($client, $c['username']);
-                }
-            }
-        }
-        // call the next mikrotik
-        if ($p['routers'] != $b['routers'] && $p['routers'] != 'radius') {
-            $mikrotik = Mikrotik::info($p['routers']);
-        }
-        if ($p['type'] == 'Hotspot') {
-            if ($b) {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
-                } else {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::addHotspotUser($client, $p, $c);
-                }
-            } else {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
-                } else {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::addHotspotUser($client, $p, $c);
-                }
-            }
-        } else {
-            if ($b) {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
-                } else {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::addPpoeUser($client, $p, $c);
-                }
-            } else {
-                if ($p['is_radius']) {
-                    Radius::customerAddPlan($c, $p);
-                } else {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::addPpoeUser($client, $p, $c);
-                }
-            }
-        }
+
+        // if ($p['routers'] == $b['routers'] && $b['routers'] != 'radius') {
+        //     $mikrotik = Mikrotik::info($p['routers']);
+        // } else {
+        //     $mikrotik = Mikrotik::info($b['routers']);
+        // }
+        // // delete first
+        // if ($p['type'] == 'Hotspot') {
+        //     if ($b) {
+        //         if (!$p['is_radius']) {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::removeHotspotUser($client, $c['username']);
+        //             Mikrotik::removeHotspotActiveUser($client, $c['username']);
+        //         }
+        //     } else {
+        //         if (!$p['is_radius']) {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::removeHotspotUser($client, $c['username']);
+        //             Mikrotik::removeHotspotActiveUser($client, $c['username']);
+        //         }
+        //     }
+        // } else {
+        //     if ($b) {
+        //         if (!$p['is_radius']) {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::removePpoeUser($client, $c['username']);
+        //             Mikrotik::removePpoeActive($client, $c['username']);
+        //         }
+        //     } else {
+        //         if (!$p['is_radius']) {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::removePpoeUser($client, $c['username']);
+        //             Mikrotik::removePpoeActive($client, $c['username']);
+        //         }
+        //     }
+        // }
+        // // call the next mikrotik
+        // if ($p['routers'] != $b['routers'] && $p['routers'] != 'radius') {
+        //     $mikrotik = Mikrotik::info($p['routers']);
+        // }
+        // if ($p['type'] == 'Hotspot') {
+        //     if ($b) {
+        //         if ($p['is_radius']) {
+        //             Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
+        //         } else {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::addHotspotUser($client, $p, $c);
+        //         }
+        //     } else {
+        //         if ($p['is_radius']) {
+        //             Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
+        //         } else {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::addHotspotUser($client, $p, $c);
+        //         }
+        //     }
+        // } else {
+        //     if ($b) {
+        //         if ($p['is_radius']) {
+        //             Radius::customerAddPlan($c, $p);
+        //         } else {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::addPpoeUser($client, $p, $c);
+        //         }
+        //     } else {
+        //         if ($p['is_radius']) {
+        //             Radius::customerAddPlan($c, $p);
+        //         } else {
+        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //             Mikrotik::addPpoeUser($client, $p, $c);
+        //         }
+        //     }
+        // }
     }
 
 

@@ -10,7 +10,8 @@
 
 use PEAR2\Net\RouterOS;
 
-class MikrotikHotspot {
+class MikrotikHotspot
+{
 
     /**
      * Establishes a connection between a MikroTik router and a customer.
@@ -24,8 +25,17 @@ class MikrotikHotspot {
      *                        such as their username or account details.
      * @return void
      */
-    function connect_customer($routers, $customer){
-
+    function connect_customer($customer, $plan)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        $mikrotik = $this->info($plan['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        Mikrotik::removePpoeUser($client, $customer['username']);
+        Mikrotik::removePpoeActive($client, $customer['username']);
+        Mikrotik::addPpoeUser($client, $plan, $customer);
     }
 
     /**
@@ -40,8 +50,179 @@ class MikrotikHotspot {
      *                        such as their username or account details.
      * @return void
      */
-    function disconnect_customer($routers, $customer){
+    function disconnect_customer($customer, $plan)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        $mikrotik = $this->info($plan['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        if (!empty($p['pool_expired'])) {
+            Mikrotik::setPpoeUserPlan($client, $customer['username'], 'EXPIRED NUXBILL ' . $p['pool_expired']);
+        } else {
+            Mikrotik::removePpoeUser($client, $customer['username']);
+        }
+        Mikrotik::removePpoeActive($client, $customer['username']);
+    }
 
+    function change_customer($tur, $customer, $plan)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        $mikrotik = $this->info($plan['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        Mikrotik::removePpoeUser($client, $customer['username']);
+        Mikrotik::removePpoeActive($client, $customer['username']);
+        Mikrotik::addPpoeUser($client, $plan, $customer);
+    }
+
+
+    function add_plan($plan)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        $mikrotik = $this->info($plan['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        if ($plan['rate_down_unit'] == 'Kbps') {
+            $unitdown = 'K';
+        } else {
+            $unitdown = 'M';
+        }
+        if ($plan['rate_up_unit'] == 'Kbps') {
+            $unitup = 'K';
+        } else {
+            $unitup = 'M';
+        }
+        $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
+        $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
+        $client->sendSync(
+            $addRequest
+                ->setArgument('name', $plan['name_plan'])
+                ->setArgument('shared-users', $plan['shared_users'])
+                ->setArgument('rate-limit', $rate)
+        );
+    }
+
+    function update_plan($old_name, $plan)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        $mikrotik = $this->info($plan['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        if ($plan['rate_down_unit'] == 'Kbps') {
+            $unitdown = 'K';
+        } else {
+            $unitdown = 'M';
+        }
+        if ($plan['rate_up_unit'] == 'Kbps') {
+            $unitup = 'K';
+        } else {
+            $unitup = 'M';
+        }
+        $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
+        $printRequest = new RouterOS\Request(
+            '/ip hotspot user profile print .proplist=.id',
+            RouterOS\Query::where('name', $old_name)
+        );
+        $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($profileID)) {
+            Mikrotik::addHotspotPlan($client, $plan['name_plan'], $plan['shared_users'], $rate);
+        } else {
+            $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
+            $client->sendSync(
+                $setRequest
+                    ->setArgument('numbers', $profileID)
+                    ->setArgument('name', $plan['name_plan'])
+                    ->setArgument('shared-users', $plan['shared_users'])
+                    ->setArgument('rate-limit', $rate)
+            );
+        }
+    }
+
+    function remove_plan($plan)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        $mikrotik = $this->info($plan['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        $printRequest = new RouterOS\Request(
+            '/ip hotspot user profile print .proplist=.id',
+            RouterOS\Query::where('name', $plan['name_plan'])
+        );
+        $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        $removeRequest = new RouterOS\Request('/ip/hotspot/user/profile/remove');
+        $client->sendSync(
+            $removeRequest
+                ->setArgument('numbers', $profileID)
+        );
+    }
+
+    function add_pool($pool){
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+        $mikrotik = $this->info($pool['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        $addRequest = new RouterOS\Request('/ip/pool/add');
+        $client->sendSync(
+            $addRequest
+                ->setArgument('name', $pool['pool_name'])
+                ->setArgument('ranges', $pool['range_ip'])
+        );
+    }
+
+    function update_pool($old_pool, $new_pool){
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+        $mikrotik = $this->info($new_pool['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        $printRequest = new RouterOS\Request(
+            '/ip pool print .proplist=.id',
+            RouterOS\Query::where('name', $old_pool['pool_name'])
+        );
+        $poolID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($poolID)) {
+            $this->add_pool($new_pool);
+        } else {
+            $setRequest = new RouterOS\Request('/ip/pool/set');
+            $client->sendSync(
+                $setRequest
+                    ->setArgument('numbers', $poolID)
+                    ->setArgument('name', $new_pool['pool_name'])
+                    ->setArgument('ranges', $new_pool['range_ip'])
+            );
+        }
+    }
+
+    function remove_pool($pool){
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+        $mikrotik = $this->info($pool['routers']);
+        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        $printRequest = new RouterOS\Request(
+            '/ip pool print .proplist=.id',
+            RouterOS\Query::where('name', $pool['pool_name'])
+        );
+        $poolID = $client->sendSync($printRequest)->getProperty('.id');
+        $removeRequest = new RouterOS\Request('/ip/pool/remove');
+        $client->sendSync(
+            $removeRequest
+                ->setArgument('numbers', $poolID)
+        );
     }
 
     function info($name)
@@ -87,251 +268,6 @@ class MikrotikHotspot {
                 ->setArgument('mac-address', $mac)
         );
     }
-
-    function logMeOut($client, $user)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip hotspot active print',
-            RouterOS\Query::where('user', $user)
-        );
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-        $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
-        $client->sendSync(
-            $removeRequest
-                ->setArgument('numbers', $id)
-        );
-    }
-
-    function addHotspotPlan($client, $name, $sharedusers, $rate)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
-        $client->sendSync(
-            $addRequest
-                ->setArgument('name', $name)
-                ->setArgument('shared-users', $sharedusers)
-                ->setArgument('rate-limit', $rate)
-        );
-    }
-
-    function setHotspotPlan($client, $name, $sharedusers, $rate)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip hotspot user profile print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $profileID = $client->sendSync($printRequest)->getProperty('.id');
-        if (empty($profileID)) {
-            Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
-        } else {
-            $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-            $client->sendSync(
-                $setRequest
-                    ->setArgument('numbers', $profileID)
-                    ->setArgument('shared-users', $sharedusers)
-                    ->setArgument('rate-limit', $rate)
-            );
-        }
-    }
-
-    function setHotspotExpiredPlan($client, $name, $pool)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip hotspot user profile print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $profileID = $client->sendSync($printRequest)->getProperty('.id');
-        if (empty($profileID)) {
-            $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
-            $client->sendSync(
-                $addRequest
-                    ->setArgument('name', $name)
-                    ->setArgument('shared-users', 3)
-                    ->setArgument('address-pool', $pool)
-                    ->setArgument('rate-limit', '512K/512K')
-            );
-        } else {
-            $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
-            $client->sendSync(
-                $setRequest
-                    ->setArgument('numbers', $profileID)
-                    ->setArgument('shared-users', 3)
-                    ->setArgument('address-pool', $pool)
-                    ->setArgument('rate-limit', '512K/512K')
-            );
-        }
-    }
-
-    function removeHotspotPlan($client, $name)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip hotspot user profile print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $profileID = $client->sendSync($printRequest)->getProperty('.id');
-
-        $removeRequest = new RouterOS\Request('/ip/hotspot/user/profile/remove');
-        $client->sendSync(
-            $removeRequest
-                ->setArgument('numbers', $profileID)
-        );
-    }
-
-    function removeHotspotUser($client, $username)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip hotspot user print .proplist=.id',
-            RouterOS\Query::where('name', $username)
-        );
-        $userID = $client->sendSync($printRequest)->getProperty('.id');
-        $removeRequest = new RouterOS\Request('/ip/hotspot/user/remove');
-        $client->sendSync(
-            $removeRequest
-                ->setArgument('numbers', $userID)
-        );
-    }
-
-    function addHotspotUser($client, $plan, $customer)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $addRequest = new RouterOS\Request('/ip/hotspot/user/add');
-        if ($plan['typebp'] == "Limited") {
-            if ($plan['limit_type'] == "Time_Limit") {
-                if ($plan['time_unit'] == 'Hrs')
-                    $timelimit = $plan['time_limit'] . ":00:00";
-                else
-                    $timelimit = "00:" . $plan['time_limit'] . ":00";
-                $client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $customer['username'])
-                        ->setArgument('profile', $plan['name_plan'])
-                        ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'])
-                        ->setArgument('email', $customer['email'])
-                        ->setArgument('limit-uptime', $timelimit)
-                );
-            } else if ($plan['limit_type'] == "Data_Limit") {
-                if ($plan['data_unit'] == 'GB')
-                    $datalimit = $plan['data_limit'] . "000000000";
-                else
-                    $datalimit = $plan['data_limit'] . "000000";
-                $client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $customer['username'])
-                        ->setArgument('profile', $plan['name_plan'])
-                        ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'])
-                        ->setArgument('email', $customer['email'])
-                        ->setArgument('limit-bytes-total', $datalimit)
-                );
-            } else if ($plan['limit_type'] == "Both_Limit") {
-                if ($plan['time_unit'] == 'Hrs')
-                    $timelimit = $plan['time_limit'] . ":00:00";
-                else
-                    $timelimit = "00:" . $plan['time_limit'] . ":00";
-                if ($plan['data_unit'] == 'GB')
-                    $datalimit = $plan['data_limit'] . "000000000";
-                else
-                    $datalimit = $plan['data_limit'] . "000000";
-                $client->sendSync(
-                    $addRequest
-                        ->setArgument('name', $customer['username'])
-                        ->setArgument('profile', $plan['name_plan'])
-                        ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'])
-                        ->setArgument('email', $customer['email'])
-                        ->setArgument('limit-uptime', $timelimit)
-                        ->setArgument('limit-bytes-total', $datalimit)
-                );
-            }
-        } else {
-            $client->sendSync(
-                $addRequest
-                    ->setArgument('name', $customer['username'])
-                    ->setArgument('profile', $plan['name_plan'])
-                    ->setArgument('comment', $customer['fullname'])
-                    ->setArgument('email', $customer['email'])
-                    ->setArgument('password', $customer['password'])
-            );
-        }
-    }
-
-    function setHotspotUser($client, $user, $pass)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-        $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $user));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-        $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
-        $setRequest->setArgument('numbers', $id);
-        $setRequest->setArgument('password', $pass);
-        $client->sendSync($setRequest);
-    }
-
-    function setHotspotUserPackage($client, $user, $plan)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
-        $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $user));
-        $id = $client->sendSync($printRequest)->getProperty('.id');
-
-        $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
-        $setRequest->setArgument('numbers', $id);
-        $setRequest->setArgument('profile', $plan);
-        $client->sendSync($setRequest);
-    }
-
-    function removeHotspotActiveUser($client, $username)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
-        $onlineRequest->setArgument('.proplist', '.id');
-        $onlineRequest->setQuery(RouterOS\Query::where('user', $username));
-        $id = $client->sendSync($onlineRequest)->getProperty('.id');
-
-        $removeRequest = new RouterOS\Request('/ip/hotspot/active/remove');
-        $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
-    }
-
     function removePpoeUser($client, $username)
     {
         global $_app_stage;
@@ -419,64 +355,6 @@ class MikrotikHotspot {
         $client->sendSync($removeRequest);
     }
 
-    function removePool($client, $name)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip pool print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $poolID = $client->sendSync($printRequest)->getProperty('.id');
-
-        $removeRequest = new RouterOS\Request('/ip/pool/remove');
-        $client->sendSync(
-            $removeRequest
-                ->setArgument('numbers', $poolID)
-        );
-    }
-
-    function addPool($client, $name, $ip_address)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $addRequest = new RouterOS\Request('/ip/pool/add');
-        $client->sendSync(
-            $addRequest
-                ->setArgument('name', $name)
-                ->setArgument('ranges', $ip_address)
-        );
-    }
-
-    function setPool($client, $name, $ip_address)
-    {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return null;
-        }
-        $printRequest = new RouterOS\Request(
-            '/ip pool print .proplist=.id',
-            RouterOS\Query::where('name', $name)
-        );
-        $poolID = $client->sendSync($printRequest)->getProperty('.id');
-
-        if (empty($poolID)) {
-            self::addPool($client, $name, $ip_address);
-        } else {
-            $setRequest = new RouterOS\Request('/ip/pool/set');
-            $client->sendSync(
-                $setRequest
-                    ->setArgument('numbers', $poolID)
-                    ->setArgument('ranges', $ip_address)
-            );
-        }
-    }
-
-
     function addPpoePlan($client, $name, $pool, $rate)
     {
         global $_app_stage;
@@ -550,7 +428,8 @@ class MikrotikHotspot {
         $client->sendSync($smsRequest);
     }
 
-    function getIpHotspotUser($client, $username){
+    function getIpHotspotUser($client, $username)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return null;
