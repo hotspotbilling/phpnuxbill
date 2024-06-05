@@ -12,9 +12,7 @@ $ui->assign('_system_menu', 'network');
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
-use PEAR2\Net\RouterOS;
-
-require_once 'system/autoload/PEAR2/Autoload.php';
+require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "MikrotikHotspot.php";
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
@@ -93,8 +91,10 @@ switch ($action) {
         }
 
         if ($msg == '') {
-            Mikrotik::getClient($ip_address, $username, $password);
             run_hook('add_router'); #HOOK
+            if(_post("testIt")){
+                (new MikrotikHotspot())->getClient($ip_address, $username, $password);
+            }
             $d = ORM::for_table('tbl_routers')->create();
             $d->name = $name;
             $d->ip_address = $ip_address;
@@ -152,10 +152,11 @@ switch ($action) {
             $msg .= '<b>Radius</b> name is reserved<br>';
         }
 
-
         if ($msg == '') {
-            Mikrotik::getClient($ip_address, $username, $password);
             run_hook('router_edit'); #HOOK
+            if(_post("testIt")){
+                (new MikrotikHotspot())->getClient($ip_address, $username, $password);
+            }
             $d->name = $name;
             $d->ip_address = $ip_address;
             $d->username = $username;
