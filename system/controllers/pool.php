@@ -13,9 +13,10 @@ $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
 if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-    _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
+    _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
+require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "MikrotikPppoe.php";
 
 switch ($action) {
     case 'list':
@@ -60,15 +61,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_pool')->find_one($id);
         if ($d) {
             if ($d['routers'] != 'radius') {
-                try {
-                    $mikrotik = Mikrotik::info($d['routers']);
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePool($client, $d['pool_name']);
-                } catch (Exception $e) {
-                    //ignore exception, it means router has already deleted
-                } catch(Throwable $e){
-                    //ignore exception, it means router has already deleted
-                }
+                (new MikrotikPppoe())->remove_pool($d);
             }
             $d->delete();
 
@@ -81,9 +74,7 @@ switch ($action) {
         $log = '';
         foreach ($pools as $pool) {
             if ($pool['routers'] != 'radius') {
-                $mikrotik = Mikrotik::info($pool['routers']);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::addPool($client, $pool['pool_name'], $pool['range_ip']);
+                (new MikrotikPppoe())->update_pool($pool, $pool);
                 $log .= 'DONE: ' . $pool['pool_name'] . ': ' . $pool['range_ip'] . '<br>';
             }
         }
@@ -108,9 +99,7 @@ switch ($action) {
         }
         if ($msg == '') {
             if ($routers != 'radius') {
-                $mikrotik = Mikrotik::info($routers);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::addPool($client, $name, $ip_address);
+                (new MikrotikPppoe())->add_pool($pool);
             }
 
             $b = ORM::for_table('tbl_pool')->create();
@@ -138,21 +127,19 @@ switch ($action) {
 
         $id = _post('id');
         $d = ORM::for_table('tbl_pool')->find_one($id);
-        if ($d) {
-        } else {
+        $old = ORM::for_table('tbl_pool')->find_one($id);
+        if (!$d) {
             $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
         if ($msg == '') {
-            if ($routers != 'radius') {
-                $mikrotik = Mikrotik::info($routers);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::setPool($client, $d['pool_name'], $ip_address);
-            }
-
             $d->range_ip = $ip_address;
             $d->routers = $routers;
             $d->save();
+
+            if ($routers != 'radius') {
+                (new MikrotikPppoe())->update_pool($old, $d);
+            }
 
             r2(U . 'pool/list', 's', Lang::T('Data Updated Successfully'));
         } else {

@@ -32,33 +32,14 @@ foreach ($d as $ds) {
         $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
-        $dvc = $DEVICE_PATH . DIRECTORY_SEPARATOR . $p['device'].'.php';
-        if(file_exists($dvc)){
-            include $dvc;
-            new $p['device']->disconnect_customer($ds['routers'], $c, $p);
-        }else{
+        $dvc = Package::getDevice($p);
+        if (file_exists($dvc)) {
+            require_once $dvc;
+            new $p['device']->remove_customer($ds['routers'], $c, $p);
+        } else {
             echo "Cron error Devices $p[device] not found, cannot disconnect $c[username]";
             Message::sendTelegram("Cron error Devices $p[device] not found, cannot disconnect $c[username]");
         }
-        // if ($p['is_radius']) {
-        //     if (empty($p['pool_expired'])) {
-        //         print_r(Radius::customerDeactivate($c['username']));
-        //     } else {
-        //         Radius::upsertCustomerAttr($c['username'], 'Framed-Pool', $p['pool_expired'], ':=');
-        //         print_r(Radius::disconnectCustomer($c['username']));
-        //     }
-        // } else {
-        //     $client = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-        //     if (!empty($p['pool_expired'])) {
-        //         Mikrotik::setHotspotUserPackage($client, $c['username'], 'EXPIRED NUXBILL ' . $p['pool_expired']);
-        //         // }if (!empty($p['list_expired'])) {
-        //         //     $ip = Mikrotik::getIpHotspotUser($client, $ds['username']);
-        //         //     Mikrotik::addIpToAddressList($client, $ip, $p['list_expired'], $c['username']);
-        //     } else {
-        //         Mikrotik::removeHotspotUser($client, $c['username']);
-        //     }
-        //     Mikrotik::removeHotspotActiveUser($client, $c['username']);
-        // }
         echo Message::sendPackageNotification($c, $u['namebp'], $p['price'], $textExpired, $config['user_notification_expired']) . "\n";
         //update database user dengan status off
         $u->status = 'off';
@@ -91,7 +72,7 @@ foreach ($d as $ds) {
         } else {
             echo "no renewall | balance $config[enable_balance] auto_renewal $c[auto_renewal]\n";
         }
-    } else{
+    } else {
         echo " : ACTIVE \r\n";
     }
 }

@@ -41,21 +41,14 @@ switch ($action) {
         $log = '';
         $router = '';
         foreach ($plans as $plan) {
-            if ($router != $plan['routers'] && $plan['routers'] != 'radius') {
-                $mikrotik = Mikrotik::info($plan['routers']);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                $router = $plan['routers'];
-            }
             $p = ORM::for_table('tbl_plans')->findOne($plan['plan_id']);
             $c = ORM::for_table('tbl_customers')->findOne($plan['customer_id']);
-            if ($plan['routers'] == 'radius') {
-                Radius::customerAddPlan($c, $p, $plan['expiration'] . ' ' . $plan['time']);
+            $dvc = Package::getDevice($plan);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->add_customer($c, $p);
             } else {
-                if ($plan['type'] == 'Hotspot') {
-                    Mikrotik::addHotspotUser($client, $p, $c);
-                } else if ($plan['type'] == 'PPPOE') {
-                    Mikrotik::addPpoeUser($client, $p, $c);
-                }
+                new Exception(Lang::T("Devices Not Found"));
             }
             $log .= "DONE : $plan[username], $plan[namebp], $plan[type], $plan[routers]<br>";
         }
@@ -265,19 +258,11 @@ switch ($action) {
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
-            if ($p['is_radius']) {
-                Radius::customerDeactivate($d['username']);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->remove_customer($c, $p);
             } else {
-                $mikrotik = Mikrotik::info($d['routers']);
-                if ($d['type'] == 'Hotspot') {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotUser($client, $d['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $d['username']);
-                } else {
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoeUser($client, $d['username']);
-                    Mikrotik::removePpoeActive($client, $d['username']);
-                }
+                new Exception(Lang::T("Devices Not Found"));
             }
             $d->delete();
             _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer ' . $c['username'] . '  [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
@@ -786,25 +771,14 @@ switch ($action) {
             $tur->status = "on";
             $tur->save();
             App::setToken($stoken, $id);
-            if ($tur['routers'] != 'radius') {
-                $mikrotik = Mikrotik::info($tur['routers']);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                $router = $tur['routers'];
-            }
-            $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
             $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
-            if ($tur['routers'] == 'radius') {
-                Radius::customerAddPlan($c, $p, $tur['expiration'] . ' ' . $tur['time']);
+            $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
+            $dvc = Package::getDevice($p);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->add_customer($c, $p);
             } else {
-                if ($tur['type'] == 'Hotspot') {
-                    Mikrotik::removeHotspotUser($client, $c['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $c['username']);
-                    Mikrotik::addHotspotUser($client, $p, $c);
-                } else if ($tur['type'] == 'PPPOE') {
-                    Mikrotik::removePpoeUser($client, $c['username']);
-                    Mikrotik::removePpoeActive($client, $c['username']);
-                    Mikrotik::addPpoeUser($client, $p, $c);
-                }
+                new Exception(Lang::T("Devices Not Found"));
             }
             _log("$admin[fullname] extend Customer $tur[customer_id] $tur[username] for $days days", $admin['user_type'], $admin['id']);
             r2(U . 'plan', 's', "Extend until $expiration");

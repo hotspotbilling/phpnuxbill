@@ -154,26 +154,15 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             }
         }
         if ($tur['status'] != 'on') {
-            if ($tur['routers'] != 'radius') {
-                $mikrotik = Mikrotik::info($tur['routers']);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                $router = $tur['routers'];
-            }
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
-            if (!$p) {
-                r2(U . 'home', '3', "Plan Not Found");
-            }
-            if ($tur['routers'] == 'radius') {
-                Radius::customerAddPlan($user, $p, $tur['expiration'] . ' ' . $tur['time']);
+            $dvc = Package::getDevice($p);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->add_customer($user, $p);
             } else {
-                if ($tur['type'] == 'Hotspot') {
-                    Mikrotik::removeHotspotUser($client, $user['username']);
-                    Mikrotik::addHotspotUser($client, $p, $user);
-                } else if ($tur['type'] == 'PPPOE') {
-                    Mikrotik::removePpoeUser($client, $user['username']);
-                    Mikrotik::addPpoeUser($client, $p, $user);
-                }
+                new Exception(Lang::T("Devices Not Found"));
             }
+
             // make customer cannot extend again
             $days = $config['extend_days'];
             $expiration = date('Y-m-d', strtotime(" +$days day"));
@@ -198,22 +187,12 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['deactivate'])->where('username', $user['username'])->findOne();
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
-        if ($p['is_radius']) {
-            Radius::customerDeactivate($user['username']);
+        $dvc = Package::getDevice($p);
+        if (file_exists($dvc)) {
+            require_once $dvc;
+            new $p['device']->remove_customer($user, $p);
         } else {
-            try {
-                $mikrotik = Mikrotik::info($bill['routers']);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                if ($bill['type'] == 'Hotspot') {
-                    Mikrotik::removeHotspotUser($client, $bill['username']);
-                    Mikrotik::removeHotspotActiveUser($client, $bill['username']);
-                } else if ($bill['type'] == 'PPPOE') {
-                    Mikrotik::removePpoeUser($client, $bill['username']);
-                    Mikrotik::removePpoeActive($client, $bill['username']);
-                }
-            } catch (Exception $e) {
-                //ignore it maybe mikrotik has been deleted
-            }
+            new Exception(Lang::T("Devices Not Found"));
         }
         $bill->status = 'off';
         $bill->expiration = date('Y-m-d');
@@ -231,16 +210,19 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
-    if ($_GET['mikrotik'] == 'login') {
-        $m = Mikrotik::info($bill['routers']);
-        $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-        Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
-        r2(U . 'home', 's', Lang::T('Login Request successfully'));
-    } else if ($_GET['mikrotik'] == 'logout') {
-        $m = Mikrotik::info($bill['routers']);
-        $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-        Mikrotik::logMeOut($c, $user['username']);
-        r2(U . 'home', 's', Lang::T('Logout Request successfully'));
+    $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
+    $dvc = Package::getDevice($p);
+    if (file_exists($dvc)) {
+        require_once $dvc;
+        if ($_GET['mikrotik'] == 'login') {
+            new $p['device']->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
+            r2(U . 'home', 's', Lang::T('Login Request successfully'));
+        } else if ($_GET['mikrotik'] == 'logout') {
+            new $p['device']->disconnect_customer($user, $bill['routers']);
+            r2(U . 'home', 's', Lang::T('Logout Request successfully'));
+        }
+    } else {
+        new Exception(Lang::T("Devices Not Found"));
     }
 }
 

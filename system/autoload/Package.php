@@ -221,10 +221,10 @@ class Package
             }
 
             if ($isChangePlan || $b['status'] == 'off') {
-                $dvc = $DEVICE_PATH . DIRECTORY_SEPARATOR . $p['device'] . '.php';
+                $dvc = Package::getDevice($p);
                 if (file_exists($dvc)) {
-                    include $dvc;
-                    new $p['device']->connect_customer($c, $p);
+                    require_once $dvc;
+                    new $p['device']->add_customer($c, $p);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -303,11 +303,11 @@ class Package
                 "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                 "\nNote:\n" . $note);
         } else {
-            // plan not exists
-            $dvc = $DEVICE_PATH . DIRECTORY_SEPARATOR . $p['device'] . '.php';
+            // active plan not exists
+            $dvc = Package::getDevice($p);
             if (file_exists($dvc)) {
-                include $dvc;
-                new $p['device']->connect_customer($c, $p);
+                require_once $dvc;
+                new $p['device']->add_customer($c, $p);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -412,86 +412,13 @@ class Package
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
         $b = ORM::for_table('tbl_user_recharges')->find_one($from_id);
 
-        $dvc = $DEVICE_PATH . DIRECTORY_SEPARATOR . $p['device'] . '.php';
+        $dvc = Package::getDevice($p);
         if (file_exists($dvc)) {
-            include $dvc;
+            require_once $dvc;
             new $p['device']->change_customer($b, $c, $p);
         } else {
             new Exception(Lang::T("Devices Not Found"));
         }
-
-        // if ($p['routers'] == $b['routers'] && $b['routers'] != 'radius') {
-        //     $mikrotik = Mikrotik::info($p['routers']);
-        // } else {
-        //     $mikrotik = Mikrotik::info($b['routers']);
-        // }
-        // // delete first
-        // if ($p['type'] == 'Hotspot') {
-        //     if ($b) {
-        //         if (!$p['is_radius']) {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::removeHotspotUser($client, $c['username']);
-        //             Mikrotik::removeHotspotActiveUser($client, $c['username']);
-        //         }
-        //     } else {
-        //         if (!$p['is_radius']) {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::removeHotspotUser($client, $c['username']);
-        //             Mikrotik::removeHotspotActiveUser($client, $c['username']);
-        //         }
-        //     }
-        // } else {
-        //     if ($b) {
-        //         if (!$p['is_radius']) {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::removePpoeUser($client, $c['username']);
-        //             Mikrotik::removePpoeActive($client, $c['username']);
-        //         }
-        //     } else {
-        //         if (!$p['is_radius']) {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::removePpoeUser($client, $c['username']);
-        //             Mikrotik::removePpoeActive($client, $c['username']);
-        //         }
-        //     }
-        // }
-        // // call the next mikrotik
-        // if ($p['routers'] != $b['routers'] && $p['routers'] != 'radius') {
-        //     $mikrotik = Mikrotik::info($p['routers']);
-        // }
-        // if ($p['type'] == 'Hotspot') {
-        //     if ($b) {
-        //         if ($p['is_radius']) {
-        //             Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
-        //         } else {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::addHotspotUser($client, $p, $c);
-        //         }
-        //     } else {
-        //         if ($p['is_radius']) {
-        //             Radius::customerAddPlan($c, $p, $b['expiration'] . '' . $b['time']);
-        //         } else {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::addHotspotUser($client, $p, $c);
-        //         }
-        //     }
-        // } else {
-        //     if ($b) {
-        //         if ($p['is_radius']) {
-        //             Radius::customerAddPlan($c, $p);
-        //         } else {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::addPpoeUser($client, $p, $c);
-        //         }
-        //     } else {
-        //         if ($p['is_radius']) {
-        //             Radius::customerAddPlan($c, $p);
-        //         } else {
-        //             $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        //             Mikrotik::addPpoeUser($client, $p, $c);
-        //         }
-        //     }
-        // }
     }
 
 
@@ -619,5 +546,26 @@ class Package
         $tax_rate_decimal = $tax_rate / 100;
         $tax = $price * $tax_rate_decimal;
         return $tax;
+    }
+
+    public static function getDevice($plan)
+    {
+        global $DEVICE_PATH;
+        if (!empty($plan['device'])) {
+            return $DEVICE_PATH . DIRECTORY_SEPARATOR . $plan['device'] . '.php';
+        }
+        if ($plan['is_radius'] == 1) {
+            $plan->device = 'Radius';
+            $plan->save();
+            return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'Radius' . '.php';
+        }
+        if ($plan['type'] == 'PPPOE') {
+            $plan->device = 'MikrotikPppoe';
+            $plan->save();
+            return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikPppoe' . '.php';
+        }
+        $plan->device = 'MikrotikHotspot';
+        $plan->save();
+        return $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikHotspot' . '.php';
     }
 }

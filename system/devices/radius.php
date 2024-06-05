@@ -1,37 +1,417 @@
 <?php
 
+
+/**
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
+ *
+ * This is Core, don't modification except you want to contribute
+ * better create new plugin
+ **/
+
 class Radius {
 
-    /**
-     * Establishes a connection between a MikroTik router and a customer.
-     *
-     * This function takes two parameters: $routers and $customer.
-     *
-     * @param array $routers An array containing information about the MikroTik routers.
-     *                       This can include IP addresses or connection details.
-     * @param mixed $customer An object or array representing a specific customer.
-     *                        This can contain relevant information about the customer,
-     *                        such as their username or account details.
-     * @return void
-     */
-    function connect_customer($routers, $customer){
+    function add_customer($customer, $plan)
+    {
+        global $b;
+        $this->customerAddPlan($customer, $plan, $b['expiration'] . '' . $b['time']);
+    }
 
+    function remove_customer($customer, $plan)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        if (empty($plan['pool_expired'])) {
+            $this->customerDeactivate($customer['username']);
+        } else {
+            $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool_expired'], ':=');
+            $this->disconnectCustomer($customer['username']);
+        }
+    }
+
+    function change_customer($customer, $plan)
+    {
+        $this->customerUpsert($customer, $plan);
+    }
+
+    function add_plan($plan)
+    {
+        if ($plan['rate_down_unit'] == 'Kbps') {
+            $unitdown = 'K';
+        } else {
+            $unitdown = 'M';
+        }
+        if ($plan['rate_up_unit'] == 'Kbps') {
+            $unitup = 'K';
+        } else {
+            $unitup = 'M';
+        }
+        $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
+
+        $rates = explode('/', $rate);
+        ##burst fixed
+        if (strpos($rate, ' ')) {
+            $ratos = $rates[0] . '/' . $rates[1] . ' ' . $rates[2] . '/' . $rates[3] . '/' . $rates[4] . '/' . $rates[5] . '/' . $rates[6];
+        } else {
+            $ratos = $rates[0] . '/' . $rates[1];
+        }
+
+        $this->upsertPackage($plan['id'], 'Ascend-Data-Rate', $rates[1], ':=');
+        $this->upsertPackage($plan['id'], 'Ascend-Xmit-Rate', $rates[0], ':=');
+        $this->upsertPackage($plan['id'], 'Mikrotik-Rate-Limit', $ratos, ':=');
+    }
+
+    function update_plan($old_name, $plan)
+    {
+        $this->add_plan($plan);
+    }
+
+    function remove_plan($plan)
+    {
+        // Delete Plan
+        $this->getTablePackage()->where_equal('plan_id', "plan_" . $plan['id'])->delete_many();
+        // Reset User Plan
+        $c = $this->getTableUserPackage()->where_equal('groupname', "plan_" . $plan['id'])->findMany();
+        if ($c) {
+            foreach ($c as $u) {
+                $u->groupname = '';
+                $u->save();
+            }
+        }
+    }
+
+    function online_customer($customer, $router_name)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+    }
+
+    function connect_customer($customer, $ip, $mac_address, $router_name)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+    }
+
+    function disconnect_customer($customer, $router_name)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+    }
+
+    public function getTableNas()
+    {
+        return ORM::for_table('nas', 'radius');
+    }
+    public function getTableAcct()
+    {
+        return ORM::for_table('radacct', 'radius');
+    }
+    public function getTableCustomer()
+    {
+        return ORM::for_table('radcheck', 'radius');
+    }
+
+    public function getTableCustomerAttr()
+    {
+        return ORM::for_table('radreply', 'radius');
+    }
+
+    public function getTablePackage()
+    {
+        return ORM::for_table('radgroupreply', 'radius');
+    }
+
+    public function getTableUserPackage()
+    {
+        return ORM::for_table('radusergroup', 'radius');
+    }
+
+    public function nasAdd($name, $ip, $ports, $secret, $routers = "", $description = "", $type = 'other', $server = null, $community = null)
+    {
+        $n = $this->getTableNas()->create();
+        $n->nasname = $ip;
+        $n->shortname = $name;
+        $n->type = $type;
+        $n->ports = $ports;
+        $n->secret = $secret;
+        $n->description = $description;
+        $n->server = $server;
+        $n->community = $community;
+        $n->routers = $routers;
+        $n->save();
+        return $n->id();
+    }
+
+    public function nasUpdate($id, $name, $ip, $ports, $secret, $routers = "", $description = "", $type = 'other', $server = null, $community = null)
+    {
+        $n = $this->getTableNas()->find_one($id);
+        if (empty($n)) {
+            return false;
+        }
+        $n->nasname = $ip;
+        $n->shortname = $name;
+        $n->type = $type;
+        $n->ports = $ports;
+        $n->secret = $secret;
+        $n->description = $description;
+        $n->server = $server;
+        $n->community = $community;
+        $n->routers = $routers;
+        return $n->save();
+    }
+
+    public function planUpSert($plan_id, $rate, $pool = null)
+    {
+        $rates = explode('/', $rate);
+        ##burst fixed
+        if (strpos($rate, ' ')) {
+            $ratos = $rates[0] . '/' . $rates[1] . ' ' . $rates[2] . '/' . $rates[3] . '/' . $rates[4] . '/' . $rates[5] . '/' . $rates[6];
+        } else {
+            $ratos = $rates[0] . '/' . $rates[1];
+        }
+
+        $this->upsertPackage($plan_id, 'Ascend-Data-Rate', $rates[1], ':=');
+        $this->upsertPackage($plan_id, 'Ascend-Xmit-Rate', $rates[0], ':=');
+        $this->upsertPackage($plan_id, 'Mikrotik-Rate-Limit', $ratos, ':=');
+        // if ($pool != null) {
+        //     $this->upsertPackage($plan_id, 'Framed-Pool', $pool, ':=');
+        // }
+    }
+
+    public function customerChangeUsername($from, $to)
+    {
+        $c = $this->getTableCustomer()->where_equal('username', $from)->findMany();
+        if ($c) {
+            foreach ($c as $u) {
+                $u->username = $to;
+                $u->save();
+            }
+        }
+        $c = $this->getTableUserPackage()->where_equal('username', $from)->findMany();
+        if ($c) {
+            foreach ($c as $u) {
+                $u->username = $to;
+                $u->save();
+            }
+        }
+    }
+
+    public function customerDeactivate($username, $radiusDisconnect = true)
+    { {
+            global $radius_pass;
+            $r = $this->getTableCustomer()->where_equal('username', $username)->whereEqual('attribute', 'Cleartext-Password')->findOne();
+            if ($r) {
+                // no need to delete, because it will make ID got higher
+                // we just change the password
+                $r->value = md5(time() . $username . $radius_pass);
+                $r->save();
+                if ($radiusDisconnect)
+                    return $this->disconnectCustomer($username);
+            }
+        }
+        return '';
+    }
+
+    public function customerDelete($username)
+    {
+        $this->getTableCustomer()->where_equal('username', $username)->delete_many();
+        $this->getTableUserPackage()->where_equal('username', $username)->delete_many();
     }
 
     /**
-     * Disconnects a customer from a MikroTik router.
-     *
-     * This function takes two parameters: $routers and $customer.
-     *
-     * @param array $routers An array containing information about the MikroTik routers.
-     *                       This can include IP addresses or connection details.
-     * @param mixed $customer An object or array representing a specific customer.
-     *                        This can contain relevant information about the customer,
-     *                        such as their username or account details.
-     * @return void
+     * When add a plan to Customer, use this
      */
-    function disconnect_customer($routers, $customer){
+    public function customerAddPlan($customer, $plan, $expired = null)
+    {
+        global $config;
+        if ($this->customerUpsert($customer, $plan)) {
+            $p = $this->getTableUserPackage()->where_equal('username', $customer['username'])->findOne();
+            if ($p) {
+                // if exists
+                $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
+                //$this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+				$this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
+                $p->groupname = "plan_" . $plan['id'];
+                $p->save();
+            } else {
+                $p = $this->getTableUserPackage()->create();
+                $p->username = $customer['username'];
+                $p->groupname = "plan_" . $plan['id'];
+                $p->priority = 1;
+                $p->save();
+            }
+            if ($plan['type'] == 'Hotspot' && $plan['typebp'] == "Limited") {
+                if ($plan['limit_type'] == "Time_Limit") {
+                    if ($plan['time_unit'] == 'Hrs')
+                        $timelimit = $plan['time_limit'] * 60 * 60;
+                    else
+                        $timelimit = $plan['time_limit'] * 60;
+                    $this->upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
+                    //$this->upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                } else if ($plan['limit_type'] == "Data_Limit") {
+                    if ($plan['data_unit'] == 'GB')
+                        $datalimit = $plan['data_limit'] . "000000000";
+                    else
+                        $datalimit = $plan['data_limit'] . "000000";
+                    //$this->upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                    // Mikrotik Spesific
+                    $this->upsertCustomer($customer['username'], 'Max-Data', $datalimit);
+                    //$this->upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
+                } else if ($plan['limit_type'] == "Both_Limit") {
+                    if ($plan['time_unit'] == 'Hrs')
+                        $timelimit = $plan['time_limit'] * 60 * 60;
+                    else
+                        $timelimit = $plan['time_limit'] * 60;
+                    if ($plan['data_unit'] == 'GB')
+                        $datalimit = $plan['data_limit'] . "000000000";
+                    else
+                        $datalimit = $plan['data_limit'] . "000000";
+                    //$this->upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
+                    $this->upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
+                    // Mikrotik Spesific
+                    $this->upsertCustomer($customer['username'], 'Max-Data', $datalimit);
+                    //$this->upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
 
+
+
+
+                }
+            } else {
+                //$this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
+            }
+
+            $this->disconnectCustomer($customer['username']);
+            $this->getTableAcct()->where_equal('username', $customer['username'])->delete_many();
+
+
+            // expired user
+            if ($expired != null) {
+                //$this->upsertCustomer($customer['username'], 'access-period', strtotime($expired) - time());
+                $this->upsertCustomer($customer['username'], 'Max-All-Session', strtotime($expired) - time());
+                //$this->upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
+                // Mikrotik Spesific
+                $this->upsertCustomer(
+                    $customer['username'],
+                    'WISPr-Session-Terminate-Time',
+                    date('Y-m-d', strtotime($expired)) . 'T' . date('H:i:s', strtotime($expired)) . Timezone::getTimeOffset($config['timezone'])
+                );
+            } else {
+                $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
+                //$this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
+                //$this->delAtribute($this->getTableCustomer(), 'expiration', 'username', $customer['username']);
+            }
+
+            if ($plan['type'] == 'PPPOE') {
+                $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
+            }
+
+
+            return true;
+        }
+        return false;
     }
+
+    public function customerUpsert($customer, $plan)
+    {
+        if ($plan['type'] == 'PPPOE') {
+            $this->upsertCustomer($customer['username'], 'Cleartext-Password', (empty($customer['pppoe_password'])) ? $customer['password'] : $customer['pppoe_password']);
+        } else {
+            $this->upsertCustomer($customer['username'], 'Cleartext-Password',  $customer['password']);
+        }
+        $this->upsertCustomer($customer['username'], 'Simultaneous-Use', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
+        // Mikrotik Spesific
+        $this->upsertCustomer($customer['username'], 'Port-Limit', ($plan['type'] == 'PPPOE') ? 1 : $plan['shared_users']);
+        $this->upsertCustomer($customer['username'], 'Mikrotik-Wireless-Comment', $customer['fullname']);
+        return true;
+    }
+
+    private function delAtribute($tabel, $attribute, $key, $value)
+    {
+        $r = $tabel->where_equal($key, $value)->whereEqual('attribute', $attribute)->findOne();
+        if ($r) $r->delete();
+    }
+
+    /**
+     * To insert or update existing plan
+     */
+    private function upsertPackage($plan_id, $attr, $value, $op = ':=')
+    {
+        $r = $this->getTablePackage()->where_equal('plan_id', $plan_id)->whereEqual('attribute', $attr)->find_one();
+        if (!$r) {
+            $r = $this->getTablePackage()->create();
+            $r->groupname = "plan_" . $plan_id;
+            $r->plan_id = $plan_id;
+        }
+        $r->attribute = $attr;
+        $r->op = $op;
+        $r->value = $value;
+        return $r->save();
+    }
+
+    /**
+     * To insert or update existing customer
+     */
+    public function upsertCustomer($username, $attr, $value, $op = ':=')
+    {
+        $r = $this->getTableCustomer()->where_equal('username', $username)->whereEqual('attribute', $attr)->find_one();
+        if (!$r) {
+            $r = $this->getTableCustomer()->create();
+            $r->username = $username;
+        }
+        $r->attribute = $attr;
+        $r->op = $op;
+        $r->value = $value;
+        return $r->save();
+    }
+    /**
+     * To insert or update existing customer Attribute
+     */
+    public function upsertCustomerAttr($username, $attr, $value, $op = ':=')
+    {
+        $r = $this->getTableCustomerAttr()->where_equal('username', $username)->whereEqual('attribute', $attr)->find_one();
+        if (!$r) {
+            $r = $this->getTableCustomerAttr()->create();
+            $r->username = $username;
+        }
+        $r->attribute = $attr;
+        $r->op = $op;
+        $r->value = $value;
+        return $r->save();
+    }
+
+    public function disconnectCustomer($username)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return null;
+        }
+        /**
+         * Fix loop to all Nas but still detecting Hotspot Multylogin from other Nas
+         */
+        $act = ORM::for_table('radacct')->where_raw("acctstoptime IS NULL")->where('username', $username)->find_one();
+        $nas = $this->getTableNas()->where('nasname', $act['nasipaddress'])->find_many();
+        $count = count($nas) * 15;
+        set_time_limit($count);
+        $result = [];
+        foreach ($nas as $n) {
+            $port = 3799;
+            if (!empty($n['ports'])) {
+                $port = $n['ports'];
+            }
+            $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username,Framed-IP-Address = " . $act['framedipaddress'] . "' | radclient -x " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
+        }
+        return $result;
+    }
+
 
 }

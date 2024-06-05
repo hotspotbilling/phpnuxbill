@@ -41,22 +41,14 @@ switch ($action) {
 
                     $c = ORM::for_table('tbl_user_recharges')->where('username', $user['username'])->find_one();
                     if ($c) {
+                        // if has active plan, change the password to devices
                         $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
-                        if ($p['is_radius']) {
-                            if ($c['type'] == 'Hotspot' || ($c['type'] == 'PPPOE' && empty($d['pppoe_password']))) {
-                                Radius::customerUpsert($d, $p);
-                            }
+                        $dvc = Package::getDevice($p);
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            new $p['device']->remove_customer($c, $p);
                         } else {
-                            $mikrotik = Mikrotik::info($c['routers']);
-                            $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                            if ($c['type'] == 'Hotspot') {
-                                Mikrotik::setHotspotUser($client, $c['username'], $npass);
-                                Mikrotik::removeHotspotActiveUser($client, $user['username']);
-                            } else if (empty($d['pppoe_password'])) {
-                                // only change when pppoe_password empty
-                                Mikrotik::setPpoeUser($client, $c['username'], $npass);
-                                Mikrotik::removePpoeActive($client, $user['username']);
-                            }
+                            new Exception(Lang::T("Devices Not Found"));
                         }
                     }
                     $d->password = $npass;

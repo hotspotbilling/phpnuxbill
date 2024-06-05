@@ -27,43 +27,20 @@ switch ($action) {
             $log = '';
             $router = '';
             foreach ($plans as $plan) {
-                if ($plan['is_radius']) {
-                    if ($b['rate_down_unit'] == 'Kbps') {
-                        $raddown = '000';
-                    } else {
-                        $raddown = '000000';
-                    }
-                    if ($b['rate_up_unit'] == 'Kbps') {
-                        $radup = '000';
-                    } else {
-                        $radup = '000000';
-                    }
-                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $plan['burst'];
-                    Radius::planUpSert($plan['id'], $radiusRate);
-                    $log .= "DONE : Radius $plan[name_plan], $plan[shared_users], $radiusRate<br>";
-                } else {
-                    if ($router != $plan['routers']) {
-                        $mikrotik = Mikrotik::info($plan['routers']);
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        $router = $plan['routers'];
-                    }
-                    if ($plan['rate_down_unit'] == 'Kbps') {
-                        $unitdown = 'K';
-                    } else {
-                        $unitdown = 'M';
-                    }
-                    if ($plan['rate_up_unit'] == 'Kbps') {
-                        $unitup = 'K';
-                    } else {
-                        $unitup = 'M';
-                    }
-                    $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
-                    Mikrotik::addHotspotPlan($client, $plan['name_plan'], $plan['shared_users'], $rate);
-                    $log .= "DONE : $plan[name_plan], $plan[shared_users], $rate<br>";
+                $dvc = Package::getDevice($plan);
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    new $p['device']->add_plan($plan);
                     if (!empty($plan['pool_expired'])) {
-                        Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired']);
-                        $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
+                        $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
+                        $plan->rate_down_unit = "Kbps";
+                        $plan->rate_up_unit == 'Kbps';
+                        $plan->rate_up = '512';
+                        $plan->rate_down = '512';
+                        new $p['device']->add_plan($plan);
                     }
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
                 }
             }
             r2(U . 'services/hotspot', 's', $log);
@@ -72,43 +49,20 @@ switch ($action) {
             $log = '';
             $router = '';
             foreach ($plans as $plan) {
-                if ($plan['is_radius']) {
-                    if ($b['rate_down_unit'] == 'Kbps') {
-                        $raddown = '000';
-                    } else {
-                        $raddown = '000000';
-                    }
-                    if ($b['rate_up_unit'] == 'Kbps') {
-                        $radup = '000';
-                    } else {
-                        $radup = '000000';
-                    }
-                    $radiusRate = $plan['rate_up'] . $radup . '/' . $plan['rate_down'] . $raddown . '/' . $plan['burst'];
-                    Radius::planUpSert($plan['id'], $radiusRate, $plan['pool']);
-                    $log .= "DONE : RADIUS $plan[name_plan], $plan[pool], $rate<br>";
-                } else {
-                    if ($router != $plan['routers']) {
-                        $mikrotik = Mikrotik::info($plan['routers']);
-                        $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                        $router = $plan['routers'];
-                    }
-                    if ($plan['rate_down_unit'] == 'Kbps') {
-                        $unitdown = 'K';
-                    } else {
-                        $unitdown = 'M';
-                    }
-                    if ($plan['rate_up_unit'] == 'Kbps') {
-                        $unitup = 'K';
-                    } else {
-                        $unitup = 'M';
-                    }
-                    $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
-                    Mikrotik::addPpoePlan($client, $plan['name_plan'], $plan['pool'], $rate);
-                    $log .= "DONE : $plan[name_plan], $plan[pool], $rate<br>";
+                $dvc = Package::getDevice($plan);
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    new $p['device']->add_plan($plan);
                     if (!empty($plan['pool_expired'])) {
-                        Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $plan['pool_expired'], $plan['pool_expired'], '512K/512K');
-                        $log .= "DONE Expired : EXPIRED NUXBILL $plan[pool_expired]<br>";
+                        $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
+                        $plan->rate_down_unit = "Kbps";
+                        $plan->rate_up_unit == 'Kbps';
+                        $plan->rate_up = '512';
+                        $plan->rate_down = '512';
+                        new $p['device']->add_plan($plan);
                     }
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
                 }
             }
             r2(U . 'services/pppoe', 's', $log);
@@ -162,20 +116,13 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_plan'); #HOOK
-            if ($d['is_radius']) {
-                Radius::planDelete($d['id']);
+            $dvc = Package::getDevice($d);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->remove_plan($d);
             } else {
-                try {
-                    $mikrotik = Mikrotik::info($d['routers']);
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removeHotspotPlan($client, $d['name_plan']);
-                } catch (Exception $e) {
-                    //ignore exception, it means router has already deleted
-                } catch (Throwable $e) {
-                    //ignore exception, it means router has already deleted
-                }
+                new Exception(Lang::T("Devices Not Found"));
             }
-
             $d->delete();
 
             r2(U . 'services/hotspot', 's', Lang::T('Data Deleted Successfully'));
@@ -272,19 +219,22 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->save();
-            $plan_id = $d->id();
 
-            if ($d['is_radius']) {
-                Radius::planUpSert($plan_id, $radiusRate);
-            } else {
-                $mikrotik = Mikrotik::info($routers);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::addHotspotPlan($client, $name, $sharedusers, $rate);
+            $dvc = Package::getDevice($d);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->add_plan($d);
                 if (!empty($pool_expired)) {
-                    Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
+                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
+                    $d->rate_down_unit = "Kbps";
+                    $d->rate_up_unit == 'Kbps';
+                    $d->rate_up = '512';
+                    $d->rate_down = '512';
+                    new $p['device']->add_plan($d);
                 }
+            } else {
+                new Exception(Lang::T("Devices Not Found"));
             }
-
 
             r2(U . 'services/hotspot', 's', Lang::T('Data Created Successfully'));
         } else {
@@ -324,6 +274,7 @@ switch ($action) {
             $msg .= Lang::T('All field is required') . '<br>';
         }
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
             $msg .= Lang::T('Data Not Found') . '<br>';
@@ -350,16 +301,6 @@ switch ($action) {
 
             $rate = trim($rate . " " . $b['burst']);
 
-            if ($d['is_radius']) {
-                Radius::planUpSert($id, $radiusRate);
-            } else {
-                $mikrotik = Mikrotik::info($routers);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::setHotspotPlan($client, $name, $sharedusers, $rate);
-                if (!empty($pool_expired)) {
-                    Mikrotik::setHotspotExpiredPlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired);
-                }
-            }
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
             $d->price = $price; // Set price with or without tax based on configuration
@@ -378,6 +319,23 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->save();
+
+            $dvc = Package::getDevice($d);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $d['device']->update_plan($old, $d);
+                if (!empty($pool_expired)) {
+                    $old->name_plan = 'EXPIRED NUXBILL ' . $old['pool_expired'];
+                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
+                    $d->rate_down_unit = "Kbps";
+                    $d->rate_up_unit == 'Kbps';
+                    $d->rate_up = '512';
+                    $d->rate_down = '512';
+                    new $d['device']->update_plan($old, $d);
+                }
+            } else {
+                new Exception(Lang::T("Devices Not Found"));
+            }
 
             r2(U . 'services/hotspot', 's', Lang::T('Data Updated Successfully'));
         } else {
@@ -441,18 +399,13 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
             run_hook('delete_ppoe'); #HOOK
-            if ($d['is_radius']) {
-                Radius::planDelete($d['id']);
+
+            $dvc = Package::getDevice($d);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->remove_plan($d);
             } else {
-                try {
-                    $mikrotik = Mikrotik::info($d['routers']);
-                    $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    Mikrotik::removePpoePlan($client, $d['name_plan']);
-                } catch (Exception $e) {
-                    //ignore exception, it means router has already deleted
-                } catch (Throwable $e) {
-                    //ignore exception, it means router has already deleted
-                }
+                new Exception(Lang::T("Devices Not Found"));
             }
             $d->delete();
 
@@ -537,17 +490,21 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->save();
-            $plan_id = $d->id();
 
-            if ($d['is_radius']) {
-                Radius::planUpSert($plan_id, $radiusRate, $pool);
-            } else {
-                $mikrotik = Mikrotik::info($routers);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::addPpoePlan($client, $name, $pool, $rate);
+            $dvc = Package::getDevice($d);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $p['device']->add_plan($d);
                 if (!empty($pool_expired)) {
-                    Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
+                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
+                    $d->rate_down_unit = "Kbps";
+                    $d->rate_up_unit == 'Kbps';
+                    $d->rate_up = '512';
+                    $d->rate_down = '512';
+                    new $p['device']->add_plan($d);
                 }
+            } else {
+                new Exception(Lang::T("Devices Not Found"));
             }
 
             r2(U . 'services/pppoe', 's', Lang::T('Data Created Successfully'));
@@ -583,6 +540,7 @@ switch ($action) {
         }
 
         $d = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
+        $old = ORM::for_table('tbl_plans')->where('id', $id)->find_one();
         if ($d) {
         } else {
             $msg .= Lang::T('Data Not Found') . '<br>';
@@ -608,16 +566,6 @@ switch ($action) {
             $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown . '/' . $b['burst'];
             $rate = trim($rate . " " . $b['burst']);
 
-            if ($d['is_radius']) {
-                Radius::planUpSert($id, $radiusRate, $pool);
-            } else {
-                $mikrotik = Mikrotik::info($routers);
-                $client = Mikrotik::getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                Mikrotik::setPpoePlan($client, $name, $pool, $rate);
-                if (!empty($pool_expired)) {
-                    Mikrotik::setPpoePlan($client, 'EXPIRED NUXBILL ' . $pool_expired, $pool_expired, '512K/512K');
-                }
-            }
             $d->name_plan = $name;
             $d->id_bw = $id_bw;
             $d->price = $price;
@@ -631,6 +579,23 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->save();
+
+            $dvc = Package::getDevice($d);
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                new $d['device']->update_plan($old, $d);
+                if (!empty($pool_expired)) {
+                    $old->name_plan = 'EXPIRED NUXBILL ' . $old['pool_expired'];
+                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
+                    $d->rate_down_unit = "Kbps";
+                    $d->rate_up_unit == 'Kbps';
+                    $d->rate_up = '512';
+                    $d->rate_down = '512';
+                    new $d['device']->update_plan($old, $d);
+                }
+            } else {
+                new Exception(Lang::T("Devices Not Found"));
+            }
 
             r2(U . 'services/pppoe', 's', Lang::T('Data Updated Successfully'));
         } else {

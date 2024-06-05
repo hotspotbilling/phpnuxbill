@@ -7,7 +7,7 @@ just follow the template
 
 class FileName {
 
-    function connect_customer($customer, $plan)
+    function add_customer($customer, $plan)
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
@@ -15,7 +15,7 @@ class FileName {
         }
     }
 
-    function disconnect_customer($customer, $plan)
+    function remove_customer($customer, $plan)
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
@@ -23,7 +23,7 @@ class FileName {
         }
     }
 
-    function change_customer($tur, $customer, $plan)
+    function change_customer($customer, $plan)
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
@@ -55,25 +55,29 @@ class FileName {
         }
     }
 
-    function add_pool($pool){
+    function online_customer($customer, $router_name)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
-            return null;
+            return;
         }
     }
 
-    function update_pool($old_pool, $new_pool){
+    function connect_customer($customer, $ip, $mac_address, $router_name)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
-            return null;
+            return;
         }
     }
 
-    function remove_pool($pool){
+    function disconnect_customer($customer, $router_name)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
-            return null;
+            return;
         }
     }
+
 }
 ```
