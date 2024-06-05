@@ -224,7 +224,7 @@ class Package
                 $dvc = Package::getDevice($p);
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    new $p['device']->add_customer($c, $p);
+                    (new $p['device'])->add_customer($c, $p);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -307,7 +307,7 @@ class Package
             $dvc = Package::getDevice($p);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->add_customer($c, $p);
+                (new $p['device'])->add_customer($c, $p);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -415,7 +415,7 @@ class Package
         $dvc = Package::getDevice($p);
         if (file_exists($dvc)) {
             require_once $dvc;
-            new $p['device']->change_customer($b, $c, $p);
+            (new $p['device'])->change_customer($b, $c, $p);
         } else {
             new Exception(Lang::T("Devices Not Found"));
         }

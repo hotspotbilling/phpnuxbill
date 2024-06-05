@@ -158,7 +158,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             $dvc = Package::getDevice($p);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->add_customer($user, $p);
+                (new $p['device'])->add_customer($user, $p);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -190,7 +190,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         $dvc = Package::getDevice($p);
         if (file_exists($dvc)) {
             require_once $dvc;
-            new $p['device']->remove_customer($user, $p);
+            (new $p['device'])->remove_customer($user, $p);
         } else {
             new Exception(Lang::T("Devices Not Found"));
         }
@@ -215,10 +215,10 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
     if (file_exists($dvc)) {
         require_once $dvc;
         if ($_GET['mikrotik'] == 'login') {
-            new $p['device']->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
+            (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
             r2(U . 'home', 's', Lang::T('Login Request successfully'));
         } else if ($_GET['mikrotik'] == 'logout') {
-            new $p['device']->disconnect_customer($user, $bill['routers']);
+            (new $p['device'])->disconnect_customer($user, $bill['routers']);
             r2(U . 'home', 's', Lang::T('Logout Request successfully'));
         }
     } else {

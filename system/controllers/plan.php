@@ -46,7 +46,7 @@ switch ($action) {
             $dvc = Package::getDevice($plan);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->add_customer($c, $p);
+                (new $p['device'])->add_customer($c, $p);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -260,7 +260,7 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->remove_customer($c, $p);
+                (new $p['device'])->remove_customer($c, $p);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -776,7 +776,7 @@ switch ($action) {
             $dvc = Package::getDevice($p);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->add_customer($c, $p);
+                (new $p['device'])->add_customer($c, $p);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }

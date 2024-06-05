@@ -30,14 +30,14 @@ switch ($action) {
                 $dvc = Package::getDevice($plan);
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    new $p['device']->add_plan($plan);
+                    (new $p['device'])->add_plan($plan);
                     if (!empty($plan['pool_expired'])) {
                         $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
                         $plan->rate_down_unit = "Kbps";
                         $plan->rate_up_unit == 'Kbps';
                         $plan->rate_up = '512';
                         $plan->rate_down = '512';
-                        new $p['device']->add_plan($plan);
+                        (new $p['device'])->add_plan($plan);
                     }
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
@@ -52,14 +52,14 @@ switch ($action) {
                 $dvc = Package::getDevice($plan);
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    new $p['device']->add_plan($plan);
+                    (new $p['device'])->add_plan($plan);
                     if (!empty($plan['pool_expired'])) {
                         $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
                         $plan->rate_down_unit = "Kbps";
                         $plan->rate_up_unit == 'Kbps';
                         $plan->rate_up = '512';
                         $plan->rate_down = '512';
-                        new $p['device']->add_plan($plan);
+                        (new $p['device'])->add_plan($plan);
                     }
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
@@ -119,7 +119,7 @@ switch ($action) {
             $dvc = Package::getDevice($d);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->remove_plan($d);
+                (new $p['device'])->remove_plan($d);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -223,14 +223,14 @@ switch ($action) {
             $dvc = Package::getDevice($d);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->add_plan($d);
+                (new $p['device'])->add_plan($d);
                 if (!empty($pool_expired)) {
                     $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
                     $d->rate_down_unit = "Kbps";
                     $d->rate_up_unit == 'Kbps';
                     $d->rate_up = '512';
                     $d->rate_down = '512';
-                    new $p['device']->add_plan($d);
+                    (new $p['device'])->add_plan($d);
                 }
             } else {
                 new Exception(Lang::T("Devices Not Found"));
@@ -323,7 +323,7 @@ switch ($action) {
             $dvc = Package::getDevice($d);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $d['device']->update_plan($old, $d);
+                (new $d['device'])->update_plan($old, $d);
                 if (!empty($pool_expired)) {
                     $old->name_plan = 'EXPIRED NUXBILL ' . $old['pool_expired'];
                     $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
@@ -331,7 +331,7 @@ switch ($action) {
                     $d->rate_up_unit == 'Kbps';
                     $d->rate_up = '512';
                     $d->rate_down = '512';
-                    new $d['device']->update_plan($old, $d);
+                    (new $d['device'])->update_plan($old, $d);
                 }
             } else {
                 new Exception(Lang::T("Devices Not Found"));
@@ -403,7 +403,7 @@ switch ($action) {
             $dvc = Package::getDevice($d);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->remove_plan($d);
+                (new $p['device'])->remove_plan($d);
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -494,14 +494,14 @@ switch ($action) {
             $dvc = Package::getDevice($d);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $p['device']->add_plan($d);
+                (new $p['device'])->add_plan($d);
                 if (!empty($pool_expired)) {
                     $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
                     $d->rate_down_unit = "Kbps";
                     $d->rate_up_unit == 'Kbps';
                     $d->rate_up = '512';
                     $d->rate_down = '512';
-                    new $p['device']->add_plan($d);
+                    (new $p['device'])->add_plan($d);
                 }
             } else {
                 new Exception(Lang::T("Devices Not Found"));
@@ -583,7 +583,7 @@ switch ($action) {
             $dvc = Package::getDevice($d);
             if (file_exists($dvc)) {
                 require_once $dvc;
-                new $d['device']->update_plan($old, $d);
+                (new $d['device'])->update_plan($old, $d);
                 if (!empty($pool_expired)) {
                     $old->name_plan = 'EXPIRED NUXBILL ' . $old['pool_expired'];
                     $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
@@ -591,7 +591,7 @@ switch ($action) {
                     $d->rate_up_unit == 'Kbps';
                     $d->rate_up = '512';
                     $d->rate_down = '512';
-                    new $d['device']->update_plan($old, $d);
+                    (new $d['device'])->update_plan($old, $d);
                 }
             } else {
                 new Exception(Lang::T("Devices Not Found"));

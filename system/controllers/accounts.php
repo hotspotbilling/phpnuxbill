@@ -46,7 +46,7 @@ switch ($action) {
                         $dvc = Package::getDevice($p);
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            new $p['device']->remove_customer($c, $p);
+                            (new $p['device'])->remove_customer($c, $p);
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
                         }
