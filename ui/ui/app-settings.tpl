@@ -220,12 +220,6 @@
                                 href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius"
                                 target="_blank">Radius Instructions</a></p>
                     </div>
-                    <div class="form-group">
-                        <label class="col-md-2 control-label">Radius Client</label>
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" name="radius_client" value="{$_c['radius_client']}">
-                        </div>
-                    </div>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">

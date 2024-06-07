@@ -8,7 +8,7 @@
  $maintenance_mode = $config['maintenance_mode'];
  if ($maintenance_mode == true){
      displayMaintenanceMessage();
- } 
+ }
 
 if (User::getID()) {
     r2(U . 'home');
@@ -95,9 +95,18 @@ switch ($do) {
                     // add customer to mikrotik
                     if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
                         try {
-                            $m = Mikrotik::info($v1['routers']);
-                            $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                            Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
+                            $p = ORM::for_table('tbl_plans')->where('id', $v1['id_plan'])->find_one();
+                            $dvc = Package::getDevice($p);
+                            if (file_exists($dvc)) {
+                                require_once $dvc;
+                                (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
+                            } else {
+                                if (!empty($config['voucher_redirect'])) {
+                                    r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                                } else {
+                                    r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                                }
+                            }
                             if (!empty($config['voucher_redirect'])) {
                                 r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
                             } else {
@@ -130,9 +139,18 @@ switch ($do) {
                     $user->save();
                     if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
                         try {
-                            $m = Mikrotik::info($v1['routers']);
-                            $c = Mikrotik::getClient($m['ip_address'], $m['username'], $m['password']);
-                            Mikrotik::logMeIn($c, $user['username'], $user['password'], $_SESSION['nux-ip'], $_SESSION['nux-mac']);
+                            $p = ORM::for_table('tbl_plans')->where('id', $v1['id_plan'])->find_one();
+                            $dvc = Package::getDevice($p);
+                            if (file_exists($dvc)) {
+                                require_once $dvc;
+                                (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
+                            } else {
+                                if (!empty($config['voucher_redirect'])) {
+                                    r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                                } else {
+                                    r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                                }
+                            }
                             if (!empty($config['voucher_redirect'])) {
                                 r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, you are connected to internet"));
                             } else {

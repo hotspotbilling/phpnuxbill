@@ -128,7 +128,7 @@ switch ($action) {
             r2(U . "order/package", 'e', Lang::T("Transaction Not found"));
         }
 
-        $router = Mikrotik::info($trx['routers']);
+        $router = ORM::for_table('tbl_routers')->where('name', $trx['routers'])->find_one();
         $plan = ORM::for_table('tbl_plans')->find_one($trx['plan_id']);
         $bandw = ORM::for_table('tbl_bandwidth')->find_one($plan['id_bw']);
         $invoice = ORM::for_table('tbl_transactions')->where("invoice", $trx['trx_invoice'])->find_one();

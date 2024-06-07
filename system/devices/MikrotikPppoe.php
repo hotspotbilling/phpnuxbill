@@ -208,6 +208,23 @@ class MikrotikPppoe
         );
     }
 
+
+    function online_customer($customer, $router_name)
+    {
+        global $_app_stage;
+        if ($_app_stage == 'demo') {
+            return;
+        }
+        $mikrotik = $this->info($router_name);
+        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        $printRequest = new RouterOS\Request(
+            '/ppp active print',
+            RouterOS\Query::where('user', $customer['username'])
+        );
+        return $client->sendSync($printRequest)->getProperty('.id');
+    }
+
+
     function connect_customer($customer, $ip, $mac_address, $router_name)
     {
         global $_app_stage;

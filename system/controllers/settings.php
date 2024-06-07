@@ -41,14 +41,6 @@ switch ($action) {
             $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
         }
         $ui->assign('logo', $logo);
-        if ($config['radius_enable'] && empty($config['radius_client'])) {
-            try {
-                $config['radius_client'] = Radius::getClient();
-                $ui->assign('_c', $_c);
-            } catch (Exception $e) {
-                //ignore
-            }
-        }
         $themes = [];
         $files = scandir('ui/themes/');
         foreach ($files as $file) {
@@ -109,7 +101,8 @@ switch ($action) {
         } else {
             if ($radius_enable) {
                 try {
-                    Radius::getTableNas()->find_many();
+                    require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "Radius.php";
+                    (new Radius())->getTableNas()->find_many();
                 } catch (Exception $e) {
                     $ui->assign("error_title", "RADIUS Error");
                     $ui->assign("error_message", "Radius table not found.<br><br>" .

@@ -93,7 +93,7 @@ class MikrotikHotspot
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
             '/ip hotspot active print',
-            RouterOS\Query::where('user', $customer['username'])
+            RouterOS\Query::where('name', $customer['username'])
         );
         return $client->sendSync($printRequest)->getProperty('.id');
     }

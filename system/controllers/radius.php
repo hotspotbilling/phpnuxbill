@@ -56,7 +56,8 @@ switch ($action) {
             $msg .= 'NAS IP Exists<br>';
         }
         if ($msg == '') {
-            $id = Radius::nasAdd($shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community);
+            require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "Radius.php";
+            (new Radius())->nasAdd($shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community);
             if ($id > 0) {
                 r2(U . 'radius/nas-list/', 's', "NAS Added");
             } else {
@@ -113,7 +114,8 @@ switch ($action) {
             $type = null;
         }
         if ($msg == '') {
-            if (Radius::nasUpdate($id, $shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community)) {
+            require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "Radius.php";
+            if ((new Radius())->nasUpdate($id, $shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community)) {
                 r2(U . 'radius/list/', 's', "NAS Saved");
             } else {
                 r2(U . 'radius/nas-add', 'e', 'NAS NOT Exists');
