@@ -330,3 +330,4 @@ ALTER TABLE `tbl_customers` ADD `status` ENUM('Active','Banned','Disabled') NOT 
 ALTER TABLE `tbl_customers` CHANGE `status` `status` ENUM('Active','Banned','Disabled','Inactive','Limited','Suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Active';
 ALTER TABLE `tbl_plans` ADD `price_old` VARCHAR(40) NOT NULL DEFAULT '' AFTER `price`;
 ALTER TABLE `tbl_plans` ADD `device` VARCHAR(32) NOT NULL DEFAULT '' AFTER `plan_type`;
+ALTER TABLE `tbl_pool` ADD `local_ip` VARCHAR(40) NOT NULL DEFAULT '' AFTER `pool_name`;

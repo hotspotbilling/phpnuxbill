@@ -106,5 +106,8 @@
     "2024.6.5" : [
         "ALTER TABLE `tbl_plans` ADD `price_old` VARCHAR(40) NOT NULL DEFAULT '' AFTER `price`;",
         "ALTER TABLE `tbl_plans` ADD `device` VARCHAR(32) NOT NULL DEFAULT '' AFTER `plan_type`;"
+    ],
+    "2024.6.10" : [
+        "ALTER TABLE `tbl_pool` ADD `local_ip` VARCHAR(40) NOT NULL DEFAULT '' AFTER `pool_name`;"
     ]
 }

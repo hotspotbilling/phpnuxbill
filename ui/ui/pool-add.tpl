@@ -14,9 +14,15 @@
 						</div>
                     </div>
                     <div class="form-group">
+						<label class="col-md-2 control-label">{Lang::T('Local IP')}</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" id="local_ip" name="local_ip" placeholder="192.168.88.1">
+						</div>
+                    </div>
+                    <div class="form-group">
 						<label class="col-md-2 control-label">{Lang::T('Range IP')}</label>
 						<div class="col-md-6">
-							<input type="text" class="form-control" id="ip_address" name="ip_address" placeholder="ex: 192.168.88.2-192.168.88.254">
+							<input type="text" class="form-control" id="ip_address" name="ip_address" placeholder="192.168.88.2-192.168.88.254">
 						</div>
                     </div>
                     <div class="form-group">
@@ -31,9 +37,6 @@
                                 {/foreach}
                             </select>
 						</div>
-                        {if $_c['radius_enable']}
-                            <p class="help-block col-md-4">For Radius, you need to add <b>Pool Name</b> in Mikrotik manually</p>
-                        {/if}
                     </div>
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">

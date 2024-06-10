@@ -15,6 +15,12 @@
 						</div>
                     </div>
                     <div class="form-group">
+						<label class="col-md-2 control-label">{Lang::T('Local IP')}</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" id="local_ip" name="local_ip" value="{$d['local_ip']}" placeholder="192.168.88.1">
+						</div>
+                    </div>
+                    <div class="form-group">
 						<label class="col-md-2 control-label">{Lang::T('Range IP')}</label>
 						<div class="col-md-6">
 							<input type="text" class="form-control" id="ip_address" name="ip_address" value="{$d['range_ip']}">

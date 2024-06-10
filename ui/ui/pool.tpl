@@ -9,7 +9,7 @@
                         onclick="return confirm('This will sync/send IP Pool to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>
-                {Lang::T('IP Pool')}
+                {Lang::T('IP Pool')} - PPPOE
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
@@ -37,6 +37,7 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Name Pool')}</th>
+                                <th>{Lang::T('Local IP')}</th>
                                 <th>{Lang::T('Range IP')}</th>
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Manage')}</th>
@@ -47,6 +48,7 @@
                             {foreach $d as $ds}
                                 <tr>
                                     <td>{$ds['pool_name']}</td>
+                                    <td>{$ds['local_ip']}</td>
                                     <td>{$ds['range_ip']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td align="center">

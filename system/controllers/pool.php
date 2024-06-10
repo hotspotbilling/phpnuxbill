@@ -83,6 +83,7 @@ switch ($action) {
     case 'add-post':
         $name = _post('name');
         $ip_address = _post('ip_address');
+        $local_ip = _post('local_ip');
         $routers = _post('routers');
         run_hook('add_pool'); #HOOK
         $msg = '';
@@ -103,6 +104,7 @@ switch ($action) {
             }
 
             $b = ORM::for_table('tbl_pool')->create();
+            $d->local_ip = $local_ip;
             $b->pool_name = $name;
             $b->range_ip = $ip_address;
             $b->routers = $routers;
@@ -116,6 +118,7 @@ switch ($action) {
 
 
     case 'edit-post':
+        $local_ip = _post('local_ip');
         $ip_address = _post('ip_address');
         $routers = _post('routers');
         run_hook('edit_pool'); #HOOK
@@ -133,6 +136,7 @@ switch ($action) {
         }
 
         if ($msg == '') {
+            $d->local_ip = $local_ip;
             $d->range_ip = $ip_address;
             $d->routers = $routers;
             $d->save();
