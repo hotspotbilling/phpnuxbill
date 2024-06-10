@@ -67,23 +67,28 @@ class MikrotikPppoe
 
         //Add Pool
 
-        if ($plan['rate_down_unit'] == 'Kbps') {
+        $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
+        if ($bw['rate_down_unit'] == 'Kbps') {
             $unitdown = 'K';
         } else {
             $unitdown = 'M';
         }
-        if ($plan['rate_up_unit'] == 'Kbps') {
+        if ($bw['rate_up_unit'] == 'Kbps') {
             $unitup = 'K';
         } else {
             $unitup = 'M';
         }
-        $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
+        $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
+        if(!empty(trim($bw['burst']))){
+            $rate .= ' '.$bw['burst'];
+        }
+        $pool = ORM::for_table("tbl_pool")->where("pool_name", $plan['pool'])->find_one();
         $addRequest = new RouterOS\Request('/ppp/profile/add');
         $client->sendSync(
             $addRequest
                 ->setArgument('name', $plan['name_plan'])
-                ->setArgument('local-address', $plan['pool'])
-                ->setArgument('remote-address', $plan['pool'])
+                ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip']: $pool['pool_name'])
+                ->setArgument('remote-address', $pool['pool_name'])
                 ->setArgument('rate-limit', $rate)
         );
     }
@@ -105,24 +110,28 @@ class MikrotikPppoe
         if (empty($profileID)) {
             $this->add_plan($new_plan);
         } else {
-            if ($new_plan['rate_down_unit'] == 'Kbps') {
+            $bw = ORM::for_table("tbl_bandwidth")->find_one($new_plan['id_bw']);
+            if ($bw['rate_down_unit'] == 'Kbps') {
                 $unitdown = 'K';
             } else {
                 $unitdown = 'M';
             }
-            if ($new_plan['rate_up_unit'] == 'Kbps') {
+            if ($bw['rate_up_unit'] == 'Kbps') {
                 $unitup = 'K';
             } else {
                 $unitup = 'M';
             }
-            $rate = $new_plan['rate_up'] . $unitup . "/" . $new_plan['rate_down'] . $unitdown;
-
+            $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
+            if(!empty(trim($bw['burst']))){
+                $rate .= ' '.$bw['burst'];
+            }
+            $pool = ORM::for_table("tbl_pool")->where("pool_name", $new_plan['pool'])->find_one();
             $setRequest = new RouterOS\Request('/ppp/profile/set');
             $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $profileID)
-                    ->setArgument('local-address', $new_plan['pool'])
-                    ->setArgument('remote-address', $new_plan['pool'])
+                    ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip']: $pool['pool_name'])
+                    ->setArgument('remote-address', $pool['pool_name'])
                     ->setArgument('rate-limit', $rate)
             );
         }
