@@ -38,18 +38,21 @@ class Radius {
 
     function add_plan($plan)
     {
-        if ($plan['rate_down_unit'] == 'Kbps') {
+        $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
+        if ($bw['rate_down_unit'] == 'Kbps') {
             $unitdown = 'K';
         } else {
             $unitdown = 'M';
         }
-        if ($plan['rate_up_unit'] == 'Kbps') {
+        if ($bw['rate_up_unit'] == 'Kbps') {
             $unitup = 'K';
         } else {
             $unitup = 'M';
         }
-        $rate = $plan['rate_up'] . $unitup . "/" . $plan['rate_down'] . $unitdown;
-
+        $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
+        if(!empty(trim($bw['burst']))){
+            $rate .= ' '.$bw['burst'];
+        }
         $rates = explode('/', $rate);
         ##burst fixed
         if (strpos($rate, ' ')) {
