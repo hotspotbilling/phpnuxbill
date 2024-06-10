@@ -632,5 +632,6 @@
     "Zip": "Zip",
     "Zip_Code": "Zip Code",
     "Local_IP": "Local IP",
-    "": ""
+    "": "",
+    "Device": "Device"
 }

@@ -44,6 +44,7 @@
                                 <th>{Lang::T('Data Limit')}</th>
                                 <th>{Lang::T('Plan Validity')}</th>
                                 <th>{Lang::T('Routers')}</th>
+                                <th>{Lang::T('Device')}</th>
                                 <th>{Lang::T('Expired IP Pool')}</th>
                                 <th>{Lang::T('ID')}</th>
                                 <th>{Lang::T('Manage')}</th>
@@ -70,6 +71,7 @@
                                     {/if}
                                     {/if}
                                 </td>
+                                <td>{$ds['device']}</td>
                                 <td>{$ds['pool_expired']}{if $ds['list_expired']}{if $ds['pool_expired']} |
                                     {/if}{$ds['list_expired']}{/if}</td>
                                 <td>{$ds['id']}</td>

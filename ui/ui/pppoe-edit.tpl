@@ -17,22 +17,23 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-10">
-                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes" {if $d['prepaid'] == yes}checked{/if}>
+                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes"
+                                {if $d['prepaid'] == yes}checked{/if}>
                             Prepaid
-                            <input type="radio" name="prepaid" onclick="postPaid()" value="no" {if $d['prepaid'] == no}checked{/if}> Postpaid
+                            <input type="radio" name="prepaid" onclick="postPaid()" value="no"
+                                {if $d['prepaid'] == no}checked{/if}> Postpaid
                         </div>
                     </div>
-                     <div class="form-group">
+                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Plan Type')}</label>
                         <div class="col-md-10">
-                            <input type="radio" name="plan_type"   value="Personal"
+                            <input type="radio" name="plan_type" value="Personal"
                                 {if $d['plan_type'] == 'Personal'}checked{/if}>
                             Personal
-                            <input type="radio" name="plan_type"   value="Business"
+                            <input type="radio" name="plan_type" value="Business"
                                 {if $d['plan_type'] == 'Business'}checked{/if}> Business
                         </div>
                     </div>
-                    
                     {if $_c['radius_enable'] and $d['is_radius']}
                         <div class="form-group">
                             <label class="col-md-2 control-label">Radius</label>
@@ -41,6 +42,16 @@
                             </div>
                         </div>
                     {/if}
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Device')}</label>
+                        <div class="col-md-6">
+                            <select class="form-control" id="device" name="device">
+                                {foreach $devices as $dev}
+                                    <option value="{$dev}" {if $dev == $d['device']}selected{/if}>{$dev}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Plan Name')}</label>
                         <div class="col-md-6">
@@ -69,13 +80,13 @@
                             </div>
                         </div>
                         {if $_c['enable_tax'] == 'yes'}
-                        {if $_c['tax_rate'] == 'custom'}
-                        <p class="help-block col-md-4">{number_format($_c['custom_tax_rate'], 2)} % {Lang::T('Tax Rates
+                            {if $_c['tax_rate'] == 'custom'}
+                                <p class="help-block col-md-4">{number_format($_c['custom_tax_rate'], 2)} % {Lang::T('Tax Rates
                             will be added')}</p>
-                        {else}
-                        <p class="help-block col-md-4">{number_format($_c['tax_rate'] * 100, 2)} % {Lang::T('Tax Rates
+                            {else}
+                                <p class="help-block col-md-4">{number_format($_c['tax_rate'] * 100, 2)} % {Lang::T('Tax Rates
                             will be added')}</p>
-                        {/if}
+                            {/if}
                         {/if}
 
                     </div>

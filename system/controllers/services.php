@@ -33,10 +33,6 @@ switch ($action) {
                     (new $p['device'])->add_plan($plan);
                     if (!empty($plan['pool_expired'])) {
                         $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                        $plan->rate_down_unit = "Kbps";
-                        $plan->rate_up_unit == 'Kbps';
-                        $plan->rate_up = '512';
-                        $plan->rate_down = '512';
                         (new $p['device'])->add_plan($plan);
                     }
                 } else {
@@ -55,10 +51,6 @@ switch ($action) {
                     (new $p['device'])->add_plan($plan);
                     if (!empty($plan['pool_expired'])) {
                         $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                        $plan->rate_down_unit = "Kbps";
-                        $plan->rate_up_unit == 'Kbps';
-                        $plan->rate_up = '512';
-                        $plan->rate_down = '512';
                         (new $p['device'])->add_plan($plan);
                     }
                 } else {
@@ -90,6 +82,15 @@ switch ($action) {
         $ui->assign('d', $d);
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
+        $devices = [];
+        $files = scandir($DEVICE_PATH);
+        foreach($files as $file){
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if($ext == 'php'){
+                $devices[] = pathinfo($file, PATHINFO_FILENAME);
+            }
+        }
+        $ui->assign('devices', $devices);
         run_hook('view_add_plan'); #HOOK
         $ui->display('hotspot-add.tpl');
         break;
@@ -98,11 +99,28 @@ switch ($action) {
         $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
+            if(empty($d['device'])){
+                if($d['is_radius']){
+                    $d->device = 'Radius';
+                }else{
+                    $d->device = 'MikrotikHotspot';
+                }
+                $d->save();
+            }
             $ui->assign('d', $d);
             $p = ORM::for_table('tbl_pool')->where('routers', $d['routers'])->find_many();
             $ui->assign('p', $p);
             $b = ORM::for_table('tbl_bandwidth')->find_many();
             $ui->assign('b', $b);
+            $devices = [];
+            $files = scandir($DEVICE_PATH);
+            foreach($files as $file){
+                $ext = pathinfo($file, PATHINFO_EXTENSION);
+                if($ext == 'php'){
+                    $devices[] = pathinfo($file, PATHINFO_FILENAME);
+                }
+            }
+            $ui->assign('devices', $devices);
             run_hook('view_edit_plan'); #HOOK
             $ui->display('hotspot-edit.tpl');
         } else {
@@ -145,6 +163,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
+        $device = _post('device');
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
         $enabled = _post('enabled');
@@ -173,24 +192,6 @@ switch ($action) {
         run_hook('add_plan'); #HOOK
 
         if ($msg == '') {
-            $b = ORM::for_table('tbl_bandwidth')->where('id', $id_bw)->find_one();
-            if ($b['rate_down_unit'] == 'Kbps') {
-                $unitdown = 'K';
-                $raddown = '000';
-            } else {
-                $unitdown = 'M';
-                $raddown = '000000';
-            }
-            if ($b['rate_up_unit'] == 'Kbps') {
-                $unitup = 'K';
-                $radup = '000';
-            } else {
-                $unitup = 'M';
-                $radup = '000000';
-            }
-            $rate = $b['rate_up'] . $unitup . "/" . $b['rate_down'] . $unitdown;
-            $radiusRate = $b['rate_up'] . $radup . '/' . $b['rate_down'] . $raddown . '/' . $b['burst'];
-            $rate = trim($rate . " " . $b['burst']);
             // Create new plan
             $d = ORM::for_table('tbl_plans')->create();
             $d->name_plan = $name;
@@ -218,6 +219,7 @@ switch ($action) {
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
+            $d->device = $device;
             $d->save();
 
             $dvc = Package::getDevice($d);
@@ -260,6 +262,7 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
+        $device = _post('device');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
         $routers = _post('routers');
@@ -318,6 +321,7 @@ switch ($action) {
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
+            $d->device = $device;
             $d->save();
 
             $dvc = Package::getDevice($d);
@@ -367,6 +371,15 @@ switch ($action) {
         $ui->assign('d', $d);
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
+        $devices = [];
+        $files = scandir($DEVICE_PATH);
+        foreach($files as $file){
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if($ext == 'php'){
+                $devices[] = pathinfo($file, PATHINFO_FILENAME);
+            }
+        }
+        $ui->assign('devices', $devices);
         run_hook('view_add_ppoe'); #HOOK
         $ui->display('pppoe-add.tpl');
         break;
@@ -376,6 +389,14 @@ switch ($action) {
         $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
+            if(empty($d['device'])){
+                if($d['is_radius']){
+                    $d->device = 'Radius';
+                }else{
+                    $d->device = 'MikrotikPppoe';
+                }
+                $d->save();
+            }
             $ui->assign('d', $d);
             $p = ORM::for_table('tbl_pool')->where('routers', ($d['is_radius']) ? 'radius' : $d['routers'])->find_many();
             $ui->assign('p', $p);
@@ -386,6 +407,15 @@ switch ($action) {
                 $r = ORM::for_table('tbl_routers')->find_many();
             }
             $ui->assign('r', $r);
+            $devices = [];
+            $files = scandir($DEVICE_PATH);
+            foreach($files as $file){
+                $ext = pathinfo($file, PATHINFO_EXTENSION);
+                if($ext == 'php'){
+                    $devices[] = pathinfo($file, PATHINFO_FILENAME);
+                }
+            }
+            $ui->assign('devices', $devices);
             run_hook('view_edit_ppoe'); #HOOK
             $ui->display('pppoe-edit.tpl');
         } else {
@@ -422,6 +452,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
+        $device = _post('device');
         $pool = _post('pool_name');
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
@@ -489,6 +520,7 @@ switch ($action) {
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
+            $d->device = $device;
             $d->save();
 
             $dvc = Package::getDevice($d);
@@ -497,10 +529,6 @@ switch ($action) {
                 (new $p['device'])->add_plan($d);
                 if (!empty($pool_expired)) {
                     $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                    $d->rate_down_unit = "Kbps";
-                    $d->rate_up_unit == 'Kbps';
-                    $d->rate_up = '512';
-                    $d->rate_down = '512';
                     (new $p['device'])->add_plan($d);
                 }
             } else {
@@ -522,6 +550,7 @@ switch ($action) {
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
+        $device = _post('device');
         $pool = _post('pool_name');
         $pool_expired = _post('pool_expired');
         $list_expired = _post('list_expired');
@@ -578,6 +607,7 @@ switch ($action) {
             $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
+            $d->device = $device;
             $d->save();
 
             $dvc = Package::getDevice($d);
