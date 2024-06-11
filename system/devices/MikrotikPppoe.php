@@ -34,8 +34,9 @@ class MikrotikPppoe
         }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        if (!empty($plan['pool_expired'])) {
-            $this->setPpoeUserPlan($client, $customer['username'], 'EXPIRED NUXBILL ' . $plan['pool_expired']);
+        if (!empty($plan['plan_expired'])) {
+            $p = ORM::for_table("tbl_plans")->select("name_plan")->find_one($plan['plan_expired']);
+            $this->setPpoeUserPlan($client, $customer['username'], $p['plan_expired']);
         } else {
             $this->removePpoeUser($client, $customer['username']);
         }

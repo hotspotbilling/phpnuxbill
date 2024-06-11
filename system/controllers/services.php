@@ -15,10 +15,6 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
-use PEAR2\Net\RouterOS;
-
-require_once 'system/autoload/PEAR2/Autoload.php';
-
 switch ($action) {
     case 'sync':
         set_time_limit(-1);
@@ -31,10 +27,6 @@ switch ($action) {
                 if (file_exists($dvc)) {
                     require_once $dvc;
                     (new $p['device'])->add_plan($plan);
-                    if (!empty($plan['pool_expired'])) {
-                        $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                        (new $p['device'])->add_plan($plan);
-                    }
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -49,10 +41,6 @@ switch ($action) {
                 if (file_exists($dvc)) {
                     require_once $dvc;
                     (new $p['device'])->add_plan($plan);
-                    if (!empty($plan['pool_expired'])) {
-                        $plan->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                        (new $p['device'])->add_plan($plan);
-                    }
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -84,9 +72,9 @@ switch ($action) {
         $ui->assign('r', $r);
         $devices = [];
         $files = scandir($DEVICE_PATH);
-        foreach($files as $file){
+        foreach ($files as $file) {
             $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if($ext == 'php'){
+            if ($ext == 'php') {
                 $devices[] = pathinfo($file, PATHINFO_FILENAME);
             }
         }
@@ -99,28 +87,33 @@ switch ($action) {
         $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
-            if(empty($d['device'])){
-                if($d['is_radius']){
+            if (empty($d['device'])) {
+                if ($d['is_radius']) {
                     $d->device = 'Radius';
-                }else{
+                } else {
                     $d->device = 'MikrotikHotspot';
                 }
                 $d->save();
             }
             $ui->assign('d', $d);
-            $p = ORM::for_table('tbl_pool')->where('routers', $d['routers'])->find_many();
-            $ui->assign('p', $p);
             $b = ORM::for_table('tbl_bandwidth')->find_many();
             $ui->assign('b', $b);
             $devices = [];
             $files = scandir($DEVICE_PATH);
-            foreach($files as $file){
+            foreach ($files as $file) {
                 $ext = pathinfo($file, PATHINFO_EXTENSION);
-                if($ext == 'php'){
+                if ($ext == 'php') {
                     $devices[] = pathinfo($file, PATHINFO_FILENAME);
                 }
             }
             $ui->assign('devices', $devices);
+            //select expired plan
+            if($d['is_radius']){
+                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("is_radius", 1)->findArray();
+            }else{
+                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("routers", $d['routers'])->findArray();
+            }
+            $ui->assign('exps', $exps);
             run_hook('view_edit_plan'); #HOOK
             $ui->display('hotspot-edit.tpl');
         } else {
@@ -164,8 +157,6 @@ switch ($action) {
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
         $device = _post('device');
-        $pool_expired = _post('pool_expired');
-        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
 
@@ -215,8 +206,6 @@ switch ($action) {
                 $d->is_radius = 0;
                 $d->routers = $routers;
             }
-            $d->pool_expired = $pool_expired;
-            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
@@ -226,14 +215,6 @@ switch ($action) {
             if (file_exists($dvc)) {
                 require_once $dvc;
                 (new $p['device'])->add_plan($d);
-                if (!empty($pool_expired)) {
-                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                    $d->rate_down_unit = "Kbps";
-                    $d->rate_up_unit == 'Kbps';
-                    $d->rate_up = '512';
-                    $d->rate_down = '512';
-                    (new $p['device'])->add_plan($d);
-                }
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -260,8 +241,7 @@ switch ($action) {
         $sharedusers = _post('sharedusers');
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
-        $pool_expired = _post('pool_expired');
-        $list_expired = _post('list_expired');
+        $plan_expired = _post('plan_expired', '0');
         $device = _post('device');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
@@ -317,8 +297,7 @@ switch ($action) {
             $d->validity = $validity;
             $d->validity_unit = $validity_unit;
             $d->shared_users = $sharedusers;
-            $d->pool_expired = $pool_expired;
-            $d->list_expired = $list_expired;
+            $d->plan_expired = $plan_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
@@ -328,15 +307,6 @@ switch ($action) {
             if (file_exists($dvc)) {
                 require_once $dvc;
                 (new $d['device'])->update_plan($old, $d);
-                if (!empty($pool_expired)) {
-                    $old->name_plan = 'EXPIRED NUXBILL ' . $old['pool_expired'];
-                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                    $d->rate_down_unit = "Kbps";
-                    $d->rate_up_unit == 'Kbps';
-                    $d->rate_up = '512';
-                    $d->rate_down = '512';
-                    (new $d['device'])->update_plan($old, $d);
-                }
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -373,9 +343,9 @@ switch ($action) {
         $ui->assign('r', $r);
         $devices = [];
         $files = scandir($DEVICE_PATH);
-        foreach($files as $file){
+        foreach ($files as $file) {
             $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if($ext == 'php'){
+            if ($ext == 'php') {
                 $devices[] = pathinfo($file, PATHINFO_FILENAME);
             }
         }
@@ -389,10 +359,10 @@ switch ($action) {
         $id = $routes['2'];
         $d = ORM::for_table('tbl_plans')->find_one($id);
         if ($d) {
-            if(empty($d['device'])){
-                if($d['is_radius']){
+            if (empty($d['device'])) {
+                if ($d['is_radius']) {
                     $d->device = 'Radius';
-                }else{
+                } else {
                     $d->device = 'MikrotikPppoe';
                 }
                 $d->save();
@@ -409,13 +379,20 @@ switch ($action) {
             $ui->assign('r', $r);
             $devices = [];
             $files = scandir($DEVICE_PATH);
-            foreach($files as $file){
+            foreach ($files as $file) {
                 $ext = pathinfo($file, PATHINFO_EXTENSION);
-                if($ext == 'php'){
+                if ($ext == 'php') {
                     $devices[] = pathinfo($file, PATHINFO_FILENAME);
                 }
             }
             $ui->assign('devices', $devices);
+            //select expired plan
+            if($d['is_radius']){
+                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("is_radius", 1)->findArray();
+            }else{
+                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("routers", $d['routers'])->findArray();
+            }
+            $ui->assign('exps', $exps);
             run_hook('view_edit_ppoe'); #HOOK
             $ui->display('pppoe-edit.tpl');
         } else {
@@ -454,8 +431,6 @@ switch ($action) {
         $routers = _post('routers');
         $device = _post('device');
         $pool = _post('pool_name');
-        $pool_expired = _post('pool_expired');
-        $list_expired = _post('list_expired');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
 
@@ -516,8 +491,6 @@ switch ($action) {
                 $d->is_radius = 0;
                 $d->routers = $routers;
             }
-            $d->pool_expired = $pool_expired;
-            $d->list_expired = $list_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
@@ -527,10 +500,6 @@ switch ($action) {
             if (file_exists($dvc)) {
                 require_once $dvc;
                 (new $p['device'])->add_plan($d);
-                if (!empty($pool_expired)) {
-                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                    (new $p['device'])->add_plan($d);
-                }
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }
@@ -552,8 +521,7 @@ switch ($action) {
         $routers = _post('routers');
         $device = _post('device');
         $pool = _post('pool_name');
-        $pool_expired = _post('pool_expired');
-        $list_expired = _post('list_expired');
+        $plan_expired = _post('plan_expired');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
 
@@ -603,8 +571,7 @@ switch ($action) {
             $d->validity_unit = $validity_unit;
             $d->routers = $routers;
             $d->pool = $pool;
-            $d->pool_expired = $pool_expired;
-            $d->list_expired = $list_expired;
+            $d->plan_expired = $plan_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
@@ -614,15 +581,6 @@ switch ($action) {
             if (file_exists($dvc)) {
                 require_once $dvc;
                 (new $d['device'])->update_plan($old, $d);
-                if (!empty($pool_expired)) {
-                    $old->name_plan = 'EXPIRED NUXBILL ' . $old['pool_expired'];
-                    $d->name_plan = 'EXPIRED NUXBILL ' . $pool_expired;
-                    $d->rate_down_unit = "Kbps";
-                    $d->rate_up_unit == 'Kbps';
-                    $d->rate_up = '512';
-                    $d->rate_down = '512';
-                    (new $d['device'])->update_plan($old, $d);
-                }
             } else {
                 new Exception(Lang::T("Devices Not Found"));
             }

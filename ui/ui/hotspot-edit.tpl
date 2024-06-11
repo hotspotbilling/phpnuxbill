@@ -179,8 +179,7 @@
                                 {/if}
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}
-                        </p>
+                        <p class="help-block col-md-4">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                     </div>
                     <span id="routerChoose" class="{if $d['is_radius']}hidden{/if}">
                         <div class="form-group">
@@ -194,24 +193,18 @@
                     </span>
                     <legend>{Lang::T('Expired Action')} <sub>{Lang::T('Optional')}</sub></legend>
                     <div class="form-group">
-                        <label class="col-md-2 control-label"><a
-                                href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
+                        <label class="col-md-2 control-label">{Lang::T('Expired Internet Plan')}</label>
                         <div class="col-md-6">
-                            <select id="pool_expired" name="pool_expired" class="form-control select2">
-                                <option value=''>{Lang::T('Select Pool')}</option>
-                                {foreach $p as $ps}
-                                    <option value="{$ps['pool_name']}" {if $d['pool_expired'] eq $ps['pool_name']} selected
-                                        {/if}>{$ps['pool_name']}</option>
+                            <select id="plan_expired" name="plan_expired" class="form-control select2">
+                                <option value='0'>Default - Remove Customer</option>
+                                {foreach $exps as $exp}
+                                    <option value="{$exp['id']}" {if $d['plan_expired'] eq $exp['id']} selected
+                                        {/if}>{$exp['name_plan']}</option>
                                 {/foreach}
                             </select>
                         </div>
+                        <p class="help-block col-md-4">{Lang::T('When Expired, customer will be move to selected internet plan')}</p>
                     </div>
-                    {* <div class="form-group" id="AddressList">
-                        <label class="col-md-2 control-label">{Lang::T('Address List')}</label>
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" name="list_expired" id="list_expired" value="{$d['list_expired']}">
-                        </div>
-                    </div> *}
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
                             <button class="btn btn-success" type="submit">{Lang::T('Save Changes')}</button>

@@ -633,5 +633,7 @@
     "Zip_Code": "Zip Code",
     "Local_IP": "Local IP",
     "": "",
-    "Device": "Device"
+    "Device": "Device",
+    "Expired_Internet_Plan": "Expired Internet Plan",
+    "When_Expired__customer_will_be_move_to_selected_internet_plan": "When Expired, customer will be move to selected internet plan"
 }

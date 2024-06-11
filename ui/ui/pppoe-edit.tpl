@@ -136,24 +136,18 @@
                     </div>
                     <legend>{Lang::T('Expired Action')} <sub>{Lang::T('Optional')}</sub></legend>
                     <div class="form-group">
-                        <label class="col-md-2 control-label"><a
-                                href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
+                        <label class="col-md-2 control-label">{Lang::T('Expired Internet Plan')}</label>
                         <div class="col-md-6">
-                            <select id="pool_expired" name="pool_expired" class="form-control select2">
-                                <option value=''>{Lang::T('Select Pool')}</option>
-                                {foreach $p as $ps}
-                                    <option value="{$ps['pool_name']}" {if $d['pool_expired'] eq $ps['pool_name']} selected
-                                        {/if}>{$ps['pool_name']}</option>
+                            <select id="plan_expired" name="plan_expired" class="form-control select2">
+                                <option value='0'>Default - Remove Customer</option>
+                                {foreach $exps as $exp}
+                                    <option value="{$exp['id']}" {if $d['plan_expired'] eq $exp['id']} selected
+                                        {/if}>{$exp['name_plan']}</option>
                                 {/foreach}
                             </select>
                         </div>
+                        <p class="help-block col-md-4">{Lang::T('When Expired, customer will be move to selected internet plan')}</p>
                     </div>
-                    {* <div class="form-group" id="AddressList">
-                        <label class="col-md-2 control-label">{Lang::T('Address List')}</label>
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" name="list_expired" id="list_expired" value="{$d['list_expired']}">
-                        </div>
-                    </div> *}
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success" type="submit">{Lang::T('Save Changes')}</button>
@@ -181,22 +175,4 @@
         $("#validity_unit").html(postOpt);
     }
 </script>
-{if $_c['radius_enable'] && $d['is_radius']}
-    {literal}
-        <script>
-            document.getElementById("routers").required = false;
-            document.getElementById("routers").disabled = true;
-            setTimeout(() => {
-                $.ajax({
-                    url: "index.php?_route=autoload/pool",
-                    data: "routers=radius",
-                    cache: false,
-                    success: function(msg) {
-                        $("#pool_expired").html(msg);
-                    }
-                });
-            }, 2000);
-        </script>
-    {/literal}
-{/if}
 {include file="sections/footer.tpl"}

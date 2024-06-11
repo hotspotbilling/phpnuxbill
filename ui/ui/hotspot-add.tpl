@@ -169,22 +169,6 @@
                             </div>
                         </div>
                     </span>
-                    <legend>{Lang::T('Expired Action')} <sub>{Lang::T('Optional')}</sub></legend>
-                    <div class="form-group" id="ipPool">
-                        <label class="col-md-2 control-label"><a
-                                href="{$_url}pool/add">{Lang::T('Expired IP Pool')}</a></label>
-                        <div class="col-md-6">
-                            <select id="pool_expired" name="pool_expired" class="form-control select2">
-                                <option value=''>{Lang::T('Select Pool')}</option>
-                            </select>
-                        </div>
-                    </div>
-                    {* <div class="form-group" id="AddressList">
-                        <label class="col-md-2 control-label">{Lang::T('Address List')}</label>
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" name="list_expired" id="list_expired">
-                        </div>
-                    </div> *}
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
                             <button class="btn btn-success" type="submit">{Lang::T('Save Changes')}</button>

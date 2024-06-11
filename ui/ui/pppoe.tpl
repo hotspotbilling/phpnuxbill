@@ -41,7 +41,7 @@
                                 <th>{Lang::T('Plan Price')}</th>
                                 <th>{Lang::T('Plan Validity')}</th>
                                 <th>{Lang::T('IP Pool')}</th>
-                                <th>{Lang::T('Expired IP Pool')}</th>
+                                <th>{Lang::T('Expired Internet Plan')}</th>
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Device')}</th>
                                 <th>{Lang::T('Manage')}</th>
@@ -57,10 +57,7 @@
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                     <td>{$ds['pool']}</td>
-                                    <td>{$ds['pool_expired']}{if $ds['list_expired']}
-                                        {if $ds['pool_expired']} |
-                                            {/if}{$ds['list_expired']}
-                                        {/if}</td>
+                                    <td>{if $ds['plan_expired']}<a href="{$_url}services/edit/{$ds['plan_expired']}">Yes</a>{else}No{/if}</td>
                                     <td>
                                         {if $ds['is_radius']}
                                             <span class="label label-primary">RADIUS</span>

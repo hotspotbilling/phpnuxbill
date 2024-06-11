@@ -331,3 +331,5 @@ ALTER TABLE `tbl_customers` CHANGE `status` `status` ENUM('Active','Banned','Dis
 ALTER TABLE `tbl_plans` ADD `price_old` VARCHAR(40) NOT NULL DEFAULT '' AFTER `price`;
 ALTER TABLE `tbl_plans` ADD `device` VARCHAR(32) NOT NULL DEFAULT '' AFTER `plan_type`;
 ALTER TABLE `tbl_pool` ADD `local_ip` VARCHAR(40) NOT NULL DEFAULT '' AFTER `pool_name`;
+ALTER TABLE `tbl_plans` ADD `plan_expired` INT NOT NULL DEFAULT '0' AFTER `pool`;
+ALTER TABLE `tbl_plans` DROP `pool_expired`, DROP `list_expired`;

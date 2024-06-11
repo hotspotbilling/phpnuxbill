@@ -45,7 +45,7 @@
                                 <th>{Lang::T('Plan Validity')}</th>
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Device')}</th>
-                                <th>{Lang::T('Expired IP Pool')}</th>
+                                <th>{Lang::T('Expired Internet Plan')}</th>
                                 <th>{Lang::T('ID')}</th>
                                 <th>{Lang::T('Manage')}</th>
                             </tr>
@@ -72,8 +72,7 @@
                                     {/if}
                                 </td>
                                 <td>{$ds['device']}</td>
-                                <td>{$ds['pool_expired']}{if $ds['list_expired']}{if $ds['pool_expired']} |
-                                    {/if}{$ds['list_expired']}{/if}</td>
+                                <td>{if $ds['plan_expired']}<a href="{$_url}services/edit/{$ds['plan_expired']}">Yes</a>{else}No{/if}</td>
                                 <td>{$ds['id']}</td>
                                 <td>
                                     <a href="{$_url}services/edit/{$ds['id']}"

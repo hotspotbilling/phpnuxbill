@@ -23,8 +23,10 @@ class Radius {
         if ($_app_stage == 'demo') {
             return;
         }
-        if (empty($plan['pool_expired'])) {
+        if (empty($plan['plan_expired'])) {
+            $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             $this->customerDeactivate($customer['username']);
+            $this->customerAddPlan($customer, $p);
         } else {
             $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool_expired'], ':=');
             $this->disconnectCustomer($customer['username']);

@@ -109,5 +109,9 @@
     ],
     "2024.6.10" : [
         "ALTER TABLE `tbl_pool` ADD `local_ip` VARCHAR(40) NOT NULL DEFAULT '' AFTER `pool_name`;"
+    ],
+    "2024.6.11" : [
+        "ALTER TABLE `tbl_plans` ADD `plan_expired` INT NOT NULL DEFAULT '0' AFTER `pool`;",
+        "ALTER TABLE `tbl_plans` DROP `pool_expired`, DROP `list_expired`;"
     ]
 }
