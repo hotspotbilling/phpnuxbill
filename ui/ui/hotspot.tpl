@@ -87,6 +87,10 @@
                     </table>
                 </div>
                 {include file="pagination.tpl"}
+				<div class="bs-callout bs-callout-info" id="callout-navbar-role">
+					<h4>Create expired Internet Plan</h4>
+					<p>When customer expired, you can move it to Expired Internet Plan</p>
+				</div>
             </div>
         </div>
     </div>
