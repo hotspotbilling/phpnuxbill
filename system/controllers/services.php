@@ -108,10 +108,10 @@ switch ($action) {
             }
             $ui->assign('devices', $devices);
             //select expired plan
-            if($d['is_radius']){
-                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("is_radius", 1)->findArray();
-            }else{
-                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("routers", $d['routers'])->findArray();
+            if ($d['is_radius']) {
+                $exps = ORM::for_table('tbl_plans')->selects('id', 'name_plan')->where('type', 'Hotspot')->where("is_radius", 1)->findArray();
+            } else {
+                $exps = ORM::for_table('tbl_plans')->selects('id', 'name_plan')->where('type', 'Hotspot')->where("routers", $d['routers'])->findArray();
             }
             $ui->assign('exps', $exps);
             run_hook('view_edit_plan'); #HOOK
@@ -219,7 +219,7 @@ switch ($action) {
                 new Exception(Lang::T("Devices Not Found"));
             }
 
-            r2(U . 'services/hotspot', 's', Lang::T('Data Created Successfully'));
+            r2(U . 'services/edit/' . $d->id(), 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/add', 'e', $msg);
         }
@@ -387,10 +387,10 @@ switch ($action) {
             }
             $ui->assign('devices', $devices);
             //select expired plan
-            if($d['is_radius']){
-                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("is_radius", 1)->findArray();
-            }else{
-                $exps = ORM::for_table('tbl_plans')->selects('id','name_plan')->where("routers", $d['routers'])->findArray();
+            if ($d['is_radius']) {
+                $exps = ORM::for_table('tbl_plans')->selects('id', 'name_plan')->where('type', 'PPPOE')->where("is_radius", 1)->findArray();
+            } else {
+                $exps = ORM::for_table('tbl_plans')->selects('id', 'name_plan')->where('type', 'PPPOE')->where("routers", $d['routers'])->findArray();
             }
             $ui->assign('exps', $exps);
             run_hook('view_edit_ppoe'); #HOOK

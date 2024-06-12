@@ -21,7 +21,7 @@ $textExpired = Lang::getNotifText('expired');
 
 $d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->where_lte('expiration', date("Y-m-d"))->find_many();
 echo "Found " . count($d) . " user(s)\n";
-run_hook('cronjob'); #HOOK
+//run_hook('cronjob'); #HOOK
 
 foreach ($d as $ds) {
     $date_now = strtotime(date("Y-m-d H:i:s"));
@@ -35,7 +35,7 @@ foreach ($d as $ds) {
         $dvc = Package::getDevice($p);
         if (file_exists($dvc)) {
             require_once $dvc;
-            (new $p['device'])->remove_customer($ds['routers'], $c, $p);
+            (new $p['device'])->remove_customer($c, $p);
         } else {
             echo "Cron error Devices $p[device] not found, cannot disconnect $c[username]";
             Message::sendTelegram("Cron error Devices $p[device] not found, cannot disconnect $c[username]");
