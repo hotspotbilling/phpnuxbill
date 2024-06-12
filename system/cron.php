@@ -33,7 +33,7 @@ foreach ($d as $ds) {
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
         $dvc = Package::getDevice($p);
-        if (file_exists($dvc)) {
+        if (file_exists($dvc) && $_app_stage != 'demo') {
             require_once $dvc;
             (new $p['device'])->remove_customer($c, $p);
         } else {

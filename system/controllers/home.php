@@ -156,7 +156,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         if ($tur['status'] != 'on') {
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
             $dvc = Package::getDevice($p);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->add_customer($user, $p);
             } else {
@@ -188,7 +188,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
         $dvc = Package::getDevice($p);
-        if (file_exists($dvc)) {
+        if (file_exists($dvc) && $_app_stage != 'demo') {
             require_once $dvc;
             (new $p['device'])->remove_customer($user, $p);
         } else {
@@ -212,7 +212,7 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
     $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
     $dvc = Package::getDevice($p);
-    if (file_exists($dvc)) {
+    if (file_exists($dvc) && $_app_stage != 'demo') {
         require_once $dvc;
         if ($_GET['mikrotik'] == 'login') {
             (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);

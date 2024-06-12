@@ -97,7 +97,7 @@ switch ($do) {
                         try {
                             $p = ORM::for_table('tbl_plans')->where('id', $v1['id_plan'])->find_one();
                             $dvc = Package::getDevice($p);
-                            if (file_exists($dvc)) {
+                            if (file_exists($dvc) && $_app_stage != 'demo') {
                                 require_once $dvc;
                                 (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
                             } else {
@@ -141,7 +141,7 @@ switch ($do) {
                         try {
                             $p = ORM::for_table('tbl_plans')->where('id', $v1['id_plan'])->find_one();
                             $dvc = Package::getDevice($p);
-                            if (file_exists($dvc)) {
+                            if (file_exists($dvc) && $_app_stage != 'demo') {
                                 require_once $dvc;
                                 (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
                             } else {

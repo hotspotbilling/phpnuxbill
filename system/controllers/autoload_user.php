@@ -18,7 +18,7 @@ switch ($action) {
         $bill = ORM::for_table('tbl_user_recharges')->where('id', $routes['2'])->where('username', $user['username'])->findOne();
         if ($bill['type'] == 'Hotspot' && $bill['status'] == 'on') {
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 if ((new $d['device'])->online_customer($user, $bill['routers'])) {
                     die('<a href="' . U . 'home&mikrotik=logout&id='.$bill['id'].'" onclick="return confirm(\''.Lang::T('Disconnect Internet?').'\')" class="btn btn-success btn-xs btn-block">'.Lang::T('You are Online, Logout?').'</a>');

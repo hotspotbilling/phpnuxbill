@@ -15,10 +15,6 @@ class MikrotikPppoe
 
     function add_customer($customer, $plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $this->removePpoeUser($client, $customer['username']);
@@ -28,10 +24,6 @@ class MikrotikPppoe
 
     function remove_customer($customer, $plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
@@ -45,10 +37,6 @@ class MikrotikPppoe
 
     function change_customer($customer, $plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $this->removePpoeUser($client, $customer['username']);
@@ -59,10 +47,6 @@ class MikrotikPppoe
 
     function add_plan($plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 
@@ -96,10 +80,6 @@ class MikrotikPppoe
 
     function update_plan($old_name, $new_plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($new_plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 
@@ -140,10 +120,6 @@ class MikrotikPppoe
 
     function remove_plan($plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
@@ -221,10 +197,6 @@ class MikrotikPppoe
 
     function online_customer($customer, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($router_name);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
@@ -237,18 +209,10 @@ class MikrotikPppoe
 
     function connect_customer($customer, $ip, $mac_address, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
     }
 
     function disconnect_customer($customer, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
     }
 
     function info($name)

@@ -15,10 +15,6 @@ class MikrotikHotspot
 
     function add_customer($customer, $plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $this->removeHotspotUser($client, $customer['username']);
@@ -28,10 +24,6 @@ class MikrotikHotspot
 
     function remove_customer($customer, $plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
@@ -45,10 +37,6 @@ class MikrotikHotspot
 
     function change_customer($customer, $plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $this->removeHotspotUser($client, $customer['username']);
@@ -58,10 +46,6 @@ class MikrotikHotspot
 
     function add_plan($plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
@@ -90,10 +74,6 @@ class MikrotikHotspot
 
     function online_customer($customer, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($router_name);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
@@ -105,10 +85,6 @@ class MikrotikHotspot
 
     function connect_customer($customer, $ip, $mac_address, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($router_name);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $addRequest = new RouterOS\Request('/ip/hotspot/active/login');
@@ -123,10 +99,6 @@ class MikrotikHotspot
 
     function disconnect_customer($customer, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($router_name);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
@@ -144,10 +116,6 @@ class MikrotikHotspot
 
     function update_plan($old_plan, $new_plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($new_plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 
@@ -187,10 +155,6 @@ class MikrotikHotspot
 
     function remove_plan($plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(

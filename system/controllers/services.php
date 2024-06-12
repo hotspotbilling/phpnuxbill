@@ -24,7 +24,7 @@ switch ($action) {
             $router = '';
             foreach ($plans as $plan) {
                 $dvc = Package::getDevice($plan);
-                if (file_exists($dvc)) {
+                if (file_exists($dvc) && $_app_stage != 'demo') {
                     require_once $dvc;
                     (new $p['device'])->add_plan($plan);
                 } else {
@@ -38,7 +38,7 @@ switch ($action) {
             $router = '';
             foreach ($plans as $plan) {
                 $dvc = Package::getDevice($plan);
-                if (file_exists($dvc)) {
+                if (file_exists($dvc) && $_app_stage != 'demo') {
                     require_once $dvc;
                     (new $p['device'])->add_plan($plan);
                 } else {
@@ -128,7 +128,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_plan'); #HOOK
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->remove_plan($d);
             } else {
@@ -212,7 +212,7 @@ switch ($action) {
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->add_plan($d);
             } else {
@@ -304,7 +304,7 @@ switch ($action) {
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $d['device'])->update_plan($old, $d);
             } else {
@@ -408,7 +408,7 @@ switch ($action) {
             run_hook('delete_ppoe'); #HOOK
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->remove_plan($d);
             } else {
@@ -497,7 +497,7 @@ switch ($action) {
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->add_plan($d);
             } else {
@@ -578,7 +578,7 @@ switch ($action) {
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $d['device'])->update_plan($old, $d);
             } else {

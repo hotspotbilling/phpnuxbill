@@ -19,10 +19,6 @@ class Radius {
 
     function remove_customer($customer, $plan)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
         if (empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             $this->customerDeactivate($customer['username']);
@@ -89,26 +85,14 @@ class Radius {
 
     function online_customer($customer, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
     }
 
     function connect_customer($customer, $ip, $mac_address, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
     }
 
     function disconnect_customer($customer, $router_name)
     {
-        global $_app_stage;
-        if ($_app_stage == 'demo') {
-            return;
-        }
     }
 
     public function getTableNas()

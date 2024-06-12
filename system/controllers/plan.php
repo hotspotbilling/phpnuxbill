@@ -44,7 +44,7 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->findOne($plan['plan_id']);
             $c = ORM::for_table('tbl_customers')->findOne($plan['customer_id']);
             $dvc = Package::getDevice($plan);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->add_customer($c, $p);
             } else {
@@ -258,7 +258,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->remove_customer($c, $p);
             } else {
@@ -774,7 +774,7 @@ switch ($action) {
             $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             $dvc = Package::getDevice($p);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->add_customer($c, $p);
             } else {

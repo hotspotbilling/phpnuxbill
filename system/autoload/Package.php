@@ -20,7 +20,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel, $note = '')
     {
-        global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx, $DEVICE_PATH;
+        global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx, $_app_stage;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
@@ -222,7 +222,7 @@ class Package
 
             if ($isChangePlan || $b['status'] == 'off') {
                 $dvc = Package::getDevice($p);
-                if (file_exists($dvc)) {
+                if (file_exists($dvc) && $_app_stage != 'demo') {
                     require_once $dvc;
                     (new $p['device'])->add_customer($c, $p);
                 } else {
@@ -305,7 +305,7 @@ class Package
         } else {
             // active plan not exists
             $dvc = Package::getDevice($p);
-            if (file_exists($dvc)) {
+            if (file_exists($dvc) && $_app_stage != 'demo') {
                 require_once $dvc;
                 (new $p['device'])->add_customer($c, $p);
             } else {
@@ -407,13 +407,13 @@ class Package
 
     public static function changeTo($username, $plan_id, $from_id)
     {
-        global $DEVICE_PATH;
+        global $_app_stage;
         $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
         $b = ORM::for_table('tbl_user_recharges')->find_one($from_id);
 
         $dvc = Package::getDevice($p);
-        if (file_exists($dvc)) {
+        if (file_exists($dvc) && $_app_stage != 'demo') {
             require_once $dvc;
             (new $p['device'])->change_customer($b, $c, $p);
         } else {
