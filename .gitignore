@@ -40,3 +40,8 @@ system/lan/**
 !system/lan/english.json
 !system/lan/country.json
 *.zip
+system/devices/**
+!system/devices/readme.md
+!system/devices/Radius.php
+!system/devices/MikrotikPppoe.php
+!system/devices/MikrotikHotspot.php

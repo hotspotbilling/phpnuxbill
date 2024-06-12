@@ -33,6 +33,83 @@ if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
     $json = json_decode($data, true);
 }
 switch ($action) {
+    case 'dlinstall':
+        if (!is_writeable($CACHE_PATH)) {
+            r2(U . "pluginmanager", 'e', 'Folder cache/ is not writable');
+        }
+        if (!is_writeable($PLUGIN_PATH)) {
+            r2(U . "pluginmanager", 'e', 'Folder plugin/ is not writable');
+        }
+        if (!is_writeable($DEVICE_PATH)) {
+            r2(U . "pluginmanager", 'e', 'Folder devices/ is not writable');
+        }
+        if (!is_writeable($UI_PATH . DIRECTORY_SEPARATOR . 'themes')) {
+            r2(U . "pluginmanager", 'e', 'Folder themes/ is not writable');
+        }
+        $cache = $CACHE_PATH . DIRECTORY_SEPARATOR . 'installer' . DIRECTORY_SEPARATOR;
+        if (!file_exists($cache)) {
+            mkdir($cache);
+        }
+        if (file_exists($_FILES['zip_plugin']['tmp_name'])) {
+            $zip = new ZipArchive();
+            $zip->open($_FILES['zip_plugin']['tmp_name']);
+            $zip->extractTo($cache);
+            $zip->close();
+            unlink($_FILES['zip_plugin']['tmp_name']);
+            //moving
+            if (file_exists($cache . 'plugin')) {
+                File::copyFolder($cache . 'plugin' . DIRECTORY_SEPARATOR, $PLUGIN_PATH . DIRECTORY_SEPARATOR);
+            }
+            if (file_exists($cache . 'paymentgateway')) {
+                File::copyFolder($cache . 'paymentgateway' . DIRECTORY_SEPARATOR, $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR);
+            }
+            if (file_exists($cache . 'theme')) {
+                File::copyFolder($cache . 'theme' . DIRECTORY_SEPARATOR, $UI_PATH . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR);
+            }
+            if (file_exists($cache . 'device')) {
+                File::copyFolder($cache . 'device' . DIRECTORY_SEPARATOR, $DEVICE_PATH . DIRECTORY_SEPARATOR);
+            }
+            //Cleaning
+            File::deleteFolder($cache);
+            r2(U . "pluginmanager", 's', 'Installation success');
+        } else if (_post('gh_url', '') != '') {
+            $ghUrl = _post('gh_url', '');
+            $plugin = basename($ghUrl);
+            $file = $cache . $plugin . '.zip';
+            $fp = fopen($file, 'w+');
+            $ch = curl_init($ghUrl . '/archive/refs/heads/master.zip');
+            curl_setopt($ch, CURLOPT_POST, 0);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_exec($ch);
+            curl_close($ch);
+            fclose($fp);
+            $zip = new ZipArchive();
+            $zip->open($file);
+            $zip->extractTo($cache);
+            $zip->close();
+            $folder = $cache . DIRECTORY_SEPARATOR . $plugin . '-main' . DIRECTORY_SEPARATOR;
+            if (file_exists($folder . 'plugin')) {
+                File::copyFolder($folder . 'plugin' . DIRECTORY_SEPARATOR, $PLUGIN_PATH . DIRECTORY_SEPARATOR);
+            }
+            if (file_exists($folder . 'paymentgateway')) {
+                File::copyFolder($folder . 'paymentgateway' . DIRECTORY_SEPARATOR, $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR);
+            }
+            if (file_exists($folder . 'theme')) {
+                File::copyFolder($folder . 'theme' . DIRECTORY_SEPARATOR, $UI_PATH . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR);
+            }
+            if (file_exists($folder . 'device')) {
+                File::copyFolder($folder . 'device' . DIRECTORY_SEPARATOR, $DEVICE_PATH . DIRECTORY_SEPARATOR);
+            }
+            File::deleteFolder($cache);
+            r2(U . "pluginmanager", 's', 'Installation success');
+        } else {
+            r2(U . 'pluginmanager', 'e', 'Nothing Installed');
+        }
+        break;
     case 'delete':
         if (!is_writeable($CACHE_PATH)) {
             r2(U . "pluginmanager", 'e', 'Folder cache/ is not writable');
@@ -180,17 +257,17 @@ function scanAndRemovePath($source, $target)
     $files = scandir($source);
     foreach ($files as $file) {
         if (is_file($source . $file)) {
-            if(file_exists($target.$file)){
+            if (file_exists($target . $file)) {
                 unlink($target . $file);
             }
         } else if (is_dir($source . $file) && !in_array($file, ['.', '..'])) {
-            scanAndRemovePath($source. $file. DIRECTORY_SEPARATOR, $target. $file. DIRECTORY_SEPARATOR);
-            if(file_exists($target.$file)){
+            scanAndRemovePath($source . $file . DIRECTORY_SEPARATOR, $target . $file . DIRECTORY_SEPARATOR);
+            if (file_exists($target . $file)) {
                 rmdir($target . $file);
             }
         }
     }
-    if(file_exists($target)){
+    if (file_exists($target)) {
         rmdir($target);
     }
 }
