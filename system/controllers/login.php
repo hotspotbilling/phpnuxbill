@@ -5,10 +5,10 @@
  *  by https://t.me/ibnux
  **/
 
- $maintenance_mode = $config['maintenance_mode'];
- if ($maintenance_mode == true){
-     displayMaintenanceMessage();
- }
+$maintenance_mode = $config['maintenance_mode'];
+if ($maintenance_mode == true) {
+    displayMaintenanceMessage();
+}
 
 if (User::getID()) {
     r2(U . 'home');

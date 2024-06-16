@@ -8,41 +8,9 @@
 try {
     require_once 'init.php';
 } catch (Throwable $e) {
-    $ui = new Smarty();
-    $ui->setTemplateDir([
-        'custom' => File::pathFixer($UI_PATH . '/ui_custom/'),
-        'default' => File::pathFixer($UI_PATH . '/ui/')
-    ]);
-    $ui->assign('_url', APP_URL . '/index.php?_route=');
-    $ui->setCompileDir(File::pathFixer($UI_PATH . '/compiled/'));
-    $ui->setConfigDir(File::pathFixer($UI_PATH . '/conf/'));
-    $ui->setCacheDir(File::pathFixer($UI_PATH . '/cache/'));
-    $ui->assign("error_title", "PHPNuxBill Crash");
-    if (_auth()) {
-        $ui->assign("error_message", $e->getMessage() . '<br>');
-    } else {
-        $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
-    }
-    $ui->display('router-error.tpl');
-    die();
+    die($e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
 } catch (Exception $e) {
-    $ui = new Smarty();
-    $ui->setTemplateDir([
-        'custom' => File::pathFixer($UI_PATH . '/ui_custom/'),
-        'default' => File::pathFixer($UI_PATH . '/ui/')
-    ]);
-    $ui->assign('_url', APP_URL . '/index.php?_route=');
-    $ui->setCompileDir(File::pathFixer($UI_PATH . '/compiled/'));
-    $ui->setConfigDir(File::pathFixer($UI_PATH . '/conf/'));
-    $ui->setCacheDir(File::pathFixer($UI_PATH . '/cache/'));
-    $ui->assign("error_title", "PHPNuxBill Crash");
-    if (_auth()) {
-        $ui->assign("error_message", $e->getMessage() . '<br>');
-    } else {
-        $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
-    }
-    $ui->display('router-error.tpl');
-    die();
+    die($e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
 }
 
 function _notify($msg, $type = 'e')
