@@ -40,3 +40,4 @@ system/lan/**
 !system/lan/english.json
 !system/lan/country.json
 *.zip
+/.vs
