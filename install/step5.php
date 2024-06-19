@@ -13,8 +13,65 @@
     <link type='text/css' href='css/style.css' rel='stylesheet' />
     <link type='text/css' href="css/bootstrap.min.css" rel="stylesheet">
 </head>
-<?php if (!file_exists('../pages')) rename('../pages_template', '../pages'); ?>
+<?php
+$sourceDir = $_SERVER['DOCUMENT_ROOT'].'/pages_template';
+$targetDir = $_SERVER['DOCUMENT_ROOT'].'/pages';
 
+function copyDir($src, $dst) {
+    $dir = opendir($src);
+    if (!$dir) {
+        throw new Exception("Cannot open directory: $src");
+    }
+
+    if (!file_exists($dst)) {
+        if (!mkdir($dst, 0777, true)) {
+            throw new Exception("Failed to create directory: $dst");
+        }
+    }
+
+    while (false !== ($file = readdir($dir))) {
+        if (($file != '.') && ($file != '..')) {
+            if (is_dir($src . '/' . $file)) {
+                copyDir($src . '/' . $file, $dst . '/' . $file);
+            } else {
+                if (!copy($src . '/' . $file, $dst . '/' . $file)) {
+                    throw new Exception("Failed to copy $src/$file to $dst/$file");
+                }
+            }
+        }
+    }
+    closedir($dir);
+}
+
+function removeDir($dir) {
+    if (!is_dir($dir)) return;
+    $objects = scandir($dir);
+    foreach ($objects as $object) {
+        if ($object == '.' || $object == '..') continue;
+        if (is_dir($dir . '/' . $object))
+            removeDir($dir . '/' . $object);
+        else
+            if (!unlink($dir . '/' . $object)) {
+                throw new Exception("Failed to delete file: $dir/$object");
+            }
+    }
+    if (!rmdir($dir)) {
+        throw new Exception("Failed to remove directory: $dir");
+    }
+}
+
+try {
+    if (!file_exists($sourceDir)) {
+        throw new Exception("Source directory does not exist.");
+    }
+
+    copyDir($sourceDir, $targetDir);
+    removeDir($sourceDir);
+
+} catch (Exception $e) {
+    echo 'Error: ', $e->getMessage(), "\n";
+}
+?>
 <body style='background-color: #FBFBFB;'>
     <div id='main-container'>
         <img src="img/logo.png" class="img-responsive" alt="Logo" />

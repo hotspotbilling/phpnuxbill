@@ -45,3 +45,4 @@ system/devices/**
 !system/devices/Radius.php
 !system/devices/MikrotikPppoe.php
 !system/devices/MikrotikHotspot.php
+/.vs
