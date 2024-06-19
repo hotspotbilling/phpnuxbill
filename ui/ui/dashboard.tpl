@@ -22,7 +22,7 @@
                 <h4><sup>{$_c['currency_code']}</sup>
                     {number_format($imonth,0,$_c['dec_point'],$_c['thousands_sep'])}</h4>
 
-                <p>{Lang::T('Income This Month')}</p>
+                <p title="from {$first_day_month}">{Lang::T('Income This Month')}</p>
             </div>
             <div class="icon">
                 <i class="ion ion-stats-bars"></i>

@@ -20,10 +20,17 @@ if(isset($_GET['refresh'])){
     r2(U . 'dashboard', 's', 'Data Refreshed');
 }
 
-$fdate = date('Y-m-01');
-$tdate = date('Y-m-t');
+$reset_day = $config['reset_day'];
+if(empty($reset_day)){
+    $reset_day = 1;
+}
+
 //first day of month
-$first_day_month = date('Y-m-01');
+if($reset_day >= date("d")){
+    $first_day_month = date('Y-m-'.$reset_day);
+}else{
+    $first_day_month = date('Y-m-'.$reset_day, strtotime("-1 MONTH"));
+}
 $mdate = date('Y-m-d');
 $month_n = date('n');
 
@@ -194,6 +201,7 @@ if (file_exists($cacheMSfile) && time() - filemtime($cacheMSfile) < 43200) {
 }
 
 // Assign the monthly sales data to Smarty
+$ui->assign('first_day_month',$first_day_month);
 $ui->assign('monthlySales', $monthlySales);
 $ui->assign('xfooter', '');
 $ui->assign('monthlyRegistered', $monthlyRegistered);
