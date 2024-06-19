@@ -2,6 +2,16 @@
 
 # CHANGELOG
 
+## 2024.6.19
+
+- new system for device, it can support non mikrotik devices, as long someone create device file
+- add local ip in the pool
+- Custom Fix Expired Date for postpaid
+- Expired customer can move to another Internet Plan
+- Plugin installer
+- refresh plugin manager cache
+- Docker File by George Njeri (@Swagfin)
+
 ## 2024.5.21
 
 - Add Maintenance Mode by @freeispradius
