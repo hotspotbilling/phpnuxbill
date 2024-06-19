@@ -7,14 +7,22 @@
             <div class="panel-body">
                 <form class="form-horizontal" method="post" role="form" action="{$_url}services/add-post">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Status')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Status')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Customer cannot buy disabled Plan, but admin can recharge it, use it if you want only admin recharge it">?</a>
+                        </label>
                         <div class="col-md-10">
                             <input type="radio" name="enabled" value="1" checked> Enable
                             <input type="radio" name="enabled" value="0"> Disable
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Type')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Type')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Postpaid will have fix expired date">?</a>
+                        </label>
                         <div class="col-md-10">
                             <input type="radio" name="prepaid" onclick="prePaid()" value="yes" checked> Prepaid
                             <input type="radio" name="prepaid" onclick="postPaid()" value="no"> Postpaid
@@ -22,7 +30,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Personal Plan will only show to personal Customer, Business plan will only show to Business Customer">?</a>
+                        </label>
                         <div class="col-md-10">
                             <input type="radio" name="plan_type" value="Personal" checked> Personal
                             <input type="radio" name="plan_type" value="Business"> Business
@@ -30,7 +42,11 @@
                     </div>
                     {if $_c['radius_enable']}
                         <div class="form-group">
-                            <label class="col-md-2 control-label">Radius</label>
+                            <label class="col-md-2 control-label">Radius
+                                <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                    data-trigger="focus" data-container="body"
+                                    data-content="If you enable Radius, choose device to radius, except if you have custome device">?</a>
+                            </label>
                             <div class="col-md-6">
                                 <label class="radio-inline">
                                     <input type="checkbox" name="radius" onclick="isRadius(this)" value="1"> Radius Plan
@@ -40,7 +56,11 @@
                         </div>
                     {/if}
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Device')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Device')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="This Device are the logic how PHPNuxBill Communicate with Mikrotik or other Devices">?</a>
+                        </label>
                         <div class="col-md-6">
                             <select class="form-control" id="device" name="device">
                                 {foreach $devices as $dev}
@@ -133,13 +153,15 @@
                             will be added')}</p>
                             {/if}
                         {/if}
-
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Shared Users')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Shared Users')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="How many devices can online in one Customer account">?</a>
+                        </label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="sharedusers" name="sharedusers" value="1">
-                            <p class="help-block">{Lang::T('1 user can be used for many devices?')}</p>
                         </div>
                     </div>
                     <div class="form-group">

@@ -8,14 +8,22 @@
                 <form class="form-horizontal" method="post" role="form" action="{$_url}services/edit-post">
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Status')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Status')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Customer cannot buy disabled Plan, but admin can recharge it, use it if you want only admin recharge it">?</a>
+                        </label>
                         <div class="col-md-10">
                             <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}> Enable
                             <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> Disable
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Type')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Type')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Postpaid will have fix expired date">?</a>
+                        </label>
                         <div class="col-md-10">
                             <input type="radio" name="prepaid" onclick="prePaid()" value="yes"
                                 {if $d['prepaid'] == yes}checked{/if}>
@@ -25,7 +33,11 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Personal Plan will only show to personal Customer, Business plan will only show to Business Customer">?</a>
+                        </label>
                         <div class="col-md-10">
                             <input type="radio" name="plan_type" value="Personal"
                                 {if $d['plan_type'] == 'Personal'}checked{/if}>
@@ -36,14 +48,22 @@
                     </div>
                     {if $_c['radius_enable'] and $d['is_radius']}
                         <div class="form-group">
-                            <label class="col-md-2 control-label">Radius</label>
+                            <label class="col-md-2 control-label">Radius
+                                <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                    data-trigger="focus" data-container="body"
+                                    data-content="If you enable Radius, choose device to radius, except if you have custome device">?</a>
+                            </label>
                             <div class="col-md-10">
                                 <label class="label label-primary">RADIUS</label>
                             </div>
                         </div>
                     {/if}
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Device')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Device')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="This Device are the logic how PHPNuxBill Communicate with Mikrotik or other Devices">?</a>
+                        </label>
                         <div class="col-md-6">
                             <select class="form-control" id="device" name="device">
                                 {foreach $devices as $dev}
@@ -150,7 +170,11 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Shared Users')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Shared Users')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="How many devices can online in one Customer account">?</a>
+                        </label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="sharedusers" name="sharedusers"
                                 value="{$d['shared_users']}">
@@ -179,7 +203,8 @@
                                 {/if}
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
+                        <p class="help-block col-md-4">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}
+                        </p>
                     </div>
                     <span id="routerChoose" class="{if $d['is_radius']}hidden{/if}">
                         <div class="form-group">
@@ -198,12 +223,13 @@
                             <select id="plan_expired" name="plan_expired" class="form-control select2">
                                 <option value='0'>Default - Remove Customer</option>
                                 {foreach $exps as $exp}
-                                    <option value="{$exp['id']}" {if $d['plan_expired'] eq $exp['id']} selected
-                                        {/if}>{$exp['name_plan']}</option>
+                                    <option value="{$exp['id']}" {if $d['plan_expired'] eq $exp['id']} selected {/if}>
+                                        {$exp['name_plan']}</option>
                                 {/foreach}
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('When Expired, customer will be move to selected internet plan')}</p>
+                        <p class="help-block col-md-4">
+                            {Lang::T('When Expired, customer will be move to selected internet plan')}</p>
                     </div>
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
