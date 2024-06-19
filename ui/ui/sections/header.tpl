@@ -451,10 +451,6 @@
                                     <a href="{$_url}pluginmanager"><i class="glyphicon glyphicon-tasks"></i>
                                         {Lang::T('Plugin Manager')} <small class="label pull-right">Free</small></a>
                                 </li>
-                                {* <li {if $_routes[0] eq 'codecanyon' }class="active" {/if}>
-                                <a href="{$_url}codecanyon"><i class="glyphicon glyphicon-shopping-cart"></i>
-                                    Codecanyon.net <small class="label pull-right">Paid</small></a>
-                            </li> *}
                             {/if}
                         </ul>
                     </li>

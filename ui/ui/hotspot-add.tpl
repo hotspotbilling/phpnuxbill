@@ -176,6 +176,16 @@
                         <p class="help-block col-md-4">{Lang::T('1 Period = 1 Month, Expires the 20th of each month')}
                         </p>
                     </div>
+                    <div class="form-group hidden" id="expired_date">
+                        <label class="col-md-2 control-label">{Lang::T('Expired Date')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Expired will be this date every month, 0 will be when customer buy internet plan">?</a>
+                        </label>
+                        <div class="col-md-6">
+                            <input type="number" class="form-control" name="expired_date" maxlength="2" value="20" min="1" max="28" step="1" >
+                        </div>
+                    </div>
                     <span id="routerChoose" class="">
                         <div class="form-group">
                             <label class="col-md-2 control-label"><a
@@ -210,10 +220,12 @@
     var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
     function prePaid() {
         $("#validity_unit").html(preOpt);
+        $('#expired_date').addClass('hidden');
     }
 
     function postPaid() {
         $("#validity_unit").html(postOpt);
+        $("#expired_date").removeClass('hidden');
     }
     document.addEventListener("DOMContentLoaded", function(event) {
         prePaid()

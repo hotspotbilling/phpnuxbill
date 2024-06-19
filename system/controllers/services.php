@@ -159,6 +159,7 @@ switch ($action) {
         $device = _post('device');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
+        $expired_date = _post('expired_date');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -209,6 +210,14 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
+            if($prepaid == 'no'){
+                if($expired_date>28 && $expired_date < 1){
+                    $expired_date = 20;
+                }
+                $d->expired_date = $expired_date;
+            }else{
+                $d->expired_date = 0;
+            }
             $d->save();
 
             $dvc = Package::getDevice($d);
@@ -246,6 +255,7 @@ switch ($action) {
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
         $routers = _post('routers');
+        $expired_date = _post('expired_date');
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
             $msg .= 'The validity must be a number' . '<br>';
@@ -301,6 +311,14 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
+            if($prepaid == 'no'){
+                if($expired_date>28 && $expired_date < 1){
+                    $expired_date = 20;
+                }
+                $d->expired_date = $expired_date;
+            }else{
+                $d->expired_date = 0;
+            }
             $d->save();
 
             $dvc = Package::getDevice($d);
@@ -433,6 +451,7 @@ switch ($action) {
         $pool = _post('pool_name');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
+        $expired_date = _post('expired_date');
 
 
         $msg = '';
@@ -491,6 +510,14 @@ switch ($action) {
                 $d->is_radius = 0;
                 $d->routers = $routers;
             }
+            if($prepaid == 'no'){
+                if($expired_date>28 && $expired_date < 1){
+                    $expired_date = 20;
+                }
+                $d->expired_date = $expired_date;
+            }else{
+                $d->expired_date = 0;
+            }
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
@@ -524,6 +551,7 @@ switch ($action) {
         $plan_expired = _post('plan_expired');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
+        $expired_date = _post('expired_date');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -575,6 +603,14 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
+            if($prepaid == 'no'){
+                if($expired_date>28 && $expired_date < 1){
+                    $expired_date = 20;
+                }
+                $d->expired_date = $expired_date;
+            }else{
+                $d->expired_date = 0;
+            }
             $d->save();
 
             $dvc = Package::getDevice($d);

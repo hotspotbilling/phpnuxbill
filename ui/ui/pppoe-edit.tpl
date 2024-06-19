@@ -26,10 +26,10 @@
                         </label>
                         <div class="col-md-10">
                             <input type="radio" name="prepaid" onclick="prePaid()" value="yes"
-                                {if $d['prepaid'] == yes}checked{/if}>
+                                {if $d['prepaid'] == 'yes'}checked{/if}>
                             Prepaid
                             <input type="radio" name="prepaid" onclick="postPaid()" value="no"
-                                {if $d['prepaid'] == no}checked{/if}> Postpaid
+                                {if $d['prepaid'] == 'no'}checked{/if}> Postpaid
                         </div>
                     </div>
                     <div class="form-group">
@@ -136,6 +136,17 @@
                         <p class="help-block col-md-4">
                             {Lang::T('1 Period = 1 Month, Expires the 20th of each month')}</p>
                     </div>
+                    <div class="form-group {if $d['prepaid'] == yes}hidden{/if}" id="expired_date">
+                        <label class="col-md-2 control-label">{Lang::T('Expired Date')}
+                            <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
+                                data-trigger="focus" data-container="body"
+                                data-content="Expired will be this date every month">?</a>
+                        </label>
+                        <div class="col-md-6">
+                            <input type="number" class="form-control" name="expired_date" maxlength="2"
+                                value="{$d['expired_date']}" min="1" max="28" step="1">
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label"><a href="{$_url}pool/add">{Lang::T('IP Pool')}</a></label>
                         <div class="col-md-6">
@@ -190,10 +201,12 @@
     var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
     function prePaid() {
         $("#validity_unit").html(preOpt);
+        $('#expired_date').addClass('hidden');
     }
 
     function postPaid() {
         $("#validity_unit").html(postOpt);
+        $("#expired_date").removeClass('hidden');
     }
 </script>
 {include file="sections/footer.tpl"}

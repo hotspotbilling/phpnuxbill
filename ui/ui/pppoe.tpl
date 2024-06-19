@@ -35,13 +35,21 @@
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
+                                <th></th>
+                                <th colspan="4" class="text-center">{Lang::T('Internet Plan')}</th>
+                                <th></th>
+                                <th colspan="2" class="text-center" style="background-color: rgb(243, 241, 172);">{Lang::T('Expired')}</th>
+                                <th colspan="4"></th>
+                            </tr>
+                            <tr>
                                 <th>{Lang::T('Plan Name')}</th>
                                 <th>{Lang::T('Plan Type')}</th>
                                 <th>{Lang::T('Bandwidth Plans')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
                                 <th>{Lang::T('Plan Validity')}</th>
                                 <th>{Lang::T('IP Pool')}</th>
-                                <th>{Lang::T('Expired Internet Plan')}</th>
+                                <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Plan')}</th>
+                                <th style="background-color: rgb(243, 241, 172);">{Lang::T('Date')}</th>
                                 <th>{Lang::T('Routers')}</th>
                                 <th>{Lang::T('Device')}</th>
                                 <th>{Lang::T('Manage')}</th>
@@ -58,6 +66,7 @@
                                     <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                     <td>{$ds['pool']}</td>
                                     <td>{if $ds['plan_expired']}<a href="{$_url}services/edit/{$ds['plan_expired']}">Yes</a>{else}No{/if}</td>
+                                    <td>{if $ds['prepaid'] == no}{$ds['expired_date']}{/if}</td>
                                     <td>
                                         {if $ds['is_radius']}
                                             <span class="label label-primary">RADIUS</span>
