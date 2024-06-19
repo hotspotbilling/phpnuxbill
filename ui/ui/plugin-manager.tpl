@@ -1,12 +1,15 @@
 {include file="sections/header.tpl"}
 
-<form method="post" enctype="multipart/form-data" onsubmit="return confirm('Warning, installing unknown source can damage your server, continue?')" action="{$_url}pluginmanager/dlinstall">
+<form method="post" enctype="multipart/form-data"
+    onsubmit="return confirm('Warning, installing unknown source can damage your server, continue?')"
+    action="{$_url}pluginmanager/dlinstall">
     <div class="panel panel-primary panel-hovered">
         <div class="panel-heading">
             {Lang::T('Plugin Installer')}
             <div class="btn-group pull-right">
-                <a class="btn btn-warning btn-xs" title="save" href="https://github.com/hotspotbilling/phpnuxbill/wiki/Installing-Plugin-or-Payment-Gateway" target="_blank"><span
-                        class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></a>
+                <a class="btn btn-warning btn-xs" title="save"
+                    href="https://github.com/hotspotbilling/phpnuxbill/wiki/Installing-Plugin-or-Payment-Gateway"
+                    target="_blank"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></a>
             </div>
         </div>
         <div class="panel-body row">
@@ -16,7 +19,8 @@
             </div>
             <div class="form-group col-md-7">
                 <label>Github url</label>
-                <input type="url" class="form-control" name="gh_url" placeholder="https://github.com/username/repository">
+                <input type="url" class="form-control" name="gh_url"
+                    placeholder="https://github.com/username/repository">
             </div>
             <div class="col-md-1">
                 <br>
@@ -27,7 +31,12 @@
 </form>
 
 <div class="panel panel-primary panel-hovered">
-    <div class="panel-heading">{Lang::T('Plugin')}</div>
+    <div class="panel-heading">{Lang::T('Plugin')}
+        <div class="btn-group pull-right">
+            <a class="btn btn-success btn-xs" title="refresh cache" href="{$_url}pluginmanager/refresh"><span
+                    class="glyphicon glyphicon-refresh" aria-hidden="true"></span></a>
+        </div>
+    </div>
     <div class="panel-body row">
         {foreach $plugins as $plugin}
             <div class="col-md-4">

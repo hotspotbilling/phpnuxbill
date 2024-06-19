@@ -109,6 +109,7 @@ CREATE TABLE `tbl_plans` (
   `is_radius` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 is radius',
   `pool` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `plan_expired` int NOT NULL DEFAULT '0',
+  `expired_date` TINYINT(1) NOT NULL DEFAULT '20',
   `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled\r\n',
   `prepaid` enum('yes','no') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'yes' COMMENT 'is prepaid',
   `plan_type` enum('Business','Personal') COLLATE utf8mb4_general_ci DEFAULT 'Personal' COMMENT 'For selecting account type',

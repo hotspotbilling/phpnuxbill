@@ -113,5 +113,8 @@
     "2024.6.11" : [
         "ALTER TABLE `tbl_plans` ADD `plan_expired` INT NOT NULL DEFAULT '0' AFTER `pool`;",
         "ALTER TABLE `tbl_plans` DROP `pool_expired`, DROP `list_expired`;"
+    ],
+    "2024.6.19" : [
+        "ALTER TABLE `tbl_plans` ADD `expired_date` TINYINT(1) NOT NULL DEFAULT '20' AFTER `plan_expired`;"
     ]
 }

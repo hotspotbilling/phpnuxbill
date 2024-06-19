@@ -25,7 +25,7 @@ if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
     $json = json_decode($txt, true);
     if (empty($json['plugins']) && empty($json['payment_gateway'])) {
         unlink($cache);
-        r2(U . 'dashboard', 'd', $txt);
+        r2(U . 'pluginmanager');
     }
 } else {
     $data = Http::getData($plugin_repository);
@@ -33,6 +33,10 @@ if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
     $json = json_decode($data, true);
 }
 switch ($action) {
+    case 'refresh':
+        if (file_exists($cache)) unlink($cache);
+        r2(U . "pluginmanager", 's', 'Refresh success');
+        break;
     case 'dlinstall':
         if (!is_writeable($CACHE_PATH)) {
             r2(U . "pluginmanager", 'e', 'Folder cache/ is not writable');

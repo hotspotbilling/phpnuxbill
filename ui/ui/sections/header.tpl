@@ -475,8 +475,8 @@
                                             href="{$_url}logs/radius">Radius</a>
                                     </li>
                                 {/if}
+                                {$_MENU_LOGS}
                             </ul>
-                            {$_MENU_LOGS}
                         </li>
                     {/if}
                     {$_MENU_AFTER_LOGS}
