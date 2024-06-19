@@ -7,7 +7,7 @@ services:
     ports:
       - "80:80"
     environment:
-       TZ: Africa/Nairobi
+      TZ: Africa/Nairobi
     depends_on:
       - mysql
 
