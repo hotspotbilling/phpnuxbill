@@ -101,10 +101,9 @@ class Lang
 
     public static function timeElapsed($datetime, $full = false)
     {
-        $now = new DateTime;
+        $now = new DateTime(date("Y-m-d H:i:s"));
         $ago = new DateTime($datetime);
         $diff = $now->diff($ago);
-
         $diff->w = floor($diff->d / 7);
         $diff->d -= $diff->w * 7;
 
@@ -124,10 +123,15 @@ class Lang
                 unset($string[$k]);
             }
         }
-
+        $when = "";
+        if(time()>strtotime($datetime)){
+            $when = Lang::T('ago');
+        }else{
+            $when = Lang::T('later');
+        }
         if (!$full)
             $string = array_slice($string, 0, 1);
-            return $string ? implode(', ', $string) .' '. Lang::T('ago') : Lang::T('just now');
+        return $string ? implode(', ', $string) .' '. $when : Lang::T('just now');
     }
 
     public static function nl2br($text)
