@@ -96,6 +96,15 @@
                         <p class="help-block col-md-4">This used for admin to select payment in recharge, using comma
                             for every new options</p>
                     </div>
+
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Income reset date')}</label>
+                        <div class="col-md-6">
+                            <input type="number" required class="form-control" id="reset_day" placeholder="20" min="1"
+                                max="28" step="1" name="reset_day" value="{$_c['reset_day']}">
+                        </div>
+                        <span class="help-block col-md-4">Income will reset every this day</span>
+                    </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">APP URL</label>
                         <div class="col-md-6">

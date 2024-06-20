@@ -24,7 +24,6 @@ $reset_day = $config['reset_day'];
 if(empty($reset_day)){
     $reset_day = 1;
 }
-$reset_day = 20;
 //first day of month
 if($reset_day >= date("d")){
     $first_day_month = date('Y-m-'.$reset_day);

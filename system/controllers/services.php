@@ -19,33 +19,33 @@ switch ($action) {
     case 'sync':
         set_time_limit(-1);
         if ($routes['2'] == 'hotspot') {
-            $plans = ORM::for_table('tbl_bandwidth')->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where('tbl_plans.enabled', '1')->find_many();
+            $plans = ORM::for_table('tbl_plans')->where('type', 'Hotspot')->find_many();
             $log = '';
-            $router = '';
             foreach ($plans as $plan) {
                 $dvc = Package::getDevice($plan);
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
                         require_once $dvc;
-                        (new $p['device'])->add_plan($plan);
+                        (new $plan['device'])->add_plan($plan);
+                        $log .= "DONE : $plan[name_plan], $plan[device]<br>";
                     } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                        $log .= "FAILED : $plan[name_plan], $plan[device] | Device Not Found<br>";
                     }
                 }
             }
             r2(U . 'services/hotspot', 's', $log);
         } else if ($routes['2'] == 'pppoe') {
-            $plans = ORM::for_table('tbl_bandwidth')->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->where('tbl_plans.enabled', '1')->find_many();
+            $plans = ORM::for_table('tbl_plans')->where('type', 'PPPOE')->find_many();
             $log = '';
-            $router = '';
             foreach ($plans as $plan) {
                 $dvc = Package::getDevice($plan);
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
                         require_once $dvc;
-                        (new $p['device'])->add_plan($plan);
+                        (new $plan['device'])->add_plan($plan);
+                        $log .= "DONE : $plan[name_plan], $plan[device]<br>";
                     } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                        $log .= "FAILED : $plan[name_plan], $plan[device] | Device Not Found<br>";
                     }
                 }
             }
