@@ -42,21 +42,23 @@ switch ($action) {
         $router = '';
         foreach ($turs as $tur) {
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
-            if($p){
+            if ($p) {
                 $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
-                if($c){
+                if ($c) {
                     $dvc = Package::getDevice($p);
-                    if (file_exists($dvc) && $_app_stage != 'demo') {
-                        require_once $dvc;
-                        (new $p['device'])->add_customer($c, $p);
-                    } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            (new $p['device'])->add_customer($c, $p);
+                        } else {
+                            new Exception(Lang::T("Devices Not Found"));
+                        }
                     }
                     $log .= "DONE : $tur[username], $ptur[namebp], $tur[type], $tur[routers]<br>";
-                }else{
+                } else {
                     $log .= "Customer NOT FOUND : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
                 }
-            }else{
+            } else {
                 $log .= "PLAN NOT FOUND : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
             }
         }
@@ -71,7 +73,7 @@ switch ($action) {
         }
         $usings = explode(',', $config['payment_usings']);
         $usings = array_filter(array_unique($usings));
-        if(count($usings)==0){
+        if (count($usings) == 0) {
             $usings[] = Lang::T('Cash');
         }
         $ui->assign('usings', $usings);
@@ -117,7 +119,7 @@ switch ($action) {
             }
             $usings = explode(',', $config['payment_usings']);
             $usings = array_filter(array_unique($usings));
-            if(count($usings)==0){
+            if (count($usings) == 0) {
                 $usings[] = Lang::T('Cash');
             }
             $ui->assign('usings', $usings);
@@ -267,11 +269,14 @@ switch ($action) {
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->remove_customer($c, $p);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            $dvc = Package::getDevice($p);
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->remove_customer($c, $p);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
             $d->delete();
             _log('[' . $admin['username'] . ']: ' . 'Delete Plan for Customer ' . $c['username'] . '  [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
@@ -316,19 +321,23 @@ switch ($action) {
                 //remove from old plan
                 $p = ORM::for_table('tbl_plans')->find_one($oldPlanID);
                 $dvc = Package::getDevice($p);
-                if (file_exists($dvc) && $_app_stage != 'demo') {
-                    require_once $dvc;
-                    (new $p['device'])->remove_customer($customer, $p);
-                } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $p['device'])->remove_customer($customer, $p);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
                 }
                 //add new plan
                 $dvc = Package::getDevice($newPlan);
-                if (file_exists($dvc) && $_app_stage != 'demo') {
-                    require_once $dvc;
-                    (new $newPlan['device'])->add_customer($customer, $newPlan);
-                } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $newPlan['device'])->add_customer($customer, $newPlan);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
                 }
             }
             $d->save();
@@ -580,13 +589,12 @@ switch ($action) {
             }
             run_hook('create_voucher'); #HOOK
             $vouchers = [];
-            if($voucher_format == 'numbers'){
-                if (strlen($lengthcode)<6) {
+            if ($voucher_format == 'numbers') {
+                if (strlen($lengthcode) < 6) {
                     $msg .= 'The Length Code must be a more than 6 for numbers' . '<br>';
                 }
                 $vouchers = generateUniqueNumericVouchers($numbervoucher, $lengthcode);
-            }
-            else {
+            } else {
                 for ($i = 0; $i < $numbervoucher; $i++) {
                     $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
                     if ($voucher_format == 'low') {
@@ -595,11 +603,10 @@ switch ($action) {
                         $code = Lang::randomUpLowCase($code);
                     }
                     $vouchers[] = $code;
-
                 }
             }
 
-            foreach($vouchers as $code){
+            foreach ($vouchers as $code) {
                 $d = ORM::for_table('tbl_voucher')->create();
                 $d->type = $type;
                 $d->routers = $server;
@@ -758,7 +765,7 @@ switch ($action) {
                 $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
                 $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
-                if(!empty($stoken)){
+                if (!empty($stoken)) {
                     App::setToken($stoken, $in['id']);
                 }
                 $ui->display('invoice.tpl');
@@ -793,15 +800,17 @@ switch ($action) {
             $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             $dvc = Package::getDevice($p);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->add_customer($c, $p);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->add_customer($c, $p);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
             _log("$admin[fullname] extend Customer $tur[customer_id] $tur[username] for $days days", $admin['user_type'], $admin['id']);
             r2(U . 'plan', 's', "Extend until $expiration");
-        }else{
+        } else {
             r2(U . 'plan', 's', "Customer is not expired yet");
         }
         break;
@@ -811,8 +820,8 @@ switch ($action) {
         $search = _post('search');
         if ($search != '') {
             $query = ORM::for_table('tbl_user_recharges')
-            ->whereRaw("username LIKE '%$search%' OR namebp LIKE '%$search%' OR method LIKE '%$search%' OR routers LIKE '%$search%' OR type LIKE '%$search%'")
-            ->order_by_desc('id');
+                ->whereRaw("username LIKE '%$search%' OR namebp LIKE '%$search%' OR method LIKE '%$search%' OR routers LIKE '%$search%' OR type LIKE '%$search%'")
+                ->order_by_desc('id');
             $d = Paginator::findMany($query, ['search' => $search]);
         } else {
             $query = ORM::for_table('tbl_user_recharges')->order_by_desc('id');

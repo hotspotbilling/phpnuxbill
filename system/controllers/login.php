@@ -97,14 +97,17 @@ switch ($do) {
                         try {
                             $p = ORM::for_table('tbl_plans')->where('id', $v1['id_plan'])->find_one();
                             $dvc = Package::getDevice($p);
-                            if (file_exists($dvc) && $_app_stage != 'demo') {
-                                require_once $dvc;
-                                (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
-                            } else {
-                                if (!empty($config['voucher_redirect'])) {
-                                    r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                            if ($_app_stage != 'demo') {
+                                if (file_exists($dvc)) {
+                                    require_once $dvc;
+                                    (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
+                                    if (!empty($config['voucher_redirect'])) {
+                                        r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                                    } else {
+                                        r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                                    }
                                 } else {
-                                    r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                                    new Exception(Lang::T("Devices Not Found"));
                                 }
                             }
                             if (!empty($config['voucher_redirect'])) {
@@ -141,14 +144,17 @@ switch ($do) {
                         try {
                             $p = ORM::for_table('tbl_plans')->where('id', $v1['id_plan'])->find_one();
                             $dvc = Package::getDevice($p);
-                            if (file_exists($dvc) && $_app_stage != 'demo') {
-                                require_once $dvc;
-                                (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
-                            } else {
-                                if (!empty($config['voucher_redirect'])) {
-                                    r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                            if ($_app_stage != 'demo') {
+                                if (file_exists($dvc)) {
+                                    require_once $dvc;
+                                    (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $v1['routers']);
+                                    if (!empty($config['voucher_redirect'])) {
+                                        r2($config['voucher_redirect'], 's', Lang::T("Voucher activation success, now you can login"));
+                                    } else {
+                                        r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                                    }
                                 } else {
-                                    r2(U . "login", 's', Lang::T("Voucher activation success, now you can login"));
+                                    new Exception(Lang::T("Devices Not Found"));
                                 }
                             }
                             if (!empty($config['voucher_redirect'])) {
@@ -182,7 +188,7 @@ switch ($do) {
     default:
         run_hook('customer_view_login'); #HOOK
         if ($config['disable_registration'] == 'yes') {
-            $ui->assign('code', alphanumeric(_get('code'),"-"));
+            $ui->assign('code', alphanumeric(_get('code'), "-"));
             $ui->display('user-login-noreg.tpl');
         } else {
             $ui->display('user-login.tpl');

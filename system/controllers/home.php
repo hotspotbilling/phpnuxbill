@@ -156,11 +156,13 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         if ($tur['status'] != 'on') {
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
             $dvc = Package::getDevice($p);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->add_customer($user, $p);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->add_customer($user, $p);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
 
             // make customer cannot extend again
@@ -188,11 +190,13 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
         $dvc = Package::getDevice($p);
-        if (file_exists($dvc) && $_app_stage != 'demo') {
-            require_once $dvc;
-            (new $p['device'])->remove_customer($user, $p);
-        } else {
-            new Exception(Lang::T("Devices Not Found"));
+        if ($_app_stage != 'demo') {
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                (new $p['device'])->remove_customer($user, $p);
+            } else {
+                new Exception(Lang::T("Devices Not Found"));
+            }
         }
         $bill->status = 'off';
         $bill->expiration = date('Y-m-d');
@@ -212,17 +216,19 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
     $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
     $dvc = Package::getDevice($p);
-    if (file_exists($dvc) && $_app_stage != 'demo') {
-        require_once $dvc;
-        if ($_GET['mikrotik'] == 'login') {
-            (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
-            r2(U . 'home', 's', Lang::T('Login Request successfully'));
-        } else if ($_GET['mikrotik'] == 'logout') {
-            (new $p['device'])->disconnect_customer($user, $bill['routers']);
-            r2(U . 'home', 's', Lang::T('Logout Request successfully'));
+    if ($_app_stage != 'demo') {
+        if (file_exists($dvc)) {
+            require_once $dvc;
+            if ($_GET['mikrotik'] == 'login') {
+                (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
+                r2(U . 'home', 's', Lang::T('Login Request successfully'));
+            } else if ($_GET['mikrotik'] == 'logout') {
+                (new $p['device'])->disconnect_customer($user, $bill['routers']);
+                r2(U . 'home', 's', Lang::T('Logout Request successfully'));
+            }
+        } else {
+            new Exception(Lang::T("Devices Not Found"));
         }
-    } else {
-        new Exception(Lang::T("Devices Not Found"));
     }
 }
 
@@ -230,6 +236,6 @@ $ui->assign('unpaid', ORM::for_table('tbl_payment_gateway')
     ->where('username', $user['username'])
     ->where('status', 1)
     ->find_one());
-    $ui->assign('code', alphanumeric(_get('code'),"-"));
+$ui->assign('code', alphanumeric(_get('code'), "-"));
 run_hook('view_customer_dashboard'); #HOOK
 $ui->display('user-dashboard.tpl');

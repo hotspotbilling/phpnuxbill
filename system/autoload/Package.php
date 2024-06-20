@@ -68,7 +68,7 @@ class Package
         if ($p['prepaid'] == 'no') {
             $day_exp = $p['expired_date'];
         }
-        if(empty($day_exp)){
+        if (empty($day_exp)) {
             $day_exp = 20;
         }
 
@@ -214,11 +214,13 @@ class Package
 
             if ($isChangePlan || $b['status'] == 'off') {
                 $dvc = Package::getDevice($p);
-                if (file_exists($dvc) && $_app_stage != 'demo') {
-                    require_once $dvc;
-                    (new $p['device'])->add_customer($c, $p);
-                } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $p['device'])->add_customer($c, $p);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
                 }
             }
 
@@ -297,11 +299,13 @@ class Package
         } else {
             // active plan not exists
             $dvc = Package::getDevice($p);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->add_customer($c, $p);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->add_customer($c, $p);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
 
             $d = ORM::for_table('tbl_user_recharges')->create();
@@ -396,23 +400,6 @@ class Package
         }
         return $inv;
     }
-
-    public static function changeTo($username, $plan_id, $from_id)
-    {
-        global $_app_stage;
-        $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
-        $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
-        $b = ORM::for_table('tbl_user_recharges')->find_one($from_id);
-
-        $dvc = Package::getDevice($p);
-        if (file_exists($dvc) && $_app_stage != 'demo') {
-            require_once $dvc;
-            (new $p['device'])->change_customer($b, $c, $p);
-        } else {
-            new Exception(Lang::T("Devices Not Found"));
-        }
-    }
-
 
     public static function _raid()
     {

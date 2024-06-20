@@ -214,11 +214,13 @@ switch ($action) {
             if ($p) {
                 $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
                 $dvc = Package::getDevice($p);
-                if (file_exists($dvc) && $_app_stage != 'demo') {
-                    require_once $dvc;
-                    (new $p['device'])->change_customer($c, $p);
-                } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $p['device'])->change_customer($c, $p);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
                 }
                 $b->status = 'off';
                 $b->expiration = date('Y-m-d');
@@ -242,11 +244,13 @@ switch ($action) {
                 if ($p) {
                     $routers[] = $b['routers'];
                     $dvc = Package::getDevice($p);
-                    if (file_exists($dvc) && $_app_stage != 'demo') {
-                        require_once $dvc;
-                        (new $p['device'])->add_customer($c, $p);
-                    } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            (new $p['device'])->add_customer($c, $p);
+                        } else {
+                            new Exception(Lang::T("Devices Not Found"));
+                        }
                     }
                 }
             }
@@ -328,13 +332,15 @@ switch ($action) {
             $c = ORM::for_table('tbl_user_recharges')->where('username', $d['username'])->find_one();
             if ($c) {
                 $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
-                if($p){
+                if ($p) {
                     $dvc = Package::getDevice($p);
-                    if (file_exists($dvc) && $_app_stage != 'demo') {
-                        require_once $dvc;
-                        (new $p['device'])->remove_customer($d, $p);
-                    } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            (new $p['device'])->remove_customer($d, $p);
+                        } else {
+                            new Exception(Lang::T("Devices Not Found"));
+                        }
                     }
                 }
                 try {
@@ -569,12 +575,14 @@ switch ($action) {
                     $c->save();
                     $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
                     $dvc = Package::getDevice($p);
-                    if (file_exists($dvc) && $_app_stage != 'demo') {
-                        require_once $dvc;
-                        (new $p['device'])->remove_customer($d, $p);
-                        (new $p['device'])->add_customer($d, $p);
-                    } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            (new $p['device'])->remove_customer($d, $p);
+                            (new $p['device'])->add_customer($d, $p);
+                        } else {
+                            new Exception(Lang::T("Devices Not Found"));
+                        }
                     }
                 }
             }

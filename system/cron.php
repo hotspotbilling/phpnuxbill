@@ -33,12 +33,14 @@ foreach ($d as $ds) {
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
         $dvc = Package::getDevice($p);
-        if (file_exists($dvc) && $_app_stage != 'demo') {
-            require_once $dvc;
-            (new $p['device'])->remove_customer($c, $p);
-        } else {
-            echo "Cron error Devices $p[device] not found, cannot disconnect $c[username]";
-            Message::sendTelegram("Cron error Devices $p[device] not found, cannot disconnect $c[username]");
+        if($_app_stage != 'demo'){
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                (new $p['device'])->remove_customer($c, $p);
+            } else {
+                echo "Cron error Devices $p[device] not found, cannot disconnect $c[username]";
+                Message::sendTelegram("Cron error Devices $p[device] not found, cannot disconnect $c[username]");
+            }
         }
         echo Message::sendPackageNotification($c, $u['namebp'], $p['price'], $textExpired, $config['user_notification_expired']) . "\n";
         //update database user dengan status off

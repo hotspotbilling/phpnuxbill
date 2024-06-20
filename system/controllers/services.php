@@ -24,11 +24,13 @@ switch ($action) {
             $router = '';
             foreach ($plans as $plan) {
                 $dvc = Package::getDevice($plan);
-                if (file_exists($dvc) && $_app_stage != 'demo') {
-                    require_once $dvc;
-                    (new $p['device'])->add_plan($plan);
-                } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $p['device'])->add_plan($plan);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
                 }
             }
             r2(U . 'services/hotspot', 's', $log);
@@ -38,11 +40,13 @@ switch ($action) {
             $router = '';
             foreach ($plans as $plan) {
                 $dvc = Package::getDevice($plan);
-                if (file_exists($dvc) && $_app_stage != 'demo') {
-                    require_once $dvc;
-                    (new $p['device'])->add_plan($plan);
-                } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $p['device'])->add_plan($plan);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
                 }
             }
             r2(U . 'services/pppoe', 's', $log);
@@ -128,11 +132,13 @@ switch ($action) {
         if ($d) {
             run_hook('delete_plan'); #HOOK
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->remove_plan($d);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->remove_plan($d);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
             $d->delete();
 
@@ -210,24 +216,25 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
-            if($prepaid == 'no'){
-                if($expired_date>28 && $expired_date < 1){
+            if ($prepaid == 'no') {
+                if ($expired_date > 28 && $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
-            }else{
+            } else {
                 $d->expired_date = 0;
             }
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->add_plan($d);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->add_plan($d);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
-
             r2(U . 'services/edit/' . $d->id(), 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/add', 'e', $msg);
@@ -311,24 +318,25 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
-            if($prepaid == 'no'){
-                if($expired_date>28 && $expired_date < 1){
+            if ($prepaid == 'no') {
+                if ($expired_date > 28 && $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
-            }else{
+            } else {
                 $d->expired_date = 0;
             }
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $d['device'])->update_plan($old, $d);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $d['device'])->update_plan($old, $d);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
-
             r2(U . 'services/hotspot', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/edit/' . $id, 'e', $msg);
@@ -426,11 +434,13 @@ switch ($action) {
             run_hook('delete_ppoe'); #HOOK
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->remove_plan($d);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->remove_plan($d);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
             $d->delete();
 
@@ -510,12 +520,12 @@ switch ($action) {
                 $d->is_radius = 0;
                 $d->routers = $routers;
             }
-            if($prepaid == 'no'){
-                if($expired_date>28 && $expired_date < 1){
+            if ($prepaid == 'no') {
+                if ($expired_date > 28 && $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
-            }else{
+            } else {
                 $d->expired_date = 0;
             }
             $d->enabled = $enabled;
@@ -524,13 +534,14 @@ switch ($action) {
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->add_plan($d);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $p['device'])->add_plan($d);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
-
             r2(U . 'services/pppoe', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'services/pppoe-add', 'e', $msg);
@@ -603,24 +614,25 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
-            if($prepaid == 'no'){
-                if($expired_date>28 && $expired_date < 1){
+            if ($prepaid == 'no') {
+                if ($expired_date > 28 && $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
-            }else{
+            } else {
                 $d->expired_date = 0;
             }
             $d->save();
 
             $dvc = Package::getDevice($d);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $d['device'])->update_plan($old, $d);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+            if ($_app_stage != 'demo') {
+                if (file_exists($dvc)) {
+                    require_once $dvc;
+                    (new $d['device'])->update_plan($old, $d);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
-
             r2(U . 'services/pppoe', 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(U . 'services/pppoe-edit/' . $id, 'e', $msg);
