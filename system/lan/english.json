@@ -642,5 +642,7 @@
     "Time": "Time",
     "Data": "Data",
     "Category": "Category",
-    "later": "later"
+    "later": "later",
+    "Package_Details": "Package Details",
+    "Summary": "Summary"
 }

@@ -288,26 +288,28 @@
                 </div>
                 <div class="box-body">
                     <form method="post" role="form" class="form-horizontal" action="{$_url}voucher/activation-post">
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label text-center">{Lang::T('Code Voucher')}</label>
-                            <div class="col-sm-7">
-                                <input type="text" id="code" name="code" class="form-control"
-                                    placeholder="{Lang::T('Enter voucher code here')}">
-                            </div>
-                        </div>
-                        <div class="form-group" align="center">
-                            <button class="btn btn-success" type="submit">{Lang::T('Recharge')}</button>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <a class="btn btn-default"
+                                    href="{APP_URL}/scan/?back={urlencode($_url)}{urlencode("home&code=")}"><i
+                                        class="glyphicon glyphicon-qrcode"></i></a>
+                            </span>
+                            <input type="text" id="code" name="code" class="form-control"
+                                placeholder="{Lang::T('Enter voucher code here')}" value="{$code}">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit">{Lang::T('Recharge')}</button>
+                            </span>
                         </div>
                     </form>
                 </div>
                 <div class="box-body">
                     <div class="btn-group btn-group-justified" role="group">
-                        <a class="btn btn-warning" href="{$_url}voucher/activation">
+                        <a class="btn btn-default" href="{$_url}voucher/activation">
                             <i class="ion ion-ios-cart"></i>
                             {Lang::T('Order Voucher')}
                         </a>
                         {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
-                            <a href="{$_url}order/package" class="btn btn-primary">
+                            <a href="{$_url}order/package" class="btn btn-default">
                                 <i class="ion ion-ios-cart"></i>
                                 {Lang::T('Order Package')}
                             </a>

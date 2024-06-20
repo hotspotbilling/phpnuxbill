@@ -59,8 +59,13 @@
                             </div>
                             <div class="form-group">
                                 <label>{Lang::T('Enter voucher code here')}</label>
-                                <input type="text" class="form-control" name="voucher" required autocomplete="off"
-                                    placeholder="{Lang::T('Code Voucher')}">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="voucher" name="voucher" required value="{$code}"
+                                        placeholder="{Lang::T('Enter voucher code here')}">
+                                    <span class="input-group-btn">
+                                        <a class="btn btn-default" href="{APP_URL}/scan/?back={urlencode($_url)}{urlencode("login&code=")}"><i class="glyphicon glyphicon-qrcode"></i></a>
+                                    </span>
+                                </div>
                             </div>
                             <div class="btn-group btn-group-justified mb15">
                                 <div class="btn-group">
