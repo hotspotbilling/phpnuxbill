@@ -17,7 +17,7 @@ switch ($action) {
 
     case 'activation':
         run_hook('view_activate_voucher'); #HOOK
-        $ui->assign('code', alphanumeric(_get('code')));
+        $ui->assign('code', alphanumeric(_get('code'),"-"));
         $ui->display('user-activation.tpl');
         break;
 
