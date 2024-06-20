@@ -37,20 +37,28 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         set_time_limit(-1);
-        $plans = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
+        $turs = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
         $log = '';
         $router = '';
-        foreach ($plans as $plan) {
-            $p = ORM::for_table('tbl_plans')->findOne($plan['plan_id']);
-            $c = ORM::for_table('tbl_customers')->findOne($plan['customer_id']);
-            $dvc = Package::getDevice($plan);
-            if (file_exists($dvc) && $_app_stage != 'demo') {
-                require_once $dvc;
-                (new $p['device'])->add_customer($c, $p);
-            } else {
-                new Exception(Lang::T("Devices Not Found"));
+        foreach ($turs as $tur) {
+            $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
+            if($p){
+                $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
+                if($c){
+                    $dvc = Package::getDevice($p);
+                    if (file_exists($dvc) && $_app_stage != 'demo') {
+                        require_once $dvc;
+                        (new $p['device'])->add_customer($c, $p);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
+                    $log .= "DONE : $tur[username], $ptur[namebp], $tur[type], $tur[routers]<br>";
+                }else{
+                    $log .= "Customer NOT FOUND : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
+                }
+            }else{
+                $log .= "PLAN NOT FOUND : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
             }
-            $log .= "DONE : $plan[username], $plan[namebp], $plan[type], $plan[routers]<br>";
         }
         r2(U . 'plan/list', 's', $log);
     case 'recharge':
@@ -235,12 +243,13 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
         if ($d) {
             $ui->assign('d', $d);
+            $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             if (in_array($admin['user_type'], array('SuperAdmin', 'Admin'))) {
-                $p = ORM::for_table('tbl_plans')->where_not_equal('type', 'Balance')->find_many();
+                $ps = ORM::for_table('tbl_plans')->where('type', $p['type'])->where('is_radius', $p['is_radius'])->find_many();
             } else {
-                $p = ORM::for_table('tbl_plans')->where('enabled', '1')->where_not_equal('type', 'Balance')->find_many();
+                $ps = ORM::for_table('tbl_plans')->where("enabled", 1)->where('is_radius', $p['is_radius'])->where('type', $p['type'])->find_many();
             }
-            $ui->assign('p', $p);
+            $ui->assign('p', $ps);
             run_hook('view_edit_customer_plan'); #HOOK
             $ui->assign('_title', 'Edit Plan');
             $ui->display('plan-edit.tpl');
@@ -274,7 +283,6 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $username = _post('username');
         $id_plan = _post('id_plan');
         $recharged_on = _post('recharged_on');
         $expiration = _post('expiration');
@@ -286,17 +294,14 @@ switch ($action) {
         } else {
             $msg .= Lang::T('Data Not Found') . '<br>';
         }
-        $p = ORM::for_table('tbl_plans')->where('id', $id_plan)->where('enabled', '1')->find_one();
-        if ($d) {
+        $oldPlanID = $d['plan_id'];
+        $newPlan = ORM::for_table('tbl_plans')->where('id', $id_plan)->find_one();
+        if ($newPlan) {
         } else {
             $msg .= ' Plan Not Found<br>';
         }
         if ($msg == '') {
             run_hook('edit_customer_plan'); #HOOK
-            $d->username = $username;
-            $d->plan_id = $id_plan;
-            $d->namebp = $p['name_plan'];
-            //$d->recharged_on = $recharged_on;
             $d->expiration = $expiration;
             $d->time = $time;
             if ($d['status'] == 'off') {
@@ -304,15 +309,29 @@ switch ($action) {
                     $d->status = 'on';
                 }
             }
-            if ($p['is_radius']) {
-                $d->routers = 'radius';
-            } else {
-                $d->routers = $p['routers'];
+            if ($d['status'] == 'on' && $oldPlanID != $id_plan) {
+                $d->plan_id = $newPlan['id'];
+                $d->namebp = $newPlan['name_plan'];
+                $customer = User::_info($d['customer_id']);
+                //remove from old plan
+                $p = ORM::for_table('tbl_plans')->find_one($oldPlanID);
+                $dvc = Package::getDevice($p);
+                if (file_exists($dvc) && $_app_stage != 'demo') {
+                    require_once $dvc;
+                    (new $p['device'])->remove_customer($customer, $p);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
+                //add new plan
+                $dvc = Package::getDevice($newPlan);
+                if (file_exists($dvc) && $_app_stage != 'demo') {
+                    require_once $dvc;
+                    (new $newPlan['device'])->add_customer($customer, $newPlan);
+                } else {
+                    new Exception(Lang::T("Devices Not Found"));
+                }
             }
             $d->save();
-            if ($d['status'] == 'on') {
-                Package::changeTo($username, $id_plan, $id);
-            }
             _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . '][' . Lang::moneyFormat($p['price']) . ']', $admin['user_type'], $admin['id']);
             r2(U . 'plan/list', 's', Lang::T('Data Updated Successfully'));
         } else {

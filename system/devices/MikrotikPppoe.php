@@ -35,16 +35,6 @@ class MikrotikPppoe
         $this->removePpoeActive($client, $customer['username']);
     }
 
-    function change_customer($customer, $plan)
-    {
-        $mikrotik = $this->info($plan['routers']);
-        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        $this->removePpoeUser($client, $customer['username']);
-        $this->removePpoeActive($client, $customer['username']);
-        $this->addPpoeUser($client, $plan, $customer);
-    }
-
-
     function add_plan($plan)
     {
         $mikrotik = $this->info($plan['routers']);

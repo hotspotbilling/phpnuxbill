@@ -127,11 +127,19 @@ class Lang
         if(time()>strtotime($datetime)){
             $when = Lang::T('ago');
         }else{
-            $when = Lang::T('later');
+            $when = '';
         }
         if (!$full)
             $string = array_slice($string, 0, 1);
-        return $string ? implode(', ', $string) .' '. $when : Lang::T('just now');
+        if($string){
+            if(empty($when)){
+                return '<b>'. implode(', ', $string) .'</b>';
+            }else{
+                return implode(', ', $string) .' '. $when;
+            }
+        }else{
+            return Lang::T('just now');
+        }
     }
 
     public static function nl2br($text)

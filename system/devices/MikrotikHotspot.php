@@ -35,15 +35,6 @@ class MikrotikHotspot
         $this->removeHotspotActiveUser($client, $customer['username']);
     }
 
-    function change_customer($customer, $plan)
-    {
-        $mikrotik = $this->info($plan['routers']);
-        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        $this->removeHotspotUser($client, $customer['username']);
-        $this->removeHotspotActiveUser($client, $customer['username']);
-        $this->addHotspotUser($client, $plan, $customer);
-    }
-
     function add_plan($plan)
     {
         $mikrotik = $this->info($plan['routers']);

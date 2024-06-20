@@ -1,13 +1,13 @@
 {include file="sections/user-header.tpl"}
 
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-md-6 col-md-offset-3">
         <div class="panel panel-info panel-hovered">
             <div class="panel-heading">{Lang::T('Available Payment Gateway')}</div>
             <div class="panel-footer">
                 <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
                     <div class="form-group row">
-                        <label class="col-md-2 control-label">Payment Gateway</label>
+                        <label class="col-md-4 ">Payment Gateway</label>
                         <div class="col-md-8">
                             <select name="gateway" id="gateway" class="form-control">
                                 {foreach $pgs as $pg}

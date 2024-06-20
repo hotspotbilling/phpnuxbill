@@ -20,11 +20,15 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Service Plan')}</label>
                         <div class="col-md-6">
+
                             <select id="id_plan" name="id_plan" class="form-control select2">
                                 {foreach $p as $ps}
                                     <option value="{$ps['id']}" {if $d['plan_id'] eq $ps['id']} selected {/if}>
-                                    {if $ps['enabled'] neq 1}DISABLED PLAN &bull; {/if}
-                                    {if $ps['is_radius']=='1'}Radius{else}{$ps['routers']}{/if} &bull; {$ps['name_plan']}</option>
+                                        {if $ps['enabled'] neq 1}DISABLED PLAN &bull; {/if}
+                                        {$ps['name_plan']} &bull;
+                                        {Lang::moneyFormat($ps['price'])}
+                                        {if $ps['prepaid'] neq 'yes'} &bull; POSTPAID {/if}
+                                    </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -32,7 +36,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Created On')}</label>
                         <div class="col-md-4">
-                            <input type="date" class="form-control" name="expiration" readonly
+                            <input type="date" class="form-control" readonly
                                 value="{$d['recharged_on']}">
                         </div>
                         <div class="col-md-2">
@@ -54,8 +58,7 @@
 
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success"
-                                type="submit">{Lang::T('Edit')}</button>
+                            <button class="btn btn-success" type="submit">{Lang::T('Edit')}</button>
                             Or <a href="{$_url}plan/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>

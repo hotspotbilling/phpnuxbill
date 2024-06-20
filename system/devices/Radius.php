@@ -20,17 +20,11 @@ class Radius {
     {
         if (empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
-            $this->customerDeactivate($customer['username']);
-            $this->customerAddPlan($customer, $p);
+            $this->customerAddPlan($customer, $plan);
         } else {
             $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool_expired'], ':=');
             $this->disconnectCustomer($customer['username']);
         }
-    }
-
-    function change_customer($customer, $plan)
-    {
-        $this->customerUpsert($customer, $plan);
     }
 
     function add_plan($plan)
@@ -92,6 +86,7 @@ class Radius {
 
     function disconnect_customer($customer, $router_name)
     {
+        $this->disconnectCustomer($customer['username']);
     }
 
     public function getTableNas()
