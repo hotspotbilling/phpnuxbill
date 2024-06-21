@@ -104,6 +104,8 @@ class MikrotikPppoe
                     ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip']: $pool['pool_name'])
                     ->setArgument('remote-address', $pool['pool_name'])
                     ->setArgument('rate-limit', $rate)
+                    ->setArgument('on-up', $new_plan['on_login'])
+                    ->setArgument('on-down', $new_plan['on_logout'])
             );
         }
     }

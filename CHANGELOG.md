@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.6.21
+
+- Add filter result in voucher and internet plan
+- Add input script on-login and on-logout
+- Add local ip for pppoe
+
 ## 2024.6.19
 
 - new system for device, it can support non mikrotik devices, as long someone create device file

@@ -329,6 +329,8 @@ switch ($action) {
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
         $routers = _post('routers');
+        $on_login = _post('on_login');
+        $on_logout = _post('on_logout');
         $expired_date = _post('expired_date');
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -384,6 +386,8 @@ switch ($action) {
             $d->plan_expired = $plan_expired;
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
+            $d->on_login = $on_login;
+            $d->on_logout = $on_logout;
             $d->device = $device;
             if ($prepaid == 'no') {
                 if ($expired_date > 28 && $expired_date < 1) {
@@ -700,6 +704,8 @@ switch ($action) {
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
         $expired_date = _post('expired_date');
+        $on_login = _post('on_login');
+        $on_logout = _post('on_logout');
 
         $msg = '';
         if (Validator::UnsignedNumber($validity) == false) {
@@ -751,6 +757,8 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
+            $d->on_login = $on_login;
+            $d->on_logout = $on_logout;
             if ($prepaid == 'no') {
                 if ($expired_date > 28 && $expired_date < 1) {
                     $expired_date = 20;

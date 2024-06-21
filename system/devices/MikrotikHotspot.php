@@ -140,6 +140,8 @@ class MikrotikHotspot
                     ->setArgument('name', $new_plan['name_plan'])
                     ->setArgument('shared-users', $new_plan['shared_users'])
                     ->setArgument('rate-limit', $rate)
+                    ->setArgument('on-login', $new_plan['on_login'])
+                    ->setArgument('on-logout', $new_plan['on_logout'])
             );
         }
     }

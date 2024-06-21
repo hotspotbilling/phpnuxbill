@@ -44,7 +44,7 @@
                             <label class="col-md-2 control-label">Radius
                                 <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                     data-trigger="focus" data-container="body"
-                                    data-content="If you enable Radius, choose device to radius, except if you have custom device. *This option will be deleted and replaced by Device">?</a>
+                                    data-content="If you enable Radius, choose device to radius, except if you have custom device.">?</a>
                             </label>
                             <div class="col-md-6">
                                 <input type="checkbox" name="radius" onclick="isRadius(this)" value="1"> Radius Plan

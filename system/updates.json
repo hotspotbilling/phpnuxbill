@@ -116,5 +116,9 @@
     ],
     "2024.6.19" : [
         "ALTER TABLE `tbl_plans` ADD `expired_date` TINYINT(1) NOT NULL DEFAULT '20' AFTER `plan_expired`;"
+    ],
+    "2024.6.21" : [
+        "ALTER TABLE `tbl_plans` ADD `on_login` TEXT NULL DEFAULT NULL AFTER `device`;",
+        "ALTER TABLE `tbl_plans` ADD `on_logout` TEXT NULL DEFAULT NULL AFTER `on_login`;"
     ]
 }
