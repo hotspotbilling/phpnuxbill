@@ -269,6 +269,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_customer_active_plan'); #HOOK
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
+            $c = User::_info($d['customer_id']);
             $dvc = Package::getDevice($p);
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {

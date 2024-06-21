@@ -51,7 +51,7 @@
                             <label class="col-md-2 control-label">Radius
                                 <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                     data-trigger="focus" data-container="body"
-                                    data-content="If you enable Radius, choose device to radius, except if you have custome device">?</a>
+                                    data-content="If you enable Radius, choose device to radius, except if you have custom device. *This option will be deleted and replaced by Device">?</a>
                             </label>
                             <div class="col-md-10">
                                 <label class="label label-primary">RADIUS</label>
@@ -102,7 +102,7 @@
                             </div>
                         </div>
                     </div>
-                    <div {if $d['typebp'] eq 'Unlimited'} style="display:none;"
+                    <div {if $d['typebp'] eq 'Unlimited'} style="display:none;" 
                     {elseif ($d['time_limit']) eq '0'}
                         style="display:none;" {/if} id="TimeLimit">
                         <div class="form-group">
@@ -121,7 +121,7 @@
                             </div>
                         </div>
                     </div>
-                    <div {if $d['typebp'] eq 'Unlimited'} style="display:none;"
+                    <div {if $d['typebp'] eq 'Unlimited'} style="display:none;" 
                     {elseif ($d['data_limit']) eq '0'}
                         style="display:none;" {/if} id="DataLimit">
                         <div class="form-group">
@@ -214,7 +214,8 @@
                         </label>
                         <div class="col-md-6">
                             <input type="number" class="form-control" name="expired_date" maxlength="2"
-                                value="{$d['expired_date']}" min="1" max="28" step="1">
+                                value="{if $d['expired_date']}{$d['expired_date']}{else}20{/if}" min="1" max="28"
+                                step="1">
                         </div>
                     </div>
                     <span id="routerChoose" class="{if $d['is_radius']}hidden{/if}">

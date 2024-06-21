@@ -213,11 +213,12 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
             if ($p) {
                 $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
+                $c = User::_info($id_customer);
                 $dvc = Package::getDevice($p);
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
                         require_once $dvc;
-                        (new $p['device'])->change_customer($c, $p);
+                        (new $p['device'])->remove_customer($c, $p);
                     } else {
                         new Exception(Lang::T("Devices Not Found"));
                     }
@@ -240,7 +241,7 @@ switch ($action) {
             $routers = [];
             foreach ($bs as $b) {
                 $c = ORM::for_table('tbl_customers')->find_one($id_customer);
-                $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->where('enabled', '1')->find_one();
+                $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
                 if ($p) {
                     $routers[] = $b['routers'];
                     $dvc = Package::getDevice($p);
@@ -325,33 +326,33 @@ switch ($action) {
         }
         $id = $routes['2'];
         run_hook('delete_customer'); #HOOK
-        $d = ORM::for_table('tbl_customers')->find_one($id);
-        if ($d) {
+        $c = ORM::for_table('tbl_customers')->find_one($id);
+        if ($c) {
             // Delete the associated Customers Attributes records from tbl_customer_custom_fields table
             ORM::for_table('tbl_customers_fields')->where('customer_id', $id)->delete_many();
-            $c = ORM::for_table('tbl_user_recharges')->where('username', $d['username'])->find_one();
-            if ($c) {
-                $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
+            //Delete active package
+            $turs = ORM::for_table('tbl_user_recharges')->where('username', $c['username'])->find_one();
+            foreach($turs as $tur){
+                $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            (new $p['device'])->remove_customer($d, $p);
+                            (new $p['device'])->remove_customer($c, $p);
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
                         }
                     }
                 }
                 try {
-                    $c->delete();
+                    $tur->delete();
                 } catch (Exception $e) {
                 }
             }
             try {
-                $d->delete();
+                $c->delete();
             } catch (Exception $e) {
-            } catch (Throwable $e) {
             }
             r2(U . 'customers/list', 's', Lang::T('User deleted Successfully'));
         }

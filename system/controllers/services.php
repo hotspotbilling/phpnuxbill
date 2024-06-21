@@ -135,7 +135,7 @@ switch ($action) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $p['device'])->remove_plan($d);
+                    (new $d['device'])->remove_plan($d);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -222,7 +222,7 @@ switch ($action) {
                 }
                 $d->expired_date = $expired_date;
             } else {
-                $d->expired_date = 0;
+                $d->expired_date = 20;
             }
             $d->save();
 
@@ -230,7 +230,7 @@ switch ($action) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $p['device'])->add_plan($d);
+                    (new $d['device'])->add_plan($d);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -324,7 +324,7 @@ switch ($action) {
                 }
                 $d->expired_date = $expired_date;
             } else {
-                $d->expired_date = 0;
+                $d->expired_date = 20;
             }
             $d->save();
 
@@ -437,7 +437,7 @@ switch ($action) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $p['device'])->remove_plan($d);
+                    (new $d['device'])->remove_plan($d);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -537,7 +537,7 @@ switch ($action) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $p['device'])->add_plan($d);
+                    (new $d['device'])->add_plan($d);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
