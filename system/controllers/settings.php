@@ -260,8 +260,8 @@ switch ($action) {
             $d->value = $lan;
             $d->save();
             unset($_SESSION['Lang']);
-            _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
-            r2(U . 'settings/localisation', 's', Lang::T('Settings Saved Successfully'));
+            _log('[' . $admin['username'] . ']: ' . 'Settings Saved Successfully', $admin['user_type'], $admin['id']);
+            r2(U . 'settings/localisation', 's', 'Settings Saved Successfully');
         }
         break;
 

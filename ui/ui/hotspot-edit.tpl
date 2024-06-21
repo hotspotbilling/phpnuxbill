@@ -211,7 +211,7 @@
                         <label class="col-md-3 control-label">{Lang::T('Expired Date')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Expired will be this date every month, 0 will be when customer buy internet plan">?</a>
+                                data-content="Expired will be this date every month">?</a>
                         </label>
                         <div class="col-md-9">
                             <input type="number" class="form-control" name="expired_date" maxlength="2"
