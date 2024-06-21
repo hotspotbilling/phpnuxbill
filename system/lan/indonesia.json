@@ -512,5 +512,10 @@
     "Rate": "Kecepatan",
     "Burst": "Meletus",
     "Router_Name___Location": "Nama\/Lokasi Router",
-    "Extend": "Memperpanjang"
+    "Extend": "Memperpanjang",
+    "City": "Kota",
+    "": "",
+    "District": "Daerah",
+    "State": "Negara",
+    "Zip": "Ritsleting"
 }

@@ -212,7 +212,7 @@ switch ($action) {
         if ($b) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
             if ($p) {
-                $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
+                $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
                 $c = User::_info($id_customer);
                 $dvc = Package::getDevice($p);
                 if ($_app_stage != 'demo') {
@@ -470,20 +470,20 @@ switch ($action) {
         }
 
         $id = _post('id');
-        $d = ORM::for_table('tbl_customers')->find_one($id);
+        $c = ORM::for_table('tbl_customers')->find_one($id);
 
         //lets find user Customers Attributes using id
         $customFields = ORM::for_table('tbl_customers_fields')
             ->where('customer_id', $id)
             ->find_many();
 
-        if (!$d) {
+        if (!$c) {
             $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
-        $oldusername = $d['username'];
-        $oldPppoePassword = $d['password'];
-        $oldPassPassword = $d['pppoe_password'];
+        $oldusername = $c['username'];
+        $oldPppoePassword = $c['password'];
+        $oldPassPassword = $c['pppoe_password'];
         $userDiff = false;
         $pppoeDiff = false;
         $passDiff = false;
@@ -503,25 +503,25 @@ switch ($action) {
 
         if ($msg == '') {
             if ($userDiff) {
-                $d->username = $username;
+                $c->username = $username;
             }
             if ($password != '') {
-                $d->password = $password;
+                $c->password = $password;
             }
-            $d->pppoe_password = $pppoe_password;
-            $d->fullname = $fullname;
-            $d->email = $email;
-            $d->account_type = $account_type;
-            $d->address = $address;
-            $d->status = $status;
-            $d->phonenumber = $phonenumber;
-            $d->service_type = $service_type;
-            $d->coordinates = $coordinates;
-            $d->city = $city;
-            $d->district = $district;
-            $d->state = $state;
-            $d->zip = $zip;
-            $d->save();
+            $c->pppoe_password = $pppoe_password;
+            $c->fullname = $fullname;
+            $c->email = $email;
+            $c->account_type = $account_type;
+            $c->address = $address;
+            $c->status = $status;
+            $c->phonenumber = $phonenumber;
+            $c->service_type = $service_type;
+            $c->coordinates = $coordinates;
+            $c->city = $city;
+            $c->district = $district;
+            $c->state = $state;
+            $c->zip = $zip;
+            $c->save();
 
 
             // Update Customers Attributes values in tbl_customers_fields table
@@ -570,17 +570,17 @@ switch ($action) {
             }
 
             if ($userDiff || $pppoeDiff || $passDiff) {
-                $c = ORM::for_table('tbl_user_recharges')->where('username', ($userDiff) ? $oldusername : $username)->find_one();
-                if ($c) {
-                    $c->username = $username;
-                    $c->save();
-                    $p = ORM::for_table('tbl_plans')->find_one($c['plan_id']);
+                $tur = ORM::for_table('tbl_user_recharges')->where('username', ($userDiff) ? $oldusername : $username)->find_one();
+                if ($tur) {
+                    $tur->username = $username;
+                    $tur->save();
+                    $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            (new $p['device'])->remove_customer($d, $p);
-                            (new $p['device'])->add_customer($d, $p);
+                            (new $p['device'])->remove_customer($c, $p);
+                            (new $p['device'])->add_customer($c, $p);
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
                         }
