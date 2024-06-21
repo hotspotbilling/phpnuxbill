@@ -612,7 +612,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>
                         <div class="col-md-6">
                             <select name="extend_expiry" id="extend_expiry" class="form-control">
-                                <option value="yes" {if $_c['extend_expiry']=='yes' }selected="selected" {/if}>
+                                <option value="yes" {if $_c['extend_expiry']!='no' }selected="selected" {/if}>
                                     {Lang::T('Yes')}</option>
                                 <option value="no" {if $_c['extend_expiry']=='no' }selected="selected" {/if}>
                                     {Lang::T('No')}</option>
@@ -651,22 +651,22 @@
                         <div class="col-md-6">
                             <select name="tax_rate" id="tax_rate" class="form-control">
                                 <option value="0.5" {if $_c['tax_rate']=='0.5' }selected="selected" {/if}>
-                                    {Lang::T('0.5%')}
+                                    0.5%
                                 </option>
                                 <option value="1" {if $_c['tax_rate']=='1' }selected="selected" {/if}>
-                                    {Lang::T('1%')}
+                                    1%
                                 </option>
                                 <option value="1.5" {if $_c['tax_rate']=='1.5' }selected="selected" {/if}>
-                                    {Lang::T('1.5%')}
+                                    1.5%
                                 </option>
                                 <option value="2" {if $_c['tax_rate']=='2' }selected="selected" {/if}>
-                                    {Lang::T('2%')}
+                                    2%
                                 </option>
                                 <option value="5" {if $_c['tax_rate']=='5' }selected="selected" {/if}>
-                                    {Lang::T('5%')}
+                                    5%
                                 </option>
                                 <option value="10" {if $_c['tax_rate']=='10' }selected="selected" {/if}>
-                                    {Lang::T('10%')}
+                                    10%
                                 </option>
                                 <!-- Custom tax rate option -->
                                 <option value="custom" {if $_c['tax_rate']=='custom' }selected="selected" {/if}>
