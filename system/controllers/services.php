@@ -82,7 +82,12 @@ switch ($action) {
             . "&router=" . urlencode($router);
 
         $bws = ORM::for_table('tbl_plans')->distinct()->select("id_bw")->where('tbl_plans.type', 'Hotspot')->findArray();
-        $ui->assign('bws', ORM::for_table('tbl_bandwidth')->selects(["id", 'name_bw'])->where_in('id', array_column($bws, 'id_bw'))->findArray());
+        $ids = array_column($bws, 'id_bw');
+        if(count($ids)){
+            $ui->assign('bws', ORM::for_table('tbl_bandwidth')->select("id")->select('name_bw')->where_id_in($ids)->findArray());
+        }else{
+            $ui->assign('bws', []);
+        }
         $ui->assign('type2s', ORM::for_table('tbl_plans')->getEnum("plan_type"));
         $ui->assign('type3s', ORM::for_table('tbl_plans')->getEnum("typebp"));
         $ui->assign('valids', ORM::for_table('tbl_plans')->getEnum("validity_unit"));
@@ -446,8 +451,13 @@ switch ($action) {
             . "&status=" . urlencode($status)
             . "&router=" . urlencode($router);
 
-        $bws = ORM::for_table('tbl_plans')->distinct()->select("id_bw")->findArray();
-        $ui->assign('bws', ORM::for_table('tbl_bandwidth')->selects(["id", 'name_bw'])->where_in('id', array_column($bws, 'id_bw'))->findArray());
+        $bws = ORM::for_table('tbl_plans')->distinct()->select("id_bw")->where('tbl_plans.type', 'PPPOE')->findArray();
+        $ids = array_column($bws, 'id_bw');
+        if(count($ids)){
+            $ui->assign('bws', ORM::for_table('tbl_bandwidth')->select("id")->select('name_bw')->where_id_in($ids)->findArray());
+        }else{
+            $ui->assign('bws', []);
+        }
         $ui->assign('type2s', ORM::for_table('tbl_plans')->getEnum("plan_type"));
         $ui->assign('type3s', ORM::for_table('tbl_plans')->getEnum("typebp"));
         $ui->assign('valids', ORM::for_table('tbl_plans')->getEnum("validity_unit"));
