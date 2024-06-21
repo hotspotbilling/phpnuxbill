@@ -302,16 +302,6 @@
                     $("#routerChoose").removeClass('hidden');
                 }
             }
-            setTimeout(() => {
-                $.ajax({
-                    url: "index.php?_route=autoload/pool",
-                    data: "routers=radius",
-                    cache: false,
-                    success: function(msg) {
-                        $("#pool_expired").html(msg);
-                    }
-                });
-            }, 2000);
         </script>
     {/literal}
 {/if}

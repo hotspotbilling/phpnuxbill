@@ -48,7 +48,6 @@ $(document).ready(function(){
         cache: false,
         success: function(msg){
             $("#pool_name").html(msg);
-            $("#pool_expired").html(msg);
         }
     });
   });

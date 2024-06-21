@@ -190,14 +190,6 @@
                             $("#pool_name").html(msg);
                         }
                     });
-                    $.ajax({
-                        url: "index.php?_route=autoload/pool",
-                        data: "routers=radius",
-                        cache: false,
-                        success: function(msg) {
-                            $("#pool_expired").html(msg);
-                        }
-                    });
                 } else {
                     document.getElementById("routers").required = true;
                     document.getElementById("routers").disabled = false;

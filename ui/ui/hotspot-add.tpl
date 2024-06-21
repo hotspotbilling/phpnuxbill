@@ -238,15 +238,6 @@
                 if (cek.checked) {
                     $("#routerChoose").addClass('hidden');
                     document.getElementById("routers").required = false;
-                    $("#pool_expired").html('');
-                    $.ajax({
-                        url: "index.php?_route=autoload/pool",
-                        data: "routers=radius",
-                        cache: false,
-                        success: function(msg) {
-                            $("#pool_expired").html(msg);
-                        }
-                    });
                 } else {
                     document.getElementById("routers").required = true;
                     $("#routerChoose").removeClass('hidden');
