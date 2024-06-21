@@ -352,12 +352,47 @@ switch ($action) {
     case 'voucher':
         $ui->assign('_title', Lang::T('Vouchers'));
         $search = _req('search');
+        $router = _req('router');
+        $customer = _req('customer');
+        $plan = _req('plan');
+        $status = _req('status');
+        $ui->assign('router', $router);
+        $ui->assign('customer', $customer);
+        $ui->assign('status', $status);
+        $ui->assign('plan', $plan);
+
+        $query = ORM::for_table('tbl_plans')
+            ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'));
+
+        if (!empty($router)) {
+            $query->where('tbl_voucher.routers', $router);
+        }
+
+        if ($status == '1' || $status == '0') {
+            $query->where('tbl_voucher.status', $status);
+        }
+
+        if (!empty($plan)) {
+            $query->where('tbl_voucher.id_plan', $plan);
+        }
+
+        if (!empty($customer)) {
+            $query->where('tbl_voucher.user', $customer);
+        }
+
+        $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status);
+
+        // option customers
+        $ui->assign('customers',  ORM::for_table('tbl_voucher')->distinct()->select("user")->whereNotEqual("user", '0')->findArray());
+        // option plans
+        $plns = ORM::for_table('tbl_voucher')->distinct()->select("id_plan")->findArray();
+        $ui->assign('plans', ORM::for_table('tbl_plans')->selects(["id", 'name_plan'])->whereIdIn(array_column($plns, 'id_plan'))->findArray());
+
+        $ui->assign('routers', array_column(ORM::for_table('tbl_voucher')->distinct()->select("routers")->findArray(), 'routers'));
+
         if ($search != '') {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                $query = ORM::for_table('tbl_plans')->where('enabled', '1')
-                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                    ->where_like('tbl_voucher.code', '%' . $search . '%');
-                $d = Paginator::findMany($query, ["search" => $search]);
+                $query->where_like('tbl_voucher.code', '%' . $search . '%');
             } else if ($admin['user_type'] == 'Agent') {
                 $sales = [];
                 $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
@@ -365,17 +400,11 @@ switch ($action) {
                     $sales[] = $s['id'];
                 }
                 $sales[] = $admin['id'];
-                $query = ORM::for_table('tbl_plans')
-                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                    ->where_in('generated_by', $sales)
+                $query->where_in('generated_by', $sales)
                     ->where_like('tbl_voucher.code', '%' . $search . '%');
-                $d = Paginator::findMany($query, ["search" => $search]);
             }
         } else {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                $query = ORM::for_table('tbl_plans')->where('enabled', '1')
-                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'));
-                $d = Paginator::findMany($query);
             } else if ($admin['user_type'] == 'Agent') {
                 $sales = [];
                 $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
@@ -383,11 +412,13 @@ switch ($action) {
                     $sales[] = $s['id'];
                 }
                 $sales[] = $admin['id'];
-                $query = ORM::for_table('tbl_plans')
-                    ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                    ->where_in('generated_by', $sales);
-                $d = Paginator::findMany($query);
+                $query->where_in('generated_by', $sales);
             }
+        }
+        if ($search != '') {
+            $d = Paginator::findMany($query, ["search" => $search], 10, $append_url);
+        } else {
+            $d = Paginator::findMany($query, [], 10, $append_url);
         }
         // extract admin
         $admins = [];
@@ -411,6 +442,7 @@ switch ($action) {
                 $admins[$adm['id']] = $adm['fullname'] . $tipe;
             }
         }
+
         $ui->assign('admins', $admins);
         $ui->assign('d', $d);
         $ui->assign('search', $search);
