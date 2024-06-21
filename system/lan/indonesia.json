@@ -510,5 +510,6 @@
     "When_Expired__customer_will_be_move_to_selected_internet_plan": "Ketika Expired, pelanggan akan dipindahkan ke paket internet yang dipilih",
     "Period": "Periode",
     "Rate": "Kecepatan",
-    "Burst": "Meletus"
+    "Burst": "Meletus",
+    "Router_Name___Location": "Nama\/Lokasi Router"
 }

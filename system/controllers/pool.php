@@ -16,7 +16,7 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
-require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "MikrotikPppoe.php";
+require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikPppoe' . '.php';
 
 switch ($action) {
     case 'list':
@@ -99,17 +99,15 @@ switch ($action) {
             $msg .= Lang::T('Pool Name Already Exist') . '<br>';
         }
         if ($msg == '') {
-            if ($routers != 'radius') {
-                (new MikrotikPppoe())->add_pool($pool);
-            }
-
             $b = ORM::for_table('tbl_pool')->create();
-            $d->local_ip = $local_ip;
+            $b->local_ip = $local_ip;
             $b->pool_name = $name;
             $b->range_ip = $ip_address;
             $b->routers = $routers;
+            if ($routers != 'radius') {
+                (new MikrotikPppoe())->add_pool($b);
+            }
             $b->save();
-
             r2(U . 'pool/list', 's', Lang::T('Data Created Successfully'));
         } else {
             r2(U . 'pool/add', 'e', $msg);
