@@ -41,7 +41,7 @@
                     <select class="form-control" id="router" name="router">
                         <option value="">{Lang::T('Routers')}</option>
                         {foreach $routers as $r}
-                            <option value="{$r}" {if $router eq $r }selected{/if}>{Lang::T($r)}
+                            <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
                             </option>
                         {/foreach}
                     </select>
@@ -137,8 +137,6 @@
             </tbody>
         </table>
     </div>
-    <center>
-        {include file="pagination.tpl"}
-    </center>
+    {include file="pagination.tpl"}
 </div>
 {include file="sections/footer.tpl"}

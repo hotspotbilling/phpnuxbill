@@ -1,4 +1,5 @@
 {if $paginator}
+    <center>
     <nav aria-label="Page navigation pagination-sm">
         <ul class="pagination">
             <li {if empty($paginator['prev'])}class="disabled" {/if}>
@@ -17,4 +18,5 @@
             </li>
         </ul>
     </nav>
+    </center>
 {/if}

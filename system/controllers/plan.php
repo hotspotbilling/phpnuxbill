@@ -415,11 +415,7 @@ switch ($action) {
                 $query->where_in('generated_by', $sales);
             }
         }
-        if ($search != '') {
-            $d = Paginator::findMany($query, ["search" => $search], 10, $append_url);
-        } else {
-            $d = Paginator::findMany($query, [], 10, $append_url);
-        }
+        $d = Paginator::findMany($query, ["search" => $search], 10, $append_url);
         // extract admin
         $admins = [];
         foreach ($d as $k) {

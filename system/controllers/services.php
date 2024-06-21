@@ -54,21 +54,88 @@ switch ($action) {
         r2(U . 'services/hotspot', 'w', 'Unknown command');
     case 'hotspot':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/hotspot.js"></script>');
+        $name = _req('name');
+        $type1 = _req('type1');
+        $type2 = _req('type2');
+        $type3 = _req('type3');
+        $bandwidth = _req('bandwidth');
+        $valid = _req('valid');
+        $device = _req('device');
+        $status = _req('status');
+        $router = _req('router');
+        $ui->assign('type1', $type1);
+        $ui->assign('type2', $type2);
+        $ui->assign('type3', $type3);
+        $ui->assign('bandwidth', $bandwidth);
+        $ui->assign('valid', $valid);
+        $ui->assign('device', $device);
+        $ui->assign('status', $status);
+        $ui->assign('router', $router);
 
-        $name = _post('name');
-        if ($name != '') {
-            $query = ORM::for_table('tbl_bandwidth')->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot')->where_like('tbl_plans.name_plan', '%' . $name . '%');
-            $d = Paginator::findMany($query, ['name' => $name]);
-        } else {
-            $query = ORM::for_table('tbl_bandwidth')->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'Hotspot');
-            $d = Paginator::findMany($query);
+        $append_url = "&type1=" . urlencode($type1)
+            . "&type2=" . urlencode($type2)
+            . "&type3=" . urlencode($type3)
+            . "&bandwidth=" . urlencode($bandwidth)
+            . "&valid=" . urlencode($valid)
+            . "&device=" . urlencode($device)
+            . "&status=" . urlencode($status)
+            . "&router=" . urlencode($router);
+
+        $bws = ORM::for_table('tbl_plans')->distinct()->select("id_bw")->where('tbl_plans.type', 'Hotspot')->findArray();
+        $ui->assign('bws', ORM::for_table('tbl_bandwidth')->selects(["id", 'name_bw'])->whereIdIn(array_column($bws, 'id_bw'))->findArray());
+        $ui->assign('type2s', ORM::for_table('tbl_plans')->getEnum("plan_type"));
+        $ui->assign('type3s', ORM::for_table('tbl_plans')->getEnum("typebp"));
+        $ui->assign('valids', ORM::for_table('tbl_plans')->getEnum("validity_unit"));
+        $ui->assign('routers', array_column(ORM::for_table('tbl_plans')->distinct()->select("routers")->where('tbl_plans.type', 'Hotspot')->whereNotEqual('routers', '')->findArray(), 'routers'));
+        $devices = [];
+        $files = scandir($DEVICE_PATH);
+        foreach ($files as $file) {
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if ($ext == 'php') {
+                $devices[] = pathinfo($file, PATHINFO_FILENAME);
+            }
         }
+        $ui->assign('devices', $devices);
+        $query = ORM::for_table('tbl_bandwidth')
+            ->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))
+            ->where('tbl_plans.type', 'Hotspot');
 
+        if (!empty($type1)) {
+            $query->where('tbl_plans.prepaid', $type1);
+        }
+        if (!empty($type2)) {
+            $query->where('tbl_plans.plan_type', $type2);
+        }
+        if (!empty($type3)) {
+            $query->where('tbl_plans.typebp', $type3);
+        }
+        if (!empty($bandwidth)) {
+            $query->where('tbl_plans.id_bw', $bandwidth);
+        }
+        if (!empty($valid)) {
+            $query->where('tbl_plans.validity_unit', $valid);
+        }
+        if (!empty($router)) {
+            if ($router == 'radius') {
+                $query->where('tbl_plans.is_radius', '1');
+            } else {
+                $query->where('tbl_plans.routers', $router);
+            }
+        }
+        if (!empty($device)) {
+            $query->where('tbl_plans.device', $device);
+        }
+        if (in_array($status, ['0', '1'])) {
+            $query->where('tbl_plans.enabled', $status);
+        }
+        if ($name != '') {
+            $query->where_like('tbl_plans.name_plan', '%' . $name . '%');
+        }
+        $d = Paginator::findMany($query, ['name' => $name], 20, $append_url);
         $ui->assign('d', $d);
         run_hook('view_list_plans'); #HOOK
         $ui->display('hotspot.tpl');
         break;
-
     case 'add':
         $d = ORM::for_table('tbl_bandwidth')->find_many();
         $ui->assign('d', $d);
@@ -348,13 +415,83 @@ switch ($action) {
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pppoe.js"></script>');
 
         $name = _post('name');
-        if ($name != '') {
-            $query = ORM::for_table('tbl_bandwidth')->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE')->where_like('tbl_plans.name_plan', '%' . $name . '%');
-            $d = Paginator::findMany($query, ['name' => $name]);
-        } else {
-            $query = ORM::for_table('tbl_bandwidth')->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))->where('tbl_plans.type', 'PPPOE');
-            $d = Paginator::findMany($query);
+        $name = _req('name');
+        $type1 = _req('type1');
+        $type2 = _req('type2');
+        $type3 = _req('type3');
+        $bandwidth = _req('bandwidth');
+        $valid = _req('valid');
+        $device = _req('device');
+        $status = _req('status');
+        $router = _req('router');
+        $ui->assign('type1', $type1);
+        $ui->assign('type2', $type2);
+        $ui->assign('type3', $type3);
+        $ui->assign('bandwidth', $bandwidth);
+        $ui->assign('valid', $valid);
+        $ui->assign('device', $device);
+        $ui->assign('status', $status);
+        $ui->assign('router', $router);
+
+        $append_url = "&type1=" . urlencode($type1)
+            . "&type2=" . urlencode($type2)
+            . "&type3=" . urlencode($type3)
+            . "&bandwidth=" . urlencode($bandwidth)
+            . "&valid=" . urlencode($valid)
+            . "&device=" . urlencode($device)
+            . "&status=" . urlencode($status)
+            . "&router=" . urlencode($router);
+
+        $bws = ORM::for_table('tbl_plans')->distinct()->select("id_bw")->findArray();
+        $ui->assign('bws', ORM::for_table('tbl_bandwidth')->selects(["id", 'name_bw'])->whereIdIn(array_column($bws, 'id_bw'))->findArray());
+        $ui->assign('type2s', ORM::for_table('tbl_plans')->getEnum("plan_type"));
+        $ui->assign('type3s', ORM::for_table('tbl_plans')->getEnum("typebp"));
+        $ui->assign('valids', ORM::for_table('tbl_plans')->getEnum("validity_unit"));
+        $ui->assign('routers', array_column(ORM::for_table('tbl_plans')->distinct()->select("routers")->whereNotEqual('routers', '')->findArray(), 'routers'));
+        $devices = [];
+        $files = scandir($DEVICE_PATH);
+        foreach ($files as $file) {
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if ($ext == 'php') {
+                $devices[] = pathinfo($file, PATHINFO_FILENAME);
+            }
         }
+        $ui->assign('devices', $devices);
+        $query = ORM::for_table('tbl_bandwidth')
+            ->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))
+            ->where('tbl_plans.type', 'PPPOE');
+        if (!empty($type1)) {
+            $query->where('tbl_plans.prepaid', $type1);
+        }
+        if (!empty($type2)) {
+            $query->where('tbl_plans.plan_type', $type2);
+        }
+        if (!empty($type3)) {
+            $query->where('tbl_plans.typebp', $type3);
+        }
+        if (!empty($bandwidth)) {
+            $query->where('tbl_plans.id_bw', $bandwidth);
+        }
+        if (!empty($valid)) {
+            $query->where('tbl_plans.validity_unit', $valid);
+        }
+        if (!empty($router)) {
+            if ($router == 'radius') {
+                $query->where('tbl_plans.is_radius', '1');
+            } else {
+                $query->where('tbl_plans.routers', $router);
+            }
+        }
+        if (!empty($device)) {
+            $query->where('tbl_plans.device', $device);
+        }
+        if (in_array($status, ['0', '1'])) {
+            $query->where('tbl_plans.enabled', $status);
+        }
+        if ($name != '') {
+            $query->where_like('tbl_plans.name_plan', '%' . $name . '%');
+        }
+        $d = Paginator::findMany($query, ['name' => $name], 20, $append_url);
 
         $ui->assign('d', $d);
         run_hook('view_list_ppoe'); #HOOK
