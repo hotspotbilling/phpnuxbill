@@ -494,5 +494,21 @@
     "Tax_Rates_in_percentage": "Tarif Pajak dalam persentase",
     "Custom_Tax_Rate": "Tarif Pajak Khusus",
     "Enter_Custom_Tax_Rate": "Masukkan Tarif Pajak Khusus",
-    "Enter_the_custom_tax_rate__e_g___3_75_for_3_75__": "Masukkan tarif pajak khusus (misalnya 3,75 untuk 3,75%)"
+    "Enter_the_custom_tax_rate__e_g___3_75_for_3_75__": "Masukkan tarif pajak khusus (misalnya 3,75 untuk 3,75%)",
+    "Local_IP": "IP lokal",
+    "Business": "Bisnis",
+    "Category": "Kategori",
+    "Device": "Perangkat",
+    "Expired": "Kedaluwarsa",
+    "Time": "Waktu",
+    "Data": "Data",
+    "1_Period___1_Month__Expires_the_20th_of_each_month": "1 Periode = 1 Bulan, Berakhir pada tanggal 20 setiap bulannya",
+    "Expired_Date": "Tanggal kadaluarsa",
+    "Expired_Action": "Tindakan Kedaluwarsa",
+    "Optional": "Opsional",
+    "Expired_Internet_Plan": "Paket Internet Kedaluwarsa",
+    "When_Expired__customer_will_be_move_to_selected_internet_plan": "Ketika Expired, pelanggan akan dipindahkan ke paket internet yang dipilih",
+    "Period": "Periode",
+    "Rate": "Kecepatan",
+    "Burst": "Meletus"
 }

@@ -220,7 +220,7 @@ class Radius {
             if ($p) {
                 // if exists
                 $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
-                //$this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
 				$this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
                 $p->groupname = "plan_" . $plan['id'];
                 $p->save();
@@ -238,7 +238,7 @@ class Radius {
                     else
                         $timelimit = $plan['time_limit'] * 60;
                     $this->upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
-                    //$this->upsertCustomer($customer['username'], 'Expire-After', $timelimit);
+                    $this->upsertCustomer($customer['username'], 'Expire-After', $timelimit);
                 } else if ($plan['limit_type'] == "Data_Limit") {
                     if ($plan['data_unit'] == 'GB')
                         $datalimit = $plan['data_limit'] . "000000000";
@@ -281,7 +281,7 @@ class Radius {
             if ($expired != null) {
                 //$this->upsertCustomer($customer['username'], 'access-period', strtotime($expired) - time());
                 $this->upsertCustomer($customer['username'], 'Max-All-Session', strtotime($expired) - time());
-                //$this->upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
+                $this->upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
                 // Mikrotik Spesific
                 $this->upsertCustomer(
                     $customer['username'],
@@ -291,7 +291,7 @@ class Radius {
             } else {
                 $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
                 //$this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
-                //$this->delAtribute($this->getTableCustomer(), 'expiration', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'expiration', 'username', $customer['username']);
             }
 
             if ($plan['type'] == 'PPPOE') {
