@@ -39,7 +39,7 @@
                 </div>
                 <div class="col-lg-2">
                     <select class="form-control" id="router" name="router">
-                        <option value="">{Lang::T('Routers')}</option>
+                        <option value="">{Lang::T('Location')}</option>
                         {foreach $routers as $r}
                             <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
                             </option>
