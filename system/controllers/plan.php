@@ -386,8 +386,11 @@ switch ($action) {
         $ui->assign('customers',  ORM::for_table('tbl_voucher')->distinct()->select("user")->whereNotEqual("user", '0')->findArray());
         // option plans
         $plns = ORM::for_table('tbl_voucher')->distinct()->select("id_plan")->findArray();
-        $ui->assign('plans', ORM::for_table('tbl_plans')->selects(["id", 'name_plan'])->where_in('id', array_column($plns, 'id_plan'))->findArray());
-
+        if(count($plns)>0){
+            $ui->assign('plans', ORM::for_table('tbl_plans')->selects(["id", 'name_plan'])->where_in('id', array_column($plns, 'id_plan'))->findArray());
+        }else{
+            $ui->assign('plans', []);
+        }
         $ui->assign('routers', array_column(ORM::for_table('tbl_voucher')->distinct()->select("routers")->findArray(), 'routers'));
 
         if ($search != '') {
