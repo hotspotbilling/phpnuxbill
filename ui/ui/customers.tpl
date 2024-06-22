@@ -66,7 +66,7 @@
                                 <input type="text" name="search" class="form-control"
                                     placeholder="{Lang::T('Search')}..." value="{$search}">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-primary" type="submit">{Lang::T('Query')}</button>
+                                    <button class="btn btn-primary" type="submit"><span class="fa fa-search"></span></button>
                                     <button class="btn btn-primary" type="submit" name="export" value="csv">
                                         <span class="glyphicon glyphicon-download"
                                         aria-hidden="true"></span> CSV
@@ -75,9 +75,9 @@
                             </div>
                         </div>
                         <div class="col-lg-1">
-                            <a href="{$_url}customers/add" class="btn btn-success text-black btn-block"><i
-                                    class="ion ion-android-add">
-                                </i> {Lang::T('Add')}</a>
+                            <a href="{$_url}customers/add" class="btn btn-success text-black btn-block" title="{Lang::T('Add')}">
+                            <i class="ion ion-android-add"></i><i class="glyphicon glyphicon-user"></i>
+                            </a>
                         </div>
                     </div>
                 </form>

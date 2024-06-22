@@ -850,18 +850,44 @@ switch ($action) {
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/plan.js"></script>');
         $ui->assign('_title', Lang::T('Customer'));
         $search = _post('search');
-        if ($search != '') {
-            $query = ORM::for_table('tbl_user_recharges')
-                ->whereRaw("username LIKE '%$search%' OR namebp LIKE '%$search%' OR method LIKE '%$search%' OR routers LIKE '%$search%' OR type LIKE '%$search%'")
-                ->order_by_desc('id');
-            $d = Paginator::findMany($query, ['search' => $search]);
-        } else {
-            $query = ORM::for_table('tbl_user_recharges')->order_by_desc('id');
-            $d = Paginator::findMany($query);
+        $status = _req('status');
+        $router = _req('router');
+        $plan = _req('plan');
+        $append_url = "&search=" . urlencode($search)
+            . "&status=" . urlencode($status)
+            . "&router=" . urlencode($type3)
+            . "&plan=" . urlencode($plan);
+        $ui->assign('append_url', $append_url);
+        $ui->assign('plan', $plan);
+        $ui->assign('status', $status);
+        $ui->assign('router', $router);
+        $ui->assign('search', $search);
+        $ui->assign('routers', array_column(ORM::for_table('tbl_user_recharges')->distinct()->select("routers")->whereNotEqual('routers', '')->findArray(), 'routers'));
+
+        $plns = ORM::for_table('tbl_user_recharges')->distinct()->select("plan_id")->findArray();
+        $ids = array_column($plns, 'plan_id');
+        if(count($ids)){
+            $ui->assign('plans', ORM::for_table('tbl_plans')->select("id")->select('name_plan')->where_id_in($ids)->findArray());
+        }else{
+            $ui->assign('plans', []);
         }
+        $query = ORM::for_table('tbl_user_recharges')->order_by_desc('id');
+
+        if ($search != '') {
+            $query->where_like("username","%$search%");
+        }
+        if (!empty($router)) {
+            $query->where('routers', $router);
+        }
+        if (!empty($plan)) {
+            $query->where('plan_id', $plan);
+        }
+        if (!empty($status) && $status != '-') {
+            $query->where('status', $status);
+        }
+        $d = Paginator::findMany($query, ['search' => $search], 25, $append_url);
         run_hook('view_list_billing'); #HOOK
         $ui->assign('d', $d);
-        $ui->assign('search', $search);
         $ui->display('plan.tpl');
         break;
 }

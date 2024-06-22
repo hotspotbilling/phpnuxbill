@@ -70,7 +70,7 @@
                         </div>
                         <div class="col-lg-1 col-xs-4">
                             <select class="form-control" id="router" name="router">
-                                <option value="">{Lang::T('Routers')}</option>
+                                <option value="">{Lang::T('Location')}</option>
                                 {foreach $routers as $r}
                                     <option value="{$r}" {if $router eq $r }selected{/if}>{$r}</option>
                                 {/foreach}
@@ -118,13 +118,13 @@
                         <tr>
                             <th>{Lang::T('Name')}</th>
                             <th>{Lang::T('Type')}</th>
-                            <th>{Lang::T('Bandwidth')}</th>
+                            <th><a href="{$_url}bandwidth/list">{Lang::T('Bandwidth')}</a></th>
                             <th>{Lang::T('Category')}</th>
                             <th>{Lang::T('Price')}</th>
                             <th>{Lang::T('Validity')}</th>
                             <th style="background-color: rgb(246, 244, 244);">{Lang::T('Time')}</th>
                             <th style="background-color: rgb(246, 244, 244);">{Lang::T('Data')}</th>
-                            <th>{Lang::T('Routers')}</th>
+                            <th><a href="{$_url}routers/list">{Lang::T('Location')}</a></th>
                             <th>{Lang::T('Device')}</th>
                             <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Plan')}</th>
                             <th style="background-color: rgb(243, 241, 172);">{Lang::T('Date')}</th>

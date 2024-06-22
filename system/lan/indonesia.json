@@ -514,8 +514,13 @@
     "Router_Name___Location": "Nama\/Lokasi Router",
     "Extend": "Memperpanjang",
     "City": "Kota",
-    "": "",
     "District": "Daerah",
     "State": "Negara",
-    "Zip": "Ritsleting"
+    "Zip": "Kode Pos",
+    "ago": "yang lalu",
+    "Created_Date": "Tanggal Dibuat",
+    "Ascending": "Naik",
+    "Descending": "Menurun",
+    "Query": "Query",
+    "Add": "Menambahkan"
 }
