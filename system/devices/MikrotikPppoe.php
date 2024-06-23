@@ -27,8 +27,8 @@ class MikrotikPppoe
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
-            $p = ORM::for_table("tbl_plans")->select("name_plan")->find_one($plan['plan_expired']);
-            $this->setPpoeUserPlan($client, $customer['username'], $p['plan_expired']);
+            $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
+            $this->add_customer($customer, $p);
         } else {
             $this->removePpoeUser($client, $customer['username']);
         }

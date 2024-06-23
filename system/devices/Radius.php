@@ -18,9 +18,9 @@ class Radius {
 
     function remove_customer($customer, $plan)
     {
-        if (empty($plan['plan_expired'])) {
+        if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
-            $this->customerAddPlan($customer, $plan);
+            $this->customerAddPlan($customer, $p);
         } else {
             $this->customerDeactivate($customer['username'], true);
         }

@@ -522,5 +522,10 @@
     "Ascending": "Naik",
     "Descending": "Menurun",
     "Query": "Query",
-    "Add": "Menambahkan"
+    "Add": "Menambahkan",
+    "Logout_Successful": "Logout Berhasil",
+    "warning": "peringatan",
+    "Created___Expired": "Dibuat \/ Kedaluwarsa",
+    "Login___Activate_Voucher": "Masuk \/ Aktifkan Voucher",
+    "Voucher_activation_success__now_you_can_login": "Aktivasi voucher berhasil, sekarang Anda dapat login"
 }
