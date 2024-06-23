@@ -86,7 +86,11 @@
                         {foreach $d as $ds}
                             <tr {if $ds['status']=='off'}class="danger" {/if}>
                                 <td><a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a></td>
-                                <td>{$ds['namebp']}</td>
+                                {if $ds['type'] == 'Hotspot'}
+                                    <td><a href="{$_url}services/edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
+                                {else}
+                                    <td><a href="{$_url}services/pppoe-edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
+                                {/if}
                                 <td>{$ds['type']}</td>
                                 <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
                                 <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>

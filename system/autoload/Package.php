@@ -546,6 +546,12 @@ class Package
     public static function getDevice($plan)
     {
         global $DEVICE_PATH;
+        if($plan === false){
+            return "none";
+        }
+        if(!isset($plan['device'])){
+            return "none";
+        }
         if (!empty($plan['device'])) {
             return $DEVICE_PATH . DIRECTORY_SEPARATOR . $plan['device'] . '.php';
         }

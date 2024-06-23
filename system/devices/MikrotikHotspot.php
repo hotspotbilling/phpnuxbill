@@ -27,8 +27,8 @@ class MikrotikHotspot
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
-            $p = ORM::for_table("tbl_plans")->select("name_plan")->find_one($plan['plan_expired']);
-            $this->setHotspotUserPackage($client, $customer['username'], $p['name_plan']);
+            $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
+            $this->add_customer($customer, $p);
         } else {
             $this->removeHotspotUser($client, $customer['username']);
         }
@@ -280,7 +280,7 @@ class MikrotikHotspot
         $client->sendSync($setRequest);
     }
 
-    function setHotspotUserPackage($client, $user, $plan_name)
+    function setHotspotUserPackage($client, $username, $plan_name)
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
@@ -288,7 +288,7 @@ class MikrotikHotspot
         }
         $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
         $printRequest->setArgument('.proplist', '.id');
-        $printRequest->setQuery(RouterOS\Query::where('name', $user));
+        $printRequest->setQuery(RouterOS\Query::where('name', $username));
         $id = $client->sendSync($printRequest)->getProperty('.id');
 
         $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
