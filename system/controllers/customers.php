@@ -331,7 +331,7 @@ switch ($action) {
             // Delete the associated Customers Attributes records from tbl_customer_custom_fields table
             ORM::for_table('tbl_customers_fields')->where('customer_id', $id)->delete_many();
             //Delete active package
-            $turs = ORM::for_table('tbl_user_recharges')->where('username', $c['username'])->find_one();
+            $turs = ORM::for_table('tbl_user_recharges')->where('username', $c['username'])->find_many();
             foreach($turs as $tur){
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
