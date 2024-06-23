@@ -93,8 +93,8 @@ switch ($action) {
             };
         }
         $msg = '';
-        if (Validator::Length($name, 16, 4) == false) {
-            $msg .= 'Name should be between 5 to 15 characters' . '<br>';
+        if (Validator::Length($name, 255, 4) == false) {
+            $msg .= 'Name should be between 5 to 255 characters' . '<br>';
         }
 
         if ($rate_down_unit == 'Kbps') {
