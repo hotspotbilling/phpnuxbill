@@ -405,7 +405,7 @@
     "day": "Hari",
     "hour": "Jam",
     "minute": "Menit",
-    "second": "Kedua",
+    "second": "Detik",
     "Account_Type": "Jenis akun",
     "Contact": "Kontak",
     "Paid": "Dibayar",
@@ -538,5 +538,14 @@
     "Zip_Code": "Kode Pos",
     "Phone": "Telepon",
     "Customer_Geo_Location_Information": "Informasi Lokasi Geo Pelanggan",
-    "": ""
+    "": "",
+    "Code": "Kode",
+    "Send_Personal_Message": "Kirim Pesan Pribadi",
+    "Send_Via": "Kirim melalui",
+    "Compose_your_message___": "Tulis pesan Anda...",
+    "Use_placeholders_": "Gunakan placeholder:",
+    "Customer_Name": "Nama Pelanggan",
+    "Customer_Username": "Nama Pengguna Pelanggan",
+    "Customer_Phone": "Telepon Pelanggan",
+    "Your_Company_Name": "Nama perusahaan Anda"
 }
