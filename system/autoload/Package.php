@@ -67,7 +67,7 @@ class Package
         if ($p['validity_unit'] == 'Period') {
             // if customer has attribute Expired Date use it
             $day_exp = User::getAttribute("Expired Date", $c['id']);
-            if (!$day_exp) {
+            if ($day_exp) {
                 $day_exp = 20;
                 $f = ORM::for_table('tbl_customers_fields')->create();
                 $f->customer_id = $c['id'];
