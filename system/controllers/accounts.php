@@ -35,7 +35,7 @@ switch ($action) {
                 if ($npass != $cnpass) {
                     r2(U . 'accounts/change-password', 'e', 'Both Password should be same');
                 }
-
+                $user->password = $npass;
                 $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->find_one();
                 if ($tur) {
                     // if has active plan, change the password to devices
@@ -53,7 +53,6 @@ switch ($action) {
                         }
                     }
                 }
-                $user->password = $npass;
                 $user->save();
                 User::removeCookie();
                 session_destroy();
