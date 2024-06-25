@@ -25,11 +25,10 @@ switch ($action) {
         $password = _post('password');
         run_hook('customer_change_password'); #HOOK
         if ($password != '') {
-            $d_pass = $d['password'];
+            $d_pass = $user['password'];
             $npass = _post('npass');
             $cnpass = _post('cnpass');
-
-            if (Password::_uverify($password, $d_pass) == true) {
+            if ($password == $d_pass) {
                 if (!Validator::Length($password, 36, 2)) {
                     r2(U . 'accounts/change-password', 'e', 'New Password must be 2 to 35 character');
                 }
@@ -56,12 +55,12 @@ switch ($action) {
                 }
                 $user->password = $npass;
                 $user->save();
-
-                _msglog('s', Lang::T('Password changed successfully, Please login again'));
+                User::removeCookie();
+                session_destroy();
                 _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
-
-                r2(U . 'login');
+                _alert(Lang::T('Password changed successfully, Please login again'), 'success', "login");
             } else {
+                die($password);
                 r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
             }
         } else {

@@ -535,5 +535,8 @@
     "Additional_Information": "informasi tambahan",
     "City_of_Resident": "Kota Residen",
     "State_of_Resident": "Negara Bagian Tempat Tinggal",
-    "Zip_Code": "Kode Pos"
+    "Zip_Code": "Kode Pos",
+    "Phone": "Telepon",
+    "Customer_Geo_Location_Information": "Informasi Lokasi Geo Pelanggan",
+    "": ""
 }
