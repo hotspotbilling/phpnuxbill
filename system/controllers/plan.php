@@ -248,15 +248,15 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             if (in_array($admin['user_type'], array('SuperAdmin', 'Admin'))) {
                 $ps = ORM::for_table('tbl_plans')
-                ->where('type', $p['type'])
-                ->where('is_radius', $p['is_radius'])
-                ->find_many();
+                    ->where('type', $p['type'])
+                    ->where('is_radius', $p['is_radius'])
+                    ->find_many();
             } else {
                 $ps = ORM::for_table('tbl_plans')
-                ->where("enabled", 1)
-                ->where('is_radius', $p['is_radius'])
-                ->where('type', $p['type'])
-                ->find_many();
+                    ->where("enabled", 1)
+                    ->where('is_radius', $p['is_radius'])
+                    ->where('type', $p['type'])
+                    ->find_many();
             }
             $ui->assign('p', $ps);
             run_hook('view_edit_customer_plan'); #HOOK
@@ -322,29 +322,31 @@ switch ($action) {
                     $d->status = 'on';
                 }
             }
-            if ($d['status'] == 'on' && $oldPlanID != $id_plan) {
+            if ($oldPlanID != $id_plan) {
                 $d->plan_id = $newPlan['id'];
                 $d->namebp = $newPlan['name_plan'];
                 $customer = User::_info($d['customer_id']);
                 //remove from old plan
-                $p = ORM::for_table('tbl_plans')->find_one($oldPlanID);
-                $dvc = Package::getDevice($p);
-                if ($_app_stage != 'demo') {
-                    if (file_exists($dvc)) {
-                        require_once $dvc;
-                        (new $p['device'])->remove_customer($customer, $p);
-                    } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                if ($d['status'] == 'on') {
+                    $p = ORM::for_table('tbl_plans')->find_one($oldPlanID);
+                    $dvc = Package::getDevice($p);
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            (new $p['device'])->remove_customer($customer, $p);
+                        } else {
+                            new Exception(Lang::T("Devices Not Found"));
+                        }
                     }
-                }
-                //add new plan
-                $dvc = Package::getDevice($newPlan);
-                if ($_app_stage != 'demo') {
-                    if (file_exists($dvc)) {
-                        require_once $dvc;
-                        (new $newPlan['device'])->add_customer($customer, $newPlan);
-                    } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                    //add new plan
+                    $dvc = Package::getDevice($newPlan);
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            (new $newPlan['device'])->add_customer($customer, $newPlan);
+                        } else {
+                            new Exception(Lang::T("Devices Not Found"));
+                        }
                     }
                 }
             }
@@ -393,9 +395,9 @@ switch ($action) {
         $ui->assign('customers',  ORM::for_table('tbl_voucher')->distinct()->select("user")->whereNotEqual("user", '0')->findArray());
         // option plans
         $plns = ORM::for_table('tbl_voucher')->distinct()->select("id_plan")->findArray();
-        if(count($plns)>0){
+        if (count($plns) > 0) {
             $ui->assign('plans', ORM::for_table('tbl_plans')->selects(["id", 'name_plan'])->where_in('id', array_column($plns, 'id_plan'))->findArray());
-        }else{
+        } else {
             $ui->assign('plans', []);
         }
         $ui->assign('routers', array_column(ORM::for_table('tbl_voucher')->distinct()->select("routers")->findArray(), 'routers'));
@@ -873,15 +875,15 @@ switch ($action) {
 
         $plns = ORM::for_table('tbl_user_recharges')->distinct()->select("plan_id")->findArray();
         $ids = array_column($plns, 'plan_id');
-        if(count($ids)){
+        if (count($ids)) {
             $ui->assign('plans', ORM::for_table('tbl_plans')->select("id")->select('name_plan')->where_id_in($ids)->findArray());
-        }else{
+        } else {
             $ui->assign('plans', []);
         }
         $query = ORM::for_table('tbl_user_recharges')->order_by_desc('id');
 
         if ($search != '') {
-            $query->where_like("username","%$search%");
+            $query->where_like("username", "%$search%");
         }
         if (!empty($router)) {
             $query->where('routers', $router);
