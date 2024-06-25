@@ -247,9 +247,16 @@ switch ($action) {
             $ui->assign('d', $d);
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             if (in_array($admin['user_type'], array('SuperAdmin', 'Admin'))) {
-                $ps = ORM::for_table('tbl_plans')->where('type', $p['type'])->where('is_radius', $p['is_radius'])->find_many();
+                $ps = ORM::for_table('tbl_plans')
+                ->where('type', $p['type'])
+                ->where('is_radius', $p['is_radius'])
+                ->find_many();
             } else {
-                $ps = ORM::for_table('tbl_plans')->where("enabled", 1)->where('is_radius', $p['is_radius'])->where('type', $p['type'])->find_many();
+                $ps = ORM::for_table('tbl_plans')
+                ->where("enabled", 1)
+                ->where('is_radius', $p['is_radius'])
+                ->where('type', $p['type'])
+                ->find_many();
             }
             $ui->assign('p', $ps);
             run_hook('view_edit_customer_plan'); #HOOK

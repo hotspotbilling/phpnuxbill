@@ -119,6 +119,7 @@ switch ($action) {
         if ($d) {
             //run_hook('customer_view_edit_profile'); #HOOK
             $ui->assign('d', $d);
+            $ui->assign('new_phone', $_SESSION['new_phone']);
             $ui->display('user-phone-update.tpl');
         } else {
             r2(U . 'home', 'e', Lang::T('Account Not Found'));
@@ -129,7 +130,7 @@ switch ($action) {
         $phone = Lang::phoneFormat(_post('phone'));
         $username = $user['username'];
         $otpPath = $CACHE_PATH . '/sms/';
-
+        $_SESSION['new_phone'] = $phone;
         // Validate the phone number format
         if (!preg_match('/^[0-9]{10,}$/', $phone)) {
             r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid phone number format'));

@@ -547,5 +547,17 @@
     "Customer_Name": "Nama Pelanggan",
     "Customer_Username": "Nama Pengguna Pelanggan",
     "Customer_Phone": "Telepon Pelanggan",
-    "Your_Company_Name": "Nama perusahaan Anda"
+    "Your_Company_Name": "Nama perusahaan Anda",
+    "Change": "Mengubah",
+    "Change_Phone_Number": "Ubah Nomor Telepon",
+    "Current_Number": "Nomor Saat Ini",
+    "New_Number": "Nomor baru",
+    "Input_your_phone_number": "Masukkan nomor telepon Anda",
+    "OTP": "OTP",
+    "Enter_OTP_that_was_sent_to_your_phone": "Masukkan OTP yang dikirimkan ke ponsel Anda",
+    "Update": "Memperbarui",
+    "Verification_code_has_been_sent_to_your_phone": "Kode verifikasi telah dikirimkan ke ponsel Anda",
+    "Please_wait_1039_seconds_before_sending_another_SMS": "Harap tunggu 1039 detik sebelum mengirim SMS lainnya",
+    "Please_wait_1015_seconds_before_sending_another_SMS": "Harap tunggu 1015 detik sebelum mengirim SMS lainnya",
+    "Phone_number_updated_successfully": "Nomor telepon berhasil diperbarui"
 }

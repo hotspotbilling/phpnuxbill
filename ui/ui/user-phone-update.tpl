@@ -24,7 +24,7 @@
                     <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-addon" id="basic-addon1">+</span>
-                            <input type="number" class="form-control" name="phone" id="phone" value="" required
+                            <input type="number" class="form-control" name="phone" id="phone" value="{$new_phone}" required
                                 placeholder="{Lang::T('Input your phone number')}">
                             <span class="input-group-btn">
                                 <button type="submit" class="btn btn-info btn-flat">{Lang::T('Request OTP')}</button>
@@ -47,7 +47,7 @@
                 <input type="hidden" name="phone" id="hidden_phone" required>
 
                 <div class="form-group">
-                    <div class="col-lg-offset-2 col-lg-10">
+                    <div class="col-md-offset-3 col-m2-6">
                         <button class="btn btn-success" type="submit"
                             onclick="return validateForm()">{Lang::T('Update')}</button>
                         Or <a href="{$_url}home">{Lang::T('Cancel')}</a>
