@@ -527,5 +527,13 @@
     "warning": "peringatan",
     "Created___Expired": "Dibuat \/ Kedaluwarsa",
     "Login___Activate_Voucher": "Masuk \/ Aktifkan Voucher",
-    "Voucher_activation_success__now_you_can_login": "Aktivasi voucher berhasil, sekarang Anda dapat login"
+    "Voucher_activation_success__now_you_can_login": "Aktivasi voucher berhasil, sekarang Anda dapat login",
+    "Customer_cannot_login_again": "Pelanggan tidak dapat login lagi",
+    "Customer_can_login_but_cannot_buy_internet_plan__Admin_cannot_recharge_customer": "Pelanggan dapat login tetapi tidak dapat membeli paket internet, Admin tidak dapat mengisi ulang pelanggan",
+    "Don_t_forget_to_deactivate_all_active_plan_too": "Jangan lupa untuk menonaktifkan semua paket aktif juga",
+    "Attributes": "Atribut",
+    "Additional_Information": "informasi tambahan",
+    "City_of_Resident": "Kota Residen",
+    "State_of_Resident": "Negara Bagian Tempat Tinggal",
+    "Zip_Code": "Kode Pos"
 }

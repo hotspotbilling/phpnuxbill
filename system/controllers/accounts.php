@@ -25,44 +25,42 @@ switch ($action) {
         $password = _post('password');
         run_hook('customer_change_password'); #HOOK
         if ($password != '') {
-            $d = ORM::for_table('tbl_customers')->where('username', $user['username'])->find_one();
-            if ($d) {
-                $d_pass = $d['password'];
-                $npass = _post('npass');
-                $cnpass = _post('cnpass');
+            $d_pass = $d['password'];
+            $npass = _post('npass');
+            $cnpass = _post('cnpass');
 
-                if (Password::_uverify($password, $d_pass) == true) {
-                    if (!Validator::Length($npass, 15, 2)) {
-                        r2(U . 'accounts/change-password', 'e', 'New Password must be 3 to 14 character');
-                    }
-                    if ($npass != $cnpass) {
-                        r2(U . 'accounts/change-password', 'e', 'Both Password should be same');
-                    }
+            if (Password::_uverify($password, $d_pass) == true) {
+                if (!Validator::Length($password, 36, 2)) {
+                    r2(U . 'accounts/change-password', 'e', 'New Password must be 2 to 35 character');
+                }
+                if ($npass != $cnpass) {
+                    r2(U . 'accounts/change-password', 'e', 'Both Password should be same');
+                }
 
-                    $c = ORM::for_table('tbl_user_recharges')->where('username', $user['username'])->find_one();
-                    if ($c) {
-                        // if has active plan, change the password to devices
-                        $p = ORM::for_table('tbl_plans')->where('id', $c['plan_id'])->find_one();
+                $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->find_one();
+                if ($tur) {
+                    // if has active plan, change the password to devices
+                    if ($tur['status'] == 'on') {
+                        $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
                         $dvc = Package::getDevice($p);
                         if ($_app_stage != 'demo') {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
-                                (new $p['device'])->remove_customer($c, $p);
+                                (new $p['device'])->remove_customer($user, $p);
+                                (new $p['device'])->add_customer($user, $p);
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
                             }
                         }
                     }
-                    $d->password = $npass;
-                    $d->save();
-
-                    _msglog('s', Lang::T('Password changed successfully, Please login again'));
-                    _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
-
-                    r2(U . 'login');
-                } else {
-                    r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
                 }
+                $user->password = $npass;
+                $user->save();
+
+                _msglog('s', Lang::T('Password changed successfully, Please login again'));
+                _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
+
+                r2(U . 'login');
             } else {
                 r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
             }
@@ -130,7 +128,7 @@ switch ($action) {
         break;
 
     case 'phone-update-otp':
-        $phone = _post('phone');
+        $phone = Lang::phoneFormat(_post('phone'));
         $username = $user['username'];
         $otpPath = $CACHE_PATH . '/sms/';
 
@@ -181,7 +179,7 @@ switch ($action) {
         break;
 
     case 'phone-update-post':
-        $phone = _post('phone');
+        $phone = Lang::phoneFormat(_post('phone'));
         $otp_code = _post('otp');
         $username = $user['username'];
         $otpPath = $CACHE_PATH . '/sms/';

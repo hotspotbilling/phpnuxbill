@@ -332,7 +332,7 @@ switch ($action) {
             ORM::for_table('tbl_customers_fields')->where('customer_id', $id)->delete_many();
             //Delete active package
             $turs = ORM::for_table('tbl_user_recharges')->where('username', $c['username'])->find_many();
-            foreach($turs as $tur){
+            foreach ($turs as $tur) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
                     $dvc = Package::getDevice($p);
@@ -359,10 +359,10 @@ switch ($action) {
         break;
 
     case 'add-post':
-        $username = _post('username');
+        $username = alphanumeric(_post('username'), "+_.");
         $fullname = _post('fullname');
-        $password = _post('password');
-        $pppoe_password = _post('pppoe_password');
+        $password = trim(_post('password'));
+        $pppoe_password = trim(_post('pppoe_password'));
         $email = _post('email');
         $address = _post('address');
         $phonenumber = _post('phonenumber');
@@ -380,11 +380,11 @@ switch ($action) {
 
         run_hook('add_customer'); #HOOK
         $msg = '';
-        if (Validator::Length($username, 35, 2) == false) {
-            $msg .= 'Username should be between 3 to 55 characters' . '<br>';
+        if (Validator::Length($username, 55, 2) == false) {
+            $msg .= 'Username should be between 3 to 54 characters' . '<br>';
         }
-        if (Validator::Length($fullname, 36, 2) == false) {
-            $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
+        if (Validator::Length($fullname, 36, 1) == false) {
+            $msg .= 'Full Name should be between 2 to 25 characters' . '<br>';
         }
         if (!Validator::Length($password, 36, 2)) {
             $msg .= 'Password should be between 3 to 35 characters' . '<br>';
@@ -394,10 +394,9 @@ switch ($action) {
         if ($d) {
             $msg .= Lang::T('Account already axist') . '<br>';
         }
-
         if ($msg == '') {
             $d = ORM::for_table('tbl_customers')->create();
-            $d->username = Lang::phoneFormat($username);
+            $d->username = $username;
             $d->password = $password;
             $d->pppoe_password = $pppoe_password;
             $d->email = $email;
@@ -439,11 +438,11 @@ switch ($action) {
         break;
 
     case 'edit-post':
-        $username = Lang::phoneFormat(_post('username'));
+        $username = alphanumeric(_post('username'), "+_.");
         $fullname = _post('fullname');
         $account_type = _post('account_type');
-        $password = _post('password');
-        $pppoe_password = _post('pppoe_password');
+        $password = trim(_post('password'));
+        $pppoe_password = trim(_post('pppoe_password'));
         $email = _post('email');
         $address = _post('address');
         $phonenumber = Lang::phoneFormat(_post('phonenumber'));
@@ -457,29 +456,24 @@ switch ($action) {
         $zip = _post('zip');
         run_hook('edit_customer'); #HOOK
         $msg = '';
-        if (Validator::Length($username, 35, 2) == false) {
-            $msg .= 'Username should be between 3 to 15 characters' . '<br>';
+        if (Validator::Length($username, 55, 2) == false) {
+            $msg .= 'Username should be between 3 to 54 characters' . '<br>';
         }
         if (Validator::Length($fullname, 36, 1) == false) {
             $msg .= 'Full Name should be between 2 to 25 characters' . '<br>';
-        }
-        if ($password != '') {
-            if (!Validator::Length($password, 36, 2)) {
-                $msg .= 'Password should be between 3 to 15 characters' . '<br>';
-            }
         }
 
         $id = _post('id');
         $c = ORM::for_table('tbl_customers')->find_one($id);
 
+        if (!$c) {
+            $msg .= Lang::T('Data Not Found') . '<br>';
+        }
+
         //lets find user Customers Attributes using id
         $customFields = ORM::for_table('tbl_customers_fields')
             ->where('customer_id', $id)
             ->find_many();
-
-        if (!$c) {
-            $msg .= Lang::T('Data Not Found') . '<br>';
-        }
 
         $oldusername = $c['username'];
         $oldPppoePassword = $c['password'];
@@ -488,8 +482,8 @@ switch ($action) {
         $pppoeDiff = false;
         $passDiff = false;
         if ($oldusername != $username) {
-            $c = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
-            if ($c) {
+            $cx = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+            if ($cx) {
                 $msg .= Lang::T('Account already exist') . '<br>';
             }
             $userDiff = true;
@@ -570,19 +564,26 @@ switch ($action) {
             }
 
             if ($userDiff || $pppoeDiff || $passDiff) {
-                $tur = ORM::for_table('tbl_user_recharges')->where('username', ($userDiff) ? $oldusername : $username)->find_one();
+                $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->find_one();
                 if ($tur) {
                     $tur->username = $username;
                     $tur->save();
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'demo') {
-                        if (file_exists($dvc)) {
-                            require_once $dvc;
-                            (new $p['device'])->remove_customer($c, $p);
-                            (new $p['device'])->add_customer($c, $p);
-                        } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                        // if has active package
+                        if ($tur['status'] == 'on') {
+                            if (file_exists($dvc)) {
+                                require_once $dvc;
+                                if ($userDiff) {
+                                    $c->username = $oldusername;
+                                    (new $p['device'])->remove_customer($c, $p);
+                                    $c->username = $username;
+                                }
+                                (new $p['device'])->add_customer($c, $p);
+                            } else {
+                                new Exception(Lang::T("Devices Not Found"));
+                            }
                         }
                     }
                 }
