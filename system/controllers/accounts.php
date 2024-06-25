@@ -36,8 +36,8 @@ switch ($action) {
                     r2(U . 'accounts/change-password', 'e', 'Both Password should be same');
                 }
                 $user->password = $npass;
-                $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->find_one();
-                if ($tur) {
+                $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->find_many();
+                foreach($turs as $tur) {
                     // if has active plan, change the password to devices
                     if ($tur['status'] == 'on') {
                         $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
@@ -45,7 +45,10 @@ switch ($action) {
                         if ($_app_stage != 'demo') {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
+                                $exp = $p['plan_expired'];
+                                $p['plan_expired'] = 0;
                                 (new $p['device'])->remove_customer($user, $p);
+                                $p['plan_expired'] = $exp;
                                 (new $p['device'])->add_customer($user, $p);
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));

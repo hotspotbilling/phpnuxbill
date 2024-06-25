@@ -564,8 +564,8 @@ switch ($action) {
             }
 
             if ($userDiff || $pppoeDiff || $passDiff) {
-                $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->find_one();
-                if ($tur) {
+                $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->findMany();
+                foreach ($turs as $tur) {
                     $tur->username = $username;
                     $tur->save();
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
@@ -576,9 +576,12 @@ switch ($action) {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
                                 if ($userDiff) {
-                                    $c->username = $oldusername;
+                                    $c['username'] = $oldusername;
+                                    $exp = $p['plan_expired'];
+                                    $p['plan_expired'] = 0;
                                     (new $p['device'])->remove_customer($c, $p);
-                                    $c->username = $username;
+                                    $c['username'] = $username;
+                                    $p['plan_expired'] = $exp;
                                 }
                                 (new $p['device'])->add_customer($c, $p);
                             } else {
