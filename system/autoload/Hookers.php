@@ -45,13 +45,14 @@ function register_hook($action, $function){
     ];
 }
 
-function run_hook($action){
+function run_hook($action, $args = []){
     global $hook_registered;
     foreach($hook_registered as $hook){
         if($hook['action'] == $action){
             if(function_exists($hook['function'])){
-                call_user_func($hook['function']);
+                return call_user_func($hook['function'], $args);
             }
         }
     }
+    return false;
 }
