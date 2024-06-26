@@ -20,7 +20,7 @@ class Message
     public static function sendTelegram($txt)
     {
         global $config;
-        run_hook('send_telegram'); #HOOK
+        run_hook('send_telegram', [$txt]); #HOOK
         if (!empty($config['telegram_bot']) && !empty($config['telegram_target_id'])) {
             return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $config['telegram_target_id'] . '&text=' . urlencode($txt));
         }
@@ -33,7 +33,7 @@ class Message
         if(empty($txt)){
             return "";
         }
-        run_hook('send_sms'); #HOOK
+        run_hook('send_sms', [$phone, $txt]); #HOOK
         if (!empty($config['sms_url'])) {
             if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
                 if (strlen($txt) > 160) {
@@ -84,9 +84,9 @@ class Message
     {
         global $config;
         if(empty($txt)){
-            return "";
+            return "kosong";
         }
-        run_hook('send_whatsapp'); #HOOK
+        run_hook('send_whatsapp', [$phone, $txt]); #HOOK
         if (!empty($config['wa_url'])) {
             $waurl = str_replace('[number]', urlencode(Lang::phoneFormat($phone)), $config['wa_url']);
             $waurl = str_replace('[text]', urlencode($txt), $waurl);
@@ -100,7 +100,7 @@ class Message
         if(empty($body)){
             return "";
         }
-        run_hook('send_email'); #HOOK
+        run_hook('send_email', [$to, $subject, $body]); #HOOK
         if (empty($config['smtp_host'])) {
             $attr = "";
             if (!empty($config['mail_from'])) {
