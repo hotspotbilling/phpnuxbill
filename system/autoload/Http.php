@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -21,7 +22,7 @@ class Http
         curl_setopt($ch, CURLOPT_POST, 0);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-        if(is_array($headers) && count($headers)>0){
+        if (is_array($headers) && count($headers) > 0) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -36,10 +37,16 @@ class Http
             $error_msg = curl_error($ch);
         }
         curl_close($ch);
-        if($admin && $error_msg){
-            r2(U . 'dashboard', 'd', $error_msg);
+        if ($admin && $error_msg) {
+            Message::sendTelegram(
+                "Http::getData Error:\n" .
+                    _get('_route') . "\n" .
+                    "\n$url" .
+                    "\n$error_msg"
+            );
+            return $error_msg;
         }
-        return ($server_output) ? $server_output : $error_msg;
+        return (!empty($server_output)) ? $server_output : $error_msg;
     }
 
     public static function postJsonData($url, $array_post, $headers = [], $basic = null)
@@ -60,7 +67,7 @@ class Http
             }
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($array_post));
-        if(is_array($headers) && count($headers)>0){
+        if (is_array($headers) && count($headers) > 0) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
         if (!empty($basic)) {
@@ -72,10 +79,16 @@ class Http
             $error_msg = curl_error($ch);
         }
         curl_close($ch);
-        if($admin && $error_msg){
-            r2(U . 'dashboard', 'd', $error_msg);
+        if ($admin && $error_msg) {
+            Message::sendTelegram(
+                "Http::postJsonData:\n" .
+                    _get('_route') . "\n" .
+                    "\n$url" .
+                    "\n$error_msg"
+            );
+            return $error_msg;
         }
-        return ($server_output) ? $server_output : $error_msg;
+        return (!empty($server_output)) ? $server_output : $error_msg;
     }
 
 
@@ -97,7 +110,7 @@ class Http
             }
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($array_post));
-        if(is_array($headers) && count($headers)>0){
+        if (is_array($headers) && count($headers) > 0) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
         if (!empty($basic)) {
@@ -109,9 +122,15 @@ class Http
             $error_msg = curl_error($ch);
         }
         curl_close($ch);
-        if($admin && $error_msg){
-            r2(U . 'dashboard', 'd', $error_msg);
+        if ($admin && $error_msg) {
+            Message::sendTelegram(
+                "Http::postData Error:\n" .
+                    _get('_route') . "\n" .
+                    "\n$url" .
+                    "\n$error_msg"
+            );
+            return $error_msg;
         }
-        return ($server_output) ? $server_output : $error_msg;
+        return (!empty($server_output)) ? $server_output : $error_msg;
     }
 }
