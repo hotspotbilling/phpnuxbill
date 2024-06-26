@@ -559,5 +559,6 @@
     "Verification_code_has_been_sent_to_your_phone": "Kode verifikasi telah dikirimkan ke ponsel Anda",
     "Please_wait_1039_seconds_before_sending_another_SMS": "Harap tunggu 1039 detik sebelum mengirim SMS lainnya",
     "Please_wait_1015_seconds_before_sending_another_SMS": "Harap tunggu 1015 detik sebelum mengirim SMS lainnya",
-    "Phone_number_updated_successfully": "Nomor telepon berhasil diperbarui"
+    "Phone_number_updated_successfully": "Nomor telepon berhasil diperbarui",
+    "You_cannot_use_your_current_phone_number": "Anda tidak dapat menggunakan nomor telepon Anda saat ini"
 }

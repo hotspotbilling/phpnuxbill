@@ -47,14 +47,16 @@
                         }
 
                     });
+                    setTimeout(() => {
+                        var listAttApi = document.querySelectorAll(`[api-get-text]`);
+                        listAttApi.forEach(function(el) {
+                            $.get(el.getAttribute('api-get-text'), function(data) {
+                                el.innerHTML = data;
+                            });
+                        });
+                    }, 500);
                 });
 
-                var listAtts = document.querySelectorAll(`[api-get-text]`);
-                listAtts.forEach(function(el) {
-                    $.get(el.getAttribute('api-get-text'), function(data) {
-                        el.innerHTML = data;
-                    });
-                });
 
                 function setKolaps() {
                     var kolaps = getCookie('kolaps');
