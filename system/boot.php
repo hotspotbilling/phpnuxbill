@@ -118,29 +118,29 @@ try {
         r2(U . 'dashboard', 'e', 'not found');
     }
 } catch (Throwable $e) {
+    Message::sendTelegram(
+        "Sistem Error.\n" .
+            $e->getMessage() . "\n" .
+            $e->getTraceAsString()
+    );
     if (!Admin::getID()) {
         r2(U . 'home', 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
     $ui->display('router-error.tpl');
-    Message::sendTelegram(
-        "Sistem Error.\n" .
-            $e->getMessage() . "\n" .
-            $e->getTraceAsString()
-    );
     die();
 } catch (Exception $e) {
+    Message::sendTelegram(
+        "Sistem Error.\n" .
+            $e->getMessage() . "\n" .
+            $e->getTraceAsString()
+    );
     if (!Admin::getID()) {
         r2(U . 'home', 'e', $e->getMessage());
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
     $ui->display('router-error.tpl');
-    Message::sendTelegram(
-        "Sistem Error.\n" .
-            $e->getMessage() . "\n" .
-            $e->getTraceAsString()
-    );
     die();
 }
