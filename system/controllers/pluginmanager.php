@@ -38,6 +38,9 @@ switch ($action) {
         r2(U . "pluginmanager", 's', 'Refresh success');
         break;
     case 'dlinstall':
+        if($_app_stage == 'demo'){
+            r2(U . "pluginmanager", 'e', 'Demo Mode cannot install as it Security risk');
+        }
         if (!is_writeable($CACHE_PATH)) {
             r2(U . "pluginmanager", 'e', 'Folder cache/ is not writable');
         }
