@@ -69,11 +69,6 @@ class Package
             $day_exp = User::getAttribute("Expired Date", $c['id']);
             if ($day_exp) {
                 $day_exp = 20;
-                $f = ORM::for_table('tbl_customers_fields')->create();
-                $f->customer_id = $c['id'];
-                $f->field_name = 'Expired Date';
-                $f->field_value = $day_exp;
-                $f->save();
             }else{
                  // if customer no attribute Expired Date use plan expired date
                 $day_exp = 20;
