@@ -30,19 +30,17 @@ class Radius {
     {
         $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
         if ($bw['rate_down_unit'] == 'Kbps') {
-            $unitdown = 'K';
+            $unitdown = '000';
         } else {
-            $unitdown = 'M';
+            $unitdown = '000000';
         }
         if ($bw['rate_up_unit'] == 'Kbps') {
-            $unitup = 'K';
+            $unitup = '000';
         } else {
-            $unitup = 'M';
+            $unitup = '000000';
         }
-        $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-        if(!empty(trim($bw['burst']))){
-            $rate .= ' '.$bw['burst'];
-        }
+        $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown."/".$bw['burst'];
+        
         $rates = explode('/', $rate);
         ##burst fixed
         if (strpos($rate, ' ')) {
