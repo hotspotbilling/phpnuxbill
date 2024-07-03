@@ -41,13 +41,11 @@ class Radius
             $unitup = 'M';
         }
         $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-        if (!empty(trim($bw['burst']))) {
-            $rate .= ' ' . $bw['burst'];
-        }
         $rates = explode('/', $rate);
-        ##burst fixed
-        if (strpos($rate, ' ')) {
-            $ratos = $rates[0] . '/' . $rates[1] . ' ' . $rates[2] . '/' . $rates[3] . '/' . $rates[4] . '/' . $rates[5] . '/' . $rates[6];
+
+        // cek jika punya burst
+        if (!empty(trim($bw['burst']))) {
+            $ratos = $rate . ' ' . $bw['burst'];
         } else {
             $ratos = $rates[0] . '/' . $rates[1];
         }
@@ -154,24 +152,6 @@ class Radius
         $n->community = $community;
         $n->routers = $routers;
         return $n->save();
-    }
-
-    public function planUpSert($plan_id, $rate, $pool = null)
-    {
-        $rates = explode('/', $rate);
-        ##burst fixed
-        if (strpos($rate, ' ')) {
-            $ratos = $rates[0] . '/' . $rates[1] . ' ' . $rates[2] . '/' . $rates[3] . '/' . $rates[4] . '/' . $rates[5] . '/' . $rates[6];
-        } else {
-            $ratos = $rates[0] . '/' . $rates[1];
-        }
-
-        $this->upsertPackage($plan_id, 'Ascend-Data-Rate', $this->stringToInteger($rates[1]), ':=');
-        $this->upsertPackage($plan_id, 'Ascend-Xmit-Rate', $this->stringToInteger($rates[0]), ':=');
-        $this->upsertPackage($plan_id, 'Mikrotik-Rate-Limit', $ratos, ':=');
-        // if ($pool != null) {
-        //     $this->upsertPackage($plan_id, 'Framed-Pool', $pool, ':=');
-        // }
     }
 
     public function customerChangeUsername($from, $to)
