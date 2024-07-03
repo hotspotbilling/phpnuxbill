@@ -8,7 +8,8 @@
  * better create new plugin
  **/
 
-class Radius {
+class Radius
+{
 
     function add_customer($customer, $plan)
     {
@@ -40,8 +41,8 @@ class Radius {
             $unitup = 'M';
         }
         $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-        if(!empty(trim($bw['burst']))){
-            $rate .= ' '.$bw['burst'];
+        if (!empty(trim($bw['burst']))) {
+            $rate .= ' ' . $bw['burst'];
         }
         $rates = explode('/', $rate);
         ##burst fixed
@@ -51,9 +52,14 @@ class Radius {
             $ratos = $rates[0] . '/' . $rates[1];
         }
 
-        $this->upsertPackage($plan['id'], 'Ascend-Data-Rate', $rates[1], ':=');
-        $this->upsertPackage($plan['id'], 'Ascend-Xmit-Rate', $rates[0], ':=');
+        $this->upsertPackage($plan['id'], 'Ascend-Data-Rate', $this->stringToInteger($rates[1]), ':=');
+        $this->upsertPackage($plan['id'], 'Ascend-Xmit-Rate', $this->stringToInteger($rates[1]), ':=');
         $this->upsertPackage($plan['id'], 'Mikrotik-Rate-Limit', $ratos, ':=');
+    }
+
+    function stringToInteger($str)
+    {
+        return str_replace('G', '000000000', str_replace('M', '000000', str_replace('K', '000', $str)));
     }
 
     function update_plan($old_name, $plan)
@@ -160,8 +166,8 @@ class Radius {
             $ratos = $rates[0] . '/' . $rates[1];
         }
 
-        $this->upsertPackage($plan_id, 'Ascend-Data-Rate', $rates[1], ':=');
-        $this->upsertPackage($plan_id, 'Ascend-Xmit-Rate', $rates[0], ':=');
+        $this->upsertPackage($plan_id, 'Ascend-Data-Rate', $this->stringToInteger($rates[1]), ':=');
+        $this->upsertPackage($plan_id, 'Ascend-Xmit-Rate', $this->stringToInteger($rates[0]), ':=');
         $this->upsertPackage($plan_id, 'Mikrotik-Rate-Limit', $ratos, ':=');
         // if ($pool != null) {
         //     $this->upsertPackage($plan_id, 'Framed-Pool', $pool, ':=');
@@ -220,7 +226,7 @@ class Radius {
                 // if exists
                 $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
-				$this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
                 $p->groupname = "plan_" . $plan['id'];
                 $p->save();
             } else {
@@ -394,6 +400,4 @@ class Radius {
         }
         return $result;
     }
-
-
 }
