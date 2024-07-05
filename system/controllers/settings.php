@@ -12,6 +12,33 @@ $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
 switch ($action) {
+    case 'devices':
+        $files = scandir($DEVICE_PATH);
+        $devices = [];
+        foreach ($files as $file) {
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if ($ext == 'php') {
+                $dev = pathinfo($file, PATHINFO_FILENAME);
+                require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . $file;
+                $dvc = new $dev;
+                if(method_exists($dvc, 'description')){
+                    $arr = $dvc->description();
+                    $arr['file'] = $dev;
+                    $devices[] = $arr;
+                }else{
+                    $devices[] = [
+                        'title' => $dev,
+                        'description' => '',
+                        'author' => 'unknown',
+                        'url' => [],
+                        'file' => $dev
+                    ];
+                }
+            }
+        }
+        $ui->assign('devices', $devices);
+        $ui->display('app-devices.tpl');
+        break;
     case 'app':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");

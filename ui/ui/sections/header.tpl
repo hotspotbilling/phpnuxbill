@@ -433,6 +433,8 @@
                                         href="{$_url}settings/maintenance">{Lang::T('Maintenance Mode')}</a></li>
                                 <li {if $_routes[1] eq 'notifications' }class="active" {/if}><a
                                         href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
+                                <li {if $_routes[1] eq 'devices' }class="active" {/if}><a
+                                    href="{$_url}settings/devices">{Lang::T('Devices')}</a></li>
                             {/if}
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin','Agent'])}
                                 <li {if $_routes[1] eq 'users' }class="active" {/if}><a

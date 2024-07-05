@@ -7,6 +7,22 @@ just follow the template
 
 class FileName {
 
+    // show Description
+    function description()
+    {
+        return [
+            'title' => 'Device',
+            'description' => '',
+            'author' => 'ibnu maksum',
+            'url' => [
+                'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
+                'Telegram' => 'https://t.me/ibnux',
+                'Donate' => 'https://paypal.me/ibnux',
+                'any text' => 'Any Url'
+            ]
+        ];
+    }
+
     // Add Customer to Mikrotik/Device
     function add_customer($customer, $plan)
     {

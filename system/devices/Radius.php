@@ -11,6 +11,21 @@
 class Radius
 {
 
+    // show Description
+    function description()
+    {
+        return [
+            'title' => 'Radius',
+            'description' => 'Radius system with database Mysql/Mariadb as database',
+            'author' => 'ibnux',
+            'url' => [
+                'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
+                'Telegram' => 'https://t.me/ibnux',
+                'Donate' => 'https://paypal.me/ibnux'
+            ]
+        ];
+    }
+
     function add_customer($customer, $plan)
     {
         global $b;

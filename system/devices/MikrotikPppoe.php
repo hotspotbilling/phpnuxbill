@@ -12,6 +12,20 @@ use PEAR2\Net\RouterOS;
 
 class MikrotikPppoe
 {
+    // show Description
+    function description()
+    {
+        return [
+            'title' => 'Mikrotik PPPOE',
+            'description' => 'To handle connection between PHPNuxBill with Mikrotik PPPOE',
+            'author' => 'ibnux',
+            'url' => [
+                'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
+                'Telegram' => 'https://t.me/ibnux',
+                'Donate' => 'https://paypal.me/ibnux'
+            ]
+        ];
+    }
 
     function add_customer($customer, $plan)
     {

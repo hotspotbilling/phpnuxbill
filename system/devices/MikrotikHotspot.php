@@ -13,6 +13,22 @@ use PEAR2\Net\RouterOS;
 class MikrotikHotspot
 {
 
+    // show Description
+    function description()
+    {
+        return [
+            'title' => 'Mikrotik Hotspot',
+            'description' => 'To handle connection between PHPNuxBill with Mikrotik Hotspot',
+            'author' => 'ibnux',
+            'url' => [
+                'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
+                'Telegram' => 'https://t.me/ibnux',
+                'Donate' => 'https://paypal.me/ibnux'
+            ]
+        ];
+    }
+
+
     function add_customer($customer, $plan)
     {
         $mikrotik = $this->info($plan['routers']);
