@@ -16,7 +16,7 @@ class Radius
     {
         return [
             'title' => 'Radius',
-            'description' => 'Radius system with database Mysql/Mariadb as database',
+            'description' => 'Radius system with Mysql/Mariadb as database',
             'author' => 'ibnux',
             'url' => [
                 'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
