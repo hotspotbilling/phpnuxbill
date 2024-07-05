@@ -42,7 +42,9 @@ system/lan/**
 *.zip
 system/devices/**
 !system/devices/readme.md
+!system/devices/Dummy.php
 !system/devices/Radius.php
+!system/devices/RadiusRest.php
 !system/devices/MikrotikPppoe.php
 !system/devices/MikrotikHotspot.php
 /.vs
