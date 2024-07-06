@@ -64,7 +64,7 @@ switch ($do) {
             $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
             if (!$user) {
                 $d = ORM::for_table('tbl_customers')->create();
-                $d->username = alphanumeric($username, "+_.@");
+                $d->username = alphanumeric($username, "+_.@-");
                 $d->password = $voucher;
                 $d->fullname = '';
                 $d->address = '';
