@@ -16,7 +16,7 @@ $otpPath = $CACHE_PATH . File::pathFixer('/sms/');
 switch ($do) {
     case 'post':
         $otp_code = _post('otp_code');
-        $username = alphanumeric(_post('username'), "+_.@");
+        $username = alphanumeric(_post('username'), "+_.@-");
         $email = _post('email');
         $fullname = _post('fullname');
         $password = _post('password');
@@ -78,7 +78,7 @@ switch ($do) {
         if ($msg == '') {
             run_hook('register_user'); #HOOK
             $d = ORM::for_table('tbl_customers')->create();
-            $d->username = alphanumeric($username, "+_.@");
+            $d->username = alphanumeric($username, "+_.@-");
             $d->password = $password;
             $d->fullname = $fullname;
             $d->address = $address;
