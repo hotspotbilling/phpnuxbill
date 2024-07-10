@@ -59,8 +59,8 @@
 					</div>
 
                     <div class="form-group">
-						<label for="dbname"><input type="checkbox" class="form-control" id="radius" name="radius" value="yes"> Install Radius Table?</label>
-
+						<label for="radius"><input type="checkbox" class="form-" id="radius" name="radius" value="yes"> Install <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius" target="_blank">Radius</a> Table?</label>
+						<span class='help-block'>You Don't need this if you planning to use <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius-Rest" target="_blank">FreeRadius REST</a></span>
 					</div>
 
 					<button type="submit" class="btn btn-primary">Submit</button>

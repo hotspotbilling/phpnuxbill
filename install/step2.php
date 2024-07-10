@@ -51,7 +51,9 @@
             if ($passed == '111') {
                 echo ("<br/> $ltext <br/> Great! System Test Completed. You can run PHPNuxBill on your server. Click Continue For Next Step.
 				<br><br>
-				<a href=\"step3.php\" class=\"btn btn-primary\">Continue</a><br><br><a href=\"update.php\" class=\"btn btn-primary\">Update System</a>");
+                <a href=\"update.php\" class=\"btn btn-warning\">Update System From PHPMixBill</a>
+                <br><br><br><br>
+				<a href=\"step3.php\" class=\"btn btn-primary\">Continue to Install PHPNuxBill</a><br><br>");
             } else {
                 echo ("<br/> $ltext <br/> Sorry. The requirements of PHPNuxBill  is not available on your server.
 				Contact with us at Telegram <a href=\"https://t.me/phpnuxbill\">@phpnuxbill</a> with this code- $passed Or contact with your server administrator
