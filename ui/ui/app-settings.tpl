@@ -621,6 +621,22 @@
                         <p class="help-block col-md-4">
                             {Lang::T('If user buy same internet plan, expiry date will extend')}</p>
                     </div>
+                    <div class="form-group">
+                            <label class="col-md-2 control-label">{Lang::T('Hotspot Auth Method')}</label>
+                            <div class="col-md-6">
+                                <select name="hs_auth_method" id="auth_method" class="form-control">
+                                    <option value="api" {if $_c['hs_auth_method']=='api' }selected="selected" {/if}>
+                                    {Lang::T('Api')}
+                                    </option>
+                                    <option value="hchap" {if $_c['hs_auth_method']=='hchap' }selected="selected" {/if}>
+                                        {Lang::T('Http-Chap')}
+                                    </option>
+                                </select>
+                            </div>
+                            <p class="help-block col-md-4">
+                                {Lang::T('Hotspot Authentication Method. Make sure you have changed your hotspot login page.')}<br><a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot" target="_blank">Download phpnuxbill-login-hotspot</a>
+                            </p>
+                        </div>
                 </div>
 
                 <div class="panel-heading">
