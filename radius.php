@@ -174,6 +174,10 @@ function process_radiust_rest($tur, $code)
     $attrs['reply:expiration'] = date('d M Y H:i:s', $timeexp);
     $attrs['reply:WISPr-Session-Terminate-Time'] = date('Y-m-d', $timeexp) . 'T' . date('H:i:sP', $timeexp);
 
+    if ($plan['type'] == 'PPPOE') {
+        $attrs['reply:Framed-Pool'] = $plan['pool'];
+    }
+
     if ($plan['typebp'] == "Limited") {
         if ($plan['limit_type'] == "Time_Limit") {
             if ($plan['time_unit'] == 'Hrs')
