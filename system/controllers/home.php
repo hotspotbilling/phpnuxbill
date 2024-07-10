@@ -210,7 +210,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     }
 }
 
-if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
+if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && $_c['hs_auth_method'] != 'hchap')) {
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
