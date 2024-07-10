@@ -27,11 +27,12 @@ class Package
         $time = date("H:i:s");
         $inv = "";
         $isVoucher = false;
+        $c = [];
 
         if ($id_customer == '' or $router_name == '' or $plan_id == '') {
             return false;
         }
-        if($channel == 'Voucher' && $id_customer = 0){
+        if(trim($gateway) == 'Voucher' && $id_customer == 0){
             $isVoucher = true;
         }
 

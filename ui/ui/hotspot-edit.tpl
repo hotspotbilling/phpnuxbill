@@ -248,20 +248,24 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                <div class="panel-heading">on-login / on-up</div>
-                <div class="panel-body">
-                    <textarea class="form-control" id="code" name="on_login" style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_login']}</textarea>
+        {if !$d['is_radius']}
+            <div class="col-md-6">
+                <div class="panel panel-primary panel-hovered panel-stacked mb30">
+                    <div class="panel-heading">on-login / on-up</div>
+                    <div class="panel-body">
+                        <textarea class="form-control" id="code" name="on_login"
+                            style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_login']}</textarea>
+                    </div>
+                </div>
+                <div class="panel panel-primary panel-hovered panel-stacked mb30">
+                    <div class="panel-heading">on-logout / on-down</div>
+                    <div class="panel-body">
+                        <textarea class="form-control" id="code2" name="on_logout"
+                            style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_logout']}</textarea>
+                    </div>
                 </div>
             </div>
-            <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                <div class="panel-heading">on-logout / on-down</div>
-                <div class="panel-body">
-                <textarea class="form-control" id="code2" name="on_logout" style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_logout']}</textarea>
-                </div>
-            </div>
-        </div>
+        {/if}
     </div>
     <div class="form-group">
         <div class="col-md-offset-2 col-md-9">
@@ -306,11 +310,17 @@
     {/literal}
 {/if}
 
-<script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
-<script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/perl/perl.min.js"></script>
+<script language="javascript" type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+<script language="javascript" type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/perl/perl.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"></link>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/abbott.min.css"></link>
+<link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+</link>
+<link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/abbott.min.css">
+</link>
 
 <script>
     CodeMirror.fromTextArea(document.getElementById('code'), {

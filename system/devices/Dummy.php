@@ -11,7 +11,7 @@ class Dummy {
             'author' => 'ibnu maksum',
             'url' => [
                 'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
-                'Telegram' => 'https://t.me/ibnux',
+                'Telegram' => 'https://t.me/phpnuxbill',
                 'Donate' => 'https://paypal.me/ibnux'
             ]
         ];

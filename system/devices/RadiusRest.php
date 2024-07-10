@@ -11,7 +11,7 @@ class RadiusRest {
             'author' => 'ibnu maksum',
             'url' => [
                 'Wiki Tutorial' => 'https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius-Rest',
-                'Telegram' => 'https://t.me/ibnux',
+                'Telegram' => 'https://t.me/phpnuxbill',
                 'Donate' => 'https://paypal.me/ibnux'
             ]
         ];

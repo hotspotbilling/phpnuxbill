@@ -65,6 +65,10 @@
                     </table>
                 </div>
                 {include file="pagination.tpl"}
+                <div class="bs-callout bs-callout-info" id="callout-navbar-role">
+                    <h4>RADIUS REST</h4>
+                    <p>For Radius REST, you don't need to add NAS, NAS need to add to client.conf manually</p>
+                </div>
             </div>
         </div>
     </div>

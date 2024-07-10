@@ -67,8 +67,7 @@ try {
                     $v = ORM::for_table('tbl_voucher')->where('code', $username)->where('routers', 'radius')->find_one();
                     if ($v) {
                         if ($v['status'] == 0) {
-                            // voucher activation
-                            if (Package::rechargeUser(0, $v['routers'], $v1['id_plan'], "Voucher", $username)) {
+                            if (Package::rechargeUser(0, $v['routers'], $v['id_plan'], "Voucher", $username)) {
                                 $v->status = "1";
                                 $v->save();
                                 $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->find_one();
@@ -90,6 +89,7 @@ try {
                     show_radius_result(['Reply-Message' => 'Internet Plan Expired..'], 401);
                 }
             }
+            die("hehe");
             break;
         case 'accounting':
             $username = _req('username');
@@ -126,6 +126,7 @@ try {
             $e->getTraceAsString(),
         $config['telegram_topik_error']
     );
+    show_radius_result(['Reply-Message' => 'Command Failed : '.$action], 401);
 } catch (Exception $e) {
     Message::sendTelegram(
         "Sistem Error.\n" .
@@ -133,8 +134,9 @@ try {
             $e->getTraceAsString(),
         $config['telegram_topik_error']
     );
+    show_radius_result(['Reply-Message' => 'Command Failed : '.$action], 401);
 }
-show_radius_result(['Reply-Message' => 'Invalid Command'], 401);
+show_radius_result(['Reply-Message' => 'Invalid Command : '.$action], 401);
 
 function process_radiust_rest($tur, $code)
 {

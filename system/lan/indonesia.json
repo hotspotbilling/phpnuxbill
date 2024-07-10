@@ -562,5 +562,6 @@
     "Phone_number_updated_successfully": "Nomor telepon berhasil diperbarui",
     "You_cannot_use_your_current_phone_number": "Anda tidak dapat menggunakan nomor telepon Anda saat ini",
     "Devices": "Perangkat",
-    "Voucher_Prefix": "Awalan Voucher"
+    "Voucher_Prefix": "Awalan Voucher",
+    "This_account_status": "Status akun ini"
 }
