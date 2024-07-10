@@ -57,8 +57,7 @@ switch ($action) {
         }
         if ($msg == '') {
             require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "Radius.php";
-            (new Radius())->nasAdd($shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community);
-            if ($id > 0) {
+            if ((new Radius())->nasAdd($shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community) > 0) {
                 r2(U . 'radius/nas-list/', 's', "NAS Added");
             } else {
                 r2(U . 'radius/nas-add/', 'e', "NAS Added Failed");

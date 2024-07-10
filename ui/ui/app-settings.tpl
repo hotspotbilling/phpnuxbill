@@ -200,7 +200,7 @@
                             <label class="col-md-2 control-label">Redirect after Activation</label>
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
-                                    placeholder="https://192.168.88.1/status" value="{$voucher_redirect}">
+                                    placeholder="https://192.168.88.1/status" value="{$_c['voucher_redirect']}">
                             </div>
                             <p class="help-block col-md-4">
                                 {Lang::T('After Customer activate voucher or login, customer will be redirected to this
