@@ -23,15 +23,36 @@ if (empty($action)) {
 
 $code = 200;
 
+//debug
+// if (!empty($action)) {
+//     file_put_contents("$action.json", json_encode([
+//         'header' => $_SERVER,
+//         'get' => $_GET,
+//         'post' => $_POST,
+//         'time' => time()
+//     ]));
+// }
+
 try {
     switch ($action) {
         case 'authenticate':
             $username = _req('username');
             $password = _req('password');
+            if (empty($username) || empty($password)) {
+                show_radius_result([
+                    "control:Auth-Type" => "Reject",
+                    "reply:Reply-Message" => 'Login invalid'
+                ], 401);
+            }
             if ($username == $password) {
                 $d = ORM::for_table('tbl_voucher')->where('code', $username)->find_one();
             } else {
                 $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+                if ($d['password'] != $password) {
+                    if ($d['pppoe_password'] != $password) {
+                        unset($d);
+                    }
+                }
             }
             if ($d) {
                 header("HTTP/1.1 204 No Content");
@@ -47,7 +68,7 @@ try {
             $username = _req('username');
             $password = _req('password');
             $isVoucher = ($username == $password);
-            if (empty($username)) {
+            if (empty($username) || empty($password)) {
                 show_radius_result([
                     "control:Auth-Type" => "Reject",
                     "reply:Reply-Message" => 'Login invalid......'
@@ -58,7 +79,9 @@ try {
                 if (!$isVoucher) {
                     $d = ORM::for_table('tbl_customers')->select('password')->where('username', $username)->find_one();
                     if ($d['password'] != $password) {
-                        show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
+                        if ($d['pppoe_password'] != $password) {
+                            show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
+                        }
                     }
                 }
                 process_radiust_rest($tur, $code);
@@ -89,11 +112,14 @@ try {
                     show_radius_result(['Reply-Message' => 'Internet Plan Expired..'], 401);
                 }
             }
-            die("hehe");
             break;
         case 'accounting':
             $username = _req('username');
             if (empty($username)) {
+                show_radius_result([
+                    "control:Auth-Type" => "Reject",
+                    "reply:Reply-Message" => 'Username empty'
+                ], 200);
                 die();
             }
             header("HTTP/1.1 200 ok");
@@ -107,6 +133,7 @@ try {
             }
             $d->acctsessionid = _post('acctSessionId');
             $d->username = $username;
+            $d->realm = _post('realm');
             $d->nasipaddress = _post('nasip');
             $d->nasid = _post('nasid');
             $d->nasportid = _post('nasPortId');
@@ -116,6 +143,10 @@ try {
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
             $d->save();
+            show_radius_result([
+                "control:Auth-Type" => "Accept",
+                "reply:Reply-Message" => 'Saved'
+            ], 200);
             break;
     }
     die();
@@ -126,7 +157,7 @@ try {
             $e->getTraceAsString(),
         $config['telegram_topik_error']
     );
-    show_radius_result(['Reply-Message' => 'Command Failed : '.$action], 401);
+    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 } catch (Exception $e) {
     Message::sendTelegram(
         "Sistem Error.\n" .
@@ -134,9 +165,9 @@ try {
             $e->getTraceAsString(),
         $config['telegram_topik_error']
     );
-    show_radius_result(['Reply-Message' => 'Command Failed : '.$action], 401);
+    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 }
-show_radius_result(['Reply-Message' => 'Invalid Command : '.$action], 401);
+show_radius_result(['Reply-Message' => 'Invalid Command : ' . $action], 401);
 
 function process_radiust_rest($tur, $code)
 {
