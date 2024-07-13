@@ -563,5 +563,9 @@
     "You_cannot_use_your_current_phone_number": "Anda tidak dapat menggunakan nomor telepon Anda saat ini",
     "Devices": "Perangkat",
     "Voucher_Prefix": "Awalan Voucher",
-    "This_account_status": "Status akun ini"
+    "This_account_status": "Status akun ini",
+    "Hotspot_Auth_Method": "Metode Otentikasi Hotspot",
+    "Api": "Api",
+    "Http_Chap": "Http-Bab",
+    "Hotspot_Authentication_Method__Make_sure_you_have_changed_your_hotspot_login_page_": "Metode Otentikasi Hotspot. Pastikan Anda telah mengubah halaman login hotspot Anda."
 }

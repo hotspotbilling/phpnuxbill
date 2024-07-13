@@ -215,5 +215,9 @@
     "Currency_Code": "Currency Code",
     "Keep_it_blank_if_you_do_not_want_to_show_currency_code": "Keep it blank if you do not want to show currency code",
     "Country_Code_Phone": "Country Code Phone",
-    "Change_title_in_user_Plan_order": "Change title in user Plan order"
+    "Change_title_in_user_Plan_order": "Change title in user Plan order",
+    "Devices": "Devices",
+    "Name_of_Area_that_router_operated": "Name of Area that router operated",
+    "Explain_Coverage_of_router": "Explain Coverage of router",
+    "Documentation": "Documentation"
 }

@@ -49,3 +49,6 @@ system/devices/**
 !system/devices/MikrotikHotspot.php
 /.vs
 docker-compose.yml
+docs/**
+!docs/*.html
+!docs/*.md

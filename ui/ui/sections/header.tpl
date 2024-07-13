@@ -154,32 +154,40 @@
             margin-bottom: 5px
         }
 
-        .bs-callout p:last-child{
-            margin-bottom:0
+        .bs-callout p:last-child {
+            margin-bottom: 0
         }
-        .bs-callout code{
-            border-radius:3px
+
+        .bs-callout code {
+            border-radius: 3px
         }
-        .bs-callout+.bs-callout{
-            margin-top:-5px
+
+        .bs-callout+.bs-callout {
+            margin-top: -5px
         }
-        .bs-callout-danger{
-            border-left-color:#ce4844
+
+        .bs-callout-danger {
+            border-left-color: #ce4844
         }
-        .bs-callout-danger h4{
-            color:#ce4844
+
+        .bs-callout-danger h4 {
+            color: #ce4844
         }
-        .bs-callout-warning{
-            border-left-color:#aa6708
+
+        .bs-callout-warning {
+            border-left-color: #aa6708
         }
-        .bs-callout-warning h4{
-            color:#aa6708
+
+        .bs-callout-warning h4 {
+            color: #aa6708
         }
-        .bs-callout-info{
-            border-left-color:#1b809e
+
+        .bs-callout-info {
+            border-left-color: #1b809e
         }
-        .bs-callout-info h4{
-            color:#1b809e
+
+        .bs-callout-info h4 {
+            color: #1b809e
         }
     </style>
     {if isset($xheader)}
@@ -434,7 +442,7 @@
                                 <li {if $_routes[1] eq 'notifications' }class="active" {/if}><a
                                         href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
                                 <li {if $_routes[1] eq 'devices' }class="active" {/if}><a
-                                    href="{$_url}settings/devices">{Lang::T('Devices')}</a></li>
+                                        href="{$_url}settings/devices">{Lang::T('Devices')}</a></li>
                             {/if}
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin','Agent'])}
                                 <li {if $_routes[1] eq 'users' }class="active" {/if}><a
@@ -478,12 +486,20 @@
                         </li>
                     {/if}
                     {$_MENU_AFTER_LOGS}
-                    <li {if $_system_menu eq 'community' }class="active" {/if}>
-                        <a href="{$_url}community">
-                            <i class="ion ion-chatboxes"></i>
-                            <span class="text">{Lang::T('Community')}</span>
-                        </a>
-                    </li>
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                        <li {if $_system_menu eq 'community' }class="active" {/if}>
+                            <a href="./docs/">
+                                <i class="ion ion-ios-bookmarks"></i>
+                                <span class="text">{Lang::T('Documentation')}</span>
+                            </a>
+                        </li>
+                        <li {if $_system_menu eq 'community' }class="active" {/if}>
+                            <a href="{$_url}community">
+                                <i class="ion ion-chatboxes"></i>
+                                <span class="text">{Lang::T('Community')}</span>
+                            </a>
+                        </li>
+                    {/if}
                     {$_MENU_AFTER_COMMUNITY}
                 </ul>
             </section>
