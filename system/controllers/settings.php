@@ -111,9 +111,12 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $company = _post('CompanyName');
+        $custom_tax_rate = filter_var(_post('custom_tax_rate'), FILTER_SANITIZE_SPECIAL_CHARS);
+        if (preg_match('/[^0-9.]/', $custom_tax_rate)) {
+            r2(U . 'settings/app', 'e', 'Special characters are not allowed in tax rate');
+            return;
+        }
         run_hook('save_settings'); #HOOK
-
-
         if (!empty($_FILES['logo']['name'])) {
             if (function_exists('imagecreatetruecolor')) {
                 if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) unlink($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png');
@@ -141,6 +144,9 @@ switch ($action) {
             }
             // Save all settings including tax system
             foreach ($_POST as $key => $value) {
+                $key = filter_var($key, FILTER_SANITIZE_SPECIAL_CHARS);
+                $value = filter_var($value, FILTER_SANITIZE_SPECIAL_CHARS);
+
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
                     $d->value = $value;
