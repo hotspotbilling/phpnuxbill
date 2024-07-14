@@ -114,7 +114,7 @@ switch ($action) {
         $custom_tax_rate = filter_var(_post('custom_tax_rate'), FILTER_SANITIZE_SPECIAL_CHARS);
         if (preg_match('/[^0-9.]/', $custom_tax_rate)) {
             r2(U . 'settings/app', 'e', 'Special characters are not allowed in tax rate');
-            return;
+            die();
         }
         run_hook('save_settings'); #HOOK
         if (!empty($_FILES['logo']['name'])) {
