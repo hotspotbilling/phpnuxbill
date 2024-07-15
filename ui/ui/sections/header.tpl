@@ -488,9 +488,12 @@
                     {$_MENU_AFTER_LOGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li {if $_system_menu eq 'community' }class="active" {/if}>
-                            <a href="./docs/">
+                        <a href="{if $_c['docs_clicked'] != 'yes'}{$_url}settings/docs{else}./docs/{/if}">
                                 <i class="ion ion-ios-bookmarks"></i>
                                 <span class="text">{Lang::T('Documentation')}</span>
+                                {if $_c['docs_clicked'] != 'yes'}
+                                    <span class="pull-right-container"><small class="label pull-right bg-green">New</small></span>
+                                {/if}
                             </a>
                         </li>
                         <li {if $_system_menu eq 'community' }class="active" {/if}>

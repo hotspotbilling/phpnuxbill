@@ -12,6 +12,19 @@ $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
 switch ($action) {
+    case 'docs':
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'docs_clicked')->find_one();
+        if ($d) {
+            $d->value = 'yes';
+            $d->save();
+        } else {
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'docs_clicked';
+            $d->value = 'yes';
+            $d->save();
+        }
+        r2('./docs');
+        break;
     case 'devices':
         $files = scandir($DEVICE_PATH);
         $devices = [];
