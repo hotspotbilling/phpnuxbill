@@ -154,16 +154,14 @@ try {
     Message::sendTelegram(
         "Sistem Error.\n" .
             $e->getMessage() . "\n" .
-            $e->getTraceAsString(),
-        $config['telegram_topik_error']
+            $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 } catch (Exception $e) {
     Message::sendTelegram(
         "Sistem Error.\n" .
             $e->getMessage() . "\n" .
-            $e->getTraceAsString(),
-        $config['telegram_topik_error']
+            $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 }
