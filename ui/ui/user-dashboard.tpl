@@ -167,12 +167,25 @@
                                 <td class="small mb15">{$nux_mac}</td>
                             </tr>
                         {/if}
-                        {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on' && $_bill['routers'] != 'radius'}
+                        {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on' && $_bill['routers'] != 'radius' && $_c['hs_auth_method'] != 'hchap'}
                             <tr>
                                 <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
                                 <td class="small mb15" id="login_status_{$_bill['id']}">
                                     <img src="ui/ui/images/loading.gif">
                                 </td>
+                            </tr>
+                        {/if}
+                        {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on' && $_c['hs_auth_method'] == 'hchap'}
+                            <tr>
+                                <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
+                                <td class="small mb15">
+                            {if $logged == '1'}
+                        <a href="http://{$hostname}/status" class="btn btn-success btn-xs btn-block">{Lang::T('You are Online, Check Status')}</a>
+                            {else}
+                        <a href="{$_url}home&mikrotik=login" 
+                            onclick="return confirm('{Lang::T('Connect to Internet')}')" class="btn btn-danger btn-xs btn-block">{Lang::T('Not Online, Login now?')}</a>
+                            {/if}
+                                 </td>
                             </tr>
                         {/if}
                         <tr>
@@ -210,7 +223,7 @@
         {/if}
         {if $_bills}
             {foreach $_bills as $_bill}
-                {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on'}
+                {if $_bill['type'] == 'Hotspot' && $_bill['status'] == 'on' && $_c['hs_auth_method'] != 'hchap'}
                     <script>
                         setTimeout(() => {
                             $.ajax({
@@ -320,4 +333,17 @@
         {/if}
     </div>
 </div>
+{if isset($hostname) && $hchap == 'true' && $_c['hs_auth_method'] == 'hchap'}
+<script type="text/javascript" src="/ui/ui/scripts/md5.js"></script>
+<script type="text/javascript">
+     var hostname = "http://{$hostname}/login";
+     var user = "{$_user['username']}";
+     var pass = "{$_user['password']}";
+     var dst = "{$apkurl}";
+     var authdly = "2";
+     var key = hexMD5('{$key1}' + pass + '{$key2}');
+     var auth = hostname + '?username=' + user + '&dst=' + dst + '&password=' + key;
+     document.write('<meta http-equiv="refresh" target="_blank" content="'+authdly+'; url='+auth+'">');
+</script>
+{/if}
 {include file="sections/user-footer.tpl"}

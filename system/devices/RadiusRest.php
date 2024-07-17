@@ -1,16 +1,16 @@
 <?php
 
-class Dummy {
+class RadiusRest {
 
     // show Description
     function description()
     {
         return [
-            'title' => 'Dummy',
-            'description' => 'This devices is just dummy and do nothing, good if you just want to use billing only without doing something to device',
+            'title' => 'Radius Rest API',
+            'description' => 'This devices will handle Radius Connection using Rest API',
             'author' => 'ibnu maksum',
             'url' => [
-                'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
+                'Wiki Tutorial' => 'https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius-Rest',
                 'Telegram' => 'https://t.me/phpnuxbill',
                 'Donate' => 'https://paypal.me/ibnux'
             ]

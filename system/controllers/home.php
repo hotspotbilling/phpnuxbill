@@ -210,7 +210,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     }
 }
 
-if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
+if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && $_c['hs_auth_method'] != 'hchap')) {
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
@@ -231,6 +231,60 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
         }
     }
 }
+
+if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSION['nux-hostname']) && $_c['hs_auth_method'] == 'hchap')) {
+    $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff')|| $_SERVER['SERVER_PORT'] == 443)?'https':'http').'://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $ui->assign('nux_mac', $_SESSION['nux-mac']);
+    $ui->assign('nux_ip', $_SESSION['nux-ip']);
+    $keys = explode('-', $_SESSION['nux-key']);
+    $ui->assign('hostname', $_SESSION['nux-hostname']);
+    $ui->assign('apkurl', $apkurl);
+    $ui->assign('key1', $keys[0]);
+    $ui->assign('key2', $keys[1]);
+    $ui->assign('hchap', $_GET['hchap']);
+    $ui->assign('logged', $_GET['logged']);
+    if ($_app_stage != 'demo') {
+            if ($_GET['mikrotik'] == 'login') {
+                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully')); 
+                } 
+                $getmsg = $_GET['msg'];
+                ///get auth notification from mikrotik
+                if($getmsg == 'Connected') {
+                    $msg .= Lang::T($getmsg);
+                    r2(U . 'home&logged=1', 's', $msg); 
+                } else if($getmsg){
+                    $msg .= Lang::T($getmsg);
+                    r2(U . 'home', 's', $msg); 
+            }
+        }
+    }
+
+if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSION['nux-hostname']) && $_c['hs_auth_method'] == 'hchap')) {
+    $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff')|| $_SERVER['SERVER_PORT'] == 443)?'https':'http').'://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $ui->assign('nux_mac', $_SESSION['nux-mac']);
+    $ui->assign('nux_ip', $_SESSION['nux-ip']);
+    $keys = explode('-', $_SESSION['nux-key']);
+    $ui->assign('hostname', $_SESSION['nux-hostname']);
+    $ui->assign('apkurl', $apkurl);
+    $ui->assign('key1', $keys[0]);
+    $ui->assign('key2', $keys[1]);
+    $ui->assign('hchap', $_GET['hchap']);
+    $ui->assign('logged', $_GET['logged']);
+    if ($_app_stage != 'demo') {
+            if ($_GET['mikrotik'] == 'login') {
+                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully')); 
+                } 
+                $getmsg = $_GET['msg'];
+                ///get auth notification from mikrotik
+                if($getmsg == 'Connected') {
+                    $msg .= Lang::T($getmsg);
+                    r2(U . 'home&logged=1', 's', $msg); 
+                } else if($getmsg){
+                    $msg .= Lang::T($getmsg);
+                    r2(U . 'home', 's', $msg); 
+            }
+        }
+    }
 
 $ui->assign('unpaid', ORM::for_table('tbl_payment_gateway')
     ->where('username', $user['username'])

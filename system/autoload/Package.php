@@ -26,16 +26,26 @@ class Package
         $time_only = date("H:i:s");
         $time = date("H:i:s");
         $inv = "";
+        $isVoucher = false;
+        $c = [];
 
         if ($id_customer == '' or $router_name == '' or $plan_id == '') {
             return false;
         }
+        if(trim($gateway) == 'Voucher' && $id_customer == 0){
+            $isVoucher = true;
+        }
 
-        $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
-        if ($c['status'] != 'Active') {
-            _alert(Lang::T('This account status') . ' : ' . Lang::T($c['status']), 'danger', "");
+        if(!$isVoucher){
+            $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
+            if ($c['status'] != 'Active') {
+                _alert(Lang::T('This account status') . ' : ' . Lang::T($c['status']), 'danger', "");
+            }
+        }else{
+            $c['username'] = $channel;
+            $c['fullname'] = $gateway;
         }
 
         $add_cost = 0;

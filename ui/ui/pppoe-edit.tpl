@@ -184,22 +184,24 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                <div class="panel-heading">on-login / on-up</div>
-                <div class="panel-body">
-                    <textarea class="form-control" id="code" name="on_login"
-                        style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_login']}</textarea>
+        {if !$d['is_radius']}
+            <div class="col-md-6">
+                <div class="panel panel-primary panel-hovered panel-stacked mb30">
+                    <div class="panel-heading">on-login / on-up</div>
+                    <div class="panel-body">
+                        <textarea class="form-control" id="code" name="on_login"
+                            style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_login']}</textarea>
+                    </div>
+                </div>
+                <div class="panel panel-primary panel-hovered panel-stacked mb30">
+                    <div class="panel-heading">on-logout / on-down</div>
+                    <div class="panel-body">
+                        <textarea class="form-control" id="code2" name="on_logout"
+                            style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_logout']}</textarea>
+                    </div>
                 </div>
             </div>
-            <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                <div class="panel-heading">on-logout / on-down</div>
-                <div class="panel-body">
-                    <textarea class="form-control" id="code2" name="on_logout"
-                        style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_logout']}</textarea>
-                </div>
-            </div>
-        </div>
+        {/if}
     </div>
     <div class="form-group">
         <div class="col-lg-offset-2 col-lg-10">

@@ -21,7 +21,7 @@ class MikrotikPppoe
             'author' => 'ibnux',
             'url' => [
                 'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
-                'Telegram' => 'https://t.me/ibnux',
+                'Telegram' => 'https://t.me/phpnuxbill',
                 'Donate' => 'https://paypal.me/ibnux'
             ]
         ];
@@ -31,9 +31,23 @@ class MikrotikPppoe
     {
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-        $this->removePpoeUser($client, $customer['username']);
-        $this->removePpoeActive($client, $customer['username']);
-        $this->addPpoeUser($client, $plan, $customer);
+        //check if customer exists
+        $printRequest = new RouterOS\Request('/ppp/secret/print');
+        $printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
+        $cid = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($cid)) {
+            //customer not exists, add it
+            $this->addPpoeUser($client, $plan, $customer);
+        }else{
+            $setRequest = new RouterOS\Request('/ppp/secret/set');
+            $setRequest->setArgument('numbers', $cid);
+            $setRequest->setArgument('profile', $plan['name_plan']);
+            $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email']);
+            $setRequest->setArgument('password', $customer['password']);
+            $client->sendSync($setRequest);
+            //disconnect then
+            $this->removePpoeActive($client, $customer['username']);
+        }
     }
 
     function remove_customer($customer, $plan)
@@ -210,15 +224,6 @@ class MikrotikPppoe
             RouterOS\Query::where('user', $customer['username'])
         );
         return $client->sendSync($printRequest)->getProperty('.id');
-    }
-
-
-    function connect_customer($customer, $ip, $mac_address, $router_name)
-    {
-    }
-
-    function disconnect_customer($customer, $router_name)
-    {
     }
 
     function info($name)

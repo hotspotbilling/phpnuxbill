@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.7.15
+
+- Radius Rest API
+- Getting Started Documentation
+- Only Show new update just once
+
 ## 2024.6.21
 
 - Add filter result in voucher and internet plan

@@ -15,7 +15,7 @@ if (php_sapi_name() !== 'cli') {
     echo "<pre>";
 }
 
-$d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
+$d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->whereNotEqual('customer_id', '0')->find_many();
 
 run_hook('cronjob_reminder'); #HOOK
 
