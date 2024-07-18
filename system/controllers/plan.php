@@ -322,6 +322,7 @@ switch ($action) {
                     $d->status = 'on';
                 }
             }
+            // plan different then do something
             if ($oldPlanID != $id_plan) {
                 $d->plan_id = $newPlan['id'];
                 $d->namebp = $newPlan['name_plan'];

@@ -51,6 +51,27 @@ class MikrotikHotspot
         $this->removeHotspotActiveUser($client, $customer['username']);
     }
 
+    // customer change username
+    public function change_username($plan, $from, $to)
+    {
+        $mikrotik = $this->info($plan['routers']);
+        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+        //check if customer exists
+        $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
+        $printRequest->setArgument('.proplist', '.id');
+        $printRequest->setQuery(RouterOS\Query::where('name', $from));
+        $id = $client->sendSync($printRequest)->getProperty('.id');
+
+        if (!empty($cid)) {
+            $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
+            $setRequest->setArgument('numbers', $id);
+            $setRequest->setArgument('name', $to);
+            $client->sendSync($setRequest);
+            //disconnect then
+            $this->removeHotspotActiveUser($client, $from);
+        }
+    }
+
     function add_plan($plan)
     {
         $mikrotik = $this->info($plan['routers']);

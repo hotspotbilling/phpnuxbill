@@ -27,6 +27,12 @@ class Dummy {
     {
     }
 
+    // customer change username
+    public function change_username($from, $to)
+    {
+    }
+
+
     // Add Plan to Mikrotik/Device
     function add_plan($plan)
     {

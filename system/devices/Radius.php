@@ -42,6 +42,24 @@ class Radius
         }
     }
 
+    public function change_username($from, $to)
+    {
+        $c = $this->getTableCustomer()->where_equal('username', $from)->findMany();
+        if ($c) {
+            foreach ($c as $u) {
+                $u->username = $to;
+                $u->save();
+            }
+        }
+        $c = $this->getTableUserPackage()->where_equal('username', $from)->findMany();
+        if ($c) {
+            foreach ($c as $u) {
+                $u->username = $to;
+                $u->save();
+            }
+        }
+    }
+
     function add_plan($plan)
     {
         $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
@@ -167,24 +185,6 @@ class Radius
         $n->community = $community;
         $n->routers = $routers;
         return $n->save();
-    }
-
-    public function customerChangeUsername($from, $to)
-    {
-        $c = $this->getTableCustomer()->where_equal('username', $from)->findMany();
-        if ($c) {
-            foreach ($c as $u) {
-                $u->username = $to;
-                $u->save();
-            }
-        }
-        $c = $this->getTableUserPackage()->where_equal('username', $from)->findMany();
-        if ($c) {
-            foreach ($c as $u) {
-                $u->username = $to;
-                $u->save();
-            }
-        }
     }
 
     public function customerDeactivate($username, $radiusDisconnect = true)
