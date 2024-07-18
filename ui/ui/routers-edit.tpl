@@ -55,7 +55,7 @@
                         <div class="form-group row">
                             <label class="col-md-2 control-label"></label>
                             <div class="col-md-6">
-                                <label><input type="checkbox" name="testIt" value="yes"> Test Connection</label>
+                                <label><input type="checkbox" checked name="testIt" value="yes"> Test Connection</label>
                             </div>
                         </div>
                         <div class="form-group">
