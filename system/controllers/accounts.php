@@ -45,10 +45,6 @@ switch ($action) {
                         if ($_app_stage != 'demo') {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
-                                $exp = $p['plan_expired'];
-                                $p['plan_expired'] = 0;
-                                (new $p['device'])->remove_customer($user, $p);
-                                $p['plan_expired'] = $exp;
                                 (new $p['device'])->add_customer($user, $p);
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));

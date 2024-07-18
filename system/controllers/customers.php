@@ -577,12 +577,7 @@ switch ($action) {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
                                 if ($userDiff) {
-                                    $c['username'] = $oldusername;
-                                    $exp = $p['plan_expired'];
-                                    $p['plan_expired'] = 0;
-                                    (new $p['device'])->remove_customer($c, $p);
-                                    $c['username'] = $username;
-                                    $p['plan_expired'] = $exp;
+                                    (new $p['device'])->change_username($p, $oldusername, $username);
                                 }
                                 (new $p['device'])->add_customer($c, $p);
                             } else {
