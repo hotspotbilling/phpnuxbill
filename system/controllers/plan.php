@@ -836,21 +836,33 @@ switch ($action) {
                 //expired
                 $expiration = date('Y-m-d', strtotime(" +$days day"));
             }
-            $tur->expiration = $expiration;
-            $tur->status = "on";
-            $tur->save();
             App::setToken($stoken, $id);
             $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
-            $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
-            $dvc = Package::getDevice($p);
-            if ($_app_stage != 'demo') {
-                if (file_exists($dvc)) {
-                    require_once $dvc;
-                    (new $p['device'])->add_customer($c, $p);
+            if ($c) {
+                $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
+                if ($p) {
+                    $dvc = Package::getDevice($p);
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            (new $p['device'])->add_customer($c, $p);
+                        } else {
+                            new Exception(Lang::T("Devices Not Found"));
+                        }
+                    }
+                    $tur->expiration = $expiration;
+                    $tur->status = "on";
+                    $tur->save();
                 } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                    r2(U . 'plan', 's', "Plan not found");
                 }
+            } else {
+                r2(U . 'plan', 's', "Customer not found");
             }
+            Message::sendTelegram("#u$tur[username] #extend #" . $p['type'] . " \n" . $p['name_plan'] .
+                "\nLocation: " . $p['routers'] .
+                "\nCustomer: " . $c['fullname'] .
+                "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
             _log("$admin[fullname] extend Customer $tur[customer_id] $tur[username] for $days days", $admin['user_type'], $admin['id']);
             r2(U . 'plan', 's', "Extend until $expiration");
         } else {
