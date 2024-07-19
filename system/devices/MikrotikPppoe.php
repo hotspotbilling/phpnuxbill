@@ -51,7 +51,7 @@ class MikrotikPppoe
             $setRequest->setArgument('password', $pass);
             $client->sendSync($setRequest);
             //disconnect then
-            $this->removePpoeActive($client, $customer['username']);
+            //$this->removePpoeActive($client, $customer['username']);
         }
     }
 
