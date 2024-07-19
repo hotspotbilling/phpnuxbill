@@ -28,8 +28,15 @@ class Radius
 
     function add_customer($customer, $plan)
     {
-        global $b;
-        $this->customerAddPlan($customer, $plan, $b['expiration'] . '' . $b['time']);
+        $b = ORM::for_table('tbl_user_recharges')
+        ->where('customer_id', $customer['id'])
+        ->where('plan_id', $plan['id'])
+        ->where('status', 'on')
+        ->findMany();
+
+        if($b){
+            $this->customerAddPlan($customer, $plan, $b['expiration'] . ' ' . $b['time']);
+        }
     }
 
     function remove_customer($customer, $plan)
@@ -262,10 +269,6 @@ class Radius
                     // Mikrotik Spesific
                     $this->upsertCustomer($customer['username'], 'Max-Data', $datalimit);
                     //$this->upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
-
-
-
-
                 }
             } else {
                 //$this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
