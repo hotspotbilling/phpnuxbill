@@ -28,7 +28,11 @@ if ($cn == '1') {
     if (isset($_POST['radius']) && $_POST['radius'] == 'yes') {
         $input = '<?php
 
-define(\'APP_URL\', \'' . $appurl . '\');
+$protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";
+$host = $_SERVER[\'HTTP_HOST\'];
+$baseDir = rtrim(dirname($_SERVER[\'SCRIPT_NAME\']), \'/\\\');
+define(\'APP_URL\', $protocol . $host . $baseDir);
+
 $_app_stage = \'Live\';
 
 // Database PHPNuxBill
@@ -56,7 +60,11 @@ if($_app_stage!=\'Live\'){
     } else {
         $input = '<?php
 
-    define(\'APP_URL\', \'' . $appurl . '\');
+    $protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";
+    $host = $_SERVER[\'HTTP_HOST\'];
+    $baseDir = rtrim(dirname($_SERVER[\'SCRIPT_NAME\']), \'/\\\');
+    define(\'APP_URL\', $protocol . $host . $baseDir);
+
     $_app_stage = \'Live\';
 
     // Database PHPNuxBill
