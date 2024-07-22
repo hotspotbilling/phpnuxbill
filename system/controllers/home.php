@@ -71,8 +71,8 @@ if (_post('send') == 'balance') {
             $d->pg_url_payment = 'balance';
             $d->status = 2;
             $d->save();
-            Message::sendBalanceNotification($user['phonenumber'], $target['fullname'] . ' (' . $target['username'] . ')', $balance, ($user['balance'] - $balance), Lang::getNotifText('balance_send'), $config['user_notification_payment']);
-            Message::sendBalanceNotification($target['phonenumber'], $user['fullname'] . ' (' . $user['username'] . ')', $balance, ($target['balance'] + $balance), Lang::getNotifText('balance_received'), $config['user_notification_payment']);
+            Message::sendBalanceNotification($user, $balance, ($user['balance'] - $balance), Lang::getNotifText('balance_send'), $config['user_notification_payment']);
+            Message::sendBalanceNotification($target, $balance, ($target['balance'] + $balance), Lang::getNotifText('balance_received'), $config['user_notification_payment']);
             Message::sendTelegram("#u$user[username] send balance to #u$target[username] \n" . Lang::moneyFormat($balance));
             r2(U . 'home', 's', Lang::T('Sending balance success'));
         }
@@ -245,16 +245,16 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
     $ui->assign('logged', $_GET['logged']);
     if ($_app_stage != 'demo') {
             if ($_GET['mikrotik'] == 'login') {
-                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully')); 
-                } 
+                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
+                }
                 $getmsg = $_GET['msg'];
                 ///get auth notification from mikrotik
                 if($getmsg == 'Connected') {
                     $msg .= Lang::T($getmsg);
-                    r2(U . 'home&logged=1', 's', $msg); 
+                    r2(U . 'home&logged=1', 's', $msg);
                 } else if($getmsg){
                     $msg .= Lang::T($getmsg);
-                    r2(U . 'home', 's', $msg); 
+                    r2(U . 'home', 's', $msg);
             }
         }
     }
@@ -272,16 +272,16 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
     $ui->assign('logged', $_GET['logged']);
     if ($_app_stage != 'demo') {
             if ($_GET['mikrotik'] == 'login') {
-                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully')); 
-                } 
+                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
+                }
                 $getmsg = $_GET['msg'];
                 ///get auth notification from mikrotik
                 if($getmsg == 'Connected') {
                     $msg .= Lang::T($getmsg);
-                    r2(U . 'home&logged=1', 's', $msg); 
+                    r2(U . 'home&logged=1', 's', $msg);
                 } else if($getmsg){
                     $msg .= Lang::T($getmsg);
-                    r2(U . 'home', 's', $msg); 
+                    r2(U . 'home', 's', $msg);
             }
         }
     }

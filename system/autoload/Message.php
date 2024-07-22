@@ -30,7 +30,7 @@ class Message
     public static function sendSMS($phone, $txt)
     {
         global $config;
-        if(empty($txt)){
+        if (empty($txt)) {
             return "";
         }
         run_hook('send_sms', [$phone, $txt]); #HOOK
@@ -68,7 +68,7 @@ class Message
         if ($_app_stage == 'demo') {
             return null;
         }
-        if(!isset($client_m)){
+        if (!isset($client_m)) {
             $mikrotik = ORM::for_table('tbl_routers')->where('name', $router_name)->find_one();
             $iport = explode(":", $mikrotik['ip_address']);
             $client_m = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
@@ -83,7 +83,7 @@ class Message
     public static function sendWhatsapp($phone, $txt)
     {
         global $config;
-        if(empty($txt)){
+        if (empty($txt)) {
             return "kosong";
         }
         run_hook('send_whatsapp', [$phone, $txt]); #HOOK
@@ -96,8 +96,11 @@ class Message
 
     public static function sendEmail($to, $subject, $body)
     {
-        global $config;
-        if(empty($body)){
+        global $config, $PAGES_PATH, $_app_stage;
+        if (empty($body)) {
+            return "";
+        }
+        if (empty($to)) {
             return "";
         }
         run_hook('send_email', [$to, $subject, $body]); #HOOK
@@ -113,7 +116,9 @@ class Message
         } else {
             $mail = new PHPMailer();
             $mail->isSMTP();
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+            if ($_app_stage == 'Dev') {
+                $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+            }
             $mail->Host       = $config['smtp_host'];
             $mail->SMTPAuth   = true;
             $mail->Username   = $config['smtp_user'];
@@ -126,18 +131,38 @@ class Message
             if (!empty($config['mail_reply_to'])) {
                 $mail->addReplyTo($config['mail_reply_to']);
             }
-            $mail->isHTML(false);
+
             $mail->addAddress($to);
             $mail->Subject = $subject;
-            $mail->Body    = $body;
+
+            if (!file_exists($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
+                if (!copy($PAGES_PATH . '_template' . DIRECTORY_SEPARATOR . 'Email.html', $PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
+                    file_put_contents($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html', Http::getData('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/pages_template/Email.html'));
+                }
+            }
+
+            if (file_exists($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
+                $html = file_get_contents($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html');
+                $html = str_replace('[[Subject]]', $subject, $html);
+                $html = str_replace('[[Company_Address]]', nl2br($config['address']), $html);
+                $html = str_replace('[[Company_Name]]', nl2br($config['CompanyName']), $html);
+                $html = str_replace('[[Body]]', nl2br($body), $html);
+                $mail->isHTML(true);
+                $mail->Body    = $html;
+            } else {
+                $mail->isHTML(false);
+                $mail->Body    = $body;
+            }
             $mail->send();
+
+            //<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
         }
     }
 
     public static function sendPackageNotification($customer, $package, $price, $message, $via)
     {
-        global $ds;
-        if(empty($message)){
+        global $ds, $config;
+        if (empty($message)) {
             return "";
         }
         $msg = str_replace('[[name]]', $customer['fullname'], $message);
@@ -146,19 +171,19 @@ class Message
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', Lang::moneyFormat($price), $msg);
         list($bills, $add_cost) = User::getBills($customer['id']);
-        if($add_cost>0){
+        if ($add_cost > 0) {
             $note = "";
             foreach ($bills as $k => $v) {
                 $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
             }
-            $note .= "Total : " . Lang::moneyFormat($add_cost+$price) . "\n";
+            $note .= "Total : " . Lang::moneyFormat($add_cost + $price) . "\n";
             $msg = str_replace('[[bills]]', $note, $msg);
-        }else{
+        } else {
             $msg = str_replace('[[bills]]', '', $msg);
         }
         if ($ds) {
             $msg = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($ds['expiration'], $ds['time']), $msg);
-        }else{
+        } else {
             $msg = str_replace('[[expired_date]]', "", $msg);
         }
         if (
@@ -167,6 +192,8 @@ class Message
         ) {
             if ($via == 'sms') {
                 echo Message::sendSMS($customer['phonenumber'], $msg);
+            } else if ($via == 'email') {
+                self::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Internet Plan Reminder"), $msg);
             } else if ($via == 'wa') {
                 echo Message::sendWhatsapp($customer['phonenumber'], $msg);
             }
@@ -174,17 +201,21 @@ class Message
         return "$via: $msg";
     }
 
-    public static function sendBalanceNotification($phone, $name, $balance, $balance_now, $message, $via)
+    public static function sendBalanceNotification($cust, $balance, $balance_now, $message, $via)
     {
-        $msg = str_replace('[[name]]', $name, $message);
+        global $config;
+        $msg = str_replace('[[name]]', $cust['fullname'] . ' (' . $cust['username'] . ')', $message);
         $msg = str_replace('[[current_balance]]', Lang::moneyFormat($balance_now), $msg);
         $msg = str_replace('[[balance]]', Lang::moneyFormat($balance), $msg);
+        $phone = $cust['phonenumber'];
         if (
             !empty($phone) && strlen($phone) > 5
-            && !empty($message) && in_array($via, ['sms', 'wa'])
+            && !empty($message) && in_array($via, ['sms', 'wa', 'email'])
         ) {
             if ($via == 'sms') {
                 Message::sendSMS($phone, $msg);
+            } else if ($config['user_notification_payment'] == 'email') {
+                self::sendEmail($cust['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Balance Notification"), $msg);
             } else if ($via == 'wa') {
                 Message::sendWhatsapp($phone, $msg);
             }
@@ -221,6 +252,8 @@ class Message
 
         if ($config['user_notification_payment'] == 'sms') {
             Message::sendSMS($cust['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'email') {
+            self::sendEmail($cust['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' #' . $trx['invoice'], $textInvoice);
         } else if ($config['user_notification_payment'] == 'wa') {
             Message::sendWhatsapp($cust['phonenumber'], $textInvoice);
         }
