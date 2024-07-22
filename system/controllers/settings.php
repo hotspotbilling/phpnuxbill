@@ -157,9 +157,6 @@ switch ($action) {
             }
             // Save all settings including tax system
             foreach ($_POST as $key => $value) {
-                $key = filter_var($key, FILTER_SANITIZE_SPECIAL_CHARS);
-                $value = filter_var($value, FILTER_SANITIZE_SPECIAL_CHARS);
-
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
                     $d->value = $value;
