@@ -372,6 +372,7 @@
         {/literal}
     {/if}
 </script>
+{if $_c['new_version_notify'] != 'disable'}
 <script>
     window.addEventListener('DOMContentLoaded', function() {
         $.getJSON("./version.json?" + Math.random(), function(data) {
@@ -409,5 +410,6 @@
 
     });
 </script>
+{/if}
 
 {include file="sections/footer.tpl"}

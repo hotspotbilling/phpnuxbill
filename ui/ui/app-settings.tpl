@@ -581,6 +581,18 @@
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('New Version Notification')}</label>
+                        <div class="col-md-6">
+                            <select name="new_version_notify" id="new_version_notify" class="form-control">
+                                <option value="enable" {if $_c['new_version_notify']=='enable' }selected="selected" {/if}>{Lang::T('Enabled')}
+                                </option>
+                                <option value="disable" {if $_c['new_version_notify']=='disable' }selected="selected" {/if}>{Lang::T('Disabled')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('This is to notify you when new updates is available')}</p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('OTP Required')}</label>
                         <div class="col-md-6">
                             <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
