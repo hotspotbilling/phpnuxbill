@@ -653,7 +653,11 @@
     "Http_Chap": "Http-Chap",
     "Hotspot_Authentication_Method__Make_sure_you_have_changed_your_hotspot_login_page_": "Hotspot Authentication Method. Make sure you have changed your hotspot login page.",
     "Business": "Business",
-    "": "",
     "Source": "Source",
-    "Destination": "Destination"
+    "Destination": "Destination",
+    "Activate_Voucher": "Activate Voucher",
+    "Voucher_invalid": "Voucher invalid",
+    "Account_Not_Found": "Account Not Found",
+    "Voucher_activation_success__now_you_can_login": "Voucher activation success, now you can login",
+    "Internet_Voucher_Expired": "Internet Voucher Expired"
 }

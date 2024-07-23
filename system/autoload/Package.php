@@ -44,8 +44,12 @@ class Package
                 _alert(Lang::T('This account status') . ' : ' . Lang::T($c['status']), 'danger', "");
             }
         }else{
-            $c['username'] = $channel;
-            $c['fullname'] = $gateway;
+            $c = [
+                'fullname' => $gateway,
+                'email' => '',
+                'username' => $channel,
+                'password' => $channel,
+            ];
         }
 
         $add_cost = 0;
@@ -146,7 +150,8 @@ class Package
         /**
          * 1 Customer only can have 1 PPPOE and 1 Hotspot Plan, 1 prepaid and 1 postpaid
          */
-        $b = ORM::for_table('tbl_user_recharges')
+
+        $query = ORM::for_table('tbl_user_recharges')
             ->select('tbl_user_recharges.id', 'id')
             ->select('customer_id')
             ->select('username')
@@ -162,14 +167,18 @@ class Package
             ->select('tbl_user_recharges.type', 'type')
             ->select('admin_id')
             ->select('prepaid')
-            ->where('customer_id', $id_customer)
             ->where('tbl_user_recharges.routers', $router_name)
             ->where('tbl_user_recharges.Type', $p['type'])
             # PPPOE or Hotspot only can have 1 per customer prepaid or postpaid
             # because 1 customer can have 1 PPPOE and 1 Hotspot Plan in mikrotik
             //->where('prepaid', $p['prepaid'])
-            ->left_outer_join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'))
-            ->find_one();
+            ->left_outer_join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'));
+        if($isVoucher){
+            $query->where('username', $c['username']);
+        }else{
+            $query->where('customer_id', $id_customer);
+        }
+        $b = $query->find_one();
 
         run_hook("recharge_user");
 
