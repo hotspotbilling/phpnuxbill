@@ -56,6 +56,22 @@ class User
         return [$bills, $addcost];
     }
 
+    public static function getBillNames($id = 0)
+    {
+        if (!$id) {
+            $id = User::getID();
+            if (!$id) {
+                return [];
+            }
+        }
+        $bills = [];
+        $attrs = User::getAttributes('Bill', $id);
+        foreach ($attrs as $k => $v) {
+            $bills[] = str_replace(' Bill', '', $k);
+        }
+        return $bills;
+    }
+
     public static function billsPaid($bills, $id = 0)
     {
         if (!$id) {

@@ -658,6 +658,8 @@
     "Activate_Voucher": "Activate Voucher",
     "Voucher_invalid": "Voucher invalid",
     "Account_Not_Found": "Account Not Found",
-    "Voucher_activation_success__now_you_can_login": "Voucher activation success, now you can login",
-    "Internet_Voucher_Expired": "Internet Voucher Expired"
+    "Internet_Voucher_Expired": "Internet Voucher Expired",
+    "": "",
+    "Additional_Billing": "Additional Billing",
+    "_": "-"
 }

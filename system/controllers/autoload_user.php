@@ -29,7 +29,7 @@ switch ($action) {
                         if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'])) {
                             die('<a href="' . U . 'home&mikrotik=login&id=' . $bill['id'] . '" onclick="return confirm(\'' . Lang::T('Connect to Internet?') . '\')" class="btn btn-danger btn-xs btn-block">' . Lang::T('Not Online, Login now?') . '</a>');
                         } else {
-                            die(Lang::T('Your account not connected to internet'));
+                            die(Lang::T('-'));
                         }
                     }
                 } else {

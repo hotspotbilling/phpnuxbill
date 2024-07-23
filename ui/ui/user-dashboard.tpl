@@ -106,6 +106,36 @@
                     </tr>
                 {/if}
             </table>
+            {if $abills && count($abills)>0}
+                <div class="box-header">
+                    <h3 class="box-title">{Lang::T('Additional Billing')}</h3>
+                </div>
+                <table class="table table-bordered table-striped table-bordered table-hover mb-0"
+                    style="margin-bottom: 0px;">
+                    {assign var="total" value=0}
+                    {foreach $abills as $k => $v}
+                        <tr>
+                            <td class="small text-success text-uppercase text-normal">{str_replace(' Bill', '', $k)}</td>
+                            <td class="small mb15">
+                                {if strpos($v, ':') === false}
+                                    {Lang::moneyFormat($v)}
+                                    <sup title="recurring">∞</sup>
+                                    {assign var="total" value=$v+$total}
+                                {else}
+                                    {assign var="exp" value=explode(':',$v)}
+                                    {Lang::moneyFormat($exp[0])}
+                                    <sup title="{$exp[1]} more times">{$exp[1]}x</sup>
+                                    {assign var="total" value=$exp[0]+$total}
+                                {/if}
+                            </td>
+                        </tr>
+                    {/foreach}
+                    <tr>
+                        <td class="small text-success text-uppercase text-normal"><b>{Lang::T('Total')}</b></td>
+                        <td class="small mb15"><b>{Lang::moneyFormat($total)}</b></td>
+                    </tr>
+                </table>
+            {/if}
         </div>
         {if $_bills}
             <div class="box box-primary box-solid">
@@ -179,13 +209,15 @@
                             <tr>
                                 <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
                                 <td class="small mb15">
-                            {if $logged == '1'}
-                        <a href="http://{$hostname}/status" class="btn btn-success btn-xs btn-block">{Lang::T('You are Online, Check Status')}</a>
-                            {else}
-                        <a href="{$_url}home&mikrotik=login" 
-                            onclick="return confirm('{Lang::T('Connect to Internet')}')" class="btn btn-danger btn-xs btn-block">{Lang::T('Not Online, Login now?')}</a>
-                            {/if}
-                                 </td>
+                                    {if $logged == '1'}
+                                        <a href="http://{$hostname}/status"
+                                            class="btn btn-success btn-xs btn-block">{Lang::T('You are Online, Check Status')}</a>
+                                    {else}
+                                        <a href="{$_url}home&mikrotik=login"
+                                            onclick="return confirm('{Lang::T('Connect to Internet')}')"
+                                            class="btn btn-danger btn-xs btn-block">{Lang::T('Not Online, Login now?')}</a>
+                                    {/if}
+                                </td>
                             </tr>
                         {/if}
                         <tr>
@@ -334,16 +366,16 @@
     </div>
 </div>
 {if isset($hostname) && $hchap == 'true' && $_c['hs_auth_method'] == 'hchap'}
-<script type="text/javascript" src="/ui/ui/scripts/md5.js"></script>
-<script type="text/javascript">
-     var hostname = "http://{$hostname}/login";
-     var user = "{$_user['username']}";
-     var pass = "{$_user['password']}";
-     var dst = "{$apkurl}";
-     var authdly = "2";
-     var key = hexMD5('{$key1}' + pass + '{$key2}');
-     var auth = hostname + '?username=' + user + '&dst=' + dst + '&password=' + key;
-     document.write('<meta http-equiv="refresh" target="_blank" content="'+authdly+'; url='+auth+'">');
-</script>
+    <script type="text/javascript" src="/ui/ui/scripts/md5.js"></script>
+    <script type="text/javascript">
+        var hostname = "http://{$hostname}/login";
+        var user = "{$_user['username']}";
+        var pass = "{$_user['password']}";
+        var dst = "{$apkurl}";
+        var authdly = "2";
+        var key = hexMD5('{$key1}' + pass + '{$key2}');
+        var auth = hostname + '?username=' + user + '&dst=' + dst + '&password=' + key;
+        document.write('<meta http-equiv="refresh" target="_blank" content="' + authdly + '; url=' + auth + '">');
+    </script>
 {/if}
 {include file="sections/user-footer.tpl"}

@@ -291,5 +291,9 @@ $ui->assign('unpaid', ORM::for_table('tbl_payment_gateway')
     ->where('status', 1)
     ->find_one());
 $ui->assign('code', alphanumeric(_get('code'), "-"));
+
+$abills = User::getAttributes("Bill");
+$ui->assign('abills', $abills);
+
 run_hook('view_customer_dashboard'); #HOOK
 $ui->display('user-dashboard.tpl');
