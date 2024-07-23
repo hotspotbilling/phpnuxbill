@@ -2,6 +2,14 @@
 
 # CHANGELOG
 
+## 2024.7.23
+
+- Add Additional Bill Info to Customer
+- Add Voucher only Login, without username
+- Add Additional Bill info to Mikrotik Comment
+- Add dynamic Application URL For Installation
+- Fix Active Customers for Voucher
+
 ## 2024.7.15
 
 - Radius Rest API
