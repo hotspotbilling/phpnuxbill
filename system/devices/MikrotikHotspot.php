@@ -88,8 +88,8 @@ class MikrotikHotspot
             $unitup = 'M';
         }
         $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-        if(!empty(trim($bw['burst']))){
-            $rate .= ' '.$bw['burst'];
+        if (!empty(trim($bw['burst']))) {
+            $rate .= ' ' . $bw['burst'];
         }
         $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
         $client->sendSync(
@@ -167,8 +167,8 @@ class MikrotikHotspot
                 $unitup = 'M';
             }
             $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-            if(!empty(trim($bw['burst']))){
-                $rate .= ' '.$bw['burst'];
+            if (!empty(trim($bw['burst']))) {
+                $rate .= ' ' . $bw['burst'];
             }
             $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
             $client->sendSync(
@@ -250,7 +250,7 @@ class MikrotikHotspot
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'])
+                        ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                         ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
                 );
@@ -264,7 +264,7 @@ class MikrotikHotspot
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'])
+                        ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                         ->setArgument('email', $customer['email'])
                         ->setArgument('limit-bytes-total', $datalimit)
                 );
@@ -282,7 +282,7 @@ class MikrotikHotspot
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
                         ->setArgument('password', $customer['password'])
-                        ->setArgument('comment', $customer['fullname'])
+                        ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                         ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
                         ->setArgument('limit-bytes-total', $datalimit)
@@ -293,7 +293,7 @@ class MikrotikHotspot
                 $addRequest
                     ->setArgument('name', $customer['username'])
                     ->setArgument('profile', $plan['name_plan'])
-                    ->setArgument('comment', $customer['fullname'])
+                    ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                     ->setArgument('email', $customer['email'])
                     ->setArgument('password', $customer['password'])
             );

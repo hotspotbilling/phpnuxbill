@@ -47,7 +47,7 @@ class MikrotikPppoe
             $setRequest = new RouterOS\Request('/ppp/secret/set');
             $setRequest->setArgument('numbers', $cid);
             $setRequest->setArgument('profile', $plan['name_plan']);
-            $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email']);
+            $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $setRequest->setArgument('password', $pass);
             $client->sendSync($setRequest);
             //disconnect then
@@ -294,7 +294,7 @@ class MikrotikPppoe
                 ->setArgument('name', $customer['username'])
                 ->setArgument('service', 'pppoe')
                 ->setArgument('profile', $plan['name_plan'])
-                ->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'])
+                ->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                 ->setArgument('password', $pass)
         );
     }
