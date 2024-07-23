@@ -85,7 +85,13 @@
                     <tbody>
                         {foreach $d as $ds}
                             <tr {if $ds['status']=='off'}class="danger" {/if}>
-                                <td><a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a></td>
+                                <td>
+                                    {if $ds['customer_id'] == '0'}
+                                        <a href="{$_url}plan/voucher/&search={$ds['username']}">{$ds['username']}</a>
+                                    {else}
+                                        <a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a>
+                                    {/if}
+                                </td>
                                 {if $ds['type'] == 'Hotspot'}
                                     <td><a href="{$_url}services/edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
                                 {else}
