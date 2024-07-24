@@ -4,6 +4,13 @@
 
 ## 2024.7.23
 
+- add Voucher Used Date
+- Reports page just 1 for all
+- fix start date at dashboard
+- fix installation parameter
+
+## 2024.7.23
+
 - Add Additional Bill Info to Customer
 - Add Voucher only Login, without username
 - Add Additional Bill info to Mikrotik Comment
