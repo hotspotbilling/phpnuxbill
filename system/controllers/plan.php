@@ -480,7 +480,10 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $d = ORM::for_table('tbl_voucher')->where_equal('status', '1')->findMany();
+        $time3months = strtotime('-3 months');
+        $d = ORM::for_table('tbl_voucher')->where_equal('status', '1')
+        ->where_raw("UNIX_TIMESTAMP(used_date) < $time3months")
+        ->findMany();
         if ($d) {
             $jml = 0;
             foreach ($d as $v) {

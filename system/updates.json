@@ -127,6 +127,7 @@
         "ALTER TABLE `rad_acct` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"
     ],
     "2024.7.24" : [
-        "ALTER TABLE `tbl_voucher` ADD `used_date` DATETIME NULL DEFAULT NULL AFTER `status`;"
+        "ALTER TABLE `tbl_voucher` ADD `used_date` DATETIME NULL DEFAULT NULL AFTER `status`;",
+        "UPDATE `tbl_voucher` SET `used_date`=now() WHERE `status`=1;"
     ]
 }

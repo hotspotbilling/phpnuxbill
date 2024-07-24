@@ -661,5 +661,6 @@
     "Internet_Voucher_Expired": "Internet Voucher Expired",
     "": "",
     "Additional_Billing": "Additional Billing",
-    "_": "-"
+    "_": "-",
+    "Used_Date": "Used Date"
 }
