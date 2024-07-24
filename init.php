@@ -67,9 +67,13 @@ require_once $root_path . File::pathFixer('system/orm.php');
 require_once $root_path . File::pathFixer('system/autoload/PEAR2/Autoload.php');
 include $root_path . File::pathFixer('system/autoload/Hookers.php');
 
+if(!empty($db_password)){
+    // compability for old version
+    $db_pass = $db_password;
+}
 ORM::configure("mysql:host=$db_host;dbname=$db_name");
 ORM::configure('username', $db_user);
-ORM::configure('password', $db_password);
+ORM::configure('password', $db_pass);
 ORM::configure('return_result_sets', true);
 if ($_app_stage != 'Live') {
     ORM::configure('logging', true);
@@ -112,6 +116,7 @@ date_default_timezone_set($config['timezone']);
 
 if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')) {
     if(!empty($radius_password)){
+        // compability for old version
         $radius_pass = $radius_password;
     }
     ORM::configure("mysql:host=$radius_host;dbname=$radius_name", null, 'radius');

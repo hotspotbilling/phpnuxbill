@@ -28,61 +28,60 @@ if ($cn == '1') {
     if (isset($_POST['radius']) && $_POST['radius'] == 'yes') {
         $input = '<?php
 
-$protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";
-$host = $_SERVER[\'HTTP_HOST\'];
-$baseDir = rtrim(dirname($_SERVER[\'SCRIPT_NAME\']), \'/\\\');
-define(\'APP_URL\', $protocol . $host . $baseDir);
+$protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" || $_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
+$host = $_SERVER["HTTP_HOST"];
+$baseDir = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\");
+define("APP_URL", $protocol . $host . $baseDir);
 
-$_app_stage = \'Live\';
+// Live, Dev, Demo
+$_app_stage = "Live";
 
 // Database PHPNuxBill
-$db_host	    = \'' . $db_host . '\';
-$db_user        = \'' . $db_user . '\';
-$db_password	= \'' . $db_password . '\';
-$db_name	    = \'' . $db_name . '\';
+$db_host	    = "' . $db_host . '";
+$db_user        = "' . $db_user . '";
+$db_pass    	= "' . $db_password . '";
+$db_name	    = "' . $db_name . '";
 
 // Database Radius
-$radius_host	    = \'' . $db_host . '\';
-$radius_user        = \'' . $db_user . '\';
-$radius_pass    	= \'' . $db_password . '\';
-$radius_name	    = \'' . $db_name . '\';
+$radius_host	    = "' . $db_host . '";
+$radius_user        = "' . $db_user . '";
+$radius_pass    	= "' . $db_password . '";
+$radius_name	    = "' . $db_name . '";
 
-if($_app_stage!=\'Live\'){
+if($_app_stage!="Live"){
     error_reporting(E_ERROR);
-    ini_set(\'display_errors\', 1);
-    ini_set(\'display_startup_errors\', 1);
+    ini_set("display_errors", 1);
+    ini_set("display_startup_errors", 1);
 }else{
     error_reporting(E_ERROR);
-    ini_set(\'display_errors\', 0);
-    ini_set(\'display_startup_errors\', 0);
-}
-';
+    ini_set("display_errors", 0);
+    ini_set("display_startup_errors", 0);
+}';
     } else {
         $input = '<?php
+$protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" || $_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
+$host = $_SERVER["HTTP_HOST"];
+$baseDir = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\");
+define("APP_URL", $protocol . $host . $baseDir);
 
-    $protocol = (!empty($_SERVER[\'HTTPS\']) && $_SERVER[\'HTTPS\'] !== \'off\' || $_SERVER[\'SERVER_PORT\'] == 443) ? "https://" : "http://";
-    $host = $_SERVER[\'HTTP_HOST\'];
-    $baseDir = rtrim(dirname($_SERVER[\'SCRIPT_NAME\']), \'/\\\');
-    define(\'APP_URL\', $protocol . $host . $baseDir);
+// Live, Dev, Demo
+$_app_stage = "Live";
 
-    $_app_stage = \'Live\';
+// Database PHPNuxBill
+$db_host	    = "' . $db_host . '";
+$db_user        = "' . $db_user . '";
+$db_pass	    = "' . $db_password . '";
+$db_name	    = "' . $db_name . '";
 
-    // Database PHPNuxBill
-    $db_host	    = \'' . $db_host . '\';
-    $db_user        = \'' . $db_user . '\';
-    $db_password	= \'' . $db_password . '\';
-    $db_name	    = \'' . $db_name . '\';
-
-    if($_app_stage!=\'Live\'){
-        error_reporting(E_ERROR);
-        ini_set(\'display_errors\', 1);
-        ini_set(\'display_startup_errors\', 1);
-    }else{
-        error_reporting(E_ERROR);
-        ini_set(\'display_errors\', 0);
-        ini_set(\'display_startup_errors\', 0);
-    }
-    ';
+if($_app_stage!="Live"){
+    error_reporting(E_ERROR);
+    ini_set("display_errors", 1);
+    ini_set("display_startup_errors", 1);
+}else{
+    error_reporting(E_ERROR);
+    ini_set("display_errors", 0);
+    ini_set("display_startup_errors", 0);
+}';
     }
     $wConfig = "../config.php";
     $fh = fopen($wConfig, 'w') or die("Can't create config file, your server does not support 'fopen' function,
