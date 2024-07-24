@@ -9,7 +9,7 @@ _admin();
 $ui->assign('_title', Lang::T('Dashboard'));
 $ui->assign('_admin', $admin);
 
-if(isset($_GET['refresh'])){
+if (isset($_GET['refresh'])) {
     $files = scandir($CACHE_PATH);
     foreach ($files as $file) {
         $ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -21,20 +21,21 @@ if(isset($_GET['refresh'])){
 }
 
 $reset_day = $config['reset_day'];
-if(empty($reset_day)){
+if (empty($reset_day)) {
     $reset_day = 1;
 }
 //first day of month
-if($reset_day >= date("d")){
-    $first_day_month = date('Y-m-'.$reset_day);
-}else{
-    $first_day_month = date('Y-m-'.$reset_day, strtotime("-1 MONTH"));
+if (date("d") >= $reset_day) {
+    $start_date = date('Y-m-' . $reset_day);
+} else {
+    $start_date = date('Y-m-' . $reset_day, strtotime("-1 MONTH"));
 }
-$mdate = date('Y-m-d');
+
+$current_date = date('Y-m-d');
 $month_n = date('n');
 
 $iday = ORM::for_table('tbl_transactions')
-    ->where('recharged_on', $mdate)
+    ->where('recharged_on', $current_date)
     ->where_not_equal('method', 'Customer - Balance')
     ->where_not_equal('method', 'Recharge Balance - Administrator')
     ->sum('price');
@@ -44,7 +45,11 @@ if ($iday == '') {
 }
 $ui->assign('iday', $iday);
 
-$imonth = ORM::for_table('tbl_transactions')->where_not_equal('method', 'Customer - Balance')->where_not_equal('method', 'Recharge Balance - Administrator')->where_gte('recharged_on', $first_day_month)->where_lte('recharged_on', $mdate)->sum('price');
+$imonth = ORM::for_table('tbl_transactions')
+    ->where_not_equal('method', 'Customer - Balance')
+    ->where_not_equal('method', 'Recharge Balance - Administrator')
+    ->where_gte('recharged_on', $start_date)
+    ->where_lte('recharged_on', $current_date)->sum('price');
 if ($imonth == '') {
     $imonth = '0.00';
 }
@@ -72,13 +77,13 @@ $ui->assign('c_all', $c_all);
 if ($config['hide_uet'] != 'yes') {
     //user expire
     $query = ORM::for_table('tbl_user_recharges')
-        ->where_lte('expiration', $mdate)
+        ->where_lte('expiration', $current_date)
         ->order_by_desc('expiration');
     $expire = Paginator::findMany($query);
 
     // Get the total count of expired records for pagination
     $totalCount = ORM::for_table('tbl_user_recharges')
-        ->where_lte('expiration', $mdate)
+        ->where_lte('expiration', $current_date)
         ->count();
 
     // Pass the total count and current page to the paginator
@@ -200,7 +205,8 @@ if (file_exists($cacheMSfile) && time() - filemtime($cacheMSfile) < 43200) {
 }
 
 // Assign the monthly sales data to Smarty
-$ui->assign('first_day_month',$first_day_month);
+$ui->assign('start_date', $start_date);
+$ui->assign('current_date', $current_date);
 $ui->assign('monthlySales', $monthlySales);
 $ui->assign('xfooter', '');
 $ui->assign('monthlyRegistered', $monthlyRegistered);

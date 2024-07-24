@@ -1,6 +1,5 @@
 {include file="sections/header.tpl"}
 
-
 <div class="row">
     <div class="col-lg-3 col-xs-6">
         <div class="small-box bg-aqua">
@@ -22,7 +21,7 @@
                 <h4><sup>{$_c['currency_code']}</sup>
                     {number_format($imonth,0,$_c['dec_point'],$_c['thousands_sep'])}</h4>
 
-                <p title="from {$first_day_month}">{Lang::T('Income This Month')}</p>
+                <p>{Lang::T('Income This Month')}</p>
             </div>
             <div class="icon">
                 <i class="ion ion-stats-bars"></i>
@@ -60,6 +59,10 @@
         </div>
     </div>
 </div>
+<ol class="breadcrumb">
+    <li>{Lang::dateFormat($start_date)}</li>
+    <li>{Lang::dateFormat($current_date)}</li>
+</ol>
 <div class="row">
     <div class="col-md-7">
 
@@ -156,7 +159,8 @@
                                 <tr>
                                     <td><a href="{$_url}customers/viewu/{$expired['username']}">{$expired['username']}</a></td>
                                     <td><small data-toggle="tooltip" data-placement="top"
-                                    title="{Lang::dateAndTimeFormat($expired['recharged_on'],$expired['recharged_time'])}">{Lang::timeElapsed($rem_started)}</small> /
+                                            title="{Lang::dateAndTimeFormat($expired['recharged_on'],$expired['recharged_time'])}">{Lang::timeElapsed($rem_started)}</small>
+                                        /
                                         <span data-toggle="tooltip" data-placement="top"
                                             title="{Lang::dateAndTimeFormat($expired['expiration'],$expired['time'])}">{Lang::timeElapsed($rem_exp)}</span>
                                     </td>
@@ -176,7 +180,7 @@
     <div class="col-md-5">
         {if $_c['hide_pg'] != 'yes'}
             <div class="panel panel-success panel-hovered mb20 activities">
-                <div class="panel-heading">{Lang::T('Payment Gateway')}: {$_c['payment_gateway']}</div>
+                <div class="panel-heading">{Lang::T('Payment Gateway')}: {str_replace(',',', ',$_c['payment_gateway'])}</div>
             </div>
         {/if}
         {if $_c['hide_aui'] != 'yes'}
@@ -373,43 +377,44 @@
     {/if}
 </script>
 {if $_c['new_version_notify'] != 'disable'}
-<script>
-    window.addEventListener('DOMContentLoaded', function() {
-        $.getJSON("./version.json?" + Math.random(), function(data) {
-            var localVersion = data.version;
-            $('#version').html('Version: ' + localVersion);
-            $.getJSON(
-                "https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?" +
-                Math
-                .random(),
-                function(data) {
-                    var latestVersion = data.version;
-                    if (localVersion !== latestVersion) {
-                        $('#version').html('Latest Version: ' + latestVersion);
-                        if(getCookie(latestVersion) != 'done'){
-                            Swal.fire({
-                                icon: 'info',
-                                title: "New Version Available\nVersion: "+latestVersion,
-                                toast: true,
-                                position: 'bottom-right',
-                                showConfirmButton: true,
-                                showCloseButton: true,
-                                timer: 30000,
-                                confirmButtonText: '<a href="{$_url}community#latestVersion" style="color: white;">Update Now</a>',
-                                timerProgressBar: true,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                }
-                            });
-                            setCookie(latestVersion, 'done', 7);
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            $.getJSON("./version.json?" + Math.random(), function(data) {
+                var localVersion = data.version;
+                $('#version').html('Version: ' + localVersion);
+                $.getJSON(
+                    "https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?" +
+                    Math
+                    .random(),
+                    function(data) {
+                        var latestVersion = data.version;
+                        if (localVersion !== latestVersion) {
+                            $('#version').html('Latest Version: ' + latestVersion);
+                            if (getCookie(latestVersion) != 'done') {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: "New Version Available\nVersion: " + latestVersion,
+                                    toast: true,
+                                    position: 'bottom-right',
+                                    showConfirmButton: true,
+                                    showCloseButton: true,
+                                    timer: 30000,
+                                    confirmButtonText: '<a href="{$_url}community#latestVersion" style="color: white;">Update Now</a>',
+                                    timerProgressBar: true,
+                                    didOpen: (toast) => {
+                                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                                        toast.addEventListener('mouseleave', Swal
+                                            .resumeTimer)
+                                    }
+                                });
+                                setCookie(latestVersion, 'done', 7);
+                            }
                         }
-                    }
-                });
-        });
+                    });
+            });
 
-    });
-</script>
+        });
+    </script>
 {/if}
 
 {include file="sections/footer.tpl"}
