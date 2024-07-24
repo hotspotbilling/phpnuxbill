@@ -92,6 +92,7 @@ try {
                         if ($v['status'] == 0) {
                             if (Package::rechargeUser(0, $v['routers'], $v['id_plan'], "Voucher", $username)) {
                                 $v->status = "1";
+                                $v->used_date = date('Y-m-d H:i:s');
                                 $v->save();
                                 $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->find_one();
                                 if ($tur) {

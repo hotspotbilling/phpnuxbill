@@ -188,6 +188,7 @@ switch ($do) {
                     // voucher activation
                     if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $voucher)) {
                         $v1->status = "1";
+                        $v1->used_date = date('Y-m-d H:i:s');
                         $v1->user = $user['username'];
                         $v1->save();
                         $user->last_login = date('Y-m-d H:i:s');

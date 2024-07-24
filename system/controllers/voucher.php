@@ -28,6 +28,7 @@ switch ($action) {
         if ($v1) {
             if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $code)) {
                 $v1->status = "1";
+                $v1->used_date = date('Y-m-d H:i:s');
                 $v1->user = $user['username'];
                 $v1->save();
                 r2(U . "voucher/list-activated", 's', Lang::T('Activation Vouchers Successfully'));

@@ -201,6 +201,7 @@ CREATE TABLE `tbl_voucher` (
   `code` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `used_date` DATETIME NULL DEFAULT NULL,
   `generated_by` int NOT NULL DEFAULT '0' COMMENT 'id admin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
