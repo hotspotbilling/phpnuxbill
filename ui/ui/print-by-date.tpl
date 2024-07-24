@@ -22,7 +22,7 @@
 <div class="row">
     <div class="col-md-12">
         <div id="printable">
-            <h4>{Lang::T('All Transactions at Date')}: {date($_c['date_format'], strtotime($mdate))}</h4>
+            <h4>{Lang::T('All Transactions at Date')}: {Lang::dateAndTimeFormat($sd, $ts)} - {Lang::dateAndTimeFormat($ed, $te)}</h4>
             <div class="table-responsive">
                 <table class="table table-bordered table-condensed table-bordered" style="background: #ffffff">
                     <th class="text-center">{Lang::T('Username')}</th>

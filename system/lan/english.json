@@ -662,5 +662,15 @@
     "": "",
     "Additional_Billing": "Additional Billing",
     "_": "-",
-    "Used_Date": "Used Date"
+    "Used_Date": "Used Date",
+    "Filter": "Filter",
+    "Start_time": "Start time",
+    "End_Time": "End Time",
+    "Internet_Plans": "Internet Plans",
+    "Methods": "Methods",
+    "Hap_Lite": "Hap Lite",
+    "balance": "balance",
+    "radius": "radius",
+    "Start_Date": "Start Date",
+    "End_Date": "End Date"
 }
