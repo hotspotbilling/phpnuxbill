@@ -55,7 +55,7 @@
         <button type="button" id="actprint" class="btn btn-default btn-sm no-print">{Lang::T('Click Here to Print')}</button>
     </div>
 </div>
-<script src="ui/ui/scripts/jquery-1.10.2.js"></script>
+<script src="ui/ui/scripts/jquery.min.js"></script>
 <script src="ui/ui/scripts/bootstrap.min.js"></script>
 {if isset($xfooter)}
     {$xfooter}

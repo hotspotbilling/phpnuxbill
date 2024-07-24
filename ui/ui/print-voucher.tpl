@@ -117,7 +117,7 @@
             {/foreach}
         </div>
     </page>
-    <script src="ui/ui/scripts/jquery-1.10.2.js"></script>
+    <script src="ui/ui/scripts/jquery.min.js"></script>
     {if isset($xfooter)}
         {$xfooter}
     {/if}
