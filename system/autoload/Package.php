@@ -209,13 +209,8 @@ class Package
             $date_exp = $datetime[0];
             $time = $datetime[1];
         }
-        $isChangePlan = false;
 
         if ($b) {
-            // plan exists
-            if ($plan_id != $b['plan_id']) {
-                $isChangePlan = true;
-            }
             if ($config['extend_expiry'] != 'no') {
                 if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
@@ -240,7 +235,7 @@ class Package
                 }
             }
 
-            if ($isChangePlan || $b['status'] == 'off') {
+            if ($b['status'] == 'off') {
                 $dvc = Package::getDevice($p);
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
