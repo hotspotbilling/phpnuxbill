@@ -24,16 +24,16 @@
                     </li>
                     <li class="list-group-item">{Lang::nl2br($d['address'])}</li>
                     <li class="list-group-item">
-                        <b>{Lang::T('City')}</b> <span class="pull-right">{Lang::T($d['city'])}</span>
+                        <b>{Lang::T('City')}</b> <span class="pull-right">{$d['city']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('District')}</b> <span class="pull-right">{Lang::T($d['district'])}</span>
+                        <b>{Lang::T('District')}</b> <span class="pull-right">{$d['district']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('State')}</b> <span class="pull-right">{Lang::T($d['state'])}</span>
+                        <b>{Lang::T('State')}</b> <span class="pull-right">{$d['state']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('Zip')}</b> <span class="pull-right">{Lang::T($d['zip'])}</span>
+                        <b>{Lang::T('Zip')}</b> <span class="pull-right">{$d['zip']}</span>
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Password')}</b> <input type="password" value="{$d['password']}"
