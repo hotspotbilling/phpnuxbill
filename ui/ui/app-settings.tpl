@@ -590,13 +590,16 @@
                         <label class="col-md-2 control-label">{Lang::T('New Version Notification')}</label>
                         <div class="col-md-6">
                             <select name="new_version_notify" id="new_version_notify" class="form-control">
-                                <option value="enable" {if $_c['new_version_notify']=='enable' }selected="selected" {/if}>{Lang::T('Enabled')}
+                                <option value="enable" {if $_c['new_version_notify']=='enable' }selected="selected"
+                                    {/if}>{Lang::T('Enabled')}
                                 </option>
-                                <option value="disable" {if $_c['new_version_notify']=='disable' }selected="selected" {/if}>{Lang::T('Disabled')}
+                                <option value="disable" {if $_c['new_version_notify']=='disable' }selected="selected"
+                                    {/if}>{Lang::T('Disabled')}
                                 </option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('This is to notify you when new updates is available')}</p>
+                        <p class="help-block col-md-4">{Lang::T('This is to notify you when new updates is available')}
+                        </p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('OTP Required')}</label>
@@ -722,35 +725,39 @@
                         <p class="help-block col-md-4">{Lang::T('Enter the custom tax rate (e.g., 3.75 for 3.75%)')}</p>
                     </div>
                 </div>
-
-                {* <div class="panel-heading" id="envato">
+                <div class="panel-heading" id="Github_Authentication">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
-                    Envato / Codecanyon
+                    Github Authentication
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Envato Personal Token</label>
+                        <label class="col-md-2 control-label">Github Username</label>
                         <div class="col-md-6">
-                            <input type="password" class="form-control" id="envato_token" name="envato_token"
-                                value="{$_c['envato_token']}" placeholder="BldWuBsxxxxxxxxxxxPDzPozHAPui">
+                        <div class="input-group">
+                            <span class="input-group-addon">https://github.com/</span>
+                            <input type="text" class="form-control" id="github_username" name="github_username"
+                                value="{$_c['github_username']}" placeholder="ibnux">
                         </div>
-                        <span class="help-block col-md-4"><a href="https://build.envato.com/create-token/"
-                                target="_blank">Create Token</a></span>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">Envato
-                            Permission<br>
-                            - View and search Envato sites<br>
-                            - Download the user's purchased items<br>
-                            - List purchases the user has made<br><br>
-                            <a href="https://codecanyon.net/category/php-scripts?term=phpnuxbill" target="_blank"
-                                class="btn btn-xs btn-primary">View MarketPlace</a>
-                        </label>
+                        <label class="col-md-2 control-label">Github Token</label>
+                        <div class="col-md-6">
+                            <input type="password" class="form-control" id="github_token" name="github_token"
+                                value="{$_c['github_token']}" placeholder="ghp_........">
+                        </div>
+                        <span class="help-block col-md-4"><a href="https://github.com/settings/tokens/new"
+                                target="_blank">Create GitHub personal access token (classic)</a>, only need repo scope</span>
                     </div>
-                </div> *}
+                    <div class="form-group">
+                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">This will allow
+                            you to download
+                            plugin from private/paid repository</label>
+                    </div>
+                </div>
             </div>
 
             <div class="panel-body">

@@ -81,6 +81,9 @@ switch ($action) {
             r2(U . "pluginmanager", 's', 'Installation success');
         } else if (_post('gh_url', '') != '') {
             $ghUrl = _post('gh_url', '');
+            if(!empty($config['github_token']) && !empty($config['github_username'])) {
+                $ghUrl = str_replace('https://github.com', 'https://'.$config['github_username'].':'.$config['github_token'].'@github.com', $ghUrl);
+            }
             $plugin = basename($ghUrl);
             $file = $cache . $plugin . '.zip';
             $fp = fopen($file, 'w+');
@@ -132,6 +135,9 @@ switch ($action) {
         if ($tipe == 'plugin') {
             foreach ($json['plugins'] as $plg) {
                 if ($plg['id'] == $plugin) {
+                    if(!empty($config['github_token']) && !empty($config['github_username'])) {
+                        $plg['github'] = str_replace('https://github.com', 'https://'.$config['github_username'].':'.$config['github_token'].'@github.com', $plg['github']);
+                    }
                     $fp = fopen($file, 'w+');
                     $ch = curl_init($plg['github'] . '/archive/refs/heads/master.zip');
                     curl_setopt($ch, CURLOPT_POST, 0);
@@ -180,6 +186,9 @@ switch ($action) {
         if ($tipe == 'plugin') {
             foreach ($json['plugins'] as $plg) {
                 if ($plg['id'] == $plugin) {
+                    if(!empty($config['github_token']) && !empty($config['github_username'])) {
+                        $plg['github'] = str_replace('https://github.com', 'https://'.$config['github_username'].':'.$config['github_token'].'@github.com', $plg['github']);
+                    }
                     $fp = fopen($file, 'w+');
                     $ch = curl_init($plg['github'] . '/archive/refs/heads/master.zip');
                     curl_setopt($ch, CURLOPT_POST, 0);
@@ -214,6 +223,9 @@ switch ($action) {
         } else if ($tipe == 'payment') {
             foreach ($json['payment_gateway'] as $plg) {
                 if ($plg['id'] == $plugin) {
+                    if(!empty($config['github_token']) && !empty($config['github_username'])) {
+                        $plg['github'] = str_replace('https://github.com', 'https://'.$config['github_username'].':'.$config['github_token'].'@github.com', $plg['github']);
+                    }
                     $fp = fopen($file, 'w+');
                     $ch = curl_init($plg['github'] . '/archive/refs/heads/master.zip');
                     curl_setopt($ch, CURLOPT_POST, 0);

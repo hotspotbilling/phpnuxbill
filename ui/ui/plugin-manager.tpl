@@ -30,6 +30,8 @@
     </div>
 </form>
 
+<p class="help-block">To download from private/paid repository, <a href="{$_url}settings/app#Github_Authentication">Set your Github Authentication first</a></p>
+
 <div class="panel panel-primary panel-hovered">
     <div class="panel-heading">{Lang::T('Plugin')}
         <div class="btn-group pull-right">
