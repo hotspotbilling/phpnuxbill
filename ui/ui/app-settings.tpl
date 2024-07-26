@@ -747,7 +747,8 @@
                         <label class="col-md-2 control-label">Github Token</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" id="github_token" name="github_token"
-                                value="{$_c['github_token']}" placeholder="ghp_........">
+                                value="{$_c['github_token']}" placeholder="ghp_........"
+                                onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                         <span class="help-block col-md-4"><a href="https://github.com/settings/tokens/new"
                                 target="_blank">Create GitHub personal access token (classic)</a>, only need repo scope</span>
