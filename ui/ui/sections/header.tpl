@@ -329,12 +329,14 @@
                     {/if}
                     {$_MENU_AFTER_PLANS}
                     <li class="{if $_system_menu eq 'reports'}active{/if} treeview">
-                        <a href="#">
-                            <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
+                        {if in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
+                            <a href="#">
+                                <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
+                                <span class="pull-right-container">
+                                    <i class="fa fa-angle-left pull-right"></i>
+                                </span>
+                            </a>
+                        {/if}
                         <ul class="treeview-menu">
                             <li {if $_system_menu eq 'reports' }class="active" {/if}><a
                                     href="{$_url}reports">{Lang::T('Daily Reports')}</a></li>
@@ -486,11 +488,12 @@
                     {$_MENU_AFTER_LOGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li {if $_system_menu eq 'community' }class="active" {/if}>
-                        <a href="{if $_c['docs_clicked'] != 'yes'}{$_url}settings/docs{else}./docs/{/if}">
+                            <a href="{if $_c['docs_clicked'] != 'yes'}{$_url}settings/docs{else}./docs/{/if}">
                                 <i class="ion ion-ios-bookmarks"></i>
                                 <span class="text">{Lang::T('Documentation')}</span>
                                 {if $_c['docs_clicked'] != 'yes'}
-                                    <span class="pull-right-container"><small class="label pull-right bg-green">New</small></span>
+                                    <span class="pull-right-container"><small
+                                            class="label pull-right bg-green">New</small></span>
                                 {/if}
                             </a>
                         </li>
