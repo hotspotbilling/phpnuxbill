@@ -150,7 +150,7 @@ class Radius
     function remove_plan($plan)
     {
         // Delete Plan
-        $this->getTablePackage()->where_equal('plan_id', "plan_" . $plan['id'])->delete_many();
+        $this->getTablePackage()->where_equal('plan_id', $plan['id'])->delete_many();
         // Reset User Plan
         $c = $this->getTableUserPackage()->where_equal('groupname', "plan_" . $plan['id'])->findMany();
         if ($c) {
