@@ -28,14 +28,56 @@ class Radius
 
     function add_customer($customer, $plan)
     {
-        $b = ORM::for_table('tbl_user_recharges')
-        ->where('customer_id', $customer['id'])
-        ->where('plan_id', $plan['id'])
-        ->where('status', 'on')
-        ->findMany();
+        $p = ORM::for_table('tbl_plans')
+            ->where('id', $plan['id'])
+            ->findOne();
 
-        if($b){
-            $this->customerAddPlan($customer, $plan, $b['expiration'] . ' ' . $b['time']);
+        $date_only = date("Y-m-d");
+        if ($p['validity_unit'] == 'Period') {
+            // if customer has attribute Expired Date use it
+            $day_exp = User::getAttribute("Expired Date", $customer['id']);
+            if (!$day_exp) {
+                // if customer no attribute Expired Date use plan expired date
+                $day_exp = 20;
+                if ($p['prepaid'] == 'no') {
+                    $day_exp = $p['expired_date'];
+                }
+                if (empty($day_exp)) {
+                    $day_exp = 20;
+                }
+            }
+        }
+
+        if ($p['validity_unit'] == 'Months') {
+            $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
+        } else if ($p['validity_unit'] == 'Period') {
+            $date_tmp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
+            $dt1 = new DateTime("$date_only");
+            $dt2 = new DateTime("$date_tmp");
+            $diff = $dt2->diff($dt1);
+            $sum =  $diff->format("%a"); // => 453
+            if ($sum >= 35 * $p['validity']) {
+                $date_exp = date("Y-m-$day_exp", strtotime('+0 month'));
+            } else {
+                $date_exp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
+            };
+            $time = date("23:59:00");
+        } else if ($p['validity_unit'] == 'Days') {
+            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' day')));
+            $date_exp = $datetime[0];
+            $time = $datetime[1];
+        } else if ($p['validity_unit'] == 'Hrs') {
+            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' hour')));
+            $date_exp = $datetime[0];
+            $time = $datetime[1];
+        } else if ($p['validity_unit'] == 'Mins') {
+            $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' minute')));
+            $date_exp = $datetime[0];
+            $time = $datetime[1];
+        }
+
+        if ($p) {
+            $this->customerAddPlan($customer, $plan, $date_exp . ' ' . $time);
         }
     }
 
@@ -219,16 +261,23 @@ class Radius
     /**
      * When add a plan to Customer, use this
      */
-    public function customerAddPlan($customer, $plan, $expired = null)
+    public function customerAddPlan($customer, $plan, $expired = '')
     {
         global $config;
         if ($this->customerUpsert($customer, $plan)) {
             $p = $this->getTableUserPackage()->where_equal('username', $customer['username'])->findOne();
             if ($p) {
                 // if exists
+                // session timeout [it reset everyday, am still making my research] we can use it for something like 1H/Day - since it reset daily, and Max-All-Session clear everything
+                //$this->delAtribute($customer['username'], 'Session-Timeout', 3600); // 3600 = 1 hour
                 $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
-                $this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Mikrotik-Rate-Limit', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'WISPr-Session-Terminate-Time', 'username', $customer['username']);
+                //$this->delAtribute($this->getTableCustomer(), 'Ascend-Data-Rate', 'username', $customer['username']);
+                //we are removing the below in the next two updates, some users may have that attribute, it will remove them before we remove it
+                $this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
                 $p->groupname = "plan_" . $plan['id'];
                 $p->save();
             } else {
@@ -238,53 +287,63 @@ class Radius
                 $p->priority = 1;
                 $p->save();
             }
+
+
+            $this->addBandwidth($customer, $plan);
+
             if ($plan['type'] == 'Hotspot' && $plan['typebp'] == "Limited") {
                 if ($plan['limit_type'] == "Time_Limit") {
                     if ($plan['time_unit'] == 'Hrs')
                         $timelimit = $plan['time_limit'] * 60 * 60;
                     else
                         $timelimit = $plan['time_limit'] * 60;
+                    // session timeout [it reset everyday, am still making my research] we can use it for something like 1H/Day - since it reset daily, and Max-All-Session clear everything
+                    //$this->upsertCustomer($customer['username'], 'Session-Timeout', 3600); // 3600 = 1 hour
                     $this->upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
-                    $this->upsertCustomer($customer['username'], 'Expire-After', $timelimit);
                 } else if ($plan['limit_type'] == "Data_Limit") {
                     if ($plan['data_unit'] == 'GB')
                         $datalimit = $plan['data_limit'] . "000000000";
                     else
                         $datalimit = $plan['data_limit'] . "000000";
-                    //$this->upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
-                    // Mikrotik Spesific
                     $this->upsertCustomer($customer['username'], 'Max-Data', $datalimit);
-                    //$this->upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
                 } else if ($plan['limit_type'] == "Both_Limit") {
                     if ($plan['time_unit'] == 'Hrs')
                         $timelimit = $plan['time_limit'] * 60 * 60;
                     else
                         $timelimit = $plan['time_limit'] * 60;
+                    // session timeout [it reset everyday, am still making my research] we can use it for something like 1H/Day - since it reset daily, and Max-All-Session clear everything
+                    //$this->upsertCustomer($customer['username'], 'Session-Timeout', 3600); // 3600 = 1 hour
+                    $this->upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
                     if ($plan['data_unit'] == 'GB')
                         $datalimit = $plan['data_limit'] . "000000000";
                     else
                         $datalimit = $plan['data_limit'] . "000000";
-                    //$this->upsertCustomer($customer['username'], 'Max-Volume', $datalimit);
-                    $this->upsertCustomer($customer['username'], 'Max-All-Session', $timelimit);
                     // Mikrotik Spesific
                     $this->upsertCustomer($customer['username'], 'Max-Data', $datalimit);
-                    //$this->upsertCustomer($customer['username'], 'Mikrotik-Total-Limit', $datalimit);
                 }
             } else {
-                //$this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
+                // session timeout [it reset everyday, am still making my research] we can use it for something like 1H/Day - since it reset daily, and Max-All-Session clear everything
+                //$this->delAtribute($customer['username'], 'Session-Timeout', 3600); // 3600 = 1 hour
                 $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Mikrotik-Rate-Limit', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'WISPr-Session-Terminate-Time', 'username', $customer['username']);
+                //we are removing the below in the next two updates, some users may have that attribute, it will remove them before we remove it
+                $this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
             }
 
             $this->disconnectCustomer($customer['username']);
             $this->getTableAcct()->where_equal('username', $customer['username'])->delete_many();
-
-
             // expired user
-            if ($expired != null) {
-                //$this->upsertCustomer($customer['username'], 'access-period', strtotime($expired) - time());
-                $this->upsertCustomer($customer['username'], 'Max-All-Session', strtotime($expired) - time());
-                $this->upsertCustomer($customer['username'], 'expiration', date('d M Y H:i:s', strtotime($expired)));
+            if ($expired != '') {
+                //extend session time only if the plan are the same
+                if ($plan['plan_id'] == $p['plan_id'] && $config['extend_expiry'] != 'no') {
+                    // session timeout [it reset everyday, am still making my research] we can use it for something like 1H/Day - since it reset daily, and Max-All-Session clear everything
+                    //$this->upsertCustomer($customer['username'], 'Session-Timeout', 3600); // 3600 = 1 hour
+                    $this->upsertCustomer($customer['username'], 'Max-All-Session', strtotime($expired) - time());
+                    $this->upsertCustomer($customer['username'], 'Expiration', date('d M Y H:i:s', strtotime($expired)));
+                }
                 // Mikrotik Spesific
                 $this->upsertCustomer(
                     $customer['username'],
@@ -293,8 +352,11 @@ class Radius
                 );
             } else {
                 $this->delAtribute($this->getTableCustomer(), 'Max-All-Session', 'username', $customer['username']);
-                //$this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
-                $this->delAtribute($this->getTableCustomer(), 'expiration', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Expiration', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'Mikrotik-Rate-Limit', 'username', $customer['username']);
+                $this->delAtribute($this->getTableCustomer(), 'WISPr-Session-Terminate-Time', 'username', $customer['username']);
+                //we are removing the below in the next two updates, some users may have that attribute, it will remove them before we remove it
+                $this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
             }
 
             if ($plan['type'] == 'PPPOE') {
@@ -307,7 +369,8 @@ class Radius
         return false;
     }
 
-    public function customerUpsert($customer, $plan)
+
+    public function customerUpsert($customer, $plan) //Update or Insert customer plan
     {
         if ($plan['type'] == 'PPPOE') {
             $this->upsertCustomer($customer['username'], 'Cleartext-Password', (empty($customer['pppoe_password'])) ? $customer['password'] : $customer['pppoe_password']);
@@ -321,9 +384,9 @@ class Radius
         return true;
     }
 
-    private function delAtribute($tabel, $attribute, $key, $value)
+    private function delAtribute($table, $attribute, $key, $value)
     {
-        $r = $tabel->where_equal($key, $value)->whereEqual('attribute', $attribute)->findOne();
+        $r = $table->where_equal($key, $value)->whereEqual('attribute', $attribute)->findOne();
         if ($r) $r->delete();
     }
 
@@ -357,7 +420,8 @@ class Radius
         $r->attribute = $attr;
         $r->op = $op;
         $r->value = $value;
-        return $r->save();
+        $r->save();
+        return true;
     }
     /**
      * To insert or update existing customer Attribute
@@ -397,5 +461,32 @@ class Radius
             $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username,Framed-IP-Address = " . $act['framedipaddress'] . "' | radclient -x " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
         }
         return $result;
+    }
+
+    public function addBandwidth($customer, $plan)
+    {
+        $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
+        $unitdown = ($bw['rate_down_unit'] == 'Kbps') ? 'K' : 'M';
+        $unitup = ($bw['rate_up_unit'] == 'Kbps') ? 'K' : 'M';
+
+        // TODO Burst mode [ 2M/1M 256K/128K 128K/64K 1s 1 64K/32K] 
+
+        if (!empty(trim($bw['burst']))) {
+            // burst format: 2M/1M 256K/128K 128K/64K 1s 1 64K/32K
+            $pattern = '/(\d+[KM])\/(\d+[KM]) (\d+[KM])\/(\d+[KM]) (\d+) (\d+) (\d+[KM])\/(\d+[KM])/';
+            preg_match($pattern, $bw['burst'], $matches);
+            if (count($matches) == 9) {
+
+                $burst = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown . ' ' . $matches[1] . '/' . $matches[2] . ' ' . $matches[3] . '/' . $matches[4] . ' ' . $matches[5] . ' ' . $matches[6] . ' ' . $matches[7] . '/' . $matches[8];
+                $this->upsertCustomer($customer['username'], 'Mikrotik-Rate-Limit', $burst);
+            } else {
+                _log("Unexpected burst format for customer " . $customer['username']);
+            }
+        } else {
+            //$this->upsertCustomer($customer['username'], 'Ascend-Data-Rate', $this->stringToInteger($bw['rate_up'] . $unitup) . "/" . $this->stringToInteger($bw['rate_down'] . $unitdown));
+            $this->upsertCustomer($customer['username'], 'Mikrotik-Rate-Limit', $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown);
+        }
+
+        return true;
     }
 }
