@@ -235,7 +235,7 @@ class Package
                 }
             }
 
-            if ($b['status'] == 'off') {
+            if ($b['status'] == 'on') {
                 $dvc = Package::getDevice($p);
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
