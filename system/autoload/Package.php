@@ -235,7 +235,7 @@ class Package
                 }
             }
 
-            if ($b['status'] == 'on') {
+            //if ($b['status'] == 'on') {
                 $dvc = Package::getDevice($p);
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
@@ -245,7 +245,7 @@ class Package
                         new Exception(Lang::T("Devices Not Found"));
                     }
                 }
-            }
+            //}
 
             $b->customer_id = $id_customer;
             $b->username = $c['username'];
