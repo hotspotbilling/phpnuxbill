@@ -67,11 +67,11 @@ require_once $root_path . File::pathFixer('system/orm.php');
 require_once $root_path . File::pathFixer('system/autoload/PEAR2/Autoload.php');
 include $root_path . File::pathFixer('system/autoload/Hookers.php');
 
-if(!empty($db_password)){
+if($db_password != null && ($db_pass == null || empty($db_pass))){
     // compability for old version
     $db_pass = $db_password;
 }
-if(!empty($db_pass)){
+if($db_pass != null){
     // compability for old version
     $db_password = $db_pass;
 }
