@@ -11,7 +11,7 @@ class Admin
 
     public static function getID()
     {
-        global $db_password, $config;
+        global $db_pass, $config;
         $enable_session_timeout = $config['enable_session_timeout'];
         $session_timeout_duration = $config['session_timeout_duration'] * 60; // Convert minutes to seconds
 
@@ -27,7 +27,7 @@ class Admin
         elseif (isset($_COOKIE['aid'])) {
             // id.time.sha1
             $tmp = explode('.', $_COOKIE['aid']);
-            if (sha1($tmp[0] . '.' . $tmp[1] . '.' . $db_password) == $tmp[2]) {
+            if (sha1($tmp[0] . '.' . $tmp[1] . '.' . $db_pass) == $tmp[2]) {
                 if (time() - $tmp[1] < 86400 * 7) {
                     $_SESSION['aid'] = $tmp[0];
                     if ($enable_session_timeout) {
@@ -43,12 +43,12 @@ class Admin
 
     public static function setCookie($aid)
     {
-        global $db_password, $config;
+        global $db_pass, $config;
         $enable_session_timeout = $config['enable_session_timeout'];
         $session_timeout_duration = $config['session_timeout_duration'] * 60; // Convert minutes to seconds
         if (isset($aid)) {
             $time = time();
-            $token = $aid . '.' . $time . '.' . sha1($aid . '.' . $time . '.' . $db_password);
+            $token = $aid . '.' . $time . '.' . sha1($aid . '.' . $time . '.' . $db_pass);
             setcookie('aid', $token, time() + 86400 * 7);
             $_SESSION['aid'] = $aid;
             if ($enable_session_timeout) {

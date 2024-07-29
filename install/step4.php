@@ -9,14 +9,14 @@
 $appurl = $_POST['appurl'];
 $db_host = $_POST['dbhost'];
 $db_user = $_POST['dbuser'];
-$db_password = $_POST['dbpass'];
+$db_pass = $_POST['dbpass'];
 $db_name = $_POST['dbname'];
 $cn = '0';
 try {
     $dbh = new pdo(
         "mysql:host=$db_host;dbname=$db_name",
         "$db_user",
-        "$db_password",
+        "$db_pass",
         array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
     );
     $cn = '1';
@@ -39,13 +39,13 @@ $_app_stage = "Live";
 // Database PHPNuxBill
 $db_host	    = "' . $db_host . '";
 $db_user        = "' . $db_user . '";
-$db_pass    	= "' . $db_password . '";
+$db_pass    	= "' . $db_pass . '";
 $db_name	    = "' . $db_name . '";
 
 // Database Radius
 $radius_host	    = "' . $db_host . '";
 $radius_user        = "' . $db_user . '";
-$radius_pass    	= "' . $db_password . '";
+$radius_pass    	= "' . $db_pass . '";
 $radius_name	    = "' . $db_name . '";
 
 if($_app_stage!="Live"){
@@ -70,7 +70,7 @@ $_app_stage = "Live";
 // Database PHPNuxBill
 $db_host	    = "' . $db_host . '";
 $db_user        = "' . $db_user . '";
-$db_pass	    = "' . $db_password . '";
+$db_pass	    = "' . $db_pass . '";
 $db_name	    = "' . $db_name . '";
 
 if($_app_stage!="Live"){
