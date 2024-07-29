@@ -155,7 +155,9 @@ switch ($action) {
                     die();
                 }
             }
-            // Save all settings including tax system
+             // Save all settings including tax system
+            $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
+            $_POST['enable_session_timeout'] = $enable_session_timeout;
             foreach ($_POST as $key => $value) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
