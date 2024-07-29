@@ -29,6 +29,11 @@ class Package
         $isVoucher = false;
         $c = [];
 
+        if($trx && $trx['status'] == 2){
+            // if its already paid, return it
+            return;
+        }
+
         if ($id_customer == '' or $router_name == '' or $plan_id == '') {
             return false;
         }
