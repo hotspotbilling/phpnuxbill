@@ -701,7 +701,7 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
-        $dbc = new mysqli($db_host, $db_user, $db_password, $db_name);
+        $dbc = new mysqli($db_host, $db_user, $db_pass, $db_name);
         if ($result = $dbc->query('SHOW TABLE STATUS')) {
             $tables = array();
             while ($row = $result->fetch_array()) {

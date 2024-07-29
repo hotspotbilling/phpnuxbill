@@ -149,8 +149,8 @@ switch ($action) {
                     mkdir($otpPath);
                     touch($otpPath . 'index.html');
                 }
-                $otpFile = $otpPath . sha1($username . $db_password) . ".txt";
-                $phoneFile = $otpPath . sha1($username . $db_password) . "_phone.txt";
+                $otpFile = $otpPath . sha1($username . $db_pass) . ".txt";
+                $phoneFile = $otpPath . sha1($username . $db_pass) . "_phone.txt";
 
                 // expired 10 minutes
                 if (file_exists($otpFile) && time() - filemtime($otpFile) < 1200) {
@@ -189,8 +189,8 @@ switch ($action) {
         }
 
         if (!empty($config['sms_url'])) {
-            $otpFile = $otpPath . sha1($username . $db_password) . ".txt";
-            $phoneFile = $otpPath . sha1($username . $db_password) . "_phone.txt";
+            $otpFile = $otpPath . sha1($username . $db_pass) . ".txt";
+            $phoneFile = $otpPath . sha1($username . $db_pass) . "_phone.txt";
 
             // Check if OTP file exists
             if (!file_exists($otpFile)) {

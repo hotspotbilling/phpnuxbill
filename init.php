@@ -71,6 +71,10 @@ if(!empty($db_password)){
     // compability for old version
     $db_pass = $db_password;
 }
+if(!empty($db_pass)){
+    // compability for old version
+    $db_password = $db_pass;
+}
 ORM::configure("mysql:host=$db_host;dbname=$db_name");
 ORM::configure('username', $db_user);
 ORM::configure('password', $db_pass);
@@ -329,7 +333,7 @@ function _alert($text, $type = 'success', $url = "home", $time = 3)
 
 
 if (!isset($api_secret)) {
-    $api_secret = $db_password;
+    $api_secret = $db_pass;
 }
 
 function displayMaintenanceMessage(): void

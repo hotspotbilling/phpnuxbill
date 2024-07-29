@@ -104,7 +104,7 @@ if (empty($step)) {
         $db = new pdo(
             "mysql:host=$db_host;dbname=$db_name",
             $db_user,
-            $db_password,
+            $db_pass,
             array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
         );
 
