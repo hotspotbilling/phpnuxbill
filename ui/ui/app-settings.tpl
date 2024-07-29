@@ -587,6 +587,24 @@
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Enable Session Timeout')}</label>
+                        <div class="col-md-6">
+                            <label class="switch">
+                                <input type="checkbox" id="enable_session_timeout" value="1" name="enable_session_timeout" {if $_c['enable_session_timeout']==1}checked{/if}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                    </div>
+                    <div class="form-group" id="timeout_duration_input" style="display: none;">
+                        <label class="col-md-2 control-label">{Lang::T('Timeout Duration')}</label>
+                        <div class="col-md-6">
+                            <input type="number" value="{$_c['session_timeout_duration']}" class="form-control" name="session_timeout_duration" id="session_timeout_duration" 
+                                   placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx minutes')}</p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('New Version Notification')}</label>
                         <div class="col-md-6">
                             <select name="new_version_notify" id="new_version_notify" class="form-control">
@@ -786,6 +804,38 @@ add dst-host=*.{$_domain}</pre>
         </div>
     </div>
 </form>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var sectionTimeoutCheckbox = document.getElementById('enable_session_timeout');
+        var timeoutDurationInput = document.getElementById('timeout_duration_input');
+        var timeoutDurationField = document.getElementById('session_timeout_duration');
+
+        if (sectionTimeoutCheckbox.checked) {
+            timeoutDurationInput.style.display = 'block';
+            timeoutDurationField.required = true;
+        }
+
+        sectionTimeoutCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                timeoutDurationInput.style.display = 'block';
+                timeoutDurationField.required = true;
+            } else {
+                timeoutDurationInput.style.display = 'none';
+                timeoutDurationField.required = false;
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(event) {
+            if (sectionTimeoutCheckbox.checked && (!timeoutDurationField.value || isNaN(timeoutDurationField.value))) {
+                event.preventDefault();
+                alert('Please enter a valid session timeout duration.');
+                timeoutDurationField.focus();
+            }
+        });
+    });
+</script>
 <script>
     function testWa() {
         var target = prompt("Phone number\nSave First before Test", "");
