@@ -103,6 +103,21 @@
                                 <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Send Welcome Message')}</label>
+                        <div class="col-md-9">
+                            <label class="switch">
+                                <input type="checkbox" id="send_welcome_message" value="1" name="send_welcome_message">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="method" style="display: none;">
+                        <label class="col-md-3 control-label">{Lang::T('Method')}</label>
+                        <label class="col-md-3 control-label"><input type="checkbox" name="sms" value="1"> {Lang::T('SMS')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="wa" value="1"> {Lang::T('WA')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="email" value="1"> {Lang::T('Email')}</label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -175,6 +190,38 @@
     </center>
 </form>
 {literal}
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var sendWelcomeCheckbox = document.getElementById('send_welcome_message');
+        var methodSection = document.getElementById('method');
+
+        function toggleMethodSection() {
+            if (sendWelcomeCheckbox.checked) {
+                methodSection.style.display = 'block';
+            } else {
+                methodSection.style.display = 'none';
+            }
+        }
+
+        toggleMethodSection();
+
+        sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
+        document.querySelector('form').addEventListener('submit', function(event) {
+            if (sendWelcomeCheckbox.checked) {
+                var methodCheckboxes = methodSection.querySelectorAll('input[type="checkbox"]');
+                var oneChecked = Array.from(methodCheckboxes).some(function(checkbox) {
+                    return checkbox.checked;
+                });
+
+                if (!oneChecked) {
+                    event.preventDefault();
+                    alert('Please choose at least one method.');
+                    methodSection.focus();
+                }
+            }
+        });
+    });
+    </script>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
             var customFieldsContainer = document.getElementById('custom-fields-container');
