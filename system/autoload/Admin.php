@@ -14,7 +14,11 @@ class Admin
         global $db_pass, $config;
         $enable_session_timeout = $config['enable_session_timeout'];
 if ($enable_session_timeout) {
-        $session_timeout_duration = intval($config['session_timeout_duration']) * 60; // Convert minutes to seconds
+$timeout = 0;
+if($config['session_timeout_duration']){
+$timeout = intval($config['session_timeout_duration']);
+}
+        $session_timeout_duration = $timeout * 60; // Convert minutes to seconds
 }
 
         if (isset($_SESSION['aid']) && isset($_SESSION['aid_expiration']) && $_SESSION['aid_expiration'] > time()) {
