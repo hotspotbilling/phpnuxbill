@@ -46,7 +46,7 @@ switch ($do) {
         }
 
         if (!empty($config['sms_url'])) {
-            $otpPath .= sha1($username . $db_password) . ".txt";
+            $otpPath .= sha1($username . $db_pass) . ".txt";
             run_hook('validate_otp'); #HOOK
             //expired 10 minutes
             if (file_exists($otpPath) && time() - filemtime($otpPath) > 1200) {
@@ -122,7 +122,7 @@ switch ($do) {
                     mkdir($otpPath);
                     touch($otpPath . 'index.html');
                 }
-                $otpPath .= sha1($username . $db_password) . ".txt";
+                $otpPath .= sha1($username . $db_pass) . ".txt";
                 //expired 10 minutes
                 if (file_exists($otpPath) && time() - filemtime($otpPath) < 1200) {
                     $ui->assign('username', $username);

@@ -55,9 +55,10 @@ if ($imonth == '') {
 }
 $ui->assign('imonth', $imonth);
 
-$cb = ORM::for_table('tbl_customers')->whereGte('balance', 0)->sum('balance');
-
-$ui->assign('cb', $cb);
+if ($config['enable_balance'] == 'yes'){
+    $cb = ORM::for_table('tbl_customers')->whereGte('balance', 0)->sum('balance');
+    $ui->assign('cb', $cb);
+}
 
 $u_act = ORM::for_table('tbl_user_recharges')->where('status', 'on')->count();
 if (empty($u_act)) {

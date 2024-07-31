@@ -29,6 +29,11 @@ class Package
         $isVoucher = false;
         $c = [];
 
+        if($trx && $trx['status'] == 2){
+            // if its already paid, return it
+            return;
+        }
+
         if ($id_customer == '' or $router_name == '' or $plan_id == '') {
             return false;
         }
@@ -235,7 +240,7 @@ class Package
                 }
             }
 
-            if ($b['status'] == 'on') {
+            //if ($b['status'] == 'on') {
                 $dvc = Package::getDevice($p);
                 if ($_app_stage != 'demo') {
                     if (file_exists($dvc)) {
@@ -245,7 +250,7 @@ class Package
                         new Exception(Lang::T("Devices Not Found"));
                     }
                 }
-            }
+            //}
 
             $b->customer_id = $id_customer;
             $b->username = $c['username'];

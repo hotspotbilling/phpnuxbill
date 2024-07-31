@@ -67,9 +67,13 @@ require_once $root_path . File::pathFixer('system/orm.php');
 require_once $root_path . File::pathFixer('system/autoload/PEAR2/Autoload.php');
 include $root_path . File::pathFixer('system/autoload/Hookers.php');
 
-if(!empty($db_password)){
+if($db_password != null && ($db_pass == null || empty($db_pass))){
     // compability for old version
     $db_pass = $db_password;
+}
+if($db_pass != null){
+    // compability for old version
+    $db_password = $db_pass;
 }
 ORM::configure("mysql:host=$db_host;dbname=$db_name");
 ORM::configure('username', $db_user);
@@ -329,7 +333,7 @@ function _alert($text, $type = 'success', $url = "home", $time = 3)
 
 
 if (!isset($api_secret)) {
-    $api_secret = $db_password;
+    $api_secret = $db_pass;
 }
 
 function displayMaintenanceMessage(): void

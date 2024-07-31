@@ -53,7 +53,7 @@
 <ol class="breadcrumb">
     <li>{Lang::dateFormat($start_date)}</li>
     <li>{Lang::dateFormat($current_date)}</li>
-    {if in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
+    {if $_c['enable_balance'] == 'yes' && in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
         <li>
             {Lang::T('Customer Balance')} <sup>{$_c['currency_code']}</sup>
             <b>{number_format($cb,0,$_c['dec_point'],$_c['thousands_sep'])}</b>
@@ -337,6 +337,9 @@
                 //lets calculate the inactive users as reported
                 var expired = u_all - u_act;
                 var inactive = c_all - u_all;
+                if(inactive < 0){
+                    inactive = 0;
+                }
                 // Create the chart data
                 var data = {
                     labels: ['Active Users', 'Expired Users', 'Inactive Users'],
