@@ -432,6 +432,47 @@ switch ($action) {
                     }
                 }
             }
+
+            // Send welcome message
+            if (isset($_POST['send_welcome_message']) && $_POST['send_welcome_message'] == true) {
+                $welcomeMessage = Lang::getNotifText('welcome_message');
+                $welcomeMessage = str_replace('[[company_name]]', $config['CompanyName'], $welcomeMessage);
+                $welcomeMessage = str_replace('[[name]]', $d['fullname'], $welcomeMessage);
+                $welcomeMessage = str_replace('[[username]]', $d['username'], $welcomeMessage);
+                $welcomeMessage = str_replace('[[password]]', $d['password'], $welcomeMessage);
+                $welcomeMessage = str_replace('[[url]]', APP_URL . '/index.php?_route=login', $welcomeMessage);
+
+                $emailSubject = "Welcome to " . $config['CompanyName'];
+
+                $channels = [
+                    'sms' => [
+                        'enabled' => isset($_POST['sms']),
+                        'method' => 'sendSMS',
+                        'args' => [$d['phonenumber'], $welcomeMessage]
+                    ],
+                    'whatsapp' => [
+                        'enabled' => isset($_POST['wa']) && $_POST['wa'] == 'wa',
+                        'method' => 'sendWhatsapp',
+                        'args' => [$d['phonenumber'], $welcomeMessage]
+                    ],
+                    'email' => [
+                        'enabled' => isset($_POST['email']),
+                        'method' => 'Message::sendEmail',
+                        'args' => [$d['email'], $emailSubject, $welcomeMessage, $d['email']]
+                    ]
+                ];
+
+                foreach ($channels as $channel => $message) {
+                    if ($message['enabled']) {
+                        try {
+                            call_user_func_array($message['method'], $message['args']);
+                        } catch (Exception $e) {
+                            // Log the error and handle the failure
+                            _log("Failed to send welcome message via $channel: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
             r2(U . 'customers/list', 's', Lang::T('Account Created Successfully'));
         } else {
             r2(U . 'customers/add', 'e', $msg);
