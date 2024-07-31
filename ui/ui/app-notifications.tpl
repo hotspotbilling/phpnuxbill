@@ -136,6 +136,22 @@
                         </p>
                     </div>
                 </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Welcome Message')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="welcome_message" name="welcome_message"
+                                rows="4">{Lang::htmlspecialchars($_json['welcome_message'])}</textarea>
+                        </div>
+                        <p class="help-block col-md-4">
+                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name')}.<br>
+                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
+                            <b>[[password]]</b> - {Lang::T('will be replaced with Customer password')}.<br>
+                            <b>[[url]]</b> - {Lang::T('will be replaced with Customer Portal URL')}.<br>
+                            <b>[[company]]</b> - {Lang::T('will be replaced with Company Name')}.<br>
+                        </p>
+                    </div>
+                </div>
                 {if $_c['enable_balance'] == 'yes'}
                     <div class="panel-body">
                         <div class="form-group">
