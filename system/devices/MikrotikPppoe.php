@@ -29,6 +29,7 @@ class MikrotikPppoe
 
     function add_customer($customer, $plan)
     {
+        global $isChangePlan;
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         //check if customer exists
@@ -51,7 +52,9 @@ class MikrotikPppoe
             $setRequest->setArgument('password', $pass);
             $client->sendSync($setRequest);
             //disconnect then
-            //$this->removePpoeActive($client, $customer['username']);
+            if(isset($isChangePlan) && $isChangePlan){
+                $this->removePpoeActive($client, $customer['username']);
+            }
         }
     }
 
