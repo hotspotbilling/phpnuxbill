@@ -130,8 +130,8 @@
         "ALTER TABLE `tbl_voucher` ADD `used_date` DATETIME NULL DEFAULT NULL AFTER `status`;",
         "UPDATE `tbl_voucher` SET `used_date`=now() WHERE `status`=1;"
     ],
-    "2024.7.31" : [
-        "ALTER TABLE `tbl_payment_gateway` CHANGE `gateway_trx_id` `gateway_trx_id` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "ALTER TABLE `tbl_payment_gateway` CHANGE `pg_url_payment` `pg_url_payment` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+    "2024.8.1" : [
+        "ALTER TABLE `tbl_payment_gateway` CHANGE `gateway_trx_id` `gateway_trx_id` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';",
+        "ALTER TABLE `tbl_payment_gateway` CHANGE `pg_url_payment` `pg_url_payment` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';"
     ]
 }

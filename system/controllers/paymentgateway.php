@@ -19,6 +19,36 @@ if ($action == 'delete') {
     r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway Deleted'));
 }
 
+if ($action == 'audit') {
+    $pg = alphanumeric($routes[2]);
+    $q = alphanumeric(_req('q'),'-._ ');
+    $query = ORM::for_table('tbl_payment_gateway')->order_by_desc("id");
+    $query->selects('id', 'username', 'gateway', 'gateway_trx_id', 'plan_id', 'plan_name', 'routers_id', 'routers', 'price', 'pg_url_payment', 'payment_method', 'payment_channel', 'expired_date', 'created_date', 'paid_date', 'trx_invoice', 'status');
+    $query->where('gateway', $pg);
+    if(!empty($q)) {
+        $query->whereRaw("(gateway_trx_id LIKE '%$q%' OR username LIKE '%$q%' OR routers LIKE '%$q%' OR plan_name LIKE '%$q%')");
+        $append_url = 'q='. urlencode($q);
+    }
+    $pgs = Paginator::findMany($query, ["search" => $search], 50, $append_url);
+
+    $ui->assign('_title', 'Payment Gateway Audit');
+    $ui->assign('pgs', $pgs);
+    $ui->assign('pg', $pg);
+    $ui->assign('q', $q);
+    $ui->display('paymentgateway-audit.tpl');
+    die();
+}
+
+if ($action == 'auditview') {
+    $pg = alphanumeric($routes[2]);
+
+    $d = ORM::for_table('tbl_payment_gateway')->find_one($pg);
+    $ui->assign('_title', 'Payment Gateway Audit View');
+    $ui->assign('pg', $d);
+    $ui->display('paymentgateway-audit-view.tpl');
+    die();
+}
+
 if (_post('save') == 'actives') {
     $pgs = '';
     if(is_array($_POST['pgs'])){

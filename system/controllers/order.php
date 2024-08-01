@@ -460,7 +460,6 @@ switch ($action) {
             } else {
                 $d->price = ($plan['price'] + $add_cost + $tax);
             }
-            //$d->price = ($plan['price'] + $add_cost);
             $d->created_date = date('Y-m-d H:i:s');
             $d->status = 1;
             $d->save();

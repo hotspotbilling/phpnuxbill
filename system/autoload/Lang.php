@@ -11,7 +11,7 @@ class Lang
     public static function T($key)
     {
         global $_L, $lan_file, $config;
-        if(is_array($_SESSION['Lang'])){
+        if (is_array($_SESSION['Lang'])) {
             $_L = array_merge($_L, $_SESSION['Lang']);
         }
         $key = preg_replace('/\s+/', ' ', $key);
@@ -124,20 +124,20 @@ class Lang
             }
         }
         $when = "";
-        if(time()>strtotime($datetime)){
+        if (time() > strtotime($datetime)) {
             $when = Lang::T('ago');
-        }else{
+        } else {
             $when = '';
         }
         if (!$full)
             $string = array_slice($string, 0, 1);
-        if($string){
-            if(empty($when)){
-                return '<b>'. implode(', ', $string) .'</b>';
-            }else{
-                return implode(', ', $string) .' '. $when;
+        if ($string) {
+            if (empty($when)) {
+                return '<b>' . implode(', ', $string) . '</b>';
+            } else {
+                return implode(', ', $string) . ' ' . $when;
             }
-        }else{
+        } else {
             return Lang::T('just now');
         }
     }
@@ -245,16 +245,30 @@ class Lang
         return $txt;
     }
 
-    public static function maskText($text){
+    public static function maskText($text)
+    {
         $len = strlen($text);
-        if($len < 3){
+        if ($len < 3) {
             return "***";
-        }else if($len<5){
-            return substr($text,0,1)."***".substr($text,-1,1);
-        }else if($len<8){
-            return substr($text,0,2)."***".substr($text,-2,2);
-        }else{
-            return substr($text,0,4)."******".substr($text,-3,3);
+        } else if ($len < 5) {
+            return substr($text, 0, 1) . "***" . substr($text, -1, 1);
+        } else if ($len < 8) {
+            return substr($text, 0, 2) . "***" . substr($text, -2, 2);
+        } else {
+            return substr($text, 0, 4) . "******" . substr($text, -3, 3);
         }
+    }
+
+    // echo Json array to text
+    public static function jsonArray2text($array, $start = '', $result = '')
+    {
+        foreach ($array as $k => $v) {
+            if (is_array($v)) {
+                $result .= self::jsonArray2text($v, "$start$k.", '');
+            } else {
+                $result .= "$start$k = " . strval($v) . "\n";
+            }
+        }
+        return $result;
     }
 }
