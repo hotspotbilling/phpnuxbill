@@ -124,15 +124,24 @@
                                 {else}
                                     {assign var="exp" value=explode(':',$v)}
                                     {Lang::moneyFormat($exp[0])}
-                                    <sup title="{$exp[1]} more times">{$exp[1]}x</sup>
-                                    {assign var="total" value=$exp[0]+$total}
+                                    <sup
+                                        title="{$exp[1]} more times">{if $exp[1]==0}{Lang::T('paid off')}{else}{$exp[1]}x{/if}</sup>
+                                    {if $exp[1]>0}
+                                        {assign var="total" value=$exp[0]+$total}
+                                    {/if}
                                 {/if}
                             </td>
                         </tr>
                     {/foreach}
                     <tr>
                         <td class="small text-success text-uppercase text-normal"><b>{Lang::T('Total')}</b></td>
-                        <td class="small mb15"><b>{Lang::moneyFormat($total)}</b></td>
+                        <td class="small mb15"><b>
+                                {if $total==0}
+                                    {ucwords(Lang::T('paid off'))}
+                                {else}
+                                    {Lang::moneyFormat($total)}
+                                {/if}
+                            </b></td>
                     </tr>
                 </table>
             {/if}
@@ -164,6 +173,12 @@
                                 {if $_bill['status'] != 'on'}
                                     <a class="label label-danger pull-right" href="{$_url}order/package">{Lang::T('expired')}</a>
                                 {/if}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="small text-primary text-uppercase text-normal">{Lang::T('Bandwidth')}</td>
+                            <td class="small mb15">
+                                {$_bill['name_bw']}
                             </td>
                         </tr>
                         <tr>
@@ -234,9 +249,14 @@
                                         href="{$_url}home&extend={$_bill['id']}&stoken={App::getToken()}"
                                         onclick="return confirm('{Text::toHex($_c['extend_confirmation'])}')">{Lang::T('Extend')}</a>
                                 {/if}
-                                <a class="btn btn-primary pull-right  btn-sm"
+                                <a class="btn btn-primary pull-right btn-sm"
                                     href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
                                     onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
+                                <a class="btn btn-warning text-black pull-right btn-sm"
+                                    href="{$_url}home&sync={$_bill['id']}&stoken={App::getToken()}"
+                                    onclick="return confirm('{Lang::T('Sync account if you failed login to internet')}?')"
+                                    data-toggle="tooltip" data-placement="top" title="{Lang::T('Sync account if you failed login to internet')}"><span
+                                        class="glyphicon glyphicon-refresh" aria-hidden="true"></span> {Lang::T('Sync')}</a>
                             </td>
                         </tr>
                     </table>
