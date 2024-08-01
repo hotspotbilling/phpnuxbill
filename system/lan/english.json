@@ -680,5 +680,6 @@
     "Enter_the_session_timeout_duration__minutes_": "Enter the session timeout duration (minutes)",
     "Idle_Timeout__Logout_Admin_if_Idle_for_xx_minutes": "Idle Timeout, Logout Admin if Idle for xx minutes",
     "Failed_to_create_transaction__please_tell_seller_": "Failed to create transaction, please tell seller.",
-    "_": "-"
+    "paid_off": "paid off",
+    "Sync_account_if_you_failed_login_to_internet": "Sync account if you failed login to internet"
 }

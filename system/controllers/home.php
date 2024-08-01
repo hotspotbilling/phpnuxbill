@@ -94,8 +94,35 @@ if (_post('send') == 'balance') {
     }
     r2(U . 'home', 'w', Lang::T('Your friend do not have active package'));
 }
+$_bill = User::_billing();
+$ui->assign('_bills', $_bill);
 
-$ui->assign('_bills', User::_billing());
+// Sync plan to router
+if (isset($_GET['sync']) && !empty($_GET['sync'])) {
+    foreach ($_bill as $tur) {
+        $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
+        if ($p) {
+            $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
+            if ($c) {
+                $dvc = Package::getDevice($p);
+                if ($_app_stage != 'demo') {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $p['device'])->add_customer($c, $p);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
+                }
+                $log .= "DONE : $ptur[namebp], $tur[type], $tur[routers]<br>";
+            } else {
+                $log .= "Customer NOT FOUND : $tur[namebp], $tur[type], $tur[routers]<br>";
+            }
+        } else {
+            $log .= "PLAN NOT FOUND : $tur[namebp], $tur[type], $tur[routers]<br>";
+        }
+    }
+    r2(U . 'home', 's', $log);
+}
 
 if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     if ($user['status'] != 'Active') {
