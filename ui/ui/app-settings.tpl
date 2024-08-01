@@ -242,8 +242,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Allow Extend')}</label>
                         <div class="col-md-6">
                             <select name="extend_expired" id="extend_expired" class="form-control text-muted">
-                                <option value="0">No</option>
                                 <option value="1" {if $_c['extend_expired']}selected="selected" {/if}>Yes</option>
+                                <option value="0">No</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">Customer can request to extend expirations</p>
@@ -599,7 +599,7 @@
                     <div class="form-group" id="timeout_duration_input" style="display: none;">
                         <label class="col-md-2 control-label">{Lang::T('Timeout Duration')}</label>
                         <div class="col-md-6">
-                            <input type="number" value="{$_c['session_timeout_duration']}" class="form-control" name="session_timeout_duration" id="session_timeout_duration" 
+                            <input type="number" value="{$_c['session_timeout_duration']}" class="form-control" name="session_timeout_duration" id="session_timeout_duration"
                                    placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx minutes')}</p>

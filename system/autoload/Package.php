@@ -20,7 +20,7 @@ class Package
      */
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel, $note = '')
     {
-        global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx, $_app_stage;
+        global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx, $_app_stage, $isChangePlan;
         $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
@@ -29,7 +29,7 @@ class Package
         $isVoucher = false;
         $c = [];
 
-        if($trx && $trx['status'] == 2){
+        if ($trx && $trx['status'] == 2) {
             // if its already paid, return it
             return;
         }
@@ -37,18 +37,18 @@ class Package
         if ($id_customer == '' or $router_name == '' or $plan_id == '') {
             return false;
         }
-        if(trim($gateway) == 'Voucher' && $id_customer == 0){
+        if (trim($gateway) == 'Voucher' && $id_customer == 0) {
             $isVoucher = true;
         }
 
         $p = ORM::for_table('tbl_plans')->where('id', $plan_id)->find_one();
 
-        if(!$isVoucher){
+        if (!$isVoucher) {
             $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
             if ($c['status'] != 'Active') {
                 _alert(Lang::T('This account status') . ' : ' . Lang::T($c['status']), 'danger', "");
             }
-        }else{
+        } else {
             $c = [
                 'fullname' => $gateway,
                 'email' => '',
@@ -87,7 +87,7 @@ class Package
             // if customer has attribute Expired Date use it
             $day_exp = User::getAttribute("Expired Date", $c['id']);
             if (!$day_exp) {
-                 // if customer no attribute Expired Date use plan expired date
+                // if customer no attribute Expired Date use plan expired date
                 $day_exp = 20;
                 if ($p['prepaid'] == 'no') {
                     $day_exp = $p['expired_date'];
@@ -178,9 +178,9 @@ class Package
             # because 1 customer can have 1 PPPOE and 1 Hotspot Plan in mikrotik
             //->where('prepaid', $p['prepaid'])
             ->left_outer_join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'));
-        if($isVoucher){
+        if ($isVoucher) {
             $query->where('username', $c['username']);
-        }else{
+        } else {
             $query->where('customer_id', $id_customer);
         }
         $b = $query->find_one();
@@ -216,6 +216,7 @@ class Package
         }
 
         if ($b) {
+            $isChangePlan = false;
             if ($config['extend_expiry'] != 'no') {
                 if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
                     // if it same internet plan, expired will extend
@@ -237,19 +238,41 @@ class Package
                         $date_exp = $datetime[0];
                         $time = $datetime[1];
                     }
+                } else {
+                    $isChangePlan = true;
                 }
             }
 
             //if ($b['status'] == 'on') {
-                $dvc = Package::getDevice($p);
-                if ($_app_stage != 'demo') {
+            $dvc = Package::getDevice($p);
+            if ($_app_stage != 'demo') {
+                try {
                     if (file_exists($dvc)) {
                         require_once $dvc;
                         (new $p['device'])->add_customer($c, $p);
                     } else {
                         new Exception(Lang::T("Devices Not Found"));
                     }
+                } catch (Throwable $e) {
+                    Message::sendTelegram(
+                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                            "Router: $router_name\n" .
+                            "Customer: u$c[username]\n" .
+                            "Plan: p$p[name_plan]\n" .
+                            $e->getMessage() . "\n" .
+                            $e->getTraceAsString()
+                    );
+                } catch (Exception $e) {
+                    Message::sendTelegram(
+                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                            "Router: $router_name\n" .
+                            "Customer: u$c[username]\n" .
+                            "Plan: p$p[name_plan]\n" .
+                            $e->getMessage() . "\n" .
+                            $e->getTraceAsString()
+                    );
                 }
+            }
             //}
 
             $b->customer_id = $id_customer;
@@ -328,11 +351,31 @@ class Package
             // active plan not exists
             $dvc = Package::getDevice($p);
             if ($_app_stage != 'demo') {
-                if (file_exists($dvc)) {
-                    require_once $dvc;
-                    (new $p['device'])->add_customer($c, $p);
-                } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                try {
+                    if (file_exists($dvc)) {
+                        require_once $dvc;
+                        (new $p['device'])->add_customer($c, $p);
+                    } else {
+                        new Exception(Lang::T("Devices Not Found"));
+                    }
+                } catch (Throwable $e) {
+                    Message::sendTelegram(
+                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                            "Router: $router_name\n" .
+                            "Customer: u$c[username]\n" .
+                            "Plan: p$p[name_plan]\n" .
+                            $e->getMessage() . "\n" .
+                            $e->getTraceAsString()
+                    );
+                } catch (Exception $e) {
+                    Message::sendTelegram(
+                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                            "Router: $router_name\n" .
+                            "Customer: u$c[username]\n" .
+                            "Plan: p$p[name_plan]\n" .
+                            $e->getMessage() . "\n" .
+                            $e->getTraceAsString()
+                    );
                 }
             }
 
@@ -558,10 +601,10 @@ class Package
     public static function getDevice($plan)
     {
         global $DEVICE_PATH;
-        if($plan === false){
+        if ($plan === false) {
             return "none";
         }
-        if(!isset($plan['device'])){
+        if (!isset($plan['device'])) {
             return "none";
         }
         if (!empty($plan['device'])) {
