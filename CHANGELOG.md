@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.8.1
+
+- Show Bandwidth Plan in the customer dashboard
+- Show
+
 ## 2024.7.23
 
 - add Voucher Used Date

@@ -30,7 +30,8 @@
     </div>
 </form>
 
-<p class="help-block">To download from private/paid repository, <a href="{$_url}settings/app#Github_Authentication">Set your Github Authentication first</a></p>
+<p class="help-block">To download from private/paid repository, <a href="{$_url}settings/app#Github_Authentication">Set
+        your Github Authentication first</a></p>
 
 <div class="panel panel-primary panel-hovered">
     <div class="panel-heading">{Lang::T('Plugin')}
@@ -53,8 +54,8 @@
                         <center><small><i>@{$plugin['author']} Last update: {$plugin['last_update']}</i></small>
                         </center>
                         <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                            <a href="{$plugin['url']}" target="_blank" style="color: black;" class="btn btn-primary"><i
-                                    class="glyphicon glyphicon-globe"></i> Web</a>
+                            <a href="{$plugin['url']}" target="_blank" style="color: black;" class="btn btn-{if $plugin['ispaid']}warning{else}primary{/if}"><i
+                                    class="glyphicon glyphicon-globe"></i> {if $plugin['ispaid']}Buy{else}Web{/if}</a>
                             <a href="{$plugin['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
                                     class="glyphicon glyphicon-align-left"></i> Source</a>
                         </div>
@@ -90,8 +91,11 @@
                     <div class="box-footer ">
                         <center><small><i>@{$pg['author']} Last update: {$pg['last_update']}</i></small></center>
                         <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                            <a href="{$pg['url']}" target="_blank" style="color: black;" class="btn btn-primary"><i
-                                    class="glyphicon glyphicon-globe"></i> Web</a>
+                            <a href="{$pg['url']}" target="_blank" style="color: black;"
+                                class="btn btn-{if $pg['ispaid']}warning{else}primary{/if}"><i
+                                    class="glyphicon glyphicon-globe"></i>
+                                {if $pg['ispaid']}Buy{else}Web{/if}
+                            </a>
                             <a href="{$pg['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
                                     class="glyphicon glyphicon-align-left"></i> Source</a>
                             <a {if $zipExt } href="{$_url}pluginmanager/install/payment/{$pg['id']}"
