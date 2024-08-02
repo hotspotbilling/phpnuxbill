@@ -218,6 +218,7 @@ class Package
         }
 
         if ($b) {
+            $lastExpired = Lang::dateAndTimeFormat($b['expiration'], $b['time']);
             $isChangePlan = false;
             if ($config['extend_expiry'] != 'no') {
                 if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
@@ -347,6 +348,8 @@ class Package
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
+                "\nLast Expired: $lastExpired" .
+                "\nNew Expired: " . Lang::dateAndTimeFormat($date_exp, $time).
                 "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                 "\nNote:\n" . $note);
         } else {
@@ -459,6 +462,7 @@ class Package
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
+                "\nExpired: " . Lang::dateAndTimeFormat($date_exp, $time).
                 "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                 "\nNote:\n" . $note);
         }
