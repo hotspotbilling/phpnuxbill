@@ -360,7 +360,7 @@ switch ($action) {
         break;
 
     case 'add-post':
-        $username = alphanumeric(_post('username'), "+_.@-");
+        $username = _post('username');
         $fullname = _post('fullname');
         $password = trim(_post('password'));
         $pppoe_password = trim(_post('pppoe_password'));
@@ -480,7 +480,7 @@ switch ($action) {
         break;
 
     case 'edit-post':
-        $username = alphanumeric(_post('username'), "+_.@-");
+        $username = _post('username');
         $fullname = _post('fullname');
         $account_type = _post('account_type');
         $password = trim(_post('password'));
