@@ -147,6 +147,8 @@ class Package
                 Message::sendSMS($c['phonenumber'], $textInvoice);
             } else if ($config['user_notification_payment'] == 'wa') {
                 Message::sendWhatsapp($c['phonenumber'], $textInvoice);
+            } else if ($config['user_notification_payment'] == 'email') {
+                Message::sendEmail($c['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' ' . $inv ,$textInvoice);
             }
 
             return true;
