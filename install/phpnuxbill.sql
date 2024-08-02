@@ -222,6 +222,18 @@ CREATE TABLE `rad_acct` (
   `dateAdded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `tbl_customers_inbox` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
+  `date_created` datetime NOT NULL,
+  `date_read` datetime DEFAULT NULL,
+  `subject` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `body` varchar(512) COLLATE utf8mb4_general_ci NOT NULL,
+  `from` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'System' COMMENT 'System or Admin or Else',
+  `admin_id` int NOT NULL DEFAULT '0' COMMENT 'other than admin is 0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 ALTER TABLE `rad_acct`
   ADD PRIMARY KEY (`id`),
