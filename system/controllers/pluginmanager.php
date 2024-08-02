@@ -121,6 +121,9 @@ switch ($action) {
             $zip->extractTo($cache);
             $zip->close();
             $folder = $cache . DIRECTORY_SEPARATOR . $plugin . '-main' . DIRECTORY_SEPARATOR;
+            if(!file_exists($folder)) {
+                $folder = $cache . DIRECTORY_SEPARATOR . $plugin . '-master' . DIRECTORY_SEPARATOR;
+            }
             $success = 0;
             if (file_exists($folder . 'plugin')) {
                 File::copyFolder($folder . 'plugin' . DIRECTORY_SEPARATOR, $PLUGIN_PATH . DIRECTORY_SEPARATOR);
