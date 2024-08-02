@@ -87,6 +87,19 @@
                 </a>
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
+                        <li class="dropdown notifications-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <i class="fa fa-envelope-o"></i>
+                                <span class="label label-warning" api-get-text="{$_url}autoload_user/inbox_unread"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu" api-get-text="{$_url}autoload_user/inbox"></ul>
+                                </li>
+                                <li class="footer"><a href="{$_url}mail">{Lang::T('Inbox')}</a></li>
+                            </ul>
+                        </li>
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 {if $_c['enable_balance'] == 'yes'}
@@ -146,6 +159,13 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
+                    <li {if $_system_menu eq 'inbox'}class="active" {/if}>
+                        <a href="{$_url}mail">
+                            <i class="fa fa-envelope"></i>
+                            <span>{Lang::T('Inbox')}</span>
+                        </a>
+                    </li>
+                    {$_MENU_AFTER_INBOX}
                     {if $_c['disable_voucher'] != 'yes'}
                         <li {if $_system_menu eq 'voucher'}class="active" {/if}>
                             <a href="{$_url}voucher/activation">

@@ -9,8 +9,7 @@
                 <input type="text" name="q" class="form-control" placeholder="{Lang::T('Search')}..."
                     value="{$q}">
                 <div class="input-group-btn">
-                    <button type="submit" class="btn btn-danger" title="Clear Search Query"
-                        href="{$_url}plan/list"><span class="glyphicon glyphicon-search"></span></button>
+                    <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-search"></span></button>
                 </div>
             </div>
         </form>

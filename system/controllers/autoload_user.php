@@ -45,6 +45,18 @@ switch ($action) {
             die('--');
         }
         break;
+    case 'inbox_unread':
+        $count =  ORM::for_table('tbl_customers_inbox')->where('customer_id', $user['id'])->whereRaw('date_read is null')->count('id');
+        if($count>0){
+            echo $count;
+        }
+        die();
+    case 'inbox':
+        $inboxs = ORM::for_table('tbl_customers_inbox')->selects(['id', 'subject', 'date_created'])->where('customer_id', $user['id'])->whereRaw('date_read is null')->order_by_desc('date_created')->limit(10)->find_many();
+        foreach($inboxs as $inbox){
+            echo '<li><a href="'.U.'mail/view/'.$inbox['id'].'">'.$inbox['subject'].'<br><sub class="text-muted">'.Lang::dateTimeFormat($inbox['date_created']).'</sub></a></li>';
+        }
+        die();
     default:
         $ui->display('404.tpl');
 }

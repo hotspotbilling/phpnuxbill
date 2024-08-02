@@ -222,7 +222,8 @@ CREATE TABLE `rad_acct` (
   `dateAdded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `tbl_customers_inbox` (
+DROP TABLE IF EXISTS `tbl_customers_inbox`;
+CREATE TABLE `tbl_customers_inbox` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `customer_id` int NOT NULL,
   `date_created` datetime NOT NULL,
