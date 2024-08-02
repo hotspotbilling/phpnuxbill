@@ -42,20 +42,20 @@
 					</div>
 					<div class="form-group">
 						<label for="dbhost">Database Host</label>
-						<input type="text" class="form-control" id="dbhost" name="dbhost">
+						<input type="text" class="form-control" id="dbhost" required name="dbhost">
 					</div>
 					<div class="form-group">
 						<label for="dbuser">Database Username</label>
-						<input type="text" class="form-control" id="dbuser" name="dbuser">
+						<input type="text" class="form-control" id="dbuser" required name="dbuser">
 					</div>
 					<div class="form-group">
 						<label for="dbpass">Database Password</label>
-						<input type="text" class="form-control" id="dbpass" name="dbpass">
+						<input type="text" class="form-control" id="dbpass" required name="dbpass">
 					</div>
 
 					<div class="form-group">
 						<label for="dbname">Database Name</label>
-						<input type="text" class="form-control" id="dbname" name="dbname">
+						<input type="text" class="form-control" id="dbname" required name="dbname">
 					</div>
 
                     <div class="form-group">
