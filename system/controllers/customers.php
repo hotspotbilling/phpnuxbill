@@ -655,12 +655,28 @@ switch ($action) {
             $query = ORM::for_table('tbl_customers');
             $query->where("status", $filter);
         }
+
         if ($orderby == 'asc') {
             $query->order_by_asc($order);
         } else {
             $query->order_by_desc($order);
         }
-        $d = $query->findMany();
+
+        $customers = $query->findMany();
+
+        foreach ($customers as $customer) {
+            $d = ORM::for_table('tbl_user_recharges')->where('customer_id', $customer->id)->findOne();
+            if ($d) {
+                if ($d['status'] == 'on') {
+                    $customer->recharge_status = '<span class="label label-success" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . '</span>';
+                } else {
+                    $customer->recharge_status = '<span class="label label-danger" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . '</span>';
+                }
+            } else {
+                $customer->recharge_status = '<span class="label label-danger">&bull;</span>';
+            }
+        }
+
         if (_post('export', '') == 'csv') {
             $h = false;
             set_time_limit(-1);
@@ -680,13 +696,14 @@ switch ($action) {
                 'email',
                 'balance',
                 'service_type',
+                'recharge_status'
             ];
             $fp = fopen('php://output', 'wb');
             if (!$h) {
                 fputcsv($fp, $headers, ";");
                 $h = true;
             }
-            foreach ($d as $c) {
+            foreach ($customers as $c) {
                 $row = [
                     $c['id'],
                     $c['username'],
@@ -696,14 +713,16 @@ switch ($action) {
                     $c['email'],
                     $c['balance'],
                     $c['service_type'],
+                    $c->recharge_status
                 ];
                 fputcsv($fp, $row, ";");
             }
             fclose($fp);
             die();
         }
+
         $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
-        $ui->assign('d', $d);
+        $ui->assign('customers', $customers);
         $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
         $ui->assign('filter', $filter);
         $ui->assign('search', $search);
