@@ -122,8 +122,12 @@
                                                     class="glyphicon glyphicon-map-marker"></i></a>
                                         {/if}
                                     </td>
-                                    <td align="center">
+                                     <td align="center">
+                                        {if $ds.recharge_status}
                                         {$ds.recharge_status}
+                                        {else}
+                                        <span class="label label-default">&bull;</span>
+                                        {/if}
                                     </td>
                                     <td>{$ds['service_type']}</td>
                                     <td>{Lang::T($ds['status'])}</td>
