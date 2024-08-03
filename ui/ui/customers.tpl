@@ -135,6 +135,9 @@
                                         <a href="{$_url}customers/edit/{$ds['id']}" id="{$ds['id']}"
                                             style="margin: 0px; color:black"
                                             class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Edit')}&nbsp;&nbsp;</a>
+                                            <a href="{$_url}customers/sync/{$ds['id']}" id="{$ds['id']}"
+                                            style="margin: 5px; color:black"
+                                            class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Sync')}&nbsp;&nbsp;</a>
                                         <a href="{$_url}plan/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
                                             class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
                                     </td>
