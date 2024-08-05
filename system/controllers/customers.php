@@ -363,7 +363,9 @@ switch ($action) {
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
         $password = trim(_post('password'));
+        $pppoe_username = trim(_post('pppoe_username'));
         $pppoe_password = trim(_post('pppoe_password'));
+        $pppoe_ip = trim(_post('pppoe_ip'));
         $email = _post('email');
         $address = _post('address');
         $phonenumber = _post('phonenumber');
@@ -399,7 +401,9 @@ switch ($action) {
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = $username;
             $d->password = $password;
+            $d->pppoe_username = $pppoe_username;
             $d->pppoe_password = $pppoe_password;
+            $d->pppoe_ip = $pppoe_ip;
             $d->email = $email;
             $d->account_type = $account_type;
             $d->fullname = $fullname;
@@ -484,7 +488,9 @@ switch ($action) {
         $fullname = _post('fullname');
         $account_type = _post('account_type');
         $password = trim(_post('password'));
+        $pppoe_username = trim(_post('pppoe_username'));
         $pppoe_password = trim(_post('pppoe_password'));
+        $pppoe_ip = trim(_post('pppoe_ip'));
         $email = _post('email');
         $address = _post('address');
         $phonenumber = Lang::phoneFormat(_post('phonenumber'));
@@ -544,7 +550,9 @@ switch ($action) {
             if ($password != '') {
                 $c->password = $password;
             }
+            $c->pppoe_username = $pppoe_username;
             $c->pppoe_password = $pppoe_password;
+            $c->pppoe_ip = $pppoe_ip;
             $c->fullname = $fullname;
             $c->email = $email;
             $c->account_type = $account_type;

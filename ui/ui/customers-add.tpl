@@ -58,17 +58,6 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('PPPOE Password')}</label>
-                        <div class="col-md-9">
-                            <input type="password" class="form-control" id="pppoe_password" name="pppoe_password"
-                                value="{$d['pppoe_password']}" onmouseleave="this.type = 'password'"
-                                onmouseenter="this.type = 'text'">
-                            <span class="help-block">
-                                {Lang::T('User Cannot change this, only admin. if it Empty it will use user password')}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Address')}</label>
                         <div class="col-md-9">
                             <textarea name="address" id="address" class="form-control"></textarea>
@@ -103,6 +92,35 @@
                                 <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
                         </div>
                     </div>
+                </div>
+                <div class="panel-heading">PPPOE</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Username')}</label>
+                        <div class="col-md-9">
+                            <input type="username" class="form-control" id="pppoe_username" name="pppoe_username">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Password')}</label>
+                        <div class="col-md-9">
+                            <input type="password" class="form-control" id="pppoe_password" name="pppoe_password"
+                                onmouseleave="this.type = 'password'"
+                                onmouseenter="this.type = 'text'">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">Local IP</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip">
+                        </div>
+                    </div>
+                    <span class="help-block">
+                        {Lang::T('User Cannot change this, only admin. if it Empty it will use user password')}
+                    </span>
+                </div>
+                <div class="panel-heading"></div>
+                <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Send Welcome Message')}</label>
                         <div class="col-md-9">

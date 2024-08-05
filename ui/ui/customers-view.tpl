@@ -41,12 +41,22 @@
                             onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                             onclick="this.select()">
                     </li>
+                    {if $d['pppoe_username'] != ''}
+                        <li class="list-group-item">
+                            <b>PPPOE {Lang::T('Username')}</b> <span class="pull-right">{$d['pppoe_username']}</span>
+                        </li>
+                    {/if}
                     {if $d['pppoe_password'] != ''}
                         <li class="list-group-item">
                             <b>PPPOE {Lang::T('Password')}</b> <input type="password" value="{$d['pppoe_password']}"
                                 style=" border: 0px; text-align: right;" class="pull-right"
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                                 onclick="this.select()">
+                        </li>
+                    {/if}
+                    {if $d['pppoe_ip'] != ''}
+                        <li class="list-group-item">
+                            <b>PPPOE Local IP</b> <span class="pull-right">{$d['pppoe_ip']}</span>
                         </li>
                     {/if}
                     <!--Customers Attributes view start -->

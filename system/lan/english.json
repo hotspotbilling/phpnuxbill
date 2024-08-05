@@ -688,5 +688,7 @@
     "Previous": "Previous",
     "Share": "Share",
     "Mail_Deleted_Successfully": "Mail Deleted Successfully",
-    "Message_Not_Found": "Message Not Found"
+    "Message_Not_Found": "Message Not Found",
+    "Send_Welcome_Message": "Send Welcome Message",
+    "WA": "WA"
 }
