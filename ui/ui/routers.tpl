@@ -4,7 +4,12 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">{Lang::T('Routers')}</div>
+            <div class="panel-heading">{Lang::T('Routers')}
+            <div class="btn-group pull-right">
+                <a class="btn btn-primary btn-xs" title="save" href="{$_url}routers/maps">
+                <span class="glyphicon glyphicon-map-marker"></span></a>
+            </div>
+            </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
@@ -43,7 +48,13 @@
                         <tbody>
                             {foreach $d as $ds}
                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled" {/if}>
-                                    <td>{$ds['name']}</td>
+                                    <td>
+                                    {if $ds['coordinates']}
+                                        <a href="https://www.google.com/maps/dir//{$ds['coordinates']}/" target="_blank"
+                                            class="btn btn-default btn-xs" title="{$ds['coordinates']}"><i
+                                                class="glyphicon glyphicon-map-marker"></i></a>
+                                    {/if}
+                                    {$ds['name']}</td>
                                     <td>{$ds['ip_address']}</td>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['description']}</td>

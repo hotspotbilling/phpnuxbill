@@ -713,7 +713,6 @@ switch ($action) {
             die();
         }
         $d = Paginator::findMany($query, ['search' => $search], 30, $append_url);
-        $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('d', $d);
         $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
         $ui->assign('filter', $filter);

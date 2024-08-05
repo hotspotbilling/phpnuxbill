@@ -140,5 +140,9 @@
     "2024.8.5" : [
         "ALTER TABLE `tbl_customers` ADD `pppoe_username` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `password`;",
         "ALTER TABLE `tbl_customers` ADD `pppoe_ip` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `pppoe_password`;"
+    ],
+    "2024.8.5.1" : [
+        "ALTER TABLE `tbl_routers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '' AFTER `description`;",
+        "ALTER TABLE `tbl_routers` ADD `coverage` VARCHAR(8) NOT NULL DEFAULT '0' AFTER `coordinates`;"
     ]
 }

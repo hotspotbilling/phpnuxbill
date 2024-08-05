@@ -427,10 +427,12 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'list' }class="active" {/if}><a
-                                    href="{$_url}routers/list">{Lang::T('Routers')}</a></li>
+                            <li {if $_routes[0] eq 'routers' and $_routes[1] eq '' }class="active" {/if}><a
+                                    href="{$_url}routers">{Lang::T('Routers')}</a></li>
                             <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
                                     href="{$_url}pool/list">{Lang::T('IP Pool')}</a></li>
+                            <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'maps' }class="active" {/if}><a
+                                href="{$_url}routers/maps">{Lang::T('Routers Maps')}</a></li>
                             {$_MENU_NETWORK}
                         </ul>
                     </li>

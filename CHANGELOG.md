@@ -8,6 +8,7 @@
 - Add pppoe customer and pppoe IP to make static username and IP
 - Add Sync button
 - Allow Mac Address Username
+- Router Maps
 
 ## 2024.8.1
 
