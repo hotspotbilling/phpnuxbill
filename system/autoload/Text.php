@@ -44,21 +44,27 @@ class Text
         return $result;
     }
 
-    public static function maskText($text){
+    public static function maskText($text)
+    {
         $len = strlen($text);
-        if($len < 3){
+        if ($len < 3) {
             return "***";
-        }else if($len<5){
-            return substr($text,0,1)."***".substr($text,-1,1);
-        }else if($len<8){
-            return substr($text,0,2)."***".substr($text,-2,2);
-        }else{
-            return substr($text,0,4)."******".substr($text,-3,3);
+        } else if ($len < 5) {
+            return substr($text, 0, 1) . "***" . substr($text, -1, 1);
+        } else if ($len < 8) {
+            return substr($text, 0, 2) . "***" . substr($text, -2, 2);
+        } else {
+            return substr($text, 0, 4) . "******" . substr($text, -3, 3);
         }
     }
 
     public static function sanitize($str)
     {
         return preg_replace("/[^A-Za-z0-9]/", '_', $str);;
+    }
+
+    public static function is_html($string)
+    {
+        return preg_match("/<[^<]+>/", $string, $m) != 0;
     }
 }

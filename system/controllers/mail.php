@@ -20,11 +20,26 @@ switch ($action) {
             $mail->date_read = date('Y-m-d H:i:s');
             $mail->save();
         }
+        $next = ORM::for_table('tbl_customers_inbox')->select("id")->where('customer_id', $user['id'])->where_gt("id", $routes['2'])->order_by_asc("id")->find_one();
+        $prev = ORM::for_table('tbl_customers_inbox')->select("id")->where('customer_id', $user['id'])->where_lt("id", $routes['2'])->order_by_desc("id")->find_one();
+
+        $ui->assign('next', $next['id']);
+        $ui->assign('prev', $prev['id']);
         $ui->assign('mail', $mail);
         $ui->assign('tipe', 'view');
         $ui->assign('_system_menu', 'inbox');
         $ui->assign('_title', Lang::T('Inbox'));
         $ui->display('user-inbox.tpl');
+        break;
+    case 'delete':
+        if($routes['2']){
+            if(ORM::for_table('tbl_customers_inbox')->where('customer_id', $user['id'])->where('id', $routes['2'])->find_one()->delete()){
+                r2(U. 'mail', 's', Lang::T('Mail Deleted Successfully'));
+            }else{
+                r2(U. 'home', 'e', Lang::T('Failed to Delete Message'));
+            }
+            break;
+        }
     default:
         $q = _req('q');
         $limit = 40;

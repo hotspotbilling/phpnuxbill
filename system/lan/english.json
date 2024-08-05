@@ -685,6 +685,8 @@
     "Channel": "Channel",
     "Payment_Link": "Payment Link",
     "Created": "Created",
-    "2": "2",
-    "_": "-"
+    "Previous": "Previous",
+    "Share": "Share",
+    "Mail_Deleted_Successfully": "Mail Deleted Successfully",
+    "Message_Not_Found": "Message Not Found"
 }
