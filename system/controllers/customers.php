@@ -655,6 +655,8 @@ switch ($action) {
             'status' => 7
         ];
 
+        $append_url = "&order=" . urlencode($order) . "&filter=" . urlencode($filter) . "&orderby=" . urlencode($orderby);
+
         if ($search != '') {
             $query = ORM::for_table('tbl_customers')
                 ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' " .
@@ -668,8 +670,8 @@ switch ($action) {
         } else {
             $query->order_by_desc($order);
         }
-        $d = $query->findMany();
         if (_post('export', '') == 'csv') {
+            $d = $query->findMany();
             $h = false;
             set_time_limit(-1);
             header('Pragma: public');
@@ -710,6 +712,7 @@ switch ($action) {
             fclose($fp);
             die();
         }
+        $d = Paginator::findMany($query, ['search' => $search], 30, $append_url);
         $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('d', $d);
         $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));

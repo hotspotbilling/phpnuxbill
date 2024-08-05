@@ -33,16 +33,22 @@
                                 <div class="row row-no-gutters">
                                     <div class="col-xs-8">
                                         <select class="form-control" id="order" name="order">
-                                            <option value="username" {if $order eq 'username' }selected{/if}>{Lang::T('Username')}</option>
-                                            <option value="created_at" {if $order eq 'created_at' }selected{/if}>{Lang::T('Created Date')}</option>
-                                            <option value="balance" {if $order eq 'balance' }selected{/if}>{Lang::T('Balance')}</option>
-                                            <option value="status" {if $order eq 'status' }selected{/if}>{Lang::T('Status')}</option>
+                                            <option value="username" {if $order eq 'username' }selected{/if}>
+                                                {Lang::T('Username')}</option>
+                                            <option value="created_at" {if $order eq 'created_at' }selected{/if}>
+                                                {Lang::T('Created Date')}</option>
+                                            <option value="balance" {if $order eq 'balance' }selected{/if}>
+                                                {Lang::T('Balance')}</option>
+                                            <option value="status" {if $order eq 'status' }selected{/if}>
+                                                {Lang::T('Status')}</option>
                                         </select>
                                     </div>
                                     <div class="col-xs-4">
                                         <select class="form-control" id="orderby" name="orderby">
-                                            <option value="asc" {if $orderby eq 'asc' }selected{/if}>{Lang::T('Ascending')}</option>
-                                            <option value="desc" {if $orderby eq 'desc' }selected{/if}>{Lang::T('Descending')}</option>
+                                            <option value="asc" {if $orderby eq 'asc' }selected{/if}>
+                                                {Lang::T('Ascending')}</option>
+                                            <option value="desc" {if $orderby eq 'desc' }selected{/if}>
+                                                {Lang::T('Descending')}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -53,7 +59,8 @@
                                 <span class="input-group-addon">Status</span>
                                 <select class="form-control" id="filter" name="filter">
                                     {foreach $statuses as $status}
-                                        <option value="{$status}" {if $filter eq $status }selected{/if}>{Lang::T($status)}</option>
+                                        <option value="{$status}" {if $filter eq $status }selected{/if}>{Lang::T($status)}
+                                        </option>
                                     {/foreach}
                                 </select>
                             </div>
@@ -66,17 +73,18 @@
                                 <input type="text" name="search" class="form-control"
                                     placeholder="{Lang::T('Search')}..." value="{$search}">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-primary" type="submit"><span class="fa fa-search"></span></button>
+                                    <button class="btn btn-primary" type="submit"><span
+                                            class="fa fa-search"></span></button>
                                     <button class="btn btn-primary" type="submit" name="export" value="csv">
-                                        <span class="glyphicon glyphicon-download"
-                                        aria-hidden="true"></span> CSV
+                                        <span class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-1">
-                            <a href="{$_url}customers/add" class="btn btn-success text-black btn-block" title="{Lang::T('Add')}">
-                            <i class="ion ion-android-add"></i><i class="glyphicon glyphicon-user"></i>
+                            <a href="{$_url}customers/add" class="btn btn-success text-black btn-block"
+                                title="{Lang::T('Add')}">
+                                <i class="ion ion-android-add"></i><i class="glyphicon glyphicon-user"></i>
                             </a>
                         </div>
                     </div>
@@ -100,7 +108,7 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr {if $ds['status'] != 'Active'}class="danger"{/if}>
+                                <tr {if $ds['status'] != 'Active'}class="danger" {/if}>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
                                     <td>{$ds['account_type']}</td>
@@ -110,7 +118,8 @@
                                     <td align="center">
                                         {if $ds['phonenumber']}
                                             <a href="tel:{$ds['phonenumber']}" class="btn btn-default btn-xs"
-                                                title="{$ds['phonenumber']}"><i class="glyphicon glyphicon-earphone"></i></a>
+                                                title="{$ds['phonenumber']}"><i
+                                                    class="glyphicon glyphicon-earphone"></i></a>
                                         {/if}
                                         {if $ds['email']}
                                             <a href="mailto:{$ds['email']}" class="btn btn-default btn-xs"
@@ -135,7 +144,7 @@
                                         <a href="{$_url}customers/edit/{$ds['id']}" id="{$ds['id']}"
                                             style="margin: 0px; color:black"
                                             class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Edit')}&nbsp;&nbsp;</a>
-                                            <a href="{$_url}customers/sync/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{$_url}customers/sync/{$ds['id']}" id="{$ds['id']}"
                                             style="margin: 5px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('Sync')}&nbsp;&nbsp;</a>
                                         <a href="{$_url}plan/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
@@ -146,27 +155,9 @@
                         </tbody>
                     </table>
                 </div>
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>
 </div>
-
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
-<script>
-    var $j = jQuery.noConflict();
-
-    $j(document).ready(function() {
-        $j('#customerTable').DataTable({
-            order: [[{$order_pos}, '{$orderby}']],
-            "pagingType": "full_numbers",
-            "lengthMenu": [
-                [5, 10, 25, 50, 100, -1],
-                [5, 10, 25, 50, 100, "All"]
-            ],
-            "pageLength": 25
-        });
-    });
-</script>
 {include file="sections/footer.tpl"}
