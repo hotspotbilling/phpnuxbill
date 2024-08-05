@@ -99,7 +99,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                             {foreach $customers as $ds}
+                            {foreach $d as $ds}
                                 <tr {if $ds['status'] != 'Active'}class="danger"{/if}>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
@@ -122,12 +122,8 @@
                                                     class="glyphicon glyphicon-map-marker"></i></a>
                                         {/if}
                                     </td>
-                                     <td align="center">
-                                        {if $ds.recharge_status}
-                                        {$ds.recharge_status}
-                                        {else}
+                                    <td align="center" api-get-text="{$_url}autoload/customer_is_active/{$ds['id']}">
                                         <span class="label label-default">&bull;</span>
-                                        {/if}
                                     </td>
                                     <td>{$ds['service_type']}</td>
                                     <td>{Lang::T($ds['status'])}</td>
