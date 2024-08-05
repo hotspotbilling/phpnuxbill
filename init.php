@@ -348,3 +348,13 @@ function displayMaintenanceMessage(): void
     $ui->display('maintenance.tpl');
     die();
 }
+
+function isMysqlRadius()
+{
+    try {
+        $record = ORM::forTable('radacct', 'radius')->find_one();
+        return $record !== false;
+    } catch (Exception $e) {
+        return false;
+    }
+}
