@@ -2,10 +2,18 @@
 
 # CHANGELOG
 
+## 2024.8.5
+
+- Add Customer Mail Inbox
+- Add pppoe customer and pppoe IP to make static username and IP
+- Add Sync button
+- Allow Mac Address Username
+
 ## 2024.8.1
 
 - Show Bandwidth Plan in the customer dashboard
-- Show
+- Add Audit Payment Gateway
+- Fix Plugin Manager
 
 ## 2024.7.23
 
