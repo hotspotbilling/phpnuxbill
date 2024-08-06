@@ -68,31 +68,31 @@ try {
             $username = _req('username');
             $password = _req('password');
             $isVoucher = ($username == $password);
-			$real = _req('CHAPassword');
-			$challenge = _req('CHAPchallenge');
-			if (!empty($real)) { //aktif hanya kalo chappasword ada isinya
-            $dd = ORM::for_table('tbl_customers')->select('password')->where('username', $username)->find_one();
-			$pwd = $dd['password']; //ambil password text 
-			$challenger = hex2bin(substr($challenge, 2)); //buang 0x
-			$realr = substr($real, 2); //buang 0x lagi
-			$chapid = substr($realr, 0, 2); //ambil chap-id dari chap-pass
-			$chapidr = hex2bin($chapid); //konvert chap-id
-			$result = $chapidr . $pwd . $challenger; //mix semua 
-			$response = $chapid.md5($result); //enkripsi lagi hasilnya trus di mix sama chap id
-			if ($response != $realr) { //begal kalo hasil gak sama
-				 show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
-			}
-			
-			//if ($response == $realr) { echo 'ok betul 100'; }else{ echo 'salah'; } // untuk keperluan debug
-			} else { //kalo chappassword kosong brrti eksekusi yg ini
+            $real = _req('CHAPassword');
+            $challenge = _req('CHAPchallenge');
+            if (!empty($real)) { //aktif hanya kalo chappasword ada isinya
+                $dd = ORM::for_table('tbl_customers')->select('password')->where('username', $username)->find_one();
+                $pwd = $dd['password']; //ambil password text
+                $challenger = hex2bin(substr($challenge, 2)); //buang 0x
+                $realr = substr($real, 2); //buang 0x lagi
+                $chapid = substr($realr, 0, 2); //ambil chap-id dari chap-pass
+                $chapidr = hex2bin($chapid); //konvert chap-id
+                $result = $chapidr . $pwd . $challenger; //mix semua
+                $response = $chapid . md5($result); //enkripsi lagi hasilnya trus di mix sama chap id
+                if ($response != $realr) { //begal kalo hasil gak sama
+                    show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
+                }
 
-            if (empty($username) || empty($password)) {
-                show_radius_result([
-                    "control:Auth-Type" => "Reject",
-                    "reply:Reply-Message" => 'Login invalid......'
-                ], 401);
-					}
-				}
+                //if ($response == $realr) { echo 'ok betul 100'; }else{ echo 'salah'; } // untuk keperluan debug
+            } else { //kalo chappassword kosong brrti eksekusi yg ini
+
+                if (empty($username) || empty($password)) {
+                    show_radius_result([
+                        "control:Auth-Type" => "Reject",
+                        "reply:Reply-Message" => 'Login invalid......'
+                    ], 401);
+                }
+            }
             $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->find_one();
             if ($tur) {
                 if (!$isVoucher) {
@@ -150,6 +150,15 @@ try {
                 ->findOne();
             if (!$d) {
                 $d = ORM::for_table('rad_acct')->create();
+            }
+            $acctOutputOctets = _post('acctOutputOctets');
+            $acctInputOctets = _post('acctInputOctets');
+            if ($acctOutputOctets !== false && $acctInputOctets !== false) {
+                $d->acctOutputOctets += $acctOutputOctets;
+                $d->acctInputOctets += $acctInputOctets;
+            }else{
+                $d->acctOutputOctets = 0;
+                $d->acctInputOctets = 0;
             }
             $d->acctsessionid = _post('acctSessionId');
             $d->username = $username;

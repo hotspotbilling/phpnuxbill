@@ -144,5 +144,9 @@
     "2024.8.5.1" : [
         "ALTER TABLE `tbl_routers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '' AFTER `description`;",
         "ALTER TABLE `tbl_routers` ADD `coverage` VARCHAR(8) NOT NULL DEFAULT '0' AFTER `coordinates`;"
+    ],
+    "2024.8.6" : [
+        "ALTER TABLE `rad_acct` ADD `acctinputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `framedipaddress`;",
+        "ALTER TABLE `rad_acct` ADD `acctoutputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `acctinputoctets`;"
     ]
 }
