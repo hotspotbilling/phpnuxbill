@@ -41,6 +41,7 @@ class MikrotikPppoe
             $this->addPpoeUser($client, $plan, $customer);
         }else{
             $setRequest = new RouterOS\Request('/ppp/secret/set');
+            $setRequest->setArgument('numbers', $cid);
             if (!empty($customer['pppoe_password'])) {
                 $setRequest->setArgument('password', $customer['pppoe_password']);
             } else {
@@ -54,7 +55,6 @@ class MikrotikPppoe
             if (!empty($customer['pppoe_ip'])) {
                 $setRequest->setArgument('local-address', $customer['pppoe_ip']);
             }
-            $setRequest->setArgument('numbers', $cid);
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $client->sendSync($setRequest);
