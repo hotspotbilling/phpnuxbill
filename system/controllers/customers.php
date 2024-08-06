@@ -524,19 +524,31 @@ switch ($action) {
             ->find_many();
 
         $oldusername = $c['username'];
-        $oldPppoePassword = $c['password'];
-        $oldPassPassword = $c['pppoe_password'];
+        $oldPppoeUsername = $c['pppoe_username'];
+        $oldPppoePassword = $c['pppoe_password'];
+        $oldPppoeIp = $c['pppoe_ip'];
+        $oldPassPassword = $c['password'];
         $userDiff = false;
         $pppoeDiff = false;
         $passDiff = false;
         if ($oldusername != $username) {
-            $cx = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
-            if ($cx) {
-                $msg .= Lang::T('Account already exist') . '<br>';
+            if (ORM::for_table('tbl_customers')->where('username', $username)->find_one()) {
+                $msg .= Lang::T('Username already used by another customer') . '<br>';
+            }
+            if(ORM::for_table('tbl_customers')->where('pppoe_username', $username)->find_one()){
+                $msg.= Lang::T('Username already used by another customer') . '<br>';
             }
             $userDiff = true;
         }
-        if ($oldPppoePassword != $pppoe_password) {
+        if ($oldPppoeUsername != $pppoe_username) {
+            if(!empty($pppoe_username)){
+                if(ORM::for_table('tbl_customers')->where('pppoe_username', $pppoe_username)->find_one()){
+                    $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
+                }
+                if(ORM::for_table('tbl_customers')->where('username', $pppoe_username)->find_one()){
+                    $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
+                }
+            }
             $pppoeDiff = true;
         }
         if ($password != '' && $oldPassPassword != $password) {
@@ -616,8 +628,6 @@ switch ($action) {
             if ($userDiff || $pppoeDiff || $passDiff) {
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->findMany();
                 foreach ($turs as $tur) {
-                    $tur->username = $username;
-                    $tur->save();
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'demo') {
@@ -628,12 +638,26 @@ switch ($action) {
                                 if ($userDiff) {
                                     (new $p['device'])->change_username($p, $oldusername, $username);
                                 }
+                                if ($pppoeDiff && $tur['type'] == 'PPPOE') {
+                                    if(empty($oldPppoeUsername) && !empty($pppoe_username)){
+                                        // admin just add pppoe username
+                                        (new $p['device'])->change_username($p, $username, $pppoe_username);
+                                    }else if(empty($pppoe_username) && !empty($oldPppoeUsername)){
+                                        // admin want to use customer username
+                                        (new $p['device'])->change_username($p, $oldPppoeUsername, $username);
+                                    }else{
+                                        // regular change pppoe username
+                                        (new $p['device'])->change_username($p, $oldPppoeUsername, $pppoe_username);
+                                    }
+                                }
                                 (new $p['device'])->add_customer($c, $p);
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
                             }
                         }
                     }
+                    $tur->username = $username;
+                    $tur->save();
                 }
             }
             r2(U . 'customers/view/' . $id, 's', 'User Updated Successfully');

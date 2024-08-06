@@ -71,12 +71,14 @@ class MikrotikPppoe
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
-            $this->add_customer($customer, $p);
-        } else {
-            $this->removePpoeUser($client, $customer['username']);
-            if (!empty($customer['pppoe_username'])) {
-                $this->removePpoeUser($client, $customer['pppoe_username']);
+            if($p){
+                $this->add_customer($customer, $p);
+                return;
             }
+        }
+        $this->removePpoeUser($client, $customer['username']);
+        if (!empty($customer['pppoe_username'])) {
+            $this->removePpoeUser($client, $customer['pppoe_username']);
         }
         $this->removePpoeActive($client, $customer['username']);
         if (!empty($customer['pppoe_username'])) {

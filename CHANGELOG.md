@@ -2,6 +2,10 @@
 
 # CHANGELOG
 
+## 2024.8.6
+
+- Fix Customer pppoe username
+
 ## 2024.8.5
 
 - Add Customer Mail Inbox
