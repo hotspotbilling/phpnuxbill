@@ -524,8 +524,10 @@ switch ($action) {
             ->find_many();
 
         $oldusername = $c['username'];
-        $oldPppoePassword = $c['password'];
-        $oldPassPassword = $c['pppoe_password'];
+        $oldPppoeUsername = $c['pppoe_username'];
+        $oldPppoePassword = $c['pppoe_password'];
+        $oldPppoeIp = $c['pppoe_ip'];
+        $oldPassPassword = $c['password'];
         $userDiff = false;
         $pppoeDiff = false;
         $passDiff = false;
@@ -536,7 +538,7 @@ switch ($action) {
             }
             $userDiff = true;
         }
-        if ($oldPppoePassword != $pppoe_password) {
+        if ($oldPppoeUsername != $pppoe_username) {
             $pppoeDiff = true;
         }
         if ($password != '' && $oldPassPassword != $password) {
@@ -616,8 +618,6 @@ switch ($action) {
             if ($userDiff || $pppoeDiff || $passDiff) {
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->findMany();
                 foreach ($turs as $tur) {
-                    $tur->username = $username;
-                    $tur->save();
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'demo') {
@@ -628,12 +628,22 @@ switch ($action) {
                                 if ($userDiff) {
                                     (new $p['device'])->change_username($p, $oldusername, $username);
                                 }
+                                if ($pppoeDiff && $tur['type'] == 'PPPOE') {
+                                    if(empty($oldPppoeUsername)){
+                                        // admin just add pppoe username
+                                        (new $p['device'])->change_username($p, $username, $pppoe_username);
+                                    }else{
+                                        (new $p['device'])->change_username($p, $oldPppoeUsername, $pppoe_username);
+                                    }
+                                }
                                 (new $p['device'])->add_customer($c, $p);
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
                             }
                         }
                     }
+                    $tur->username = $username;
+                    $tur->save();
                 }
             }
             r2(U . 'customers/view/' . $id, 's', 'User Updated Successfully');
