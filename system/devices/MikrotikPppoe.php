@@ -51,6 +51,8 @@ class MikrotikPppoe
             }
             if (!empty($customer['pppoe_ip'])) {
                 $setRequest->setArgument('local-address', $customer['pppoe_ip']);
+            }else{
+                $setRequest->setArgument('local-address', null);
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
@@ -72,8 +74,14 @@ class MikrotikPppoe
             $this->add_customer($customer, $p);
         } else {
             $this->removePpoeUser($client, $customer['username']);
+            if (!empty($customer['pppoe_username'])) {
+                $this->removePpoeUser($client, $customer['pppoe_username']);
+            }
         }
         $this->removePpoeActive($client, $customer['username']);
+        if (!empty($customer['pppoe_username'])) {
+            $this->removePpoeActive($client, $customer['pppoe_username']);
+        }
     }
 
     // customer change username
