@@ -531,6 +531,7 @@ switch ($action) {
         $userDiff = false;
         $pppoeDiff = false;
         $passDiff = false;
+        $pppoeIpDiff = false;
         if ($oldusername != $username) {
             if (ORM::for_table('tbl_customers')->where('username', $username)->find_one()) {
                 $msg .= Lang::T('Username already used by another customer') . '<br>';
@@ -550,6 +551,10 @@ switch ($action) {
                 }
             }
             $pppoeDiff = true;
+        }
+
+        if ($oldPppoeIp != $pppoe_ip) {
+            $pppoeIpDiff = true;
         }
         if ($password != '' && $oldPassPassword != $password) {
             $passDiff = true;
@@ -625,7 +630,7 @@ switch ($action) {
                 }
             }
 
-            if ($userDiff || $pppoeDiff || $passDiff) {
+            if ($userDiff || $pppoeDiff || $pppoeIpDiff || $passDiff) {
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->findMany();
                 foreach ($turs as $tur) {
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);

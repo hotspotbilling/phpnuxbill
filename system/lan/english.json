@@ -695,5 +695,6 @@
     "Routers_Maps": "Routers Maps",
     "Routers_Geo_Location_Information": "Routers Geo Location Information",
     "Coverage": "Coverage",
-    "PPPoE_Username_already_used_by_another_customer": "PPPoE Username already used by another customer"
+    "PPPoE_Username_already_used_by_another_customer": "PPPoE Username already used by another customer",
+    "just_now": "just now"
 }
