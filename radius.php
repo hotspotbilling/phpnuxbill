@@ -156,7 +156,7 @@ try {
             if ($acctOutputOctets !== false && $acctInputOctets !== false) {
                 $d->acctOutputOctets += $acctOutputOctets;
                 $d->acctInputOctets += $acctInputOctets;
-            }else{
+            } else {
                 $d->acctOutputOctets = 0;
                 $d->acctInputOctets = 0;
             }
@@ -172,6 +172,18 @@ try {
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
             $d->save();
+            if($d->acctstatustype == 'Start'){
+                $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->where('status', 'on')->where('routers', 'radius')->find_one();
+                $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+                if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
+                    $totalUsage = $d['acctOutputOctets'] + $d['acctInputOctets'];
+                    $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
+                    if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
+                        $attrs['reply:Mikrotik-Total-Limit'] = 0;
+                        show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+                    }
+                }
+            }
             show_radius_result([
                 "control:Auth-Type" => "Accept",
                 "reply:Reply-Message" => 'Saved'
@@ -239,6 +251,15 @@ function process_radiust_rest($tur, $code)
     }
 
     if ($plan['typebp'] == "Limited") {
+        if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
+            $raddact = ORM::for_table('rad_acct')->where('username', $tur['username'])->find_one();
+            $totalUsage = $raddact['acctOutputOctets'] + $raddact['acctInputOctets'];
+            $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
+            if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
+                $attrs['reply:Mikrotik-Total-Limit'] = 0;
+                show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+            }
+        }
         if ($plan['limit_type'] == "Time_Limit") {
             if ($plan['time_unit'] == 'Hrs')
                 $timelimit = $plan['time_limit'] * 60 * 60;
