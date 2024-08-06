@@ -67,4 +67,20 @@ class Text
     {
         return preg_match("/<[^<]+>/", $string, $m) != 0;
     }
+
+    public static function convertDataUnit($datalimit, $unit = 'MB')
+    {
+        $unit = strtoupper($unit);
+        if ($unit == 'KB') {
+            return $datalimit * 1024;
+        } elseif ($unit == 'MB') {
+            return $datalimit * 1024 * 1000;
+        } elseif ($unit == 'GB') {
+            return $datalimit * 1024 * 1000 * 1000;
+        } elseif ($unit == 'TB') {
+            return $datalimit * 1024 * 1000 * 1000 * 1000;
+        } else {
+            return $datalimit;
+        }
+    }
 }
