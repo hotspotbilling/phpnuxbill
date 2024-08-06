@@ -44,10 +44,11 @@ class MikrotikHotspot
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
-            $this->add_customer($customer, $p);
-        } else {
-            $this->removeHotspotUser($client, $customer['username']);
+            if($p){
+                $this->add_customer($customer, $p);
+            }
         }
+        $this->removeHotspotUser($client, $customer['username']);
         $this->removeHotspotActiveUser($client, $customer['username']);
     }
 

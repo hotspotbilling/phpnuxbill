@@ -85,10 +85,11 @@ class Radius
     {
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
-            $this->customerAddPlan($customer, $p);
-        } else {
-            $this->customerDeactivate($customer['username'], true);
+            if ($p) {
+                $this->customerAddPlan($customer, $p);
+            }
         }
+        $this->customerDeactivate($customer['username'], true);
     }
 
     public function change_username($from, $to)
@@ -469,7 +470,7 @@ class Radius
         $unitdown = ($bw['rate_down_unit'] == 'Kbps') ? 'K' : 'M';
         $unitup = ($bw['rate_up_unit'] == 'Kbps') ? 'K' : 'M';
 
-        // TODO Burst mode [ 2M/1M 256K/128K 128K/64K 1s 1 64K/32K] 
+        // TODO Burst mode [ 2M/1M 256K/128K 128K/64K 1s 1 64K/32K]
 
         if (!empty(trim($bw['burst']))) {
             // burst format: 2M/1M 256K/128K 128K/64K 1s 1 64K/32K
