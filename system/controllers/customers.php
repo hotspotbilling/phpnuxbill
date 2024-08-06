@@ -532,20 +532,22 @@ switch ($action) {
         $pppoeDiff = false;
         $passDiff = false;
         if ($oldusername != $username) {
-            $cx = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
-            if ($cx) {
-                $msg .= Lang::T('Account already exist') . '<br>';
+            if (ORM::for_table('tbl_customers')->where('username', $username)->find_one()) {
+                $msg .= Lang::T('Username already used by another customer') . '<br>';
+            }
+            if(ORM::for_table('tbl_customers')->where('pppoe_username', $username)->find_one()){
+                $msg.= Lang::T('Username already used by another customer') . '<br>';
             }
             $userDiff = true;
         }
         if ($oldPppoeUsername != $pppoe_username) {
-            $pppoeDiff = true;
             if(ORM::for_table('tbl_customers')->where('pppoe_username', $pppoe_username)->find_one()){
                 $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
             }
             if(ORM::for_table('tbl_customers')->where('username', $pppoe_username)->find_one()){
                 $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
             }
+            $pppoeDiff = true;
         }
         if ($password != '' && $oldPassPassword != $password) {
             $passDiff = true;
