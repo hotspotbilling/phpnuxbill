@@ -629,10 +629,14 @@ switch ($action) {
                                     (new $p['device'])->change_username($p, $oldusername, $username);
                                 }
                                 if ($pppoeDiff && $tur['type'] == 'PPPOE') {
-                                    if(empty($oldPppoeUsername)){
+                                    if(empty($oldPppoeUsername) && !empty($pppoe_username)){
                                         // admin just add pppoe username
                                         (new $p['device'])->change_username($p, $username, $pppoe_username);
+                                    }else if(empty($pppoe_username) && !empty($oldPppoeUsername)){
+                                        // admin want to use customer username
+                                        (new $p['device'])->change_username($p, $oldPppoeUsername, $username);
                                     }else{
+                                        // regular change pppoe username
                                         (new $p['device'])->change_username($p, $oldPppoeUsername, $pppoe_username);
                                     }
                                 }
