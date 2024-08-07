@@ -259,16 +259,4 @@ class Lang
         }
     }
 
-    // echo Json array to text
-    public static function jsonArray2text($array, $start = '', $result = '')
-    {
-        foreach ($array as $k => $v) {
-            if (is_array($v)) {
-                $result .= self::jsonArray2text($v, "$start$k.", '');
-            } else {
-                $result .= "$start$k = " . strval($v) . "\n";
-            }
-        }
-        return $result;
-    }
 }

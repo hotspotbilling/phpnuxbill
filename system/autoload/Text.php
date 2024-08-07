@@ -83,4 +83,30 @@ class Text
             return $datalimit;
         }
     }
+
+    // echo Json array to text
+    public static function jsonArray2text($array, $start = '', $result = '')
+    {
+        foreach ($array as $k => $v) {
+            if (is_array($v)) {
+                $result .= self::jsonArray2text($v, "$start$k.", '');
+            } else {
+                $result .= "$start$k = " . strval($v) . "\n";
+            }
+        }
+        return $result;
+    }
+
+    public static function jsonArray21Array($array){
+        $text = self::jsonArray2text($array);
+        $lines = explode("\n", $text);
+        $result = [];
+        foreach($lines as $line){
+            $parts = explode(' = ', $line);
+            if(count($parts) == 2){
+                $result[trim($parts[0])] = trim($parts[1]);
+            }
+        }
+        return $result;
+    }
 }

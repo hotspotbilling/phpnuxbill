@@ -67,13 +67,31 @@
     <div class="panel-heading">
         Response when request payment
     </div>
-    <pre class="panel-body p-1">{if $pg['pg_request'] != null}{Lang::jsonArray2text(json_decode($pg['pg_request'], true))}{/if}</pre>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-condensed">
+            {foreach $pg['pg_request'] as $k => $v}
+                <tr>
+                    <td>{$k}</td>
+                    <td>{$v}</td>
+                </tr>
+            {/foreach}
+        </table>
+    </div>
 </div>
 <div class="panel panel-hovered mb20 panel-primary">
     <div class="panel-heading">
         Response when payment PAID
     </div>
-    <pre class="panel-body p-1">{if $pg['pg_request'] != null}{Lang::jsonArray2text(json_decode($pg['pg_paid_response'], true))}{/if}</pre>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-condensed">
+            {foreach $pg['pg_paid_response'] as $k => $v}
+                <tr>
+                    <td>{$k}</td>
+                    <td>{$v}</td>
+                </tr>
+            {/foreach}
+        </table>
+    </div>
 </div>
 
 {include file="sections/footer.tpl"}
