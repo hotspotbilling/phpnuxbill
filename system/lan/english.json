@@ -312,7 +312,6 @@
     "Reminder_3_days": "Reminder 3 days",
     "Reminder_1_day": "Reminder 1 day",
     "PPPOE_Password": "PPPOE Password",
-    "User_Cannot_change_this__only_admin__if_it_Empty_it_will_use_user_password": "User Cannot change this, only admin. if it Empty it will use user password",
     "Invoice_Balance_Message": "Invoice Balance Message",
     "Invoice_Notification_Payment": "Invoice Notification Payment",
     "Balance_Notification_Payment": "Balance Notification Payment",
@@ -696,5 +695,7 @@
     "Routers_Geo_Location_Information": "Routers Geo Location Information",
     "Coverage": "Coverage",
     "PPPoE_Username_already_used_by_another_customer": "PPPoE Username already used by another customer",
-    "just_now": "just now"
+    "just_now": "just now",
+    "Not_Working_for_freeradius": "Not Working for freeradius",
+    "User_Cannot_change_this__only_admin__if_it_Empty_it_will_use_Customer_Credentials": "User Cannot change this, only admin. if it Empty it will use Customer Credentials"
 }

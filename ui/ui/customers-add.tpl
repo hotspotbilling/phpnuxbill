@@ -12,7 +12,7 @@
                             <div class="input-group">
                                 {if $_c['country_code_phone'] != ''}
                                     <span class="input-group-addon" id="basic-addon1"><i
-                                    class="glyphicon glyphicon-phone-alt"></i></span>
+                                            class="glyphicon glyphicon-phone-alt"></i></span>
                                 {else}
                                     <span class="input-group-addon" id="basic-addon1"><i
                                             class="glyphicon glyphicon-user"></i></span>
@@ -89,7 +89,7 @@
                         <div class="col-md-9">
                             <input name="coordinates" id="coordinates" class="form-control" value=""
                                 placeholder="6.465422, 3.406448">
-                                <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
+                            <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
                         </div>
                     </div>
                 </div>
@@ -99,24 +99,25 @@
                         <label class="col-md-3 control-label">{Lang::T('Username')}</label>
                         <div class="col-md-9">
                             <input type="username" class="form-control" id="pppoe_username" name="pppoe_username">
+                            <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Password')}</label>
                         <div class="col-md-9">
                             <input type="password" class="form-control" id="pppoe_password" name="pppoe_password"
-                                onmouseleave="this.type = 'password'"
-                                onmouseenter="this.type = 'text'">
+                                onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">Local IP</label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip">
+                            <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
                         </div>
                     </div>
                     <span class="help-block">
-                        {Lang::T('User Cannot change this, only admin. if it Empty it will use user password')}
+                        {Lang::T('User Cannot change this, only admin. if it Empty it will use Customer Credentials')}
                     </span>
                 </div>
                 <div class="panel-heading"></div>
@@ -132,9 +133,12 @@
                     </div>
                     <div class="form-group" id="method" style="display: none;">
                         <label class="col-md-3 control-label">{Lang::T('Method')}</label>
-                        <label class="col-md-3 control-label"><input type="checkbox" name="sms" value="1"> {Lang::T('SMS')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="wa" value="1"> {Lang::T('WA')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="email" value="1"> {Lang::T('Email')}</label>
+                        <label class="col-md-3 control-label"><input type="checkbox" name="sms" value="1">
+                            {Lang::T('SMS')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="wa" value="1">
+                            {Lang::T('WA')}</label>
+                        <label class="col-md-2 control-label"><input type="checkbox" name="email" value="1">
+                            {Lang::T('Email')}</label>
                     </div>
                 </div>
             </div>
@@ -167,8 +171,7 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('City')}</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="city" name="city"
-                                value="{$d['city']}">
+                            <input type="text" class="form-control" id="city" name="city" value="{$d['city']}">
                             <small class="form-text text-muted">{Lang::T('City of Resident')}</small>
                         </div>
                     </div>
@@ -183,16 +186,14 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('State')}</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="state" name="state"
-                                value="{$d['state']}">
+                            <input type="text" class="form-control" id="state" name="state" value="{$d['state']}">
                             <small class="form-text text-muted">{Lang::T('State of Resident')}</small>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Zip')}</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="zip" name="zip"
-                                value="{$d['zip']}">
+                            <input type="text" class="form-control" id="zip" name="zip" value="{$d['zip']}">
                             <small class="form-text text-muted">{Lang::T('Zip Code')}</small>
                         </div>
                     </div>
@@ -208,37 +209,37 @@
     </center>
 </form>
 {literal}
- <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var sendWelcomeCheckbox = document.getElementById('send_welcome_message');
-        var methodSection = document.getElementById('method');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var sendWelcomeCheckbox = document.getElementById('send_welcome_message');
+            var methodSection = document.getElementById('method');
 
-        function toggleMethodSection() {
-            if (sendWelcomeCheckbox.checked) {
-                methodSection.style.display = 'block';
-            } else {
-                methodSection.style.display = 'none';
-            }
-        }
-
-        toggleMethodSection();
-
-        sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
-        document.querySelector('form').addEventListener('submit', function(event) {
-            if (sendWelcomeCheckbox.checked) {
-                var methodCheckboxes = methodSection.querySelectorAll('input[type="checkbox"]');
-                var oneChecked = Array.from(methodCheckboxes).some(function(checkbox) {
-                    return checkbox.checked;
-                });
-
-                if (!oneChecked) {
-                    event.preventDefault();
-                    alert('Please choose at least one method.');
-                    methodSection.focus();
+            function toggleMethodSection() {
+                if (sendWelcomeCheckbox.checked) {
+                    methodSection.style.display = 'block';
+                } else {
+                    methodSection.style.display = 'none';
                 }
             }
+
+            toggleMethodSection();
+
+            sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
+            document.querySelector('form').addEventListener('submit', function(event) {
+                if (sendWelcomeCheckbox.checked) {
+                    var methodCheckboxes = methodSection.querySelectorAll('input[type="checkbox"]');
+                    var oneChecked = Array.from(methodCheckboxes).some(function(checkbox) {
+                        return checkbox.checked;
+                    });
+
+                    if (!oneChecked) {
+                        event.preventDefault();
+                        alert('Please choose at least one method.');
+                        methodSection.focus();
+                    }
+                }
+            });
         });
-    });
     </script>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
@@ -288,20 +289,20 @@
         function setupMap(lat, lon) {
             var map = L.map('map').setView([lat, lon], 13);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
-                attribution:
-                    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                    subdomains: 'abcd',
-                    maxZoom: 20
-            }).addTo(map);
-            var marker = L.marker([lat, lon]).addTo(map);
-            map.on('click', function(e){
-                var coord = e.latlng;
-                var lat = coord.lat;
-                var lng = coord.lng;
-                var newLatLng = new L.LatLng(lat, lng);
-                marker.setLatLng(newLatLng);
-                $('#coordinates').val(lat + ',' + lng);
-            });
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 20
+        }).addTo(map);
+        var marker = L.marker([lat, lon]).addTo(map);
+        map.on('click', function(e) {
+            var coord = e.latlng;
+            var lat = coord.lat;
+            var lng = coord.lng;
+            var newLatLng = new L.LatLng(lat, lng);
+            marker.setLatLng(newLatLng);
+            $('#coordinates').val(lat + ',' + lng);
+        });
         }
         window.onload = function() {
             getLocation();
