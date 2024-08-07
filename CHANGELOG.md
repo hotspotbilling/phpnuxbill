@@ -4,6 +4,13 @@
 
 ## 2024.8.6
 
+- Fix QRCode Scanner
+- Simplify Chap verification password
+- Quota based Freeradius Rest
+- Fix Payment Gateway Audit
+
+## 2024.8.6
+
 - Fix Customer pppoe username
 
 ## 2024.8.5
