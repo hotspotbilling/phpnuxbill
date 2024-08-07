@@ -148,5 +148,8 @@
     "2024.8.6" : [
         "ALTER TABLE `rad_acct` ADD `acctinputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `framedipaddress`;",
         "ALTER TABLE `rad_acct` ADD `acctoutputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `acctinputoctets`;"
+    ],
+    "2024.8.7" : [
+        "ALTER TABLE `tbl_customers` CHANGE `coordinates` `coordinates` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates';"
     ]
 }
