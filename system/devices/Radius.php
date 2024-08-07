@@ -92,7 +92,7 @@ class Radius
         $this->customerDeactivate($customer['username'], true);
     }
 
-    public function change_username($from, $to)
+    public function change_username($plan, $from, $to)
     {
         $c = $this->getTableCustomer()->where_equal('username', $from)->findMany();
         if ($c) {

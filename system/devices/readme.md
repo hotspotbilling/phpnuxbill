@@ -34,7 +34,7 @@ class FileName {
     }
 
     // customer change username
-    public function change_username($from, $to)
+    public function change_username($plan, $from, $to)
     {
     }
 
