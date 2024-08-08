@@ -329,7 +329,7 @@ switch ($action) {
                     File::copyFolder($folder, $DEVICE_PATH . DIRECTORY_SEPARATOR, ['README.md', 'LICENSE']);
                     File::deleteFolder($folder);
                     unlink($file);
-                    r2(U . "paymentgateway", 's', 'Payment Gateway ' . $plugin . ' has been installed');
+                    r2(U . "settings/devices", 's', 'Device ' . $plugin . ' has been installed');
                     break;
                 }
             }
@@ -344,6 +344,7 @@ switch ($action) {
         $ui->assign('zipExt', $zipExt);
         $ui->assign('plugins', $json['plugins']);
         $ui->assign('pgs', $json['payment_gateway']);
+        $ui->assign('dvcs', $json['devices']);
         $ui->display('plugin-manager.tpl');
 }
 
