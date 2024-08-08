@@ -28,7 +28,6 @@ class Package
         $inv = "";
         $isVoucher = false;
         $c = [];
-
         if ($trx && $trx['status'] == 2) {
             // if its already paid, return it
             return;
@@ -277,25 +276,28 @@ class Package
                 }
             }
             //}
-
-            $b->customer_id = $id_customer;
-            $b->username = $c['username'];
-            $b->plan_id = $plan_id;
-            $b->namebp = $p['name_plan'];
-            $b->recharged_on = $date_only;
-            $b->recharged_time = $time_only;
-            $b->expiration = $date_exp;
-            $b->time = $time;
-            $b->status = "on";
-            $b->method = "$gateway - $channel";
-            $b->routers = $router_name;
-            $b->type = $p['type'];
-            if ($admin) {
-                $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
-            } else {
-                $b->admin_id = '0';
+            // if started with voucher, don't insert into tbl_user_recharges
+            // this is not necessary, but in case a bug come
+            if(strlen($p['device'])>7 && substr($p['device'], 0 , 7) != 'Voucher'){
+                $b->customer_id = $id_customer;
+                $b->username = $c['username'];
+                $b->plan_id = $plan_id;
+                $b->namebp = $p['name_plan'];
+                $b->recharged_on = $date_only;
+                $b->recharged_time = $time_only;
+                $b->expiration = $date_exp;
+                $b->time = $time;
+                $b->status = "on";
+                $b->method = "$gateway - $channel";
+                $b->routers = $router_name;
+                $b->type = $p['type'];
+                if ($admin) {
+                    $b->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
+                    $b->admin_id = '0';
+                }
+                $b->save();
             }
-            $b->save();
 
             // insert table transactions
             $t = ORM::for_table('tbl_transactions')->create();
@@ -383,27 +385,28 @@ class Package
                     );
                 }
             }
-
-            $d = ORM::for_table('tbl_user_recharges')->create();
-            $d->customer_id = $id_customer;
-            $d->username = $c['username'];
-            $d->plan_id = $plan_id;
-            $d->namebp = $p['name_plan'];
-            $d->recharged_on = $date_only;
-            $d->recharged_time = $time_only;
-            $d->expiration = $date_exp;
-            $d->time = $time;
-            $d->status = "on";
-            $d->method = "$gateway - $channel";
-            $d->routers = $router_name;
-            $d->type = $p['type'];
-            if ($admin) {
-                $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
-            } else {
-                $d->admin_id = '0';
+            // if started with voucher, don't insert into tbl_user_recharges
+            if(strlen($p['device'])>7 && substr($p['device'], 0 , 7) != 'Voucher'){
+                $d = ORM::for_table('tbl_user_recharges')->create();
+                $d->customer_id = $id_customer;
+                $d->username = $c['username'];
+                $d->plan_id = $plan_id;
+                $d->namebp = $p['name_plan'];
+                $d->recharged_on = $date_only;
+                $d->recharged_time = $time_only;
+                $d->expiration = $date_exp;
+                $d->time = $time;
+                $d->status = "on";
+                $d->method = "$gateway - $channel";
+                $d->routers = $router_name;
+                $d->type = $p['type'];
+                if ($admin) {
+                    $d->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
+                    $d->admin_id = '0';
+                }
+                $d->save();
             }
-            $d->save();
-
             // insert table transactions
             $t = ORM::for_table('tbl_transactions')->create();
             $t->invoice = $inv = "INV-" . Package::_raid();
