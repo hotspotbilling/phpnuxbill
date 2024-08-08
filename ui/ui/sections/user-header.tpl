@@ -166,6 +166,14 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_INBOX}
+                    {if $_user['service_type'] == 'PPPoE'}
+                        <li {if $_system_menu eq 'pppoe-settings'}class="active" {/if}>
+                            <a href="{$_url}accounts/pppoe-setting">
+                                <i class="ion ion-settings"></i>
+                                <span>{Lang::T('PPPoE Settings')}</span>
+                            </a>
+                        </li>
+                    {/if}
                     {if $_c['disable_voucher'] != 'yes'}
                         <li {if $_system_menu eq 'voucher'}class="active" {/if}>
                             <a href="{$_url}voucher/activation">
