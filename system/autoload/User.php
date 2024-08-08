@@ -196,6 +196,11 @@ class User
         return $d;
     }
 
+    public static function isUserVoucher($kode) {
+        $regex = '/^GC\d+C.{10}$/';
+        return preg_match($regex, $kode);
+    }
+
     public static function _billing($id = 0)
     {
         if (!$id) {

@@ -299,36 +299,40 @@ class Package
                 $b->save();
             }
 
-            // insert table transactions
-            $t = ORM::for_table('tbl_transactions')->create();
-            $t->invoice = $inv = "INV-" . Package::_raid();
-            $t->username = $c['username'];
-            $t->plan_name = $p['name_plan'];
-            if ($p['validity_unit'] == 'Period') {
-                // Postpaid price from field
-                $add_inv = User::getAttribute("Invoice", $id_customer);
-                if (empty($add_inv) or $add_inv == 0) {
-                    $t->price = $p['price'] + $add_cost;
+            if($gateway == 'Voucher' && User::isUserVoucher($channel)){
+                // maybe someday i will do something in here
+            }else{
+                // insert table transactions
+                $t = ORM::for_table('tbl_transactions')->create();
+                $t->invoice = $inv = "INV-" . Package::_raid();
+                $t->username = $c['username'];
+                $t->plan_name = $p['name_plan'];
+                if ($p['validity_unit'] == 'Period') {
+                    // Postpaid price from field
+                    $add_inv = User::getAttribute("Invoice", $id_customer);
+                    if (empty($add_inv) or $add_inv == 0) {
+                        $t->price = $p['price'] + $add_cost;
+                    } else {
+                        $t->price = $add_inv + $add_cost;
+                    }
                 } else {
-                    $t->price = $add_inv + $add_cost;
+                    $t->price = $p['price'] + $add_cost;
                 }
-            } else {
-                $t->price = $p['price'] + $add_cost;
+                $t->recharged_on = $date_only;
+                $t->recharged_time = $time_only;
+                $t->expiration = $date_exp;
+                $t->time = $time;
+                $t->method = "$gateway - $channel";
+                $t->routers = $router_name;
+                $t->note = $note;
+                $t->type = $p['type'];
+                if ($admin) {
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
+                    $t->admin_id = '0';
+                }
+                $t->save();
             }
-            $t->recharged_on = $date_only;
-            $t->recharged_time = $time_only;
-            $t->expiration = $date_exp;
-            $t->time = $time;
-            $t->method = "$gateway - $channel";
-            $t->routers = $router_name;
-            $t->note = $note;
-            $t->type = $p['type'];
-            if ($admin) {
-                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-            } else {
-                $t->admin_id = '0';
-            }
-            $t->save();
 
             if ($p['validity_unit'] == 'Period') {
                 // insert price to fields for invoice next month
@@ -407,33 +411,38 @@ class Package
                 }
                 $d->save();
             }
-            // insert table transactions
-            $t = ORM::for_table('tbl_transactions')->create();
-            $t->invoice = $inv = "INV-" . Package::_raid();
-            $t->username = $c['username'];
-            $t->plan_name = $p['name_plan'];
-            if ($p['validity_unit'] == 'Period') {
-                // Postpaid price always zero for first time
-                $note = '';
-                $bills = [];
-                $t->price = 0;
-            } else {
-                $t->price = $p['price'] + $add_cost;
+
+            if($gateway == 'Voucher' && User::isUserVoucher($channel)){
+                // maybe someday i will do something in here
+            }else{
+                // insert table transactions
+                $t = ORM::for_table('tbl_transactions')->create();
+                $t->invoice = $inv = "INV-" . Package::_raid();
+                $t->username = $c['username'];
+                $t->plan_name = $p['name_plan'];
+                if ($p['validity_unit'] == 'Period') {
+                    // Postpaid price always zero for first time
+                    $note = '';
+                    $bills = [];
+                    $t->price = 0;
+                } else {
+                    $t->price = $p['price'] + $add_cost;
+                }
+                $t->recharged_on = $date_only;
+                $t->recharged_time = $time_only;
+                $t->expiration = $date_exp;
+                $t->time = $time;
+                $t->method = "$gateway - $channel";
+                $t->note = $note;
+                $t->routers = $router_name;
+                if ($admin) {
+                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+                } else {
+                    $t->admin_id = '0';
+                }
+                $t->type = $p['type'];
+                $t->save();
             }
-            $t->recharged_on = $date_only;
-            $t->recharged_time = $time_only;
-            $t->expiration = $date_exp;
-            $t->time = $time;
-            $t->method = "$gateway - $channel";
-            $t->note = $note;
-            $t->routers = $router_name;
-            if ($admin) {
-                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-            } else {
-                $t->admin_id = '0';
-            }
-            $t->type = $p['type'];
-            $t->save();
 
             if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                 // insert price to fields for invoice next month
