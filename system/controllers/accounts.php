@@ -239,6 +239,33 @@ switch ($action) {
         r2(U . 'accounts/profile', 's', Lang::T('Phone number updated successfully'));
         break;
 
+    case 'pppoe-setting':
+        $c = ORM::for_table('tbl_customers')->where('username', $user['username'])->find_one();
+        if ($c) {
+            $ui->assign('d', $c);
+            $ui->display('accounts-pppoe-setting.tpl');
+        } else {
+            r2(U . 'home', 'e', Lang::T('Error occured'));
+        }
+
+        break;
+    case 'pppoe-settings-post':
+        $id = $user['id'];
+        $pppoe_username = trim(_post('pppoe_username'));
+        $pppoe_password = trim(_post('pppoe_password'));
+        $c = ORM::for_table('tbl_customers')->find_one($id);
+        if ($c) {
+            $c->pppoe_username = $pppoe_username;
+            if ($pppoe_password != '') {
+                $c->pppoe_password = $pppoe_password;
+            }
+            $c->save();
+            r2(U . 'home','s', 'PPPoE Setting Updated Successfully');
+        } else {
+            r2(U . 'home', 'e', Lang::T('Error occured'));
+        }
+        break;
+
     default:
         $ui->display('a404.tpl');
 }
