@@ -699,5 +699,6 @@
     "Not_Working_for_freeradius": "Not Working for freeradius",
     "User_Cannot_change_this__only_admin__if_it_Empty_it_will_use_Customer_Credentials": "User Cannot change this, only admin. if it Empty it will use Customer Credentials",
     "Failed_to_buy_package": "Failed to buy package",
-    "New_Voucher_Created": "New Voucher Created"
+    "New_Voucher_Created": "New Voucher Created",
+    "New_Voucher_for_10mbps_Created": "New Voucher for 10mbps Created"
 }

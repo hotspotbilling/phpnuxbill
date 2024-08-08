@@ -147,7 +147,7 @@ class Package
             } else if ($config['user_notification_payment'] == 'wa') {
                 Message::sendWhatsapp($c['phonenumber'], $textInvoice);
             } else if ($config['user_notification_payment'] == 'email') {
-                Message::sendEmail($c['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' ' . $inv ,$textInvoice);
+                Message::sendEmail($c['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' ' . $inv, $textInvoice);
             }
 
             return true;
@@ -278,7 +278,7 @@ class Package
             //}
             // if started with voucher, don't insert into tbl_user_recharges
             // this is not necessary, but in case a bug come
-            if(strlen($p['device'])>7 && substr($p['device'], 0 , 7) != 'Voucher'){
+            if (strlen($p['device']) > 7 && substr($p['device'], 0, 7) != 'Voucher') {
                 $b->customer_id = $id_customer;
                 $b->username = $c['username'];
                 $b->plan_id = $plan_id;
@@ -299,14 +299,15 @@ class Package
                 $b->save();
             }
 
-            if($gateway == 'Voucher' && User::isUserVoucher($channel)){
-                // maybe someday i will do something in here
-            }else{
-                // insert table transactions
-                $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = $inv = "INV-" . Package::_raid();
-                $t->username = $c['username'];
-                $t->plan_name = $p['name_plan'];
+            // insert table transactions
+            $t = ORM::for_table('tbl_transactions')->create();
+            $t->invoice = $inv = "INV-" . Package::_raid();
+            $t->username = $c['username'];
+            $t->plan_name = $p['name_plan'];
+            if ($gateway == 'Voucher' && User::isUserVoucher($channel)) {
+                //its already paid
+                $t->price = 0;
+            } else {
                 if ($p['validity_unit'] == 'Period') {
                     // Postpaid price from field
                     $add_inv = User::getAttribute("Invoice", $id_customer);
@@ -318,21 +319,21 @@ class Package
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }
-                $t->recharged_on = $date_only;
-                $t->recharged_time = $time_only;
-                $t->expiration = $date_exp;
-                $t->time = $time;
-                $t->method = "$gateway - $channel";
-                $t->routers = $router_name;
-                $t->note = $note;
-                $t->type = $p['type'];
-                if ($admin) {
-                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $t->admin_id = '0';
-                }
-                $t->save();
             }
+            $t->recharged_on = $date_only;
+            $t->recharged_time = $time_only;
+            $t->expiration = $date_exp;
+            $t->time = $time;
+            $t->method = "$gateway - $channel";
+            $t->routers = $router_name;
+            $t->note = $note;
+            $t->type = $p['type'];
+            if ($admin) {
+                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
+                $t->admin_id = '0';
+            }
+            $t->save();
 
             if ($p['validity_unit'] == 'Period') {
                 // insert price to fields for invoice next month
@@ -355,7 +356,7 @@ class Package
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
                 "\nLast Expired: $lastExpired" .
-                "\nNew Expired: " . Lang::dateAndTimeFormat($date_exp, $time).
+                "\nNew Expired: " . Lang::dateAndTimeFormat($date_exp, $time) .
                 "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                 "\nNote:\n" . $note);
         } else {
@@ -390,7 +391,7 @@ class Package
                 }
             }
             // if started with voucher, don't insert into tbl_user_recharges
-            if(strlen($p['device'])>7 && substr($p['device'], 0 , 7) != 'Voucher'){
+            if (strlen($p['device']) > 7 && substr($p['device'], 0, 7) != 'Voucher') {
                 $d = ORM::for_table('tbl_user_recharges')->create();
                 $d->customer_id = $id_customer;
                 $d->username = $c['username'];
@@ -412,14 +413,15 @@ class Package
                 $d->save();
             }
 
-            if($gateway == 'Voucher' && User::isUserVoucher($channel)){
-                // maybe someday i will do something in here
-            }else{
-                // insert table transactions
-                $t = ORM::for_table('tbl_transactions')->create();
-                $t->invoice = $inv = "INV-" . Package::_raid();
-                $t->username = $c['username'];
-                $t->plan_name = $p['name_plan'];
+            // insert table transactions
+            $t = ORM::for_table('tbl_transactions')->create();
+            $t->invoice = $inv = "INV-" . Package::_raid();
+            $t->username = $c['username'];
+            $t->plan_name = $p['name_plan'];
+            if ($gateway == 'Voucher' && User::isUserVoucher($channel)) {
+                $t->price = 0;
+                // its already paid
+            } else {
                 if ($p['validity_unit'] == 'Period') {
                     // Postpaid price always zero for first time
                     $note = '';
@@ -428,21 +430,21 @@ class Package
                 } else {
                     $t->price = $p['price'] + $add_cost;
                 }
-                $t->recharged_on = $date_only;
-                $t->recharged_time = $time_only;
-                $t->expiration = $date_exp;
-                $t->time = $time;
-                $t->method = "$gateway - $channel";
-                $t->note = $note;
-                $t->routers = $router_name;
-                if ($admin) {
-                    $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-                } else {
-                    $t->admin_id = '0';
-                }
-                $t->type = $p['type'];
-                $t->save();
             }
+            $t->recharged_on = $date_only;
+            $t->recharged_time = $time_only;
+            $t->expiration = $date_exp;
+            $t->time = $time;
+            $t->method = "$gateway - $channel";
+            $t->note = $note;
+            $t->routers = $router_name;
+            if ($admin) {
+                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+            } else {
+                $t->admin_id = '0';
+            }
+            $t->type = $p['type'];
+            $t->save();
 
             if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                 // insert price to fields for invoice next month
@@ -474,7 +476,7 @@ class Package
                 "\nRouter: " . $router_name .
                 "\nGateway: " . $gateway .
                 "\nChannel: " . $channel .
-                "\nExpired: " . Lang::dateAndTimeFormat($date_exp, $time).
+                "\nExpired: " . Lang::dateAndTimeFormat($date_exp, $time) .
                 "\nPrice: " . Lang::moneyFormat($p['price'] + $add_cost) .
                 "\nNote:\n" . $note);
         }
