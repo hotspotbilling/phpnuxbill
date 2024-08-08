@@ -60,10 +60,12 @@ class MikrotikPppoe
             //disconnect then
             if(isset($isChangePlan) && $isChangePlan){
                 $this->removePpoeActive($client, $customer['username']);
+                if (!empty($customer['pppoe_username'])) {
+                    $this->removePpoeActive($client, $customer['pppoe_username']);
+                }
             }
         }
     }
-
 
     function remove_customer($customer, $plan)
     {

@@ -1,7 +1,7 @@
 {include file="sections/user-header.tpl"}
 
 <div class="row">
-    <div class="col-md-4 col-md-offset-2">
+    <div class="col-lg-12">
         <div class="panel panel-hovered panel-primary panel-stacked mb30">
             <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
