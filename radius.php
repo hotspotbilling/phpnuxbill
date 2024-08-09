@@ -166,7 +166,6 @@ try {
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
                 ->where('username', $username)
-                ->where('macaddr', _post('macAddr'))
                 ->where('acctstatustype', _post('acctStatusType'))
                 ->findOne();
             if (!$d) {
@@ -178,7 +177,6 @@ try {
                 // log in the Start only
                 $start = ORM::for_table('rad_acct')
                     ->where('username', $username)
-                    ->where('macaddr', _post('macAddr'))
                     ->where('acctstatustype', 'Start')
                     ->findOne();
                 if (!$start) {
