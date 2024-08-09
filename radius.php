@@ -294,7 +294,7 @@ function process_radiust_rest($tur, $code)
     if ($plan['typebp'] == "Limited") {
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
             $raddact = ORM::for_table('rad_acct')->where('username', $tur['username'])->where('acctstatustype', 'Start')->find_one();
-            $totalUsage = $raddact['acctOutputOctets'] + $raddact['acctInputOctets'];
+            $totalUsage = intval($raddact['acctOutputOctets']) + intval($raddact['acctInputOctets']);
             $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
             if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
                 $attrs['reply:Mikrotik-Total-Limit'] = 0;
