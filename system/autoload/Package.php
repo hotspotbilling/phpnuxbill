@@ -278,7 +278,9 @@ class Package
             //}
             // if started with voucher, don't insert into tbl_user_recharges
             // this is not necessary, but in case a bug come
-            if (strlen($p['device']) > 7 && substr($p['device'], 0, 7) != 'Voucher') {
+            if (strlen($p['device']) > 7 && substr($p['device'], 0, 7) == 'Voucher') {
+                // maybe something need in here for buy Voucher
+            }else{
                 $b->customer_id = $id_customer;
                 $b->username = $c['username'];
                 $b->plan_id = $plan_id;
@@ -391,7 +393,9 @@ class Package
                 }
             }
             // if started with voucher, don't insert into tbl_user_recharges
-            if (strlen($p['device']) > 7 && substr($p['device'], 0, 7) != 'Voucher') {
+            if (strlen($p['device']) > 7 && substr($p['device'], 0, 7) == 'Voucher') {
+
+            }else{
                 $d = ORM::for_table('tbl_user_recharges')->create();
                 $d->customer_id = $id_customer;
                 $d->username = $c['username'];
