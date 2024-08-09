@@ -25,6 +25,15 @@ class RadiusRest {
     // Remove Customer to Mikrotik/Device
     function remove_customer($customer, $plan)
     {
+        // set zero data usage
+        if ($plan['typebp'] == "Limited" && ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit")) {
+            $cs = ORM::for_table("rad_acct")->where('username', $customer['username'])->findMany();
+            foreach ($cs as $c) {
+                $c->acctOutputOctets = 0;
+                $c->acctInputOctets = 0;
+                $c->save();
+            }
+        }
     }
 
     // customer change username
