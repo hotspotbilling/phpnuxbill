@@ -172,8 +172,8 @@ try {
             if (!$d) {
                 $d = ORM::for_table('rad_acct')->create();
             }
-            $acctOutputOctets = _post('acctOutputOctets');
-            $acctInputOctets = _post('acctInputOctets');
+            $acctOutputOctets = _post('acctOutputOctets', 0);
+            $acctInputOctets = _post('acctInputOctets', 0);
             if ($acctOutputOctets !== false && $acctInputOctets !== false) {
                 $d->acctOutputOctets += $acctOutputOctets;
                 $d->acctInputOctets += $acctInputOctets;
