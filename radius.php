@@ -174,12 +174,34 @@ try {
             }
             $acctOutputOctets = _post('acctOutputOctets', 0);
             $acctInputOctets = _post('acctInputOctets', 0);
-            if ($acctOutputOctets !== false && $acctInputOctets !== false) {
-                $d->acctOutputOctets += $acctOutputOctets;
-                $d->acctInputOctets += $acctInputOctets;
-            } else {
+            if(_post('acctStatusType')=='Stop'){
+                // log in the Start only
+                $start = ORM::for_table('rad_acct')
+                    ->where('username', $username)
+                    ->where('macaddr', _post('macAddr'))
+                    ->where('acctstatustype', 'Start')
+                    ->findOne();
+                if (!$start) {
+                    $start = ORM::for_table('rad_acct')->create();
+                }
+                if ($acctOutputOctets !== false && $acctInputOctets !== false) {
+                    $start->acctOutputOctets += $acctOutputOctets;
+                    $start->acctInputOctets += $acctInputOctets;
+                } else {
+                    $start->acctOutputOctets = 0;
+                    $start->acctInputOctets = 0;
+                }
+                $start->save();
                 $d->acctOutputOctets = 0;
                 $d->acctInputOctets = 0;
+            }else{
+                if ($acctOutputOctets !== false && $acctInputOctets !== false) {
+                    $d->acctOutputOctets += $acctOutputOctets;
+                    $d->acctInputOctets += $acctInputOctets;
+                } else {
+                    $d->acctOutputOctets = 0;
+                    $d->acctInputOctets = 0;
+                }
             }
             $d->acctsessionid = _post('acctSessionId');
             $d->username = $username;
@@ -273,7 +295,7 @@ function process_radiust_rest($tur, $code)
 
     if ($plan['typebp'] == "Limited") {
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
-            $raddact = ORM::for_table('rad_acct')->where('username', $tur['username'])->find_one();
+            $raddact = ORM::for_table('rad_acct')->where('username', $tur['username'])->where('acctstatustype', 'Start')->find_one();
             $totalUsage = $raddact['acctOutputOctets'] + $raddact['acctInputOctets'];
             $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
             if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
