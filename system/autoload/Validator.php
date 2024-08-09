@@ -301,23 +301,30 @@ class Validator
         return (bool)in_array($format, $formats);
     }
 
-    public static function countRouterPlan($plans, $router){
+    public static function countRouterPlan($plans, $router)
+    {
         $n = 0;
-        foreach ($plans as $plan){
-            if($plan['routers'] == $router){
+        foreach ($plans as $plan) {
+            if ($plan['routers'] == $router) {
                 $n++;
             }
         }
         return $n;
     }
 
-    public static function isRouterHasPlan($plans, $router){
-        foreach ($plans as $plan){
-            if($plan['routers'] == $router){
+    public static function isRouterHasPlan($plans, $router)
+    {
+        foreach ($plans as $plan) {
+            if ($plan['routers'] == $router) {
                 return true;
             }
         }
         return false;
     }
 
+    public static function containsKeyword($string, $keywords = ['mikrotik', 'hotspot', 'pppoe', 'radius', 'dummy'])
+    {
+        $regex = '/' . implode('|', $keywords) . '/i';
+        return preg_match($regex, $string);
+    }
 }
