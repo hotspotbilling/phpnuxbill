@@ -46,6 +46,8 @@ class MikrotikHotspot
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             if($p){
                 $this->add_customer($customer, $p);
+                $this->removeHotspotActiveUser($client, $customer['username']);
+                return;
             }
         }
         $this->removeHotspotUser($client, $customer['username']);
