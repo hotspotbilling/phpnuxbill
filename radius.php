@@ -183,8 +183,8 @@ try {
                     $start = ORM::for_table('rad_acct')->create();
                 }
                 if ($acctOutputOctets !== false && $acctInputOctets !== false) {
-                    $start->acctOutputOctets += $acctOutputOctets;
-                    $start->acctInputOctets += $acctInputOctets;
+                    $start->acctOutputOctets += intval($acctOutputOctets);
+                    $start->acctInputOctets += intval($acctInputOctets);
                 } else {
                     $start->acctOutputOctets = 0;
                     $start->acctInputOctets = 0;
@@ -194,8 +194,8 @@ try {
                 $d->acctInputOctets = 0;
             }else{
                 if ($acctOutputOctets !== false && $acctInputOctets !== false) {
-                    $d->acctOutputOctets += $acctOutputOctets;
-                    $d->acctInputOctets += $acctInputOctets;
+                    $d->acctOutputOctets += intval($acctOutputOctets);
+                    $d->acctInputOctets += intval($acctInputOctets);
                 } else {
                     $d->acctOutputOctets = 0;
                     $d->acctInputOctets = 0;
@@ -349,5 +349,4 @@ function show_radius_result($array, $code = 200)
         die();
     }
     die(json_encode($array));
-    die();
 }
