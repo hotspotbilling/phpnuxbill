@@ -74,11 +74,11 @@ class Text
         if ($unit == 'KB') {
             return $datalimit * 1024;
         } elseif ($unit == 'MB') {
-            return $datalimit * 1024 * 1000;
+            return $datalimit * 1048576;
         } elseif ($unit == 'GB') {
-            return $datalimit * 1024 * 1000 * 1000;
+            return $datalimit * 1073741824;
         } elseif ($unit == 'TB') {
-            return $datalimit * 1024 * 1000 * 1000 * 1000;
+            return $datalimit * 1099511627776;
         } else {
             return $datalimit;
         }
