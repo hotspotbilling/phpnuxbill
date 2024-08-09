@@ -75,6 +75,10 @@ class MikrotikPppoe
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
             if($p){
                 $this->add_customer($customer, $p);
+                $this->removePpoeActive($client, $customer['username']);
+                if (!empty($customer['pppoe_username'])) {
+                    $this->removePpoeActive($client, $customer['pppoe_username']);
+                }
                 return;
             }
         }
