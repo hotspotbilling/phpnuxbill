@@ -33,6 +33,7 @@ $code = 200;
 //     ]));
 // }
 
+
 try {
     switch ($action) {
         case 'authenticate':
@@ -46,7 +47,7 @@ try {
                 if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                     $password = $c['password'];
                     $isVoucher = false;
-                }else{
+                } else {
                     // check if voucher
                     if (Password::chap_verify($username, $CHAPassword, $CHAPchallenge)) {
                         $isVoucher = true;
@@ -63,6 +64,23 @@ try {
                     ], 401);
                 }
             }
+
+            // Check if the user has exceeded their data limit
+            $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->where('status', 'on')->find_one();
+            if (!$tur) {
+                show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You don\'t have active plan'], 401);
+                die();
+            } else {
+                $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+                if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
+                    $remaining_data = getTotalUsageAndRemainingData($username, Text::convertDataUnit($plan['data_limit'], $plan['data_unit']))->remaining_data;
+                    if ($remaining_data <= 0) {
+                        show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+                    }
+                }
+            }
+
+
             if ($username == $password) {
                 $d = ORM::for_table('tbl_voucher')->where('code', $username)->find_one();
             } else {
@@ -95,7 +113,7 @@ try {
                 if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                     $password = $c['password'];
                     $isVoucher = false;
-                }else{
+                } else {
                     // check if voucher
                     if (Password::chap_verify($username, $CHAPassword, $CHAPchallenge)) {
                         $isVoucher = true;
@@ -115,6 +133,17 @@ try {
                 }
             }
             $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->find_one();
+            if ($tur) {
+                $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+                if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
+                    $remaining_data = getTotalUsageAndRemainingData($username, Text::convertDataUnit($plan['data_limit'], $plan['data_unit']))->remaining_data;
+                    if ($remaining_data <= 0) {
+                        show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+                    }
+                }
+            }
+
+
             if ($tur) {
                 if (!$isVoucher) {
                     $d = ORM::for_table('tbl_customers')->select('password')->where('username', $username)->find_one();
@@ -164,86 +193,77 @@ try {
                 die();
             }
             header("HTTP/1.1 200 ok");
-            $d = ORM::for_table('rad_acct')
-                ->where('username', $username)
-                ->where('acctstatustype', _post('acctStatusType'))
-                ->findOne();
-            if (!$d) {
-                $d = ORM::for_table('rad_acct')->create();
-            }
-            $acctOutputOctets = _post('acctOutputOctets', 0);
-            $acctInputOctets = _post('acctInputOctets', 0);
-            if(_post('acctStatusType')=='Stop'){
-                // log in the Start only
-                $start = ORM::for_table('rad_acct')
+
+            $acctStatusType = _post('acctStatusType');
+
+            // Handle Interim-Update: update the existing session
+            if ($acctStatusType === 'Interim-Update') {
+                // Find the existing session record by acctsessionid
+                $d = ORM::for_table('rad_acct')
                     ->where('username', $username)
-                    ->where('acctstatustype', 'Start')
-                    ->findOne();
-                if (!$start) {
-                    $start = ORM::for_table('rad_acct')->create();
+                    ->where('acctsessionid', _post('acctSessionId'))
+                    ->find_one();
+                if ($d) {
+                    $d->acctoutputoctets = floatval(_post('acctOutputOctets')) ?? 0;
+                    $d->acctinputoctets = floatval(_post('acctInputOctets')) ?? 0;
+                    $d->save();
                 }
-                if ($acctOutputOctets !== false && $acctInputOctets !== false) {
-                    $start->acctOutputOctets += intval($acctOutputOctets);
-                    $start->acctInputOctets += intval($acctInputOctets);
-                } else {
-                    $start->acctOutputOctets = 0;
-                    $start->acctInputOctets = 0;
-                }
-                $start->save();
-                $d->acctOutputOctets = 0;
-                $d->acctInputOctets = 0;
-            }else{
-                if ($acctOutputOctets !== false && $acctInputOctets !== false) {
-                    $d->acctOutputOctets += intval($acctOutputOctets);
-                    $d->acctInputOctets += intval($acctInputOctets);
-                } else {
-                    $d->acctOutputOctets = 0;
-                    $d->acctInputOctets = 0;
-                }
+            } else {
+                // For other acctStatusType values, create a new record
+                $d = ORM::for_table('rad_acct')->create();
+                sendTelegram(json_encode($_POST));
+                $d->acctsessionid = _post('acctSessionId');
+                $d->username = $username;
+                $d->realm = _post('realm');
+                $d->nasipaddress = _post('nasIpAddress');
+                $d->nasid = _post('nasid');
+                $d->nasportid = _post('nasPortId');
+                $d->nasporttype = _post('nasPortType');
+                $d->framedipaddress = _post('framedIPAddress');
+                $d->acctstatustype = $acctStatusType;
+                $d->acctoutputoctets = floatval(_post('acctOutputOctets')) ?? 0;
+                $d->acctinputoctets = floatval(_post('acctInputOctets')) ?? 0;
+                $d->macaddr = _post('macAddr');
+                $d->dateAdded = date('Y-m-d H:i:s');
+                $d->save();
             }
-            $d->acctsessionid = _post('acctSessionId');
-            $d->username = $username;
-            $d->realm = _post('realm');
-            $d->nasipaddress = _post('nasip');
-            $d->nasid = _post('nasid');
-            $d->nasportid = _post('nasPortId');
-            $d->nasporttype = _post('nasPortType');
-            $d->framedipaddress = _post('framedIPAddress');
-            $d->acctstatustype = _post('acctStatusType');
-            $d->macaddr = _post('macAddr');
-            $d->dateAdded = date('Y-m-d H:i:s');
-            $d->save();
-            if($d->acctstatustype == 'Start'){
+
+            // Check if the user has exceeded their data limit after logging the session data
+            if ($d->acctstatustype) {
                 $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->where('status', 'on')->where('routers', 'radius')->find_one();
                 $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
                 if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
-                    $totalUsage = $d['acctOutputOctets'] + $d['acctInputOctets'];
-                    $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
-                    if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
-                        $attrs['reply:Mikrotik-Total-Limit'] = 0;
+                    $remaining_data = getTotalUsageAndRemainingData($tur['username'], Text::convertDataUnit($plan['data_limit'], $plan['data_unit']))->remaining_data;
+                    if ($remaining_data <= 0) {
+                        // change the status of the user recharge to off if the user has exceeded their data limit
+                        $tur->status = 'off';
+                        $tur->save();
                         show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
                     }
+                    $attrs['reply:Mikrotik-Total-Limit'] = $remaining_data;
                 }
             }
+
             show_radius_result([
                 "control:Auth-Type" => "Accept",
                 "reply:Reply-Message" => 'Saved'
             ], 200);
             break;
+
     }
     die();
-} catch (Throwable $e) {
-    Message::sendTelegram(
-        "Sistem Error.\n" .
-            $e->getMessage() . "\n" .
-            $e->getTraceAsString()
-    );
-    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 } catch (Exception $e) {
     Message::sendTelegram(
-        "Sistem Error.\n" .
-            $e->getMessage() . "\n" .
-            $e->getTraceAsString()
+        "System Error.\n" .
+        $e->getMessage() . "\n" .
+        $e->getTraceAsString()
+    );
+    show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
+} catch (Throwable $e) {
+    Message::sendTelegram(
+        "Throwable system Error.\n" .
+        $e->getMessage() . "\n" .
+        $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 }
@@ -293,9 +313,9 @@ function process_radiust_rest($tur, $code)
 
     if ($plan['typebp'] == "Limited") {
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
-            $raddact = ORM::for_table('rad_acct')->where('username', $tur['username'])->where('acctstatustype', 'Start')->find_one();
-            $totalUsage = intval($raddact['acctOutputOctets']) + intval($raddact['acctInputOctets']);
-            $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
+            $remaining_data = getTotalUsageAndRemainingData($tur['username'], Text::convertDataUnit($plan['data_limit'], $plan['data_unit']))->remaining_data;
+            sendTelegram("Remaining Data : " . $remaining_data);
+            $attrs['reply:Mikrotik-Total-Limit'] = $remaining_data;
             if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
                 $attrs['reply:Mikrotik-Total-Limit'] = 0;
                 show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
@@ -309,31 +329,24 @@ function process_radiust_rest($tur, $code)
             $attrs['reply:Max-All-Session'] = $timelimit;
             $attrs['reply:Expire-After'] = $timelimit;
         } else if ($plan['limit_type'] == "Data_Limit") {
-            if ($plan['data_unit'] == 'GB')
-                $datalimit = $plan['data_limit'] . "000000000";
-            else
-                $datalimit = $plan['data_limit'] . "000000";
-            $attrs['reply:Max-Data'] = $datalimit;
-            $attrs['reply:Mikrotik-Recv-Limit-Gigawords'] = $datalimit;
-            $attrs['reply:Mikrotik-Xmit-Limit-Gigawords'] = $datalimit;
+            $attrs['reply:Max-Data'] = $remaining_data;
+            $attrs['reply:Mikrotik-Recv-Limit-Gigawords'] = $remaining_data;
+            $attrs['reply:Mikrotik-Xmit-Limit-Gigawords'] = $remaining_data;
         } else if ($plan['limit_type'] == "Both_Limit") {
             if ($plan['time_unit'] == 'Hrs')
                 $timelimit = $plan['time_limit'] * 60 * 60;
             else
                 $timelimit = $plan['time_limit'] * 60;
-            if ($plan['data_unit'] == 'GB')
-                $datalimit = $plan['data_limit'] . "000000000";
-            else
-                $datalimit = $plan['data_limit'] . "000000";
+
             $attrs['reply:Max-All-Session'] = $timelimit;
-            $attrs['reply:Max-Data'] = $datalimit;
-            $attrs['reply:Mikrotik-Recv-Limit-Gigawords'] = $datalimit;
-            $attrs['reply:Mikrotik-Xmit-Limit-Gigawords'] = $datalimit;
+            $attrs['reply:Max-Data'] = $remaining_data;
+            $attrs['reply:Mikrotik-Recv-Limit-Gigawords'] = $remaining_data;
+            $attrs['reply:Mikrotik-Xmit-Limit-Gigawords'] = $remaining_data;
         }
     }
     $result = array_merge([
         "control:Auth-Type" => "Accept",
-        "reply" =>  ["Reply-Message" => ['value' => 'success']]
+        "reply" => ["Reply-Message" => ['value' => 'success']]
     ], $attrs);
     show_radius_result($result, $code);
 }
@@ -341,12 +354,57 @@ function process_radiust_rest($tur, $code)
 function show_radius_result($array, $code = 200)
 {
     if ($code == 401) {
+        sendTelegram("Radius Error : " . json_encode($array));
         header("HTTP/1.1 401 Unauthorized");
     } else if ($code == 200) {
+        sendTelegram(json_encode($array));
         header("HTTP/1.1 200 OK");
     } else if ($code == 204) {
+        sendTelegram(json_encode($array));
         header("HTTP/1.1 204 No Content");
         die();
     }
     die(json_encode($array));
+}
+
+function getTotalUsageAndRemainingData($username, $dataLimit)
+{
+    // Retrieve the last recharge date and time from the user's active plan
+    $lastRecharge = ORM::for_table('tbl_user_recharges')
+        ->where('username', $username)
+        ->where('status', 'on') // Assuming 'on' indicates an active plan
+        ->find_one();
+    if (!$lastRecharge) {
+        return (object)[
+            'total_usage' => 0,
+            'remaining_data' => 0,
+            'recharged_on' => null,
+            'recharged_time' => null
+        ];
+    }
+    // Combine recharged_on and recharged_time to form a timestamp
+    $lastPlanStart = $lastRecharge->recharged_on . ' ' . $lastRecharge->recharged_time;
+    // Calculate total usage (input + output) since the last plan activation
+    $usage = ORM::for_table('rad_acct')
+        ->where('username', $username)
+        ->where_raw('dateAdded >= ?', [$lastPlanStart])
+        ->select_expr('SUM(acctinputoctets + acctoutputoctets)', 'total_usage')
+        ->find_one();
+
+    $totalUsage = $usage->total_usage ?? 0;
+
+    // Calculate remaining data based on the total data limit
+    $remainingData = $dataLimit - $totalUsage;
+
+    // Ensure that remaining data cannot go below zero
+    if ($remainingData <= 0) {
+        $remainingData = 0;
+    }
+
+    return (object)[
+        'total_usage' => $totalUsage,
+        'remaining_data' => $remainingData,
+        'recharged_on' => $lastRecharge->recharged_on,
+        'recharged_time' => $lastRecharge->recharged_time
+    ];
 }
