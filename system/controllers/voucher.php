@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -11,19 +12,17 @@ $action = $routes['1'];
 $user = User::_info();
 $ui->assign('_user', $user);
 
-require_once 'system/autoload/PEAR2/Autoload.php';
-
 switch ($action) {
 
     case 'activation':
         run_hook('view_activate_voucher'); #HOOK
-        $ui->assign('code', alphanumeric(_get('code'),"-"));
+        $ui->assign('code', alphanumeric(_get('code'), "-_.,"));
         $ui->display('user-activation.tpl');
         break;
 
     case 'activation-post':
-        $code = _post('code');
-        $v1 = ORM::for_table('tbl_voucher')->where('code', $code)->where('status', 0)->find_one();
+        $code = alphanumeric(_post('code'), "-_.,");
+        $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$code'")->where('status', 0)->find_one();
         run_hook('customer_activate_voucher'); #HOOK
         if ($v1) {
             if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $code)) {
@@ -52,15 +51,15 @@ switch ($action) {
         break;
     case 'invoice':
         $id = $routes[2];
-        if(empty($id)){
+        if (empty($id)) {
             $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id')->find_one();
-        }else{
+        } else {
             $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->where('id', $id)->find_one();
         }
-        if($in){
+        if ($in) {
             Package::createInvoice($in);
             $ui->display('invoice-customer.tpl');
-        }else{
+        } else {
             r2(U . 'voucher/list-activated', 'e', Lang::T('Not Found'));
         }
         break;

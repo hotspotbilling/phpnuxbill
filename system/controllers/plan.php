@@ -482,8 +482,8 @@ switch ($action) {
         }
         $time3months = strtotime('-3 months');
         $d = ORM::for_table('tbl_voucher')->where_equal('status', '1')
-        ->where_raw("UNIX_TIMESTAMP(used_date) < $time3months")
-        ->findMany();
+            ->where_raw("UNIX_TIMESTAMP(used_date) < $time3months")
+            ->findMany();
         if ($d) {
             $jml = 0;
             foreach ($d as $v) {
@@ -756,9 +756,9 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $code = _post('code');
+        $code = Text::alphanumeric(_post('code'), "-_.,");
         $user = ORM::for_table('tbl_customers')->where('id', _post('id_customer'))->find_one();
-        $v1 = ORM::for_table('tbl_voucher')->where('code', $code)->where('status', 0)->find_one();
+        $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '?'", [$code])->where('status', 0)->find_one();
 
         run_hook('refill_customer'); #HOOK
         if ($v1) {

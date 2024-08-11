@@ -57,7 +57,7 @@ switch ($do) {
 
     case 'activation':
         if (!empty(_post('voucher_only'))) {
-            $voucher = _post('voucher_only');
+            $voucher = Text::alphanumeric(_post('voucher_only'), "-_.,");
             $tur = ORM::for_table('tbl_user_recharges')
                 ->where('username', $voucher)
                 ->where('customer_id', '0') // Voucher Only will make customer ID as 0
@@ -101,7 +101,7 @@ switch ($do) {
                     _alert(Lang::T('Internet Plan Expired'), 'danger', "login");
                 }
             } else {
-                $v = ORM::for_table('tbl_voucher')->where('code', $voucher)->find_one();
+                $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$voucher'")->find_one();
                 if (!$v) {
                     _alert(Lang::T('Voucher invalid'), 'danger', "login");
                 }
@@ -156,9 +156,9 @@ switch ($do) {
                 }
             }
         } else {
-            $voucher = _post('voucher');
+            $voucher = Text::alphanumeric(_post('voucher'), "-_.,");
             $username = _post('username');
-            $v1 = ORM::for_table('tbl_voucher')->where('code', $voucher)->find_one();
+            $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$voucher'")->find_one();
             if ($v1) {
                 // voucher exists, check customer exists or not
                 $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();

@@ -64,7 +64,8 @@ try {
                 }
             }
             if ($username == $password) {
-                $d = ORM::for_table('tbl_voucher')->where('code', $username)->find_one();
+                $username = Text::alphanumeric($username, "-_.,");
+                $d = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$username'")->find_one();
             } else {
                 $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
                 if ($d['password'] != $password) {
@@ -127,7 +128,8 @@ try {
                 process_radiust_rest($tur, $code);
             } else {
                 if ($isVoucher) {
-                    $v = ORM::for_table('tbl_voucher')->where('code', $username)->where('routers', 'radius')->find_one();
+                    $username = Text::alphanumeric($username, "-_.,");
+                    $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$username'")->where('routers', 'radius')->find_one();
                     if ($v) {
                         if ($v['status'] == 0) {
                             if (Package::rechargeUser(0, $v['routers'], $v['id_plan'], "Voucher", $username)) {
