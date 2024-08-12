@@ -41,7 +41,7 @@ try {
             $CHAPassword = _req('CHAPassword');
             $CHAPchallenge = _req('CHAPchallenge');
             if (!empty($CHAPassword)) {
-                $c = ORM::for_table('tbl_customers')->select('password')->where('username', $username)->find_one();
+                $c = ORM::for_table('tbl_customers')->select('password')->whereRaw("BINARY `username` = '$username'")->find_one();
                 //if verified
                 if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                     $password = $c['password'];
@@ -67,7 +67,7 @@ try {
                 $username = Text::alphanumeric($username, "-_.,");
                 $d = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$username'")->find_one();
             } else {
-                $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+                $d = ORM::for_table('tbl_customers')->whereRaw("BINARY `username` = '$username'")->find_one();
                 if ($d['password'] != $password) {
                     if ($d['pppoe_password'] != $password) {
                         unset($d);
@@ -91,7 +91,7 @@ try {
             $CHAPassword = _req('CHAPassword');
             $CHAPchallenge = _req('CHAPchallenge');
             if (!empty($CHAPassword)) {
-                $c = ORM::for_table('tbl_customers')->select('password')->where('username', $username)->find_one();
+                $c = ORM::for_table('tbl_customers')->select('password')->whereRaw("BINARY `username` = '$username'")->find_one();
                 //if verified
                 if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                     $password = $c['password'];
@@ -115,10 +115,10 @@ try {
                     ], 401);
                 }
             }
-            $tur = ORM::for_table('tbl_user_recharges')->where('username', $username)->find_one();
+            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `username` = '$username'")->find_one();
             if ($tur) {
-                if (!$isVoucher) {
-                    $d = ORM::for_table('tbl_customers')->select('password')->where('username', $username)->find_one();
+                if (!$isVoucher && empty($CHAPassword)) {
+                    $d = ORM::for_table('tbl_customers')->select('password')->whereRaw("BINARY `username` = '$username'")->find_one();
                     if ($d['password'] != $password) {
                         if ($d['pppoe_password'] != $password) {
                             show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
