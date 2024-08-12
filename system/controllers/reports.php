@@ -21,6 +21,137 @@ $before_30_days = date('Y-m-d', strtotime('today - 30 days'));
 $month_n = date('n');
 
 switch ($action) {
+    case 'ajax':
+        $data = $routes['2'];
+        $reset_day = $config['reset_day'];
+        if (empty($reset_day)) {
+            $reset_day = 1;
+        }
+        //first day of month
+        if (date("d") >= $reset_day) {
+            $start_date = date('Y-m-' . $reset_day);
+        } else {
+            $start_date = date('Y-m-' . $reset_day, strtotime("-1 MONTH"));
+        }
+        $sd = _req('sd', $start_date);
+        $ed = _req('ed', $mdate);
+        $ts = _req('ts', '00:00:00');
+        $te = _req('te', '23:59:59');
+        $types = ORM::for_table('tbl_transactions')->getEnum('type');
+        $tps = ($_GET['tps']) ? $_GET['tps'] : $types;
+        $plans = array_column(ORM::for_table('tbl_transactions')->select('plan_name')->distinct('plan_name')->find_array(), 'plan_name');
+        $plns = ($_GET['plns']) ? $_GET['plns'] : $plans;
+        $methods = array_column(ORM::for_table('tbl_transactions')->rawQuery("SELECT DISTINCT SUBSTRING_INDEX(`method`, ' - ', 1) as method FROM tbl_transactions;")->findArray(), 'method');
+        $mts = ($_GET['mts']) ? $_GET['mts'] : $methods;
+        $routers = array_column(ORM::for_table('tbl_transactions')->select('routers')->distinct('routers')->find_array(), 'routers');
+        $rts = ($_GET['rts']) ? $_GET['rts'] : $routers;
+        $result = [];
+        switch ($data) {
+            case 'type':
+                foreach ($tps as $tp) {
+                    $query = ORM::for_table('tbl_transactions')
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
+                        ->where('type', $tp);
+                    if (count($mts) > 0) {
+                        if (count($mts) != count($methods)) {
+                            foreach ($mts as $mt) {
+                                $query->where_like('method', "$mt - %");
+                            }
+                        }
+                    }
+                    if (count($rts) > 0) {
+                        $query->where_in('routers', $rts);
+                    }
+                    if (count($plns) > 0) {
+                        $query->where_in('plan_name', $plns);
+                    }
+                    $count = $query->count();
+                    if ($count > 0) {
+                        $result['datas'][] = $count;
+                        $result['labels'][] = "$tp ($count)";
+                    }
+                }
+                break;
+            case 'plan':
+                foreach ($plns as $pln) {
+                    $query = ORM::for_table('tbl_transactions')
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
+                        ->where('plan_name', $pln);
+                    if (count($tps) > 0) {
+                        $query->where_in('type', $tps);
+                    }
+                    if (count($mts) > 0) {
+                        if (count($mts) != count($methods)) {
+                            foreach ($mts as $mt) {
+                                $query->where_like('method', "$mt - %");
+                            }
+                        }
+                    }
+                    if (count($rts) > 0) {
+                        $query->where_in('routers', $rts);
+                    }
+                    $count = $query->count();
+                    if ($count > 0) {
+                        $result['datas'][] = $count;
+                        $result['labels'][] = "$pln ($count)";
+                    }
+                }
+                break;
+            case 'method':
+                foreach ($mts as $mt) {
+                    $query = ORM::for_table('tbl_transactions')
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
+                        ->where_like('method', "$mt - %");
+                    if (count($tps) > 0) {
+                        $query->where_in('type', $tps);
+                    }
+                    if (count($rts) > 0) {
+                        $query->where_in('routers', $rts);
+                    }
+                    if (count($plns) > 0) {
+                        $query->where_in('plan_name', $plns);
+                    }
+                    if (count($mts) > 0) {
+                        if (count($mts) != count($methods)) {
+                            foreach ($mts as $mt) {
+                                $query->where_like('method', "$mt - %");
+                            }
+                        }
+                    }
+                    $count = $query->count();
+                    if ($count > 0) {
+                        $result['datas'][] = $count;
+                        $result['labels'][] = "$mt ($count)";
+                    }
+                }
+                break;
+            case 'router':
+                foreach ($rts as $rt) {
+                    $query = ORM::for_table('tbl_transactions')
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
+                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
+                        ->where('routers', $rt);
+                    if (count($tps) > 0) {
+                        $query->where_in('type', $tps);
+                    }
+                    if (count($plns) > 0) {
+                        $query->where_in('plan_name', $plns);
+                    }
+                    $count = $query->count();
+                    if ($count > 0) {
+                        $result['datas'][] = $count;
+                        $result['labels'][] = "$rt ($count)";
+                    }
+                }
+                break;
+            default:
+                $result = ['labels' => [], 'datas' => []];
+        }
+        echo json_encode($result);
+        die();
     case 'by-date':
     case 'activation':
         $q = (_post('q') ? _post('q') : _get('q'));

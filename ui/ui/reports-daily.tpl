@@ -48,13 +48,29 @@
     </div>
     <div class="col-lg-9">
         <div class="box box-primary box-solid">
+            <div class="box-body row">
+                <div class="col-md-3 col-xs-6">
+                    <canvas id="cart_type"></canvas>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <canvas id="cart_plan"></canvas>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <canvas id="cart_method"></canvas>
+                </div>
+                <div class="col-md-3 col-xs-6">
+                    <canvas id="cart_router"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="box box-primary box-solid">
             <div class="table-responsive">
                 <table class="table table-bordered table-condensed">
                     <thead>
                         <tr>
                             <th>
-                                <a href="{$_url}export/print-by-date&{$filter}" class="btn btn-default" target="_blank"><i
-                                        class="ion ion-printer"></i></a>
+                                <a href="{$_url}export/print-by-date&{$filter}" class="btn btn-default"
+                                    target="_blank"><i class="ion ion-printer"></i></a>
                                 <a href="{$_url}export/pdf-by-date&{$filter}" class="btn btn-default"><i
                                         class="fa fa-file-pdf-o"></i></a>
                             </th>
@@ -95,7 +111,7 @@
             </div>
             <div class="box-footer">
                 <p class="text-center small text-info">{Lang::T('All Transactions at Date')}:
-                {Lang::dateAndTimeFormat($sd, $ts)} - {Lang::dateAndTimeFormat($ed, $te)}</p>
+                    {Lang::dateAndTimeFormat($sd, $ts)} - {Lang::dateAndTimeFormat($ed, $te)}</p>
             </div>
         </div>
     </div>
@@ -107,6 +123,9 @@
     <h4>Information</h4>
     <p>Export and Print will show all data without pagination.</p>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
 
 <script>
     var isShow = false;
@@ -125,6 +144,54 @@
             isShow = true;
         }
     }
+    document.addEventListener("DOMContentLoaded", function() {
+    const autocolors = window['chartjs-plugin-autocolors'];
+    Chart.register(autocolors);
+    var options = {
+    responsive: true,
+    aspectRatio: 1,
+    plugins: {
+    autocolors: {
+    mode: 'data'
+    },
+    legend: {
+    position: 'bottom',
+    labels: {
+        boxWidth: 15
+    }
+    }
+    }
+    };
+
+    function create_cart(field, labels, datas, options) {
+    new Chart(document.getElementById(field), {
+    type: 'pie',
+    data: {
+    labels: labels,
+    datasets: [{
+        data: datas,
+        borderWidth: 1
+    }]
+    },
+    options: options
+    });
+    }
+
+    // get cart one by one
+    $.getJSON("{$_url}reports/ajax/type&{$filter}", function( data ) {
+    create_cart('cart_type', data.labels, data.datas, options);
+    $.getJSON("{$_url}reports/ajax/plan&{$filter}", function( data ) {
+    create_cart('cart_plan', data.labels, data.datas, options);
+    $.getJSON("{$_url}reports/ajax/method&{$filter}", function( data ) {
+    create_cart('cart_method', data.labels, data.datas, options);
+    $.getJSON("{$_url}reports/ajax/router&{$filter}", function( data ) {
+    create_cart('cart_router', data.labels, data.datas, options);
+    });
+    });
+    });
+    });
+
+    });
 </script>
 
 {include file="sections/footer.tpl"}
