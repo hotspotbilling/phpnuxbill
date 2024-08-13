@@ -147,6 +147,105 @@ switch ($action) {
                     }
                 }
                 break;
+            case 'line':
+                $query = ORM::for_table('tbl_transactions')
+                    ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
+                    ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
+                    ->order_by_desc('id');
+                if (count($tps) > 0) {
+                    $query->where_in('type', $tps);
+                }
+                if (count($mts) > 0) {
+                    if (count($mts) != count($methods)) {
+                        foreach ($mts as $mt) {
+                            $query->where_like('method', "$mt - %");
+                        }
+                    }
+                }
+                if (count($rts) > 0) {
+                    $query->where_in('routers', $rts);
+                }
+                if (count($plns) > 0) {
+                    $query->where_in('plan_name', $plns);
+                }
+                $datas = $query->find_array();
+                $period = new DatePeriod(
+                    new DateTime($sd),
+                    new DateInterval('P1D'),
+                    new DateTime($ed)
+                );
+                $pos = 0;
+                $dates = [];
+                foreach ($period as $key => $value) {
+                    $dates[] = $value->format('Y-m-d');
+                }
+                $dates = array_reverse($dates);
+                $result = [];
+                $temp;
+                foreach ($dates as $date) {
+                    $result['labels'][] = $date;
+                    // type
+                    foreach ($tps as $key) {
+                        if (!isset($temp[$key][$date])) {
+                            $temp[$key][$date] = 0;
+                        }
+                        foreach ($datas as $data) {
+                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && $data['type'] == $key) {
+                                $temp[$key][$date] += 1;
+                            }
+                        }
+                    }
+                    //plan
+                    foreach ($plns as $key) {
+                        if (!isset($temp[$key][$date])) {
+                            $temp[$key][$date] = 0;
+                        }
+                        foreach ($datas as $data) {
+                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && $data['plan_name'] == $key) {
+                                $temp[$key][$date] += 1;
+                            }
+                        }
+                    }
+                    //method
+                    foreach ($mts as $key) {
+                        if (!isset($temp[$key][$date])) {
+                            $temp[$key][$date] = 0;
+                        }
+                        foreach ($datas as $data) {
+                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && strpos($data['method'], $key) !== false) {
+                                $temp[$key][$date] += 1;
+                            }
+                        }
+                    }
+
+                    foreach ($rts as $key) {
+                        if (!isset($temp[$key][$date])) {
+                            $temp[$key][$date] = 0;
+                        }
+                        foreach ($datas as $data) {
+                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && $data['routers'] == $key) {
+                                $temp[$key][$date] += 1;
+                            }
+                        }
+                    }
+                    $pos++;
+                    if ($pos > 29) {
+                        // only 30days
+                        break;
+                    }
+                }
+                foreach ($temp as $key => $value) {
+                    $array = ['label' => $key];
+                    $total = 0;
+                    foreach ($value as $k => $v) {
+                        $total += $v;
+                        $array['data'][] = $v;
+                    }
+                    if($total>0){
+                        $result['datas'][] = $array;
+                    }
+                }
+                break;
             default:
                 $result = ['labels' => [], 'datas' => []];
         }
@@ -285,6 +384,6 @@ switch ($action) {
         $ui->assign('dr', $dr);
         $ui->assign('mdate', $mdate);
         run_hook('view_daily_reports'); #HOOK
-        $ui->display('reports-daily.tpl');
+        $ui->display('reports.tpl');
         break;
 }

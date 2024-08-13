@@ -8,6 +8,13 @@
                     <h3 class="box-title">{Lang::T('Filter')}</h3>
                 </div>
                 <div id="filter_box" class="box-body hidden-xs hidden-sm hidden-md">
+                    <center>
+                        <label>
+                            <input type="checkbox" id="show_chart" onclick="return setShowChart()">
+                            Show chart
+                        </label>
+                    </center>
+                    <hr style="margin: 1px;">
                     <input type="hidden" name="_route" value="reports">
                     <label>{Lang::T('Start Date')}</label>
                     <input type="date" class="form-control" name="sd" value="{$sd}">
@@ -47,22 +54,32 @@
         </form>
     </div>
     <div class="col-lg-9">
-        <div class="box box-primary box-solid">
-            <div class="box-body row">
-                <div class="col-md-3 col-xs-6">
-                    <canvas id="cart_type"></canvas>
-                </div>
-                <div class="col-md-3 col-xs-6">
-                    <canvas id="cart_plan"></canvas>
-                </div>
-                <div class="col-md-3 col-xs-6">
-                    <canvas id="cart_method"></canvas>
-                </div>
-                <div class="col-md-3 col-xs-6">
-                    <canvas id="cart_router"></canvas>
+        <span id="chart_area" class="hidden">
+            <div class="box box-primary box-solid">
+                <div class="box-body row">
+                    <div class="col-md-3 col-xs-6">
+                        <canvas id="cart_type"></canvas>
+                    </div>
+                    <div class="col-md-3 col-xs-6">
+                        <canvas id="cart_plan"></canvas>
+                    </div>
+                    <div class="col-md-3 col-xs-6">
+                        <canvas id="cart_method"></canvas>
+                    </div>
+                    <div class="col-md-3 col-xs-6">
+                        <canvas id="cart_router"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
+            <div class="box box-primary box-solid">
+                <div class="box-header">
+                    <h3 class="box-title">{Lang::dateFormat($sd)} - {Lang::dateFormat($ed)} <sup>Max 30 days</sup></h3>
+                </div>
+                <div class="box-body row" style="height: 300px;">
+                    <canvas id="line_cart"></canvas>
+                </div>
+            </div>
+        </span>
         <div class="box box-primary box-solid">
             <div class="table-responsive">
                 <table class="table table-bordered table-condensed">
@@ -127,71 +144,125 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
 
-<script>
-    var isShow = false;
+{literal}
+    <script>
+        var isShow = false;
 
-    function showFilter() {
-        if (isShow) {
-            $("#filter_box").addClass("hidden-xs");
-            $("#filter_box").addClass("hidden-sm");
-            $("#filter_box").addClass("hidden-md");
-            isShow = false;
-        } else {
-            // remove class
-            $("#filter_box").removeClass("hidden-xs");
-            $("#filter_box").removeClass("hidden-sm");
-            $("#filter_box").removeClass("hidden-md");
-            isShow = true;
+        function showFilter() {
+            if (isShow) {
+                $("#filter_box").addClass("hidden-xs");
+                $("#filter_box").addClass("hidden-sm");
+                $("#filter_box").addClass("hidden-md");
+                isShow = false;
+            } else {
+                // remove class
+                $("#filter_box").removeClass("hidden-xs");
+                $("#filter_box").removeClass("hidden-sm");
+                $("#filter_box").removeClass("hidden-md");
+                isShow = true;
+            }
         }
-    }
-    document.addEventListener("DOMContentLoaded", function() {
-    const autocolors = window['chartjs-plugin-autocolors'];
-    Chart.register(autocolors);
-    var options = {
-    responsive: true,
-    aspectRatio: 1,
-    plugins: {
-    autocolors: {
-    mode: 'data'
-    },
-    legend: {
-    position: 'bottom',
-    labels: {
-        boxWidth: 15
-    }
-    }
-    }
-    };
+        document.addEventListener("DOMContentLoaded", function() {
+        const autocolors = window['chartjs-plugin-autocolors'];
+        Chart.register(autocolors);
+        var options = {
+        responsive: true,
+        aspectRatio: 1,
+        plugins: {
+            autocolors: {
+                mode: 'data'
+            },
+            legend: {
+                position: 'bottom',
+                labels: {
+                    boxWidth: 15
+                }
+            }
+        }
+        };
 
-    function create_cart(field, labels, datas, options) {
-    new Chart(document.getElementById(field), {
-    type: 'pie',
-    data: {
-    labels: labels,
-    datasets: [{
-        data: datas,
-        borderWidth: 1
-    }]
-    },
-    options: options
-    });
-    }
+        function create_cart(field, labels, datas, options) {
+        new Chart(document.getElementById(field), {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: datas,
+                    borderWidth: 1
+                }]
+            },
+            options: options
+        });
+        }
 
-    // get cart one by one
-    $.getJSON("{$_url}reports/ajax/type&{$filter}", function( data ) {
-    create_cart('cart_type', data.labels, data.datas, options);
-    $.getJSON("{$_url}reports/ajax/plan&{$filter}", function( data ) {
-    create_cart('cart_plan', data.labels, data.datas, options);
-    $.getJSON("{$_url}reports/ajax/method&{$filter}", function( data ) {
-    create_cart('cart_method', data.labels, data.datas, options);
-    $.getJSON("{$_url}reports/ajax/router&{$filter}", function( data ) {
-    create_cart('cart_router', data.labels, data.datas, options);
-    });
-    });
-    });
-    });
+        function showChart() {
+        // get cart one by one
+        $.getJSON("{/literal}{$_url}{literal}reports/ajax/type&{/literal}{$filter}{literal}", function( data ) {
+        create_cart('cart_type', data.labels, data.datas, options);
+        $.getJSON("{/literal}{$_url}{literal}reports/ajax/plan&{/literal}{$filter}{literal}", function( data ) {
+        create_cart('cart_plan', data.labels, data.datas, options);
+        $.getJSON("{/literal}{$_url}{literal}reports/ajax/method&{/literal}{$filter}{literal}", function( data ) {
+        create_cart('cart_method', data.labels, data.datas, options);
+        $.getJSON("{/literal}{$_url}{literal}reports/ajax/router&{/literal}{$filter}{literal}", function( data ) {
+        create_cart('cart_router', data.labels, data.datas, options);
+        getLineChartData();
+        });
+        });
+        });
+        });
+        }
 
-    });
-</script>
+        if (getCookie('show_report_graph') != 'hide') {
+            $("#chart_area").removeClass("hidden");
+            document.getElementById('show_chart').checked = true;
+            showChart();
+        }
+
+        });
+
+        function setShowChart() {
+            if (document.getElementById('show_chart').checked) {
+                setCookie('show_report_graph', 'show', 30);
+            } else {
+                setCookie('show_report_graph', 'hide', 30);
+            }
+            location.reload();
+        }
+
+        function getLineChartData() {
+            $.getJSON("{/literal}{$_url}{literal}reports/ajax/line&{/literal}{$filter}{literal}", function( data ) {
+            var linechart = new Chart(document.getElementById('line_cart'), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: data.datas,
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    aspectRatio: 1,
+                    plugins: {
+                        autocolors: {
+                            mode: 'data'
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+        }
+        // [{
+        //     label: 'a',
+        //     data: [8, 3, 9, 2, 7, 4, 2]
+        // }, {
+        //     label: 'b',
+        //     data: [6, 4, 5, 5, 9, 6, 3]
+        // }, {
+        //     label: 'c',
+        //     data: [5, 2, 3, 6, 4, 8, 6]
+        // }]
+    </script>
+{/literal}
 
 {include file="sections/footer.tpl"}
