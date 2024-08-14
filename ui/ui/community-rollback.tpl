@@ -15,14 +15,14 @@
                     <tbody>
                         {foreach $masters as $data}
                             <tr>
-                                <td>{nl2br($data['commit']['message'])}</td>
-                                <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
+                            <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
                                 <td>
                                     <a href="/update.php?update_url=https://github.com/hotspotbilling/phpnuxbill/archive/{$data['sha']}.zip"
                                         class="btn btn-sm btn-primary">
-                                        update
+                                        install
                                     </a>
                                 </td>
+                                <td>{nl2br($data['commit']['message'])}</td>
                             </tr>
                         {/foreach}
                     </tbody>
@@ -40,14 +40,14 @@
                     <tbody>
                         {foreach $devs as $data}
                             <tr>
-                                <td>{nl2br($data['commit']['message'])}</td>
-                                <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
+                            <td>{Lang::dateTimeFormat(str_replace(['Z','T'],'',$data['commit']['author']['date']))}</td>
                                 <td>
                                     <a href="/update.php?update_url=https://github.com/hotspotbilling/phpnuxbill/archive/{$data['sha']}.zip"
                                         class="btn btn-sm btn-primary">
-                                        update
+                                        install
                                     </a>
                                 </td>
+                                <td>{nl2br($data['commit']['message'])}</td>
                             </tr>
                         {/foreach}
                     </tbody>

@@ -233,7 +233,7 @@ try {
                                 $v->status = "1";
                                 $v->used_date = date('Y-m-d H:i:s');
                                 $v->save();
-                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `code` = '$username'")->find_one();
+                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `username` = '$username'")->find_one();
                                 if ($tur) {
                                     process_radiust_rest($tur, $code);
                                 } else {
@@ -264,7 +264,7 @@ try {
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY `code` = '$username'")
+                ->whereRaw("BINARY `username` = '$username'")
                 ->where('acctstatustype', _post('acctStatusType'))
                 ->findOne();
             if (!$d) {
@@ -275,7 +275,7 @@ try {
             if (_post('acctStatusType') == 'Stop') {
                 // log in the Start only
                 $start = ORM::for_table('rad_acct')
-                    ->whereRaw("BINARY `code` = '$username'")
+                    ->whereRaw("BINARY `username` = '$username'")
                     ->where('acctstatustype', 'Start')
                     ->findOne();
                 if (!$start) {
@@ -288,6 +288,17 @@ try {
                     $start->acctOutputOctets = 0;
                     $start->acctInputOctets = 0;
                 }
+                $start->acctsessionid = _post('acctSessionId');
+                $start->username = $username;
+                $start->realm = _post('realm');
+                $start->nasipaddress = _post('nasip');
+                $start->nasid = _post('nasid');
+                $start->nasportid = _post('nasPortId');
+                $start->nasporttype = _post('nasPortType');
+                $start->framedipaddress = _post('framedIPAddress');
+                $start->acctstatustype = _post('acctStatusType');
+                $start->macaddr = _post('macAddr');
+                $start->dateAdded = date('Y-m-d H:i:s');
                 $start->save();
                 $d->acctOutputOctets = 0;
                 $d->acctInputOctets = 0;
@@ -313,7 +324,7 @@ try {
             $d->dateAdded = date('Y-m-d H:i:s');
             $d->save();
             if ($d->acctstatustype == 'Start') {
-                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `code` = '$username'")->where('status', 'on')->where('routers', 'radius')->find_one();
+                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `username` = '$username'")->where('status', 'on')->where('routers', 'radius')->find_one();
                 $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
                 if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
                     $totalUsage = $d['acctOutputOctets'] + $d['acctInputOctets'];
@@ -392,7 +403,7 @@ function process_radiust_rest($tur, $code)
 
     if ($plan['typebp'] == "Limited") {
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
-            $raddact = ORM::for_table('rad_acct')->whereRaw("BINARY `code` = '$tur[username]'")->where('acctstatustype', 'Start')->find_one();
+            $raddact = ORM::for_table('rad_acct')->whereRaw("BINARY `username` = '$tur[username]'")->where('acctstatustype', 'Start')->find_one();
             $totalUsage = intval($raddact['acctOutputOctets']) + intval($raddact['acctInputOctets']);
             $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
             if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {

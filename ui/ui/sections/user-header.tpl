@@ -5,15 +5,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{$_title} - {$_c['CompanyName']}</title>
-    <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
+    <link rel="shortcut icon" href="{$app_url}ui/ui/images/logo.png" type="image/x-icon" />
 
-    <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="{$app_url}ui/ui/styles/bootstrap.min.css">
 
-    <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/sweetalert2.min.css" />
-    <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="{$app_url}ui/ui/fonts/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="{$app_url}ui/ui/fonts/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{$app_url}ui/ui/styles/modern-AdminLTE.min.css">
+    <link rel="stylesheet" href="{$app_url}ui/ui/styles/sweetalert2.min.css" />
+    <script src="{$app_url}ui/ui/scripts/sweetalert2.all.min.js"></script>
 
 
     <style>
@@ -77,7 +77,7 @@
 <body class="hold-transition modern-skin-dark sidebar-mini">
     <div class="wrapper">
         <header class="main-header" style="position:fixed; width: 100%">
-            <a href="{$_url}home" class="logo">
+            <a href="{$app_url}home" class="logo">
                 <span class="logo-mini"><b>N</b>uX</span>
                 <span class="logo-lg">{$_c['CompanyName']}</span>
             </a>
@@ -90,14 +90,14 @@
                         <li class="dropdown notifications-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fa fa-envelope-o"></i>
-                                <span class="label label-warning" api-get-text="{$_url}autoload_user/inbox_unread"></span>
+                                <span class="label label-warning" api-get-text="{$app_url}autoload_user/inbox_unread"></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
                                     <!-- inner menu: contains the actual data -->
-                                    <ul class="menu" api-get-text="{$_url}autoload_user/inbox"></ul>
+                                    <ul class="menu" api-get-text="{$app_url}autoload_user/inbox"></ul>
                                 </li>
-                                <li class="footer"><a href="{$_url}mail">{Lang::T('Inbox')}</a></li>
+                                <li class="footer"><a href="{$app_url}mail">{Lang::T('Inbox')}</a></li>
                             </ul>
                         </li>
                         <li class="dropdown user user-menu">
@@ -127,18 +127,18 @@
                                 <li class="user-body">
                                     <div class="row">
                                         <div class="col-xs-7 text-center text-sm">
-                                            <a href="{$_url}accounts/change-password"><i class="ion ion-settings"></i>
+                                            <a href="{$app_url}accounts/change-password"><i class="ion ion-settings"></i>
                                                 {Lang::T('Change Password')}</a>
                                         </div>
                                         <div class="col-xs-5 text-center text-sm">
-                                            <a href="{$_url}accounts/profile"><i class="ion ion-person"></i>
+                                            <a href="{$app_url}accounts/profile"><i class="ion ion-person"></i>
                                                 {Lang::T('My Account')}</a>
                                         </div>
                                     </div>
                                 </li>
                                 <li class="user-footer">
                                     <div class="pull-right">
-                                        <a href="{$_url}logout" class="btn btn-default btn-flat"><i
+                                        <a href="{$app_url}logout" class="btn btn-default btn-flat"><i
                                                 class="ion ion-power"></i> {Lang::T('Logout')}</a>
                                     </div>
                                 </li>
@@ -153,14 +153,14 @@
             <section class="sidebar">
                 <ul class="sidebar-menu" data-widget="tree">
                     <li {if $_system_menu eq 'home'}class="active" {/if}>
-                        <a href="{$_url}home">
+                        <a href="{$app_url}home">
                             <i class="ion ion-monitor"></i>
                             <span>{Lang::T('Dashboard')}</span>
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
                     <li {if $_system_menu eq 'inbox'}class="active" {/if}>
-                        <a href="{$_url}mail">
+                        <a href="{$app_url}mail">
                             <i class="fa fa-envelope"></i>
                             <span>{Lang::T('Inbox')}</span>
                         </a>
@@ -168,7 +168,7 @@
                     {$_MENU_AFTER_INBOX}
                     {if $_c['disable_voucher'] != 'yes'}
                         <li {if $_system_menu eq 'voucher'}class="active" {/if}>
-                            <a href="{$_url}voucher/activation">
+                            <a href="{$app_url}voucher/activation">
                                 <i class="fa fa-ticket"></i>
                                 <span>{Lang::T('Voucher')}</span>
                             </a>
@@ -177,20 +177,20 @@
                     {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
                         {if $_c['enable_balance'] == 'yes'}
                             <li {if $_system_menu eq 'balance'}class="active" {/if}>
-                                <a href="{$_url}order/balance">
+                                <a href="{$app_url}order/balance">
                                     <i class="ion ion-ios-cart"></i>
                                     <span>{Lang::T('Buy Balance')}</span>
                                 </a>
                             </li>
                         {/if}
                         <li {if $_system_menu eq 'package'}class="active" {/if}>
-                            <a href="{$_url}order/package">
+                            <a href="{$app_url}order/package">
                                 <i class="ion ion-ios-cart"></i>
                                 <span>{Lang::T('Buy Package')}</span>
                             </a>
                         </li>
                         <li {if $_system_menu eq 'history'}class="active" {/if}>
-                            <a href="{$_url}order/history">
+                            <a href="{$app_url}order/history">
                                 <i class="fa fa-file-text"></i>
                                 <span>{Lang::T('Order History')}</span>
                             </a>
@@ -198,7 +198,7 @@
                     {/if}
                     {$_MENU_AFTER_ORDER}
                     <li {if $_system_menu eq 'list-activated'}class="active" {/if}>
-                        <a href="{$_url}voucher/list-activated">
+                        <a href="{$app_url}voucher/list-activated">
                             <i class="fa fa-list-alt"></i>
                             <span>{Lang::T('Activation History')}</span>
                         </a>
