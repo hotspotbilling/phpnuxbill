@@ -5,15 +5,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{$_title} - {$_c['CompanyName']}</title>
-    <link rel="shortcut icon" href="{$app_url}ui/ui/images/logo.png" type="image/x-icon" />
+    <link rel="shortcut icon" href="{$app_url}/ui/ui/images/logo.png" type="image/x-icon" />
 
-    <link rel="stylesheet" href="{$app_url}ui/ui/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/bootstrap.min.css">
 
-    <link rel="stylesheet" href="{$app_url}ui/ui/fonts/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="{$app_url}ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="{$app_url}ui/ui/styles/modern-AdminLTE.min.css">
-    <link rel="stylesheet" href="{$app_url}ui/ui/styles/sweetalert2.min.css" />
-    <script src="{$app_url}ui/ui/scripts/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/modern-AdminLTE.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
+    <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
 
 
     <style>
@@ -127,11 +127,11 @@
                                 <li class="user-body">
                                     <div class="row">
                                         <div class="col-xs-7 text-center text-sm">
-                                            <a href="{$app_url}accounts/change-password"><i class="ion ion-settings"></i>
+                                            <a href="{$app_url}/accounts/change-password"><i class="ion ion-settings"></i>
                                                 {Lang::T('Change Password')}</a>
                                         </div>
                                         <div class="col-xs-5 text-center text-sm">
-                                            <a href="{$app_url}accounts/profile"><i class="ion ion-person"></i>
+                                            <a href="{$app_url}/accounts/profile"><i class="ion ion-person"></i>
                                                 {Lang::T('My Account')}</a>
                                         </div>
                                     </div>
@@ -198,7 +198,7 @@
                     {/if}
                     {$_MENU_AFTER_ORDER}
                     <li {if $_system_menu eq 'list-activated'}class="active" {/if}>
-                        <a href="{$app_url}voucher/list-activated">
+                        <a href="{$app_url}/voucher/list-activated">
                             <i class="fa fa-list-alt"></i>
                             <span>{Lang::T('Activation History')}</span>
                         </a>
