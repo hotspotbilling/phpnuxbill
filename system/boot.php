@@ -43,7 +43,7 @@ $ui->setConfigDir(File::pathFixer($UI_PATH . '/conf/'));
 $ui->setCacheDir(File::pathFixer($UI_PATH . '/cache/'));
 $ui->assign('app_url', APP_URL);
 $ui->assign('_domain', str_replace('www.', '', parse_url(APP_URL, PHP_URL_HOST)));
-$ui->assign('_url', APP_URL . '/index.php?_route=');
+$ui->assign('_url', APP_URL . '/?_route=');
 $ui->assign('_path', __DIR__);
 $ui->assign('_c', $config);
 $ui->assign('UPLOAD_PATH', str_replace($root_path, '',  $UPLOAD_PATH));
@@ -66,8 +66,12 @@ if (isset($_SESSION['notify'])) {
     unset($_SESSION['ntype']);
 }
 
-// Routing Engine
-$req = _get('_route');
+if(!isset($_GET['_route'])) {
+    $req = ltrim(parse_url($_SERVER['REQUEST_URI'])['path'], '/');
+}else{
+    // Routing Engine
+    $req = _get('_route');
+}
 $routes = explode('/', $req);
 $ui->assign('_routes', $routes);
 $handler = $routes[0];
