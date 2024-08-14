@@ -1,9 +1,24 @@
 {include file="sections/header.tpl"}
 
-<center><a href="https://s.id/standwithpalestine" target="_blank"><img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/banner-support.svg" class="img-responsive"></a></center>
+<center><a href="https://s.id/standwithpalestine" target="_blank"><img
+            src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/banner-support.svg"
+            class="img-responsive"></a></center>
 <br><br>
 
 <div class="row">
+    <div class="col-sm-6">
+
+        <div class="box box-hovered mb20 box-primary">
+            <div class="box-header">
+                <h3 class="box-title">Contributors</h3>
+            </div>
+            <div class="box-body">
+                <a href="https://github.com/hotspotbilling/phpnuxbill/graphs/contributors" target="_blank">
+                    <img src="https://contrib.rocks/image?repo=hotspotbilling/phpnuxbill&columns=10" width="100%" />
+                </a>
+            </div>
+        </div>
+    </div>
     <div class="col-sm-6">
         <div class="box box-hovered mb20 box-primary">
             <div class="box-header">
@@ -20,8 +35,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-sm-6">
         <div class="box box-hovered mb20 box-primary">
             <div class="box-header">
                 <h3 class="box-title">Feedback</h3>
@@ -144,7 +157,9 @@
                 <h3 class="box-title">PHPNUXBILL</h3>
             </div>
             <div class="box-body">
-                <b>PHPNuxBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate with router. If you get more profit with this application, please donate us.<br>Watch project <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">in here</a>
+                <b>PHPNuxBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate
+                with router. If you get more profit with this application, please donate us.<br>Watch project <a
+                    href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">in here</a>
             </div>
             <div class="box-footer" id="currentVersion">ver</div>
             <div class="box-footer" id="latestVersion">ver</div>
@@ -154,7 +169,8 @@
                     <a href="https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip" target="_blank"
                         class="btn btn-warning btn-sm btn-block text-black">Download Latest Version</a>
                 </div>
-                <center><a href="{$_url}community/rollback" class="btn btn-link btn-sm btn-block">Select Old Version</a></center>
+                <center><a href="{$_url}community/rollback" class="btn btn-link btn-sm btn-block">Select Old Version</a>
+                </center>
             </div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
@@ -165,7 +181,8 @@
                 </div>
             </div>
             <div class="box-footer">
-                If you Download manual the update file, sometime update change database, after uploading, click this button to update database structure.
+                If you Download manual the update file, sometime update change database, after uploading, click this
+                button to update database structure.
                 <a href="./update.php?step=4" class="btn btn-default btn-sm btn-block">Update Database</a>
             </div>
         </div>
