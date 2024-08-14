@@ -233,7 +233,7 @@ try {
                                 $v->status = "1";
                                 $v->used_date = date('Y-m-d H:i:s');
                                 $v->save();
-                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `code` = '$username'")->find_one();
+                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `username` = '$username'")->find_one();
                                 if ($tur) {
                                     process_radiust_rest($tur, $code);
                                 } else {
@@ -324,7 +324,7 @@ try {
             $d->dateAdded = date('Y-m-d H:i:s');
             $d->save();
             if ($d->acctstatustype == 'Start') {
-                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `code` = '$username'")->where('status', 'on')->where('routers', 'radius')->find_one();
+                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `username` = '$username'")->where('status', 'on')->where('routers', 'radius')->find_one();
                 $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
                 if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
                     $totalUsage = $d['acctOutputOctets'] + $d['acctInputOctets'];
