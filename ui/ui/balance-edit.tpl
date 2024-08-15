@@ -11,10 +11,10 @@
                                 <label class="col-md-2 control-label">{Lang::T('Status')}</label>
                                 <div class="col-md-10">
                                     <label class="radio-inline warning">
-                                        <input type="radio" checked name="enabled" value="1"> Enable
+                                        <input type="radio" checked name="enabled" value="1"> {Lang::T('Enable')}
                                     </label>
                                     <label class="radio-inline">
-                                        <input type="radio" name="enabled" value="0"> Disable
+                                        <input type="radio" name="enabled" value="0"> {Lang::T('Disable')}
                                     </label>
                                 </div>
                             </div>

@@ -70,7 +70,7 @@
                                 <option value="Hotspot">Hotspot
                                 </option>
                                 <option value="PPPoE">PPPoE</option>
-                                <option value="Others">Others</option>
+                                <option value="Others">{Lang::T('Others')}</option>
                             </select>
                         </div>
                     </div>
@@ -78,9 +78,9 @@
                         <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="account_type" name="account_type">
-                                <option value="Personal">Personal
+                                <option value="Personal">{Lang::T('Personal')}
                                 </option>
-                                <option value="Business">Business</option>
+                                <option value="Business">{Lang::T('Business')}</option>
                             </select>
                         </div>
                     </div>
