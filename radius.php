@@ -323,7 +323,7 @@ try {
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
             $d->save();
-            if ($d->acctstatustype == 'Start') {
+            if (_post('acctStatusType') == 'Start') {
                 $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY `username` = '$username'")->where('status', 'on')->where('routers', 'radius')->find_one();
                 $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
                 if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
