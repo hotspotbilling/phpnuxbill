@@ -101,7 +101,7 @@
                                 <i class="fa fa-flag-o"></i> <span class="d-none d-sm-inline">Language</span>
                             </a>
                             <ul class="dropdown-menu">
-                                <form method="post" action="{$_url}accounts/language-update-post">
+                                <form method="post" action="{$app_url}accounts/language-update-post">
                                     <li
                                         class="dropdown-item">
                                         <button class="btn btn-block btn-{if $user_language == 'english'}success {else}primary{/if} btn-xs" type="submit" name="language"
@@ -180,11 +180,11 @@
                                 <li class="user-body">
                                     <div class="row">
                                         <div class="col-xs-7 text-center text-sm">
-                                            <a href="{$_url}/accounts/change-password"><i class="ion ion-settings"></i>
+                                            <a href="{$app_url}/accounts/change-password"><i class="ion ion-settings"></i>
                                                 {Lang::T('Change Password')}</a>
                                         </div>
                                         <div class="col-xs-5 text-center text-sm">
-                                            <a href="{$_url}/accounts/profile"><i class="ion ion-person"></i>
+                                            <a href="{$app_url}/accounts/profile"><i class="ion ion-person"></i>
                                                 {Lang::T('My Account')}</a>
                                         </div>
                                     </div>
@@ -251,7 +251,7 @@
                     {/if}
                     {$_MENU_AFTER_ORDER}
                     <li {if $_system_menu eq 'list-activated'}class="active" {/if}>
-                        <a href="{$_url}/voucher/list-activated">
+                        <a href="{$app_url}/voucher/list-activated">
                             <i class="fa fa-list-alt"></i>
                             <span>{Lang::T('Activation History')}</span>
                         </a>
