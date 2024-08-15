@@ -327,7 +327,7 @@
                         </div>
                     </div>
                     <small id="emailHelp" class="form-text text-muted">{Lang::T('You will get Payment and Error
-                        notification<')}</small>
+                        notification')}</small>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
