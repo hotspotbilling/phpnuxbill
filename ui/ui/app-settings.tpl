@@ -83,7 +83,8 @@
                             </select>
                         </div>
                         <p class="help-block col-md-4"><a
-                                href="https://github.com/hotspotbilling/phpnuxbill/wiki/Themes" target="_blank">{Lang::T('Theme Info')}</a></p>
+                                href="https://github.com/hotspotbilling/phpnuxbill/wiki/Themes"
+                                target="_blank">{Lang::T('Theme Info')}</a></p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Recharge Using')}</label>
@@ -92,8 +93,9 @@
                                 value="{$_c['payment_usings']}"
                                 placeholder="{Lang::T('Cash')}, {Lang::T('Bank Transfer')}">
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('This used for admin to select payment in recharge, using comma
-                            for every new options')}</p>
+                        <p class="help-block col-md-4">
+                            {Lang::T('This used for admin to select payment in recharge, using comma for every new options')}
+                        </p>
                     </div>
 
                     <div class="form-group">
@@ -191,8 +193,7 @@
                                 </select>
                             </div>
                             <p class="help-block col-md-4">
-                                {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be
-                            password')}
+                                {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be password')}
                             </p>
                         </div>
                         <div class="form-group">
@@ -202,8 +203,7 @@
                                     placeholder="https://192.168.88.1/status" value="{$_c['voucher_redirect']}">
                             </div>
                             <p class="help-block col-md-4">
-                                {Lang::T('After Customer activate voucher or login, customer will be redirected to this
-                            url')}
+                                {Lang::T('After Customer activate voucher or login, customer will be redirected to this url')}
                             </p>
                         </div>
                     {/if}
@@ -326,8 +326,9 @@
                                 value="{$_c['telegram_target_id']}" placeholder="12345678">
                         </div>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You will get Payment and Error
-                        notification<')}/small>
+                    <small id="emailHelp" class="form-text text-muted">
+                        {Lang::T('You will get Payment and Error notification')}
+                    </small>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
@@ -344,7 +345,8 @@
                             <input type="text" class="form-control" id="sms_url" name="sms_url" value="{$_c['sms_url']}"
                                 placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>, {Lang::T('it will be replaced.')}
+                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
+                            {Lang::T('it will be replaced.')}
                         </p>
                     </div>
                     <div class="form-group">
@@ -359,11 +361,13 @@
                                 {/foreach}
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>, {Lang::T('it will be replaced.')}
+                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
+                            {Lang::T('it will be replaced.')}
                         </p>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp {Lang::T('in here too.')} <a
-                            href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
+                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
+                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">Free
+                            Server</a></small>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
@@ -380,10 +384,12 @@
                             <input type="text" class="form-control" id="wa_url" name="wa_url" value="{$_c['wa_url']}"
                                 placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>, {Lang::T('it will be replaced.')}
+                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
+                            {Lang::T('it will be replaced.')}
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp {Lang::T('in here too.')} <a
-                            href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
+                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
+                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">Free
+                            Server</a></small>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
@@ -449,8 +455,9 @@
                             <input type="text" class="form-control" id="mail_reply_to" name="mail_reply_to"
                                 value="{$_c['mail_reply_to']}" placeholder="support@host.tld">
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Customer will reply email to this address, empty if you want to
-                            use From Address')}</p>
+                        <p class="help-block col-md-4">
+                            {Lang::T('Customer will reply email to this address, empty if you want to use From Address')}
+                        </p>
                     </div>
                 </div>
                 <div class="panel-heading">
@@ -585,19 +592,23 @@
                         <label class="col-md-2 control-label">{Lang::T('Enable Session Timeout')}</label>
                         <div class="col-md-6">
                             <label class="switch">
-                                <input type="checkbox" id="enable_session_timeout" value="1" name="enable_session_timeout" {if $_c['enable_session_timeout']==1}checked{/if}>
+                                <input type="checkbox" id="enable_session_timeout" value="1"
+                                    name="enable_session_timeout" {if $_c['enable_session_timeout']==1}checked{/if}>
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                        <p class="help-block col-md-4">
+                            {Lang::T('Logout Admin if not Available/Online a period of time')}</p>
                     </div>
                     <div class="form-group" id="timeout_duration_input" style="display: none;">
                         <label class="col-md-2 control-label">{Lang::T('Timeout Duration')}</label>
                         <div class="col-md-6">
-                            <input type="number" value="{$_c['session_timeout_duration']}" class="form-control" name="session_timeout_duration" id="session_timeout_duration"
-                                   placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
+                            <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
+                                name="session_timeout_duration" id="session_timeout_duration"
+                                placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx minutes')}</p>
+                        <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx minutes')}
+                        </p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('New Version Notification')}</label>
@@ -624,8 +635,9 @@
                                 </option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('OTP is required when user want to change phone
-                            number')}</p>
+                        <p class="help-block col-md-4">
+                            {Lang::T('OTP is required when user want to change phone number')}
+                        </p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('OTP Method')}</label>
@@ -749,11 +761,11 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">Github Username</label>
                         <div class="col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-addon">https://github.com/</span>
-                            <input type="text" class="form-control" id="github_username" name="github_username"
-                                value="{$_c['github_username']}" placeholder="ibnux">
-                        </div>
+                            <div class="input-group">
+                                <span class="input-group-addon">https://github.com/</span>
+                                <input type="text" class="form-control" id="github_username" name="github_username"
+                                    value="{$_c['github_username']}" placeholder="ibnux">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -764,7 +776,8 @@
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                         <span class="help-block col-md-4"><a href="https://github.com/settings/tokens/new"
-                                target="_blank">Create GitHub personal access token (classic)</a>, only need repo scope</span>
+                                target="_blank">Create GitHub personal access token (classic)</a>, only need repo
+                            scope</span>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">This will allow
@@ -776,8 +789,9 @@
 
             <div class="panel-body">
                 <div class="form-group">
-                    <button class="btn btn-success btn-block" type="submit">{Lang::T('Save
-                        Changes')}</button>
+                    <button class="btn btn-success btn-block" type="submit">
+                        {Lang::T('Save Changes')}
+                    </button>
                 </div>
             </div>
 
@@ -823,7 +837,8 @@ add dst-host=*.{$_domain}</pre>
         });
 
         document.querySelector('form').addEventListener('submit', function(event) {
-            if (sectionTimeoutCheckbox.checked && (!timeoutDurationField.value || isNaN(timeoutDurationField.value))) {
+            if (sectionTimeoutCheckbox.checked && (!timeoutDurationField.value || isNaN(
+                    timeoutDurationField.value))) {
                 event.preventDefault();
                 alert('Please enter a valid session timeout duration.');
                 timeoutDurationField.focus();
