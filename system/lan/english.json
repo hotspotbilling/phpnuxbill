@@ -722,5 +722,7 @@
     "in_here_too_": "in here too.",
     "Empty_this_to_use_internal_mail___PHP": "Empty this to use internal mail() PHP",
     "Mail_Reply_To": "Mail Reply To",
-    "Customer_will_reply_email_to_this_address__empty_if_you_want_to_use_From_Address": "Customer will reply email to this address, empty if you want to use From Address"
+    "Customer_will_reply_email_to_this_address__empty_if_you_want_to_use_From_Address": "Customer will reply email to this address, empty if you want to use From Address",
+    "You_will_get_Payment_and_Error_notification": "You will get Payment and Error notification",
+    "Languge_set_to_english": "Bahasa diatur ke bahasa Inggris"
 }

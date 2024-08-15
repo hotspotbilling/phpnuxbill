@@ -325,6 +325,6 @@ class Validator
     public static function containsKeyword($string, $keywords = ['mikrotik', 'hotspot', 'pppoe', 'radius', 'dummy'])
     {
         $regex = '/' . implode('|', $keywords) . '/i';
-        return preg_match($regex, $string);
+        return preg_match($regex, strtolower($string));
     }
 }

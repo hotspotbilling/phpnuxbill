@@ -66,6 +66,15 @@
                 transform: rotate(360deg);
             }
         }
+
+        .dropdown-menu .dropdown-item {
+            margin-bottom: 5px;
+        }
+
+        .dropdown-menu .dropdown-item button {
+            margin: 0;
+            padding: 10px;
+        }
     </style>
 
     {if isset($xheader)}
@@ -87,10 +96,22 @@
                 </a>
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
+                        <li class="dropdown tasks-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                <i class="fa fa-flag-o"></i> <span class="d-none d-sm-inline">{ucwords($user_language)}</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu" api-get-text="{$_url}autoload_user/language&select={$user_language}"></ul>
+                                </li>
+                            </ul>
+                        </li>
                         <li class="dropdown notifications-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fa fa-envelope-o"></i>
-                                <span class="label label-warning" api-get-text="{$_url}autoload_user/inbox_unread"></span>
+                                <span class="label label-warning"
+                                    api-get-text="{$_url}autoload_user/inbox_unread"></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
