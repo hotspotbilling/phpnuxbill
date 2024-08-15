@@ -164,7 +164,7 @@
                                 </div>
                                 <label class="col-md-2">
                                     <input type="checkbox" name="delete_custom_fields[]" value="{$customField.field_name}">
-                                    Delete
+                                    {Lang::T('Delete')}
                                 </label>
                             </div>
                         {/foreach}

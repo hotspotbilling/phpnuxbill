@@ -28,7 +28,7 @@
 							<div class="form-group">
 								<div class="col-lg-offset-2 col-lg-10">
 									<button class="btn btn-success" type="submit">{Lang::T('Save Changes')}</button>
-									Or <a href="{$_url}dashboard">{Lang::T('Cancel')}</a>
+									{Lang::T('Or')} <a href="{$_url}dashboard">{Lang::T('Cancel')}</a>
 								</div>
 							</div>
 						</form>
