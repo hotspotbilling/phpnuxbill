@@ -5,18 +5,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>{$_title} - {$_c['CompanyName']}</title>
-    <link rel="shortcut icon" href="{$app_url}/ui/ui/images/logo.png" type="image/x-icon" />
+    <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
 
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
 
-    <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/modern-AdminLTE.min.css">
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2-bootstrap.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
-    <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
+    <link rel="stylesheet" href="ui/ui/styles/select2.min.css" />
+    <link rel="stylesheet" href="ui/ui/styles/select2-bootstrap.min.css" />
+    <link rel="stylesheet" href="ui/ui/styles/sweetalert2.min.css" />
+    <link rel="stylesheet" href="ui/ui/styles/plugins/pace.css" />
+    <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
     <style>
         ::-moz-selection {
             /* Code for Firefox */
