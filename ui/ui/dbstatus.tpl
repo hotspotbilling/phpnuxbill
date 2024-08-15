@@ -41,14 +41,14 @@
     </div>
     <div class="col-sm-5">
         <div class="panel panel-primary">
-            <div class="panel-heading">Restore Database</div>
+            <div class="panel-heading">{Lang::T('Restore Database')}</div>
             <form method="post" action="{$_url}settings/dbrestore" enctype="multipart/form-data">
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-7"><input type="file" name="json" accept="application/json"></div>
                         <div class="col-md-5 text-right">
                             <button type="submit" class="btn btn-primary btn-block btn-xs"><i class="fa fa-upload"></i>
-                                Restore Dabase</button>
+                                {Lang::T('Restore Database')}</button>
                         </div>
                     </div>
                 </div>
