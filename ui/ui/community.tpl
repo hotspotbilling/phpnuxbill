@@ -133,14 +133,14 @@
             <div class="box-header">
                 <h3 class="box-title">{Lang::T('Chat with me')}</h3>
             </div>
-            <div class="box-body">{Lang::T('$50 Paid Support<br>donation confirmation?')}<br>{Lang::T('Or ask any Donation Alternative')}</div>
+            <div class="box-body">{Lang::T('$50 Paid Support')}<br>{Lang::T('donation confirmation?')}<br>{Lang::T('Or ask any Donation Alternative')}</div>
             <div class="box-footer">
                 <a href="https://t.me/ibnux" target="_blank" class="btn btn-primary btn-sm btn-block">Telegram</a>
             </div>
         </div>
         <div class="box box-primary box-hovered mb20 activities">
             <div class="box-header">
-                <h3 class="box-title">{Lang::T('Free')} WhatsApp {Lang::T('Gateway and Telegram Bot creater')}</h3>
+                <h3 class="box-title">{Lang::T('Free WhatsApp Gateway and Telegram Bot creater')}</h3>
             </div>
             <div class="box-body">
                 {Lang::T('There is a Telegram bot wizard in here')}
@@ -159,7 +159,7 @@
             <div class="box-body">
                 <b>PHPNuxBill</b> {Lang::T('is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate
                 with router. If you get more profit with this application, please donate us.')}<br>{Lang::T('Watch project')} <a
-                    href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">in here</a>
+                    href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">{Lang::T('in here')}</a>
             </div>
             <div class="box-footer" id="currentVersion">ver</div>
             <div class="box-footer" id="latestVersion">ver</div>
@@ -182,7 +182,7 @@
             <div class="box-footer">
                 {Lang::T('If you Download manual the update file, sometime update change database, after uploading, click this
                 button to update database structure.')}
-                <a href="./update.php?step=4" class="btn btn-default btn-sm btn-block">{Lang::T('Update')} Database</a>
+                <a href="./update.php?step=4" class="btn btn-default btn-sm btn-block">{Lang::T('Update Database')}</a>
             </div>
         </div>
     </div>
