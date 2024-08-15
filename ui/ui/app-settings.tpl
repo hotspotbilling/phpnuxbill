@@ -24,8 +24,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Company Logo')}</label>
                         <div class="col-md-6">
                             <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-                            <span class="help-block">For PDF Reports | Best size 1078 x 200 | uploaded image will be
-                                autosize</span>
+                            <span class="help-block">{Lang::T('For PDF Reports | Best size 1078 x 200 | uploaded image will be
+                                autosize')}</span>
                         </div>
                         <span class="help-block col-md-4">
                             <a href="./{$logo}" target="_blank"><img src="./{$logo}" height="48" alt="logo for PDF"></a>
@@ -68,10 +68,10 @@
                             <input type="number" required class="form-control" id="printer_cols" placeholder="37"
                                 name="printer_cols" value="{$_c['printer_cols']}">
                         </div>
-                        <span class="help-block col-md-4">For invoice print using Thermal Printer</span>
+                        <span class="help-block col-md-4">{Lang::T('For invoice print using Thermal Printer')}</span>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Theme</label>
+                        <label class="col-md-2 control-label">{Lang::T('Theme')}</label>
                         <div class="col-md-6">
                             <select name="theme" id="theme" class="form-control">
                                 <option value="default" {if $_c['theme'] eq 'default' }selected="selected" {/if}>Default
@@ -83,8 +83,7 @@
                             </select>
                         </div>
                         <p class="help-block col-md-4"><a
-                                href="https://github.com/hotspotbilling/phpnuxbill/wiki/Themes" target="_blank">Theme
-                                info</a></p>
+                                href="https://github.com/hotspotbilling/phpnuxbill/wiki/Themes" target="_blank">{Lang::T('Theme Info')}</a></p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Recharge Using')}</label>
@@ -93,8 +92,8 @@
                                 value="{$_c['payment_usings']}"
                                 placeholder="{Lang::T('Cash')}, {Lang::T('Bank Transfer')}">
                         </div>
-                        <p class="help-block col-md-4">This used for admin to select payment in recharge, using comma
-                            for every new options</p>
+                        <p class="help-block col-md-4">{Lang::T('This used for admin to select payment in recharge, using comma
+                            for every new options')}</p>
                     </div>
 
                     <div class="form-group">
@@ -103,14 +102,14 @@
                             <input type="number" required class="form-control" id="reset_day" placeholder="20" min="1"
                                 max="28" step="1" name="reset_day" value="{$_c['reset_day']}">
                         </div>
-                        <span class="help-block col-md-4">Income will reset every this day</span>
+                        <span class="help-block col-md-4">{Lang::T('Income will reset every this day')}</span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">APP URL</label>
                         <div class="col-md-6">
                             <input type="text" readonly class="form-control" value="{$app_url}">
                         </div>
-                        <p class="help-block col-md-4">edit at config.php</p>
+                        <p class="help-block col-md-4">{Lang::T('edit at config.php')}</p>
                     </div>
                 </div>
                 <div class="panel-heading" id="hide_dashboard_content">
@@ -118,7 +117,7 @@
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
-                    Hide Dashboard Content
+                    {Lang::T('Hide Dashboard Content')}
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
@@ -227,7 +226,7 @@
                         </div>
                         <p class="help-block col-md-4"><a
                                 href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius"
-                                target="_blank">Radius Instructions</a></p>
+                                target="_blank">{Lang::T('Radius Instructions')}</a></p>
                     </div>
                 </div>
                 <div class="panel-heading">
@@ -246,7 +245,7 @@
                                 <option value="0">No</option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">Customer can request to extend expirations</p>
+                        <p class="help-block col-md-4">{Lang::T('Customer can request to extend expirations')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Extend Days')}</label>
@@ -259,7 +258,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Confirmation Message')}</label>
                         <div class="col-md-6">
                             <textarea type="text" rows="4" class="form-control" name="extend_confirmation"
-                                placeholder="i agree to extends and will paid full after this">{$_c['extend_confirmation']}</textarea>
+                                placeholder="{Lang::T('i agree to extends and will paid full after this')}">{$_c['extend_confirmation']}</textarea>
                         </div>
                     </div>
                 </div>
@@ -313,7 +312,7 @@
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Telegram Bot Token</label>
+                        <label class="col-md-2 control-label">{Lang::T('Telegram Bot Token')}</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" id="telegram_bot" name="telegram_bot"
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
@@ -327,8 +326,8 @@
                                 value="{$_c['telegram_target_id']}" placeholder="12345678">
                         </div>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">You will get Payment and Error
-                        notification</small>
+                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You will get Payment and Error
+                        notification<')}/small>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
@@ -345,12 +344,11 @@
                             <input type="text" class="form-control" id="sms_url" name="sms_url" value="{$_c['sms_url']}"
                                 placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
                         </div>
-                        <p class="help-block col-md-4">Must include <b>[text]</b> &amp; <b>[number]</b>, it will be
-                            replaced.
+                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>, {Lang::T('it will be replaced.')}
                         </p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Or use Mikrotik SMS</label>
+                        <label class="col-md-2 control-label">{Lang::T('Or use Mikrotik SMS')}</label>
                         <div class="col-md-6">
                             <select class="form-control"
                                 onchange="document.getElementById('sms_url').value = this.value">
@@ -361,11 +359,10 @@
                                 {/foreach}
                             </select>
                         </div>
-                        <p class="help-block col-md-4">Must include <b>[text]</b> &amp; <b>[number]</b>, it will be
-                            replaced.
+                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>, {Lang::T('it will be replaced.')}
                         </p>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">You can use WhatsApp in here too. <a
+                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp {Lang::T('in here too.')} <a
                             href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
                 </div>
                 <div class="panel-heading">
@@ -383,11 +380,9 @@
                             <input type="text" class="form-control" id="wa_url" name="wa_url" value="{$_c['wa_url']}"
                                 placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
                         </div>
-                        <p class="help-block col-md-4">Must include <b>[text]</b> &amp; <b>[number]</b>, it will be
-                            replaced.
-                        </p>
+                        <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>, {Lang::T('it will be replaced.')}
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">You can use WhatsApp in here too. <a
+                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp {Lang::T('in here too.')} <a
                             href="https://wa.nux.my.id/login" target="_blank">Free Server</a></small>
                 </div>
                 <div class="panel-heading">
@@ -410,7 +405,7 @@
                             <input type="number" class="form-control" id="smtp_port" name="smtp_port"
                                 value="{$_c['smtp_port']}" placeholder="465 587 port">
                         </div>
-                        <p class="help-block col-md-4">Empty this to use internal mail() PHP</p>
+                        <p class="help-block col-md-4">{Lang::T('Empty this to use internal mail() PHP')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">SMTP username</label>
@@ -449,13 +444,13 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Mail Reply To</label>
+                        <label class="col-md-2 control-label">{Lang::T('Mail Reply To')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="mail_reply_to" name="mail_reply_to"
                                 value="{$_c['mail_reply_to']}" placeholder="support@host.tld">
                         </div>
-                        <p class="help-block col-md-4">Customer will reply email to this address, empty if you want to
-                            use From Address</p>
+                        <p class="help-block col-md-4">{Lang::T('Customer will reply email to this address, empty if you want to
+                            use From Address')}</p>
                     </div>
                 </div>
                 <div class="panel-heading">
