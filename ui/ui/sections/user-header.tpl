@@ -98,52 +98,20 @@
                     <ul class="nav navbar-nav">
                         <li class="dropdown tasks-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                <i class="fa fa-flag-o"></i> <span class="d-none d-sm-inline">Language</span>
+                                <i class="fa fa-flag-o"></i> <span class="d-none d-sm-inline">{ucwords($user_language)}</span>
                             </a>
                             <ul class="dropdown-menu">
-                                <form method="post" action="{$app_url}accounts/language-update-post">
-                                    <li
-                                        class="dropdown-item">
-                                        <button class="btn btn-block btn-{if $user_language == 'english'}success {else}primary{/if} btn-xs" type="submit" name="language"
-                                            value="english">
-                                            {Lang::T('English')}
-                                        </button>
-                                    </li>
-                                    <li
-                                        class="dropdown-item">
-                                        <button class="btn btn-block btn-{if $user_language == 'indonesia'}success {else}primary{/if} btn-xs" type="submit" name="language"
-                                            value="indonesia">
-                                            {Lang::T('Indonesian')}
-                                        </button>
-                                    </li>
-                                    <li
-                                        class="dropdown-item">
-                                        <button class="btn btn-block btn-{if $user_language == 'spanish'}success {else}primary{/if} btn-xs" type="submit" name="language"
-                                            value="spanish">
-                                            {Lang::T('Spanish')}
-                                        </button>
-                                    </li>
-                                    <li
-                                        class="dropdown-item">
-                                        <button class="btn btn-block btn-{if $user_language == 'arabic'}success {else}primary{/if} btn-xs" type="submit" name="language"
-                                            value="arabic">
-                                            {Lang::T('Arabic')}
-                                        </button>
-                                    </li>
-                                    <li
-                                        class="dropdown-item">
-                                        <button class="btn btn-block btn-{if $user_language == 'turkish'}success {else}primary{/if} btn-xs" type="submit" name="language"
-                                            value="turkish">
-                                            {Lang::T('Turkish')}
-                                        </button>
-                                    </li>
-                                </form>
+                                <li>
+                                    <!-- inner menu: contains the actual data -->
+                                    <ul class="menu" api-get-text="{$_url}autoload_user/language&select={$user_language}"></ul>
+                                </li>
                             </ul>
                         </li>
                         <li class="dropdown notifications-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fa fa-envelope-o"></i>
-                                <span class="label label-warning" api-get-text="{$_url}autoload_user/inbox_unread"></span>
+                                <span class="label label-warning"
+                                    api-get-text="{$_url}autoload_user/inbox_unread"></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
