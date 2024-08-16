@@ -18,7 +18,7 @@ switch ($action) {
 
     case 'change-password':
         run_hook('customer_view_change_password'); #HOOK
-        $ui->display('user-change-password.tpl');
+        $ui->display('user-ui/change-password.tpl');
         break;
 
     case 'change-password-post':
@@ -71,7 +71,7 @@ switch ($action) {
         if ($d) {
             run_hook('customer_view_edit_profile'); #HOOK
             $ui->assign('d', $d);
-            $ui->display('user-profile.tpl');
+            $ui->display('user-ui/profile.tpl');
         } else {
             r2(U . 'home', 'e', Lang::T('Account Not Found'));
         }
@@ -119,7 +119,7 @@ switch ($action) {
             //run_hook('customer_view_edit_profile'); #HOOK
             $ui->assign('d', $d);
             $ui->assign('new_phone', $_SESSION['new_phone']);
-            $ui->display('user-phone-update.tpl');
+            $ui->display('user-ui/phone-update.tpl');
         } else {
             r2(U . 'home', 'e', Lang::T('Account Not Found'));
         }

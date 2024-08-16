@@ -17,7 +17,7 @@ switch ($action) {
     case 'activation':
         run_hook('view_activate_voucher'); #HOOK
         $ui->assign('code', alphanumeric(_get('code'), "-_.,"));
-        $ui->display('user-activation.tpl');
+        $ui->display('user-ui/activation.tpl');
         break;
 
     case 'activation-post':
@@ -46,7 +46,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         run_hook('customer_view_activation_list'); #HOOK
-        $ui->display('user-activation-list.tpl');
+        $ui->display('user-ui/activation-list.tpl');
 
         break;
     case 'invoice':
@@ -58,7 +58,7 @@ switch ($action) {
         }
         if ($in) {
             Package::createInvoice($in);
-            $ui->display('invoice-customer.tpl');
+            $ui->display('user-ui/invoice-customer.tpl');
         } else {
             r2(U . 'voucher/list-activated', 'e', Lang::T('Not Found'));
         }
