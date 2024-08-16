@@ -755,7 +755,7 @@
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
-                    Github Authentication
+                    Github {Lang::T('Authentication')}
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
@@ -776,13 +776,13 @@
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                         <span class="help-block col-md-4"><a href="https://github.com/settings/tokens/new"
-                                target="_blank">Create GitHub personal access token (classic)</a>, only need repo
-                            scope</span>
+                                target="_blank">{Lang::T('Create GitHub personal access token')} (classic)</a>, {Lang::T('only need repo
+                            scope')}</span>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">This will allow
+                        <label class="control-label col-md-offset-2 col-md-8" style="text-align: left;">{Lang::T('This will allow
                             you to download
-                            plugin from private/paid repository</label>
+                            plugin from private/paid repository')}</label>
                     </div>
                 </div>
             </div>

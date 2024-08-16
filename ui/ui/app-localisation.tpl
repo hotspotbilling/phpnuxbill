@@ -3,9 +3,15 @@
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
-            <div class="panel-heading">{Lang::T('Localisation')}</div>
+            <div class="panel-heading">
+                <div class="btn-group pull-right">
+                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                </div>
+            {Lang::T('Localisation')}
+            </div>
+            
             <div class="panel-body">
-
                 <form class="form-horizontal" method="post" role="form" action="{$_url}settings/localisation-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Timezone')}</label>
