@@ -1,4 +1,4 @@
-{include file="user-ui/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 <!-- user-activation -->
 
 <div class="row">
