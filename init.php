@@ -134,6 +134,8 @@ if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')
 // Check if the user has selected a language
 if (!empty($_SESSION['user_language'])) {
     $config['language'] = $_SESSION['user_language'];
+}else if (!empty($_COOKIE['user_language'])) {
+    $config['language'] = $_COOKIE['user_language'];
 }
 
 if (empty($_SESSION['Lang'])) {
