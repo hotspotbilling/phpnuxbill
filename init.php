@@ -358,12 +358,13 @@ function displayMaintenanceMessage(): void
     die();
 }
 
-function isMysqlRadius()
+function isTableExist($table)
 {
     try {
-        $record = ORM::forTable('radacct', 'radius')->find_one();
+        $record = ORM::forTable($table)->find_one();
         return $record !== false;
     } catch (Exception $e) {
         return false;
     }
 }
+
