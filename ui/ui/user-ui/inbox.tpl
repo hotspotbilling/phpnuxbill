@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 
 {if $tipe == 'view'}
     <div class="box box-primary">
@@ -110,4 +110,4 @@
 
 {/if}
 
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}

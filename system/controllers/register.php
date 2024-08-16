@@ -62,7 +62,7 @@ switch ($do) {
                     $ui->assign('phonenumber', $phonenumber);
                     $ui->assign('notify', 'Wrong Verification code');
                     $ui->assign('notify_t', 'd');
-                    $ui->display('register-otp.tpl');
+                    $ui->display('user-ui/register-otp.tpl');
                     exit();
                 } else {
                     unlink($otpPath);
@@ -96,7 +96,7 @@ switch ($do) {
                 $ui->assign('notify', 'Failed to register');
                 $ui->assign('notify_t', 'd');
                 run_hook('view_otp_register'); #HOOK
-                $ui->display('register-rotp.tpl');
+                $ui->display('user-ui/register-rotp.tpl');
             }
         } else {
             $ui->assign('username', $username);
@@ -106,7 +106,7 @@ switch ($do) {
             $ui->assign('phonenumber', $phonenumber);
             $ui->assign('notify', $msg);
             $ui->assign('notify_t', 'd');
-            $ui->display('register.tpl');
+            $ui->display('user-ui/register.tpl');
         }
         break;
 
@@ -128,7 +128,7 @@ switch ($do) {
                     $ui->assign('username', $username);
                     $ui->assign('notify', 'Please wait ' . (1200 - (time() - filemtime($otpPath))) . ' seconds before sending another SMS');
                     $ui->assign('notify_t', 'd');
-                    $ui->display('register-otp.tpl');
+                    $ui->display('user-ui/register-otp.tpl');
                 } else {
                     $otp = rand(100000, 999999);
                     file_put_contents($otpPath, $otp);
@@ -136,11 +136,11 @@ switch ($do) {
                     $ui->assign('username', $username);
                     $ui->assign('notify', 'Verification code has been sent to your phone');
                     $ui->assign('notify_t', 's');
-                    $ui->display('register-otp.tpl');
+                    $ui->display('user-ui/register-otp.tpl');
                 }
             } else {
                 run_hook('view_otp_register'); #HOOK
-                $ui->display('register-rotp.tpl');
+                $ui->display('user-ui/register-rotp.tpl');
             }
         } else {
             $ui->assign('username', "");
@@ -149,7 +149,7 @@ switch ($do) {
             $ui->assign('email', "");
             $ui->assign('otp', false);
             run_hook('view_register'); #HOOK
-            $ui->display('register.tpl');
+            $ui->display('user-ui/register.tpl');
         }
         break;
 }

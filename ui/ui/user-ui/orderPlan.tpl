@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 <!-- user-orderPlan -->
 <div class="row">
     <div class="col-sm-12">
@@ -421,4 +421,4 @@
         {/foreach}
     </div>
 </div>
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}

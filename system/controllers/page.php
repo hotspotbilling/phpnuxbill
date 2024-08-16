@@ -16,6 +16,6 @@ if(file_exists(__DIR__."/../../pages/".str_replace(".","",$action).".html")){
     $ui->assign("PageFile",$action);
     $ui->assign("pageHeader",$action);
     run_hook('customer_view_page'); #HOOK
-    $ui->display('user-pages.tpl');
+    $ui->display('user-ui/pages.tpl');
 }else
-    $ui->display('404.tpl');
+    $ui->display('user-ui/404.tpl');

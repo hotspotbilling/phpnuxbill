@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 <!-- user-orderHistory -->
 
 <div class="row">
@@ -53,4 +53,4 @@
 </div>
 
 
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}

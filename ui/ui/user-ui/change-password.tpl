@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 <!-- user-change-password -->
 
 <div class="row">
@@ -40,4 +40,4 @@
     </div>
 </div>
 
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}
