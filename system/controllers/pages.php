@@ -31,6 +31,7 @@ if(strpos($action,"-reset")!==false){
         _alert(Lang::T('You do not have permission to access this page'),'danger', "dashboard");
     }
     $path = "pages/".str_replace(".","",$action).".html";
+    $ui->assign("action", $action);
     //echo $path;
     run_hook('view_edit_pages'); #HOOK
     if(!file_exists($path)){
@@ -44,6 +45,15 @@ if(strpos($action,"-reset")!==false){
         }
     }
     if(file_exists($path)){
+        if($action=='Voucher'){
+            if(!file_exists("pages/vouchers/")){
+                mkdir("pages/vouchers/");
+                if(file_exists("pages_template/vouchers/")){
+                    File::copyFolder("pages_template/vouchers/", "pages/vouchers/");
+                }
+            }
+            $ui->assign("vouchers", scandir("pages/vouchers/"));
+        }
         $html = file_get_contents($path);
         $ui->assign("htmls",str_replace(["<div","</div>"],"",$html));
         $ui->assign("writeable",is_writable($path));
@@ -61,7 +71,12 @@ if(strpos($action,"-reset")!==false){
     if(file_exists($path)){
         $html = _post("html");
         run_hook('save_pages'); #HOOK
-        if(file_put_contents($path, str_replace(["<div","</div>"],"",$html))){
+        if(file_put_contents($path, $html)){
+            if(_post('template_save')=='yes'){
+                if(!empty(_post('template_name'))){
+                    file_put_contents("pages/vouchers/"._post('template_name').'.html', $html);
+                }
+            }
             r2(U . 'pages/'.$action, 's', Lang::T("Saving page success"));
         }else{
             r2(U . 'pages/'.$action, 'e', Lang::T("Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>"));
