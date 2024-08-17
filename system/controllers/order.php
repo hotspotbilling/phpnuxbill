@@ -46,8 +46,9 @@ switch ($action) {
         if (empty($account_type)) {
             $account_type = 'Personal';
         }
+        session_start();
         if (!empty($_SESSION['nux-router'])) {
-            if ($_SESSION['nux-router'] == 'radius') {
+            if ($_SESSION['nux-router'] = 'radius') {
                 $radius_pppoe = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->where('prepaid', 'yes')->find_many();
                 $radius_hotspot = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->where('prepaid', 'yes')->find_many();
             } else {
