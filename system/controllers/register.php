@@ -124,9 +124,9 @@ switch ($do) {
                 }
                 $otpPath .= sha1($username . $db_pass) . ".txt";
                 //expired 10 minutes
-                if (file_exists($otpPath) && time() - filemtime($otpPath) < 1200) {
+                if (file_exists($otpPath) && time() - filemtime($otpPath) < 600) {
                     $ui->assign('username', $username);
-                    $ui->assign('notify', 'Please wait ' . (1200 - (time() - filemtime($otpPath))) . ' seconds before sending another SMS');
+                    $ui->assign('notify', 'Please wait ' . (600 - (time() - filemtime($otpPath))) . ' seconds before sending another SMS');
                     $ui->assign('notify_t', 'd');
                     $ui->display('register-otp.tpl');
                 } else {
