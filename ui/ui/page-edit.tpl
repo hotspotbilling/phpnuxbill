@@ -29,7 +29,7 @@
                         {/if}
                         <button type="submit" class="btn btn-primary btn-block">SAVE</button>
                         <br>
-                        <p class="help-block">{Lang::T("Sometimes you need to refresh 3 times until content change")}</p>
+                        <p class="help-block">{Lang::T('Sometimes you need to refresh 3 times until content change')}</p>
                         <input type="text" class="form-control" onclick="this.select()" readonly
                             value="{$app_url}/pages/{$PageFile}.html">
                     </div>
@@ -41,11 +41,12 @@
                 {if $PageFile=='Voucher'}
                     <div class="panel-footer">
                         <p class="help-block">
-                            <b>[[company_name]]</b> Your Company Name at Settings.<br>
-                            <b>[[price]]</b> Plan Price.<br>
-                            <b>[[voucher_code]]</b> Voucher Code.<br>
-                            <b>[[plan]]</b> Voucher Plan.<br>
-                            <b>[[counter]]</b> Counter.<br>
+                            <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings.')}<br>
+                            <b>[[price]]</b> {Lang::T('Plan Price.')}<br>
+                            <b>[[voucher_code]]</b> {Lang::T('Voucher Code.')}<br>
+                            <b>[[plan]]</b> {Lang::T('Voucher Plan.')}<br>
+                            <b>[[counter]]</b> {Lang::T('Counter.
+')}<br>
                         </p>
                     </div>
                 {/if}
