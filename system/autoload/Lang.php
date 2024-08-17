@@ -15,7 +15,7 @@ class Lang
         if (empty($lan_file)) {
             $lan_file = $root_path . File::pathFixer('system/lan/' . $config['language'] . '.json');
         }
-        
+
         if (is_array($_SESSION['Lang'])) {
             $_L = array_merge($_L, $_SESSION['Lang']);
         }
