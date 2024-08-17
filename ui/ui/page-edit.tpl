@@ -1,4 +1,6 @@
 {include file="sections/header.tpl"}
+
+<form id="formpages" method="post" role="form" action="{$_url}pages/{$PageFile}-post">
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-primary panel-hovered">
@@ -9,8 +11,7 @@
                 </div>
                 {$pageHeader}
             </div>
-            <div id="myNicPanel" style="width: 100%;"></div>
-            <div id="panel-edit" class="panel-body">{$htmls}</div>
+            <textarea name="html" id="summernote">{$htmls}</textarea>
             {if $writeable}
                 <div class="panel-footer">
                     <a href="javascript:saveIt()" class="btn btn-primary btn-block">SAVE</a>
@@ -38,24 +39,12 @@
         </div>
     </div>
 </div>
-<form id="formpages" class="hidden" method="post" role="form" action="{$_url}pages/{$PageFile}-post">
-    <textarea name="html" id="html"></textarea>
 </form>
-<script src="ui/ui/scripts/nicEdit.js"></script>
 {literal}
     <script type="text/javascript">
-        var myNicEditor
-        bkLib.onDomLoaded(function() {
-            myNicEditor = new nicEditor({fullPanel : true});
-            myNicEditor.setPanel('myNicPanel');
-            myNicEditor.addInstance('panel-edit');
+        document.addEventListener("DOMContentLoaded", function() {
+            $('#summernote').summernote();
         });
-
-        function saveIt() {
-            //alert(document.getElementById('panel-edit').innerHTML);
-            document.getElementById('html').value = nicEditors.findEditor('panel-edit').getContent()
-            document.getElementById('formpages').submit();
-        }
     </script>
 {/literal}
 
