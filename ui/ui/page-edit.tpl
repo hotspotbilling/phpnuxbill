@@ -41,12 +41,11 @@
                 {if $PageFile=='Voucher'}
                     <div class="panel-footer">
                         <p class="help-block">
-                            <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings.')}<br>
-                            <b>[[price]]</b> {Lang::T('Plan Price.')}<br>
-                            <b>[[voucher_code]]</b> {Lang::T('Voucher Code.')}<br>
-                            <b>[[plan]]</b> {Lang::T('Voucher Plan.')}<br>
-                            <b>[[counter]]</b> {Lang::T('Counter.
-')}<br>
+                            <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings')}.<br>
+                            <b>[[price]]</b> {Lang::T('Plan Price')}.<br>
+                            <b>[[voucher_code]]</b> {Lang::T('Voucher Code')}.<br>
+                            <b>[[plan]]</b> {Lang::T('Voucher Plan')}.<br>
+                            <b>[[counter]]</b> {Lang::T('Counter')}.<br>
                         </p>
                     </div>
                 {/if}
