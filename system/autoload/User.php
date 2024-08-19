@@ -123,7 +123,7 @@ class User
         return 0;
     }
 
-    public static function getAttribute($name, $id = 0)
+    public static function getAttribute($name, $id = 0, $default = '')
     {
         if (!$id) {
             $id = User::getID();
@@ -135,7 +135,7 @@ class User
         if ($f) {
             return $f['field_value'];
         }
-        return '';
+        return $default;
     }
 
     public static function getAttributes($endWith, $id = 0)
