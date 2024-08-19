@@ -356,7 +356,7 @@ switch ($action) {
             _log(Lang::T("Payment Gateway not set, please set it in Settings"));
             r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
         }
-        if (count($pgs) > 1) {
+        if (count($pgs) > 0) {
             $ui->assign('pgs', $pgs);
             if ($tax_enable === 'yes') {
                 $ui->assign('tax', $tax);
@@ -369,13 +369,9 @@ switch ($action) {
             $ui->display('user-selectGateway.tpl');
             break;
         } else {
-            if (empty($pgs[0])) {
-                sendTelegram("Payment Gateway not set, please set it in Settings");
-                _log(Lang::T("Payment Gateway not set, please set it in Settings"));
-                r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
-            } else {
-                $_POST['gateway'] = $pgs[0];
-            }
+            sendTelegram("Payment Gateway not set, please set it in Settings");
+            _log(Lang::T("Payment Gateway not set, please set it in Settings"));
+            r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
         }
     case 'buy':
         $gateway = _post('gateway');
