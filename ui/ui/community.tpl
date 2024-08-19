@@ -10,7 +10,7 @@
 
         <div class="box box-hovered mb20 box-primary">
             <div class="box-header">
-                <h3 class="box-title">Contributors</h3>
+                <h3 class="box-title">{Lang::T('Contributors')}</h3>
             </div>
             <div class="box-body">
                 <a href="https://github.com/hotspotbilling/phpnuxbill/graphs/contributors" target="_blank">
@@ -22,29 +22,29 @@
     <div class="col-sm-6">
         <div class="box box-hovered mb20 box-primary">
             <div class="box-header">
-                <h3 class="box-title">Discussions</h3>
+                <h3 class="box-title">{Lang::T('Discussions')}</h3>
             </div>
-            <div class="box-body">Get help from community</div>
+            <div class="box-body">{Lang::T('Get help from community')}</div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                     <a href="https://github.com/hotspotbilling/phpnuxbill/discussions" target="_blank"
-                        class="btn btn-primary btn-sm btn-block"><i class="ion ion-chatboxes"></i> Github
-                        Discussions</a>
+                        class="btn btn-primary btn-sm btn-block"><i class="ion ion-chatboxes"></i> {Lang::T('Github
+                        Discussions')}</a>
                     <a href="https://t.me/phpnuxbill" target="_blank" class="btn btn-primary btn-sm btn-block"><i
-                            class="ion ion-chatboxes"></i> Telegram Group</a>
+                            class="ion ion-chatboxes"></i> {Lang::T('Telegram Group')}</a>
                 </div>
             </div>
         </div>
         <div class="box box-hovered mb20 box-primary">
             <div class="box-header">
-                <h3 class="box-title">Feedback</h3>
+                <h3 class="box-title">{Lang::T('')}Feedback</h3>
             </div>
             <div class="box-body">
-                Feedback and Bug Report
+                {Lang::T('Feedback and Bug Report')}
             </div>
             <div class="box-footer">
                 <a href="https://github.com/hotspotbilling/phpnuxbill/issues" target="_blank"
-                    class="btn btn-primary btn-sm btn-block"><i class="ion ion-chatboxes"></i> Give Feedback</a>
+                    class="btn btn-primary btn-sm btn-block"><i class="ion ion-chatboxes"></i> {Lang::T('Give Feedback')}</a>
             </div>
         </div>
     </div>
@@ -131,19 +131,19 @@
     <div class="col-sm-6">
         <div class="box box-hovered mb20 box-primary">
             <div class="box-header">
-                <h3 class="box-title">Chat with me</h3>
+                <h3 class="box-title">{Lang::T('Chat with me')}</h3>
             </div>
-            <div class="box-body">$50 Paid Support<br>donation confirmation?<br>Or ask any Donation Alternative</div>
+            <div class="box-body">{Lang::T('$50 Paid Support')}<br>{Lang::T('donation confirmation?')}<br>{Lang::T('Or ask any Donation Alternative')}</div>
             <div class="box-footer">
                 <a href="https://t.me/ibnux" target="_blank" class="btn btn-primary btn-sm btn-block">Telegram</a>
             </div>
         </div>
         <div class="box box-primary box-hovered mb20 activities">
             <div class="box-header">
-                <h3 class="box-title">Free WhatsApp Gateway and Telegram Bot creater</h3>
+                <h3 class="box-title">{Lang::T('Free WhatsApp Gateway and Telegram Bot creater')}</h3>
             </div>
             <div class="box-body">
-                There is a Telegram bot wizard in here
+                {Lang::T('There is a Telegram bot wizard in here')}
             </div>
             <div class="box-footer">
                 <a href="https://wa.nux.my.id/login" target="_blank"
@@ -157,33 +157,32 @@
                 <h3 class="box-title">PHPNUXBILL</h3>
             </div>
             <div class="box-body">
-                <b>PHPNuxBill</b> is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate
-                with router. If you get more profit with this application, please donate us.<br>Watch project <a
-                    href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">in here</a>
+                <b>PHPNuxBill</b> {Lang::T('is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate
+                with router. If you get more profit with this application, please donate us.')}<br>{Lang::T('Watch project')} <a
+                    href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">{Lang::T('in here')}</a>
             </div>
             <div class="box-footer" id="currentVersion">ver</div>
             <div class="box-footer" id="latestVersion">ver</div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                    <a href="./update.php" class="btn btn-success btn-sm btn-block">Install Latest Version</a>
+                    <a href="./update.php" class="btn btn-success btn-sm btn-block">{Lang::T('Install Latest Version')}</a>
                     <a href="https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip" target="_blank"
-                        class="btn btn-warning btn-sm btn-block text-black">Download Latest Version</a>
+                        class="btn btn-warning btn-sm btn-block text-black">{Lang::T('Download Latest Version')}</a>
                 </div>
-                <center><a href="{$_url}community/rollback" class="btn btn-link btn-sm btn-block">Select Old Version</a>
+                <center><a href="{$_url}community/rollback" class="btn btn-link btn-sm btn-block">{Lang::T('Select Old Version')}</a>
                 </center>
             </div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                    <a href="./CHANGELOG.md" target="_blank" class="btn btn-default btn-sm btn-block">Current
-                        Changelog</a>
+                    <a href="./CHANGELOG.md" target="_blank" class="btn btn-default btn-sm btn-block">{Lang::T('Current Changelog')}</a>
                     <a href="https://github.com/hotspotbilling/phpnuxbill/blob/master/CHANGELOG.md" target="_blank"
-                        class="btn btn-default btn-sm btn-block">Repo Changelog</a>
+                        class="btn btn-default btn-sm btn-block">{Lang::T('Repo Changelog')}</a>
                 </div>
             </div>
             <div class="box-footer">
-                If you Download manual the update file, sometime update change database, after uploading, click this
-                button to update database structure.
-                <a href="./update.php?step=4" class="btn btn-default btn-sm btn-block">Update Database</a>
+                {Lang::T('If you Download manual the update file, sometime update change database, after uploading, click this
+                button to update database structure.')}
+                <a href="./update.php?step=4" class="btn btn-default btn-sm btn-block">{Lang::T('Update Database')}</a>
             </div>
         </div>
     </div>

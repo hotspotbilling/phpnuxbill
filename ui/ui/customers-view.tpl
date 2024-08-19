@@ -100,8 +100,7 @@
                         <li class="list-group-item">
                             <b>{Lang::T('Coordinates')}</b> <span class="pull-right">
                                 <i class="glyphicon glyphicon-road"></i> <a style="color: black;"
-                                    href="https://www.google.com/maps/dir//{$d['coordinates']}/" target="_blank">Get
-                                    Directions</a>
+                                    href="https://www.google.com/maps/dir//{$d['coordinates']}/" target="_blank">{Lang::T('Get Directions')}</a>
                             </span>
                             <div id="map" style="width: '100%'; height: 100px;"></div>
                         </li>

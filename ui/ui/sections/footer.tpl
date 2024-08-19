@@ -12,6 +12,7 @@
 <script src="ui/ui/scripts/adminlte.min.js"></script>
 <script src="ui/ui/scripts/plugins/select2.min.js"></script>
 <script src="ui/ui/scripts/pace.min.js"></script>
+<script src="ui/ui/summernote/summernote.min.js"></script>
 <script src="ui/ui/scripts/custom.js"></script>
 
 {if isset($xfooter)}

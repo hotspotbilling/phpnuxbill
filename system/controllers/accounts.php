@@ -153,8 +153,8 @@ switch ($action) {
                 $phoneFile = $otpPath . sha1($username . $db_pass) . "_phone.txt";
 
                 // expired 10 minutes
-                if (file_exists($otpFile) && time() - filemtime($otpFile) < 1200) {
-                    r2(U . 'accounts/phone-update', 'e', Lang::T('Please wait ' . (1200 - (time() - filemtime($otpFile))) . ' seconds before sending another SMS'));
+                if (file_exists($otpFile) && time() - filemtime($otpFile) < 600) {
+                    r2(U . 'accounts/phone-update', 'e', Lang::T('Please wait ' . (600 - (time() - filemtime($otpFile))) . ' seconds before sending another SMS'));
                 } else {
                     $otp = rand(100000, 999999);
                     file_put_contents($otpFile, $otp);
