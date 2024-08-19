@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 <!-- user-dashboard -->
 
 <div class="row">
@@ -398,4 +398,4 @@
         document.write('<meta http-equiv="refresh" target="_blank" content="' + authdly + '; url=' + auth + '">');
     </script>
 {/if}
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}

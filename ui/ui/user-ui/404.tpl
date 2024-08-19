@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 
 <div class="page page-err clearfix">
     <div class="err-container">
@@ -7,4 +7,4 @@
     </div>
 </div>
 
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}

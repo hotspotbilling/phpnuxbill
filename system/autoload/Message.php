@@ -96,7 +96,7 @@ class Message
 
     public static function sendEmail($to, $subject, $body)
     {
-        global $config, $PAGES_PATH, $_app_stage;
+        global $config, $PAGES_PATH, $debug_mail;
         if (empty($body)) {
             return "";
         }
@@ -116,7 +116,7 @@ class Message
         } else {
             $mail = new PHPMailer();
             $mail->isSMTP();
-            if ($_app_stage == 'Dev') {
+            if (isset($debug_mail) && $debug_mail == 'Dev') {
                 $mail->SMTPDebug = SMTP::DEBUG_SERVER;
             }
             $mail->Host       = $config['smtp_host'];

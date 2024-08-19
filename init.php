@@ -136,6 +136,11 @@ if (!empty($_SESSION['user_language'])) {
     $config['language'] = $_SESSION['user_language'];
 }else if (!empty($_COOKIE['user_language'])) {
     $config['language'] = $_COOKIE['user_language'];
+}else if(User::getID()>0){
+    $lang = User::getAttribute("Language");
+    if(!empty($lang)){
+        $config['language'] = $lang;
+    }
 }
 
 if (empty($_SESSION['Lang'])) {

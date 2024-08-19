@@ -626,7 +626,7 @@
                         </p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('OTP Required')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Phone OTP Required')}</label>
                         <div class="col-md-6">
                             <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
                                 <option value="no" {if $_c['allow_phone_otp']=='no' }selected="selected" {/if}>
@@ -636,7 +636,7 @@
                             </select>
                         </div>
                         <p class="help-block col-md-4">
-                            {Lang::T('OTP is required when user want to change phone number')}
+                            {Lang::T('OTP is required when user want to change phone number and registration')}
                         </p>
                     </div>
                     <div class="form-group">
@@ -653,6 +653,20 @@
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Email OTP Required')}</label>
+                        <div class="col-md-6">
+                            <select name="allow_email_otp" id="allow_email_otp" class="form-control">
+                                <option value="no" {if $_c['allow_email_otp']=='no' }selected="selected" {/if}>
+                                    No</option>
+                                <option value="yes" {if $_c['allow_email_otp']=='yes' }selected="selected" {/if}>Yes
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('OTP is required when user want to change Email Address')}
+                        </p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>

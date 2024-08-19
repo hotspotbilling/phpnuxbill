@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 
 <div class="row">
     {if file_exists("$PAGES_PATH/Payment_Info.html")}
@@ -35,7 +35,7 @@
                     {if $plan['is_radius'] or $plan['routers']}
                         <li class="list-group-item">
                             <b>{Lang::T('Location')}</b> <span class="pull-right">{if
-                            $plan['is_radius']}Radius{else}{$plan['routers']}
+                                $plan['is_radius']}Radius{else}{$plan['routers']}
                             {/if}</span>
                     </li>
                     {/if}
@@ -121,4 +121,4 @@
     </div>
 </div>
 
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}

@@ -1,4 +1,4 @@
-{include file="sections/user-header.tpl"}
+{include file="user-ui/header.tpl"}
 
 <!-- user-phone-update -->
 
@@ -14,7 +14,7 @@
                     <div class="input-group">
                         <span class="input-group-addon" id="basic-addon1">+</span>
                         <input type="text" class="form-control" name="phonenumber" id="phonenumber"
-                            value="{$d['phonenumber']}" readonly placeholder="{Lang::T('Phone Number')}">
+                            value="{$_user['phonenumber']}" readonly placeholder="{Lang::T('Phone Number')}">
                     </div>
                 </div>
             </div>
@@ -77,4 +77,4 @@
         </div>
     </div>
 </div>
-{include file="sections/user-footer.tpl"}
+{include file="user-ui/footer.tpl"}

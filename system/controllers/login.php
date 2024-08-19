@@ -291,9 +291,9 @@ switch ($do) {
         run_hook('customer_view_login'); #HOOK
         if ($config['disable_registration'] == 'yes') {
             $ui->assign('code', alphanumeric(_get('code'), "-"));
-            $ui->display('user-login-noreg.tpl');
+            $ui->display('user-ui/login-noreg.tpl');
         } else {
-            $ui->display('user-login.tpl');
+            $ui->display('user-ui/login.tpl');
         }
         break;
 }
