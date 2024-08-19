@@ -137,8 +137,8 @@
 {include file="pagination.tpl"}
 
 <div class="bs-callout bs-callout-warning bg-gray">
-    <h4>Information</h4>
-    <p>Export and Print will show all data without pagination.</p>
+    <h4>{Lang::T('Information')}</h4>
+    <p>{Lang::T('Export and Print will show all data without pagination')}.</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
