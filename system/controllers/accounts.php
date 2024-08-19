@@ -328,7 +328,7 @@ switch ($action) {
             $_SESSION['Lang'] = $_L;
             file_put_contents($lan_file, json_encode($_L));
         }
-
+        User::setAttribute("Language", $selected_language);
         r2($_SERVER['HTTP_REFERER'], 's', ucwords($selected_language));
 
 
