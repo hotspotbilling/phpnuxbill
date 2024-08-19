@@ -48,24 +48,71 @@ switch ($action) {
         }
         if (!empty($_SESSION['nux-router'])) {
             if ($_SESSION['nux-router'] == 'radius') {
-                $radius_pppoe = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->where('prepaid', 'yes')->find_many();
-                $radius_hotspot = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->where('prepaid', 'yes')->find_many();
+                $radius_pppoe = ORM::for_table('tbl_plans')
+                    ->where('plan_type', $account_type)
+                    ->where('enabled', '1')
+                    ->where('is_radius', 1)
+                    ->where('type', 'PPPOE')
+                    ->where('prepaid', 'yes')->find_many();
+                $radius_hotspot = ORM::for_table('tbl_plans')
+                    ->where('plan_type', $account_type)
+                    ->where('enabled', '1')
+                    ->where('is_radius', 1)
+                    ->where('type', 'Hotspot')
+                    ->where('prepaid', 'yes')->find_many();
             } else {
                 $routers = ORM::for_table('tbl_routers')->where('id', $_SESSION['nux-router'])->find_many();
                 $rs = [];
                 foreach ($routers as $r) {
                     $rs[] = $r['name'];
                 }
-                $plans_pppoe = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'PPPOE')->where('prepaid', 'yes')->find_many();
-                $plans_hotspot = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where_in('routers', $rs)->where('is_radius', 0)->where('type', 'Hotspot')->where('prepaid', 'yes')->find_many();
+                $plans_pppoe = ORM::for_table('tbl_plans')
+                    ->where('plan_type', $account_type)
+                    ->where('enabled', '1')
+                    ->where_in('routers', $rs)
+                    ->where('is_radius', 0)
+                    ->where('type', 'PPPOE')
+                    ->where('prepaid', 'yes')
+                    ->find_many();
+                $plans_hotspot = ORM::for_table('tbl_plans')
+                    ->where('plan_type', $account_type)
+                    ->where('enabled', '1')
+                    ->where_in('routers', $rs)
+                    ->where('is_radius', 0)
+                    ->where('type', 'Hotspot')
+                    ->where('prepaid', 'yes')
+                    ->find_many();
             }
         } else {
-            $radius_pppoe = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'PPPOE')->where('prepaid', 'yes')->find_many();
-            $radius_hotspot = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 1)->where('type', 'Hotspot')->where('prepaid', 'yes')->find_many();
+            $radius_pppoe = ORM::for_table('tbl_plans')
+                ->where('plan_type', $account_type)
+                ->where('enabled', '1')
+                ->where('is_radius', 1)
+                ->where('type', 'PPPOE')
+                ->where('prepaid', 'yes')
+                ->find_many();
+            $radius_hotspot = ORM::for_table('tbl_plans')
+                ->where('plan_type', $account_type)
+                ->where('enabled', '1')
+                ->where('is_radius', 1)
+                ->where('type', 'Hotspot')
+                ->where('prepaid', 'yes')
+                ->find_many();
 
             $routers = ORM::for_table('tbl_routers')->find_many();
-            $plans_pppoe = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 0)->where('type', 'PPPOE')->where('prepaid', 'yes')->find_many();
-            $plans_hotspot = ORM::for_table('tbl_plans')->where('plan_type', $account_type)->where('enabled', '1')->where('is_radius', 0)->where('type', 'Hotspot')->where('prepaid', 'yes')->find_many();
+            $plans_pppoe = ORM::for_table('tbl_plans')
+                ->where('plan_type', $account_type)
+                ->where('enabled', '1')
+                ->where('is_radius', 0)
+                ->where('type', 'PPPOE')
+                ->where('prepaid', 'yes')
+                ->find_many();
+            $plans_hotspot = ORM::for_table('tbl_plans')
+                ->where('plan_type', $account_type)
+                ->where('enabled', '1')->where('is_radius', 0)
+                ->where('type', 'Hotspot')
+                ->where('prepaid', 'yes')
+                ->find_many();
         }
         $ui->assign('routers', $routers);
         $ui->assign('radius_pppoe', $radius_pppoe);
