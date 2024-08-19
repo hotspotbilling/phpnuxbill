@@ -2,7 +2,7 @@
 
 # CHANGELOG
 
-## 2024.8.18
+## 2024.8.19
 
 - New Page, Payment Info, To Inform Customer, which payment gateway is good
 - Move Customer UI to user-ui folder
