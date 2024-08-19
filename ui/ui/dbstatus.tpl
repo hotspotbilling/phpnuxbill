@@ -3,7 +3,7 @@
 <div class="row">
     <div class="col-sm-7">
         <div class="panel panel-primary">
-            <div class="panel-heading">Backup Database</div>
+            <div class="panel-heading">{Lang::T('Backup Database')}</div>
             <form method="post" action="{$_url}settings/dbbackup">
                 <div class="table-responsive">
                     <table class="table table-bordered">
@@ -27,7 +27,7 @@
                 </div>
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-6">Dont select logs if it failed</div>
+                        <div class="col-md-6">{Lang::T('Dont select logs if it failed')}</div>
                         <div class="col-md-4 text-right">
                             <button type="submit" class="btn btn-primary btn-xs btn-block"><i
                                     class="fa fa-download"></i>
@@ -53,7 +53,7 @@
                     </div>
                 </div>
             </form>
-            <div class="panel-footer">Restoring database will clean up data and then restore all the data</div>
+            <div class="panel-footer">{Lang::T('Restoring database will clean up data and then restore all the data')}</div>
         </div>
     </div>
 </div>
