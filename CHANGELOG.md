@@ -2,6 +2,14 @@
 
 # CHANGELOG
 
+## 2024.8.18
+
+- New Page, Payment Info, To Inform Customer, which payment gateway is good
+- Move Customer UI to user-ui folder
+- Voucher Template
+- Change editor to summernote
+- Customer can change language
+
 ## 2024.8.6
 
 - Fix QRCode Scanner
