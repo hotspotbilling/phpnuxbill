@@ -31,7 +31,7 @@
                         <br>
                         <p class="help-block">{Lang::T("Sometimes you need to refresh 3 times until content change")}</p>
                         <input type="text" class="form-control" onclick="this.select()" readonly
-                            value="{$app_url}/pages/{$PageFile}.html">
+                            value="{$app_url}/{$PAGES_PATH}/{$PageFile}.html">
                     </div>
                 {else}
                     <div class="panel-footer">
@@ -54,10 +54,10 @@
         {if $action=='Voucher'}
             <div class="col-md-4">
                 {foreach $vouchers as $v}
-                    {if is_file("pages/vouchers/$v")}
+                    {if is_file("$PAGES_PATH/vouchers/$v")}
                         <div class="panel mb20 panel-primary panel-hovered" style="cursor: pointer;" onclick="selectTemplate(this)">
                             <div class="panel-heading">{str_replace(".html", '', $v)}</div>
-                            <div class="panel-body">{include file="pages/vouchers/$v"}</div>
+                            <div class="panel-body">{include file="$PAGES_PATH/vouchers/$v"}</div>
                         </div>
                     {/if}
                 {/foreach}

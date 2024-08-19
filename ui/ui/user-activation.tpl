@@ -8,7 +8,7 @@
                 <h3 class="box-title">{Lang::T('Order Voucher')}</h3>
             </div>
             <div class="box-body">
-                {include file="$_path/../pages/Order_Voucher.html"}
+                {include file="$PAGES_PATH/Order_Voucher.html"}
             </div>
         </div>
     </div>

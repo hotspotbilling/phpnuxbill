@@ -1,8 +1,16 @@
 {include file="sections/user-header.tpl"}
 
 <div class="row">
-    <div class="col-md-6 col-md-offset-3">
-        <div class="panel panel-info panel-hovered">
+    {if file_exists("$PAGES_PATH/Payment_Info.html")}
+        <div class="col-md-6">
+            <div class="panel panel-warning panel-hovered">
+                <div class="panel-heading">{Lang::T('Payment Info')}</div>
+                <div class="panel-body">{include file="$PAGES_PATH/Payment_Info.html"}</div>
+            </div>
+        </div>
+    {/if}
+    <div class="{if file_exists("$PAGES_PATH/Payment_Info.html")}col-md-6{else}col-md-6 col-md-offset-3{/if}">
+        <div class="panel panel-success panel-hovered">
             <div class="panel-heading">{Lang::T('Available Payment Gateway')}</div>
             <div class="panel-footer">
                 <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">

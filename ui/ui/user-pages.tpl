@@ -6,7 +6,7 @@
 							<div class="panel mb20 panel-primary panel-hovered">
 								<div class="panel-heading">{$_L[$pageHeader]}</div>
 								<div class="panel-body">
-									{include file="$_path/../pages/$PageFile.html"}
+									{include file="$PAGES_PATH/$PageFile.html"}
 								</div>
 							</div>
 						</div>
