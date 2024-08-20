@@ -32,7 +32,7 @@
 							<input type="text" class="form-control" id="routers" name="routers" value="{$d['routers']}" readonly>
 						</div>
                         {if $_c['radius_enable']}
-                            <p class="help-block col-md-4">For Radius, you need to add <b>Pool Name</b> in Mikrotik manually</p>
+                            <p class="help-block col-md-4">{Lang::T('For Radius, you need to add')} <b>Pool {Lang::T('Name')}</b> {Lang::T('in Mikrotik manually')}</p>
                         {/if}
                     </div>
 
