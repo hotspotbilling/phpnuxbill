@@ -1,8 +1,8 @@
 {include file="sections/header.tpl"}
 
 {if empty($_c['github_token'])}
-    <p class="help-block">To download from private/paid repository, <a href="{$_url}settings/app#Github_Authentication">Set
-            your Github Authentication first</a></p>
+    <p class="help-block">{Lang::T('To download from private/paid repository')}, <a href="{$_url}settings/app#Github_Authentication">
+            {Lang::T('Set your Github Authentication first')}</a></p>
 {/if}
 
 <form method="post" enctype="multipart/form-data"
@@ -21,7 +21,7 @@
         </div>
         <div class="panel-body row">
             <div class="form-group col-md-4">
-                <label>Upload Zip Plugin/Theme/Device</label>
+                <label>{Lang::T('Upload Zip Plugin/Theme/Device')}</label>
                 <input type="file" name="zip_plugin" accept="application/zip" onchange="this.submit()">
             </div>
             <div class="form-group col-md-7">
@@ -31,7 +31,7 @@
             </div>
             <div class="col-md-1">
                 <br>
-                <button type="submit" class="btn btn-primary">Install</button>
+                <button type="submit" class="btn btn-primary">{Lang::T('Install')}</button>
             </div>
         </div>
     </div>
@@ -41,10 +41,10 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#plugin" aria-controls="plugin" role="tab"
-                data-toggle="tab">Plugin</a></li>
-        <li role="presentation"><a href="#pg" aria-controls="pg" role="tab" data-toggle="tab">Payment Gateway</a>
+                data-toggle="tab">{Lang::T('Plugin')}</a></li>
+        <li role="presentation"><a href="#pg" aria-controls="pg" role="tab" data-toggle="tab">{Lang::T('Payment Gateway')}</a>
         </li>
-        <li role="presentation"><a href="#device" aria-controls="device" role="tab" data-toggle="tab">Devices</a>
+        <li role="presentation"><a href="#device" aria-controls="device" role="tab" data-toggle="tab">{Lang::T('Devices')}</a>
         </li>
     </ul>
     <br>
@@ -61,7 +61,7 @@
                             <div class="box-body" style="overflow-y: scroll;">
                                 <div style="max-height: 50px; min-height: 50px;">{$plugin['description']}</div>
                             </div>
-                            <div class="box-footer ">
+                            <div class="box-footer">
                                 <center><small><i>@{$plugin['author']} Last update: {$plugin['last_update']}</i></small>
                                 </center>
                                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
