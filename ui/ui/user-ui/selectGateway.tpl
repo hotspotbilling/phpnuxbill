@@ -15,7 +15,7 @@
             <div class="panel-footer">
                 <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
                     <div class="form-group row">
-                        <label class="col-md-4 ">Payment Gateway</label>
+                        <label class="col-md-4">{Lang::T('Payment Gateway')}</label>
                         <div class="col-md-8">
                             <select name="gateway" id="gateway" class="form-control">
                                 {foreach $pgs as $pg}
