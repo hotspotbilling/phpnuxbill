@@ -26,9 +26,9 @@
                         </div>
                         <div class="col-lg-1 col-xs-4">
                             <select class="form-control" id="type1" name="type1">
-                                <option value="">Prepaid &amp; Postpaid</option>
-                                <option value="yes" {if $type1 eq 'yes' }selected{/if}>Prepaid</option>
-                                <option value="no" {if $type1 eq 'no' }selected{/if}>Postpaid</option>
+                                <option value="">{Lang::T('Prepaid')} &amp; {Lang::T('Postpaid')}</option>
+                                <option value="yes" {if $type1 eq 'yes' }selected{/if}>{Lang::T('Prepaid')}</option>
+                                <option value="no" {if $type1 eq 'no' }selected{/if}>{Lang::T('Postpaid')}</option>
                             </select>
                         </div>
                         <div class="col-lg-1 col-xs-4">
@@ -88,8 +88,8 @@
                         <div class="col-lg-1 col-xs-4">
                             <select class="form-control" id="status" name="status">
                                 <option value="-">{Lang::T('Status')}</option>
-                                <option value="1" {if $status eq '1' }selected{/if}>Enabled</option>
-                                <option value="0" {if $status eq '0' }selected{/if}>Disable</option>
+                                <option value="1" {if $status eq '1' }selected{/if}>{Lang::T('Enabled')}</option>
+                                <option value="0" {if $status eq '0' }selected{/if}>{Lang::T('Disable')}</option>
                             </select>
                         </div>
                         <div class="col-lg-1 col-xs-8">
@@ -133,13 +133,13 @@
                         {foreach $d as $ds}
                             <tr {if $ds['enabled'] != 1}class="danger" title="disabled" {/if}>
                                 <td>{$ds['name_plan']}</td>
-                                <td>{$ds['plan_type']} {if $ds['prepaid'] != 'yes'}<b>Postpaid</b>{else}Prepaid{/if}</td>
+                                <td>{$ds['plan_type']} {if $ds['prepaid'] != 'yes'}<b>{Lang::T('Postpaid')}</b>{else}{Lang::T('Prepaid')}{/if}</td>
                                 <td>{$ds['name_bw']}</td>
                                 <td>{Lang::moneyFormat($ds['price'])}</td>
                                 <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                 <td>{$ds['pool']}</td>
                                 <td>{if $ds['plan_expired']}<a
-                                        href="{$_url}services/edit/{$ds['plan_expired']}">Yes</a>{else}No
+                                        href="{$_url}services/edit/{$ds['plan_expired']}">{Lang::T('Yes')}</a>{else}{Lang::T('No')}
                                     {/if}</td>
                                 <td>{if $ds['prepaid'] == no}{$ds['expired_date']}{/if}</td>
                                 <td>
@@ -168,8 +168,8 @@
             <div class="panel-footer">
                 {include file="pagination.tpl"}
                 <div class="bs-callout bs-callout-info" id="callout-navbar-role">
-                    <h4>Create expired Internet Plan</h4>
-                    <p>When customer expired, you can move it to Expired Internet Plan</p>
+                    <h4>{Lang::T('Create expired Internet Plan')}</h4>
+                    <p>{Lang::T('When customer expired, you can move it to Expired Internet Plan')}</p>
                 </div>
             </div>
         </div>
