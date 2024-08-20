@@ -32,12 +32,12 @@
                     <div class="col-md-8">
                         <form class="form-inline" method="post" action="{$_url}logs/radius/">
                             <div class="input-group has-error">
-                                <span class="input-group-addon">Keep Logs </span>
+                                <span class="input-group-addon">{Lang::T('Keep Logs')} </span>
                                 <input type="text" name="keep" class="form-control" placeholder="90" value="90">
-                                <span class="input-group-addon">Days</span>
+                                <span class="input-group-addon">{Lang::T('Days')}</span>
                             </div>
                             <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Clear old logs?')">Clean Logs</button>
+                                onclick="return confirm('Clear old logs?')">{Lang::T('Clean Logs')}</button>
                         </form>
                     </div>&nbsp;
                 </div>
