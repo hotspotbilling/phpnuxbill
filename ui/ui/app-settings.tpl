@@ -241,8 +241,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Allow Extend')}</label>
                         <div class="col-md-6">
                             <select name="extend_expired" id="extend_expired" class="form-control text-muted">
-                                <option value="1" {if $_c['extend_expired']}selected="selected" {/if}>Yes</option>
                                 <option value="0">No</option>
+                                <option value="1" {if $_c['extend_expired'] ==1}selected="selected" {/if}>Yes</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Customer can request to extend expirations')}</p>
