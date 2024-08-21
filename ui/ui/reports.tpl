@@ -11,7 +11,7 @@
                     <center>
                         <label>
                             <input type="checkbox" id="show_chart" onclick="return setShowChart()">
-                            Show chart
+                            {Lang::T('Show chart')}
                         </label>
                     </center>
                     <hr style="margin: 1px;">
@@ -73,7 +73,7 @@
             </div>
             <div class="box box-primary box-solid">
                 <div class="box-header">
-                    <h3 class="box-title">{Lang::dateFormat($sd)} - {Lang::dateFormat($ed)} <sup>Max 30 days</sup></h3>
+                    <h3 class="box-title">{Lang::dateFormat($sd)} - {Lang::dateFormat($ed)} <sup>{Lang::T('Max 30 days')}</sup></h3>
                 </div>
                 <div class="box-body row" style="height: 300px;">
                     <canvas id="line_cart"></canvas>

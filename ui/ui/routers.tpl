@@ -58,7 +58,7 @@
                                     <td>{$ds['ip_address']}</td>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['description']}</td>
-                                    <td>{if $ds['enabled'] == 1}Enabled{else}Disabled{/if}</td>
+                                    <td>{if $ds['enabled'] == 1}{Lang::T('Enabled')}{else}{Lang::T('Disabled')}{/if}</td>
                                     <td>
                                         <a href="{$_url}routers/edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>

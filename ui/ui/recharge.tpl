@@ -54,13 +54,13 @@
                                 <option value="zero">{$_c['currency_code']} 0</option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">Postpaid Recharge for the first time use {$_c['currency_code']} 0</p>
+                        <p class="help-block col-md-4">{Lang::T('Postpaid Recharge for the first time use')} {$_c['currency_code']} 0</p>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success"
                                 type="submit">{Lang::T('Recharge')}</button>
-                            Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
+                            {Lang::T('Or')} <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>
