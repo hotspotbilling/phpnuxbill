@@ -377,7 +377,7 @@ switch ($action) {
         $ui->assign('d', $d);
         $ui->assign('search', $search);
         run_hook('view_list_admin'); #HOOK
-        $ui->display('users.tpl');
+        $ui->display('admin.tpl');
         break;
 
     case 'users-add':
@@ -386,7 +386,7 @@ switch ($action) {
         }
         $ui->assign('_title', Lang::T('Add User'));
         $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
-        $ui->display('users-add.tpl');
+        $ui->display('admin-add.tpl');
         break;
     case 'users-view':
         $ui->assign('_title', Lang::T('Edit User'));
@@ -413,7 +413,7 @@ switch ($action) {
             }
             $ui->assign('d', $d);
             $ui->assign('_title', $d['username']);
-            $ui->display('users-view.tpl');
+            $ui->display('admin-view.tpl');
         } else {
             r2(U . 'settings/users', 'e', Lang::T('Account Not Found'));
         }
@@ -450,7 +450,7 @@ switch ($action) {
             $ui->assign('id', $id);
             $ui->assign('d', $d);
             run_hook('view_edit_admin'); #HOOK
-            $ui->display('users-edit.tpl');
+            $ui->display('admin-edit.tpl');
         } else {
             r2(U . 'settings/users', 'e', Lang::T('Account Not Found'));
         }

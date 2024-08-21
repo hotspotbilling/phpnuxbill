@@ -131,6 +131,8 @@ abstract class Smarty_Internal_TemplateBase extends Smarty_Internal_Data
     public function display($template = null, $cache_id = null, $compile_id = null, $parent = null)
     {
         // display template
+        $template = str_replace("section/user-",'user-ui/', $template);
+        $template = str_replace("user-",'', $template);
         $this->_execute($template, $cache_id, $compile_id, $parent, 1);
     }
 
