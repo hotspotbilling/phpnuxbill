@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
-            <div class="panel-heading">Radius - Add NAS</div>
+            <div class="panel-heading">Radius - {Lang::T('Add NAS')}</div>
             <div class="panel-body">
 
                 <form class="form-horizontal" method="post" role="form" action="{$_url}radius/nas-add-post">
@@ -34,7 +34,7 @@
                         <div class="col-md-2">
                             <input type="text" class="form-control" id="ports" name="ports" placeholder="null">
                         </div>
-                        <label class="col-md-2 control-label">Type</label>
+                        <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-2">
                             <input type="text" class="form-control" id="type" name="type" value="other" required
                                 placeholder="other">
@@ -67,7 +67,7 @@
                                 {/foreach}
                             </select>
 						</div>
-                        <p class="help-block col-md-4">Assign NAS to Router</p>
+                        <p class="help-block col-md-4">{Lang::T('Assign NAS to Router')}</p>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
