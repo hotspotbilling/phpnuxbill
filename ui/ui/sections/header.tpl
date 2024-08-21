@@ -18,7 +18,118 @@
     <link rel="stylesheet" href="ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="ui/ui/summernote/summernote.min.css" />
     <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
-    <style>
+     <style>
+        /* New Customize Interface Start Here */
+        body {
+            position: relative;
+            z-index: 1;
+            background-color: rgb(241 245 249);
+            font-family: Satoshi, sans-serif;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            font-weight: 400;
+            color: rgb(100 116 139);
+        }
+
+        .modern-skin-dark .main-header .logo {
+            background-color: rgb(28 36 52);
+            color: #fff;
+        }
+
+        .modern-skin-dark .main-header .navbar {
+            background: rgb(28 36 52);
+        }
+
+        .modern-skin-dark .main-sidebar .sidebar {
+            background-color: rgb(28 36 52);
+            bottom: 0;
+        }
+
+        .modern-skin-dark .main-sidebar {
+            background-color: rgb(28 36 52);
+            box-shadow: 0 0 5px rgba(0, 0, 0, .3);
+        }
+
+        .modern-skin-dark .main-header .navbar>a:focus,
+        .modern-skin-dark .main-header .navbar>a:active,
+        .modern-skin-dark .main-header .navbar>a:visited,
+        .modern-skin-dark .main-header .navbar>a:hover {
+            background-color: rgb(28 36 52);
+        }
+
+        .sidebar-menu li>a {
+            position: relative;
+            background-color: rgb(28 36 52);
+        }
+        
+        .sidebar-menu li:focus,
+        .sidebar-menu li :hover {
+            color: #10d435;
+
+        }
+        
+        .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li.active a {
+            background-color: #2e298e;
+            border-radius: 5px;
+            margin: 10px;
+
+        }
+
+        .modern-skin-dark .main-sidebar .sidebar .sidebar-menu {
+            background-color: rgb(28 36 52);
+        }
+
+        .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li.active a {
+            background-color: transparent !important;
+            color: rgb(84, 131, 227);
+        }
+
+        .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li>a {
+            background-color: transparent !important;
+            padding: 10px 5px 5px 15px;
+        }
+
+        .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu {
+            padding-left: 0;
+            border-left: 3px solid #10d435;
+        }
+
+        .content-header {
+            list-style-type: none;
+            padding: 15px;
+            background-color: #f6f9fc;
+
+        }
+
+        @media (max-width: 767px) {
+            .content {
+                padding: 0 15px !important;
+                background-color: #f6f9fc;
+            }
+        }
+
+        .content {
+            padding: 25px !important;
+            background-color: #f6f9fc;
+
+        }
+
+        .content-wrapper,
+        .right-side {
+            min-height: 100%;
+            background-color: #f6f9fc;
+            z-index: 800;
+        }
+
+        .main-footer {
+            background: rgb(28 36 52);
+            padding: 15px;
+            color: rgb(100 116 139);
+            border-top: 1px solid #d2d6de;
+        }
+
+        /* New Customize Interface End Here */
+
         ::-moz-selection {
             /* Code for Firefox */
             color: red;
@@ -89,8 +200,8 @@
         }
 
         /*
-         * maintenance top-bar
-         */
+    * maintenance top-bar
+    */
 
         .notification-top-bar {
             position: fixed;
