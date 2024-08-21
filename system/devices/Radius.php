@@ -88,8 +88,9 @@ class Radius
             if ($p) {
                 $this->customerAddPlan($customer, $p);
             }
-        }
+        } else {
         $this->customerDeactivate($customer['username'], true);
+		}
     }
 
     public function change_username($plan, $from, $to)
@@ -257,6 +258,7 @@ class Radius
     {
         $this->getTableCustomer()->where_equal('username', $username)->delete_many();
         $this->getTableUserPackage()->where_equal('username', $username)->delete_many();
+        $this->getTableCustomerAttr()->where_equal('username', $username)->delete_many();
     }
 
     /**
@@ -361,8 +363,16 @@ class Radius
             }
 
             if ($plan['type'] == 'PPPOE') {
+				if (!empty($customer['pppoe_ip']) && $expired != '') {
+				$this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
+				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Address', $customer['pppoe_ip'], ':=');
+				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Netmask', '255.255.255.0', ':=');
+					}else{
                 $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
-            }
+				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Address', '0.0.0.0', ':=');
+				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Netmask', '255.255.255.0', ':=');
+				}
+            } 
 
 
             return true;
