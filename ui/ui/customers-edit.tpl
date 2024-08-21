@@ -119,11 +119,11 @@
                 <div class="panel-heading">PPPOE</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Username')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Username')} <span class="label label-danger" id="warning_username"></span></label>
                         <div class="col-md-9">
                             <input type="username" class="form-control" id="pppoe_username" name="pppoe_username"
-                                value="{$d['pppoe_username']}">
-                            <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
+                                onkeyup="checkUsername(this, {$d['id']})" value="{$d['pppoe_username']}">
+                            <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -135,11 +135,11 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">Local IP</label>
+                        <label class="col-md-3 control-label">Local IP <span class="label label-danger" id="warning_ip"></span></label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
-                                value="{$d['pppoe_ip']}">
-                            <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
+                                onkeyup="checkIP(this, {$d['id']})" value="{$d['pppoe_ip']}">
+                            <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                         </div>
                     </div>
                     <span class="help-block">

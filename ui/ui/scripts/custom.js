@@ -37,6 +37,22 @@ $(document).ready(function () {
 $("#Hotspot").prop("checked", true).change();
 
 
+function checkIP(f, id) {
+	if (f.value.length > 6) {
+		$.get('./?_route=autoload/pppoe_ip_used&ip=' + f.value + '&id=' + id, function(data) {
+			$("#warning_ip").html(data)
+		});
+	}
+}
+
+function checkUsername(f, id) {
+	if (f.value.length > 1) {
+		$.get('./?_route=autoload/pppoe_username_used&u=' + f.value + '&id=' + id, function(data) {
+			$("#warning_username").html(data)
+		});
+	}
+}
+
 //auto load pool - pppoe plan
 var htmlobjek;
 $(document).ready(function(){

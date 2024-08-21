@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -18,9 +19,9 @@ $ui->assign('_admin', $admin);
 switch ($action) {
     case 'pool':
         $routers = _get('routers');
-        if(empty($routers)){
+        if (empty($routers)) {
             $d = ORM::for_table('tbl_pool')->find_many();
-        }else{
+        } else {
             $d = ORM::for_table('tbl_pool')->where('routers', $routers)->find_many();
         }
         $ui->assign('routers', $routers);
@@ -34,20 +35,45 @@ switch ($action) {
 
         $ui->display('autoload-server.tpl');
         break;
-
+    case 'pppoe_ip_used':
+        if (!empty(_get('ip'))) {
+            $cs = ORM::for_table('tbl_customers')
+                ->select("username")
+                ->where_not_equal('id', _get('id'))
+                ->where("pppoe_ip", _get('ip'))
+                ->findArray();
+            if (count($cs) > 0) {
+                $c = array_column($cs, 'username');
+                die(Lang::T("IP has been used by") . ' : ' . implode(", ", $c));
+            }
+        }
+        die();
+    case 'pppoe_username_used':
+        if (!empty(_get('u'))) {
+            $cs = ORM::for_table('tbl_customers')
+                ->select("username")
+                ->where_not_equal('id', _get('id'))
+                ->where("pppoe_username", _get('u'))
+                ->findArray();
+            if (count($cs) > 0) {
+                $c = array_column($cs, 'username');
+                die(Lang::T("Username has been used by") . ' : ' . implode(", ", $c));
+            }
+        }
+        die();
     case 'plan':
         $server = _post('server');
         $jenis = _post('jenis');
-        if(in_array($admin['user_type'], array('SuperAdmin', 'Admin'))){
-            if($server=='radius'){
+        if (in_array($admin['user_type'], array('SuperAdmin', 'Admin'))) {
+            if ($server == 'radius') {
                 $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->find_many();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->find_many();
             }
-        }else{
-            if($server=='radius'){
+        } else {
+            if ($server == 'radius') {
                 $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->where('enabled', '1')->find_many();
-            }else{
+            } else {
                 $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->where('enabled', '1')->find_many();
             }
         }
@@ -59,9 +85,9 @@ switch ($action) {
         $d = ORM::for_table('tbl_user_recharges')->where('customer_id', $routes['2'])->findOne();
         if ($d) {
             if ($d['status'] == 'on') {
-                die('<span class="label label-success" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">'.$d['namebp'].'</span>');
+                die('<span class="label label-success" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . '</span>');
             } else {
-                die('<span class="label label-danger" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">'.$d['namebp'].'</span>');
+                die('<span class="label label-danger" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . '</span>');
             }
         } else {
             die('<span class="label label-danger">&bull;</span>');

@@ -96,9 +96,9 @@
                 <div class="panel-heading">PPPOE</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Username')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Username')} <span class="label label-danger" id="warning_username"></span></label>
                         <div class="col-md-9">
-                            <input type="username" class="form-control" id="pppoe_username" name="pppoe_username">
+                            <input type="username" class="form-control" id="pppoe_username" name="pppoe_username" onkeyup="checkUsername(this, '0')">
                             <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
                         </div>
                     </div>
@@ -110,9 +110,9 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">Local IP</label>
+                        <label class="col-md-3 control-label">Local IP <span class="label label-danger" id="warning_ip"></span></label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip">
+                            <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip" onkeyup="checkIP(this, '0')">
                             <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
                         </div>
                     </div>

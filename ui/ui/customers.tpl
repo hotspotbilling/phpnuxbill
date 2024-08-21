@@ -101,6 +101,7 @@
                                 <th>{Lang::T('Contact')}</th>
                                 <th>{Lang::T('Package')}</th>
                                 <th>{Lang::T('Service Type')}</th>
+                                <th>PPPOE</th>
                                 <th>{Lang::T('Status')}</th>
                                 <th>{Lang::T('Created On')}</th>
                                 <th>{Lang::T('Manage')}</th>
@@ -135,6 +136,11 @@
                                         <span class="label label-default">&bull;</span>
                                     </td>
                                     <td>{$ds['service_type']}</td>
+                                    <td>
+                                        {$ds['pppoe_username']}
+                                    {if !empty($ds['pppoe_username']) && !empty($ds['pppoe_ip'])}:{/if}
+                                        {$ds['pppoe_ip']}
+                                    </td>
                                     <td>{Lang::T($ds['status'])}</td>
                                     <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
                                     <td align="center">
