@@ -134,6 +134,10 @@
                             {if $package['prepaid'] eq yes}Prepaid{else}<b>Postpaid</b>{/if}</span>
                     </li>
                     <li class="list-group-item">
+                        {Lang::T('Bandwidth')} <span class="pull-right">
+                            {$package['name_bw']}</span>
+                    </li>
+                    <li class="list-group-item">
                         {Lang::T('Created On')} <span
                             class="pull-right">{Lang::dateAndTimeFormat($package['recharged_on'],$package['recharged_time'])}</span>
                     </li>
