@@ -13,8 +13,8 @@
                                 data-content="Customer cannot buy disabled Plan, but admin can recharge it, use it if you want only admin recharge it">?</a>
                         </label>
                         <div class="col-md-10">
-                            <input type="radio" checked name="enabled" value="1"> Enable
-                            <input type="radio" name="enabled" value="0"> Disable
+                            <input type="radio" checked name="enabled" value="1"> {Lang::T('Enable')}
+                            <input type="radio" name="enabled" value="0"> {Lang::T('Disable')}
                         </div>
                     </div>
                     <div class="form-group">
@@ -24,8 +24,8 @@
                                 data-content="Postpaid will have fix expired date">?</a>
                         </label>
                         <div class="col-md-10">
-                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes" checked> Prepaid
-                            <input type="radio" name="prepaid" onclick="postPaid()" value="no"> Postpaid
+                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes" checked> {Lang::T('Prepaid')}
+                            <input type="radio" name="prepaid" onclick="postPaid()" value="no"> {Lang::T('Postpaid')}
                         </div>
                     </div>
                     <div class="form-group">
@@ -35,8 +35,8 @@
                                 data-content="Personal Plan will only show to personal Customer, Business plan will only show to Business Customer">?</a>
                         </label>
                         <div class="col-md-10">
-                            <input type="radio" name="plan_type" value="Personal" checked> Personal
-                            <input type="radio" name="plan_type" value="Business"> Business
+                            <input type="radio" name="plan_type" value="Personal" checked> {Lang::T('Personal')}
+                            <input type="radio" name="plan_type" value="Business"> {Lang::T('Business')}
                         </div>
                     </div>
                     {if $_c['radius_enable']}

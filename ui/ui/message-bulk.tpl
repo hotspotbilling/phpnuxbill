@@ -90,24 +90,24 @@
 </div>
 
 {if $batchStatus}
-<p><span class="label label-success">Total SMS Sent: {$totalSMSSent}</span> <span class="label label-danger">Total SMS
-		Failed: {$totalSMSFailed}</span> <span class="label label-success">Total WhatsApp Sent:
-		{$totalWhatsappSent}</span> <span class="label label-danger">Total WhatsApp Failed:
+<p><span class="label label-success">{Lang::T('Total SMS Sent')}: {$totalSMSSent}</span> <span class="label label-danger">{Lang::T('Total SMS
+		Failed')}: {$totalSMSFailed}</span> <span class="label label-success">{Lang::T('Total WhatsApp Sent')}:
+		{$totalWhatsappSent}</span> <span class="label label-danger">{Lang::T('Total WhatsApp Failed')}:
 		{$totalWhatsappFailed}</span></p>
 {/if}
 <div class="box">
 	<div class="box-header">
-		<h3 class="box-title">Message Results</h3>
+		<h3 class="box-title">{Lang::T('Message Results')}</h3>
 	</div>
 	<!-- /.box-header -->
 	<div class="box-body">
 		<table id="messageResultsTable" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th>Name</th>
-					<th>Phone</th>
-					<th>Message</th>
-					<th>Status</th>
+					<th>{Lang::T('Name')}</th>
+					<th>{Lang::T('Phone')}</th>
+					<th>{Lang::T('Message')}</th>
+					<th>{Lang::T('Status')}</th>
 				</tr>
 			</thead>
 			<tbody>
