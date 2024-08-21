@@ -4,7 +4,7 @@
     <div class="col-sm-12">
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
-                Activity Log
+                {Lang::T('Activity Log')}
             </div>
             <div class="panel-body">
                 <div class="text-center" style="padding: 15px">
