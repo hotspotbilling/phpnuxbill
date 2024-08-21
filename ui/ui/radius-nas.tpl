@@ -24,16 +24,16 @@
                     </div>
                     <div class="col-md-4">
                         <a href="{$_url}radius/nas-add" class="btn btn-primary btn-block"><i
-                                class="ion ion-android-add"> </i> New NAS</a>
+                                class="ion ion-android-add"> </i> {Lang::T('New NAS')}</a>
                     </div>&nbsp;
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>{Lang::T('Name')}</th>
                                 <th>IP</th>
-                                <th>Type</th>
+                                <th>{Lang::T('Type')}</th>
                                 <th>Port</th>
                                 <th>Server</th>
                                 <th>Community</th>
@@ -67,7 +67,7 @@
                 {include file="pagination.tpl"}
                 <div class="bs-callout bs-callout-info" id="callout-navbar-role">
                     <h4>RADIUS REST</h4>
-                    <p>For Radius REST, you don't need to add NAS, NAS need to add to client.conf manually</p>
+                    <p>{Lang::T('For Radius REST, you don't need to add NAS, NAS need to add to client.conf manually')}</p>
                 </div>
             </div>
         </div>
