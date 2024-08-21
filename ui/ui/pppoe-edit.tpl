@@ -14,8 +14,8 @@
                                 data-content="Customer cannot buy disabled Plan, but admin can recharge it, use it if you want only admin recharge it">?</a>
                         </label>
                         <div class="col-md-9">
-                            <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}> Enable
-                            <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> Disable
+                            <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}> {Lang::T('Enable')}
+                            <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> {Lang::T('Disable')}
                         </div>
                     </div>
                     <div class="form-group">
@@ -27,9 +27,9 @@
                         <div class="col-md-9">
                             <input type="radio" name="prepaid" onclick="prePaid()" value="yes"
                                 {if $d['prepaid'] == 'yes'}checked{/if}>
-                            Prepaid
+                            {Lang::T('Prepaid')}
                             <input type="radio" name="prepaid" onclick="postPaid()" value="no"
-                                {if $d['prepaid'] == 'no'}checked{/if}> Postpaid
+                                {if $d['prepaid'] == 'no'}checked{/if}> {Lang::T('Postpaid')}
                         </div>
                     </div>
                     <div class="form-group">
@@ -41,9 +41,9 @@
                         <div class="col-md-9">
                             <input type="radio" name="plan_type" value="Personal"
                                 {if $d['plan_type'] == 'Personal'}checked{/if}>
-                            Personal
+                            {Lang::T('Personal')}
                             <input type="radio" name="plan_type" value="Business"
-                                {if $d['plan_type'] == 'Business'}checked{/if}> Business
+                                {if $d['plan_type'] == 'Business'}checked{/if}> {Lang::T('Business')}
                         </div>
                     </div>
                     {if $_c['radius_enable'] and $d['is_radius']}
@@ -187,14 +187,14 @@
         {if !$d['is_radius']}
             <div class="col-md-6">
                 <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                    <div class="panel-heading">on-login / on-up</div>
+                    <div class="panel-heading">{Lang::T('on-login / on-up')}</div>
                     <div class="panel-body">
                         <textarea class="form-control" id="code" name="on_login"
                             style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_login']}</textarea>
                     </div>
                 </div>
                 <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                    <div class="panel-heading">on-logout / on-down</div>
+                    <div class="panel-heading">{Lang::T('on-logout / on-down')}</div>
                     <div class="panel-body">
                         <textarea class="form-control" id="code2" name="on_logout"
                             style="font-family: 'Courier New', Courier, monospace;" rows="15">{$d['on_logout']}</textarea>

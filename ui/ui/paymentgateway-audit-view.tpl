@@ -10,7 +10,7 @@
             <div class="panel-body">
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>TRX ID</b> <span class="pull-right">&nbsp;{$pg['id']}&nbsp;</span>
+                        <b>{Lang::T('TRX ID')}</b> <span class="pull-right">&nbsp;{$pg['id']}&nbsp;</span>
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Invoice')}</b> <span class="pull-right">&nbsp;
@@ -65,7 +65,7 @@
 
 <div class="panel panel-hovered mb20 panel-primary">
     <div class="panel-heading">
-        Response when request payment
+        {Lang::T('Response when request payment')}
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-condensed">
@@ -80,7 +80,7 @@
 </div>
 <div class="panel panel-hovered mb20 panel-primary">
     <div class="panel-heading">
-        Response when payment PAID
+        {Lang::T('Response when payment PAID')}
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-condensed">

@@ -17,8 +17,8 @@
             <table class="table table-bordered table-striped table-condensed">
                 <thead>
                     <tr>
-                        <th>TRX ID</th>
-                        <th>PG ID</th>
+                        <th>{Lang::T('TRX ID')}</th>
+                        <th>{Lang::T('PG ID')}</th>
                         <th>{Lang::T('Username')}</th>
                         <th>{Lang::T('Plan Name')}</th>
                         <th>{Lang::T('Routers')}</th>
@@ -46,7 +46,7 @@
                             <td>
                                 {if $pg['pg_url_payment']}
                                     <a href="{$pg['pg_url_payment']}" target="_blank" class="btn btn-xs btn-default btn-block"
-                                        rel="noopener noreferrer">open</a>
+                                        rel="noopener noreferrer">{Lang::T('open')}</a>
                                 {/if}
                             </td>
                             <td>{$pg['payment_method']} - {$pg['payment_channel']}</td>
@@ -63,7 +63,7 @@
             </table>
         </div>
         {include file="pagination.tpl"}
-        <a href="{$_url}paymentgateway/" class="btn btn-default btn-xs">kembali</a>
+        <a href="{$_url}paymentgateway/" class="btn btn-default btn-xs">{Lang::T('back')}</a>
     </div>
 </div>
 
