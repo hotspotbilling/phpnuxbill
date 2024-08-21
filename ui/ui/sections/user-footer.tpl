@@ -1,0 +1,1 @@
+{include file="user-ui/footer.tpl"}
