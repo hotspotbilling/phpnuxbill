@@ -64,4 +64,4 @@
         </div>
     </div>
 </div>
-{include file="suser-ui/footer.tpl"}
+{include file="user-ui/footer.tpl"}
