@@ -52,7 +52,7 @@ class MikrotikPppoe
             if (!empty($customer['pppoe_ip'])) {
                 $setRequest->setArgument('local-address', $customer['pppoe_ip']);
             }else{
-                $setRequest->setArgument('local-address', null);
+                $setRequest->setArgument('local-address', '');
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
