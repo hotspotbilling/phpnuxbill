@@ -9,7 +9,7 @@
             </div>
             <div class="btn-group" role="group">
                 <a href="{$_url}plan/print-voucher" target="print_voucher" class="btn btn-info"><i
-                        class="ion ion-android-print"></i> Print</a>
+                        class="ion ion-android-print"></i> {Lang::T('Print')}</a>
             </div>
         </div>
     </div>
@@ -20,7 +20,7 @@
             <div class="btn-group pull-right">
                 <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{$_url}plan/remove-voucher"
                     onclick="return confirm('Delete all used voucher code more than 3 months?')"><span class="glyphicon glyphicon-trash"
-                        aria-hidden="true"></span> Delete &gt; 3 Months</a>
+                        aria-hidden="true"></span> {Lang::T('Delete')} &gt; {Lang::T('3 Months')}</a>
             </div>
         {/if}
         &nbsp;
@@ -111,8 +111,8 @@
                             onmouseleave="this.style.backgroundColor = 'black';"
                             onmouseenter="this.style.backgroundColor = 'white';">
                             {$ds['code']}</td>
-                        <td>{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success">Not
-                                Use</label> {else} <label class="btn-tag btn-tag-danger">Used</label>
+                        <td>{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success"> Not Use
+                                </label> {else} <label class="btn-tag btn-tag-danger">Used</label>
                             {/if}</td>
                         <td>{if $ds['user'] eq '0'} -
                             {else}<a href="{$_url}customers/viewu/{$ds['user']}">{$ds['user']}</a>
