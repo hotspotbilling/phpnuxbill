@@ -17,6 +17,7 @@
 
 
     <style>
+
         /* New Customize Interface Start Here */
         body {
             position: relative;
@@ -127,7 +128,7 @@
         }
 
         /* New Customize Interface End Here */
-
+        
         ::-moz-selection {
             /* Code for Firefox */
             color: red;
@@ -139,33 +140,14 @@
             background: yellow;
         }
 
-        .select2-container .select2-selection--single .select2-selection__rendered {
-            margin-top: 0px !important;
+        .content-wrapper {
+            margin-top: 50px;
         }
 
-        @media (min-width: 768px) {
-            .outer {
-                height: 200px
-                    /* Or whatever */
+        @media (max-width: 767px) {
+            .content-wrapper {
+                margin-top: 100px;
             }
-        }
-
-        th:first-child,
-        td:first-child {
-            position: sticky;
-            left: 0px;
-            background-color: #f9f9f9;
-        }
-
-
-        .text1line {
-            display: block;
-            /* or inline-block */
-            text-overflow: ellipsis;
-            word-wrap: break-word;
-            overflow: hidden;
-            max-height: 1em;
-            line-height: 1em;
         }
 
 
@@ -197,163 +179,13 @@
             }
         }
 
-        /*
-    * maintenance top-bar
-    */
-
-        .notification-top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 40px;
-            line-height: 40px;
-            width: 100%;
-            background: #ec2106;
-            text-align: center;
-            color: #FFFFFF;
-            font-family: serif;
-            font-weight: bolder;
-            font-size: 14px;
-            z-index: 9999;
-            box-sizing: border-box;
-            padding: 0 10px;
+        .dropdown-menu .dropdown-item {
+            margin-bottom: 5px;
         }
 
-        .notification-top-bar p {
-            padding: 0;
+        .dropdown-menu .dropdown-item button {
             margin: 0;
-        }
-
-        .notification-top-bar p a {
-            padding: 5px 10px;
-            border-radius: 3px;
-            background: #FFF;
-            color: #1ABC9C;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline;
-            font-size: inherit;
-        }
-
-        @media (max-width: 600px) {
-            .notification-top-bar {
-                font-size: 12px;
-                height: auto;
-                line-height: normal;
-                padding: 10px;
-            }
-
-            .notification-top-bar p a {
-                padding: 5px 10px;
-                margin: 5px 0;
-                font-size: 10px;
-                display: inline-block;
-            }
-        }
-
-        .bs-callout {
-            padding: 20px;
-            margin: 20px 0;
-            border: 1px solid #eee;
-            border-left-width: 5px;
-            border-radius: 3px;
-        }
-
-        .bs-callout h4 {
-            margin-top: 0;
-            margin-bottom: 5px
-        }
-
-        .bs-callout p:last-child {
-            margin-bottom: 0
-        }
-
-        .bs-callout code {
-            border-radius: 3px
-        }
-
-        .bs-callout+.bs-callout {
-            margin-top: -5px
-        }
-
-        .bs-callout-danger {
-            border-left-color: #ce4844
-        }
-
-        .bs-callout-danger h4 {
-            color: #ce4844
-        }
-
-        .bs-callout-warning {
-            border-left-color: #aa6708
-        }
-
-        .bs-callout-warning h4 {
-            color: #aa6708
-        }
-
-        .bs-callout-info {
-            border-left-color: #1b809e
-        }
-
-        .bs-callout-info h4 {
-            color: #1b809e
-        }
-
-        /* Checkbox container */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        /* Hidden checkbox */
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        /* Slider */
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: #2196F3;
-        }
-
-        input:focus+.slider {
-            box-shadow: 0 0 1px #2196F3;
-        }
-
-        input:checked+.slider:before {
-            -webkit-transform: translateX(26px);
-            -ms-transform: translateX(26px);
-            transform: translateX(26px);
+            padding: 10px;
         }
     </style>
 
