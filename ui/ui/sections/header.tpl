@@ -189,6 +189,13 @@
             background-color: inherit;
         }
 
+        .panel-footer {
+            padding: 10px 15px;
+            background-color: inherit;
+            border-top: 1px solid transparent;
+            border-bottom-right-radius: 25px;
+            border-bottom-left-radius: 25px;
+        }
 
         /* Search Bar Start Here */
         .wrap {
