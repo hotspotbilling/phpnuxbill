@@ -67,7 +67,7 @@
                 {include file="pagination.tpl"}
                 <div class="bs-callout bs-callout-info" id="callout-navbar-role">
                     <h4>RADIUS REST</h4>
-                    <p>{Lang::T('For Radius REST, you don't need to add NAS, NAS need to add to client.conf manually')}</p>
+                    <p>{Lang::T("For Radius REST, you don't need to add NAS, NAS need to add to client.conf manually")}</p>
                 </div>
             </div>
         </div>

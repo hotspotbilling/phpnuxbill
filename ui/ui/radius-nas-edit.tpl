@@ -69,7 +69,6 @@
 						</div>
                         <p class="help-block col-md-4">{Lang::T('Assign NAS to Router')}</p>
                     </div>
-                    <div class="form-gro
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-primary"
