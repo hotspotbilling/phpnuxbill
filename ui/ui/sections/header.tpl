@@ -18,8 +18,10 @@
     <link rel="stylesheet" href="ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="ui/ui/summernote/summernote.min.css" />
     <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
-     <style>
+    <style>
         /* New Customize Interface Start Here */
+        @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
         body {
             position: relative;
             z-index: 1;
@@ -61,13 +63,13 @@
             position: relative;
             background-color: rgb(28 36 52);
         }
-        
+
         .sidebar-menu li:focus,
         .sidebar-menu li :hover {
             color: #10d435;
 
         }
-        
+
         .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li.active a {
             background-color: #2e298e;
             border-radius: 5px;
@@ -127,6 +129,78 @@
             color: rgb(100 116 139);
             border-top: 1px solid #d2d6de;
         }
+
+        /* Search Bar Start Here */
+        .wrap {
+            width: 30%;
+            position: absolute;
+            top: 50%;
+            left: 47%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .search {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid #2e298e;
+            background-color: #2e298e;
+            color: white;
+            cursor: pointer;
+            width: 50%;
+            height: 50%;
+        }
+
+        .search-overlay {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .search-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .searchTerm {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00B4CC;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .cancelButton {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Search Bar End Here */
 
         /* New Customize Interface End Here */
 
@@ -377,6 +451,22 @@
                 </a>
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
+                        <div class="wrap">
+                            <div class="">
+                                <button id="openSearch" class="search"><i class="fa fa-search x2"></i></button>
+                            </div>
+                        </div>
+
+                        <div id="searchOverlay" class="search-overlay">
+                            <div class="search-container">
+                                <input type="text" id="searchTerm" class="searchTerm"
+                                    placeholder="{Lang::T('Search Users')}" autocomplete="off">
+                                <div id="searchResults" class="search-results">
+                                    <!-- Search results will be displayed here -->
+                                </div>
+                                <button type="button" id="closeSearch" class="cancelButton">{Lang::T('Cancel')}</button>
+                            </div>
+                        </div>
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="https://robohash.org/{$_admin['id']}?set=set3&size=100x100&bgset=bg1"

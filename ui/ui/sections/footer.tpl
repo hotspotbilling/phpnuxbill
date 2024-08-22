@@ -15,6 +15,32 @@
 <script src="ui/ui/summernote/summernote.min.js"></script>
 <script src="ui/ui/scripts/custom.js"></script>
 
+<script>
+    document.getElementById('openSearch').addEventListener('click', function () {
+        document.getElementById('searchOverlay').style.display = 'flex';
+    });
+
+    document.getElementById('closeSearch').addEventListener('click', function () {
+        document.getElementById('searchOverlay').style.display = 'none';
+    });
+
+    document.getElementById('searchTerm').addEventListener('keyup', function () {
+        let query = this.value;
+        $.ajax({
+            url: '{$_url}search_user',
+            type: 'GET',
+            data: { query: query },
+            success: function (data) {
+                if (data.trim() !== '') {
+                    $('#searchResults').html(data).show();
+                } else {
+                    $('#searchResults').html('').hide();
+                }
+            }
+        });
+    });
+</script>
+
 {if isset($xfooter)}
     {$xfooter}
 {/if}
