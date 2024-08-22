@@ -537,19 +537,19 @@ switch ($action) {
                 $msg .= Lang::T('Username already used by another customer') . '<br>';
             }
             if(ORM::for_table('tbl_customers')->where('pppoe_username', $username)->find_one()){
-                $msg.= Lang::T('Username already used by another customer') . '<br>';
+                $msg.= Lang::T('Username already used by another pppoe username customer') . '<br>';
             }
             $userDiff = true;
         }
         if ($oldPppoeUsername != $pppoe_username) {
-            if(!empty($pppoe_username)){
-                if(ORM::for_table('tbl_customers')->where('pppoe_username', $pppoe_username)->find_one()){
-                    $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
-                }
-                if(ORM::for_table('tbl_customers')->where('username', $pppoe_username)->find_one()){
-                    $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
-                }
-            }
+            // if(!empty($pppoe_username)){
+            //     if(ORM::for_table('tbl_customers')->where('pppoe_username', $pppoe_username)->find_one()){
+            //         $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
+            //     }
+            //     if(ORM::for_table('tbl_customers')->where('username', $pppoe_username)->find_one()){
+            //         $msg.= Lang::T('PPPoE Username already used by another customer') . '<br>';
+            //     }
+            // }
             $pppoeDiff = true;
         }
 
