@@ -139,7 +139,7 @@
                                 <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                 <td>{$ds['pool']}</td>
                                 <td>{if $ds['plan_expired']}<a
-                                        href="{$_url}services/edit/{$ds['plan_expired']}">{Lang::T('Yes')}</a>{else}{Lang::T('No')}
+                                        href="{$_url}services/pppoe-edit/{$ds['plan_expired']}">{Lang::T('Yes')}</a>{else}{Lang::T('No')}
                                     {/if}</td>
                                 <td>{if $ds['prepaid'] == no}{$ds['expired_date']}{/if}</td>
                                 <td>
