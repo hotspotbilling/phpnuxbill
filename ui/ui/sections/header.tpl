@@ -173,6 +173,22 @@
             border-radius: 25px !important;
         }
 
+        .box.box-solid.box-primary>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box-footer {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 25px;
+            border-bottom-left-radius: 25px;
+            border-top: 1px solid #f4f4f4;
+            padding: 10px;
+            background-color: #f6f6f6;
+        }
+
         /* Search Bar Start Here */
         .wrap {
             width: 30%;
