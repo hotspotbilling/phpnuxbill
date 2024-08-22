@@ -184,9 +184,9 @@
             border-top-right-radius: 0;
             border-bottom-right-radius: 25px;
             border-bottom-left-radius: 25px;
-            border-top: 1px solid transparent;
+            border-top: 1px solid #f4f4f4;
             padding: 10px;
-            background-color: inherit;
+            background-color: #f6f6f6;
         }
 
         /* Search Bar Start Here */
