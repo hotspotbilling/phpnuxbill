@@ -162,6 +162,17 @@
             border-top-left-radius: 3px;
         }
 
+        .content .row [class*=col-] .box {
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            -ms-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            -webkit-border-radius: 1px !important;
+            -moz-border-radius: 1px !important;
+            -ms-border-radius: 1px !important;
+            border-radius: 25px !important;
+        }
+
         /* Search Bar Start Here */
         .wrap {
             width: 30%;
