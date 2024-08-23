@@ -17,7 +17,6 @@
 
 
     <style>
-
         /* New Customize Interface Start Here */
         body {
             position: relative;
@@ -60,13 +59,13 @@
             position: relative;
             background-color: rgb(28 36 52);
         }
-        
+
         .sidebar-menu li:focus,
         .sidebar-menu li :hover {
             color: #10d435;
 
         }
-        
+
         .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li.active a {
             background-color: #2e298e;
             border-radius: 5px;
@@ -175,15 +174,15 @@
             border: 0px solid transparent;
             border-radius: 21px;
             -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
         }
 
         .content .row [class*=col-] .box {
             -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
             -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
             -ms-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
-            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-            -webkit-border-radius: 1px !important;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
             -moz-border-radius: 1px !important;
             -ms-border-radius: 1px !important;
             border-radius: 25px !important;
@@ -215,9 +214,39 @@
             background: transparent;
             background-color: transparent;
         }
+        .box.box-solid.box-primary>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .box.box-solid.box-info>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .box.box-solid.box-danger>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box.box-solid.box-warning>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box {
+            position: relative;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            width: 100%;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
+        }
 
         /* New Customize Interface End Here */
-        
+
         ::-moz-selection {
             /* Code for Firefox */
             color: red;
@@ -276,7 +305,6 @@
             margin: 0;
             padding: 10px;
         }
-
     </style>
 
     {if isset($xheader)}

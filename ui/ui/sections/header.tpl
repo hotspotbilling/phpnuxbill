@@ -163,10 +163,10 @@
         }
 
         .content .row [class*=col-] .box {
-            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
             -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
             -ms-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
-            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
             -webkit-border-radius: 1px !important;
             -moz-border-radius: 1px !important;
             -ms-border-radius: 1px !important;
@@ -174,6 +174,28 @@
         }
 
         .box.box-solid.box-primary>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .box.box-solid.box-info>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .box.box-solid.box-danger>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box.box-solid.box-warning>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box.box-solid.box-default>.box-header {
             color: inherit;
             background-color: transparent;
             border-color: transparent;
@@ -196,6 +218,18 @@
             border-bottom-right-radius: 25px;
             border-bottom-left-radius: 25px;
         }
+
+        .box {
+            position: relative;
+            border-radius: 25px;
+            background: inherit;
+            border-top: 3px solid #d2d6de;
+            margin-bottom: 20px;
+            width: 100%;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
+        }
+
 
         /* Search Bar Start Here */
         .wrap {
