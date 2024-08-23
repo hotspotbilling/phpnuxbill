@@ -195,6 +195,12 @@
             border-color: transparent;
         }
 
+        .box.box-solid.box-default>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
         .box-footer {
             border-top-left-radius: 0;
             border-top-right-radius: 0;
