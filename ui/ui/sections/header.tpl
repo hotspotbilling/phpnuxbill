@@ -130,6 +130,73 @@
             border-top: 1px solid #d2d6de;
         }
 
+        .panel-primary {
+            border-color: #333;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            background-color: #fff;
+            border: 0px solid transparent;
+            border-radius: 21px;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
+        }
+
+        .panel-primary>.panel-heading {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .panel-primary>.panel-heading {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .panel-heading {
+            padding: 10px 15px;
+            border-bottom: 1px solid transparent;
+            border-top-right-radius: 3px;
+            border-top-left-radius: 3px;
+        }
+
+        .content .row [class*=col-] .box {
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            -ms-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            -webkit-border-radius: 1px !important;
+            -moz-border-radius: 1px !important;
+            -ms-border-radius: 1px !important;
+            border-radius: 25px !important;
+        }
+
+        .box.box-solid.box-primary>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box-footer {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 25px;
+            border-bottom-left-radius: 25px;
+            border-top: 1px solid transparent;
+            padding: 10px;
+            background-color: inherit;
+        }
+
+        .panel-footer {
+            padding: 10px 15px;
+            background-color: inherit;
+            border-top: 1px solid transparent;
+            border-bottom-right-radius: 25px;
+            border-bottom-left-radius: 25px;
+        }
+
         /* Search Bar Start Here */
         .wrap {
             width: 30%;
