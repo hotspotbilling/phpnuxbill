@@ -214,6 +214,36 @@
             background: transparent;
             background-color: transparent;
         }
+        .box.box-solid.box-primary>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .box.box-solid.box-info>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .box.box-solid.box-danger>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box.box-solid.box-warning>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box {
+            position: relative;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            width: 100%;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+            box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
+        }
 
         /* New Customize Interface End Here */
 

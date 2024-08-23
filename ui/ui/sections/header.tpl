@@ -178,6 +178,22 @@
             background-color: transparent;
             border-color: transparent;
         }
+        .box.box-solid.box-info>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .box.box-solid.box-danger>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
+
+        .box.box-solid.box-warning>.box-header {
+            color: inherit;
+            background-color: transparent;
+            border-color: transparent;
+        }
 
         .box-footer {
             border-top-left-radius: 0;
