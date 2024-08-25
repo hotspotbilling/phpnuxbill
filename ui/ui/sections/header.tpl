@@ -171,7 +171,7 @@
             -webkit-border-radius: 1px !important;
             -moz-border-radius: 1px !important;
             -ms-border-radius: 1px !important;
-            border-radius: 15px !important;
+            border-radius: 25px !important;
             border-color: rgba(221, 224, 255, .54);
         }
 
@@ -180,13 +180,11 @@
             background-color: transparent;
             border-color: transparent;
         }
-
         .box.box-solid.box-info>.box-header {
             color: inherit;
             background-color: transparent;
             border-color: transparent;
         }
-
         .box.box-solid.box-danger>.box-header {
             color: inherit;
             background-color: transparent;
@@ -208,8 +206,8 @@
         .box-footer {
             border-top-left-radius: 0;
             border-top-right-radius: 0;
-            border-bottom-right-radius: 15px;
-            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 25px;
+            border-bottom-left-radius: 25px;
             border-top: 1px solid transparent;
             padding: 10px;
             background-color: inherit;
@@ -225,7 +223,7 @@
 
         .box {
             position: relative;
-            border-radius: 15px;
+            border-radius: 25px;
             background: inherit;
             border-top: 3px solid #d2d6de;
             margin-bottom: 20px;
@@ -304,8 +302,6 @@
             max-height: 200px;
             overflow-y: auto;
         }
-
-        
 
         /* Search Bar End Here */
 
