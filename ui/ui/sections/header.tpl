@@ -137,8 +137,9 @@
         .panel {
             margin-bottom: 20px;
             background-color: #fff;
-            border: 0px solid transparent;
-            border-radius: 21px;
+            border: 2px solid;
+            border-color: rgba(221, 224, 255, .54);
+            border-radius: 25px;
             -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
             box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
         }
@@ -170,7 +171,8 @@
             -webkit-border-radius: 1px !important;
             -moz-border-radius: 1px !important;
             -ms-border-radius: 1px !important;
-            border-radius: 25px !important;
+            border-radius: 15px !important;
+            border-color: rgba(221, 224, 255, .54);
         }
 
         .box.box-solid.box-primary>.box-header {
@@ -178,11 +180,13 @@
             background-color: transparent;
             border-color: transparent;
         }
+
         .box.box-solid.box-info>.box-header {
             color: inherit;
             background-color: transparent;
             border-color: transparent;
         }
+
         .box.box-solid.box-danger>.box-header {
             color: inherit;
             background-color: transparent;
@@ -204,8 +208,8 @@
         .box-footer {
             border-top-left-radius: 0;
             border-top-right-radius: 0;
-            border-bottom-right-radius: 25px;
-            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 15px;
+            border-bottom-left-radius: 15px;
             border-top: 1px solid transparent;
             padding: 10px;
             background-color: inherit;
@@ -215,13 +219,13 @@
             padding: 10px 15px;
             background-color: inherit;
             border-top: 1px solid transparent;
-            border-bottom-right-radius: 25px;
-            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 15px;
+            border-bottom-left-radius: 15px;
         }
 
         .box {
             position: relative;
-            border-radius: 25px;
+            border-radius: 15px;
             background: inherit;
             border-top: 3px solid #d2d6de;
             margin-bottom: 20px;
@@ -300,6 +304,8 @@
             max-height: 200px;
             overflow-y: auto;
         }
+
+        
 
         /* Search Bar End Here */
 
