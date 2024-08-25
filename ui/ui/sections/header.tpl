@@ -219,8 +219,8 @@
             padding: 10px 15px;
             background-color: inherit;
             border-top: 1px solid transparent;
-            border-bottom-right-radius: 15px;
-            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 25px;
+            border-bottom-left-radius: 25px;
         }
 
         .box {
