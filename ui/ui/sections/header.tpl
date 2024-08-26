@@ -679,7 +679,7 @@
                                 <li {if $_routes[1] eq 'pppoe' }class="active" {/if}><a
                                         href="{$_url}services/pppoe">PPPOE</a></li>
                                 <li {if $_routes[1] eq 'list' }class="active" {/if}><a
-                                        href="{$_url}bandwidth/list">{Lang::T('Bandwidth')}</a></li>
+                                        href="{$_url}bandwidth/list">Bandwidth</a></li>
                                 {if $_c['enable_balance'] == 'yes'}
                                     <li {if $_routes[1] eq 'balance' }class="active" {/if}><a
                                             href="{$_url}services/balance">{Lang::T('Customer Balance')}</a></li>
@@ -733,9 +733,9 @@
                             </a>
                             <ul class="treeview-menu">
                                 <li {if $_routes[0] eq 'routers' and $_routes[1] eq '' }class="active" {/if}><a
-                                        href="{$_url}routers">{Lang::T('Routers')}</a></li>
+                                        href="{$_url}routers">Routers</a></li>
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
-                                        href="{$_url}pool/list">{Lang::T('IP Pool')}</a></li>
+                                        href="{$_url}pool/list">IP Pool</a></li>
                                 <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'maps' }class="active" {/if}><a
                                         href="{$_url}routers/maps">{Lang::T('Routers Maps')}</a></li>
                                 {$_MENU_NETWORK}
@@ -769,7 +769,7 @@
                                 <li {if $_routes[1] eq 'Order_Voucher' }class="active" {/if}><a
                                         href="{$_url}pages/Order_Voucher">{Lang::T('Order Voucher')}</a></li>
                                 <li {if $_routes[1] eq 'Voucher' }class="active" {/if}><a
-                                        href="{$_url}pages/Voucher">{Lang::T('Voucher')} Template</a></li>
+                                        href="{$_url}pages/Voucher">{Lang::T('Theme Voucher')}</a></li>
                                 <li {if $_routes[1] eq 'Announcement' }class="active" {/if}><a
                                         href="{$_url}pages/Announcement">{Lang::T('Announcement')}</a></li>
                                 <li {if $_routes[1] eq 'Announcement_Customer' }class="active" {/if}><a
@@ -865,7 +865,7 @@
                         <li {if $_system_menu eq 'community' }class="active" {/if}>
                             <a href="{$_url}community">
                                 <i class="ion ion-chatboxes"></i>
-                                <span class="text">{Lang::T('Community')}</span>
+                                <span class="text">Community</span>
                             </a>
                         </li>
                     {/if}
