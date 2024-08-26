@@ -205,7 +205,7 @@ switch ($action) {
         if (!$plan['enabled']) {
             r2(U . "home", 'e', 'Plan is not exists');
         }
-        if ($routes['2'] == 'radius') {
+        if ($plan['is_radius'] == '1') {
             $router_name = 'radius';
         } else {
             $router_name = $plan['routers'];
@@ -436,8 +436,9 @@ switch ($action) {
         run_hook('customer_buy_plan'); #HOOK
         include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $gateway . '.php';
         call_user_func($gateway . '_validate_config');
-
-        if ($routes['2'] == 'radius') {
+		
+        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
+        if ($plan['is_radius'] == '1') {
             $router['id'] = 0;
             $router['name'] = 'radius';
         } else if ($routes['2'] > 0) {
@@ -446,7 +447,6 @@ switch ($action) {
             $router['id'] = 0;
             $router['name'] = 'balance';
         }
-        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
         if (empty($router) || empty($plan)) {
             r2(U . "order/package", 'e', Lang::T("Plan Not found"));
         }
