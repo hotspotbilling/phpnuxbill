@@ -137,8 +137,9 @@
         .panel {
             margin-bottom: 20px;
             background-color: #fff;
-            border: 0px solid transparent;
-            border-radius: 21px;
+            border: 2px solid;
+            border-color: rgba(221, 224, 255, .54);
+            border-radius: 25px;
             -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
             box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
         }
@@ -171,6 +172,7 @@
             -moz-border-radius: 1px !important;
             -ms-border-radius: 1px !important;
             border-radius: 25px !important;
+            border-color: rgba(221, 224, 255, .54);
         }
 
         .box.box-solid.box-primary>.box-header {
