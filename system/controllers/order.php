@@ -205,7 +205,7 @@ switch ($action) {
         if (!$plan['enabled']) {
             r2(U . "home", 'e', 'Plan is not exists');
         }
-        if ($routes['2'] == 'radius') {
+        if ($plan['is_radius'] == '1') {
             $router_name = 'radius';
         } else {
             $router_name = $plan['routers'];
