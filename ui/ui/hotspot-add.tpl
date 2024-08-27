@@ -3,14 +3,14 @@
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
-            <div class="panel-heading">{Lang::T('Add Service Plan')}</div>
+            <div class="panel-heading">{Lang::T('Add Service Package')}</div>
             <div class="panel-body">
                 <form class="form-horizontal" method="post" role="form" action="{$_url}services/add-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Status')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Customer cannot buy disabled Plan, but admin can recharge it, use it if you want only admin recharge it">?</a>
+                                data-content="Customer cannot buy disabled Package, but admin can recharge it, use it if you want only admin recharge it">?</a>
                         </label>
                         <div class="col-md-10">
                             <input type="radio" name="enabled" value="1" checked> {Lang::T('Active')}
@@ -30,10 +30,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}
+                        <label class="col-md-2 control-label">{Lang::T('Package Type')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Personal Plan will only show to personal Customer, Business plan will only show to Business Customer">?</a>
+                                data-content="Personal Plan will only show to personal Customer, Business package will only show to Business Customer">?</a>
                         </label>
                         <div class="col-md-10">
                             <input type="radio" name="plan_type" value="Personal" checked> {Lang::T('Personal')}
@@ -70,13 +70,13 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Plan Name')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Package Name')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="name" name="name" maxlength="40">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Plan Type')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Package Type')}</label>
                         <div class="col-md-10">
                             <input type="radio" id="Unlimited" name="typebp" value="Unlimited" checked>
                             {Lang::T('Unlimited')}
@@ -137,7 +137,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Plan Price')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Package Price')}</label>
                         <div class="col-md-6">
                             <div class="input-group">
                                 <span class="input-group-addon">{$_c['currency_code']}</span>
@@ -165,7 +165,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Plan Validity')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Package Validity')}</label>
                         <div class="col-md-4">
                             <input type="text" class="form-control" id="validity" name="validity">
                         </div>
