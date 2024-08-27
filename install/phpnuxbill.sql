@@ -138,6 +138,8 @@ CREATE TABLE `tbl_routers` (
   `password` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `description` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `coordinates` VARCHAR(50) NOT NULL DEFAULT '',
+  `status` ENUM('Online', 'Offline') DEFAULT 'Online',
+  `last_seen` DATETIME,
   `coverage` VARCHAR(8) NOT NULL DEFAULT '0',
   `enabled` tinyint(1) NOT NULL DEFAULT '1' COMMENT '0 disabled'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

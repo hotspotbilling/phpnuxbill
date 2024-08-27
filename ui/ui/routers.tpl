@@ -40,6 +40,8 @@
                                 <th>{Lang::T('IP Address')}</th>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Description')}</th>
+                                <th>{Lang::T('Online Status')}</th>
+                                <th>{Lang::T('Last Seen')}</th>
                                 <th>{Lang::T('Status')}</th>
                                 <th>{Lang::T('Manage')}</th>
                                 <th>ID</th>
@@ -47,27 +49,37 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr {if $ds['enabled'] != 1}class="danger" title="disabled" {/if}>
-                                    <td>
+                            <tr {if $ds['enabled'] !=1}class="danger" title="disabled" {/if}>
+                                <td>
                                     {if $ds['coordinates']}
-                                        <a href="https://www.google.com/maps/dir//{$ds['coordinates']}/" target="_blank"
-                                            class="btn btn-default btn-xs" title="{$ds['coordinates']}"><i
-                                                class="glyphicon glyphicon-map-marker"></i></a>
+                                    <a href="https://www.google.com/maps/dir//{$ds['coordinates']}/" target="_blank"
+                                        class="btn btn-default btn-xs" title="{$ds['coordinates']}"><i
+                                            class="glyphicon glyphicon-map-marker"></i></a>
                                     {/if}
-                                    {$ds['name']}</td>
-                                    <td>{$ds['ip_address']}</td>
-                                    <td>{$ds['username']}</td>
-                                    <td>{$ds['description']}</td>
-                                    <td>{if $ds['enabled'] == 1}{Lang::T('Enabled')}{else}{Lang::T('Disabled')}{/if}</td>
-                                    <td>
-                                        <a href="{$_url}routers/edit/{$ds['id']}"
-                                            class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                        <a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{Lang::T('Delete')}?')"
-                                            class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
-                                    </td>
-                                    <td>{$ds['id']}</td>
-                                </tr>
+                                    {$ds['name']}
+                                </td>
+                                <td style="background-color: black; color: black;"
+                                    onmouseleave="this.style.backgroundColor = 'black';"
+                                    onmouseenter="this.style.backgroundColor = 'white';">{$ds['ip_address']}</td>
+                                <td style="background-color: black; color: black;"
+                                    onmouseleave="this.style.backgroundColor = 'black';"
+                                    onmouseenter="this.style.backgroundColor = 'white';">{$ds['username']}</td>
+                                <td>{$ds['description']}</td>
+                                <td><span
+                                        class="label {if $ds['status'] == 'Online'}label-success {else}label-danger {/if}">{if
+                                        $ds['status'] == 'Online'}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}</span>
+                                </td>
+                                <td>{$ds['last_seen']}</td>
+                                <td>{if $ds['enabled'] == 1}{Lang::T('Enabled')}{else}{Lang::T('Disabled')}{/if}</td>
+                                <td>
+                                    <a href="{$_url}routers/edit/{$ds['id']}"
+                                        class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
+                                    <a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}"
+                                        onclick="return confirm('{Lang::T('Delete')}?')"
+                                        class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
+                                </td>
+                                <td>{$ds['id']}</td>
+                            </tr>
                             {/foreach}
                         </tbody>
                     </table>
