@@ -33,7 +33,7 @@ foreach ($d as $ds) {
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
         $dvc = Package::getDevice($p);
-        if($_app_stage != 'demo'){
+        if ($_app_stage != 'demo') {
             if (file_exists($dvc)) {
                 require_once $dvc;
                 (new $p['device'])->remove_customer($c, $p);
@@ -79,63 +79,65 @@ foreach ($d as $ds) {
     }
 }
 
-$routers = ORM::for_table('tbl_routers')->find_many();
-if (!$routers) {
-    echo "No routers found in the database.\n";
-    exit;
-}
+if ($config['router_check']) {
+    $routers = ORM::for_table('tbl_routers')->find_many();
+    if (!$routers) {
+        echo "No routers found in the database.\n";
+        exit;
+    }
 
-foreach ($routers as $router) {
-    [$ip, $port] = explode(':', $router->ip_address);
-    $isOnline = false;
+    foreach ($routers as $router) {
+        [$ip, $port] = explode(':', $router->ip_address);
+        $isOnline = false;
 
-    try {
-        $timeout = 5;
-        if (is_callable('fsockopen') && false === stripos(ini_get('disable_functions'), 'fsockopen')) {
-            $fsock = @fsockopen($ip, $port, $errno, $errstr, $timeout);
-            if ($fsock) {
-                fclose($fsock);
-                $isOnline = true;
+        try {
+            $timeout = 5;
+            if (is_callable('fsockopen') && false === stripos(ini_get('disable_functions'), 'fsockopen')) {
+                $fsock = @fsockopen($ip, $port, $errno, $errstr, $timeout);
+                if ($fsock) {
+                    fclose($fsock);
+                    $isOnline = true;
+                } else {
+                    throw new Exception("Unable to connect to $ip on port $port using fsockopen: $errstr ($errno)");
+                }
+            } elseif (is_callable('stream_socket_client') && false === stripos(ini_get('disable_functions'), 'stream_socket_client')) {
+                $connection = @stream_socket_client("$ip:$port", $errno, $errstr, $timeout);
+                if ($connection) {
+                    fclose($connection);
+                    $isOnline = true;
+                } else {
+                    throw new Exception("Unable to connect to $ip on port $port using stream_socket_client: $errstr ($errno)");
+                }
             } else {
-                throw new Exception("Unable to connect to $ip on port $port using fsockopen: $errstr ($errno)");
+                throw new Exception("Neither fsockopen nor stream_socket_client are enabled on the server.");
             }
-        } elseif (is_callable('stream_socket_client') && false === stripos(ini_get('disable_functions'), 'stream_socket_client')) {
-            $connection = @stream_socket_client("$ip:$port", $errno, $errstr, $timeout);
-            if ($connection) {
-                fclose($connection);
-                $isOnline = true;
-            } else {
-                throw new Exception("Unable to connect to $ip on port $port using stream_socket_client: $errstr ($errno)");
-            }
-        } else {
-            throw new Exception("Neither fsockopen nor stream_socket_client are enabled on the server.");
+        } catch (Exception $e) {
+            _log($e->getMessage());
+            $adminEmail = $config['mail_from'];
+            $subject = "Router Monitoring Error Alert";
+            $message = "An error occurred during the monitoring of router $ip: " . (string) $e->getMessage();
+            Message::SendEmail($adminEmail, $subject, $message);
+            sendTelegram($message);
         }
-    } catch (Exception $e) {
-        _log($e->getMessage());
-        $adminEmail = $config['mail_from'];
-        $subject = "Router Monitoring Error Alert";
-        $message = "An error occurred during the monitoring of router $ip: " . (string) $e->getMessage();
-        Message::SendEmail($adminEmail, $subject, $message);
-        sendTelegram($message);
+
+        if ($isOnline) {
+            $router->last_seen = date('Y-m-d H:i:s');
+            $router->status = 'Online';
+        } else {
+            $router->status = 'Offline';
+            $adminEmail = $config['mail_from'];
+            $subject = "Router Offline Alert";
+            $message = "Dear Administrator,\nThe router with Name: {$router->name} and IP: {$router->ip_address} appears to be offline.\nThe Router was last seen online on: {$router->last_seen}\nPlease check the router's status and take appropriate action.\n\nBest regards,\nRouter Monitoring System";
+            Message::SendEmail($adminEmail, $subject, $message);
+            sendTelegram($message);
+        }
+
+        $router->save();
     }
 
-    if ($isOnline) {
-        $router->last_seen = date('Y-m-d H:i:s');
-        $router->status = 'Online';
+    if ($isCli) {
+        echo "Cronjob finished\n";
     } else {
-        $router->status = 'Offline';
-        $adminEmail = $config['mail_from'];
-        $subject = "Router Offline Alert";
-        $message = "Dear Administrator,\nThe router with Name: {$router->name} and IP: {$router->ip_address} appears to be offline.\nThe Router was last seen online on: {$router->last_seen}\nPlease check the router's status and take appropriate action.\n\nBest regards,\nRouter Monitoring System";
-        Message::SendEmail($adminEmail, $subject, $message);
-        sendTelegram($message);
+        echo "</pre>";
     }
-
-    $router->save();
-}
-
-if ($isCli) {
-    echo "Cronjob finished\n";
-} else {
-    echo "</pre>";
 }

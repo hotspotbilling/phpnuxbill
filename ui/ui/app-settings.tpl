@@ -622,6 +622,21 @@
                         </p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Router Check')}</label>
+                        <div class="col-md-6">
+                            <select name="router_check" id="router_check" class="form-control">
+                                <option value="0" {if $_c['router_check']=='0' }selected="selected"
+                                    {/if}>{Lang::T('Disabled')}
+                                </option>
+                                <option value="1" {if $_c['router_check']=='1' }selected="selected"
+                                    {/if}>{Lang::T('Enabled')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('If enabled, the system will notify Admin when router goes Offline, If admin have 10 or more router and many customers, it will get overlapping, you can disabled')}
+                        </p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Phone OTP Required')}</label>
                         <div class="col-md-6">
                             <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
