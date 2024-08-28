@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                <div class="panel-heading">{Lang::T('Edit Service Plan')} || {$d['name_plan']}</div>
+                <div class="panel-heading">{Lang::T('Edit Service Package')} || {$d['name_plan']}</div>
                 <div class="panel-body">
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
@@ -34,7 +34,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Plan Type')}
+                        <label class="col-md-3 control-label">{Lang::T('Package Type')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
                                 data-content="Personal Plan will only show to personal Customer, Business plan will only show to Business Customer">?</a>
@@ -74,14 +74,14 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Plan Name')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Package Name')}</label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="name" name="name" maxlength="40"
                                 value="{$d['name_plan']}">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Plan Type')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Package Type')}</label>
                         <div class="col-md-9">
                             <input type="radio" id="Unlimited" name="typebp" value="Unlimited"
                                 {if $d['typebp'] eq 'Unlimited'} checked {/if}> {Lang::T('Unlimited')}
@@ -152,7 +152,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Plan Price')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Package Price')}</label>
                         <div class="col-md-9">
                             <div class="input-group">
                                 <span class="input-group-addon">{$_c['currency_code']}</span>
@@ -182,7 +182,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Plan Validity')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Package Validity')}</label>
                         <div class="col-md-3">
                             <input type="text" class="form-control" id="validity" name="validity"
                                 value="{$d['validity']}">
@@ -231,7 +231,7 @@
                     </span>
                     <legend>{Lang::T('Expired Action')} <sub>{Lang::T('Optional')}</sub></legend>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Expired Internet Plan')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Expired Internet Package')}</label>
                         <div class="col-md-9">
                             <select id="plan_expired" name="plan_expired" class="form-control select2">
                                 <option value='0'>{Lang::T('Default - Remove Customer')}</option>
@@ -241,7 +241,7 @@
                                 {/foreach}
                             </select>
                             <p class="help-block">
-                                {Lang::T('When Expired, customer will be move to selected internet plan')}</p>
+                                {Lang::T('When Expired, customer will be move to selected internet package')}</p>
                         </div>
                     </div>
 

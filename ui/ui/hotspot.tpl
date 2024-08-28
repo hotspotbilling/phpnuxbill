@@ -6,7 +6,7 @@
             <div class="panel-heading">
                 <div class="btn-group pull-right">
                     <a class="btn btn-primary btn-xs" title="save" href="{$_url}services/sync/hotspot"
-                        onclick="return confirm('This will sync/send hotspot plan to Mikrotik?')"><span
+                        onclick="return confirm('This will sync/send hotspot package to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>{Lang::T('Hotspot Plans')}
             </div>
@@ -98,7 +98,7 @@
                         </div>
                         <div class="col-lg-1 col-xs-4">
                             <a href="{$_url}services/add" class="btn btn-primary btn-block"
-                                title="{Lang::T('New Service Plan')}"><i class="ion ion-android-add"></i></a>
+                                title="{Lang::T('New Service Package')}"><i class="ion ion-android-add"></i></a>
                         </div>
                     </div>
                 </div>
@@ -108,8 +108,8 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th colspan="5" class="text-center">{Lang::T('Internet Plan')}</th>
-                            <th colspan="2" class="text-center" style="background-color: rgb(246, 244, 244);">Limit</th>
+                            <th colspan="5" class="text-center">{Lang::T('Internet Package')}</th>
+                            <th colspan="2" class="text-center" style="background-color: rgb(246, 244, 244);">{Lang::T('Limit')}</th>
                             <th colspan="2"></th>
                             <th colspan="2" class="text-center" style="background-color: rgb(243, 241, 172);">
                                 {Lang::T('Expired')}</th>
@@ -126,7 +126,7 @@
                             <th style="background-color: rgb(246, 244, 244);">{Lang::T('Data')}</th>
                             <th><a href="{$_url}routers/list">{Lang::T('Location')}</a></th>
                             <th>{Lang::T('Device')}</th>
-                            <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Plan')}</th>
+                            <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Package')}</th>
                             <th style="background-color: rgb(243, 241, 172);">{Lang::T('Date')}</th>
                             <th>{Lang::T('ID')}</th>
                             <th>{Lang::T('Manage')}</th>
@@ -174,8 +174,8 @@
             <div class="panel-footer">
                 {include file="pagination.tpl"}
                 <div class="bs-callout bs-callout-info" id="callout-navbar-role">
-                    <h4>{Lang::T('Create expired Internet Plan')}</h4>
-                    <p>{Lang::T('When customer expired, you can move it to Expired Internet Plan')}</p>
+                    <h4>{Lang::T('Create expired Internet Package')}</h4>
+                    <p>{Lang::T('When customer expired, you can move it to Expired Internet Package')}</p>
                 </div>
             </div>
         </div>
