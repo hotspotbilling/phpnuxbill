@@ -79,12 +79,40 @@ foreach ($d as $ds) {
     }
 }
 
+
 if ($config['router_check']) {
-    $routers = ORM::for_table('tbl_routers')->find_many();
-    if (!$routers) {
-        echo "No routers found in the database.\n";
+
+    $lockFile = '../system/uploads/router_monitor.lock';
+
+    if (!is_dir('../system/uploads/')) {
+        echo "Directory '/system/uploads/' does not exist. Exiting...\n";
         exit;
     }
+
+    $lock = fopen($lockFile, 'c');
+
+    if ($lock === false) {
+        echo "Failed to open lock file. Exiting...\n";
+        exit;
+    }
+
+    if (!flock($lock, LOCK_EX | LOCK_NB)) {
+        echo "Script is already running. Exiting...\n";
+        fclose($lock);
+        exit;
+    }
+
+    $routers = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
+    if (!$routers) {
+        echo "No active routers found in the database.\n";
+        flock($lock, LOCK_UN);
+        fclose($lock);
+        unlink($lockFile);
+        exit;
+    }
+
+    $offlineRouters = [];
+    $errors = [];
 
     foreach ($routers as $router) {
         [$ip, $port] = explode(':', $router->ip_address);
@@ -113,11 +141,7 @@ if ($config['router_check']) {
             }
         } catch (Exception $e) {
             _log($e->getMessage());
-            $adminEmail = $config['mail_from'];
-            $subject = "Router Monitoring Error Alert";
-            $message = "An error occurred during the monitoring of router $ip: " . (string) $e->getMessage();
-            Message::SendEmail($adminEmail, $subject, $message);
-            sendTelegram($message);
+            $errors[] = "Error with router $ip: " . $e->getMessage();
         }
 
         if ($isOnline) {
@@ -125,19 +149,45 @@ if ($config['router_check']) {
             $router->status = 'Online';
         } else {
             $router->status = 'Offline';
-            $adminEmail = $config['mail_from'];
-            $subject = "Router Offline Alert";
-            $message = "Dear Administrator,\nThe router with Name: {$router->name} and IP: {$router->ip_address} appears to be offline.\nThe Router was last seen online on: {$router->last_seen}\nPlease check the router's status and take appropriate action.\n\nBest regards,\nRouter Monitoring System";
-            Message::SendEmail($adminEmail, $subject, $message);
-            sendTelegram($message);
+            $offlineRouters[] = $router;
         }
 
         $router->save();
     }
 
-    if ($isCli) {
+    if (!empty($offlineRouters)) {
+        $message = "Dear Administrator,\n";
+        $message .= "The following routers are offline:\n";
+        foreach ($offlineRouters as $router) {
+            $message .= "Name: {$router->name}, IP: {$router->ip_address}, Last Seen: {$router->last_seen}\n";
+        }
+        $message .= "\nPlease check the router's status and take appropriate action.\n\nBest regards,\nRouter Monitoring System";
+
+        $adminEmail = $config['mail_from'];
+        $subject = "Router Offline Alert";
+        Message::SendEmail($adminEmail, $subject, $message);
+        sendTelegram($message);
+    }
+
+    if (!empty($errors)) {
+        $message = "The following errors occurred during router monitoring:\n";
+        foreach ($errors as $error) {
+            $message .= "$error\n";
+        }
+
+        $adminEmail = $config['mail_from'];
+        $subject = "Router Monitoring Error Alert";
+        Message::SendEmail($adminEmail, $subject, $message);
+        sendTelegram($message);
+    }
+
+    if (defined('PHP_SAPI') && PHP_SAPI === 'cli') {
         echo "Cronjob finished\n";
     } else {
         echo "</pre>";
     }
+    
+    flock($lock, LOCK_UN);
+    fclose($lock);
+    unlink($lockFile);
 }
