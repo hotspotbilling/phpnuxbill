@@ -175,7 +175,7 @@
 
 
     <div class="col-md-5">
-        {if $_c['router_check']}
+        {if $_c['router_check'] && count($routeroffs)> 0}
             <div class="panel panel-danger">
                 <div class="panel-heading text-bold">{Lang::T('Routers Offline')}</div>
                 <div class="table-responsive">
