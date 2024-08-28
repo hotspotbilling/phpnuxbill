@@ -56,9 +56,9 @@
                             <div class="col-md-9">
                                 <select name="status" id="status" class="form-control">
                                     <option value="Active" {if $d['status'] eq 'Active'}selected="selected" {/if}>
-                                        Active</option>
+                                        {Lang::T('Active')}</option>
                                     <option value="Inactive" {if $d['status'] eq 'Inactive'}selected="selected" {/if}>
-                                        Inactive</option>
+                                        {Lang::T('Inactive')}</option>
                                 </select>
                             </div>
                         </div>
