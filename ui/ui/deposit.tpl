@@ -16,7 +16,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label"><a href="{$_url}services/balance">{Lang::T('Balance Plans')}</a></label>
+                        <label class="col-md-2 control-label"><a href="{$_url}services/balance">{Lang::T('Balance Package')}</a></label>
                         <div class="col-md-6">
                             <select id="planSelect" class="form-control select2" name="id_plan" style="width: 100%"
                                 data-placeholder="{Lang::T('Select Plans')}...">
