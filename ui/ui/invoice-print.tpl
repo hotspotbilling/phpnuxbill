@@ -32,8 +32,8 @@
                     {Lang::pads(Lang::T('Sales'), $_admin['fullname'], ' ')}
                     {Lang::pad("", '=')}
                     {Lang::pads(Lang::T('Type'), $in['type'], ' ')}
-                    {Lang::pads(Lang::T('Plan Name'), $in['plan_name'], ' ')}
-                    {Lang::pads(Lang::T('Plan Price'), Lang::moneyFormat($in['price']), ' ')}
+                    {Lang::pads(Lang::T('Package Name'), $in['plan_name'], ' ')}
+                    {Lang::pads(Lang::T('Package Price'), Lang::moneyFormat($in['price']), ' ')}
                     {Lang::pad($in['method'], ' ', 2)}
 
                     {Lang::pads(Lang::T('Username'), $in['username'], ' ')}
