@@ -152,8 +152,8 @@
     "2024.8.7" : [
         "ALTER TABLE `tbl_customers` CHANGE `coordinates` `coordinates` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates';"
     ],
-    "2024.8.27" : [
-        "ALTER TABLE `tbl_routers` ADD `status` ENUM('Online', 'Offline') DEFAULT 'Online', AFTER `coordinates`;",
+    "2024.8.28" : [
+        "ALTER TABLE `tbl_routers` ADD `status` ENUM('Online', 'Offline') DEFAULT 'Online' AFTER `coordinates`;",
         "ALTER TABLE `tbl_routers` ADD `last_seen` DATETIME AFTER `status`;"
     ]
 }
