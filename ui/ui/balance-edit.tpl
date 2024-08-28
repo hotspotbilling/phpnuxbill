@@ -3,7 +3,7 @@
 		<div class="row">
 			<div class="col-sm-12 col-md-12">
 				<div class="panel panel-primary panel-hovered panel-stacked mb30">
-					<div class="panel-heading">{Lang::T('Edit Service Plan')}</div>
+					<div class="panel-heading">{Lang::T('Edit Service Package')}</div>
 						<div class="panel-body">
                         <form class="form-horizontal" method="post" role="form" action="{$_url}services/balance-edit-post">
                         <input type="hidden" name="id" value="{$d['id']}">
@@ -19,13 +19,13 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-md-2 control-label">{Lang::T('Plan Name')}</label>
+                                <label class="col-md-2 control-label">{Lang::T('Package Name')}</label>
                                 <div class="col-md-6">
-                                    <input type="text" required class="form-control" id="name" value="{$d['name_plan']}" name="name" maxlength="40" placeholder="Topup 100">
+                                    <input type="text" required class="form-control" id="name" value="{$d['name_plan']}" name="name" maxlength="40" placeholder="{Lang::T('Topup')} 100">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-md-2 control-label">{Lang::T('Plan Price')}</label>
+                                <label class="col-md-2 control-label">{Lang::T('Package Price')}</label>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <span class="input-group-addon">{$_c['currency_code']}</span>
