@@ -24,8 +24,8 @@
 						<div class="col-md-6">
 							<select class="form-control" name="via" id="via">
 								<option value="sms" selected> {Lang::T('SMS')}</option>
-								<option value="wa"> {Lang::T('WhatsApp')}</option>
-								<option value="both"> {Lang::T('SMS and WhatsApp')}</option>
+								<option value="wa"> {Lang::T('By WhatsApp')}</option>
+								<option value="both"> {Lang::T('By WhatsApp and SMS')}</option>
 							</select>
 						</div>
 					</div>
