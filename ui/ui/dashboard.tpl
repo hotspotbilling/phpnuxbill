@@ -112,7 +112,7 @@
                         <table class="table table-condensed">
                             <thead>
                                 <tr>
-                                    <th>{Lang::T('Plan Name')}</th>
+                                    <th>{Lang::T('Package Name')}</th>
                                     <th>unused</th>
                                     <th>used</th>
                                 </tr>
@@ -145,7 +145,7 @@
                             <tr>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Created / Expired')}</th>
-                                <th>{Lang::T('Internet Plan')}</th>
+                                <th>{Lang::T('Internet Package')}</th>
                                 <th>{Lang::T('Location')}</th>
                             </tr>
                         </thead>
