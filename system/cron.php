@@ -82,10 +82,10 @@ foreach ($d as $ds) {
 
 if ($config['router_check']) {
 
-    $lockFile = '../system/uploads/router_monitor.lock';
+    $lockFile = $CACHE_PATH . '/router_monitor.lock';
 
-    if (!is_dir('../system/uploads/')) {
-        echo "Directory '/system/uploads/' does not exist. Exiting...\n";
+    if (!is_dir($CACHE_PATH)) {
+        echo "Directory '$CACHE_PATH' does not exist. Exiting...\n";
         exit;
     }
 
@@ -115,7 +115,13 @@ if ($config['router_check']) {
     $errors = [];
 
     foreach ($routers as $router) {
-        [$ip, $port] = explode(':', $router->ip_address);
+        // check if custom port
+        if (strpos($router->ip_address, ':') === false){
+            $ip = $router->ip_address;
+            $port = 8728;
+        } else {
+            [$ip, $port] = explode(':', $router->ip_address);
+        }
         $isOnline = false;
 
         try {
@@ -186,7 +192,7 @@ if ($config['router_check']) {
     } else {
         echo "</pre>";
     }
-    
+
     flock($lock, LOCK_UN);
     fclose($lock);
     unlink($lockFile);
