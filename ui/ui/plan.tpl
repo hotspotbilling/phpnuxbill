@@ -17,6 +17,7 @@
                     </div> *}
                 {/if}
                 &nbsp;
+{Lang::T('Active Customers')}
             </div>
             <form id="site-search" method="post" action="{$_url}plan/list/">
                 <div class="panel-body">
