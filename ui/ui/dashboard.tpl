@@ -175,6 +175,25 @@
 
 
     <div class="col-md-5">
+        {if $_c['router_check']}
+            <div class="panel panel-danger">
+                <div class="panel-heading text-bold">{Lang::T('Routers Offline')}</div>
+                <div class="table-responsive">
+                    <table class="table table-condensed">
+                        <tbody>
+                            {foreach $routeroffs as $ros}
+                                <tr>
+                                    <td><a href="{$_url}routers/edit/{$ros['id']}" class="text-bold text-red">{$ros['name']}</a></td>
+                                    <td data-toggle="tooltip" data-placement="top" class="text-red"
+                                            title="{Lang::dateTimeFormat($ros['last_seen'])}">{Lang::timeElapsed($ros['last_seen'])}
+                                    </td>
+                                </tr>
+                            {/foreach}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {/if}
         {if $_c['hide_pg'] != 'yes'}
             <div class="panel panel-success panel-hovered mb20 activities">
                 <div class="panel-heading">{Lang::T('Payment Gateway')}: {str_replace(',',', ',$_c['payment_gateway'])}
@@ -337,7 +356,7 @@
                 //lets calculate the inactive users as reported
                 var expired = u_all - u_act;
                 var inactive = c_all - u_all;
-                if(inactive < 0){
+                if (inactive < 0) {
                     inactive = 0;
                 }
                 // Create the chart data

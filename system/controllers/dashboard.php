@@ -209,6 +209,12 @@ if (file_exists($cacheMSfile) && time() - filemtime($cacheMSfile) < 43200) {
     file_put_contents($cacheMSfile, json_encode($monthlySales));
 }
 
+if ($config['router_check']) {
+    $routeroffs = ORM::for_table('tbl_routers')->selects(['id', 'name', 'last_seen'])->where('status', 'Offline')->order_by_desc('name')->find_array();
+    print_r($routeroffs);
+    $ui->assign('routeroffs', $routeroffs);
+}
+
 // Assign the monthly sales data to Smarty
 $ui->assign('start_date', $start_date);
 $ui->assign('current_date', $current_date);
