@@ -8,7 +8,7 @@
                     <a class="btn btn-primary btn-xs" title="save" href="{$_url}services/sync/pppoe"
                         onclick="return confirm('This will sync/send PPPOE plan to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
-                </div>{Lang::T('PPPOE Plans')}
+                </div>{Lang::T('PPPOE Package')}
             </div>
             <form id="site-search" method="post" action="{$_url}services/pppoe">
                 <div class="panel-body">
@@ -42,7 +42,7 @@
                         </div>
                         <div class="col-lg-1 col-xs-4">
                             <select class="form-control" id="bandwidth" name="bandwidth">
-                                <option value="">{Lang::T('Bandwidth')}</option>
+                                <option value="">Bandwidth</option>
                                 {foreach $bws as $b}
                                     <option value="{$b['id']}" {if $bandwidth eq $b['id'] }selected{/if}>
                                         {$b['name_bw']}

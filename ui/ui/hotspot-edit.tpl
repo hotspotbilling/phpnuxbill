@@ -15,8 +15,8 @@
                                 data-content="Customer cannot buy disabled Plan, but admin can recharge it, use it if you want only admin recharge it">?</a>
                         </label>
                         <div class="col-md-9">
-                            <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}> {Lang::T('Enable')}
-                            <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> {Lang::T('Disable')}
+                            <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}> {Lang::T('Active')}
+                            <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> {Lang::T('Not Active')}
                         </div>
                     </div>
                     <div class="form-group">
