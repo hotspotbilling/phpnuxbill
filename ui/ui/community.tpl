@@ -79,9 +79,9 @@
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                     <a href="https://trakteer.id/ibnux" target="_blank"
-                        class="btn btn-primary btn-sm btn-block">Trakteer</a>
+                        class="btn btn-success text-black btn-sm btn-block">Trakteer</a>
                     <a href="https://karyakarsa.com/ibnux/support" target="_blank"
-                        class="btn btn-primary btn-sm btn-block">karyakarsa</a>
+                        class="btn btn-info text-black btn-sm btn-block">karyakarsa</a>
                 </div>
             </div>
         </div>
@@ -120,8 +120,6 @@
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                     <a href="https://paypal.me/ibnux" target="_blank"
                         class="btn btn-primary btn-sm btn-block">Paypal</a>
-                    <a href="https://wise.com/pay/me/ibnum37" target="_blank"
-                        class="btn btn-primary btn-sm btn-block">Wise</a>
                 </div>
             </div>
         </div>

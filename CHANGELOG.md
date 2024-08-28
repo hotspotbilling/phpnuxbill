@@ -2,6 +2,18 @@
 
 # CHANGELOG
 
+## 2024.8.28
+
+- add Router Status Offline/Online by @Focuslinkstech
+- Show Router Offline in the Dashbord
+- Fix Translation by by @ahmadhusein17
+- Add Payment Info Page, to show to customer before buy
+- Voucher Template
+- Change Niceedit to summernote
+- Customer can change their language by @Focuslinkstech
+- Fix Voucher case sensitive
+- 3 Tabs Plugin Manager
+
 ## 2024.8.19
 
 - New Page, Payment Info, To Inform Customer, which payment gateway is good
