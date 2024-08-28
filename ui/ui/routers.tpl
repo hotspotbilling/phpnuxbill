@@ -40,7 +40,9 @@
                                 <th>{Lang::T('IP Address')}</th>
                                 <th>{Lang::T('Username')}</th>
                                 <th>{Lang::T('Description')}</th>
-                                <th>{Lang::T('Online Status')}</th>
+                                {if $config['router_check']}
+                                    <th>{Lang::T('Online Status')}</th>
+                                {/if}
                                 <th>{Lang::T('Last Seen')}</th>
                                 <th>{Lang::T('Status')}</th>
                                 <th>{Lang::T('Manage')}</th>
@@ -65,10 +67,12 @@
                                     onmouseleave="this.style.backgroundColor = 'black';"
                                     onmouseenter="this.style.backgroundColor = 'white';">{$ds['username']}</td>
                                 <td>{$ds['description']}</td>
-                                <td><span
-                                        class="label {if $ds['status'] == 'Online'}label-success {else}label-danger {/if}">{if
-                                        $ds['status'] == 'Online'}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}</span>
-                                </td>
+                                {if $config['router_check']}
+                                    <td><span
+                                            class="label {if $ds['status'] == 'Online'}label-success {else}label-danger {/if}">{if
+                                            $ds['status'] == 'Online'}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}</span>
+                                    </td>
+                                {/if}
                                 <td>{$ds['last_seen']}</td>
                                 <td>{if $ds['enabled'] == 1}{Lang::T('Enabled')}{else}{Lang::T('Disabled')}{/if}</td>
                                 <td>
@@ -85,9 +89,14 @@
                     </table>
                 </div>
                 {include file="pagination.tpl"}
+                <div class="bs-callout bs-callout-info" id="callout-navbar-role">
+					<h4>{Lang::T('Check if Mikrotik Online?')}</h4>
+					<p>{Lang::T('To check if Mikrotik is Online or not, go to Settings, set Router Check Enabled')}</p>
+				</div>
             </div>
         </div>
     </div>
 </div>
+
 
 {include file="sections/footer.tpl"}
