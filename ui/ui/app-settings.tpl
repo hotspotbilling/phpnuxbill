@@ -196,7 +196,7 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">Redirect after Activation</label>
+                            <label class="col-md-2 control-label">{Lang::T('Redirect URL after Activation')}</label>
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
                                     placeholder="https://192.168.88.1/status" value="{$_c['voucher_redirect']}">
@@ -216,7 +216,7 @@
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Enable Radius</label>
+                        <label class="col-md-2 control-label">{Lang::T('Enable Radius')}</label>
                         <div class="col-md-6">
                             <select name="radius_enable" id="radius_enable" class="form-control text-muted">
                                 <option value="0">{Lang::T('No')}</option>
@@ -266,7 +266,7 @@
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
-                    {Lang::T('Balance System')}
+                    {Lang::T('Customer Balance System')}
                 </div>
                 <div class="panel-body">
                     <div class="form-group">
@@ -410,14 +410,14 @@
                         <p class="help-block col-md-4">{Lang::T('Empty this to use internal mail() PHP')}</p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">SMTP Username</label>
+                        <label class="col-md-2 control-label">{Lang::T('SMTP Username')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="smtp_user" name="smtp_user"
                                 value="{$_c['smtp_user']}" placeholder="user@host.tld">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">SMTP Password</label>
+                        <label class="col-md-2 control-label">{Lang::T('SMTP Password')}</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" id="smtp_pass" name="smtp_pass"
                                 value="{$_c['smtp_pass']}" onmouseleave="this.type = 'password'"
@@ -469,13 +469,13 @@
                         <div class="col-md-6">
                             <select name="user_notification_expired" id="user_notification_expired"
                                 class="form-control">
-                                <option value="none">None</option>
+                                <option value="none">{Lang::T('None')}</option>
                                 <option value="wa" {if $_c['user_notification_expired']=='wa' }selected="selected"
-                                    {/if}>Whatsapp</option>
+                                    {/if}>{Lang::T('By WhatsApp')}</option>
                                 <option value="sms" {if $_c['user_notification_expired']=='sms' }selected="selected"
-                                    {/if}>SMS</option>
+                                    {/if}>{Lang::T('By SMS')}</option>
                                 <option value="email" {if $_c['user_notification_expired']=='email' }selected="selected"
-                                    {/if}>Email</option>
+                                    {/if}>{Lang::T('By Email')}</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('User will get notification when package expired')}</p>
@@ -485,13 +485,13 @@
                         <div class="col-md-6">
                             <select name="user_notification_payment" id="user_notification_payment"
                                 class="form-control">
-                                <option value="none">None</option>
+                                <option value="none">{Lang::T('None')}</option>
                                 <option value="wa" {if $_c['user_notification_payment']=='wa' }selected="selected"
-                                    {/if}>Whatsapp</option>
+                                    {/if}>{Lang::T('By WhatsApp')}</option>
                                 <option value="sms" {if $_c['user_notification_payment']=='sms' }selected="selected"
-                                    {/if}>SMS</option>
+                                    {/if}>{Lang::T('By SMS')}</option>
                                 <option value="email" {if $_c['user_notification_payment']=='email' }selected="selected"
-                                    {/if}>Email</option>
+                                    {/if}>{Lang::T('By Email')}</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">
@@ -502,13 +502,13 @@
                         <div class="col-md-6">
                             <select name="user_notification_reminder" id="user_notification_reminder"
                                 class="form-control">
-                                <option value="none">None</option>
+                                <option value="none">{Lang::T('None')}</option>
                                 <option value="wa" {if $_c['user_notification_reminder']=='wa' }selected="selected"
-                                    {/if}>Whatsapp</option>
+                                    {/if}>{Lang::T('By WhatsApp')}</option>
                                 <option value="sms" {if $_c['user_notification_reminder']=='sms' }selected="selected"
-                                    {/if}>SMS</option>
+                                    {/if}>{Lang::T('By SMS')}</option>
                                 <option value="sms" {if $_c['user_notification_reminder']=='email' }selected="selected"
-                                    {/if}>Email</option>
+                                    {/if}>{Lang::T('By Email')}</option>
                             </select>
                         </div>
                     </div>
@@ -546,7 +546,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Access Token')}</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" id="api_key" name="api_key"
-                                value="{$_c['api_key']}" placeholder="Empty this to randomly created API key"
+                                value="{$_c['api_key']}" placeholder="{Lang::T('Empty this to randomly created API key')}"
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                         <p class="col-md-4 help-block">{Lang::T('This Token will act as SuperAdmin/Admin')}</p>
@@ -655,11 +655,11 @@
                         <div class="col-md-6">
                             <select name="phone_otp_type" id="phone_otp_type" class="form-control">
                                 <option value="sms" {if $_c['phone_otp_type']=='sms' }selected="selected" {/if}>
-                                    {Lang::T('SMS')}
+                                    {Lang::T('By SMS')}
                                 <option value="whatsapp" {if $_c['phone_otp_type']=='whatsapp' }selected="selected"
-                                    {/if}> {Lang::T('WhatsApp')}
+                                    {/if}> {Lang::T('by WhatsApp')}
                                 <option value="both" {if $_c['phone_otp_type']=='both' }selected="selected" {/if}>
-                                    {Lang::T('SMS and WhatsApp')}
+                                    {Lang::T('By WhatsApp and SMS')}
                                 </option>
                             </select>
                         </div>
@@ -759,18 +759,18 @@
                                 </option>
                                 <!-- Custom tax rate option -->
                                 <option value="custom" {if $_c['tax_rate']=='custom' }selected="selected" {/if}>
-                                    {Lang::T('Custom')}</option>
+                                    {Lang::T('Custome')}</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Tax Rates in percentage')}</p>
                     </div>
                     <!-- Custom tax rate input field (initially hidden) -->
                     <div class="form-group" id="customTaxRate" style="display: none;">
-                        <label class="col-md-2 control-label">{Lang::T('Custom Tax Rate')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Custome Tax Rate')}</label>
                         <div class="col-md-6">
                             <input type="text" value="{$_c['custom_tax_rate']}" class="form-control"
                                 name="custom_tax_rate" id="custom_tax_rate"
-                                placeholder="{Lang::T('Enter Custom Tax Rate')}">
+                                placeholder="{Lang::T('Enter Custome Tax Rate')}">
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Enter the custom tax rate (e.g., 3.75 for 3.75%)')}</p>
                     </div>
