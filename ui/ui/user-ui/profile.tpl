@@ -4,9 +4,8 @@
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
-            <div class="panel-heading">{Lang::T('Edit User')}</div>
+            <div class="panel-heading">{Lang::T('Data Change')}</div>
             <div class="panel-body">
-
                 <form class="form-horizontal" method="post" role="form" action="{$_url}accounts/edit-profile-post">
                     <input type="hidden" name="id" value="{$_user['id']}">
                     <div class="form-group">
@@ -21,7 +20,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Full Name')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Full name')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="fullname" name="fullname"
                                 value="{$_user['fullname']}">
@@ -36,25 +35,25 @@
                     </div>
                     {if $_c['allow_phone_otp'] != 'yes'}
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
+                            <label class="col-md-2 control-label">{Lang::T('Phone number')}</label>
                             <div class="col-md-6">
                                 <div class="input-group">
                                     <span class="input-group-addon" id="basic-addon1">+</span>
                                     <input type="text" class="form-control" name="phonenumber" id="phonenumber"
                                         value="{$_user['phonenumber']}"
-                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone number')}">
                                 </div>
                             </div>
                         </div>
                     {else}
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
+                            <label class="col-md-2 control-label">{Lang::T('Phone number')}</label>
                             <div class="col-md-6">
                                 <div class="input-group">
                                     <span class="input-group-addon" id="basic-addon1">+</span>
                                     <input type="text" class="form-control" name="phonenumber" id="phonenumber"
                                         value="{$_user['phonenumber']}" readonly
-                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone number')}">
                                     <span class="input-group-btn">
                                         <a href="{$_url}accounts/phone-update" type="button"
                                             class="btn btn-info btn-flat">{Lang::T('Change')}</a>
@@ -63,7 +62,6 @@
                             </div>
                         </div>
                     {/if}
-
                     {if $_c['allow_email_otp'] != 'yes'}
                         <div class="form-group">
                             <label class="col-md-2 control-label">{Lang::T('Email')}</label>
@@ -87,7 +85,6 @@
                             </div>
                         </div>
                     {/if}
-
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success" type="submit">
@@ -96,7 +93,6 @@
                         </div>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
