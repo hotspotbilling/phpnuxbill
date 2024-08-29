@@ -132,9 +132,9 @@ switch ($do) {
                 } else {
                     $otp = rand(100000, 999999);
                     file_put_contents($otpPath, $otp);
-                    Message::sendSMS($username, $config['CompanyName'] . "\nYour Verification code are: $otp");
+                    Message::sendSMS($username, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
                     $ui->assign('username', $username);
-                    $ui->assign('notify', 'Verification code has been sent to your phone');
+                    $ui->assign('notify', 'Registration code has been sent to your phone');
                     $ui->assign('notify_t', 's');
                     $ui->display('user-ui/register-otp.tpl');
                 }

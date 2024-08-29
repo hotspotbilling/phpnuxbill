@@ -139,12 +139,12 @@ switch ($action) {
             file_put_contents($phoneFile, $phone);
             // send send OTP to user
             if ($config['phone_otp_type'] === 'sms') {
-                Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                Message::sendSMS($phone, $config['CompanyName'] . "\n\n" . Lang::T("Verification code") . "\n$otp");
             } elseif ($config['phone_otp_type'] === 'whatsapp') {
-                Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                Message::sendWhatsapp($phone, $config['CompanyName'] . "\n\n" . Lang::T("Verification code") . "\n$otp");
             } elseif ($config['phone_otp_type'] === 'both') {
-                Message::sendSMS($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
-                Message::sendWhatsapp($phone, $config['CompanyName'] . "\n Your Verification code is: $otp");
+                Message::sendSMS($phone, $config['CompanyName'] . "\n\n" . Lang::T("Verification code") . "\n$otp");
+                Message::sendWhatsapp($phone, $config['CompanyName'] . "\n\n" . Lang::T("Verification code") . "\n$otp");
             }
             //redirect after sending OTP
             r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code has been sent to your phone'));
