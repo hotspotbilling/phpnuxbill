@@ -422,7 +422,7 @@
                         <li {if $_system_menu eq 'voucher'}class="active" {/if}>
                             <a href="{$_url}voucher/activation">
                                 <i class="fa fa-ticket"></i>
-                                <span>{Lang::T('Voucher')}</span>
+                                <span>Voucher</span>
                             </a>
                         </li>
                     {/if}
