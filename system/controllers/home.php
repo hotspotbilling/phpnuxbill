@@ -188,6 +188,8 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
+                    global $isChangePlan;
+                    $isChangePlan = true;
                     (new $p['device'])->add_customer($user, $p);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));

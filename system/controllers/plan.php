@@ -848,6 +848,8 @@ switch ($action) {
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
+                            global $isChangePlan;
+                            $isChangePlan = true;
                             (new $p['device'])->add_customer($c, $p);
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
