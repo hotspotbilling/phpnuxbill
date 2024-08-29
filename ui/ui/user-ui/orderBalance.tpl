@@ -4,7 +4,7 @@
     <div class="col-sm-12">
         {if $_c['enable_balance'] == 'yes'}
             <div class="box box-solid box-success bg-gray-light">
-                <div class="box-header">{Lang::T('Balance Plans')}</div>
+                <div class="box-header">{Lang::T('Buy Balance Plans')}</div>
                 <div class="box-body row">
                     {foreach $plans_balance as $plan}
                         <div class="col col-md-4">

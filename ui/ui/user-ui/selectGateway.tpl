@@ -41,7 +41,7 @@
                     {/if}
                     <li class="list-group-item">
                         <b>{Lang::T('Type')}</b> <span class="pull-right">{if $plan['prepaid'] eq
-                            'yes'}Prepaid{else}Postpaid
+                            'yes'}{Lang::T('Prepaid')}{else}{Lang::T('Postpaid')}
                             {/if}
                             {$plan['type']}</span>
                     </li>
@@ -54,7 +54,7 @@
                     </li>
                     {if $plan['validity']}
                         <li class="list-group-item">
-                            <b>{Lang::T('Plan Validity')}</b> <span class="pull-right">{$plan['validity']}
+                            <b>{Lang::T('Validity Periode')}</b> <span class="pull-right">{$plan['validity']}
                                 {$plan['validity_unit']}</span>
                         </li>
                     {/if}

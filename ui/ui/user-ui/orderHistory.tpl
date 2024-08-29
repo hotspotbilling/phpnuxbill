@@ -11,14 +11,14 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Plan Name')}</th>
-                                <th>{Lang::T('Gateway')}</th>
-                                <th>{Lang::T('Routers')}</th>
+                                <th>{Lang::T('Payment Method')}</th>
+                                <th>Routers</th>
                                 <th>{Lang::T('Type')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
-                                <th>{Lang::T('Created On')}</th>
-                                <th>{Lang::T('Expires On')}</th>
-                                <th>{Lang::T('Date Done')}</th>
-                                <th>{Lang::T('Method')}</th>
+                                <th>{Lang::T('Created on')}</th>
+                                <th>{Lang::T('Expires on')}</th>
+                                <th>{Lang::T('Date')}</th>
+                                <th>{Lang::T('Status')}</th>
                             </tr>
                         </thead>
                         <tbody>

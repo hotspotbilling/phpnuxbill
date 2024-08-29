@@ -89,7 +89,7 @@
                         <label class="col-md-5 control-label">{Lang::T('Send Notification')}</label>
                         <div class="col-md-7">
                             <select name="send_notif" id="send_notif" class="form-control">
-                                <option value="-">{Lang::T('Don't Send')}</option>
+                                <option value="-">{Lang::T("Don't Send")}</option>
                                 <option value="sms">{Lang::T('By SMS')}</option>
                                 <option value="wa">{Lang::T('By WhatsApp')}</option>
                             </select>
