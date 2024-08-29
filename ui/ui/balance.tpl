@@ -3,7 +3,7 @@
 					<div class="row">
 						<div class="col-sm-12">
 							<div class="panel panel-hovered mb20 panel-primary">
-								<div class="panel-heading">{Lang::T('Balance Plans')}</div>
+								<div class="panel-heading">{Lang::T('Balance Package')}</div>
 								<div class="panel-body">
 									<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
 										<div class="col-md-8">
@@ -20,15 +20,15 @@
 											</form>
 										</div>
 										<div class="col-md-4">
-											<a href="{$_url}services/balance-add" class="btn btn-primary btn-block"><i class="ion ion-android-add"> </i> {Lang::T('New Service Plan')}</a>
+											<a href="{$_url}services/balance-add" class="btn btn-primary btn-block"><i class="ion ion-android-add"> </i> {Lang::T('New Service Package')}</a>
 										</div>&nbsp;
 									</div>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped table-condensed">
                                             <thead>
                                                 <tr>
-                                                    <th>{Lang::T('Plan Name')}</th>
-                                                    <th>{Lang::T('Plan Price')}</th>
+                                                    <th>{Lang::T('Package Name')}</th>
+                                                    <th>{Lang::T('Package Price')}</th>
                                                     <th>{Lang::T('Manage')}</th>
                                                 </tr>
                                             </thead>

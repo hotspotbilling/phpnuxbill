@@ -17,7 +17,7 @@
                     <a href="{$_url}plan/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
                             class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend")}</a>
                         <button type="submit" class="btn btn-info text-black btn-sm"><i class="glyphicon glyphicon-print"></i>
-                        Print</button>
+                        {Lang::T('Print')}</button>
                     <a href="nux://print?text={urlencode($invoice)}"
                     class="btn btn-success text-black btn-sm hidden-md hidden-lg">
                         <i class="glyphicon glyphicon-phone"></i>

@@ -27,7 +27,7 @@
                             </div>
                             <br>
                         {/if}
-                        <button type="submit" class="btn btn-primary btn-block">SAVE</button>
+                        <button type="submit" class="btn btn-primary btn-block">{Lang::T('Save')}</button>
                         <br>
                         <p class="help-block">{Lang::T('Sometimes you need to refresh 3 times until content change')}</p>
                         <input type="text" class="form-control" onclick="this.select()" readonly
@@ -42,9 +42,9 @@
                     <div class="panel-footer">
                         <p class="help-block">
                             <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings')}.<br>
-                            <b>[[price]]</b> {Lang::T('Plan Price')}.<br>
+                            <b>[[price]]</b> {Lang::T('Package Price')}.<br>
                             <b>[[voucher_code]]</b> {Lang::T('Voucher Code')}.<br>
-                            <b>[[plan]]</b> {Lang::T('Voucher Plan')}.<br>
+                            <b>[[plan]]</b> {Lang::T('Voucher Package')}.<br>
                             <b>[[counter]]</b> {Lang::T('Counter')}.<br>
                         </p>
                     </div>
