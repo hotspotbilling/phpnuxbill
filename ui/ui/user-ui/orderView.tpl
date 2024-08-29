@@ -5,7 +5,7 @@
     <div class="col-md-6">
         <div
             class="panel mb20 {if $trx['status']==1}panel-warning{elseif $trx['status']==2}panel-success{elseif $trx['status']==3}panel-danger{elseif $trx['status']==4}panel-danger{else}panel-primary{/if} panel-hovered">
-            <div class="panel-footer">Transaction #{$trx['id']}</div>
+            <div class="panel-footer">{Lang::T('Transaction')} #{$trx['id']}</div>
             {if !in_array($trx['routers'],['balance','radius'])}
                 <div class="panel-body">
                     <div class="panel panel-primary panel-hovered">
@@ -120,7 +120,7 @@
                                     {/if}
                                 {/if}
                                 <tr>
-                                    <td>{Lang::T('Plan Validity')}</td>
+                                    <td>{Lang::T('Validity Periode')}</td>
                                     <td>{$plan['validity']} {$plan['validity_unit']}</td>
                                 </tr>
                                 <tr>
@@ -134,15 +134,15 @@
                 {/if}
             </div>
             {if $trx['status']==1}
-                <div class="panel-footer ">
+                <div class="panel-footer">
                     <div class="btn-group btn-group-justified">
                         <a href="{$trx['pg_url_payment']}" {if $trx['gateway']=='midtrans'} target="_blank" {/if}
-                            class="btn btn-primary">{Lang::T('PAY NOW')}</a>
+                            class="btn btn-primary">{Lang::T('Pay Now')}</a>
                         <a href="{$_url}order/view/{$trx['id']}/check"
                             class="btn btn-info">{Lang::T('Check for Payment')}</a>
                     </div>
                 </div>
-                <div class="panel-footer ">
+                <div class="panel-footer">
                     <a href="{$_url}order/view/{$trx['id']}/cancel" class="btn btn-danger"
                         onclick="return confirm('{Lang::T('Cancel it?')}')">{Lang::T('Cancel')}</a>
                 </div>
