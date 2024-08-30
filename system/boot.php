@@ -129,11 +129,11 @@ try {
             $e->getTraceAsString()
     );
     if (!Admin::getID()) {
-        r2(U . 'home', 'e', $e->getMessage());
+        $ui->display('error-user.tpl'); die();
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->display('router-error.tpl');
+    $ui->display('error.tpl');
     die();
 } catch (Exception $e) {
     Message::sendTelegram(
@@ -142,10 +142,10 @@ try {
             $e->getTraceAsString()
     );
     if (!Admin::getID()) {
-        r2(U . 'home', 'e', $e->getMessage());
+        $ui->display('error-user.tpl'); die();
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->display('router-error.tpl');
+    $ui->display('error.tpl');
     die();
 }

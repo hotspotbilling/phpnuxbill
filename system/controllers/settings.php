@@ -151,7 +151,7 @@ switch ($action) {
                     $ui->assign("error_message", "Radius table not found.<br><br>" .
                         $e->getMessage() .
                         "<br><br>Download <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/Development/install/radius.sql\">here</a> or <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/install/radius.sql\">here</a> and import it to database.<br><br>Check config.php for radius connection details");
-                    $ui->display('router-error.tpl');
+                    $ui->display('error.tpl');
                     die();
                 }
             }
