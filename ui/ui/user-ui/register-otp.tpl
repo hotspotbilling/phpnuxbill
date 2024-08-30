@@ -112,10 +112,10 @@
                                 </div>
                                 <div class="btn-group btn-group-justified mb15">
                                     <div class="btn-group">
-                                        <button class="btn btn-primary" type="submit">{Lang::T('Register')}</button>
+                                        <a href="{$_url}register" class="btn btn-success">{Lang::T('Cancel')}</a>
                                     </div>
                                     <div class="btn-group">
-                                        <a href="{$_url}register" class="btn btn-success">{Lang::T('Cancel')}</a>
+                                        <button class="btn btn-primary" type="submit">{Lang::T('Register')}</button>
                                     </div>
                                 </div>
                                 <br>
