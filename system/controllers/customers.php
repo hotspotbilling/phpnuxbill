@@ -455,7 +455,7 @@ switch ($action) {
                         'args' => [$d['phonenumber'], $welcomeMessage]
                     ],
                     'whatsapp' => [
-                        'enabled' => isset($_POST['wa']) && $_POST['wa'] == 'wa',
+                        'enabled' => isset($_POST['wa']),
                         'method' => 'sendWhatsapp',
                         'args' => [$d['phonenumber'], $welcomeMessage]
                     ],
