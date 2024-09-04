@@ -704,7 +704,7 @@
         .dark-mode textarea:not(#filterNavigateMenu),
         .dark-mode select:not(#filterNavigateMenu),
         .dark-mode .select2-selection:not(#filterNavigateMenu) {
-            color: #ffffff;
+            color: inherit;
             transition: all .5s ease-in-out;
         }
 
@@ -946,6 +946,15 @@
 
         .dark-mode .main-footer {
             border-top: 1px solid transparent;
+        }
+
+        .dark-mode .list-group-item {
+            position: relative;
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: -1px;
+            background-color: transparent;
+            border: 1px solid rgba(221, 224, 255, .54);
         }
 
         /* Dark Mode - Select2 Dropdown ends here */
