@@ -576,7 +576,6 @@
         }
 
         .dark-mode .box-header {
-            color: inherit;
             display: block;
             padding: 10px;
             position: relative;
