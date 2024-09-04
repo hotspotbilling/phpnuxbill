@@ -1121,7 +1121,7 @@
                             </a>
                         {/if}
                         <ul class="treeview-menu">
-                            <li {if $_system_menu eq 'reports' }class="active" {/if}><a
+                            <li {if $_routes[1] eq 'reports' }class="active" {/if}><a
                                     href="{$_url}reports">{Lang::T('Daily Reports')}</a></li>
                             <li {if $_routes[1] eq 'activation' }class="active" {/if}><a
                                     href="{$_url}reports/activation">{Lang::T('Activation History')}</a></li>
@@ -1274,7 +1274,7 @@
                     {/if}
                     {$_MENU_AFTER_LOGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        <li {if $_system_menu eq 'community' }class="active" {/if}>
+                        <li {if $_routes[1] eq 'docs' }class="active" {/if}>
                             <a href="{if $_c['docs_clicked'] != 'yes'}{$_url}settings/docs{else}./docs/{/if}">
                                 <i class="ion ion-ios-bookmarks"></i>
                                 <span class="text">{Lang::T('Documentation')}</span>
