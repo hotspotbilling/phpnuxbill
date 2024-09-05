@@ -264,6 +264,10 @@
             font-weight: bold;
         }
 
+        .main-header .logo .logo-lg {
+            font-weight: bold;
+        }
+
         /* New Customize Interface End Here */
 
         ::-moz-selection {
@@ -703,6 +707,14 @@
         .dark-mode .box-header>.glyphicon,
         .dark-mode .box-header>.ion,
         .dark-mode .box-header .box-title {
+            font-weight: bold;
+        }
+
+        .dark-mode .content-header>h2 {
+            font-weight: bold;
+        }
+
+        .dark-mode .main-header .logo .logo-lg {
             font-weight: bold;
         }
     </style>
