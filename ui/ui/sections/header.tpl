@@ -21,6 +21,7 @@
     <style>
         /* New Customize Interface Start Here */
         @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
         body {
             position: relative;
             z-index: 1;
@@ -680,6 +681,21 @@
         .dark-mode .panel>.table-responsive:last-child>.table:last-child>tfoot:last-child>tr:last-child th:first-child {
             background-color: #4a4949;
             border-bottom-left-radius: 21px;
+        }
+
+        .dark-mode .table>thead>tr>td.danger,
+        .dark-mode .table>thead>tr>th.danger,
+        .dark-mode .table>thead>tr.danger>td,
+        .dark-mode .table>thead>tr.danger>th,
+        .dark-mode .table>tbody>tr>td.danger,
+        .dark-mode .table>tbody>tr>th.danger,
+        .dark-mode .table>tbody>tr.danger>td,
+        .dark-mode .table>tbody>tr.danger>th,
+        .dark-mode .table>tfoot>tr>td.danger,
+        .dark-mode .table>tfoot>tr>th.danger,
+        .dark-mode .table>tfoot>tr.danger>td,
+        .dark-mode .table>tfoot>tr.danger>th {
+            background-color: #694760;
         }
 
         .dark-mode .panel-heading {
