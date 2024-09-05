@@ -1015,6 +1015,25 @@
             font-weight: bold;
         }
 
+        .dark-mode .modal-content {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 15px;
+            border-bottom-left-radius: 15px;
+            -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, .125);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, .125);
+            border: 0;
+            background: #1a202c;
+        }
+
+        .dark-mode .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(221, 224, 255, .54);
+            min-height: 16.428571429px;
+            background-color: #1a202c;
+            color: inherit;
+        }
+
         /* Dark Mode - Select2 Dropdown ends here */
 
         /* dark mode styles start ends here */
