@@ -1034,6 +1034,17 @@
             color: inherit;
         }
 
+        .dark-mode .navbar-nav>.notifications-menu>.dropdown-menu>li.footer>a,
+        .dark-mode .navbar-nav>.messages-menu>.dropdown-menu>li.footer>a,
+        .dark-mode .navbar-nav>.tasks-menu>.dropdown-menu>li.footer>a {
+            background: #1a202c !important;
+            color: inherit !important;
+        }
+
+        .dark-mode .navbar-nav>.user-menu>.dropdown-menu>.user-footer {
+            background-color: #1a202c;
+        }
+
         /* Dark Mode - Select2 Dropdown ends here */
 
         /* dark mode styles start ends here */

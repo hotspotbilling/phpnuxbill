@@ -737,6 +737,28 @@
             background-color: #1a202c;
             color: inherit;
         }
+
+
+        .dark-mode .navbar-nav>.notifications-menu>.dropdown-menu>li .menu>li>a,
+        .dark-mode .navbar-nav>.messages-menu>.dropdown-menu>li .menu>li>a,
+        .dark-mode .navbar-nav>.tasks-menu>.dropdown-menu>li .menu>li>a {
+            display: block;
+            white-space: nowrap;
+            border-bottom: 1px solid rgba(221, 224, 255, .54);
+            background: #1a202c;
+            color: inherit;
+        }
+
+        .dark-mode .navbar-nav>.notifications-menu>.dropdown-menu>li.footer>a,
+        .dark-mode .navbar-nav>.messages-menu>.dropdown-menu>li.footer>a,
+        .dark-mode .navbar-nav>.tasks-menu>.dropdown-menu>li.footer>a {
+            background: #1a202c !important;
+            color: inherit !important;
+        }
+
+        .dark-mode .navbar-nav>.user-menu>.dropdown-menu>.user-footer {
+            background-color: #1a202c;
+        }
     </style>
 
     {if isset($xheader)}
