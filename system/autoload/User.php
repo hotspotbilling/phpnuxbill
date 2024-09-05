@@ -210,14 +210,15 @@ class User
             ->select('tbl_user_recharges.id', 'id')
             ->selects([
                 'customer_id', 'username', 'plan_id', 'namebp', 'recharged_on', 'recharged_time', 'expiration', 'time',
-                'status', 'method', 'plan_type', 'name_bw',
+                'status', 'method', 'plan_type',
                 ['tbl_user_recharges.routers', 'routers'],
                 ['tbl_user_recharges.type', 'type'],
                 'admin_id', 'prepaid'
             ])
+            ->left_outer_join('tbl_plans', ['tbl_plans.id', '=', 'tbl_user_recharges.plan_id'])
+            ->left_outer_join('tbl_bandwidth', ['tbl_bandwidth.id', '=', 'tbl_plans.id_bw'])
+            ->select('tbl_bandwidth.*') 
             ->where('customer_id', $id)
-            ->left_outer_join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'))
-            ->left_outer_join('tbl_bandwidth', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))
             ->find_many();
         return $d;
     }
