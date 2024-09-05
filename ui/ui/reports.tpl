@@ -81,7 +81,7 @@
             </div>
         </span>
         <div class="box box-primary box-solid">
-            <div class="table-responsive">
+            <div class="table-responsive">&nbsp;&nbsp;
                 <table class="table table-bordered table-condensed">
                     <thead>
                         <tr>
