@@ -35,5 +35,4 @@
         {/if}
     </div>
 </div>
-</div>
 {include file="user-ui/footer.tpl"}
