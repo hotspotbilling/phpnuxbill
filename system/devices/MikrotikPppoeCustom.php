@@ -10,14 +10,14 @@
 
 use PEAR2\Net\RouterOS;
 
-class MikrotikPppoe
+class MikrotikPppoeCustom
 {
     // show Description
     function description()
     {
         return [
-            'title' => 'Mikrotik PPPOE',
-            'description' => 'To handle connection between PHPNuxBill with Mikrotik PPPOE',
+            'title' => 'Mikrotik PPPOE Custom',
+            'description' => 'To handle connection between PHPNuxBill with Mikrotik PPPOE using Custom Username, IP and Password',
             'author' => 'ibnux',
             'url' => [
                 'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
@@ -39,14 +39,30 @@ class MikrotikPppoe
         }else{
             $setRequest = new RouterOS\Request('/ppp/secret/set');
             $setRequest->setArgument('numbers', $cid);
-            $setRequest->setArgument('password', $customer['password']);
-            $setRequest->setArgument('name', $customer['username']);
+            if (!empty($customer['pppoe_password'])) {
+                $setRequest->setArgument('password', $customer['pppoe_password']);
+            } else {
+                $setRequest->setArgument('password', $customer['password']);
+            }
+            if (!empty($customer['pppoe_username'])) {
+                $setRequest->setArgument('name', $customer['pppoe_username']);
+            } else {
+                $setRequest->setArgument('name', $customer['username']);
+            }
+            if (!empty($customer['pppoe_ip'])) {
+                $setRequest->setArgument('local-address', $customer['pppoe_ip']);
+            }else{
+                $setRequest->setArgument('local-address', '0.0.0.0');
+            }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $client->sendSync($setRequest);
             //disconnect then
             if(isset($isChangePlan) && $isChangePlan){
                 $this->removePpoeActive($client, $customer['username']);
+                if (!empty($customer['pppoe_username'])) {
+                    $this->removePpoeActive($client, $customer['pppoe_username']);
+                }
             }
         }
     }
@@ -60,11 +76,20 @@ class MikrotikPppoe
             if($p){
                 $this->add_customer($customer, $p);
                 $this->removePpoeActive($client, $customer['username']);
+                if (!empty($customer['pppoe_username'])) {
+                    $this->removePpoeActive($client, $customer['pppoe_username']);
+                }
                 return;
             }
         }
-        $this->removePpoeActive($client, $customer['username']);
         $this->removePpoeUser($client, $customer['username']);
+        if (!empty($customer['pppoe_username'])) {
+            $this->removePpoeUser($client, $customer['pppoe_username']);
+        }
+        $this->removePpoeActive($client, $customer['username']);
+        if (!empty($customer['pppoe_username'])) {
+            $this->removePpoeActive($client, $customer['pppoe_username']);
+        }
     }
 
     // customer change username
@@ -125,7 +150,15 @@ class MikrotikPppoe
     function getIdByCustomer($customer, $client){
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         $printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
-        return $client->sendSync($printRequest)->getProperty('.id');
+        $id = $client->sendSync($printRequest)->getProperty('.id');
+        if(empty($id)){
+            if (!empty($customer['pppoe_username'])) {
+                $printRequest = new RouterOS\Request('/ppp/secret/print');
+                $printRequest->setQuery(RouterOS\Query::where('name', $customer['pppoe_username']));
+                $id = $client->sendSync($printRequest)->getProperty('.id');
+            }
+        }
+        return $id;
     }
 
     function update_plan($old_name, $new_plan)
@@ -294,8 +327,19 @@ class MikrotikPppoe
         $setRequest->setArgument('service', 'pppoe');
         $setRequest->setArgument('profile', $plan['name_plan']);
         $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-        $setRequest->setArgument('password', $customer['password']);
-        $setRequest->setArgument('name', $customer['username']);
+        if (!empty($customer['pppoe_password'])) {
+            $setRequest->setArgument('password', $customer['pppoe_password']);
+        } else {
+            $setRequest->setArgument('password', $customer['password']);
+        }
+        if (!empty($customer['pppoe_username'])) {
+            $setRequest->setArgument('name', $customer['pppoe_username']);
+        } else {
+            $setRequest->setArgument('name', $customer['username']);
+        }
+        if (!empty($customer['pppoe_ip'])) {
+            $setRequest->setArgument('local-address', $customer['pppoe_ip']);
+        }
         $client->sendSync($setRequest);
     }
 
