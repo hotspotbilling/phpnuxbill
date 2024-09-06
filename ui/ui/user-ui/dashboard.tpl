@@ -111,7 +111,7 @@
                         </td>
                     </tr>
                     {/if}
-                </table>
+                </table> &nbsp;&nbsp;
             </div>
             {if $abills && count($abills)>0}
             <div class="box-header">
