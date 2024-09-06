@@ -80,9 +80,8 @@
                 </div>
             </div>
         </span>
-    <div class="box box-primary box-solid">
-        <div class="table-responsive">
-            <div style="margin-left: 5px; margin-right: 5px;">
+        <div class="box box-primary box-solid">
+            <div class="table-responsive">
                 <table class="table table-bordered table-condensed">
                     <thead>
                         <tr>
@@ -127,7 +126,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
             <div class="box-footer">
                 <p class="text-center small text-info">{Lang::T('All Transactions at Date')}:
                     {Lang::dateAndTimeFormat($sd, $ts)} - {Lang::dateAndTimeFormat($ed, $te)}</p>
