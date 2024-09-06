@@ -241,6 +241,25 @@
             border-color: #d6e9c6;
         }
 
+        .content-header>h1 {
+            font-weight: bold;
+        }
+
+        .box-header>.fa,
+        .box-header>.glyphicon,
+        .box-header>.ion,
+        .box-header .box-title {
+            font-weight: bold;
+        }
+
+        .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li>a {
+            font-weight: bold;
+        }
+
+        .main-header .logo .logo-lg {
+            font-weight: bold;
+        }
+
         /* Search Bar Start Here */
         .wrap {
             width: 30%;
@@ -971,6 +990,59 @@
             margin-bottom: -1px;
             background-color: transparent;
             border: 1px solid rgba(221, 224, 255, .54);
+        }
+
+        .dark-mode .modern-skin-dark .main-sidebar .sidebar .sidebar-menu li>a {
+            font-weight: bold;
+        }
+
+        .dark-mode .content-header>h1 {
+            font-weight: bold;
+        }
+
+        .dark-mode .box-header>.fa,
+        .dark-mode .box-header>.glyphicon,
+        .dark-mode .box-header>.ion,
+        .dark-mode .box-header .box-title {
+            font-weight: bold;
+        }
+
+        .dark-mode .content-header>h2 {
+            font-weight: bold;
+        }
+
+        .dark-mode .main-header .logo .logo-lg {
+            font-weight: bold;
+        }
+
+        .dark-mode .modal-content {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 15px;
+            border-bottom-left-radius: 15px;
+            -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, .125);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, .125);
+            border: 0;
+            background: #1a202c;
+        }
+
+        .dark-mode .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(221, 224, 255, .54);
+            min-height: 16.428571429px;
+            background-color: #1a202c;
+            color: inherit;
+        }
+
+        .dark-mode .navbar-nav>.notifications-menu>.dropdown-menu>li.footer>a,
+        .dark-mode .navbar-nav>.messages-menu>.dropdown-menu>li.footer>a,
+        .dark-mode .navbar-nav>.tasks-menu>.dropdown-menu>li.footer>a {
+            background: #1a202c !important;
+            color: inherit !important;
+        }
+
+        .dark-mode .navbar-nav>.user-menu>.dropdown-menu>.user-footer {
+            background-color: #1a202c;
         }
 
         /* Dark Mode - Select2 Dropdown ends here */
