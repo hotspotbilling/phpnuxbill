@@ -29,7 +29,7 @@
                             <td>{$unpaid['routers']}</td>
                         </tr>
                     </tbody>
-                </table>
+                </table> &nbsp;
             </div>
             <div class="box-footer p-2">
                 <div class="btn-group btn-group-justified mb15">
@@ -48,7 +48,7 @@
                     </div>
                 </div>
 
-            </div>
+            </div>&nbsp;&nbsp;
         </div>
         {/if}
         <div class="box box-info box-solid">
@@ -111,7 +111,7 @@
                         </td>
                     </tr>
                     {/if}
-                </table> &nbsp;&nbsp;
+                </table>&nbsp;&nbsp;
             </div>
             {if $abills && count($abills)>0}
             <div class="box-header">
