@@ -717,6 +717,38 @@
             background-color: #694760;
         }
 
+        .dark-mode .table>thead>tr>td.warning,
+        .dark-mode .table>thead>tr>th.warning,
+        .dark-mode .table>thead>tr.warning>td,
+        .dark-mode .table>thead>tr.warning>th,
+        .dark-mode .table>tbody>tr>td.warning,
+        .dark-mode .table>tbody>tr>th.warning,
+        .dark-mode .table>tbody>tr.warning>td,
+        .dark-mode .table>tbody>tr.warning>th,
+        .dark-mode .table>tfoot>tr>td.warning,
+        .dark-mode .table>tfoot>tr>th.warning,
+        .dark-mode .table>tfoot>tr.warning>td,
+        .dark-mode .table>tfoot>tr.danger>th {
+            background-color: #787c63;
+            color: #ffffff;
+        }
+
+        .dark-mode .table>thead>tr>td.success,
+        .dark-mode .table>thead>tr>th.success,
+        .dark-mode .table>thead>tr.success>td,
+        .dark-mode .table>thead>tr.success>th,
+        .dark-mode .table>tbody>tr>td.success,
+        .dark-mode .table>tbody>tr>th.success,
+        .dark-mode .table>tbody>tr.success>td,
+        .dark-mode .table>tbody>tr.success>th,
+        .dark-mode .table>tfoot>tr>td.success,
+        .dark-mode .table>tfoot>tr>th.success,
+        .dark-mode .table>tfoot>tr.success>td,
+        .dark-mode .table>tfoot>tr.success>th {
+            background-color: #7dcba7;
+            color: #ffffff;
+        }
+
         .dark-mode .panel-heading {
             padding: 10px 15px;
             border-bottom: 1px solid transparent;
@@ -1043,6 +1075,46 @@
 
         .dark-mode .navbar-nav>.user-menu>.dropdown-menu>.user-footer {
             background-color: #1a202c;
+        }
+
+        .dark-mode .nav-tabs-custom>.tab-content {
+            background-color: #1a202c;
+            padding: 10px;
+            border-bottom-right-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+
+        .dark-mode .nav-tabs-custom {
+            margin-bottom: 20px;
+            background: #1a202c;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+            border-radius: 15px;
+        }
+
+        .dark-mode .nav-tabs-custom>.nav-tabs>li:first-of-type.active>a {
+            border-left-color: transparent;
+        }
+
+        .dark-mode .nav-tabs-custom>.nav-tabs>li.active>a {
+            border-top-color: transparent;
+            border-left-color: rgba(221, 224, 255, .54);
+            border-right-color: rgba(221, 224, 255, .54);
+            color: inherit;
+            background-color: #1a202c;
+        }
+
+        .dark-mode pre {
+            display: block;
+            padding: 9.5px;
+            margin: 0 0 10px;
+            font-size: 13px;
+            line-height: 1.428571429;
+            word-break: break-all;
+            word-wrap: break-word;
+            color: inherit;
+            background-color: inherit;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
 
         /* Dark Mode - Select2 Dropdown ends here */
