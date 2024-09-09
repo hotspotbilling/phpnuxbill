@@ -656,9 +656,6 @@
         }
 
         .toggle-container {
-            position: absolute;
-            top: 17px;
-            right: 15px;
             cursor: pointer;
         }
 
@@ -669,11 +666,6 @@
         }
 
         @media (max-width: 600px) {
-            .toggle-container {
-                top: 15px;
-                right: 60px;
-            }
-
             .toggle-container .toggle-icon {
                 font-size: 20px;
                 color: rgb(100 116 139);
@@ -1157,9 +1149,9 @@
                             </div>
                         </div>
                         <li>
-                            <div class="toggle-container">
+                            <a class="toggle-container" href="#">
                                 <i class="toggle-icon" id="toggleIcon">🌞</i>
-                            </div>
+                            </a>
                         </li>
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
