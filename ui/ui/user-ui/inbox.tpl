@@ -14,7 +14,7 @@
                 {if Text::is_html($mail['body'])}
                     {$mail['body']}
                 {else}
-                    {nl2br($mail['body'])}
+                {nl2br(htmlspecialchars_decode($mail['body']))}
                 {/if}
         </div>
     </div>
