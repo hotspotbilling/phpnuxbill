@@ -29,7 +29,7 @@
                     <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                         <div class="col-lg-4">
                             <div class="input-group">
-                                <span class="input-group-addon">Order &nbsp;&nbsp;</span>
+                                <span class="input-group-addon">Order&nbsp;&nbsp;</span>
                                 <div class="row row-no-gutters">
                                     <div class="col-xs-8">
                                         <select class="form-control" id="order" name="order">
