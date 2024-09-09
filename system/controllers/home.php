@@ -71,8 +71,9 @@ if (_post('send') == 'balance') {
             $d->pg_url_payment = 'balance';
             $d->status = 2;
             $d->save();
-            Message::sendBalanceNotification($user, $balance, ($user['balance'] - $balance), Lang::getNotifText('balance_send'), $config['user_notification_payment']);
-            Message::sendBalanceNotification($target, $balance, ($target['balance'] + $balance), Lang::getNotifText('balance_received'), $config['user_notification_payment']);
+            //
+            Message::sendBalanceNotification($user, $target, $balance, ($user['balance'] - $balance), Lang::getNotifText('balance_send'), $config['user_notification_payment']);
+            Message::sendBalanceNotification($target, $user, $balance, ($target['balance'] + $balance), Lang::getNotifText('balance_received'), $config['user_notification_payment']);
             Message::sendTelegram("#u$user[username] send balance to #u$target[username] \n" . Lang::moneyFormat($balance));
             r2(U . 'home', 's', Lang::T('Sending balance success'));
         }
