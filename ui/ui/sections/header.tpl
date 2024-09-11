@@ -148,12 +148,26 @@
             color: inherit;
             background-color: transparent;
             border-color: transparent;
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
         }
 
-        .panel-primary>.panel-heading {
-            color: inherit;
-            background-color: transparent;
-            border-color: transparent;
+        .panel-success>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+        }
+
+        .panel-warning>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+        }
+
+        .panel-danger>.panel-heading {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
         }
 
         .panel-heading {
@@ -656,6 +670,9 @@
         }
 
         .toggle-container {
+            position: absolute;
+            top: 17px;
+            right: 15px;
             cursor: pointer;
         }
 
@@ -666,6 +683,11 @@
         }
 
         @media (max-width: 600px) {
+            .toggle-container {
+                top: 15px;
+                right: 60px;
+            }
+
             .toggle-container .toggle-icon {
                 font-size: 20px;
                 color: rgb(100 116 139);
