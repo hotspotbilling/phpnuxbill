@@ -195,7 +195,7 @@
             </div>
         {/if}
         {if $run_date}
-        {if $current_time - $run_time > 3600}
+        {if $current_date - $run_time > 3600}
         <div class="panel panel-warning panel-hovered mb20 activities">
             <div class="panel-heading"><i class="fa fa-clock-o"></i> &nbsp; {Lang::T('Cron has not run for over 1 hour. Please
                 check your setup.')}</div>
