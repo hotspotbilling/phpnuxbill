@@ -295,6 +295,16 @@ switch ($action) {
                 $d->value = _post('pppoe_plan');
                 $d->save();
             }
+			$d = ORM::for_table('tbl_appconfig')->where('setting', 'vpn_plan')->find_one();
+            if ($d) {
+                $d->value = _post('vpn_plan');
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'vpn_plan';
+                $d->value = _post('vpn_plan');
+                $d->save();
+            }
 
             $currency_code = $_POST['currency_code'];
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'currency_code')->find_one();

@@ -155,5 +155,11 @@
     "2024.8.28" : [
         "ALTER TABLE `tbl_routers` ADD `status` ENUM('Online', 'Offline') DEFAULT 'Online' AFTER `coordinates`;",
         "ALTER TABLE `tbl_routers` ADD `last_seen` DATETIME AFTER `status`;"
+    ],
+    "2024.9.13" : [
+        "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+        "ALTER TABLE `tbl_customers` CHANGE `service_type` `service_type` ENUM('Hotspot','PPPoE','VPN','Others') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'Others' COMMENT 'For selecting user type';",
+		"ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+		"CREATE TABLE IF NOT EXISTS `tbl_port_pool` ( `id` int(10) NOT NULL AUTO_INCREMENT , `public_ip` varchar(40) NOT NULL, `port_name` varchar(40) NOT NULL, `range_port` varchar(40) NOT NULL, `routers` varchar(40) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
     ]
 }
