@@ -35,8 +35,8 @@
                             <select class="form-control" id="type2" name="type2">
                                 <option value="">{Lang::T('Type')}</option>
                                 {foreach $type2s as $t}
-                                    <option value="{$t}" {if $type2 eq $t }selected{/if}>{Lang::T($t)}
-                                    </option>
+                                <option value="{$t}" {if $type2 eq $t }selected{/if}>{Lang::T($t)}
+                                </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -44,9 +44,9 @@
                             <select class="form-control" id="bandwidth" name="bandwidth">
                                 <option value="">Bandwidth</option>
                                 {foreach $bws as $b}
-                                    <option value="{$b['id']}" {if $bandwidth eq $b['id'] }selected{/if}>
-                                        {$b['name_bw']}
-                                    </option>
+                                <option value="{$b['id']}" {if $bandwidth eq $b['id'] }selected{/if}>
+                                    {$b['name_bw']}
+                                </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -54,8 +54,8 @@
                             <select class="form-control" id="type3" name="type3">
                                 <option value="">{Lang::T('Category')}</option>
                                 {foreach $type3s as $t}
-                                    <option value="{$t}" {if $type3 eq $t }selected{/if}>{$t}
-                                    </option>
+                                <option value="{$t}" {if $type3 eq $t }selected{/if}>{$t}
+                                </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -63,8 +63,8 @@
                             <select class="form-control" id="valid" name="valid">
                                 <option value="">{Lang::T('Validity')}</option>
                                 {foreach $valids as $v}
-                                    <option value="{$v}" {if $valid eq $v }selected{/if}>{$v}
-                                    </option>
+                                <option value="{$v}" {if $valid eq $v }selected{/if}>{$v}
+                                </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -72,7 +72,7 @@
                             <select class="form-control" id="router" name="router">
                                 <option value="">{Lang::T('Location')}</option>
                                 {foreach $routers as $r}
-                                    <option value="{$r}" {if $router eq $r }selected{/if}>{$r}</option>
+                                <option value="{$r}" {if $router eq $r }selected{/if}>{$r}</option>
                                 {/foreach}
                                 <option value="radius" {if $router eq 'radius' }selected{/if}>Radius</option>
                             </select>
@@ -81,7 +81,7 @@
                             <select class="form-control" id="device" name="device">
                                 <option value="">{Lang::T('Device')}</option>
                                 {foreach $devices as $r}
-                                    <option value="{$r}" {if $device eq $r }selected{/if}>{$r}</option>
+                                <option value="{$r}" {if $device eq $r }selected{/if}>{$r}</option>
                                 {/foreach}
                             </select>
                         </div>
@@ -104,36 +104,38 @@
                 </div>
             </form>
             <div class="table-responsive">
-                <table class="table table-bordered table-striped table-condensed">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th colspan="4" class="text-center">{Lang::T('Internet Plan')}</th>
-                            <th></th>
-                            <th colspan="2" class="text-center" style="background-color: rgb(243, 241, 172);">
-                                {Lang::T('Expired')}</th>
-                            <th colspan="4"></th>
-                        </tr>
-                        <tr>
-                            <th>{Lang::T('Name')}</th>
-                            <th>{Lang::T('Type')}</th>
-                            <th><a href="{$_url}bandwidth/list">{Lang::T('Bandwidth')}</a></th>
-                            <th>{Lang::T('Price')}</th>
-                            <th>{Lang::T('Validity')}</th>
-                            <th><a href="{$_url}pool/list">{Lang::T('IP Pool')}</a></th>
-                            <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Plan')}</th>
-                            <th style="background-color: rgb(243, 241, 172);">{Lang::T('Date')}</th>
-                            <th><a href="{$_url}routers/list">{Lang::T('Location')}</a></th>
-                            <th>{Lang::T('Device')}</th>
-                            <th>{Lang::T('Manage')}</th>
-                            <th>ID</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {foreach $d as $ds}
-                            <tr {if $ds['enabled'] != 1}class="danger" title="disabled" {/if}>
+                <div style="margin-left: 5px; margin-right: 5px;">
+                    <table class="table table-bordered table-striped table-condensed">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th colspan="4" class="text-center">{Lang::T('Internet Plan')}</th>
+                                <th></th>
+                                <th colspan="2" class="text-center" style="background-color: rgb(243, 241, 172);">
+                                    {Lang::T('Expired')}</th>
+                                <th colspan="4"></th>
+                            </tr>
+                            <tr>
+                                <th>{Lang::T('Name')}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th><a href="{$_url}bandwidth/list">{Lang::T('Bandwidth')}</a></th>
+                                <th>{Lang::T('Price')}</th>
+                                <th>{Lang::T('Validity')}</th>
+                                <th><a href="{$_url}pool/list">{Lang::T('IP Pool')}</a></th>
+                                <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Plan')}</th>
+                                <th style="background-color: rgb(243, 241, 172);">{Lang::T('Date')}</th>
+                                <th><a href="{$_url}routers/list">{Lang::T('Location')}</a></th>
+                                <th>{Lang::T('Device')}</th>
+                                <th>{Lang::T('Manage')}</th>
+                                <th>ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {foreach $d as $ds}
+                            <tr {if $ds['enabled'] !=1}class="danger" title="disabled" {/if}>
                                 <td>{$ds['name_plan']}</td>
-                                <td>{$ds['plan_type']} {if $ds['prepaid'] != 'yes'}<b>{Lang::T('Postpaid')}</b>{else}{Lang::T('Prepaid')}{/if}</td>
+                                <td>{$ds['plan_type']} {if $ds['prepaid'] !=
+                                    'yes'}<b>{Lang::T('Postpaid')}</b>{else}{Lang::T('Prepaid')}{/if}</td>
                                 <td>{$ds['name_bw']}</td>
                                 <td>{Lang::moneyFormat($ds['price'])}</td>
                                 <td>{$ds['validity']} {$ds['validity_unit']}</td>
@@ -144,11 +146,11 @@
                                 <td>{if $ds['prepaid'] == no}{$ds['expired_date']}{/if}</td>
                                 <td>
                                     {if $ds['is_radius']}
-                                        <span class="label label-primary">RADIUS</span>
+                                    <span class="label label-primary">RADIUS</span>
                                     {else}
-                                        {if $ds['routers']!=''}
-                                            <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
-                                        {/if}
+                                    {if $ds['routers']!=''}
+                                    <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
+                                    {/if}
                                     {/if}
                                 </td>
                                 <td>{$ds['device']}</td>
@@ -161,9 +163,10 @@
                                 </td>
                                 <td>{$ds['id']}</td>
                             </tr>
-                        {/foreach}
-                    </tbody>
-                </table>
+                            {/foreach}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="panel-footer">
                 {include file="pagination.tpl"}

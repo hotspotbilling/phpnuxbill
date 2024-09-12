@@ -1,6 +1,27 @@
 <?php
 
 include "../init.php";
+$lockFile = "$CACHE_PATH/router_monitor.lock";
+
+if (!is_dir($CACHE_PATH)) {
+    echo "Directory '$CACHE_PATH' does not exist. Exiting...\n";
+    exit;
+}
+
+$lock = fopen($lockFile, 'c');
+
+if ($lock === false) {
+    echo "Failed to open lock file. Exiting...\n";
+    exit;
+}
+
+if (!flock($lock, LOCK_EX | LOCK_NB)) {
+    echo "Script is already running. Exiting...\n";
+    fclose($lock);
+    exit;
+}
+
+
 $isCli = true;
 if (php_sapi_name() !== 'cli') {
     $isCli = false;
@@ -81,27 +102,7 @@ foreach ($d as $ds) {
 
 
 if ($config['router_check']) {
-
-    $lockFile = $CACHE_PATH . '/router_monitor.lock';
-
-    if (!is_dir($CACHE_PATH)) {
-        echo "Directory '$CACHE_PATH' does not exist. Exiting...\n";
-        exit;
-    }
-
-    $lock = fopen($lockFile, 'c');
-
-    if ($lock === false) {
-        echo "Failed to open lock file. Exiting...\n";
-        exit;
-    }
-
-    if (!flock($lock, LOCK_EX | LOCK_NB)) {
-        echo "Script is already running. Exiting...\n";
-        fclose($lock);
-        exit;
-    }
-
+    echo "Checking router status...\n";
     $routers = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
     if (!$routers) {
         echo "No active routers found in the database.\n";
@@ -186,14 +187,20 @@ if ($config['router_check']) {
         Message::SendEmail($adminEmail, $subject, $message);
         sendTelegram($message);
     }
-
-    if (defined('PHP_SAPI') && PHP_SAPI === 'cli') {
-        echo "Cronjob finished\n";
-    } else {
-        echo "</pre>";
-    }
-
-    flock($lock, LOCK_UN);
-    fclose($lock);
-    unlink($lockFile);
+    echo "Router monitoring finished\n";
 }
+
+
+if (defined('PHP_SAPI') && PHP_SAPI === 'cli') {
+    echo "Cronjob finished\n";
+} else {
+    echo "</pre>";
+}
+
+flock($lock, LOCK_UN);
+fclose($lock);
+unlink($lockFile);
+
+$timestampFile = "$UPLOAD_PATH/cron_last_run.txt";
+file_put_contents($timestampFile, time());
+
