@@ -113,12 +113,19 @@ switch ($action) {
                 ->where('type', 'Hotspot')
                 ->where('prepaid', 'yes')
                 ->find_many();
+            $plans_vpn = ORM::for_table('tbl_plans')
+                ->where('plan_type', $account_type)
+                ->where('enabled', '1')->where('is_radius', 0)
+                ->where('type', 'VPN')
+                ->where('prepaid', 'yes')
+                ->find_many();
         }
         $ui->assign('routers', $routers);
         $ui->assign('radius_pppoe', $radius_pppoe);
         $ui->assign('radius_hotspot', $radius_hotspot);
         $ui->assign('plans_pppoe', $plans_pppoe);
         $ui->assign('plans_hotspot', $plans_hotspot);
+        $ui->assign('plans_vpn', $plans_vpn);
         run_hook('customer_view_order_plan'); #HOOK
         $ui->display('user-ui/orderPlan.tpl');
         break;

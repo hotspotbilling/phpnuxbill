@@ -317,7 +317,15 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
             }
         }
     }
-
+		
+$tcf = ORM::for_table('tbl_customers_fields')
+		->where('customer_id', $user['id'])
+		->find_many();
+$vpn = ORM::for_table('tbl_port_pool')
+		->find_one();
+$ui->assign('cf', $tcf);		
+$ui->assign('vpn', $vpn);		
+		
 $ui->assign('unpaid', ORM::for_table('tbl_payment_gateway')
     ->where('username', $user['username'])
     ->where('status', 1)

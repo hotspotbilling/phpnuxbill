@@ -95,8 +95,12 @@
                                 </td>
                                 {if $ds['type'] == 'Hotspot'}
                                     <td><a href="{$_url}services/edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
-                                {else}
+								{/if}
+                                {if $ds['type'] == 'PPPOE'}
                                     <td><a href="{$_url}services/pppoe-edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
+                                {/if}
+                                {if $ds['type'] == 'VPN'}
+                                    <td><a href="{$_url}services/vpn-edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
                                 {/if}
                                 <td>{$ds['type']}</td>
                                 <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>

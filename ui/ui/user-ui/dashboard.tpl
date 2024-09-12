@@ -88,6 +88,8 @@
                             Hotspot
                             {elseif $_user.service_type == 'PPPoE'}
                             PPPoE
+                            {elseif $_user.service_type == 'VPN'}
+							VPN
                             {elseif $_user.service_type == 'Others' || $_user.service_type == null}
                             Others
                             {/if}
@@ -165,8 +167,10 @@
                 <div class="btn-group pull-right">
                     {if $_bill['type'] == 'Hotspot'}
                     {if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}
-                    {else}
+                    {else if $_bill['type'] == 'PPPOE'}
                     {if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}
+                    {else if $_bill['type'] == 'VPN'}
+                    {if $_c['pppoe_plan']==''}VPN Plan{else}{$_c['vpn_plan']}{/if}
                     {/if}
                 </div>
             </div>
@@ -215,6 +219,25 @@
                             {$_bill['plan_type']}
                         </td>
                     </tr>
+					{if $_bill['type'] == 'VPN' && $_bill['routers'] == $vpn['routers']}
+                    <tr>
+                        <td class="small text-success text-uppercase text-normal">{Lang::T('Public IP')}</td>
+						<td class="small mb15">{$vpn['public_ip']} / {$vpn['port_name']}</td>
+                    </tr>
+                    <tr>
+                        <td class="small text-success text-uppercase text-normal">{Lang::T('Private IP')}</td>
+						<td class="small mb15">{$_user['pppoe_ip']}</td>
+                    </tr>
+					{foreach $cf as $tcf}
+					<tr>
+						{if $tcf['field_name'] == 'Winbox' or $tcf['field_name'] == 'Api' or $tcf['field_name'] == 'Web'}
+						<td class="small text-info text-uppercase text-normal">{$tcf['field_name']} - Port</td> 
+						<td class="small mb15"><a href="http://{$vpn['public_ip']}:{$tcf['field_value']}" target="_blank">{$tcf['field_value']}</a></td>
+					</tr>
+						{/if}
+					{/foreach}
+					{/if}
+					
                     {if $nux_ip neq ''}
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">{Lang::T('Current IP')}</td>

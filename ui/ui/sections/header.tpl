@@ -1261,6 +1261,8 @@
                                         href="{$_url}services/hotspot">Hotspot</a></li>
                                 <li {if $_routes[1] eq 'pppoe' }class="active" {/if}><a
                                         href="{$_url}services/pppoe">PPPOE</a></li>
+                                <li {if $_routes[1] eq 'vpn' }class="active" {/if}><a
+                                        href="{$_url}services/vpn">VPN</a></li>
                                 <li {if $_routes[1] eq 'list' }class="active" {/if}><a
                                         href="{$_url}bandwidth/list">Bandwidth</a></li>
                                 {if $_c['enable_balance'] == 'yes'}
@@ -1319,6 +1321,8 @@
                                         href="{$_url}routers">Routers</a></li>
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
                                         href="{$_url}pool/list">IP Pool</a></li>
+                                <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
+                                        href="{$_url}pool/port">Port Pool</a></li>
                                 <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'maps' }class="active" {/if}><a
                                         href="{$_url}routers/maps">{Lang::T('Routers Maps')}</a></li>
                                 {$_MENU_NETWORK}
