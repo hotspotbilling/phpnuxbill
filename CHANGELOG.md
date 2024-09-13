@@ -2,6 +2,13 @@
 
 # CHANGELOG
 
+## 2024.9.13
+
+- Add Selling Mikrotik VPN By @agstrxyz
+- Theme Redesign by @Focuslinkstech
+- Fix That and this
+
+
 ## 2024.8.28
 
 - add Router Status Offline/Online by @Focuslinkstech
