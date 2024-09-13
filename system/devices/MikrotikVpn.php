@@ -400,8 +400,10 @@ class MikrotikVpn
 		$this->checkPort($cust['id'], 'Web', $plan['routers']);
 		$tcf = ORM::for_table('tbl_customers_fields')
 			->where('customer_id', $cust['id'])
-			->find_many(); 
-		
+			->find_many();
+		$ip = ORM::for_table('tbl_port_pool')
+			->where('routers', $plan['routers'])
+			->find_one();
 		foreach ($tcf as $cf) {
 		$dst = $cf['field_value'];
 		$cmnt = $cf['field_name'];
@@ -421,7 +423,7 @@ class MikrotikVpn
                 ->setArgument('action', 'dst-nat')
                 ->setArgument('to-addresses', $ips)
                 ->setArgument('to-ports', $tp)
-                ->setArgument('address', $ip)
+                ->setArgument('dst-address', $ip['public_ip'])
                 ->setArgument('comment', $cmnt.' || '.$cust['username'])
         );
 			}
@@ -434,9 +436,7 @@ class MikrotikVpn
         if ($_app_stage == 'demo') {
             return null;
         }
-		$tcf = ORM::for_table('tbl_customers_fields')
-			->where('customer_id', $cstid)
-			->find_many(); 
+		
 		$cst = ORM::for_table('tbl_customers')->find_one($cstid);
         $printRequest = new RouterOS\Request('/ip/firewall/nat/print');
         $printRequest->setQuery(RouterOS\Query::where('to-addresses', $cst['pppoe_ip']));
