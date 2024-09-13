@@ -157,6 +157,30 @@
             border-bottom-left-radius: 21px;
         }
 
+        .panel-cron-success>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+            color: #fff;
+            background-color: #169210;
+            border-color: #25e01c;
+            
+        }
+
+        .panel-cron-warning>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+            color: #350808;
+            background-color: #efeb0a;
+            border-color: #efeb0a;
+        }
+        .panel-cron-danger>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+            color: #fff;
+            background-color: #e61212;
+            border-color: #df1335;
+        }
+
         .panel-danger>.panel-heading {
             color: #a94442;
             background-color: #f2dede;
