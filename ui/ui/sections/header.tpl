@@ -157,11 +157,6 @@
             border-bottom-left-radius: 21px;
         }
 
-        .panel-warning>.panel-heading {
-            border-bottom-right-radius: 21px;
-            border-bottom-left-radius: 21px;
-        }
-
         .panel-danger>.panel-heading {
             color: #a94442;
             background-color: #f2dede;
@@ -670,9 +665,6 @@
         }
 
         .toggle-container {
-            position: absolute;
-            top: 17px;
-            right: 15px;
             cursor: pointer;
         }
 
@@ -680,19 +672,6 @@
             font-size: 25px;
             color: rgb(100 116 139);
             transition: color 0.5s ease;
-        }
-
-        @media (max-width: 600px) {
-            .toggle-container {
-                top: 15px;
-                right: 60px;
-            }
-
-            .toggle-container .toggle-icon {
-                font-size: 20px;
-                color: rgb(100 116 139);
-                transition: color 0.5s ease;
-            }
         }
 
         .dark-mode .toggle-container .toggle-icon {
