@@ -670,9 +670,6 @@
         }
 
         .toggle-container {
-            position: absolute;
-            top: 17px;
-            right: 15px;
             cursor: pointer;
         }
 
