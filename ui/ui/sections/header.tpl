@@ -157,11 +157,6 @@
             border-bottom-left-radius: 21px;
         }
 
-        .panel-warning>.panel-heading {
-            border-bottom-right-radius: 21px;
-            border-bottom-left-radius: 21px;
-        }
-
         .panel-danger>.panel-heading {
             color: #a94442;
             background-color: #f2dede;
