@@ -129,6 +129,14 @@
                         <span class="help-block col-md-4">{Lang::T('Change title in user Plan order')}</span>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('VPN Package')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="vpn_plan" name="vpn_plan"
+                                value="{if $_c['vpn_plan']==''}VPN Plan{else}{$_c['vpn_plan']}{/if}">
+                        </div>
+                        <span class="help-block col-md-4">{Lang::T('Change title in user Plan order')}</span>
+                    </div>
+                    <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-primary"
                                 type="submit">{Lang::T('Save Changes')}</button>

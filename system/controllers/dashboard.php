@@ -214,6 +214,12 @@ if ($config['router_check']) {
     $ui->assign('routeroffs', $routeroffs);
 }
 
+$timestampFile = "$UPLOAD_PATH/cron_last_run.txt";
+if (file_exists($timestampFile)) {
+    $lastRunTime = file_get_contents($timestampFile);
+    $ui->assign('run_date', date('Y-m-d h:i:s A', $lastRunTime));
+}
+
 // Assign the monthly sales data to Smarty
 $ui->assign('start_date', $start_date);
 $ui->assign('current_date', $current_date);

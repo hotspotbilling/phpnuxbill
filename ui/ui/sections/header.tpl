@@ -148,12 +148,45 @@
             color: inherit;
             background-color: transparent;
             border-color: transparent;
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
         }
 
-        .panel-primary>.panel-heading {
-            color: inherit;
-            background-color: transparent;
-            border-color: transparent;
+        .panel-success>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+        }
+
+        .panel-cron-success>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+            color: #fff;
+            background-color: #169210;
+            border-color: #25e01c;
+            
+        }
+
+        .panel-cron-warning>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+            color: #350808;
+            background-color: #efeb0a;
+            border-color: #efeb0a;
+        }
+        .panel-cron-danger>.panel-heading {
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
+            color: #fff;
+            background-color: #e61212;
+            border-color: #df1335;
+        }
+
+        .panel-danger>.panel-heading {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+            border-bottom-right-radius: 21px;
+            border-bottom-left-radius: 21px;
         }
 
         .panel-heading {
@@ -656,9 +689,6 @@
         }
 
         .toggle-container {
-            position: absolute;
-            top: 17px;
-            right: 15px;
             cursor: pointer;
         }
 
@@ -666,19 +696,6 @@
             font-size: 25px;
             color: rgb(100 116 139);
             transition: color 0.5s ease;
-        }
-
-        @media (max-width: 600px) {
-            .toggle-container {
-                top: 15px;
-                right: 60px;
-            }
-
-            .toggle-container .toggle-icon {
-                font-size: 20px;
-                color: rgb(100 116 139);
-                transition: color 0.5s ease;
-            }
         }
 
         .dark-mode .toggle-container .toggle-icon {
@@ -1157,9 +1174,9 @@
                             </div>
                         </div>
                         <li>
-                            <div class="toggle-container">
+                            <a class="toggle-container" href="#">
                                 <i class="toggle-icon" id="toggleIcon">🌞</i>
-                            </div>
+                            </a>
                         </li>
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -1269,6 +1286,8 @@
                                         href="{$_url}services/hotspot">Hotspot</a></li>
                                 <li {if $_routes[1] eq 'pppoe' }class="active" {/if}><a
                                         href="{$_url}services/pppoe">PPPOE</a></li>
+                                <li {if $_routes[1] eq 'vpn' }class="active" {/if}><a
+                                        href="{$_url}services/vpn">VPN</a></li>
                                 <li {if $_routes[1] eq 'list' }class="active" {/if}><a
                                         href="{$_url}bandwidth/list">Bandwidth</a></li>
                                 {if $_c['enable_balance'] == 'yes'}
@@ -1327,6 +1346,8 @@
                                         href="{$_url}routers">Routers</a></li>
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
                                         href="{$_url}pool/list">IP Pool</a></li>
+                                <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
+                                        href="{$_url}pool/port">Port Pool</a></li>
                                 <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'maps' }class="active" {/if}><a
                                         href="{$_url}routers/maps">{Lang::T('Routers Maps')}</a></li>
                                 {$_MENU_NETWORK}

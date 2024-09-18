@@ -5,19 +5,19 @@
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                    <div class="btn-group pull-right">
-                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}plan/sync"
-                            onclick="return confirm('This will sync/send Caustomer active plan to Mikrotik?')"><span
-                                class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
-                    </div>
-                    {* <div class="btn-group pull-right">
-                        <a class="btn btn-info btn-xs" title="save" href="{$_url}plan/csv{$append_url}"
-                            onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
-                                aria-hidden="true"></span> CSV</a>
-                    </div> *}
+                <div class="btn-group pull-right">
+                    <a class="btn btn-primary btn-xs" title="save" href="{$_url}plan/sync"
+                        onclick="return confirm('This will sync/send Caustomer active plan to Mikrotik?')"><span
+                            class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
+                </div>
+                {* <div class="btn-group pull-right">
+                    <a class="btn btn-info btn-xs" title="save" href="{$_url}plan/csv{$append_url}"
+                        onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                            aria-hidden="true"></span> CSV</a>
+                </div> *}
                 {/if}
                 &nbsp;
-{Lang::T('Active Customers')}
+                {Lang::T('Active Customers')}
             </div>
             <form id="site-search" method="post" action="{$_url}plan/list/">
                 <div class="panel-body">
@@ -36,8 +36,8 @@
                             <select class="form-control" id="router" name="router">
                                 <option value="">{Lang::T('Location')}</option>
                                 {foreach $routers as $r}
-                                    <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
-                                    </option>
+                                <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
+                                </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -45,8 +45,8 @@
                             <select class="form-control" id="plan" name="plan">
                                 <option value="">{Lang::T('Plan Name')}</option>
                                 {foreach $plans as $p}
-                                    <option value="{$p['id']}" {if $plan eq $p['id'] }selected{/if}>{$p['name_plan']}
-                                    </option>
+                                <option value="{$p['id']}" {if $plan eq $p['id'] }selected{/if}>{$p['name_plan']}
+                                </option>
                                 {/foreach}
                             </select>
                         </div>
@@ -70,33 +70,38 @@
                 </div>
             </form>
             <div class="table-responsive">
-                <table id="datatable" class="table table-bordered table-striped table-condensed">
-                    <thead>
-                        <tr>
-                            <th>{Lang::T('Username')}</th>
-                            <th>{Lang::T('Plan Name')}</th>
-                            <th>{Lang::T('Type')}</th>
-                            <th>{Lang::T('Created On')}</th>
-                            <th>{Lang::T('Expires On')}</th>
-                            <th>{Lang::T('Method')}</th>
-                            <th><a href="{$_url}routers/list">{Lang::T('Location')}</a></th>
-                            <th>{Lang::T('Manage')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {foreach $d as $ds}
-                            <tr {if $ds['status']=='off'}class="danger" {/if}>
+                <div style="margin-left: 5px; margin-right: 5px;">&nbsp;
+                    <table id="datatable" class="table table-bordered table-striped table-condensed">
+                        <thead>
+                            <tr>
+                                <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Created On')}</th>
+                                <th>{Lang::T('Expires On')}</th>
+                                <th>{Lang::T('Method')}</th>
+                                <th><a href="{$_url}routers/list">{Lang::T('Location')}</a></th>
+                                <th>{Lang::T('Manage')}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {foreach $d as $ds}
+                            <tr {if $ds['status']=='off' }class="danger" {/if}>
                                 <td>
                                     {if $ds['customer_id'] == '0'}
-                                        <a href="{$_url}plan/voucher/&search={$ds['username']}">{$ds['username']}</a>
+                                    <a href="{$_url}plan/voucher/&search={$ds['username']}">{$ds['username']}</a>
                                     {else}
-                                        <a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a>
+                                    <a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a>
                                     {/if}
                                 </td>
                                 {if $ds['type'] == 'Hotspot'}
                                     <td><a href="{$_url}services/edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
-                                {else}
+								{/if}
+                                {if $ds['type'] == 'PPPOE'}
                                     <td><a href="{$_url}services/pppoe-edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
+                                {/if}
+                                {if $ds['type'] == 'VPN'}
+                                    <td><a href="{$_url}services/vpn-edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
                                 {/if}
                                 <td>{$ds['type']}</td>
                                 <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
@@ -107,19 +112,20 @@
                                     <a href="{$_url}plan/edit/{$ds['id']}" class="btn btn-warning btn-xs"
                                         style="color: black;">{Lang::T('Edit')}</a>
                                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                                        <a href="{$_url}plan/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{Lang::T('Delete')}?')" class="btn btn-danger btn-xs"><i
-                                                class="glyphicon glyphicon-trash"></i></a>
+                                    <a href="{$_url}plan/delete/{$ds['id']}" id="{$ds['id']}"
+                                        onclick="return confirm('{Lang::T('Delete')}?')"
+                                        class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     {/if}
                                     {if $ds['status']=='off' && $_c['extend_expired']}
-                                        <a href="javascript:extend('{$ds['id']}')"
-                                            class="btn btn-info btn-xs">{Lang::T('Extend')}</a>
+                                    <a href="javascript:extend('{$ds['id']}')"
+                                        class="btn btn-info btn-xs">{Lang::T('Extend')}</a>
                                     {/if}
                                 </td>
                             </tr>
-                        {/foreach}
-                    </tbody>
-                </table>
+                            {/foreach}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             {include file="pagination.tpl"}
         </div>
@@ -131,7 +137,7 @@
         var res = prompt("Extend for many days?", "3");
         if (res) {
             if (confirm("Extend for " + res + " days?")) {
-                window.location.href = "{$_url}plan/extend/"+idP+"/"+res+"&stoken={App::getToken()}";
+                window.location.href = "{$_url}plan/extend/" + idP + "/" + res + "&stoken={App::getToken()}";
             }
         }
     }

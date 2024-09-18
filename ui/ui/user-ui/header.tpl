@@ -333,9 +333,6 @@
 
 
         .toggle-container {
-            position: absolute;
-            top: 17px;
-            right: 15px;
             cursor: pointer;
         }
 
@@ -346,10 +343,6 @@
         }
 
         @media (max-width: 600px) {
-            .toggle-container {
-                top: 15px;
-                right: 200px;
-            }
 
             .toggle-container .toggle-icon {
                 font-size: 20px;
@@ -781,13 +774,13 @@
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
                         <li>
-                            <div class="toggle-container">
+                            <a class="toggle-container" href="#">
                                 <i class="toggle-icon" id="toggleIcon">🌞</i>
-                            </div>
+                            </a>
                         </li>
                         <li class="dropdown tasks-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-                                <i class="fa fa-flag-o"></i> <span class="d-none d-sm-inline">{ucwords($user_language)}</span>
+                                <i class="fa fa-flag-o"></i>
                             </a>
                             <ul class="dropdown-menu">
                                 <li>

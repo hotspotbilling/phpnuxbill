@@ -70,6 +70,7 @@
                                 <option value="Hotspot">Hotspot
                                 </option>
                                 <option value="PPPoE">PPPoE</option>
+                                <option value="VPN">VPN</option>
                                 <option value="Others">{Lang::T('Others')}</option>
                             </select>
                         </div>

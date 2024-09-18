@@ -14,7 +14,7 @@
                 {if Text::is_html($mail['body'])}
                     {$mail['body']}
                 {else}
-                    {nl2br($mail['body'])}
+                {nl2br(htmlspecialchars_decode($mail['body']))}
                 {/if}
         </div>
     </div>
@@ -29,10 +29,11 @@
                 {Lang::T("Next")}</a>
             {/if}
         </div>
+        <a href="{$_url}mail" class="btn btn-primary"><i class="fa fa-arrow-left"></i> {Lang::T("Back")}</a>
         <a href="{$_url}mail/delete/{$mail['id']}" class="btn btn-danger"
             onclick="return confirm('{Lang::T("Delete")}?')"><i class="fa fa-trash-o"></i>
             {Lang::T("Delete")}</a>
-        <a href="https://api.whatsapp.com/send?text={if Text::is_html($mail['body'])}{urlencode(strip_tags($mail['body']))}{else}{urlencode($mail['body'])}{/if}" class="btn btn-primary"><i class="fa fa-share"></i> {Lang::T("Share")}</a>
+        <a href="https://api.whatsapp.com/send?text={if Text::is_html($mail['body'])}{urlencode(strip_tags($mail['body']))}{else}{urlencode($mail['body'])}{/if}" class="btn btn-success"><i class="fa fa-share"></i> {Lang::T("Share")}</a>
     </div>
     <!-- /.box-footer -->
 </div>

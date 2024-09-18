@@ -75,6 +75,7 @@
                                 <option value="Hotspot" {if $d['service_type'] eq 'Hotspot' }selected{/if}>Hotspot
                                 </option>
                                 <option value="PPPoE" {if $d['service_type'] eq 'PPPoE' }selected{/if}>PPPoE</option>
+                                <option value="VPN" {if $d['service_type'] eq 'VPN' }selected{/if}>VPN</option>
                                 <option value="Others" {if $d['service_type'] eq 'Others' }selected{/if}>Others</option>
                             </select>
                         </div>

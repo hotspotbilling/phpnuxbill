@@ -54,7 +54,7 @@
     <li>{Lang::dateFormat($start_date)}</li>
     <li>{Lang::dateFormat($current_date)}</li>
     {if $_c['enable_balance'] == 'yes' && in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
-        <li>
+        <li onclick="window.location.href = '{$_url}customers&search=&order=balance&filter=Active&orderby=desc'" style="cursor: pointer;">
             {Lang::T('Customer Balance')} <sup>{$_c['currency_code']}</sup>
             <b>{number_format($cb,0,$_c['dec_point'],$_c['thousands_sep'])}</b>
         </li>
@@ -193,6 +193,25 @@
                     </table>
                 </div>
             </div>
+        {/if}
+        {if $run_date}
+        {assign var="current_time" value=$smarty.now}
+        {assign var="run_time" value=strtotime($run_date)}
+        {if $current_time - $run_time > 3600}
+        <div class="panel panel-cron-warning panel-hovered mb20 activities">
+            <div class="panel-heading"><i class="fa fa-clock-o"></i> &nbsp; {Lang::T('Cron has not run for over 1 hour. Please
+                check your setup.')}</div>
+        </div>
+        {else}
+        <div class="panel panel-cron-success panel-hovered mb20 activities">
+            <div class="panel-heading">{Lang::T('Cron Job last ran on')}: {$run_date}</div>
+        </div>
+        {/if}
+        {else}
+        <div class="panel panel-cron-danger panel-hovered mb20 activities">
+            <div class="panel-heading"><i class="fa fa-warning"></i> &nbsp; {Lang::T('Cron appear not been setup, please check
+                your cron setup.')}</div>
+        </div>
         {/if}
         {if $_c['hide_pg'] != 'yes'}
             <div class="panel panel-success panel-hovered mb20 activities">

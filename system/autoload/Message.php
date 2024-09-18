@@ -154,6 +154,9 @@ class Message
                 $mail->Body    = $body;
             }
             $mail->send();
+            if (!$mail->send()) {
+                _log(Lang::T("Email not sent, Mailer Error: ") . $mail->ErrorInfo);
+            }
 
             //<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
         }
@@ -201,10 +204,10 @@ class Message
         return "$via: $msg";
     }
 
-    public static function sendBalanceNotification($cust, $balance, $balance_now, $message, $via)
+    public static function sendBalanceNotification($cust, $target, $balance, $balance_now, $message, $via)
     {
         global $config;
-        $msg = str_replace('[[name]]', $cust['fullname'] . ' (' . $cust['username'] . ')', $message);
+        $msg = str_replace('[[name]]', $target['fullname'] . ' (' . $target['username'] . ')', $message);
         $msg = str_replace('[[current_balance]]', Lang::moneyFormat($balance_now), $msg);
         $msg = str_replace('[[balance]]', Lang::moneyFormat($balance), $msg);
         $phone = $cust['phonenumber'];
@@ -219,6 +222,7 @@ class Message
             } else if ($via == 'wa') {
                 Message::sendWhatsapp($phone, $msg);
             }
+            self::addToInbox($cust['id'], Lang::T('Balance Notification'), $msg);
         }
         return "$via: $msg";
     }
@@ -257,5 +261,16 @@ class Message
         } else if ($config['user_notification_payment'] == 'wa') {
             Message::sendWhatsapp($cust['phonenumber'], $textInvoice);
         }
+    }
+
+
+    public static function addToInbox($to_customer_id, $subject, $body, $from = 'System'){
+        $v = ORM::for_table('tbl_customers_inbox')->create();
+        $v->from = $from;
+        $v->customer_id = $to_customer_id;
+        $v->subject = $subject;
+        $v->date_created = date('Y-m-d H:i:s');
+        $v->body = nl2br($body);
+        $v->save();
     }
 }

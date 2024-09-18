@@ -13,25 +13,27 @@ class Admin
     {
         global $db_pass, $config;
         $enable_session_timeout = $config['enable_session_timeout'];
-        if ($enable_session_timeout) {
-            $timeout = 60;
-            if ($config['session_timeout_duration']) {
-                $timeout = intval($config['session_timeout_duration']);
+        $session_timeout_duration = $config['session_timeout_duration'] ? intval($config['session_timeout_duration'] * 60) : intval(60 * 60); // Convert minutes to seconds
+
+        // Check if the session is active and valid
+        if (isset($_SESSION['aid']) && isset($_SESSION['aid_expiration'])) {
+            if ($_SESSION['aid_expiration'] > time()) {
+                if ($enable_session_timeout) {
+                    $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
+                }
+                return $_SESSION['aid'];
             }
-            $session_timeout_duration = $timeout * 60; // Convert minutes to seconds
+            // Session expired, log out the user
+            elseif ($enable_session_timeout && $_SESSION['aid_expiration'] <= time()) {
+                self::removeCookie();
+                session_destroy();
+                _alert(Lang::T('Session has expired. Please log in again.'), 'danger', "admin");
+                return 0;
+            }
         }
 
-        if (isset($_SESSION['aid']) && isset($_SESSION['aid_expiration']) && $_SESSION['aid_expiration'] > time()) {
-            return $_SESSION['aid'];
-        } elseif ($enable_session_timeout && isset($_SESSION['aid']) && isset($_SESSION['aid_expiration']) && $_SESSION['aid_expiration'] <= time()) {
-            self::removeCookie();
-            session_destroy();
-            _alert(Lang::T('Session has expired. Please log in again.'), 'danger', "admin");
-            return 0;
-        }
-        // Check if cookie is set and valid
+        // Check if the cookie is set and valid
         elseif (isset($_COOKIE['aid'])) {
-            // id.time.sha1
             $tmp = explode('.', $_COOKIE['aid']);
             if (sha1($tmp[0] . '.' . $tmp[1] . '.' . $db_pass) == $tmp[2]) {
                 if (time() - $tmp[1] < 86400 * 7) {

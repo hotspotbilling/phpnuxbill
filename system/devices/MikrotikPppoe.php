@@ -10,14 +10,14 @@
 
 use PEAR2\Net\RouterOS;
 
-class MikrotikPppoeCustom
+class MikrotikPppoe
 {
     // show Description
     function description()
     {
         return [
             'title' => 'Mikrotik PPPOE',
-            'description' => 'To handle connection between PHPNuxBill with Mikrotik PPPOE using Custom Username, IP and Password',
+            'description' => 'To handle connection between PHPNuxBill with Mikrotik PPPOE',
             'author' => 'ibnux',
             'url' => [
                 'Github' => 'https://github.com/hotspotbilling/phpnuxbill/',
@@ -51,6 +51,8 @@ class MikrotikPppoeCustom
             }
             if (!empty($customer['pppoe_ip'])) {
                 $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
+            }else{
+                $setRequest->setArgument('remote-address', '0.0.0.0');
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
