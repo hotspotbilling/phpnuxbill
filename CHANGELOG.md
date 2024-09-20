@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.9.20
+
+- Forgot Password
+- Forgot Username
+- Public header template
+
 ## 2024.9.13
 
 - Add Selling Mikrotik VPN By @agstrxyz

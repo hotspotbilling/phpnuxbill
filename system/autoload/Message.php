@@ -217,7 +217,7 @@ class Message
         ) {
             if ($via == 'sms') {
                 Message::sendSMS($phone, $msg);
-            } else if ($config['user_notification_payment'] == 'email') {
+            } else if ($via == 'email') {
                 self::sendEmail($cust['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Balance Notification"), $msg);
             } else if ($via == 'wa') {
                 Message::sendWhatsapp($phone, $msg);
