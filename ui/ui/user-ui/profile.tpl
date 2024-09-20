@@ -12,7 +12,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Username')}</label>
                         <div class="col-md-6">
                             <div class="input-group">
-                                <span class="input-group-addon" id="basic-addon1">+</span>
+                                <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-user"></i></span>
                                 <input type="text" class="form-control" name="username" id="username" readonly
                                     value="{$_user['username']}"
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
@@ -20,7 +20,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Full name')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Full Name')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="fullname" name="fullname"
                                 value="{$_user['fullname']}">
@@ -28,32 +28,32 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Address')}</label>
+                        <label class="col-md-2 control-label">{Lang::T('Home Address')}</label>
                         <div class="col-md-6">
                             <textarea name="address" id="address" class="form-control">{$_user['address']}</textarea>
                         </div>
                     </div>
                     {if $_c['allow_phone_otp'] != 'yes'}
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Phone number')}</label>
+                            <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
                             <div class="col-md-6">
                                 <div class="input-group">
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-phone-alt"></i></span>
                                     <input type="text" class="form-control" name="phonenumber" id="phonenumber"
                                         value="{$_user['phonenumber']}"
-                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone number')}">
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
                                 </div>
                             </div>
                         </div>
                     {else}
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Phone number')}</label>
+                            <label class="col-md-2 control-label">{Lang::T('Phone Number')}</label>
                             <div class="col-md-6">
                                 <div class="input-group">
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
+                                    <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-phone-alt"></i></span>
                                     <input type="text" class="form-control" name="phonenumber" id="phonenumber"
                                         value="{$_user['phonenumber']}" readonly
-                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone number')}">
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
                                     <span class="input-group-btn">
                                         <a href="{$_url}accounts/phone-update" type="button"
                                             class="btn btn-info btn-flat">{Lang::T('Change')}</a>
@@ -64,7 +64,7 @@
                     {/if}
                     {if $_c['allow_email_otp'] != 'yes'}
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Email')}</label>
+                            <label class="col-md-2 control-label">{Lang::T('Email Address')}</label>
                             <div class="col-md-6">
                                 <input type="text" class="form-control" id="email" name="email" value="{$_user['email']}">
                             </div>
