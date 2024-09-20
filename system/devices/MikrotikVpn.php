@@ -28,7 +28,7 @@ class MikrotikVpn
         $cid = self::getIdByCustomer($customer, $client);
         if (empty($cid)) {
             $this->addVpnUser($client, $plan, $customer);
-        }else{
+        } else {
             $setRequest = new RouterOS\Request('/ppp/secret/set');
             $setRequest->setArgument('numbers', $cid);
             if (!empty($customer['pppoe_password'])) {
@@ -43,13 +43,13 @@ class MikrotikVpn
             }
             if (!empty($customer['pppoe_ip'])) {
                 $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
-            }else{
+            } else {
                 $setRequest->setArgument('remote-address', '0.0.0.0');
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $client->sendSync($setRequest);
-            if(isset($isChangePlan) && $isChangePlan){
+            if (isset($isChangePlan) && $isChangePlan) {
                 $this->removeVpnActive($client, $customer['username']);
                 if (!empty($customer['pppoe_username'])) {
                     $this->removeVpnActive($client, $customer['pppoe_username']);
@@ -64,7 +64,7 @@ class MikrotikVpn
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         if (!empty($plan['plan_expired'])) {
             $p = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
-            if($p){
+            if ($p) {
                 $this->add_customer($customer, $p);
                 $this->removeVpnActive($client, $customer['username']);
                 if (!empty($customer['pppoe_username'])) {
@@ -117,26 +117,27 @@ class MikrotikVpn
             $unitup = 'M';
         }
         $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-        if(!empty(trim($bw['burst']))){
-            $rate .= ' '.$bw['burst'];
+        if (!empty(trim($bw['burst']))) {
+            $rate .= ' ' . $bw['burst'];
         }
         $pool = ORM::for_table("tbl_pool")->where("pool_name", $plan['pool'])->find_one();
         $addRequest = new RouterOS\Request('/ppp/profile/add');
         $client->sendSync(
             $addRequest
                 ->setArgument('name', $plan['name_plan'])
-                ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip']: $pool['pool_name'])
+                ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip'] : $pool['pool_name'])
                 ->setArgument('remote-address', $pool['pool_name'])
                 ->setArgument('rate-limit', $rate)
         );
     }
 
 
-    function getIdByCustomer($customer, $client){
+    function getIdByCustomer($customer, $client)
+    {
         $printRequest = new RouterOS\Request('/ppp/secret/print');
         $printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
         $id = $client->sendSync($printRequest)->getProperty('.id');
-        if(empty($id)){
+        if (empty($id)) {
             if (!empty($customer['pppoe_username'])) {
                 $printRequest = new RouterOS\Request('/ppp/secret/print');
                 $printRequest->setQuery(RouterOS\Query::where('name', $customer['pppoe_username']));
@@ -171,15 +172,15 @@ class MikrotikVpn
                 $unitup = 'M';
             }
             $rate = $bw['rate_up'] . $unitup . "/" . $bw['rate_down'] . $unitdown;
-            if(!empty(trim($bw['burst']))){
-                $rate .= ' '.$bw['burst'];
+            if (!empty(trim($bw['burst']))) {
+                $rate .= ' ' . $bw['burst'];
             }
             $pool = ORM::for_table("tbl_pool")->where("pool_name", $new_plan['pool'])->find_one();
             $setRequest = new RouterOS\Request('/ppp/profile/set');
             $client->sendSync(
                 $setRequest
                     ->setArgument('numbers', $profileID)
-                    ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip']: $pool['pool_name'])
+                    ->setArgument('local-address', (!empty($pool['local_ip'])) ? $pool['local_ip'] : $pool['pool_name'])
                     ->setArgument('remote-address', $pool['pool_name'])
                     ->setArgument('rate-limit', $rate)
                     ->setArgument('on-up', $new_plan['on_login'])
@@ -205,7 +206,8 @@ class MikrotikVpn
         );
     }
 
-    function add_pool($pool){
+    function add_pool($pool)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return null;
@@ -220,7 +222,8 @@ class MikrotikVpn
         );
     }
 
-    function update_pool($old_pool, $new_pool){
+    function update_pool($old_pool, $new_pool)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return null;
@@ -245,7 +248,8 @@ class MikrotikVpn
         }
     }
 
-    function remove_pool($pool){
+    function remove_pool($pool)
+    {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return null;
@@ -304,7 +308,7 @@ class MikrotikVpn
         $removeRequest = new RouterOS\Request('/ppp/secret/remove');
         $removeRequest->setArgument('numbers', $id);
         $client->sendSync($removeRequest);
-		$this->rmNat($client, $cstid);
+        $this->rmNat($client, $cstid);
     }
 
     function addVpnUser($client, $plan, $customer)
@@ -324,18 +328,17 @@ class MikrotikVpn
             $setRequest->setArgument('name', $customer['username']);
         }
         if (!empty($customer['pppoe_ip'])) {
-			$ips = $customer['pppoe_ip'];
+            $ips = $customer['pppoe_ip'];
             $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
         } else {
-			$ips = $this->checkIpAddr($plan['pool'], $customer['id']);
-			$setRequest->setArgument('remote-address', $ips);
-			
-		}
-		$this->addNat($client, $plan, $customer, $ips);
+            $ips = $this->checkIpAddr($plan['pool'], $customer['id']);
+            $setRequest->setArgument('remote-address', $ips);
+        }
+        $this->addNat($client, $plan, $customer, $ips);
         $client->sendSync($setRequest);
-		$customer->service_type = 'VPN';
-		$customer->pppoe_ip = $ips;
-		$customer->save();
+        $customer->service_type = 'VPN';
+        $customer->pppoe_ip = $ips;
+        $customer->save();
     }
 
     function removeVpnActive($client, $username)
@@ -368,7 +371,6 @@ class MikrotikVpn
                 ->setArgument('comment', $comment)
                 ->setArgument('list', $listName)
         );
-
     }
 
     function removeIpFromAddressList($client, $ip)
@@ -395,110 +397,111 @@ class MikrotikVpn
         if ($_app_stage == 'demo') {
             return null;
         }
-		$this->checkPort($cust['id'], 'Winbox', $plan['routers']);
-		$this->checkPort($cust['id'], 'Api', $plan['routers']);
-		$this->checkPort($cust['id'], 'Web', $plan['routers']);
-		$tcf = ORM::for_table('tbl_customers_fields')
-			->where('customer_id', $cust['id'])
-			->find_many();
-		$ip = ORM::for_table('tbl_port_pool')
-			->where('routers', $plan['routers'])
-			->find_one();
-		foreach ($tcf as $cf) {
-		$dst = $cf['field_value'];
-		$cmnt = $cf['field_name'];
-		if ($cmnt == 'Winbox') {
-		$tp = '8291'; }
-		if ($cmnt == 'Web') {
-		$tp = '80'; }
-		if ($cmnt == 'Api') {
-		$tp = '8728'; }
-		if ($cmnt == 'Winbox' || $cmnt == 'Web' || $cmnt == 'Api') {
-        $addRequest = new RouterOS\Request('/ip/firewall/nat/add');
-        $client->sendSync(
-            $addRequest
-                ->setArgument('chain', 'dstnat')
-                ->setArgument('protocol', 'tcp')
-                ->setArgument('dst-port', $dst)
-                ->setArgument('action', 'dst-nat')
-                ->setArgument('to-addresses', $ips)
-                ->setArgument('to-ports', $tp)
-                ->setArgument('dst-address', $ip['public_ip'])
-                ->setArgument('comment', $cmnt.' || '.$cust['username'])
-        );
-			}
-		}
+        $this->checkPort($cust['id'], 'Winbox', $plan['routers']);
+        $this->checkPort($cust['id'], 'Api', $plan['routers']);
+        $this->checkPort($cust['id'], 'Web', $plan['routers']);
+        $tcf = ORM::for_table('tbl_customers_fields')
+            ->where('customer_id', $cust['id'])
+            ->find_many();
+        $ip = ORM::for_table('tbl_port_pool')
+            ->where('routers', $plan['routers'])
+            ->find_one();
+        foreach ($tcf as $cf) {
+            $dst = $cf['field_value'];
+            $cmnt = $cf['field_name'];
+            if ($cmnt == 'Winbox') {
+                $tp = '8291';
+            }
+            if ($cmnt == 'Web') {
+                $tp = '80';
+            }
+            if ($cmnt == 'Api') {
+                $tp = '8728';
+            }
+            if ($cmnt == 'Winbox' || $cmnt == 'Web' || $cmnt == 'Api') {
+                $addRequest = new RouterOS\Request('/ip/firewall/nat/add');
+                $client->sendSync(
+                    $addRequest
+                        ->setArgument('chain', 'dstnat')
+                        ->setArgument('protocol', 'tcp')
+                        ->setArgument('dst-port', $dst)
+                        ->setArgument('action', 'dst-nat')
+                        ->setArgument('to-addresses', $ips)
+                        ->setArgument('to-ports', $tp)
+                        ->setArgument('dst-address', $ip['public_ip'])
+                        ->setArgument('comment', $cmnt . ' || ' . $cust['username'])
+                );
+            }
+        }
     }
-	
+
     function rmNat($client, $cstid)
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return null;
         }
-		
-		$cst = ORM::for_table('tbl_customers')->find_one($cstid);
+
+        $cst = ORM::for_table('tbl_customers')->find_one($cstid);
         $printRequest = new RouterOS\Request('/ip/firewall/nat/print');
         $printRequest->setQuery(RouterOS\Query::where('to-addresses', $cst['pppoe_ip']));
         $nats = $client->sendSync($printRequest);
-		foreach ($nats as $nat) {
-		$id = $client->sendSync($printRequest)->getProperty('.id');
-        $removeRequest = new RouterOS\Request('/ip/firewall/nat/remove');
-        $removeRequest->setArgument('numbers', $id);
-        $client->sendSync($removeRequest);
-		}
-    } 
-	
-	
-	function checkPort($id, $portn, $router)
-	{
-		$tcf = ORM::for_table('tbl_customers_fields')
-		->where('customer_id', $id)
-		->where('field_name', $portn)
-		->find_one();
-		$ports = ORM::for_table('tbl_port_pool')
-		->where('routers', $router)
-		->find_one();
-		$port = explode('-',$ports['range_port']);
-		if (empty($tcf) && !empty($ports)) { 
-		repeat:
-		 $portr = rand($port['0'], $port['1']);
-          if (ORM::for_table('tbl_customers_fields')->where('field_value', $portr)->find_one()) {
-			  if($portr == $port['1'])
-				{
-				return;
-					}
-				goto repeat;
-               }
-		$cf = ORM::for_table('tbl_customers_fields')->create();
-		$cf->customer_id = $id;
-		$cf->field_name = $portn;
-		$cf->field_value = $portr;
-		$cf->save();
-			}
-		}
-		
-	function checkIpAddr($pname, $id) {
-		$c = ORM::for_table('tbl_customers')->find_one($id);
-		$ipp = ORM::for_table('tbl_pool')
-		->where('pool_name', $pname)
-		->find_one();
-		$ip_r = explode('-',$ipp['range_ip']);
-		$ip_1 = explode('.',$ip_r['0']);
-		$ip_2 = explode('.',$ip_r['1']);
-		repeat:
-		$ipt = rand($ip_1['3'], $ip_2['3']);
-		$ips = $ip_1['0'].'.'.$ip_1['1'].'.'.$ip_1['2'].'.'.$ipt;
-		if (empty($c['pppoe_ip'])) {
-			if (ORM::for_table('tbl_customers')->where('pppoe_ip' ,$ips)->find_one()) {
-			  if ($ip_2['3'] == $ipt)
-				{
-				return;
-					}
-				goto repeat;
-               }
-			return $ips;
-		}
-	}
-	
+        foreach ($nats as $nat) {
+            $id = $client->sendSync($printRequest)->getProperty('.id');
+            $removeRequest = new RouterOS\Request('/ip/firewall/nat/remove');
+            $removeRequest->setArgument('numbers', $id);
+            $client->sendSync($removeRequest);
+        }
+    }
+
+
+    function checkPort($id, $portn, $router)
+    {
+        $tcf = ORM::for_table('tbl_customers_fields')
+            ->where('customer_id', $id)
+            ->where('field_name', $portn)
+            ->find_one();
+        $ports = ORM::for_table('tbl_port_pool')
+            ->where('routers', $router)
+            ->find_one();
+        $port = explode('-', $ports['range_port']);
+        if (empty($tcf) && !empty($ports)) {
+            repeat:
+            $portr = rand($port['0'], $port['1']);
+            if (ORM::for_table('tbl_customers_fields')->where('field_value', $portr)->find_one()) {
+                if ($portr == $port['1']) {
+                    return;
+                }
+                goto repeat;
+            }
+            $cf = ORM::for_table('tbl_customers_fields')->create();
+            $cf->customer_id = $id;
+            $cf->field_name = $portn;
+            $cf->field_value = $portr;
+            $cf->save();
+        }
+    }
+
+    function checkIpAddr($pname, $id)
+    {
+        $c = ORM::for_table('tbl_customers')->find_one($id);
+        $ipp = ORM::for_table('tbl_pool')
+            ->where('pool_name', $pname)
+            ->find_one();
+        $ip_r = explode('-', $ipp['range_ip']);
+        $ip_1 = explode('.', $ip_r['0']);
+        $ip_2 = explode('.', $ip_r['1']);
+        repeat:
+        $ipt = rand($ip_1['3'], $ip_2['3']);
+        $ips = $ip_1['0'] . '.' . $ip_1['1'] . '.' . $ip_1['2'] . '.' . $ipt;
+        if (empty($c['pppoe_ip'])) {
+            if (ORM::for_table('tbl_customers')->where('pppoe_ip', $ips)->find_one()) {
+                if ($ip_2['3'] == $ipt) {
+                    return;
+                }
+                goto repeat;
+            }
+            return $ips;
+        }
+    }
 }

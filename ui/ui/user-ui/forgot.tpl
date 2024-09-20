@@ -1,6 +1,4 @@
 {include file="user-ui/header-public.tpl"}
-
-<div class="hidden-xs" style="height:100px"></div>
 <div class="row">
     <div class="col-sm-6 col-sm-offset-1">
         <div class="panel panel-info">
@@ -72,21 +70,4 @@
         </div>
     </div>
 </div>
-
-<!-- Modal -->
-<div class="modal fade" id="HTMLModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="modal-body" id="HTMLModal_konten"></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">&times;</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 {include file="user-ui/footer-public.tpl"}

@@ -1,4 +1,5 @@
-{include file="user-ui/header.tpl"}
+{include file="user-ui/header-public.tpl"}
+<div class="hidden-xs" style="height:100px"></div>
 
 <div class="page page-err clearfix">
     <div class="err-container">
@@ -6,5 +7,4 @@
         <p class="text-desc mb20">{Lang::T('Coming Soon! Next Version...')}</p>
     </div>
 </div>
-
-{include file="user-ui/footer.tpl"}
+{include file="user-ui/footer-public.tpl"}
