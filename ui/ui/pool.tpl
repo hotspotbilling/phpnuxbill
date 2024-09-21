@@ -9,7 +9,7 @@
                         onclick="return confirm('This will sync/send IP Pool to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>
-                {Lang::T('IP Pool')} - PPPOE
+                {Lang::T('IP Pool')}
             </div>
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
