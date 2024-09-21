@@ -111,7 +111,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">Local IP <span class="label label-danger" id="warning_ip"></span></label>
+                        <label class="col-md-3 control-label">Remote IP <span class="label label-danger" id="warning_ip"></span></label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip" onkeyup="checkIP(this, '0')">
                             <span class="help-block">{Lang::T('Not Working for freeradius')}</span>

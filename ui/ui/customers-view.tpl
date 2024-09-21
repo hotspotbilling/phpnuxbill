@@ -56,7 +56,7 @@
                     {/if}
                     {if $d['pppoe_ip'] != ''}
                         <li class="list-group-item">
-                            <b>PPPOE Local IP</b> <span class="pull-right">{$d['pppoe_ip']}</span>
+                            <b>PPPOE Remote IP</b> <span class="pull-right">{$d['pppoe_ip']}</span>
                         </li>
                     {/if}
                     <!--Customers Attributes view start -->
