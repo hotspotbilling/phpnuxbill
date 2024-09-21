@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="panel mb20 panel-hovered panel-primary">
-            <div class="panel-heading">{Lang::T('List Activated Voucher')}</div>
+            <div class="panel-heading">{Lang::T('Transaction History List')}</div>
             <div class="panel-body">
                 <div class="table-responsive">
                     <table id="datatable" class="table table-bordered table-striped table-condensed">
