@@ -174,7 +174,7 @@ class Message
         $msg = str_replace('[[package]]', $package, $msg);
         $msg = str_replace('[[price]]', Lang::moneyFormat($price), $msg);
         list($bills, $add_cost) = User::getBills($customer['id']);
-        if ($add_cost > 0) {
+        if ($add_cost != 0) {
             $note = "";
             foreach ($bills as $k => $v) {
                 $note .= $k . " : " . Lang::moneyFormat($v) . "\n";

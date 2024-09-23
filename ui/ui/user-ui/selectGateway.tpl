@@ -66,7 +66,7 @@
                         <li class="list-group-item">
                             <b>{Lang::T('Tax')}</b> <span class="pull-right">{Lang::moneyFormat($tax)}</span>
                         </li>
-                        {if $add_cost>0}
+                        {if $add_cost!=0}
                             {foreach $bills as $k => $v}
                                 <li class="list-group-item">
                                     <b>{$k}</b> <span class="pull-right">{Lang::moneyFormat($v)}</span>
@@ -89,7 +89,7 @@
                             </li>
                         {/if}
                     {else}
-                        {if $add_cost>0}
+                        {if $add_cost!=0}
                             {foreach $bills as $k => $v}
                                 <li class="list-group-item">
                                     <b>{$k}</b> <span class="pull-right">{Lang::moneyFormat($v)}</span>

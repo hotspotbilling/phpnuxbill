@@ -64,7 +64,7 @@ class Package
         } else {
             // Additional cost
             list($bills, $add_cost) = User::getBills($id_customer);
-            if ($add_cost > 0 && $router_name != 'balance') {
+            if ($add_cost != 0 && $router_name != 'balance') {
                 foreach ($bills as $k => $v) {
                     $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
                 }

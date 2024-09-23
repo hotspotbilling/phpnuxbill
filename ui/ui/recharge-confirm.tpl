@@ -66,7 +66,7 @@
                     </ul>
                     <center><b>{Lang::T('Total')}</b></center>
                     <ul class="list-group list-group-unbordered">
-                        {if $using neq 'zero' and $add_cost>0}
+                        {if $using neq 'zero' and $add_cost != 0}
                             {foreach $bills as $k => $v}
                                 <li class="list-group-item">
                                     <b>{$k}</b> <span class="pull-right">{Lang::moneyFormat($v)}</span>

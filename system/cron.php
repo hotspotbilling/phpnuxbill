@@ -71,7 +71,7 @@ foreach ($d as $ds) {
         // autorenewal from deposit
         if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
             list($bills, $add_cost) = User::getBills($ds['customer_id']);
-            if ($add_cost > 0) {
+            if ($add_cost != 0) {
                 if (!empty($add_cost)) {
                     $p['price'] += $add_cost;
                 }

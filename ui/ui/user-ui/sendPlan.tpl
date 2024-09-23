@@ -12,7 +12,7 @@
                             <td>{Lang::T('Type')}</td>
                             <td>{$plan['type']}</td>
                         </tr>
-                        {if $add_cost>0}
+                        {if $add_cost!=0}
                         {foreach $bills as $k => $v}
                         <tr>
                             <td>{$k}</td>
@@ -31,7 +31,7 @@
                         </tr>
                         {/if}
                         <tr>
-                            <td>{Lang::T('Price')}{if $add_cost>0}<small> + {Lang::T('Additional Cost')}{/if}{if
+                            <td>{Lang::T('Price')}{if $add_cost!=0}<small> + {Lang::T('Additional Cost')}{/if}{if
                                     $tax>0}<small> + {Lang::T('Tax')}{/if}</td>
                             <td
                                 style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">
