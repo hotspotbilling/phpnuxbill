@@ -133,9 +133,14 @@
                         {foreach $d as $ds}
                             <tr {if $ds['enabled'] != 1}class="danger" title="disabled" {/if}>
                                 <td>{$ds['name_plan']}</td>
-                                <td>{$ds['plan_type']} {if $ds['prepaid'] != 'yes'}<b>{Lang::T('Postpaid')}</b>{else}{Lang::T('Prepaid')}{/if}</td>
+                                <td>{$ds['plan_type']}
+                                    {if $ds['prepaid'] != 'yes'}<b>{Lang::T('Postpaid')}</b>{else}{Lang::T('Prepaid')}{/if}
+                                </td>
                                 <td>{$ds['name_bw']}</td>
-                                <td>{Lang::moneyFormat($ds['price'])}</td>
+                                <td>{Lang::moneyFormat($ds['price'])}{if !empty($ds['price_old'])}
+                                        <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($ds['price_old'])}</sup>
+                                            {/if}
+                                </td>
                                 <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                 <td>{$ds['pool']}</td>
                                 <td>{if $ds['plan_expired']}<a

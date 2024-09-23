@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.9.23
+
+- Discount Price
+- Burst Preset
+
 ## 2024.9.20
 
 - Forgot Password

@@ -36,7 +36,9 @@
                                             {foreach $d as $ds}
                                                 <tr {if $ds['enabled'] != 1}class="danger" title="disabled"{/if}>
                                                     <td>{$ds['name_plan']}</td>
-                                                    <td>{Lang::moneyFormat($ds['price'])}</td>
+                                                    <td>{Lang::moneyFormat($ds['price'])}{if !empty($ds['price_old'])}
+														<sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($ds['price_old'])}</sup>
+															{/if}</td>
                                                     <td>
                                                         <a href="{$_url}services/balance-edit/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                                         <a href="{$_url}services/balance-delete/{$ds['id']}" onclick="return confirm('{Lang::T('Delete')}?')" id="{$ds['id']}" class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
