@@ -30,8 +30,9 @@ if ($step == 1) {
         if ($user) {
             $otpPath .= sha1($username . $db_pass) . ".txt";
             if (file_exists($otpPath) && time() - filemtime($otpPath) < 600) {
+                $sec = time() - filemtime($otpPath);
                 $ui->assign('notify_t', 's');
-                $ui->assign('notify', Lang::T("If your Username is found, Verification Code has been Sent to Your Phone/Email/Whatsapp"));
+                $ui->assign('notify', Lang::T("Verification Code already Sent to Your Phone/Email/Whatsapp, please wait")." $sec seconds.");
             } else {
                 $via = $config['user_notification_reminder'];
                 if ($via == 'email') {

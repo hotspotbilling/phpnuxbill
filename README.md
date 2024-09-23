@@ -98,6 +98,7 @@ a.n Ibnu Maksum
 
 ## SPONSORS
 
+- [mixradius.com](https://mixradius.com/) Paid Services Billing Radius
 - [mlink.id](https://mlink.id)
 - [https://github.com/sonyinside](https://github.com/sonyinside)
 
