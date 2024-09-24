@@ -52,32 +52,58 @@
                         </li>
                         <li class="list-group-item">
                             <b>{Lang::T('Using')}</b> <span class="pull-right">
-                            <select name="using" style="background-color: white;outline: 1px;border: 1px solid #b7b7b7;">
-                            {foreach $usings as $us}
-                            <option value="{trim($us)}" {if $using eq trim($us)}selected{/if}>{trim(ucWords($us))}</option>
-                            {/foreach}
-                            {if $_c['enable_balance'] eq 'yes'}
-                                <option value="balance" {if $using eq 'balance'}selected{/if}>{Lang::T('Customer Balance')}</option>
-                            {/if}
-                            <option value="zero" {if $using eq 'zero'}selected{/if}>{$_c['currency_code']} 0</option>
-                        </select>
+                                <select name="using"
+                                    style="background-color: white;outline: 1px;border: 1px solid #b7b7b7;">
+                                    {foreach $usings as $us}
+                                        <option value="{trim($us)}" {if $using eq trim($us)}selected{/if}>
+                                            {trim(ucWords($us))}</option>
+                                    {/foreach}
+                                    {if $_c['enable_balance'] eq 'yes'}
+                                        <option value="balance" {if $using eq 'balance'}selected{/if}>
+                                            {Lang::T('Customer Balance')}</option>
+                                    {/if}
+                                    <option value="zero" {if $using eq 'zero'}selected{/if}>{$_c['currency_code']} 0
+                                    </option>
+                                </select>
                             </span>
                         </li>
                     </ul>
                     <center><b>{Lang::T('Total')}</b></center>
                     <ul class="list-group list-group-unbordered">
                         {if $using neq 'zero' and $add_cost != 0}
-                            {foreach $bills as $k => $v}
-                                <li class="list-group-item">
-                                    <b>{$k}</b> <span class="pull-right">{Lang::moneyFormat($v)}</span>
-                                </li>
+                            {foreach $abills as $k => $v}
+
+                                {if strpos($v, ':') === false}
+                                    <li class="list-group-item">
+                                        <b>{$k}</b> <span class="pull-right">
+                                            {Lang::moneyFormat($v)}
+                                            <sup title="recurring">∞</sup>
+                                            {assign var="total" value=$v+$total}
+                                        </span>
+                                    </li>
+                                {else}
+                                    {assign var="exp" value=explode(':',$v)}
+                                    {if $exp[1]>0}
+                                        <li class="list-group-item">
+                                            <b>{$k}</b> <span class="pull-right">
+                                            <sup title="{$exp[1]} more times">({$exp[1]}x)  </sup>
+                                                {Lang::moneyFormat($exp[0])}
+                                            </span>
+                                        </li>
+                                    {/if}
+                                {/if}
                             {/foreach}
                             <li class="list-group-item">
                                 <b>{Lang::T('Additional Cost')}</b> <span
-                                    class="pull-right">{Lang::moneyFormat($add_cost)}</span>
+                                    class="pull-right"><b>{Lang::moneyFormat($add_cost)}</b></span>
                             </li>
                             <li class="list-group-item">
-                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')} +{Lang::T('Additional Cost')})</small><span class="pull-right"
+                                <b>{$plan['name_plan']}</b> <span
+                                    class="pull-right">{if $using eq 'zero'}{Lang::moneyFormat(0)}{else}{Lang::moneyFormat($plan['price'])}{/if}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')}
+                                    +{Lang::T('Additional Cost')})</small><span class="pull-right"
                                     style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price']+$add_cost)}</span>
                             </li>
                         {else}

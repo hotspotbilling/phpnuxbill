@@ -189,7 +189,9 @@ switch ($action) {
             if (count($usings) == 0) {
                 $usings[] = Lang::T('Cash');
             }
+            $abills = User::getAttributes("Bill");
             $ui->assign('usings', $usings);
+            $ui->assign('abills', $abills);
             $ui->assign('bills', $bills);
             $ui->assign('add_cost', $add_cost);
             $ui->assign('cust', $cust);

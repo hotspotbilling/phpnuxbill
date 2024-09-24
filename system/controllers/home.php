@@ -101,7 +101,7 @@ $ui->assign('_bills', $_bill);
 // Sync plan to router
 if (isset($_GET['sync']) && !empty($_GET['sync'])) {
     foreach ($_bill as $tur) {
-        if($tur['status'] == 'on'){
+        if ($tur['status'] == 'on') {
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
             if ($p) {
                 $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
@@ -265,7 +265,7 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && $_c['hs_auth_m
 }
 
 if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSION['nux-hostname']) && $_c['hs_auth_method'] == 'hchap')) {
-    $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff')|| $_SERVER['SERVER_PORT'] == 443)?'https':'http').'://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff') || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
     $keys = explode('-', $_SESSION['nux-key']);
@@ -276,23 +276,23 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
     $ui->assign('hchap', $_GET['hchap']);
     $ui->assign('logged', $_GET['logged']);
     if ($_app_stage != 'demo') {
-            if ($_GET['mikrotik'] == 'login') {
-                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
-                }
-                $getmsg = $_GET['msg'];
-                ///get auth notification from mikrotik
-                if($getmsg == 'Connected') {
-                    $msg .= Lang::T($getmsg);
-                    r2(U . 'home&logged=1', 's', $msg);
-                } else if($getmsg){
-                    $msg .= Lang::T($getmsg);
-                    r2(U . 'home', 's', $msg);
-            }
+        if ($_GET['mikrotik'] == 'login') {
+            r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
+        }
+        $getmsg = $_GET['msg'];
+        ///get auth notification from mikrotik
+        if ($getmsg == 'Connected') {
+            $msg .= Lang::T($getmsg);
+            r2(U . 'home&logged=1', 's', $msg);
+        } else if ($getmsg) {
+            $msg .= Lang::T($getmsg);
+            r2(U . 'home', 's', $msg);
         }
     }
+}
 
 if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSION['nux-hostname']) && $_c['hs_auth_method'] == 'hchap')) {
-    $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff')|| $_SERVER['SERVER_PORT'] == 443)?'https':'http').'://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff') || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     $ui->assign('nux_mac', $_SESSION['nux-mac']);
     $ui->assign('nux_ip', $_SESSION['nux-ip']);
     $keys = explode('-', $_SESSION['nux-key']);
@@ -303,29 +303,29 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
     $ui->assign('hchap', $_GET['hchap']);
     $ui->assign('logged', $_GET['logged']);
     if ($_app_stage != 'demo') {
-            if ($_GET['mikrotik'] == 'login') {
-                r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
-                }
-                $getmsg = $_GET['msg'];
-                ///get auth notification from mikrotik
-                if($getmsg == 'Connected') {
-                    $msg .= Lang::T($getmsg);
-                    r2(U . 'home&logged=1', 's', $msg);
-                } else if($getmsg){
-                    $msg .= Lang::T($getmsg);
-                    r2(U . 'home', 's', $msg);
-            }
+        if ($_GET['mikrotik'] == 'login') {
+            r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
+        }
+        $getmsg = $_GET['msg'];
+        ///get auth notification from mikrotik
+        if ($getmsg == 'Connected') {
+            $msg .= Lang::T($getmsg);
+            r2(U . 'home&logged=1', 's', $msg);
+        } else if ($getmsg) {
+            $msg .= Lang::T($getmsg);
+            r2(U . 'home', 's', $msg);
         }
     }
-		
+}
+
 $tcf = ORM::for_table('tbl_customers_fields')
-		->where('customer_id', $user['id'])
-		->find_many();
+    ->where('customer_id', $user['id'])
+    ->find_many();
 $vpn = ORM::for_table('tbl_port_pool')
-		->find_one();
-$ui->assign('cf', $tcf);		
-$ui->assign('vpn', $vpn);		
-		
+    ->find_one();
+$ui->assign('cf', $tcf);
+$ui->assign('vpn', $vpn);
+
 $ui->assign('unpaid', ORM::for_table('tbl_payment_gateway')
     ->where('username', $user['username'])
     ->where('status', 1)
