@@ -153,7 +153,6 @@ class Message
                 $mail->isHTML(false);
                 $mail->Body    = $body;
             }
-            $mail->send();
             if (!$mail->send()) {
                 _log(Lang::T("Email not sent, Mailer Error: ") . $mail->ErrorInfo);
             }
