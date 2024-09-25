@@ -62,7 +62,8 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label"><i class="glyphicon glyphicon-print"></i> {Lang::T('Print Max Char')}</label>
+                        <label class="col-md-2 control-label"><i class="glyphicon glyphicon-print"></i>
+                            {Lang::T('Print Max Char')}</label>
                         <div class="col-md-6">
                             <input type="number" required class="form-control" id="printer_cols" placeholder="37"
                                 name="printer_cols" value="{$_c['printer_cols']}">
@@ -73,7 +74,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Theme')}</label>
                         <div class="col-md-6">
                             <select name="theme" id="theme" class="form-control">
-                                <option value="default" {if $_c['theme'] eq 'default' }selected="selected" {/if}>{Lang::T('Default')}
+                                <option value="default" {if $_c['theme'] eq 'default' }selected="selected" {/if}>
+                                    {Lang::T('Default')}
                                 </option>
                                 {foreach $themes as $theme}
                                     <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
@@ -151,9 +153,11 @@
                         <label class="col-md-2 control-label">{Lang::T('Disable Voucher')}</label>
                         <div class="col-md-6">
                             <select name="disable_voucher" id="disable_voucher" class="form-control">
-                                <option value="no" {if $_c['disable_voucher']=='no' }selected="selected" {/if}>{Lang::T('No')}
+                                <option value="no" {if $_c['disable_voucher']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}
                                 </option>
-                                <option value="yes" {if $_c['disable_voucher']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}
+                                <option value="yes" {if $_c['disable_voucher']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}
                                 </option>
                             </select>
                         </div>
@@ -184,7 +188,8 @@
                             <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
                             <div class="col-md-6">
                                 <select name="disable_registration" id="disable_registration" class="form-control">
-                                    <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>{Lang::T('No')}
+                                    <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>
+                                        {Lang::T('No')}
                                     </option>
                                     <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
                                         {Lang::T('Yes')}
@@ -220,7 +225,8 @@
                         <div class="col-md-6">
                             <select name="radius_enable" id="radius_enable" class="form-control text-muted">
                                 <option value="0">{Lang::T('No')}</option>
-                                <option value="1" {if $_c['radius_enable']}selected="selected" {/if}>{Lang::T('Yes')}</option>
+                                <option value="1" {if $_c['radius_enable']}selected="selected" {/if}>{Lang::T('Yes')}
+                                </option>
                             </select>
                         </div>
                         <p class="help-block col-md-4"><a
@@ -241,7 +247,8 @@
                         <div class="col-md-6">
                             <select name="extend_expired" id="extend_expired" class="form-control text-muted">
                                 <option value="0">{Lang::T('No')}</option>
-                                <option value="1" {if $_c['extend_expired'] ==1}selected="selected" {/if}>{Lang::T('Yes')}</option>
+                                <option value="1" {if $_c['extend_expired'] ==1}selected="selected" {/if}>
+                                    {Lang::T('Yes')}</option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Customer can request to extend expirations')}</p>
@@ -273,9 +280,11 @@
                         <label class="col-md-2 control-label">{Lang::T('Enable System')}</label>
                         <div class="col-md-6">
                             <select name="enable_balance" id="enable_balance" class="form-control">
-                                <option value="no" {if $_c['enable_balance']=='no' }selected="selected" {/if}>{Lang::T('No')}
+                                <option value="no" {if $_c['enable_balance']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}
                                 </option>
-                                <option value="yes" {if $_c['enable_balance']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}
+                                <option value="yes" {if $_c['enable_balance']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}
                                 </option>
                             </select>
                         </div>
@@ -331,7 +340,8 @@
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
-                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testSms()">{Lang::T('Test SMS')}</a>
+                        <a class="btn btn-success btn-xs" style="color: black;"
+                            href="javascript:testSms()">{Lang::T('Test SMS')}</a>
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
@@ -365,7 +375,8 @@
                         </p>
                     </div>
                     <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
-                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">{Lang::T('Free Server')}</a></small>
+                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login"
+                            target="_blank">{Lang::T('Free Server')}</a></small>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
@@ -386,11 +397,13 @@
                             {Lang::T('it will be replaced.')}
                     </div>
                     <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
-                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">{Lang::T('Free Server')}</a></small>
+                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login"
+                            target="_blank">{Lang::T('Free Server')}</a></small>
                 </div>
                 <div class="panel-heading">
                     <div class="btn-group pull-right">
-                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test Email</a>
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test
+                            Email</a>
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                     </div>
@@ -546,7 +559,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Access Token')}</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" id="api_key" name="api_key"
-                                value="{$_c['api_key']}" placeholder="{Lang::T('Empty this to randomly created API key')}"
+                                value="{$_c['api_key']}"
+                                placeholder="{Lang::T('Empty this to randomly created API key')}"
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                         <p class="col-md-4 help-block">{Lang::T('This Token will act as SuperAdmin/Admin')}</p>
@@ -576,7 +590,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">
+                <div class="panel-heading" id="miscellaneous">
                     <div class="btn-group pull-right">
                         <button class="btn btn-primary btn-xs" title="save" type="submit"><span
                                 class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
@@ -625,15 +639,16 @@
                         <label class="col-md-2 control-label">{Lang::T('Router Check')}</label>
                         <div class="col-md-6">
                             <select name="router_check" id="router_check" class="form-control">
-                                <option value="0" {if $_c['router_check']=='0' }selected="selected"
-                                    {/if}>{Lang::T('Disabled')}
+                                <option value="0" {if $_c['router_check']=='0' }selected="selected" {/if}>
+                                    {Lang::T('Disabled')}
                                 </option>
-                                <option value="1" {if $_c['router_check']=='1' }selected="selected"
-                                    {/if}>{Lang::T('Enabled')}
+                                <option value="1" {if $_c['router_check']=='1' }selected="selected" {/if}>
+                                    {Lang::T('Enabled')}
                                 </option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">{Lang::T('If enabled, the system will notify Admin when router goes Offline, If admin have 10 or more router and many customers, it will get overlapping, you can disabled')}
+                        <p class="help-block col-md-4">
+                            {Lang::T('If enabled, the system will notify Admin when router goes Offline, If admin have 10 or more router and many customers, it will get overlapping, you can disabled')}
                         </p>
                     </div>
                     <div class="form-group">
@@ -642,7 +657,8 @@
                             <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
                                 <option value="no" {if $_c['allow_phone_otp']=='no' }selected="selected" {/if}>
                                     {Lang::T('No')}</option>
-                                <option value="yes" {if $_c['allow_phone_otp']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}
+                                <option value="yes" {if $_c['allow_phone_otp']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}
                                 </option>
                             </select>
                         </div>
@@ -671,7 +687,8 @@
                             <select name="allow_email_otp" id="allow_email_otp" class="form-control">
                                 <option value="no" {if $_c['allow_email_otp']=='no' }selected="selected" {/if}>
                                     {Lang::T('No')}</option>
-                                <option value="yes" {if $_c['allow_email_otp']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}
+                                <option value="yes" {if $_c['allow_email_otp']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}
                                 </option>
                             </select>
                         </div>
@@ -691,6 +708,19 @@
                         </div>
                         <p class="help-block col-md-4">
                             {Lang::T('If user buy same internet plan, expiry date will extend')}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Show Bandwidth Plan')}</label>
+                        <div class="col-md-6">
+                            <select name="show_bandwidth_plan" id="show_bandwidth_plan" class="form-control">
+                                <option value="no" {if $_c['show_bandwidth_plan']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}</option>
+                                <option value="yes" {if $_c['show_bandwidth_plan']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}</option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T(' for Customer')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Hotspot Auth Method')}</label>

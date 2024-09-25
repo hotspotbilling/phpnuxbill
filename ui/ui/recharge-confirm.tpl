@@ -42,6 +42,10 @@
                                 class="pull-right">{if $plan['prepaid'] eq 'yes'}Prepaid{else}Postpaid{/if}
                                 {$plan['type']}</span>
                         </li>
+                        <tr>
+                            <td>{Lang::T('Bandwidth')}</td>
+                            <td api-get-text="{$_url}autoload/bw_name/{$plan['id_bw']}"></td>
+                        </tr>
                         <li class="list-group-item">
                             <b>{Lang::T('Plan Price')}</b> <span
                                 class="pull-right">{if $using eq 'zero'}{Lang::moneyFormat(0)}{else}{Lang::moneyFormat($plan['price'])}{/if}</span>

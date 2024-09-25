@@ -28,7 +28,10 @@ switch ($action) {
         $ui->assign('d', $d);
         $ui->display('autoload-pool.tpl');
         break;
-
+    case 'bw_name':
+        $bw = ORM::for_table('tbl_bandwidth')->select("name_bw")->find_one($routes['2']);
+        echo $bw['name_bw'];
+        die();
     case 'server':
         $d = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('d', $d);

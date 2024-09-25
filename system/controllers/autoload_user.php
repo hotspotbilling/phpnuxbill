@@ -45,6 +45,10 @@ switch ($action) {
             die('--');
         }
         break;
+    case 'bw_name':
+        $bw = ORM::for_table('tbl_bandwidth')->select("name_bw")->find_one($routes['2']);
+        echo $bw['name_bw'];
+        die();
     case 'inbox_unread':
         $count =  ORM::for_table('tbl_customers_inbox')->where('customer_id', $user['id'])->whereRaw('date_read is null')->count('id');
         if ($count > 0) {

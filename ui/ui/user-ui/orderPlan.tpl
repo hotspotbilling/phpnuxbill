@@ -25,6 +25,12 @@
                                                         <td>{Lang::T('Type')}</td>
                                                         <td>{$plan['type']}</td>
                                                     </tr>
+                                                    {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                        <tr>
+                                                            <td>{Lang::T('Bandwidth')}</td>
+                                                            <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                        </tr>
+                                                    {/if}
                                                     <tr>
                                                         <td>{Lang::T('Price')}</td>
                                                         <td>{Lang::moneyFormat($plan['price'])}
@@ -83,6 +89,12 @@
                                                     <td>{Lang::T('Type')}</td>
                                                     <td>{$plan['type']}</td>
                                                 </tr>
+                                                {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                    <tr>
+                                                        <td>{Lang::T('Bandwidth')}</td>
+                                                        <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                    </tr>
+                                                {/if}
                                                 <tr>
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
@@ -142,6 +154,12 @@
                                                 <td>{Lang::T('Type')}</td>
                                                 <td>{$plan['type']}</td>
                                             </tr>
+                                            {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                <tr>
+                                                    <td>{Lang::T('Bandwidth')}</td>
+                                                    <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                </tr>
+                                            {/if}
                                             <tr>
                                                 <td>{Lang::T('Price')}</td>
                                                 <td>{Lang::moneyFormat($plan['price'])}
@@ -199,6 +217,12 @@
                                                 <td>{Lang::T('Type')}</td>
                                                 <td>{$plan['type']}</td>
                                             </tr>
+                                            {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                <tr>
+                                                    <td>{Lang::T('Bandwidth')}</td>
+                                                    <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                </tr>
+                                            {/if}
                                             <tr>
                                                 <td>{Lang::T('Price')}</td>
                                                 <td>{Lang::moneyFormat($plan['price'])}
@@ -268,6 +292,12 @@
                                                             <td>{Lang::T('Type')}</td>
                                                             <td>{$plan['type']}</td>
                                                         </tr>
+                                                        {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                            <tr>
+                                                                <td>{Lang::T('Bandwidth')}</td>
+                                                                <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                            </tr>
+                                                        {/if}
                                                         <tr>
                                                             <td>{Lang::T('Price')}</td>
                                                             <td>{Lang::moneyFormat($plan['price'])}
@@ -324,6 +354,12 @@
                                                         <td>{Lang::T('Type')}</td>
                                                         <td>{$plan['type']}</td>
                                                     </tr>
+                                                    {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                        <tr>
+                                                            <td>{Lang::T('Bandwidth')}</td>
+                                                            <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                        </tr>
+                                                    {/if}
                                                     <tr>
                                                         <td>{Lang::T('Price')}</td>
                                                         <td>{Lang::moneyFormat($plan['price'])}
@@ -380,6 +416,12 @@
                                                         <td>{Lang::T('Type')}</td>
                                                         <td>{$plan['type']}</td>
                                                     </tr>
+                                                    {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                        <tr>
+                                                            <td>{Lang::T('Bandwidth')}</td>
+                                                            <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                        </tr>
+                                                    {/if}
                                                     <tr>
                                                         <td>{Lang::T('Price')}</td>
                                                         <td>{Lang::moneyFormat($plan['price'])}
@@ -440,6 +482,12 @@
                                                     <td>{Lang::T('Type')}</td>
                                                     <td>{$plan['type']}</td>
                                                 </tr>
+                                                {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                    <tr>
+                                                        <td>{Lang::T('Bandwidth')}</td>
+                                                        <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                    </tr>
+                                                {/if}
                                                 <tr>
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
@@ -494,6 +542,12 @@
                                                     <td>{Lang::T('Type')}</td>
                                                     <td>{$plan['type']}</td>
                                                 </tr>
+                                                {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                    <tr>
+                                                        <td>{Lang::T('Bandwidth')}</td>
+                                                        <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                    </tr>
+                                                {/if}
                                                 <tr>
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
@@ -548,6 +602,12 @@
                                                     <td>{Lang::T('Type')}</td>
                                                     <td>{$plan['type']}</td>
                                                 </tr>
+                                                {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                    <tr>
+                                                        <td>{Lang::T('Bandwidth')}</td>
+                                                        <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                    </tr>
+                                                {/if}
                                                 <tr>
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
