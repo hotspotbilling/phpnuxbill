@@ -33,7 +33,6 @@ class MikrotikPppoe
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $cid = self::getIdByCustomer($customer, $client);
-		$exp = ORM::for_table("tbl_plans")->find_one($plan['plan_expired']);
         if (empty($cid)) {
             //customer not exists, add it
             $this->addPpoeUser($client, $plan, $customer);
@@ -50,16 +49,24 @@ class MikrotikPppoe
             } else {
                 $setRequest->setArgument('name', $customer['username']);
             }
-            if ($exp == 0) {
-                $setRequest->setArgument('remote-address', '0.0.0.0');
-            } else if (!empty($customer['pppoe_ip'])){
+            $unsetIP = false;
+            if (!empty($customer['pppoe_ip'])){
                 $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
             } else {
-				$setRequest->setArgument('remote-address', '0.0.0.0');
+                $unsetIP = true;
 			}
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $client->sendSync($setRequest);
+
+            if($unsetIP){
+                $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
+                $unsetRequest->setArgument('.id', $cid);
+                $unsetRequest->setArgument('value-name','remote-address');
+                $client->sendSync($unsetRequest);
+            }
+
+
             //disconnect then
             if(isset($isChangePlan) && $isChangePlan){
                 $this->removePpoeActive($client, $customer['username']);
