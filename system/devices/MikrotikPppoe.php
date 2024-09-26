@@ -33,9 +33,10 @@ class MikrotikPppoe
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $cid = self::getIdByCustomer($customer, $client);
+        $isExp = ORM::for_table('tbl_plans')->select("id")->where('plan_expired', $plan['id'])->find_one();
         if (empty($cid)) {
             //customer not exists, add it
-            $this->addPpoeUser($client, $plan, $customer);
+            $this->addPpoeUser($client, $plan, $customer, $isExp);
         }else{
             $setRequest = new RouterOS\Request('/ppp/secret/set');
             $setRequest->setArgument('numbers', $cid);
@@ -50,7 +51,7 @@ class MikrotikPppoe
                 $setRequest->setArgument('name', $customer['username']);
             }
             $unsetIP = false;
-            if (!empty($customer['pppoe_ip'])){
+            if (!empty($customer['pppoe_ip']) && !$isExp){
                 $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
             } else {
                 $unsetIP = true;
@@ -331,7 +332,7 @@ class MikrotikPppoe
         $client->sendSync($removeRequest);
     }
 
-    function addPpoeUser($client, $plan, $customer)
+    function addPpoeUser($client, $plan, $customer, $isExp = false)
     {
         $setRequest = new RouterOS\Request('/ppp/secret/add');
         $setRequest->setArgument('service', 'pppoe');
@@ -347,7 +348,7 @@ class MikrotikPppoe
         } else {
             $setRequest->setArgument('name', $customer['username']);
         }
-        if (!empty($customer['pppoe_ip'])) {
+        if (!empty($customer['pppoe_ip']) && !$isExp) {
             $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
         }
         $client->sendSync($setRequest);
