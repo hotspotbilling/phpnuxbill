@@ -58,7 +58,6 @@ switch ($action) {
                 _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
                 _alert(Lang::T('Password changed successfully, Please login again'), 'success', "login");
             } else {
-                die($password);
                 r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
             }
         } else {
