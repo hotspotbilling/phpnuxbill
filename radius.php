@@ -364,6 +364,10 @@ function process_radiust_rest($tur, $code)
     global $config;
     $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
     $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
+	$USRon = ORM::for_table('radacct')->where('username', $tur['username'])->where_raw("acctstoptime IS NULL")->count();
+	if ($USRon >= $plan['shared_users'] && $plan['type'] == 'Hotspot') {
+		show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You are already logged in - access denied ('.$USRon.')'], 401);
+	}
     if ($bw['rate_down_unit'] == 'Kbps') {
         $unitdown = 'K';
     } else {
