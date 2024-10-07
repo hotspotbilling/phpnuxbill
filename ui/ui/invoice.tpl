@@ -12,19 +12,24 @@
                     <a href="{$_url}plan/list" class="btn btn-default btn-sm"><i
                             class="ion-reply-all"></i>{Lang::T('Finish')}</a>
                     <a href="https://api.whatsapp.com/send/?text={$whatsapp}" target="_blank"
-                    class="btn btn-primary btn-sm">
-                    <i class="glyphicon glyphicon-share"></i> WhatsApp</a>
+                        class="btn btn-primary btn-sm">
+                        <i class="glyphicon glyphicon-share"></i> WhatsApp</a>
                     <a href="{$_url}plan/view/{$in['id']}/send" class="btn btn-info text-black btn-sm"><i
                             class="glyphicon glyphicon-envelope"></i> {Lang::T("Resend")}</a>
-                        <button type="submit" class="btn btn-info text-black btn-sm"><i class="glyphicon glyphicon-print"></i>
-                        {Lang::T('Print')}</button>
+                    <hr>
+                    <a href="{$_url}plan/print/{$in['id']}" target="_print" class="btn btn-info text-black btn-sm"><i
+                            class="glyphicon glyphicon-print"></i>
+                        {Lang::T('Print')} HTML</a>
+                    <button type="submit" class="btn btn-info text-black btn-sm"><i
+                            class="glyphicon glyphicon-print"></i>
+                        {Lang::T('Print')} Text</button>
                     <a href="nux://print?text={urlencode($invoice)}"
-                    class="btn btn-success text-black btn-sm hidden-md hidden-lg">
+                        class="btn btn-success text-black btn-sm hidden-md hidden-lg">
                         <i class="glyphicon glyphicon-phone"></i>
                         NuxPrint
                     </a>
                     <a href="https://github.com/hotspotbilling/android-printer"
-                    class="btn btn-success text-black btn-sm hidden-xs hidden-sm" target="_blank">
+                        class="btn btn-success text-black btn-sm hidden-xs hidden-sm" target="_blank">
                         <i class="glyphicon glyphicon-phone"></i>
                         NuxPrint
                     </a>
