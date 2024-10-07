@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.10.7
+
+- Show Customer is Online or not
+- Change Invoice Theme for printing
+- Rearange Customer View
+
 ## 2024.9.23
 
 - Discount Price
