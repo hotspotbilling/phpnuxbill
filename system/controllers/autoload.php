@@ -85,15 +85,56 @@ switch ($action) {
         $ui->display('autoload.tpl');
         break;
     case 'customer_is_active':
-        $d = ORM::for_table('tbl_user_recharges')->where('customer_id', $routes['2'])->findOne();
-        if ($d) {
-            if ($d['status'] == 'on') {
-                die('<span class="label label-success" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . '</span>');
-            } else {
-                die('<span class="label label-danger" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . '</span>');
+        $c = ORM::for_table('tbl_customers')->where('username', $routes['2'])->find_one();
+        $p = ORM::for_table('tbl_plans')->find_one($routes['3']);
+        $dvc = Package::getDevice($p);
+        if ($_app_stage != 'demo') {
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                try {
+                    //don't wait more than 5 seconds for response from device, otherwise we get timeout error.
+                    ini_set('default_socket_timeout', 5);
+                    if ((new $p['device'])->online_customer($c, $p['routers'])) {
+                        echo '<span class="label label-success" title="online">&nbsp;</span>';
+                    }
+                } catch (Exception $e) {
+                    echo '<span class="label label-danger" title="error">&nbsp;</span>';
+                }
             }
+        }
+        break;
+    case 'plan_is_active':
+        $ds = ORM::for_table('tbl_user_recharges')->where('customer_id', $routes['2'])->find_array();
+        if ($ds) {
+            $ps = [];
+            $c = ORM::for_table('tbl_customers')->find_one($routes['2']);
+            foreach ($ds as $d) {
+                if ($d['status'] == 'on') {
+                    $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
+                    $dvc = Package::getDevice($p);
+                    $status = "";
+                    if ($_app_stage != 'demo') {
+                        if (file_exists($dvc)) {
+                            require_once $dvc;
+                            try {
+                                //don't wait more than 5 seconds for response from device, otherwise we get timeout error.
+                                ini_set('default_socket_timeout', 5);
+                                if ((new $p['device'])->online_customer($c, $p['routers'])) {
+                                    $status = '<span class="label label-success" title="online">&nbsp;</span>';
+                                }
+                            } catch (Exception $e) {
+                                $status = '<span class="label label-danger" title="error">&nbsp;</span>';
+                            }
+                        }
+                    }
+                    $ps[] = ('<span class="label label-primary m-1" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . ' ' . $status . '</span>');
+                } else {
+                    $ps[] = ('<span class="label label-danger m-1" title="Expired ' . Lang::dateAndTimeFormat($d['expiration'], $d['time']) . '">' . $d['namebp'] . '</span>');
+                }
+            }
+            echo implode("<br>", $ps);
         } else {
-            die('<span class="label label-danger">&bull;</span>');
+            die('');
         }
         break;
     case 'customer_select2':

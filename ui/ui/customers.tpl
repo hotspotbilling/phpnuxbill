@@ -132,7 +132,7 @@
                                                     class="glyphicon glyphicon-map-marker"></i></a>
                                         {/if}
                                     </td>
-                                    <td align="center" api-get-text="{$_url}autoload/customer_is_active/{$ds['id']}">
+                                    <td align="center" api-get-text="{$_url}autoload/plan_is_active/{$ds['id']}">
                                         <span class="label label-default">&bull;</span>
                                     </td>
                                     <td>{$ds['service_type']}</td>
