@@ -94,15 +94,18 @@
                                     <a href="{$_url}customers/viewu/{$ds['username']}">{$ds['username']}</a>
                                     {/if}
                                 </td>
+                                <td>
                                 {if $ds['type'] == 'Hotspot'}
-                                    <td><a href="{$_url}services/edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
-								{/if}
-                                {if $ds['type'] == 'PPPOE'}
-                                    <td><a href="{$_url}services/pppoe-edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
+                                    <a href="{$_url}services/edit/{$ds['plan_id']}">{$ds['namebp']}</a>
+                                    <span api-get-text="{$_url}autoload/customer_is_active/{$ds['username']}/{$ds['plan_id']}"></span>
+								{elseif $ds['type'] == 'PPPOE'}
+                                    <a href="{$_url}services/pppoe-edit/{$ds['plan_id']}">{$ds['namebp']}</a>
+                                    <span api-get-text="{$_url}autoload/customer_is_active/{$ds['username']}/{$ds['plan_id']}"></span>
+                                {elseif $ds['type'] == 'VPN'}
+                                    <a href="{$_url}services/vpn-edit/{$ds['plan_id']}">{$ds['namebp']}</a>
                                 {/if}
-                                {if $ds['type'] == 'VPN'}
-                                    <td><a href="{$_url}services/vpn-edit/{$ds['plan_id']}">{$ds['namebp']}</a></td>
-                                {/if}
+
+                                </td>
                                 <td>{$ds['type']}</td>
                                 <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
                                 <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
