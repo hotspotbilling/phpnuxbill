@@ -297,7 +297,7 @@ class MikrotikPppoe
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
         $printRequest = new RouterOS\Request(
             '/ppp active print',
-            RouterOS\Query::where('user', $customer['username'])
+            RouterOS\Query::where('name', $customer['username'])
         );
         return $client->sendSync($printRequest)->getProperty('.id');
     }
