@@ -13,6 +13,11 @@
     Allow from all
 </Files>
 
+<Files radius.php>
+    Order Allow,Deny
+    Allow from all
+</Files>
+
 RewriteEngine On
 RewriteBase /
 RewriteCond %{REQUEST_FILENAME} !-f
