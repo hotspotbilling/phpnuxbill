@@ -26,7 +26,7 @@ switch ($do) {
         //csrf token
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            _alert(Lang::T('Invalid CSRF Token') . ".", 'danger', "admin");
+            _alert(Lang::T('Invalid or Expired CSRF Token') . ".", 'danger', "admin");
         }
         run_hook('admin_login'); #HOOK
         if ($username != '' and $password != '') {

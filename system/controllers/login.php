@@ -5,10 +5,6 @@
  *  by https://t.me/ibnux
  **/
 
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
-header("Pragma: no-cache");
-
 $maintenance_mode = $config['maintenance_mode'];
 if ($maintenance_mode == true) {
     displayMaintenanceMessage();
@@ -28,6 +24,11 @@ switch ($do) {
     case 'post':
         $username = _post('username');
         $password = _post('password');
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            _msglog('e', Lang::T('Invalid or Expired CSRF Token'));
+            r2(U . 'login');
+        }
         run_hook('customer_login'); #HOOK
         if ($username != '' and $password != '') {
             $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
@@ -61,6 +62,11 @@ switch ($do) {
 
     case 'activation':
         if (!empty(_post('voucher_only'))) {
+            $csrf_token = _post('csrf_token');
+            if (!Csrf::check($csrf_token)) {
+                _msglog('e', Lang::T('Invalid or Expired CSRF Token'));
+                r2(U . 'login');
+            }
             $voucher = Text::alphanumeric(_post('voucher_only'), "-_.,");
             $tur = ORM::for_table('tbl_user_recharges')
                 ->where('username', $voucher)
@@ -293,11 +299,14 @@ switch ($do) {
         }
     default:
         run_hook('customer_view_login'); #HOOK
+        $csrf_token = Csrf::generateAndStoreToken();
         if ($config['disable_registration'] == 'yes') {
+            $ui->assign('csrf_token', $csrf_token);
             $ui->assign('_title', Lang::T('Activation'));
             $ui->assign('code', alphanumeric(_get('code'), "-"));
             $ui->display('customer/login-noreg.tpl');
         } else {
+            $ui->assign('csrf_token', $csrf_token);
             $ui->assign('_title', Lang::T('Login'));
             $ui->display('customer/login.tpl');
         }

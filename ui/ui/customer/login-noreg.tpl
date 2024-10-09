@@ -14,6 +14,7 @@
             <div class="panel-heading">{Lang::T('Login / Activate Voucher')}</div>
             <div class="panel-body">
                 <form action="{$_url}login/activation" method="post">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label>{if $_c['country_code_phone']!= ''}{Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}</label>
                         <div class="input-group">
@@ -52,6 +53,7 @@
             <div class="panel-heading">{Lang::T('Activate Voucher')}</div>
             <div class="panel-body">
                 <form action="{$_url}login/activation" method="post">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label>{Lang::T('Enter voucher code here')}</label>
                         <div class="input-group">

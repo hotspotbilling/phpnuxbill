@@ -18,6 +18,7 @@
             <div class="panel-heading">{Lang::T('Log in to Member Panel')}</div>
             <div class="panel-body">
                 <form action="{$_url}login/post" method="post">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label>{if $_c['country_code_phone']!= ''}{Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}</label>
                         <div class="input-group">
