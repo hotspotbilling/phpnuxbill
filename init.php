@@ -368,3 +368,34 @@ function isTableExist($table)
     }
 }
 
+function generateCsrfToken($expiryTime = 3600)
+{
+    $token = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = $token;
+    $_SESSION['csrf_token_time'] = time();
+    $_SESSION['csrf_token_expiry'] = $expiryTime;
+
+    return $token;
+}
+
+function validateCsrfToken($token)
+{
+    if (!isset($_SESSION['csrf_token'])) {
+        _log(Lang::T("CSRF token not set in session."));
+        return false;
+    }
+
+    if (is_null($token)) {
+        _log(Lang::T("Token passed is null."));
+        return false;
+    }
+
+    $tokenAge = time() - $_SESSION['csrf_token_time'];
+    if ($tokenAge > $_SESSION['csrf_token_expiry']) {
+        _log(Lang::T("CSRF token has expired."));
+        return false;
+    }
+
+
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
