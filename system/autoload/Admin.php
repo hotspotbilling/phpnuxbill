@@ -53,28 +53,52 @@ class Admin
     {
         global $db_pass, $config;
         $enable_session_timeout = $config['enable_session_timeout'];
+        $session_timeout_duration = intval($config['session_timeout_duration']) * 60; // Convert minutes to seconds
+
         if (isset($aid)) {
             $time = time();
-            $token = $aid . '.' . $time . '.' . sha1($aid . '.' . $time . '.' . $db_pass);
-            setcookie('aid', $token, time() + 86400 * 7);
+            $token = $aid . '.' . $time . '.' . sha1("$aid.$time.$db_pass");
+
+            // Detect the current protocol
+            $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+
+            // Set cookie with security flags
+            setcookie('aid', $token, [
+                'expires' => time() + 86400 * 7, // 7 days
+                'path' => '/',
+                'domain' => APP_URL,
+                'secure' => $isSecure,
+                'httponly' => true,
+                'samesite' => 'Lax', // or Strict
+            ]);
+
             $_SESSION['aid'] = $aid;
+
             if ($enable_session_timeout) {
-                $timeout = 60;
-                if ($config['session_timeout_duration']) {
-                    $timeout = intval($config['session_timeout_duration']);
-                }
-                $session_timeout_duration = $timeout * 60; // Convert minutes to seconds
                 $_SESSION['aid_expiration'] = $time + $session_timeout_duration;
             }
+
             return $token;
         }
+
         return '';
     }
 
     public static function removeCookie()
     {
         if (isset($_COOKIE['aid'])) {
-            setcookie('aid', '', time() - 86400);
+
+            $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+            setcookie('aid', '', [
+                'expires' => time() - 3600,
+                'path' => '/',
+                'domain' =>  APP_URL,
+                'secure' => $isSecure,
+                'httponly' => true,
+                'samesite' => 'Lax', // or Strict
+            ]);
+
+            unset($_COOKIE['aid']);
         }
     }
 
