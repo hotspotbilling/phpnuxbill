@@ -24,6 +24,7 @@
                 {$notify}
             {/if}
             <form action="{$_url}admin/post" method="post">
+                <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <div class="form-group has-feedback">
                     <input type="text" required class="form-control" name="username" placeholder="{Lang::T('Username')}">
                     <span class="glyphicon glyphicon-user form-control-feedback"></span>
