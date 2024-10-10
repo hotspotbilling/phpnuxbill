@@ -15,7 +15,7 @@ switch ($action) {
         $ui->assign('_system_menu', 'voucher');
         $ui->assign('_title', Lang::T('Order Voucher'));
         run_hook('customer_view_order'); #HOOK
-        $ui->display('user-ui/order.tpl');
+        $ui->display('customer/order.tpl');
         break;
     case 'history':
         $ui->assign('_system_menu', 'history');
@@ -24,7 +24,7 @@ switch ($action) {
         $ui->assign('d', $d);
         $ui->assign('_title', Lang::T('Order History'));
         run_hook('customer_view_order_history'); #HOOK
-        $ui->display('user-ui/orderHistory.tpl');
+        $ui->display('customer/orderHistory.tpl');
         break;
     case 'balance':
         if (strpos($user['email'], '@') === false) {
@@ -34,7 +34,7 @@ switch ($action) {
         $ui->assign('_system_menu', 'balance');
         $plans_balance = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->where('prepaid', 'yes')->find_many();
         $ui->assign('plans_balance', $plans_balance);
-        $ui->display('user-ui/orderBalance.tpl');
+        $ui->display('customer/orderBalance.tpl');
         break;
     case 'package':
         if (strpos($user['email'], '@') === false) {
@@ -127,7 +127,7 @@ switch ($action) {
         $ui->assign('plans_hotspot', $plans_hotspot);
         $ui->assign('plans_vpn', $plans_vpn);
         run_hook('customer_view_order_plan'); #HOOK
-        $ui->display('user-ui/orderPlan.tpl');
+        $ui->display('customer/orderPlan.tpl');
         break;
     case 'unpaid':
         $d = ORM::for_table('tbl_payment_gateway')
@@ -192,7 +192,7 @@ switch ($action) {
         $ui->assign('plan', $plan);
         $ui->assign('bandw', $bandw);
         $ui->assign('_title', 'TRX #' . $trxid);
-        $ui->display('user-ui/orderView.tpl');
+        $ui->display('customer/orderView.tpl');
         break;
     case 'pay':
         if ($config['enable_balance'] != 'yes') {
@@ -383,7 +383,7 @@ switch ($action) {
         $ui->assign('router', $router_name);
         $ui->assign('plan', $plan);
         $ui->assign('tax', $tax);
-        $ui->display('user-ui/sendPlan.tpl');
+        $ui->display('customer/sendPlan.tpl');
         break;
     case 'gateway':
         $ui->assign('_title', Lang::T('Select Payment Gateway'));
@@ -421,7 +421,7 @@ switch ($action) {
             $ui->assign('add_cost', $add_cost);
             $ui->assign('bills', $bills);
             $ui->assign('plan', $plan);
-            $ui->display('user-ui/selectGateway.tpl');
+            $ui->display('customer/selectGateway.tpl');
             break;
         } else {
             sendTelegram("Payment Gateway not set, please set it in Settings");
