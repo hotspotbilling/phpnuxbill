@@ -77,8 +77,8 @@ class Admin
 
             // Detect the current protocol
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-            $app_stage = ($_app_stage === 'Live') ? APP_URL : '';
-
+            $serverHost = $_SERVER['HTTP_HOST'];
+            $app_stage = ($serverHost === 'localhost') ? '' : APP_URL;
             // Set cookie with security flags
             setcookie('aid', $token, [
                 'expires' => time() + 86400 * 7, // 7 days
@@ -108,7 +108,8 @@ class Admin
         global $_app_stage;
         if (isset($_COOKIE['aid'])) {
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-            $app_stage = ($_app_stage === 'Live') ? APP_URL : '';
+            $serverHost = $_SERVER['HTTP_HOST'];
+            $app_stage = ($serverHost === 'localhost') ? '' : APP_URL;
             setcookie('aid', '', [
                 'expires' => time() - 3600,
                 'path' => '/',
