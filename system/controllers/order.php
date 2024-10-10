@@ -15,7 +15,7 @@ switch ($action) {
         $ui->assign('_system_menu', 'voucher');
         $ui->assign('_title', Lang::T('Order Voucher'));
         run_hook('customer_view_order'); #HOOK
-        $ui->display('customer/order.tpl');
+        $ui->display('user-ui/order.tpl');
         break;
     case 'history':
         $ui->assign('_system_menu', 'history');
@@ -24,7 +24,7 @@ switch ($action) {
         $ui->assign('d', $d);
         $ui->assign('_title', Lang::T('Order History'));
         run_hook('customer_view_order_history'); #HOOK
-        $ui->display('customer/orderHistory.tpl');
+        $ui->display('user-ui/orderHistory.tpl');
         break;
     case 'balance':
         if (strpos($user['email'], '@') === false) {
@@ -34,7 +34,7 @@ switch ($action) {
         $ui->assign('_system_menu', 'balance');
         $plans_balance = ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->where('prepaid', 'yes')->find_many();
         $ui->assign('plans_balance', $plans_balance);
-        $ui->display('customer/orderBalance.tpl');
+        $ui->display('user-ui/orderBalance.tpl');
         break;
     case 'package':
         if (strpos($user['email'], '@') === false) {
@@ -127,7 +127,7 @@ switch ($action) {
         $ui->assign('plans_hotspot', $plans_hotspot);
         $ui->assign('plans_vpn', $plans_vpn);
         run_hook('customer_view_order_plan'); #HOOK
-        $ui->display('customer/orderPlan.tpl');
+        $ui->display('user-ui/orderPlan.tpl');
         break;
     case 'unpaid':
         $d = ORM::for_table('tbl_payment_gateway')
@@ -192,7 +192,7 @@ switch ($action) {
         $ui->assign('plan', $plan);
         $ui->assign('bandw', $bandw);
         $ui->assign('_title', 'TRX #' . $trxid);
-        $ui->display('customer/orderView.tpl');
+        $ui->display('user-ui/orderView.tpl');
         break;
     case 'pay':
         if ($config['enable_balance'] != 'yes') {
@@ -271,7 +271,8 @@ switch ($action) {
         if (!$plan['enabled']) {
             r2(U . "home", 'e', 'Plan is not exists');
         }
-		if ($plan['is_radius'] == '1') {
+        if ($routes['2'] == 'radius') {
+            $routes['2'] = 0;
             $router_name = 'radius';
         } else {
             $router_name = $plan['routers'];
@@ -333,7 +334,7 @@ switch ($action) {
                 $d->gateway = $target['username'];
                 $d->plan_id = $plan['id'];
                 $d->plan_name = $plan['name_plan'];
-                $d->routers_id = ($routes['2'] == 'radius') ? 0 : $routes['2'];
+                $d->routers_id = $routes['2'];
                 $d->routers = $router_name;
                 $d->price = $plan['price'];
                 $d->payment_method = "Balance";
@@ -352,7 +353,7 @@ switch ($action) {
                 $d->gateway = $user['username'];
                 $d->plan_id = $plan['id'];
                 $d->plan_name = $plan['name_plan'];
-                $d->routers_id = ($routes['2'] == 'radius') ? 0 : $routes['2'];
+                $d->routers_id = $routes['2'];
                 $d->routers = $router_name;
                 $d->price = $plan['price'];
                 $d->payment_method = "Balance";
@@ -382,7 +383,7 @@ switch ($action) {
         $ui->assign('router', $router_name);
         $ui->assign('plan', $plan);
         $ui->assign('tax', $tax);
-        $ui->display('customer/sendPlan.tpl');
+        $ui->display('user-ui/sendPlan.tpl');
         break;
     case 'gateway':
         $ui->assign('_title', Lang::T('Select Payment Gateway'));
@@ -420,7 +421,7 @@ switch ($action) {
             $ui->assign('add_cost', $add_cost);
             $ui->assign('bills', $bills);
             $ui->assign('plan', $plan);
-            $ui->display('customer/selectGateway.tpl');
+            $ui->display('user-ui/selectGateway.tpl');
             break;
         } else {
             sendTelegram("Payment Gateway not set, please set it in Settings");
