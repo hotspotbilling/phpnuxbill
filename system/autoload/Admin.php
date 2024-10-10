@@ -52,7 +52,6 @@ class Admin
                     _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
                     return 0;
                 } else {
-
                     if (time() - $tmp[1] < 86400 * 7) {
                         $_SESSION['aid'] = $tmp[0];
                         if ($enable_session_timeout) {
@@ -78,8 +77,6 @@ class Admin
 
             // Detect the current protocol
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-            $serverHost = $_SERVER['HTTP_HOST'];
-            $app_stage = ($serverHost === 'localhost') ? '' : APP_URL;
             // Set cookie with security flags
             setcookie('aid', $token, [
                 'expires' => time() + 86400 * 7, // 7 days
@@ -109,8 +106,6 @@ class Admin
         global $_app_stage;
         if (isset($_COOKIE['aid'])) {
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-            $serverHost = $_SERVER['HTTP_HOST'];
-            $app_stage = ($serverHost === 'localhost') ? '' : APP_URL;
             setcookie('aid', '', [
                 'expires' => time() - 3600,
                 'path' => '/',
