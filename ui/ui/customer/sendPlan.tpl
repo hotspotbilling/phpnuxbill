@@ -1,4 +1,4 @@
-{include file="user-ui/header.tpl"}
+{include file="customer/header.tpl"}
 <!-- user-orderView -->
 <div class="row">
     <div class="col-md-3"></div>
@@ -64,4 +64,4 @@
         </div>
     </div>
 </div>
-{include file="user-ui/footer.tpl"}
+{include file="customer/footer.tpl"}

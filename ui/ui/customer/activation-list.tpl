@@ -1,4 +1,4 @@
-{include file="user-ui/header.tpl"}
+{include file="customer/header.tpl"}
 <!-- user-activation-list -->
 
 <div class="row">
@@ -41,4 +41,4 @@
 </div>
 
 
-{include file="user-ui/footer.tpl"}
+{include file="customer/footer.tpl"}

@@ -129,7 +129,7 @@ try {
             $e->getTraceAsString()
     );
     if (!Admin::getID()) {
-        $ui->display('user-ui/error.tpl'); die();
+        $ui->display('customer/error.tpl'); die();
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
@@ -142,7 +142,7 @@ try {
             $e->getTraceAsString()
     );
     if (!Admin::getID()) {
-        $ui->display('user-ui/error.tpl'); die();
+        $ui->display('customer/error.tpl'); die();
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");

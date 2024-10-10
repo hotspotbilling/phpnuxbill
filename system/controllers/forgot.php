@@ -166,4 +166,4 @@ foreach ($fs as $file) {
 
 $ui->assign('step', $step);
 $ui->assign('_title', Lang::T('Forgot Password'));
-$ui->display('user-ui/forgot.tpl');
+$ui->display('customer/forgot.tpl');

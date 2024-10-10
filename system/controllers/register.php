@@ -63,7 +63,7 @@ switch ($do) {
                     $ui->assign('notify', 'Wrong Verification code');
                     $ui->assign('notify_t', 'd');
                     $ui->assign('_title', Lang::T('Register'));
-                    $ui->display('user-ui/register-otp.tpl');
+                    $ui->display('customer/register-otp.tpl');
                     exit();
                 } else {
                     unlink($otpPath);
@@ -98,7 +98,7 @@ switch ($do) {
                 $ui->assign('notify_t', 'd');
                 $ui->assign('_title', Lang::T('Register'));
                 run_hook('view_otp_register'); #HOOK
-                $ui->display('user-ui/register-rotp.tpl');
+                $ui->display('customer/register-rotp.tpl');
             }
         } else {
             $ui->assign('username', $username);
@@ -109,7 +109,7 @@ switch ($do) {
             $ui->assign('notify', $msg);
             $ui->assign('notify_t', 'd');
             $ui->assign('_title', Lang::T('Register'));
-            $ui->display('user-ui/register.tpl');
+            $ui->display('customer/register.tpl');
         }
         break;
 
@@ -132,7 +132,7 @@ switch ($do) {
                     $ui->assign('notify', 'Please wait ' . (600 - (time() - filemtime($otpPath))) . ' seconds before sending another SMS');
                     $ui->assign('notify_t', 'd');
                     $ui->assign('_title', Lang::T('Register'));
-                    $ui->display('user-ui/register-otp.tpl');
+                    $ui->display('customer/register-otp.tpl');
                 } else {
                     $otp = rand(100000, 999999);
                     file_put_contents($otpPath, $otp);
@@ -141,12 +141,12 @@ switch ($do) {
                     $ui->assign('notify', 'Registration code has been sent to your phone');
                     $ui->assign('notify_t', 's');
                     $ui->assign('_title', Lang::T('Register'));
-                    $ui->display('user-ui/register-otp.tpl');
+                    $ui->display('customer/register-otp.tpl');
                 }
             } else {
                 $ui->assign('_title', Lang::T('Register'));
                 run_hook('view_otp_register'); #HOOK
-                $ui->display('user-ui/register-rotp.tpl');
+                $ui->display('customer/register-rotp.tpl');
             }
         } else {
             $ui->assign('username', "");
@@ -156,7 +156,7 @@ switch ($do) {
             $ui->assign('otp', false);
             $ui->assign('_title', Lang::T('Register'));
             run_hook('view_register'); #HOOK
-            $ui->display('user-ui/register.tpl');
+            $ui->display('customer/register.tpl');
         }
         break;
 }

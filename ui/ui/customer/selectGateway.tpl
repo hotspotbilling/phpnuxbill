@@ -1,4 +1,4 @@
-{include file="user-ui/header.tpl"}
+{include file="customer/header.tpl"}
 
 <div class="row">
     {if file_exists("$PAGES_PATH/Payment_Info.html")}
@@ -122,4 +122,4 @@
     </div>
 </div>
 
-{include file="user-ui/footer.tpl"}
+{include file="customer/footer.tpl"}

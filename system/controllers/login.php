@@ -292,10 +292,10 @@ switch ($do) {
         if ($config['disable_registration'] == 'yes') {
             $ui->assign('_title', Lang::T('Activation'));
             $ui->assign('code', alphanumeric(_get('code'), "-"));
-            $ui->display('user-ui/login-noreg.tpl');
+            $ui->display('customer/login-noreg.tpl');
         } else {
             $ui->assign('_title', Lang::T('Login'));
-            $ui->display('user-ui/login.tpl');
+            $ui->display('customer/login.tpl');
         }
         break;
 }

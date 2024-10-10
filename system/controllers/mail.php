@@ -29,7 +29,7 @@ switch ($action) {
         $ui->assign('tipe', 'view');
         $ui->assign('_system_menu', 'inbox');
         $ui->assign('_title', Lang::T('Inbox'));
-        $ui->display('user-ui/inbox.tpl');
+        $ui->display('customer/inbox.tpl');
         break;
     case 'delete':
         if($routes['2']){
@@ -57,5 +57,5 @@ switch ($action) {
         $ui->assign('mails', $mails);
         $ui->assign('_system_menu', 'inbox');
         $ui->assign('_title', Lang::T('Inbox'));
-        $ui->display('user-ui/inbox.tpl');
+        $ui->display('customer/inbox.tpl');
 }

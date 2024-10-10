@@ -18,7 +18,7 @@ switch ($action) {
 
     case 'change-password':
         run_hook('customer_view_change_password'); #HOOK
-        $ui->display('user-ui/change-password.tpl');
+        $ui->display('customer/change-password.tpl');
         break;
 
     case 'change-password-post':
@@ -67,7 +67,7 @@ switch ($action) {
 
     case 'profile':
         run_hook('customer_view_edit_profile'); #HOOK
-        $ui->display('user-ui/profile.tpl');
+        $ui->display('customer/profile.tpl');
         break;
     case 'edit-profile-post':
         $fullname = _post('fullname');
@@ -101,7 +101,7 @@ switch ($action) {
 
     case 'phone-update':
         $ui->assign('new_phone', $_SESSION['new_phone']);
-        $ui->display('user-ui/phone-update.tpl');
+        $ui->display('customer/phone-update.tpl');
         break;
 
     case 'phone-update-otp':
@@ -211,7 +211,7 @@ switch ($action) {
 
     case 'email-update':
         $ui->assign('new_email', $_SESSION['new_email']);
-        $ui->display('user-ui/email-update.tpl');
+        $ui->display('customer/email-update.tpl');
         break;
     case 'email-update-otp':
         $email = trim(_post('email'));

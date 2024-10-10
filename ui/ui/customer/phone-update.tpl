@@ -1,31 +1,31 @@
-{include file="user-ui/header.tpl"}
+{include file="customer/header.tpl"}
 
 <!-- user-phone-update -->
 
 <div class="box box-danger">
     <div class="box-header with-border">
-        <h3 class="box-title">{Lang::T('Change Email Address')}</h3>
+        <h3 class="box-title">{Lang::T('Change Phone Number')}</h3>
     </div>
     <div class="box-body">
         <div class="form-horizontal">
             <div class="form-group">
-                <label class="col-md-2 control-label">{Lang::T('Current Email')}</label>
+                <label class="col-md-2 control-label">{Lang::T('Current Number')}</label>
                 <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-addon" id="basic-addon1">+</span>
-                        <input type="text" class="form-control" name="email"
-                            value="{$_user['email']}" readonly placeholder="{Lang::T('Email')}">
+                        <input type="text" class="form-control" name="phonenumber" id="phonenumber"
+                            value="{$_user['phonenumber']}" readonly placeholder="{Lang::T('Phone Number')}">
                     </div>
                 </div>
             </div>
-            <form method="post" role="form" action="{$_url}accounts/email-update-otp">
+            <form method="post" role="form" action="{$_url}accounts/phone-update-otp">
                 <div class="form-group">
-                    <label class="col-md-2 control-label">{Lang::T('New Email')}</label>
+                    <label class="col-md-2 control-label">{Lang::T('New Number')}</label>
                     <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-addon" id="basic-addon1">+</span>
-                            <input type="text" class="form-control" name="email" id="email" value="{$new_email}" required
-                                placeholder="{Lang::T('Input your Email')}">
+                            <input type="number" class="form-control" name="phone" id="phone" value="{$new_phone}" required
+                                placeholder="{Lang::T('Input your phone number')}">
                             <span class="input-group-btn">
                                 <button type="submit" class="btn btn-info btn-flat">{Lang::T('Request OTP')}</button>
                             </span>
@@ -33,33 +33,35 @@
                     </div>
                 </div>
             </form>
-            <form method="post" role="form" action="{$_url}accounts/email-update-post">
+            <form method="post" role="form" action="{$_url}accounts/phone-update-post">
                 <!-- Form 2 -->
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('OTP')}</label>
                     <div class="col-md-6">
                         <input type="number" class="form-control" id="otp" name="otp"
-                            placeholder="{Lang::T('Enter OTP that was sent to your email')}" required>
+                            placeholder="{Lang::T('Enter OTP that was sent to your phone')}" required>
                     </div>
                 </div>
 
                 <!-- Hidden field to store the phone number value -->
-                <input type="hidden" name="email" id="hidden_email">
+                <input type="hidden" name="phone" id="hidden_phone" required>
 
-                <center>
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-m2-6">
                         <button class="btn btn-success" type="submit"
                             onclick="return validateForm()">{Lang::T('Update')}</button>
                         Or <a href="{$_url}home">{Lang::T('Cancel')}</a>
-                </center>
+                    </div>
+                </div>
             </form>
 
             <script>
                 function validateForm() {
-                    var email = document.getElementById("email").value;
+                    var phoneNumber = document.getElementById("phone").value;
                     var otp = document.getElementById("otp").value;
 
-                    if (email.trim() === "") {
-                        alert("Email Address is required.");
+                    if (phoneNumber.trim() === "") {
+                        alert("Phone number is required.");
                         return false; // Prevent form submission
                     }
 
@@ -69,11 +71,10 @@
                     }
 
                     // Set the phone number value in the hidden field
-                    document.getElementById("hidden_email").value = email;
-                    return true; // Allow form submission
+                    document.getElementById("hidden_phone").value = phoneNumber;
                 }
             </script>
         </div>
     </div>
 </div>
-{include file="user-ui/footer.tpl"}
+{include file="customer/footer.tpl"}

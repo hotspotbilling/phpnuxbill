@@ -1,4 +1,4 @@
-{include file="user-ui/header-public.tpl"}
+{include file="customer/header-public.tpl"}
 
 <div class="hidden-xs" style="height:100px"></div>
 <form action="{$_url}forgot&step={$step+1}" method="post">
@@ -96,4 +96,4 @@
         </div>
     </div>
 </form>
-{include file="user-ui/footer-public.tpl"}
+{include file="customer/footer-public.tpl"}

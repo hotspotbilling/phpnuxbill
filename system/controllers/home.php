@@ -336,4 +336,4 @@ $abills = User::getAttributes("Bill");
 $ui->assign('abills', $abills);
 
 run_hook('view_customer_dashboard'); #HOOK
-$ui->display('user-ui/dashboard.tpl');
+$ui->display('customer/dashboard.tpl');

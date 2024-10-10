@@ -1,4 +1,4 @@
-{include file="user-ui/header-public.tpl"}
+{include file="customer/header-public.tpl"}
 
 <div class="hidden-xs" style="height:100px"></div>
 <div class="row">
@@ -89,4 +89,4 @@
     </div>
 </div>
 
-{include file="user-ui/footer-public.tpl"}
+{include file="customer/footer-public.tpl"}
