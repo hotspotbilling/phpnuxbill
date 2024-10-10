@@ -21,6 +21,15 @@ class Admin
                 if ($enable_session_timeout) {
                     $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
                 }
+                // Validate the token in the cookie
+                $isValid = self::validateToken($_SESSION['aid'], $_COOKIE['aid']);
+                if (!$isValid) {
+                    self::removeCookie();
+                    session_destroy();
+                    _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
+                    return 0;
+                }
+
                 return $_SESSION['aid'];
             }
             // Session expired, log out the user
@@ -35,7 +44,15 @@ class Admin
         // Check if the cookie is set and valid
         elseif (isset($_COOKIE['aid'])) {
             $tmp = explode('.', $_COOKIE['aid']);
-            if (sha1($tmp[0] . '.' . $tmp[1] . '.' . $db_pass) == $tmp[2]) {
+            if (sha1("$tmp[0].$tmp[1].$db_pass") == $tmp[2]) {
+                // Validate the token in the cookie
+                $isValid = self::validateToken($tmp[0], $_COOKIE['aid']);
+                if (!$isValid) {
+                    self::removeCookie();
+                    _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
+                    return 0;
+                }
+
                 if (time() - $tmp[1] < 86400 * 7) {
                     $_SESSION['aid'] = $tmp[0];
                     if ($enable_session_timeout) {
@@ -48,10 +65,9 @@ class Admin
 
         return 0;
     }
-
     public static function setCookie($aid)
     {
-        global $db_pass, $config;
+        global $db_pass, $config, $_app_stage;
         $enable_session_timeout = $config['enable_session_timeout'];
         $session_timeout_duration = intval($config['session_timeout_duration']) * 60; // Convert minutes to seconds
 
@@ -61,12 +77,13 @@ class Admin
 
             // Detect the current protocol
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+            $app_stage = ($_app_stage === 'Live') ? APP_URL : '';
 
             // Set cookie with security flags
             setcookie('aid', $token, [
                 'expires' => time() + 86400 * 7, // 7 days
                 'path' => '/',
-                'domain' => APP_URL,
+                'domain' => $app_stage,
                 'secure' => $isSecure,
                 'httponly' => true,
                 'samesite' => 'Lax', // or Strict
@@ -78,20 +95,24 @@ class Admin
                 $_SESSION['aid_expiration'] = $time + $session_timeout_duration;
             }
 
+            self::upsertToken($aid, $token);
+
             return $token;
         }
 
         return '';
     }
-    
+
     public static function removeCookie()
     {
+        global $_app_stage;
         if (isset($_COOKIE['aid'])) {
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+            $app_stage = ($_app_stage === 'Live') ? APP_URL : '';
             setcookie('aid', '', [
                 'expires' => time() - 3600,
                 'path' => '/',
-                'domain' => APP_URL,
+                'domain' => $app_stage,
                 'secure' => $isSecure,
                 'httponly' => true,
                 'samesite' => 'Lax',
@@ -111,5 +132,28 @@ class Admin
         } else {
             return null;
         }
+    }
+
+    public static function upsertToken($aid, $token)
+    {
+        $query = ORM::for_table('tbl_users')->where('id', $aid)->findOne();
+        $query->login_token = $token;
+        $query->save();
+    }
+
+    public static function validateToken($aid, $cookieToken)
+    {
+        $query =  ORM::for_table('tbl_users')->where('id', $aid)->findOne();
+        $storedToken = $query->login_token;
+
+        if (empty($storedToken)) {
+            return false;
+        }
+
+        if ($storedToken !== $cookieToken) {
+            return false;
+        }
+
+        return $storedToken === $cookieToken;
     }
 }
