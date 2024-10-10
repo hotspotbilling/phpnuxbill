@@ -19,6 +19,7 @@
                 </div>
             </div>
             <form method="post" role="form" action="{$_url}accounts/phone-update-otp">
+                <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('New Number')}</label>
                     <div class="col-md-6">
@@ -34,6 +35,7 @@
                 </div>
             </form>
             <form method="post" role="form" action="{$_url}accounts/phone-update-post">
+                <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <!-- Form 2 -->
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('OTP')}</label>
