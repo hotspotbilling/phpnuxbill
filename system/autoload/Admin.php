@@ -47,18 +47,19 @@ class Admin
             if (sha1("$tmp[0].$tmp[1].$db_pass") == $tmp[2]) {
                 // Validate the token in the cookie
                 $isValid = self::validateToken($tmp[0], $_COOKIE['aid']);
-                if (!$isValid) {
+                if (!empty($_COOKIE['aid']) && !$isValid) {
                     self::removeCookie();
                     _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
                     return 0;
-                }
+                } else {
 
-                if (time() - $tmp[1] < 86400 * 7) {
-                    $_SESSION['aid'] = $tmp[0];
-                    if ($enable_session_timeout) {
-                        $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
+                    if (time() - $tmp[1] < 86400 * 7) {
+                        $_SESSION['aid'] = $tmp[0];
+                        if ($enable_session_timeout) {
+                            $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
+                        }
+                        return $tmp[0];
                     }
-                    return $tmp[0];
                 }
             }
         }
@@ -83,7 +84,7 @@ class Admin
             setcookie('aid', $token, [
                 'expires' => time() + 86400 * 7, // 7 days
                 'path' => '/',
-                'domain' => $app_stage,
+                'domain' => '',
                 'secure' => $isSecure,
                 'httponly' => true,
                 'samesite' => 'Lax', // or Strict
@@ -113,7 +114,7 @@ class Admin
             setcookie('aid', '', [
                 'expires' => time() - 3600,
                 'path' => '/',
-                'domain' => $app_stage,
+                'domain' => '',
                 'secure' => $isSecure,
                 'httponly' => true,
                 'samesite' => 'Lax',
