@@ -10,15 +10,8 @@ class Lang
 {
     public static function T($key)
     {
-        global $_L, $lan_file, $root_path, $config;
+        global $_L, $lan_file, $config;
 
-        if (empty($lan_file)) {
-            $lan_file = $root_path . File::pathFixer('system/lan/' . $config['language'] . '.json');
-        }
-
-        if (is_array($_SESSION['Lang'])) {
-            $_L = array_merge($_L, $_SESSION['Lang']);
-        }
         $key = preg_replace('/\s+/', ' ', $key);
         if (!empty($_L[$key])) {
             return $_L[$key];
@@ -41,8 +34,7 @@ class Lang
                 }
             }
             $_L[$key] = $val;
-            $_SESSION['Lang'][$key] = $val;
-            file_put_contents($lan_file, json_encode($_SESSION['Lang'], JSON_PRETTY_PRINT));
+            file_put_contents($lan_file, json_encode($_L, JSON_PRETTY_PRINT));
             return $val;
         }
     }

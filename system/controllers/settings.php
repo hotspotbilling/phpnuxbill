@@ -314,7 +314,6 @@ switch ($action) {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'language')->find_one();
             $d->value = $lan;
             $d->save();
-            unset($_SESSION['Lang']);
             _log('[' . $admin['username'] . ']: ' . 'Settings Saved Successfully', $admin['user_type'], $admin['id']);
             r2(U . 'settings/localisation', 's', 'Settings Saved Successfully');
         }

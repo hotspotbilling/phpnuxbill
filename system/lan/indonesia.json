@@ -574,5 +574,20 @@
     "Registration_code": "Kod3 R3g1str@s1",
     "TX": "TX",
     "RX": "RX",
-    "Database": "Database"
+    "Database": "Database",
+    "Additional_Billing": "Penagihan Tambahan",
+    "paid_off": "terbayar lunas",
+    "Sync_account_if_you_failed_login_to_internet": "Sinkronkan akun jika Anda gagal masuk ke internet",
+    "_Are_You_Sure_": "Apa kamu yakin?",
+    "Send_your_balance___": "Kirim saldo Anda?",
+    "_": "-",
+    "Search_Users": "Pencarian Pengguna",
+    "Routers_Maps": "Peta Router",
+    "Theme_Voucher": "Voucher Tema",
+    "Payment_Info": "Info Pembayaran",
+    "Documentation": "Dokumentasi",
+    "Customers": "Pelanggan",
+    "Package_Name": "Nama Paket",
+    "Routers_Offline": "Router Offline",
+    "Cron_appear_not_been_setup__please_check_your_cron_setup_": "Cron tampaknya belum disiapkan, silakan periksa pengaturan cron Anda."
 }
