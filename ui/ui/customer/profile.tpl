@@ -7,6 +7,7 @@
             <div class="panel-heading">{Lang::T('Data Change')}</div>
             <div class="panel-body">
                 <form class="form-horizontal" method="post" role="form" action="{$_url}accounts/edit-profile-post">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <input type="hidden" name="id" value="{$_user['id']}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Username')}</label>
