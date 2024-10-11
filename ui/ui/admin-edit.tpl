@@ -2,6 +2,7 @@
 <!-- user-edit -->
 
 <form class="form-horizontal" method="post" role="form" action="{$_url}settings/users-edit-post">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-sm-6 col-md-6">
             <div
