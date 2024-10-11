@@ -6,6 +6,7 @@
 			<div class="panel-heading">{Lang::T('Translation')}</div>
 			<div class="panel-body">
 				<form class="form-horizontal" method="post" role="form" action="{$_url}settings/lang-post">
+					<input type="hidden" name="csrf_token" value="{$csrf_token}">
 					{foreach $langs as $lang}
 						<div class="form-group">
 							<div class="col-md-12">

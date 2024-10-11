@@ -1414,6 +1414,8 @@
                                         href="{$_url}settings/app">{Lang::T('General Settings')}</a></li>
                                 <li {if $_routes[1] eq 'localisation' }class="active" {/if}><a
                                         href="{$_url}settings/localisation">{Lang::T('Localisation')}</a></li>
+                                <li {if $_routes[1] eq 'miscellaneous' }class="active" {/if}><a
+                                            href="{$_url}settings/miscellaneous">{Lang::T('Miscellaneous')}</a></li>
                                 <li {if $_routes[1] eq 'maintenance' }class="active" {/if}><a
                                         href="{$_url}settings/maintenance">{Lang::T('Maintenance Mode')}</a></li>
                                 <li {if $_routes[1] eq 'notifications' }class="active" {/if}><a

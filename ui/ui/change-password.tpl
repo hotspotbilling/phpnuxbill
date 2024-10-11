@@ -6,6 +6,7 @@
 					<div class="panel-heading">{Lang::T('Change Password')}</div>
 						<div class="panel-body">
 						<form class="form-horizontal" method="post" role="form" action="{$_url}settings/change-password-post">
+							<input type="hidden" name="csrf_token" value="{$csrf_token}">
 							<div class="form-group">
 								<label class="col-md-2 control-label">{Lang::T('Current Password')}</label>
 								<div class="col-md-6">

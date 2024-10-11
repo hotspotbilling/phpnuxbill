@@ -9,6 +9,7 @@
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
                         <form id="site-search" method="post" action="{$_url}settings/users/">
+                            <input type="hidden" name="csrf_token" value="{$csrf_token}">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>

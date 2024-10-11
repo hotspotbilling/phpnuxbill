@@ -34,11 +34,11 @@ switch ($action) {
                 $dev = pathinfo($file, PATHINFO_FILENAME);
                 require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . $file;
                 $dvc = new $dev;
-                if(method_exists($dvc, 'description')){
+                if (method_exists($dvc, 'description')) {
                     $arr = $dvc->description();
                     $arr['file'] = $dev;
                     $devices[] = $arr;
-                }else{
+                } else {
                     $devices[] = [
                         'title' => $dev,
                         'description' => '',
@@ -116,12 +116,18 @@ switch ($action) {
         $ui->assign('dir', str_replace('controllers', '', __DIR__));
         $ui->assign('themes', $themes);
         run_hook('view_app_settings'); #HOOK
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->display('app-settings.tpl');
         break;
 
     case 'app-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'settings/app', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $company = _post('CompanyName');
         $custom_tax_rate = filter_var(_post('custom_tax_rate'), FILTER_SANITIZE_SPECIAL_CHARS);
@@ -155,7 +161,7 @@ switch ($action) {
                     die();
                 }
             }
-             // Save all settings including tax system
+            // Save all settings including tax system
             $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
             $_POST['enable_session_timeout'] = $enable_session_timeout;
             foreach ($_POST as $key => $value) {
@@ -217,12 +223,18 @@ switch ($action) {
         $ui->assign('tlist', $timezonelist);
         $ui->assign('xjq', ' $("#tzone").select2(); ');
         run_hook('view_localisation'); #HOOK
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->display('app-localisation.tpl');
         break;
 
     case 'localisation-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'settings/app', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $tzone = _post('tzone');
         $date_format = _post('date_format');
@@ -295,7 +307,7 @@ switch ($action) {
                 $d->value = _post('pppoe_plan');
                 $d->save();
             }
-			$d = ORM::for_table('tbl_appconfig')->where('setting', 'vpn_plan')->find_one();
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'vpn_plan')->find_one();
             if ($d) {
                 $d->value = _post('vpn_plan');
                 $d->save();
@@ -386,6 +398,8 @@ switch ($action) {
         $ui->assign('d', $d);
         $ui->assign('search', $search);
         run_hook('view_list_admin'); #HOOK
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->display('admin.tpl');
         break;
 
@@ -393,6 +407,8 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_title', Lang::T('Add User'));
         $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
         $ui->display('admin-add.tpl');
@@ -422,6 +438,8 @@ switch ($action) {
             }
             $ui->assign('d', $d);
             $ui->assign('_title', $d['username']);
+            $csrf_token = Csrf::generateAndStoreToken();
+            $ui->assign('csrf_token', $csrf_token);
             $ui->display('admin-view.tpl');
         } else {
             r2(U . 'settings/users', 'e', Lang::T('Account Not Found'));
@@ -459,6 +477,8 @@ switch ($action) {
             $ui->assign('id', $id);
             $ui->assign('d', $d);
             run_hook('view_edit_admin'); #HOOK
+            $csrf_token = Csrf::generateAndStoreToken();
+            $ui->assign('csrf_token', $csrf_token);
             $ui->display('admin-edit.tpl');
         } else {
             r2(U . 'settings/users', 'e', Lang::T('Account Not Found'));
@@ -487,6 +507,10 @@ switch ($action) {
     case 'users-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'settings/users-add', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $username = _post('username');
         $fullname = _post('fullname');
@@ -552,6 +576,10 @@ switch ($action) {
         break;
 
     case 'users-edit-post':
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'settings/users-edit/', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $username = _post('username');
         $fullname = _post('fullname');
         $password = _post('password');
@@ -646,11 +674,17 @@ switch ($action) {
 
     case 'change-password':
         run_hook('view_change_password'); #HOOK
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->display('change-password.tpl');
         break;
 
     case 'change-password-post':
         $password = _post('password');
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'settings/change-password', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         if ($password != '') {
             $d = ORM::for_table('tbl_users')->where('username', $admin['username'])->find_one();
             run_hook('change_password'); #HOOK
@@ -695,12 +729,19 @@ switch ($action) {
         } else {
             $ui->assign('_json', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true));
         }
+
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_default', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true));
         $ui->display('app-notifications.tpl');
         break;
     case 'notifications-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'settings/notifications', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         file_put_contents($UPLOAD_PATH . "/notifications.json", json_encode($_POST));
         r2(U . 'settings/notifications', 's', Lang::T('Settings Saved Successfully'));
@@ -807,10 +848,16 @@ switch ($action) {
         } else {
             $ui->assign('langs', []);
         }
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->display('language-add.tpl');
         break;
 
     case 'lang-post':
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'settings/language', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         file_put_contents($lan_file, json_encode($_POST, JSON_PRETTY_PRINT));
         r2(U . 'settings/language', 's', Lang::T('Translation saved Successfully'));
         break;
@@ -820,7 +867,12 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
             exit;
         }
+
         if (_post('save') == 'save') {
+            $csrf_token = _post('csrf_token');
+            if (!Csrf::check($csrf_token)) {
+                r2(U . 'settings/maintenance', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
             $status = isset($_POST['maintenance_mode']) ? 1 : 0; // Checkbox returns 1 if checked, otherwise 0
             $force_logout = isset($_POST['maintenance_mode_logout']) ? 1 : 0; // Checkbox returns 1 if checked, otherwise 0
             $date = isset($_POST['maintenance_date']) ? $_POST['maintenance_date'] : null;
@@ -846,9 +898,43 @@ switch ($action) {
 
             r2(U . "settings/maintenance", 's', Lang::T('Settings Saved Successfully'));
         }
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_c', $config);
         $ui->assign('_title', Lang::T('Maintenance Mode Settings'));
         $ui->display('maintenance-mode.tpl');
+        break;
+
+    case 'miscellaneous':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+            exit;
+        }
+        if (_post('save') == 'save') {
+            $csrf_token = _post('csrf_token');
+            if (!Csrf::check($csrf_token)) {
+                r2(U . 'settings/miscellaneous', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
+            foreach ($_POST as $key => $value) {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+                if ($d) {
+                    $d->value = $value;
+                    $d->save();
+                } else {
+                    $d = ORM::for_table('tbl_appconfig')->create();
+                    $d->setting = $key;
+                    $d->value = $value;
+                    $d->save();
+                }
+            }
+
+            r2(U . "settings/miscellaneous", 's', Lang::T('Settings Saved Successfully'));
+        }
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
+        $ui->assign('_c', $config);
+        $ui->assign('_title', Lang::T('Miscellaneous Settings'));
+        $ui->display('miscellaneous.tpl');
         break;
 
     default:
