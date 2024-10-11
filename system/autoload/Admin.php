@@ -114,7 +114,6 @@ class Admin
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
-
             unset($_COOKIE['aid']);
         }
     }
@@ -140,7 +139,7 @@ class Admin
 
     public static function validateToken($aid, $cookieToken)
     {
-        $query =  ORM::for_table('tbl_users')->where('id', $aid)->findOne();
+        $query =  ORM::for_table('tbl_users')->select('login_token')->where('id', $aid)->findOne();
         $storedToken = $query->login_token;
 
         if (empty($storedToken)) {
