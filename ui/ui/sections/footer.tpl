@@ -76,6 +76,8 @@
 {/if}
 {literal}
     <script>
+        var listAttApi;
+        var posAttApi = 0;
         $(document).ready(function() {
             $('.select2').select2({theme: "bootstrap"});
             $('.select2tag').select2({theme: "bootstrap", tags: true});
@@ -105,15 +107,22 @@
 
             });
             setTimeout(() => {
-                var listAttApi = document.querySelectorAll(`[api-get-text]`);
-                listAttApi.forEach(function(el) {
-                    $.get(el.getAttribute('api-get-text'), function(data) {
-                        el.innerHTML = data;
-                    });
-                });
+                listAttApi = document.querySelectorAll(`[api-get-text]`);
+                apiGetText();
             }, 500);
         });
 
+        function apiGetText(){
+            var el = listAttApi[posAttApi];
+            $.get(el.getAttribute('api-get-text'), function(data) {
+                el.innerHTML = data;
+                posAttApi++;
+                if(posAttApi < listAttApi.length){
+                    apiGetText();
+                }
+            });
+
+        }
 
         function setKolaps() {
             var kolaps = getCookie('kolaps');
