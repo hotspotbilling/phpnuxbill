@@ -607,5 +607,19 @@
     "Not_Working_with_Freeradius_Mysql": "Tidak Bekerja dengan Freeradius Mysql",
     "User_Cannot_change_this__only_admin__if_it_Empty_it_will_use_Customer_Credentials": "Pengguna tidak dapat mengubah ini, hanya admin. Jika Kosong, maka akan menggunakan Kredensial Pelanggan",
     "Buy_this__your_active_package_will_be_overwritten": "Beli ini? Paket aktif Anda akan ditimpa",
-    "Pay_this_with_Balance__your_active_package_will_be_overwritten": "Bayar ini dengan Saldo? Paket aktif Anda akan ditimpa"
+    "Pay_this_with_Balance__your_active_package_will_be_overwritten": "Bayar ini dengan Saldo? Paket aktif Anda akan ditimpa",
+    "Error": "Kesalahan",
+    "Internal_Error": "Kesalahan Internal",
+    "Sorry__the_software_failed_to_process_the_request__if_it_still_happening__please_tell": "Maaf, perangkat lunak gagal memproses permintaan, jika masih terjadi, mohon beri tahu",
+    "Try_Again": "Coba Lagi",
+    "Make_sure_you_use_API_Port__Default_8728": "Pastikan Anda menggunakan Port API, Default 8728",
+    "Make_sure_Username_and_Password_are_correct": "Pastikan Username dan Password sudah benar",
+    "Make_sure_your_hosting_not_blocking_port_to_external": "Pastikan hosting Anda tidak memblokir port ke eksternal",
+    "Make_sure_your_Mikrotik_accessible_from_PHPNuxBill": "Pastikan Mikrotik Anda dapat diakses dari PHPNuxBill",
+    "If_you_just_update_PHPNuxBill_from_upload_files__try_click_Update": "Jika Anda baru saja memperbarui PHPNuxBill dari mengunggah file, coba klik Perbarui",
+    "Update_PHPNuxBill": "Perbarui PHPNuxBill",
+    "Ask_Github_Community": "Tanya Komunitas Github",
+    "Ask_Telegram_Community": "Tanya Komunitas Telegram",
+    "Token_has_expired__Please_log_in_again_": "Token telah kedaluwarsa. Silakan masuk lagi.",
+    "danger": "bahaya"
 }

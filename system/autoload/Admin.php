@@ -11,34 +11,40 @@ class Admin
 
     public static function getID()
     {
-        global $db_pass, $config;
-        $enable_session_timeout = $config['enable_session_timeout'];
-        $session_timeout_duration = $config['session_timeout_duration'] ? intval($config['session_timeout_duration'] * 60) : intval(60 * 60); // Convert minutes to seconds
+        global $db_pass, $config, $isApi;
 
-        // Check if the session is active and valid
-        if (isset($_SESSION['aid']) && isset($_SESSION['aid_expiration'])) {
+        $enable_session_timeout = $config['enable_session_timeout'] == 1;
+        $session_timeout_duration = $config['session_timeout_duration'] ? intval($config['session_timeout_duration'] * 60) : intval(60 * 60); // Convert minutes to seconds
+        if(!$isApi){
+            $enable_session_timeout = false;
+        }
+        if($enable_session_timeout && !empty($_SESSION['aid']) && !empty($_SESSION['aid_expiration'])){
             if ($_SESSION['aid_expiration'] > time()) {
-                if ($enable_session_timeout) {
-                    $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
-                }
-                // Validate the token in the cookie
                 $isValid = self::validateToken($_SESSION['aid'], $_COOKIE['aid']);
                 if (!$isValid) {
                     self::removeCookie();
                     _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
                     return 0;
                 }
+                // extend timeout duration
+                $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
 
                 return $_SESSION['aid'];
-            }
-            // Session expired, log out the user
-            elseif ($enable_session_timeout && $_SESSION['aid_expiration'] <= time()) {
+            }else{
+                // Session expired, log out the user
                 self::removeCookie();
                 _alert(Lang::T('Session has expired. Please log in again.'), 'danger', "admin");
                 return 0;
             }
+        }else if (!empty($_SESSION['aid'])) {
+            $isValid = self::validateToken($_SESSION['aid'], $_COOKIE['aid']);
+            if (!$isValid) {
+                self::removeCookie();
+                _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
+                return 0;
+            }
+            return $_SESSION['aid'];
         }
-
         // Check if the cookie is set and valid
         elseif (isset($_COOKIE['aid'])) {
             $tmp = explode('.', $_COOKIE['aid']);
@@ -65,7 +71,7 @@ class Admin
     }
     public static function setCookie($aid)
     {
-        global $db_pass, $config, $_app_stage;
+        global $db_pass, $config;
         $enable_session_timeout = $config['enable_session_timeout'];
         $session_timeout_duration = intval($config['session_timeout_duration']) * 60; // Convert minutes to seconds
 
@@ -131,24 +137,14 @@ class Admin
 
     public static function upsertToken($aid, $token)
     {
-        $query = ORM::for_table('tbl_users')->where('id', $aid)->findOne();
-        $query->login_token = $token;
+        $query = ORM::for_table('tbl_users')->findOne($aid);
+        $query->login_token = sha1($token);
         $query->save();
     }
 
     public static function validateToken($aid, $cookieToken)
     {
-        $query =  ORM::for_table('tbl_users')->select('login_token')->where('id', $aid)->findOne();
-        $storedToken = $query->login_token;
-
-        if (empty($storedToken)) {
-            return false;
-        }
-
-        if ($storedToken !== $cookieToken) {
-            return false;
-        }
-
-        return $storedToken === $cookieToken;
+        $query =  ORM::for_table('tbl_users')->select('login_token')->findOne($aid);
+        return $query->login_token === sha1($cookieToken);
     }
 }
