@@ -15,7 +15,7 @@ class Admin
 
         $enable_session_timeout = $config['enable_session_timeout'] == 1;
         $session_timeout_duration = $config['session_timeout_duration'] ? intval($config['session_timeout_duration'] * 60) : intval(60 * 60); // Convert minutes to seconds
-        if (!$isApi) {
+        if ($isApi) {
             $enable_session_timeout = false;
         }
         if ($enable_session_timeout && !empty($_SESSION['aid']) && !empty($_SESSION['aid_expiration'])) {
@@ -51,6 +51,10 @@ class Admin
             if (sha1("$tmp[0].$tmp[1].$db_pass") == $tmp[2]) {
                 // Validate the token in the cookie
                 $isValid = self::validateToken($tmp[0], $_COOKIE['aid']);
+                if ($isApi) {
+                    // For now API need to always return true, next need to add revoke token API
+                    $isValid = true;
+                }
                 if (!empty($_COOKIE['aid']) && !$isValid) {
                     self::removeCookie();
                     _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
