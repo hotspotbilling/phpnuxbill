@@ -114,6 +114,7 @@ class Admin
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
+            session_destroy();
             unset($_COOKIE['aid']);
         }
     }
