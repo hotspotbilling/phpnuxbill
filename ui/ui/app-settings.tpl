@@ -740,6 +740,22 @@
                                 phpnuxbill-login-hotspot</a>
                         </p>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Check if Customer Online')}</label>
+                        <div class="col-md-6">
+                            <select name="check_customer_online" id="check_customer_online" class="form-control">
+                                <option value="no">
+                                    {Lang::T('No')}
+                                </option>
+                            <option value="yes" {if $_c['check_customer_online']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('This will show is Customer currently is online or not')}
+                        </p>
+                    </div>
                 </div>
 
                 <div class="panel-heading">

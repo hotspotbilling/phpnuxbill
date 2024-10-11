@@ -693,5 +693,8 @@
     "This_will_allow_you_to_download_plugin_from_private_paid_repository": "Ini akan memungkinkan Anda mengunduh plugin dari repositori pribadi\/berbayar",
     "Expired_Cronjob_Every_5_Minutes": "Cronjob Kedaluwarsa Setiap 5 Menit",
     "Expired_Cronjob_Every_1_Hour": "Cronjob Kedaluwarsa Setiap 1 Jam",
-    "Reminder_Cronjob_Every_7_AM": "Pengingat Cronjob Setiap Jam 7 Pagi"
+    "Reminder_Cronjob_Every_7_AM": "Pengingat Cronjob Setiap Jam 7 Pagi",
+    "Check_if_Customer_Online": "Periksa apakah Pelanggan Online",
+    "Active_Customers": "Pelanggan Aktif",
+    "This_will_show_is_Customer_currently_is_online_or_not": "Ini akan menunjukkan apakah Pelanggan sedang online atau tidak"
 }
