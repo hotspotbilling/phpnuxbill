@@ -25,7 +25,6 @@ class Admin
                 $isValid = self::validateToken($_SESSION['aid'], $_COOKIE['aid']);
                 if (!$isValid) {
                     self::removeCookie();
-                    session_destroy();
                     _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
                     return 0;
                 }
@@ -35,7 +34,6 @@ class Admin
             // Session expired, log out the user
             elseif ($enable_session_timeout && $_SESSION['aid_expiration'] <= time()) {
                 self::removeCookie();
-                session_destroy();
                 _alert(Lang::T('Session has expired. Please log in again.'), 'danger', "admin");
                 return 0;
             }
