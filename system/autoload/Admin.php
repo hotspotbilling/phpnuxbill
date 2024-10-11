@@ -15,10 +15,10 @@ class Admin
 
         $enable_session_timeout = $config['enable_session_timeout'] == 1;
         $session_timeout_duration = $config['session_timeout_duration'] ? intval($config['session_timeout_duration'] * 60) : intval(60 * 60); // Convert minutes to seconds
-        if(!$isApi){
+        if (!$isApi) {
             $enable_session_timeout = false;
         }
-        if($enable_session_timeout && !empty($_SESSION['aid']) && !empty($_SESSION['aid_expiration'])){
+        if ($enable_session_timeout && !empty($_SESSION['aid']) && !empty($_SESSION['aid_expiration'])) {
             if ($_SESSION['aid_expiration'] > time()) {
                 $isValid = self::validateToken($_SESSION['aid'], $_COOKIE['aid']);
                 if (!$isValid) {
@@ -30,13 +30,13 @@ class Admin
                 $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
 
                 return $_SESSION['aid'];
-            }else{
+            } else {
                 // Session expired, log out the user
                 self::removeCookie();
                 _alert(Lang::T('Session has expired. Please log in again.'), 'danger', "admin");
                 return 0;
             }
-        }else if (!empty($_SESSION['aid'])) {
+        } else if (!empty($_SESSION['aid'])) {
             $isValid = self::validateToken($_SESSION['aid'], $_COOKIE['aid']);
             if (!$isValid) {
                 self::removeCookie();
