@@ -18,11 +18,17 @@ switch ($action) {
 
     case 'change-password':
         run_hook('customer_view_change_password'); #HOOK
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->display('customer/change-password.tpl');
         break;
 
     case 'change-password-post':
         $password = _post('password');
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'accounts/change-password', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         run_hook('customer_change_password'); #HOOK
         if ($password != '') {
             $d_pass = $user['password'];
@@ -67,9 +73,15 @@ switch ($action) {
 
     case 'profile':
         run_hook('customer_view_edit_profile'); #HOOK
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->display('customer/profile.tpl');
         break;
     case 'edit-profile-post':
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'accounts/profile', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $fullname = _post('fullname');
         $address = _post('address');
         $email = _post('email');
@@ -100,11 +112,17 @@ switch ($action) {
 
 
     case 'phone-update':
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->assign('new_phone', $_SESSION['new_phone']);
         $ui->display('customer/phone-update.tpl');
         break;
 
     case 'phone-update-otp':
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $phone = Lang::phoneFormat(_post('phone'));
         $username = $user['username'];
         $otpPath = $CACHE_PATH . '/sms/';
@@ -152,6 +170,10 @@ switch ($action) {
         break;
 
     case 'phone-update-post':
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $phone = Lang::phoneFormat(_post('phone'));
         $otp_code = _post('otp');
         $username = $user['username'];
@@ -210,10 +232,16 @@ switch ($action) {
         break;
 
     case 'email-update':
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
         $ui->assign('new_email', $_SESSION['new_email']);
         $ui->display('customer/email-update.tpl');
         break;
     case 'email-update-otp':
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'accounts/email-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $email = trim(_post('email'));
         $username = $user['username'];
         $otpPath = $CACHE_PATH . '/email/';
@@ -255,6 +283,10 @@ switch ($action) {
         break;
 
     case 'email-update-post':
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'accounts/email-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $email = trim(_post('email'));
         $otp_code = _post('otp');
         $username = $user['username'];

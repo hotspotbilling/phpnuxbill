@@ -47,18 +47,18 @@ class Admin
             if (sha1("$tmp[0].$tmp[1].$db_pass") == $tmp[2]) {
                 // Validate the token in the cookie
                 $isValid = self::validateToken($tmp[0], $_COOKIE['aid']);
-                if (!$isValid) {
+                if (!empty($_COOKIE['aid']) && !$isValid) {
                     self::removeCookie();
                     _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
                     return 0;
-                }
-
-                if (time() - $tmp[1] < 86400 * 7) {
-                    $_SESSION['aid'] = $tmp[0];
-                    if ($enable_session_timeout) {
-                        $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
+                } else {
+                    if (time() - $tmp[1] < 86400 * 7) {
+                        $_SESSION['aid'] = $tmp[0];
+                        if ($enable_session_timeout) {
+                            $_SESSION['aid_expiration'] = time() + $session_timeout_duration;
+                        }
+                        return $tmp[0];
                     }
-                    return $tmp[0];
                 }
             }
         }
@@ -77,13 +77,11 @@ class Admin
 
             // Detect the current protocol
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-            $serverHost = $_SERVER['HTTP_HOST'];
-            $app_stage = ($serverHost === 'localhost') ? '' : APP_URL;
             // Set cookie with security flags
             setcookie('aid', $token, [
                 'expires' => time() + 86400 * 7, // 7 days
                 'path' => '/',
-                'domain' => $app_stage,
+                'domain' => '',
                 'secure' => $isSecure,
                 'httponly' => true,
                 'samesite' => 'Lax', // or Strict
@@ -108,12 +106,10 @@ class Admin
         global $_app_stage;
         if (isset($_COOKIE['aid'])) {
             $isSecure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-            $serverHost = $_SERVER['HTTP_HOST'];
-            $app_stage = ($serverHost === 'localhost') ? '' : APP_URL;
             setcookie('aid', '', [
                 'expires' => time() - 3600,
                 'path' => '/',
-                'domain' => $app_stage,
+                'domain' => '',
                 'secure' => $isSecure,
                 'httponly' => true,
                 'samesite' => 'Lax',
