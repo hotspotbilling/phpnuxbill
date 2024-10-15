@@ -760,7 +760,7 @@ switch ($action) {
         }
         $code = Text::alphanumeric(_post('code'), "-_.,");
         $user = ORM::for_table('tbl_customers')->where('id', _post('id_customer'))->find_one();
-        $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$code'")->where('status', 0)->find_one();
+        $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$code'")->where('status', 0)->find_one();
 
         run_hook('refill_customer'); #HOOK
         if ($v1) {

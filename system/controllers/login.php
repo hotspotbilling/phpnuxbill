@@ -111,7 +111,7 @@ switch ($do) {
                     _alert(Lang::T('Internet Plan Expired'), 'danger', "login");
                 }
             } else {
-                $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$voucher'")->find_one();
+                $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$voucher'")->find_one();
                 if (!$v) {
                     _alert(Lang::T('Voucher invalid'), 'danger', "login");
                 }
@@ -168,7 +168,7 @@ switch ($do) {
         } else {
             $voucher = Text::alphanumeric(_post('voucher'), "-_.,");
             $username = _post('username');
-            $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$voucher'")->find_one();
+            $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$voucher'")->find_one();
             if ($v1) {
                 // voucher exists, check customer exists or not
                 $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();

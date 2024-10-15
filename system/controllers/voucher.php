@@ -22,7 +22,7 @@ switch ($action) {
 
     case 'activation-post':
         $code = alphanumeric(_post('code'), "-_.,");
-        $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY `code` = '$code'")->where('status', 0)->find_one();
+        $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$code'")->where('status', 0)->find_one();
         run_hook('customer_activate_voucher'); #HOOK
         if ($v1) {
             if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $code)) {
