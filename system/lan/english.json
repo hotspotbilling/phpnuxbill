@@ -778,5 +778,14 @@
     "Expired_Cronjob_Every_5_Minutes": "Expired Cronjob Every 5 Minutes",
     "Expired_Cronjob_Every_1_Hour": "Expired Cronjob Every 1 Hour",
     "Reminder_Cronjob_Every_7_AM": "Reminder Cronjob Every 7 AM",
-    "Force_Logout_": "Force Logout:"
+    "Force_Logout_": "Force Logout:",
+    "Activation": "Activation",
+    "Package_Name": "Package Name",
+    "Routers_Offline": "Routers Offline",
+    "Cron_appear_not_been_setup__please_check_your_cron_setup_": "Cron appear not been setup, please check your cron setup.",
+    "3_Months": "3 Months",
+    "Invalid_or_Expired_CSRF_Token": "Invalid or Expired CSRF Token",
+    "Miscellaneous_Settings": "Miscellaneous Settings",
+    "Check_if_Customer_Online": "Check if Customer Online",
+    "This_will_show_is_Customer_currently_is_online_or_not": "This will show is Customer currently is online or not"
 }

@@ -2,6 +2,15 @@
 
 # CHANGELOG
 
+## 2024.10.15
+
+- CSRF Security
+- Admin can only have 1 active session
+- Move Miscellaneous Settings to new page
+- Fix Customer Online
+- Count Shared user online for Radius REST
+- Fix Invoice Print
+
 ## 2024.10.7
 
 - Show Customer is Online or not
