@@ -90,8 +90,8 @@
                                 {Lang::T('Default')}
                             </option>
                             {foreach $themes as $theme}
-                            <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
-                                {Lang::ucWords($theme)}</option>
+                                <option value="{$theme}" {if $_c['theme'] eq $theme}selected="selected" {/if}>
+                                    {Lang::ucWords($theme)}</option>
                             {/foreach}
                         </select>
                     </div>
@@ -136,8 +136,9 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="HideDashboardContent">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseHideDashboardContent"
-                    aria-expanded="false" aria-controls="collapseHideDashboardContent">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseHideDashboardContent" aria-expanded="false"
+                    aria-controls="collapseHideDashboardContent">
                     {Lang::T('Hide Dashboard Content')}
                 </a>
             </h4>
@@ -170,8 +171,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="Voucher">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseVoucher"
-                    aria-expanded="false" aria-controls="collapseVoucher">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseVoucher" aria-expanded="false" aria-controls="collapseVoucher">
                     Voucher
                 </a>
             </h4>
@@ -212,34 +213,34 @@
                     <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
                 </div>
                 {if $_c['disable_voucher'] != 'yes'}
-                <div class="form-group">
-                    <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
-                    <div class="col-md-6">
-                        <select name="disable_registration" id="disable_registration" class="form-control">
-                            <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>
-                                {Lang::T('No')}
-                            </option>
-                            <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
-                                {Lang::T('Yes')}
-                            </option>
-                        </select>
-                    </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
+                        <div class="col-md-6">
+                            <select name="disable_registration" id="disable_registration" class="form-control">
+                                <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}
+                                </option>
+                                <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Yes')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be
                         password')}
-                    </p>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label">{Lang::T('Redirect URL after Activation')}</label>
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
-                            placeholder="https://192.168.88.1/status" value="{$_c['voucher_redirect']}">
+                        </p>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('After Customer activate voucher or login, customer will be redirected to this
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Redirect URL after Activation')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="voucher_redirect" name="voucher_redirect"
+                                placeholder="https://192.168.88.1/status" value="{$_c['voucher_redirect']}">
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('After Customer activate voucher or login, customer will be redirected to this
                         url')}
-                    </p>
-                </div>
+                        </p>
+                    </div>
                 {/if}
                 <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
@@ -251,8 +252,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="FreeRadius">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFreeRadius"
-                    aria-expanded="false" aria-controls="collapseFreeRadius">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseFreeRadius" aria-expanded="false" aria-controls="collapseFreeRadius">
                     FreeRadius
                 </a>
             </h4>
@@ -282,8 +283,9 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="ExtendPostpaidExpiration">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseExtendPostpaidExpiration"
-                    aria-expanded="false" aria-controls="collapseExtendPostpaidExpiration">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseExtendPostpaidExpiration" aria-expanded="false"
+                    aria-controls="collapseExtendPostpaidExpiration">
                     {Lang::T('Extend Postpaid Expiration')}
                 </a>
             </h4>
@@ -325,8 +327,9 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="CustomerBalanceSystem">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseCustomerBalanceSystem"
-                    aria-expanded="false" aria-controls="collapseCustomerBalanceSystem">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseCustomerBalanceSystem" aria-expanded="false"
+                    aria-controls="collapseCustomerBalanceSystem">
                     {Lang::T('Customer Balance System')}
                 </a>
             </h4>
@@ -376,8 +379,9 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="TelegramNotification">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTelegramNotification"
-                    aria-expanded="false" aria-controls="collapseTelegramNotification">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseTelegramNotification" aria-expanded="false"
+                    aria-controls="collapseTelegramNotification">
                     {Lang::T('Telegram Notification')}
                     <div class="btn-group pull-right">
                         <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testTg()">Test TG</a>
@@ -413,11 +417,11 @@
     </div>
 
     <div class="panel">
-        <div class="panel-heading" role="tab" id="SMSOTPRegistration">
+        <div class="panel-heading" role="tab" id="SMSNotification">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSMSOTPRegistration"
-                    aria-expanded="false" aria-controls="collapseSMSOTPRegistration">
-                    {Lang::T('SMS OTP Registration')}
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseSMSNotification" aria-expanded="false" aria-controls="collapseSMSNotification">
+                    {Lang::T('SMS Notification')}
                     <div class="btn-group pull-right">
                         <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testSms()">
                             {Lang::T('Test SMS')}
@@ -426,7 +430,7 @@
                 </a>
             </h4>
         </div>
-        <div id="collapseSMSOTPRegistration" class="panel-collapse collapse" role="tabpanel">
+        <div id="collapseSMSNotification" class="panel-collapse collapse" role="tabpanel">
             <div class="panel-body">
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('SMS Server URL')}</label>
@@ -444,13 +448,30 @@
                         <select class="form-control" onchange="document.getElementById('sms_url').value = this.value">
                             <option value="">{Lang::T('Select Router')}</option>
                             {foreach $r as $rs}
-                            <option value="{$rs['name']}" {if $rs['name']==$_c['sms_url']}selected{/if}>
-                                {$rs['name']}</option>
+                                <option value="{$rs['name']}" {if $rs['name']==$_c['sms_url']}selected{/if}>
+                                    {$rs['name']}</option>
                             {/foreach}
                         </select>
                     </div>
                     <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
                         {Lang::T('it will be replaced.')}
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('SMS OTP Registration')}</label>
+                    <div class="col-md-6">
+                        <select name="sms_otp_registration" id="sms_otp_registration" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}
+                            </option>
+                            <option value="yes" {if $_c['sms_otp_registration']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Customer Registration need to validate using OTP')}
                     </p>
                 </div>
                 <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
@@ -467,8 +488,9 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="WhatsappNotification">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseWhatsappNotification"
-                    aria-expanded="false" aria-controls="collapseWhatsappNotification">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseWhatsappNotification" aria-expanded="false"
+                    aria-controls="collapseWhatsappNotification">
                     {Lang::T('Whatsapp Notification')}
                     <div class="btn-group pull-right">
                         <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testWa()">Test WA</a>
@@ -500,8 +522,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="EmailNotification">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseEmailNotification"
-                    aria-expanded="false" aria-controls="collapseEmailNotification">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseEmailNotification" aria-expanded="false" aria-controls="collapseEmailNotification">
                     {Lang::T('Email Notification')}
                     <div class="btn-group pull-right">
                         <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test
@@ -582,8 +604,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="UserNotification">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseUserNotification"
-                    aria-expanded="false" aria-controls="collapseUserNotification">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseUserNotification" aria-expanded="false" aria-controls="collapseUserNotification">
                     {Lang::T('User Notification')}
                 </a>
             </h4>
@@ -645,8 +667,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="TawkToChatWidget">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTawkToChatWidget"
-                    aria-expanded="false" aria-controls="collapseTawkToChatWidget">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseTawkToChatWidget" aria-expanded="false" aria-controls="collapseTawkToChatWidget">
                     {Lang::T('Tawk.to Chat Widget')}
                 </a>
             </h4>
@@ -675,8 +697,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="APIKey">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseAPIKey"
-                    aria-expanded="false" aria-controls="collapseAPIKey">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseAPIKey" aria-expanded="false" aria-controls="collapseAPIKey">
                     API Key
                 </a>
             </h4>
@@ -735,8 +757,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="TaxSystem">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTaxSystem"
-                    aria-expanded="false" aria-controls="collapseTaxSystem">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseTaxSystem" aria-expanded="false" aria-controls="collapseTaxSystem">
                     {Lang::T('Tax System')}
                 </a>
             </h4>
@@ -806,8 +828,8 @@
     <div class="panel">
         <div class="panel-heading" role="tab" id="GithubAuthentication">
             <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseAuthentication"
-                    aria-expanded="false" aria-controls="collapseAuthentication">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseAuthentication" aria-expanded="false" aria-controls="collapseAuthentication">
                     Github {Lang::T('Authentication')}
                 </a>
             </h4>
@@ -850,24 +872,24 @@
 </form>
 
 <div class="well well-sm">
-<legend>{Lang::T('Settings For Mikrotik')}</legend>
-<pre>/ip hotspot walled-garden
+    <legend>{Lang::T('Settings For Mikrotik')}</legend>
+    <pre>/ip hotspot walled-garden
     add dst-host={$_domain}
     add dst-host=*.{$_domain}</pre>
 
-<legend>{Lang::T('Settings For Cron Expired')}</legend>
-<pre>
+    <legend>{Lang::T('Settings For Cron Expired')}</legend>
+    <pre>
     # {Lang::T('Expired Cronjob Every 5 Minutes')}
     */5 * * * * cd {$dir} && {$php} cron.php
 </pre>
-{Lang::T('Choose one, above or below')}
-<pre>
+    {Lang::T('Choose one, above or below')}
+    <pre>
     # {Lang::T('Expired Cronjob Every 1 Hour')}
     0 * * * * cd {$dir} && {$php} cron.php
 </pre>
 
-<legend>{Lang::T('Settings For Cron Reminder')}</legend>
-<pre>
+    <legend>{Lang::T('Settings For Cron Reminder')}</legend>
+    <pre>
     # {Lang::T('Reminder Cronjob Every 7 AM')}
     0 7 * * * cd {$dir} && {$php} cron_reminder.php
 </pre>
@@ -904,7 +926,7 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         // Function to toggle visibility of custom tax rate input field
         function toggleCustomTaxRate() {
             var taxRateSelect = document.getElementById("tax_rate");

@@ -797,5 +797,7 @@
     "Upload_Zip_Plugin_Theme_Device": "Upload Zip Plugin\/Theme\/Device",
     "Install": "Install",
     "To_download_from_private_paid_repository": "To download from private\/paid repository",
-    "Set_your_Github_Authentication_first": "Set your Github Authentication first"
+    "Set_your_Github_Authentication_first": "Set your Github Authentication first",
+    "SMS_Notification": "SMS Notification",
+    "Customer_Registration_need_to_validate_using_OTP": "Customer Registration need to validate using OTP"
 }
