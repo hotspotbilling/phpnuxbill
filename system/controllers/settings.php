@@ -934,7 +934,7 @@ switch ($action) {
         $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_c', $config);
         $ui->assign('_title', Lang::T('Miscellaneous Settings'));
-        $ui->display('miscellaneous.tpl');
+        $ui->display('app-miscellaneous.tpl');
         break;
 
     default:
