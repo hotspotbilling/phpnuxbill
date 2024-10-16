@@ -97,7 +97,8 @@
                                     </option>
                                 </select>
                             </div>
-                            <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}</p>
+                            <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}<br>
+                            {Lang::T('For Registration and Update Phone Number')}</p>
                         </div>
                         <div class="form-group">
                             <label class="col-md-2 control-label">{Lang::T('Email OTP Required')}</label>

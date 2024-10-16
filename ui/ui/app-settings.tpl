@@ -120,13 +120,6 @@
                     <span class="help-block col-md-4">{Lang::T('Income will reset every this
                         day')}</span>
                 </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label">APP URL</label>
-                    <div class="col-md-6">
-                        <input type="text" readonly class="form-control" value="{$app_url}">
-                    </div>
-                    <p class="help-block col-md-4">{Lang::T('edit at config.php')}</p>
-                </div>
                 <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
                 </button>
@@ -161,6 +154,71 @@
                             $_c['hide_vs'] eq 'yes' }checked{/if}> Vouchers Stock</label>
                     <label class="col-md-2 control-label"><input type="checkbox" name="hide_pg" value="yes" {if
                             $_c['hide_pg'] eq 'yes' }checked{/if}> Payment Gateway</label>
+                </div>
+                <button class="btn btn-success btn-block" type="submit">
+                    {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="panel">
+        <div class="panel-heading" role="tab" id="Registration">
+            <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseRegistration" aria-expanded="false" aria-controls="collapseRegistration">
+                    {Lang::T('Registration')}
+                </a>
+            </h4>
+        </div>
+        <div id="collapseRegistration" class="panel-collapse collapse" role="tabpanel">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('Registration Username')}</label>
+                    <div class="col-md-6">
+                        <select name="registration_username" id="voucher_format" class="form-control">
+                            <option value="username" {if $_c['registration_username']=='username' }selected="selected"
+                                {/if}>Username
+                            </option>
+                            <option value="email" {if $_c['registration_username']=='email' }selected="selected" {/if}>
+                                Email
+                            </option>
+                            <option value="phone" {if $_c['registration_username']=='phone' }selected="selected" {/if}>
+                                Phone Number
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('SMS OTP Registration')}</label>
+                    <div class="col-md-6">
+                        <select name="sms_otp_registration" id="sms_otp_registration" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}
+                            </option>
+                            <option value="yes" {if $_c['sms_otp_registration']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Customer Registration need to validate using OTP')}
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('OTP Method')}</label>
+                    <div class="col-md-6">
+                        <select name="phone_otp_type" id="phone_otp_type" class="form-control">
+                            <option value="sms" {if $_c['phone_otp_type']=='sms' }selected="selected" {/if}>
+                                {Lang::T('By SMS')}
+                            <option value="whatsapp" {if $_c['phone_otp_type']=='whatsapp' }selected="selected" {/if}>
+                                {Lang::T('by WhatsApp')}
+                            <option value="both" {if $_c['phone_otp_type']=='both' }selected="selected" {/if}>
+                                {Lang::T('By WhatsApp and SMS')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}<br>
+                    {Lang::T('For Registration and Update Phone Number')}</p>
                 </div>
                 <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
@@ -455,23 +513,6 @@
                     </div>
                     <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
                         {Lang::T('it will be replaced.')}
-                    </p>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-md-2 control-label">{Lang::T('SMS OTP Registration')}</label>
-                    <div class="col-md-6">
-                        <select name="sms_otp_registration" id="sms_otp_registration" class="form-control">
-                            <option value="no">
-                                {Lang::T('No')}
-                            </option>
-                            <option value="yes" {if $_c['sms_otp_registration']=='yes' }selected="selected" {/if}>
-                                {Lang::T('Yes')}
-                            </option>
-                        </select>
-                    </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Customer Registration need to validate using OTP')}
                     </p>
                 </div>
                 <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
