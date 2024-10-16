@@ -1,7 +1,7 @@
 {include file="sections/header.tpl"}
 
 {if empty($_c['github_token'])}
-    <p class="help-block">{Lang::T('To download from private/paid repository')}, <a href="{$_url}settings/app#Github_Authentication">
+    <p class="help-block">{Lang::T('To download from private/paid repository')}, <a href="{$_url}settings/app#GithubAuthentication">
             {Lang::T('Set your Github Authentication first')}</a></p>
 {/if}
 

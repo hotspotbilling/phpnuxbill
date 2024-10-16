@@ -787,5 +787,15 @@
     "Invalid_or_Expired_CSRF_Token": "Invalid or Expired CSRF Token",
     "Miscellaneous_Settings": "Miscellaneous Settings",
     "Check_if_Customer_Online": "Check if Customer Online",
-    "This_will_show_is_Customer_currently_is_online_or_not": "This will show is Customer currently is online or not"
+    "This_will_show_is_Customer_currently_is_online_or_not": "This will show is Customer currently is online or not",
+    "General": "General",
+    "Tax_Rates_by_percentage": "Tax Rates by percentage",
+    "Settings_For_Mikrotik": "Mikrotik Settings",
+    "Settings_For_Cron_Expired": "Settings For Cron Expired",
+    "Choose_one__above_or_below": "Choose one, above or below",
+    "Settings_For_Cron_Reminder": "Settings For Cron Reminder",
+    "Upload_Zip_Plugin_Theme_Device": "Upload Zip Plugin\/Theme\/Device",
+    "Install": "Install",
+    "To_download_from_private_paid_repository": "To download from private\/paid repository",
+    "Set_your_Github_Authentication_first": "Set your Github Authentication first"
 }
