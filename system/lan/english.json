@@ -847,5 +847,7 @@
     "Update_PHPNuxBill": "Update PHPNuxBill",
     "Ask_Github_Community": "Ask Github Community",
     "Ask_Telegram_Community": "Ask Telegram Community",
-    "Transaction_History_List": "Transaction History List"
+    "Transaction_History_List": "Transaction History List",
+    "Login_as_Customer": "Login as Customer",
+    "info": "info"
 }

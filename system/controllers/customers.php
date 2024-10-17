@@ -261,6 +261,19 @@ switch ($action) {
         }
         r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
         break;
+    case 'login':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        $id = $routes['2'];
+        $customer = ORM::for_table('tbl_customers')->find_one($id);
+        if($customer){
+            $_SESSION['uid'] = $id;
+            User::setCookie($id);
+            _alert("You are logging in as $customer[fullname],<br>don't logout just close tab.", 'info', "home", 10);
+        }
+        _alert(Lang::T('Customer not found'), 'danger', "customers");
+        break;
     case 'viewu':
         $customer = ORM::for_table('tbl_customers')->where('username', $routes['2'])->find_one();
     case 'view':

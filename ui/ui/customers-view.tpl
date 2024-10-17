@@ -255,16 +255,22 @@
 </div>
 <hr>
 <div class="row">
-    <div class="col-xs-4">
+    <div class="col-xs-6 col-md-3">
         <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block">{Lang::T('Back')}</a>
     </div>
-    <div class="col-xs-4">
+    <div class="col-xs-6 col-md-3">
         <a href="{$_url}customers/sync/{$d['id']}" onclick="return confirm('This will sync Customer to Mikrotik?')"
             class="btn btn-info btn-sm btn-block">{Lang::T('Sync')}</a>
     </div>
-    <div class="col-xs-4">
-        <a href="{$_url}message/send/{$d['id']}" class="btn btn-success btn-sm btn-block">{Lang::T('Send
-        Message')}</a>
+    <div class="col-xs-6 col-md-3">
+        <a href="{$_url}message/send/{$d['id']}" class="btn btn-success btn-sm btn-block">
+            {Lang::T('Send Message')}
+        </a>
+    </div>
+    <div class="col-xs-6 col-md-3">
+        <a href="{$_url}customers/login/{$d['id']}" target="_blank" class="btn btn-warning btn-sm btn-block">
+            {Lang::T('Login as Customer')}
+        </a>
     </div>
 </div>
 
