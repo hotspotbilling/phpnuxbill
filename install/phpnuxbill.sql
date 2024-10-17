@@ -244,6 +244,14 @@ CREATE TABLE `tbl_customers_inbox` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `tbl_meta` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `tbl` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Table name',
+  `tbl_id` int NOT NULL COMMENT 'table value id',
+  `name` varchar(32) COLLATE utf8mb4_general_ci NOT NULL,
+  `value` mediumtext COLLATE utf8mb4_general_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='This Table to add additional data for any table';
 
 ALTER TABLE `rad_acct`
   ADD PRIMARY KEY (`id`),
