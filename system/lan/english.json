@@ -838,5 +838,13 @@
     "To_check_if_Mikrotik_is_Online_or_not__go_to_Settings__set_Router_Check_Enabled": "To check if Mikrotik is Online or not, go to Settings, set Router Check Enabled",
     "via_SMS": "via SMS",
     "Via_WhatsApp": "Via WhatsApp",
-    "Via_WhatsApp_and_SMS": "Via WhatsApp and SMS"
+    "Via_WhatsApp_and_SMS": "Via WhatsApp and SMS",
+    "Make_sure_you_use_API_Port__Default_8728": "Make sure you use API Port, Default 8728",
+    "Make_sure_Username_and_Password_are_correct": "Make sure Username and Password are correct",
+    "Make_sure_your_hosting_not_blocking_port_to_external": "Make sure your hosting not blocking port to external",
+    "Make_sure_your_Mikrotik_accessible_from_PHPNuxBill": "Make sure your Mikrotik accessible from PHPNuxBill",
+    "If_you_just_update_PHPNuxBill_from_upload_files__try_click_Update": "If you just update PHPNuxBill from upload files, try click Update",
+    "Update_PHPNuxBill": "Update PHPNuxBill",
+    "Ask_Github_Community": "Ask Github Community",
+    "Ask_Telegram_Community": "Ask Telegram Community"
 }
