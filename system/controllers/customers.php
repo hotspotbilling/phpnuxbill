@@ -282,7 +282,7 @@ switch ($action) {
             }
             if ($v == 'order') {
                 $v = 'order';
-                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username'])->order_by_desc('id');
+                $query = ORM::for_table('tbl_payment_gateway')->where('username', $customer['username'])->order_by_desc('id');
                 $order = Paginator::findMany($query);
                 $ui->assign('order', $order);
             } else if ($v == 'activation') {
