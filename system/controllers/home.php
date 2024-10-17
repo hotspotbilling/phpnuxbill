@@ -333,10 +333,25 @@ $unpaid = ORM::for_table('tbl_payment_gateway')
     ->find_one();
 
 // check expired payments
-if($unpaid && (strtotime($unpaid['expired_date']) < time() || strtotime($unpaid['created_date'], "+24 HOUR") < time())){
-    $unpaid->status = 4;
-    $unpaid->save();
-    $unpaid = [];
+if ($unpaid) {
+    try {
+        if (strtotime($unpaid['expired_date']) < time()) {
+            $unpaid->status = 4;
+            $unpaid->save();
+            $unpaid = [];
+        }
+    } catch (Throwable $e) {
+    } catch (Exception $e) {
+    }
+    try {
+        if (strtotime($unpaid['created_date'], "+24 HOUR") < time()) {
+            $unpaid->status = 4;
+            $unpaid->save();
+            $unpaid = [];
+        }
+    } catch (Throwable $e) {
+    } catch (Exception $e) {
+    }
 }
 
 $ui->assign('unpaid', $unpaids);
