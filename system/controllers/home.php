@@ -333,15 +333,11 @@ $unpaid = ORM::for_table('tbl_payment_gateway')
     ->find_one();
 
 // check expired payments
-foreach($unpaid as $up) {
-    if(strtotime($up['expired_date']) < time() || strtotime($up['created_date'], "+24 HOUR") < time()){
-        $up->status = 4;
-        $up->save();
-    }else{
-        $unpaids[] = $up;
-    }
+if(strtotime($unpaid['expired_date']) < time() || strtotime($unpaid['created_date'], "+24 HOUR") < time()){
+    $unpaid->status = 4;
+    $unpaid->save();
+    $unpaid = [];
 }
-
 
 $ui->assign('unpaid', $unpaids);
 $ui->assign('code', alphanumeric(_get('code'), "-"));
