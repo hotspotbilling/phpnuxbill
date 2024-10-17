@@ -434,5 +434,6 @@ function show_radius_result($array, $code = 200)
         header("HTTP/1.1 204 No Content");
         die();
     }
-    die(json_encode($array));
+    echo json_encode($array);
+    die();
 }

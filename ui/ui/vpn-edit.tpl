@@ -114,7 +114,7 @@
                         <div class="col-md-9">
                             <div class="input-group">
                                 <span class="input-group-addon">{$_c['currency_code']}</span>
-                                <input type="number" class="form-control" name="price_old" required value="{$d['price_old']}">
+                                <input type="number" class="form-control" name="price_old" value="{$d['price_old']}">
                             </div>
                             <p class="help-block">{Lang::T('For Discount Rate, this is price before get discount, must be more expensive with real price')}</p>
                         </div>
