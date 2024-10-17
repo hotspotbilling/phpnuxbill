@@ -829,5 +829,14 @@
     "Default___Remove_Customer": "Default - Remove Customer",
     "When_Expired__customer_will_be_move_to_selected_internet_package": "When Expired, customer will be move to selected internet package",
     "on_login___on_up": "on-login \/ on-up",
-    "on_logout___on_down": "on-logout \/ on-down"
+    "on_logout___on_down": "on-logout \/ on-down",
+    "Online_Status": "Online Status",
+    "Last_Seen": "Last Seen",
+    "Online": "Online",
+    "Offline": "Offline",
+    "Check_if_Mikrotik_Online_": "Check if Mikrotik is Online?",
+    "To_check_if_Mikrotik_is_Online_or_not__go_to_Settings__set_Router_Check_Enabled": "To check if Mikrotik is Online or not, go to Settings, set Router Check Enabled",
+    "via_SMS": "via SMS",
+    "Via_WhatsApp": "Via WhatsApp",
+    "Via_WhatsApp_and_SMS": "Via WhatsApp and SMS"
 }
