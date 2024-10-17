@@ -63,9 +63,11 @@
                         </div>
                     </div>
                     <div class="btn-group btn-group-justified mb15">
-                        <div class="btn-group">
-                            <a href="{$_url}register" class="btn btn-success">{Lang::T('Register')}</a>
-                        </div>
+                        {if $_c['disable_registration'] != 'noreg'}
+                            <div class="btn-group">
+                                <a href="{$_url}register" class="btn btn-success">{Lang::T('Register')}</a>
+                            </div>
+                        {/if}
                         <div class="btn-group">
                             <button type="submit" class="btn btn-primary">{Lang::T('Login')}</button>
                         </div>

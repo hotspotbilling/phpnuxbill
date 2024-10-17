@@ -73,7 +73,7 @@ class Admin
 
         return 0;
     }
-    
+
     public static function setCookie($aid)
     {
         global $db_pass, $config;

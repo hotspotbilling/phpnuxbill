@@ -802,5 +802,8 @@
     "Customer_Registration_need_to_validate_using_OTP": "Customer Registration need to validate using OTP",
     "Registration_Username": "Registration Username",
     "Registration": "Registration",
-    "For_Registration_and_Update_Phone_Number": "For Registration and Update Phone Number"
+    "For_Registration_and_Update_Phone_Number": "For Registration and Update Phone Number",
+    "Voucher_Only": "Voucher Only",
+    "No_Registration": "No Registration",
+    "Allow_Registration": "Allow Registration"
 }

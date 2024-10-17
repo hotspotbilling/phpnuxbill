@@ -173,6 +173,27 @@
         <div id="collapseRegistration" class="panel-collapse collapse" role="tabpanel">
             <div class="panel-body">
                 <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('Allow Registration')}</label>
+                    <div class="col-md-6">
+                        <select name="disable_registration" id="disable_registration" class="form-control">
+                            <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                            {if $_c['disable_voucher'] != 'yes'}
+                                <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
+                                    {Lang::T('Voucher Only')}
+                                </option>
+                            {/if}
+                            <option value="noreg" {if $_c['disable_registration']=='noreg' }selected="selected" {/if}>
+                                {Lang::T('No Registration')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be password')}
+                    </p>
+                </div>
+                <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('Registration Username')}</label>
                     <div class="col-md-6">
                         <select name="registration_username" id="voucher_format" class="form-control">
@@ -218,7 +239,7 @@
                         </select>
                     </div>
                     <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}<br>
-                    {Lang::T('For Registration and Update Phone Number')}</p>
+                        {Lang::T('For Registration and Update Phone Number')}</p>
                 </div>
                 <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
@@ -271,23 +292,6 @@
                     <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
                 </div>
                 {if $_c['disable_voucher'] != 'yes'}
-                    <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('Disable Registration')}</label>
-                        <div class="col-md-6">
-                            <select name="disable_registration" id="disable_registration" class="form-control">
-                                <option value="no" {if $_c['disable_registration']=='no' }selected="selected" {/if}>
-                                    {Lang::T('No')}
-                                </option>
-                                <option value="yes" {if $_c['disable_registration']=='yes' }selected="selected" {/if}>
-                                    {Lang::T('Yes')}
-                                </option>
-                            </select>
-                        </div>
-                        <p class="help-block col-md-4">
-                            {Lang::T('Customer just Login with Phone number and Voucher Code, Voucher will be
-                        password')}
-                        </p>
-                    </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Redirect URL after Activation')}</label>
                         <div class="col-md-6">
