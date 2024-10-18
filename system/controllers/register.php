@@ -22,7 +22,7 @@ switch ($do) {
         $password = _post('password');
         $cpassword = _post('cpassword');
         $address = _post('address');
-        if (!empty($config['sms_url']) && $_c['allow_phone_otp'] == 'yes') {
+        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
             $phonenumber = Lang::phoneFormat($username);
             $username = $phonenumber;
         } else if (strlen($username) < 21) {
@@ -45,7 +45,7 @@ switch ($do) {
             $msg .= Lang::T('Passwords does not match') . '<br>';
         }
 
-        if (!empty($config['sms_url']) && $_c['allow_phone_otp'] == 'yes') {
+        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
             $otpPath .= sha1($username . $db_pass) . ".txt";
             run_hook('validate_otp'); #HOOK
             //expired 10 minutes
@@ -114,7 +114,7 @@ switch ($do) {
         break;
 
     default:
-        if (!empty($config['sms_url']) && $_c['allow_phone_otp'] == 'yes') {
+        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
             $username = _post('username');
             if (!empty($username)) {
                 $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();

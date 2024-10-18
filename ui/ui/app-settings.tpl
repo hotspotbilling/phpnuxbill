@@ -212,11 +212,11 @@
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('SMS OTP Registration')}</label>
                     <div class="col-md-6">
-                        <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
+                        <select name="sms_otp_registration" id="sms_otp_registration" class="form-control">
                             <option value="no">
                                 {Lang::T('No')}
                             </option>
-                            <option value="yes" {if $_c['allow_phone_otp']=='yes' }selected="selected" {/if}>
+                            <option value="yes" {if $_c['sms_otp_registration']=='yes' }selected="selected" {/if}>
                                 {Lang::T('Yes')}
                             </option>
                         </select>
