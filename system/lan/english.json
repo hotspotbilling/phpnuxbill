@@ -849,5 +849,8 @@
     "Ask_Telegram_Community": "Ask Telegram Community",
     "Transaction_History_List": "Transaction History List",
     "Login_as_Customer": "Login as Customer",
-    "info": "info"
+    "info": "info",
+    "Registration_code": "Registration code",
+    "Admin_can_only_have_single_session_login__it_will_logout_another_session": "Admin can only have single session login, it will logout another session",
+    "Single_session_Admin": "Single session Admin"
 }

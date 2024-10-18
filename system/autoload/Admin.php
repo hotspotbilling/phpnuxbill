@@ -149,7 +149,14 @@ class Admin
 
     public static function validateToken($aid, $cookieToken)
     {
+        global $config;
         $query =  ORM::for_table('tbl_users')->select('login_token')->findOne($aid);
+        if($config['single_session'] != 'yes'){
+            return true; // For multi-session, any token is valid
+        }
+        if(empty($query)){
+            return true;
+        }
         return $query->login_token === sha1($cookieToken);
     }
 }

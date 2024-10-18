@@ -37,6 +37,21 @@
                             </p>
                         </div>
                         <div class="form-group">
+                            <label class="col-md-2 control-label">{Lang::T('Single session Admin')}</label>
+                            <div class="col-md-6">
+                                <select name="single_session" id="single_session" class="form-control">
+                                    <option value="no">
+                                        {Lang::T('No')}</option>
+                                    <option value="yes" {if $_c['single_session']=='yes' }selected="selected" {/if}>
+                                        {Lang::T('Yes')}
+                                    </option>
+                                </select>
+                            </div>
+                            <p class="help-block col-md-4">
+                                {Lang::T('Admin can only have single session login, it will logout another session')}
+                            </p>
+                        </div>
+                        <div class="form-group">
                             <label class="col-md-2 control-label">{Lang::T('New Version Notification')}</label>
                             <div class="col-md-6">
                                 <select name="new_version_notify" id="new_version_notify" class="form-control">
