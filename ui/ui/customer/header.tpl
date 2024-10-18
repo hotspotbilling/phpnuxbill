@@ -124,26 +124,6 @@
             padding: 15px;
             color: rgb(100 116 139);
             border-top: 1px solid #d2d6de;
-            min-height: 8rem;
-        }
-        
-        .main-footer .container-fluid {
-          background: rgb(28 36 52);
-          max-width: 100%;
-          padding-left: 15px;
-          padding-right: 15px;
-        }
-        
-        .main-footer .container-fluid .company {
-          margin-bottom: 10px;
-          justify-content: center;
-          align-items: center;
-        }
-        
-        .main-footer .container-fluid .pull-right {
-          background-color: rgb(28 36 52);
-          float: right;
-          margin-right: 15px;
         }
 
         .panel-primary {
