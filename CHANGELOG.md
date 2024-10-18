@@ -2,6 +2,15 @@
 
 # CHANGELOG
 
+## 2024.10.18
+
+- Single Session Admin Can be set in the Settings
+- Auto expired unpaid transaction
+- Registration Type
+- Can Login as User from Customer View
+- Can select customer register must using OTP or not
+- Add Meta.php for additional information
+
 ## 2024.10.15
 
 - CSRF Security
