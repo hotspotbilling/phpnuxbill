@@ -124,15 +124,6 @@
             padding: 15px;
             color: rgb(100 116 139);
             border-top: 1px solid #d2d6de;
-            min-height: 10rem;
-        }
-        
-        .main-footer .container {
-          background: rgb(28 36 52);
-        }
-        
-        .main-footer .container .pull-right {
-          background-color: rgb(28 36 52);
         }
 
         .panel-primary {
