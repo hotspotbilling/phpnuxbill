@@ -3,7 +3,7 @@
 {if isset($_c['CompanyFooter'])}
     <footer class="main-footer">
       <div class="container-fluid">
-        <div class="pull-center">
+        <div class="company">
         {$_c['CompanyFooter']}
         </div>
         <div class="pull-right">
@@ -15,7 +15,7 @@
     </footer>
 {else}
     <footer class="main-footer">
-      <div>
+      <div class="container-fluid">
         PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener"
             target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener"
             target="_blank">AdminLTE</a>
