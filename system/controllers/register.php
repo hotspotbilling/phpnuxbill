@@ -136,7 +136,14 @@ switch ($do) {
                 } else {
                     $otp = rand(100000, 999999);
                     file_put_contents($otpPath, $otp);
-                    Message::sendSMS($username, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
+                    if($config['phone_otp_type'] == 'whatsapp'){
+                        Message::sendWhatsapp($username, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
+                    }else if($config['phone_otp_type'] == 'both'){
+                        Message::sendWhatsapp($username, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
+                        Message::sendSMS($username, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
+                    }else{
+                        Message::sendSMS($username, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
+                    }
                     $ui->assign('username', $username);
                     $ui->assign('notify', 'Registration code has been sent to your phone');
                     $ui->assign('notify_t', 's');
