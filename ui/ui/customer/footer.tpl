@@ -56,113 +56,142 @@
 {if $_c['tawkto'] != ''}
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
-        var Tawk_API = Tawk_API || {},
-            Tawk_LoadStart = new Date();
-        (function() {
-            var s1 = document.createElement("script"),
-                s0 = document.getElementsByTagName("script")[0];
-            s1.async = true;
-            s1.src='https://embed.tawk.to/{$_c['tawkto']}';
-            s1.charset = 'UTF-8';
-            s1.setAttribute('crossorigin', '*');
-            s0.parentNode.insertBefore(s1, s0);
-        })();
-    </script>
-    <!--End of Tawk.to Script-->
-{/if}
+        var isLoggedIn = false;
+        var Tawk_API = {
+            onLoad: function() {
+                if (!isLoggedIn) {
+                    isLoggedIn = true;
+                    window.Tawk_API.login({
+                        name: '{$_user['fullname']}',
+                        email: '{$_user['email']}',
+                        userId: '{$_user['id']}'
+                    }, function(error) {
+                        //do something if there's an error
+                        });
+                    }
+                    Tawk_API.setAttributes({
+                        'id'    : '{$_user['id']}',
+                        'username'    : '{$_user['username']}',
+                        'service_type'    : '{$_user['service_type']}',
+                        'balance'    : '{$_user['balance']}',
+                        'account_type'    : '{$_user['account_type']}',
+                        'phone'    : '{$_user['phonenumber']}'
+                    }, function(error) {});
+                }
+            };
+            var Tawk_LoadStart = new Date();Tawk_API.visitor = {
+                name : '{$_user['fullname']}',
+                email : '{$_user['email']}',
+                userId: '{$_user['id']}'
+            };
+            (function() {
+                var s1 = document.createElement("script"),
+                    s0 = document.getElementsByTagName("script")[0];
+                s1.async = true;
+                s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
+                s1.charset = 'UTF-8';
+                s1.setAttribute('crossorigin', '*');
+                s0.parentNode.insertBefore(s1, s0);
+            })();
+        </script>
+        <!--End of Tawk.to Script-->
+    {/if}
 
-<script>
-    const toggleIcon = document.getElementById('toggleIcon');
-    const body = document.body;
-    const savedMode = localStorage.getItem('mode');
-    if (savedMode === 'dark') {
-        body.classList.add('dark-mode');
-        toggleIcon.textContent = '🌜';
-    }
-
-    function setMode(mode) {
-        if (mode === 'dark') {
+    <script>
+        const toggleIcon = document.getElementById('toggleIcon');
+        const body = document.body;
+        const savedMode = localStorage.getItem('mode');
+        if (savedMode === 'dark') {
             body.classList.add('dark-mode');
             toggleIcon.textContent = '🌜';
-        } else {
-            body.classList.remove('dark-mode');
-            toggleIcon.textContent = '🌞';
         }
-    }
 
-    toggleIcon.addEventListener('click', () => {
-        if (body.classList.contains('dark-mode')) {
-            setMode('light');
-            localStorage.setItem('mode', 'light');
-        } else {
-            setMode('dark');
-            localStorage.setItem('mode', 'dark');
+        function setMode(mode) {
+            if (mode === 'dark') {
+                body.classList.add('dark-mode');
+                toggleIcon.textContent = '🌜';
+            } else {
+                body.classList.remove('dark-mode');
+                toggleIcon.textContent = '🌞';
+            }
         }
-    });
-</script>
 
-{literal}
-    <script>
-        var listAtts = document.querySelectorAll(`[api-get-text]`);
-        listAtts.forEach(function(el) {
-            $.get(el.getAttribute('api-get-text'), function(data) {
-                el.innerHTML = data;
-            });
+        toggleIcon.addEventListener('click', () => {
+            if (body.classList.contains('dark-mode')) {
+                setMode('light');
+                localStorage.setItem('mode', 'light');
+            } else {
+                setMode('dark');
+                localStorage.setItem('mode', 'dark');
+            }
         });
-        $(document).ready(function() {
-            var listAtts = document.querySelectorAll(`button[type="submit"]`);
+    </script>
+
+
+                        {literal}
+        <script>
+            var listAtts = document.querySelectorAll(`[api-get-text]`);
             listAtts.forEach(function(el) {
-                if (el.addEventListener) { // all browsers except IE before version 9
-                    el.addEventListener("click", function() {
-                        $(this).html(
-                            `<span class="loading"></span>`
-                        );
-                        setTimeout(() => {
-                            $(this).prop("disabled", true);
-                        }, 100);
-                    }, false);
-                } else {
-                    if (el.attachEvent) { // IE before version 9
-                        el.attachEvent("click", function() {
+                $.get(el.getAttribute('api-get-text'), function(data) {
+                    el.innerHTML = data;
+                });
+            });
+            $(document).ready(function() {
+                var listAtts = document.querySelectorAll(`button[type="submit"]`);
+                listAtts.forEach(function(el) {
+                    if (el.addEventListener) { // all browsers except IE before version 9
+                        el.addEventListener("click", function() {
                             $(this).html(
                                 `<span class="loading"></span>`
                             );
                             setTimeout(() => {
                                 $(this).prop("disabled", true);
                             }, 100);
-                        });
+                        }, false);
+                    } else {
+                        if (el.attachEvent) { // IE before version 9
+                            el.attachEvent("click", function() {
+                                $(this).html(
+                                    `<span class="loading"></span>`
+                                );
+                                setTimeout(() => {
+                                    $(this).prop("disabled", true);
+                                }, 100);
+                            });
+                        }
                     }
-                }
-                $(function() {
-                    $('[data-toggle="tooltip"]').tooltip()
-                })
+                    $(function() {
+                        $('[data-toggle="tooltip"]').tooltip()
+                    })
+                });
             });
-        });
 
-        function setCookie(name, value, days) {
-            var expires = "";
-            if (days) {
-                var date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
+            function setCookie(name, value, days) {
+                var expires = "";
+                if (days) {
+                    var date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
             }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/";
-        }
 
-        function getCookie(name) {
-            var nameEQ = name + "=";
-            var ca = document.cookie.split(';');
-            for (var i = 0; i < ca.length; i++) {
-                var c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            function getCookie(name) {
+                var nameEQ = name + "=";
+                var ca = document.cookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
             }
-            return null;
-        }
-        setCookie('user_language', '{/literal}{$user_language}{literal}', 365);
-    </script>
-{/literal}
+            setCookie('user_language', '
+                        {/literal}{$user_language}
+                        {literal}', 365);
+        </script>
+    {/literal}
 
-</body>
+    </body>
 
-</html>
+    </html>
