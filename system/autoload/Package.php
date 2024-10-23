@@ -21,7 +21,6 @@ class Package
     public static function rechargeUser($id_customer, $router_name, $plan_id, $gateway, $channel, $note = '')
     {
         global $config, $admin, $c, $p, $b, $t, $d, $zero, $trx, $_app_stage, $isChangePlan;
-        $date_now = date("Y-m-d H:i:s");
         $date_only = date("Y-m-d");
         $time_only = date("H:i:s");
         $time = date("H:i:s");
@@ -100,57 +99,7 @@ class Package
 
 
         if ($router_name == 'balance') {
-            // insert table transactions
-            $t = ORM::for_table('tbl_transactions')->create();
-            $t->invoice = $inv = "INV-" . Package::_raid();
-            $t->username = $c['username'];
-            $t->plan_name = $p['name_plan'];
-            $t->price = $p['price'];
-            $t->recharged_on = $date_only;
-            $t->recharged_time = date("H:i:s");
-            $t->expiration = $date_only;
-            $t->time = $time;
-            $t->method = "$gateway - $channel";
-            $t->routers = $router_name;
-            $t->type = "Balance";
-            if ($admin) {
-                $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
-            } else {
-                $t->admin_id = '0';
-            }
-            $t->save();
-
-            $balance_before = $c['balance'];
-            Balance::plus($id_customer, $p['price']);
-            $balance = $c['balance'] + $p['price'];
-
-            $textInvoice = Lang::getNotifText('invoice_balance');
-            $textInvoice = str_replace('[[company_name]]', $config['CompanyName'], $textInvoice);
-            $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
-            $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
-            $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
-            $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat($date_now), $textInvoice);
-            $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
-            $textInvoice = str_replace('[[payment_channel]]', $channel, $textInvoice);
-            $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
-            $textInvoice = str_replace('[[plan_name]]', $p['name_plan'], $textInvoice);
-            $textInvoice = str_replace('[[plan_price]]', Lang::moneyFormat($p['price']), $textInvoice);
-            $textInvoice = str_replace('[[name]]', $c['fullname'], $textInvoice);
-            $textInvoice = str_replace('[[user_name]]', $c['username'], $textInvoice);
-            $textInvoice = str_replace('[[user_password]]', $c['password'], $textInvoice);
-            $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
-            $textInvoice = str_replace('[[balance_before]]', Lang::moneyFormat($balance_before), $textInvoice);
-            $textInvoice = str_replace('[[balance]]', Lang::moneyFormat($balance), $textInvoice);
-
-            if ($config['user_notification_payment'] == 'sms') {
-                Message::sendSMS($c['phonenumber'], $textInvoice);
-            } else if ($config['user_notification_payment'] == 'wa') {
-                Message::sendWhatsapp($c['phonenumber'], $textInvoice);
-            } else if ($config['user_notification_payment'] == 'email') {
-                Message::sendEmail($c['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' ' . $inv, $textInvoice);
-            }
-
-            return true;
+            return self::rechargeBalance($c, $p, $gateway, $channel);
         }
 
         /**
@@ -491,6 +440,62 @@ class Package
             $trx->trx_invoice = $inv;
         }
         return $inv;
+    }
+
+    public static function rechargeBalance($customer, $plan, $gateway, $channel, $note = '')
+    {
+        global $admin, $config;
+        // insert table transactions
+        $t = ORM::for_table('tbl_transactions')->create();
+        $t->invoice = $inv = "INV-" . Package::_raid();
+        $t->username = $customer['username'];
+        $t->plan_name = $plan['name_plan'];
+        $t->price = $plan['price'];
+        $t->recharged_on = date("Y-m-d");
+        $t->recharged_time = date("H:i:s");
+        $t->expiration = date("Y-m-d");
+        $t->time = date("H:i:s");
+        $t->method = "$gateway - $channel";
+        $t->routers = 'balance';
+        $t->type = "Balance";
+        $t->note = $note;
+        if ($admin) {
+            $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+        } else {
+            $t->admin_id = '0';
+        }
+        $t->save();
+
+        $balance_before = $customer['balance'];
+        Balance::plus($customer['id'], $plan['price']);
+        $balance = $customer['balance'] + $plan['price'];
+
+        $textInvoice = Lang::getNotifText('invoice_balance');
+        $textInvoice = str_replace('[[company_name]]', $config['CompanyName'], $textInvoice);
+        $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
+        $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
+        $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat(date("Y-m-d")), $textInvoice);
+        $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
+        $textInvoice = str_replace('[[payment_channel]]', $channel, $textInvoice);
+        $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
+        $textInvoice = str_replace('[[plan_name]]', $plan['name_plan'], $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]', Lang::moneyFormat($plan['price']), $textInvoice);
+        $textInvoice = str_replace('[[name]]', $customer['fullname'], $textInvoice);
+        $textInvoice = str_replace('[[user_name]]', $customer['username'], $textInvoice);
+        $textInvoice = str_replace('[[user_password]]', $customer['password'], $textInvoice);
+        $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
+        $textInvoice = str_replace('[[balance_before]]', Lang::moneyFormat($balance_before), $textInvoice);
+        $textInvoice = str_replace('[[balance]]', Lang::moneyFormat($balance), $textInvoice);
+
+        if ($config['user_notification_payment'] == 'sms') {
+            Message::sendSMS($customer['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'wa') {
+            Message::sendWhatsapp($customer['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'email') {
+            Message::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' ' . $inv, $textInvoice);
+        }
+        return $t->id();
     }
 
     public static function _raid()

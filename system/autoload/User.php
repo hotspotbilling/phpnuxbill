@@ -190,8 +190,22 @@ class User
         if ($d['status'] == 'Banned') {
             _alert(Lang::T('This account status') . ' : ' . Lang::T($d['status']), 'danger', "logout");
         }
-        if (empty($d['username'])) {
-            r2(U . 'logout', 'd', '');
+        return $d;
+    }
+
+    public static function _infoByName($username)
+    {
+        global $config;
+        if ($config['maintenance_mode'] == true) {
+            if ($config['maintenance_mode_logout'] == true) {
+                r2(U . 'logout', 'd', '');
+            } else {
+                displayMaintenanceMessage();
+            }
+        }
+        $d = ORM::for_table('tbl_customers')->where("username", $username)->find_one();
+        if ($d['status'] == 'Banned') {
+            _alert(Lang::T('This account status') . ' : ' . Lang::T($d['status']), 'danger', "logout");
         }
         return $d;
     }
