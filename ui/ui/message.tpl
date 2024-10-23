@@ -50,7 +50,7 @@
 
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<button class="btn btn-success" type="submit">{Lang::T('Send Message')}</button>
+							<button class="btn btn-success" onclick="return confirm('Continue the process of sending messages?')" type="submit">{Lang::T('Send Message')}</button>
 							<a href="{$_url}dashboard" class="btn btn-default">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
