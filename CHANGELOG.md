@@ -2,6 +2,11 @@
 
 # CHANGELOG
 
+## 2024.10.23
+
+- Custom Balance admin refill Requested by Javi Tech
+-
+
 ## 2024.10.18
 
 - Single Session Admin Can be set in the Settings
