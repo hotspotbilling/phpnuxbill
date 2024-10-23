@@ -32,6 +32,14 @@ switch ($action) {
         $bw = ORM::for_table('tbl_bandwidth')->select("name_bw")->find_one($routes['2']);
         echo $bw['name_bw'];
         die();
+    case 'balance':
+        $balance = ORM::for_table('tbl_customers')->select("balance")->find_one($routes['2'])['balance'];
+        if($routes['3']=='1'){
+            echo Lang::moneyFormat($balance);
+        }else{
+            echo $balance;
+        }
+        die();
     case 'server':
         $d = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('d', $d);

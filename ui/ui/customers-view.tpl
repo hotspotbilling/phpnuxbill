@@ -35,18 +35,20 @@
                     <li class="list-group-item">
                         <b>{Lang::T('Zip')}</b> <span class="pull-right">{$d['zip']}</span>
                     </li>
-                    <li class="list-group-item">
-                        <b>{Lang::T('Password')}</b> <input type="password" value="{$d['password']}"
-                            style=" border: 0px; text-align: right;" class="pull-right"
-                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
-                            onclick="this.select()">
-                    </li>
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                        <li class="list-group-item">
+                            <b>{Lang::T('Password')}</b> <input type="password" value="{$d['password']}"
+                                style=" border: 0px; text-align: right;" class="pull-right"
+                                onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                                onclick="this.select()">
+                        </li>
+                    {/if}
                     {if $d['pppoe_username'] != ''}
                         <li class="list-group-item">
                             <b>PPPOE {Lang::T('Username')}</b> <span class="pull-right">{$d['pppoe_username']}</span>
                         </li>
                     {/if}
-                    {if $d['pppoe_password'] != ''}
+                    {if $d['pppoe_password'] != '' && in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li class="list-group-item">
                             <b>PPPOE {Lang::T('Password')}</b> <input type="password" value="{$d['pppoe_password']}"
                                 style=" border: 0px; text-align: right;" class="pull-right"

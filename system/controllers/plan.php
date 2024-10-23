@@ -797,24 +797,42 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $user = _post('id_customer');
+        $amount = _post('amount');
         $plan = _post('id_plan');
+        $note = _post('note');
         $stoken = _req('stoken');
+        $c = ORM::for_table('tbl_customers')->find_one($user);
         if (App::getTokenValue($stoken)) {
-            $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
-            $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+            $in = ORM::for_table('tbl_transactions')->find_one(App::getTokenValue($stoken));
             Package::createInvoice($in);
             $ui->display('invoice.tpl');
             die();
         }
 
         run_hook('deposit_customer'); #HOOK
-        if (!empty($user) && !empty($plan)) {
-            if (Package::rechargeUser($user, 'balance', $plan, "Deposit", $admin['fullname'])) {
-                $c = ORM::for_table('tbl_customers')->where('id', $user)->find_one();
-                $in = ORM::for_table('tbl_transactions')->where('username', $c['username'])->order_by_desc('id')->find_one();
+        if (!empty($user) && strlen($amount)>0 && $amount != 0) {
+            $plan = [];
+            $plan['name_plan'] = Lang::T('Balance');
+            $plan['price'] = $amount;
+            $trxId = Package::rechargeBalance($c, $plan, "Deposit", $admin['fullname'], $note);
+            if ($trxId > 0) {
+                $in = ORM::for_table('tbl_transactions')->find_one($trxId);
                 Package::createInvoice($in);
                 if (!empty($stoken)) {
-                    App::setToken($stoken, $in['id']);
+                    App::setToken($stoken, $trxId);
+                }
+                $ui->display('invoice.tpl');
+            } else {
+                r2(U . 'plan/refill', 'e', "Failed to refill account");
+            }
+        }else if (!empty($user) && !empty($plan)) {
+            $p = ORM::for_table('tbl_plans')->find_one($plan);
+            $trxId = Package::rechargeBalance($c, $p, "Deposit", $admin['fullname'], $note);
+            if ($trxId > 0) {
+                $in = ORM::for_table('tbl_transactions')->find_one($trxId);
+                Package::createInvoice($in);
+                if (!empty($stoken)) {
+                    App::setToken($stoken, $trxId);
                 }
                 $ui->display('invoice.tpl');
             } else {

@@ -2,6 +2,12 @@
 
 # CHANGELOG
 
+## 2024.10.23
+
+- Custom Balance admin refill Requested by Javi Tech
+- Only Admin can edit Customer Requested by Fiberwan
+- Only Admin can show password Requested by Fiberwan
+
 ## 2024.10.18
 
 - Single Session Admin Can be set in the Settings

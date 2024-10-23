@@ -6,7 +6,7 @@
             <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
                 <form class="form-horizontal" method="post" action="{$_url}plan/print" target="_blank">
-                    <pre id="content"></pre>
+                    <pre id="content" style="text-align: center;"></pre>
                     <textarea class="hidden" id="formcontent" name="content">{$invoice}</textarea>
                     <input type="hidden" name="id" value="{$in['id']}">
                     <a href="{$_url}plan/list" class="btn btn-default btn-sm"><i

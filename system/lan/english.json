@@ -852,5 +852,19 @@
     "info": "info",
     "Registration_code": "Registration code",
     "Admin_can_only_have_single_session_login__it_will_logout_another_session": "Admin can only have single session login, it will logout another session",
-    "Single_session_Admin": "Single session Admin"
+    "Single_session_Admin": "Single session Admin",
+    "Get_Directions": "Get Directions",
+    "Buy_Balance_Plans": "Buy Balance Plans",
+    "Buy": "Buy",
+    "Cron_Job_last_ran_on": "Cron Job last ran on",
+    "VPN_Plans": "VPN Plans",
+    "Postpaid_Recharge_for_the_first_time_use": "Postpaid Recharge for the first time use",
+    "Or": "Or",
+    "Balance_Package": "Balance Package",
+    "Balance_Custom": "Balance Custom",
+    "Balance_Amount": "Balance Amount",
+    "Select_Balance_Package_or_Custom_Amount": "Select Balance Package or Custom Amount",
+    "Note": "Note",
+    "Or_custom_balance_amount_below": "Or custom balance amount below",
+    "Input_custom_balance__will_ignore_plan_above": "Input custom balance, will ignore plan above"
 }

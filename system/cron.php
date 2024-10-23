@@ -53,6 +53,9 @@ foreach ($d as $ds) {
         $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
         $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
+		if (empty($c)) {
+			$c = $u;
+		}
         $dvc = Package::getDevice($p);
         if ($_app_stage != 'demo') {
             if (file_exists($dvc)) {

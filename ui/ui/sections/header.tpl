@@ -163,7 +163,7 @@
             color: #fff;
             background-color: #169210;
             border-color: #25e01c;
-            
+
         }
 
         .panel-cron-warning>.panel-heading {
