@@ -314,7 +314,7 @@ switch ($action) {
         }
         break;
     case 'edit':
-        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id = $routes['2'];
