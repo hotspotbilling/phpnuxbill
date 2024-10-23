@@ -147,7 +147,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
-                            <button class="btn btn-primary" type="submit">{Lang::T('Save Changes')}</button>
+                            <button class="btn btn-primary" onclick="return confirm('Continue the PPPoE package creation process?')" type="submit">{Lang::T('Save Changes')}</button>
                             Or <a href="{$_url}services/pppoe">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
