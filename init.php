@@ -69,11 +69,11 @@ require_once $root_path . File::pathFixer('system/orm.php');
 require_once $root_path . File::pathFixer('system/autoload/PEAR2/Autoload.php');
 include $root_path . File::pathFixer('system/autoload/Hookers.php');
 
-if($db_password != null && ($db_pass == null || empty($db_pass))){
+if ($db_password != null && ($db_pass == null || empty($db_pass))) {
     // compability for old version
     $db_pass = $db_password;
 }
-if($db_pass != null){
+if ($db_pass != null) {
     // compability for old version
     $db_password = $db_pass;
 }
@@ -121,7 +121,7 @@ if (empty($http_proxy) && !empty($config['http_proxy'])) {
 date_default_timezone_set($config['timezone']);
 
 if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')) {
-    if(!empty($radius_password)){
+    if (!empty($radius_password)) {
         // compability for old version
         $radius_pass = $radius_password;
     }
@@ -136,11 +136,11 @@ if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')
 // Check if the user has selected a language
 if (!empty($_SESSION['user_language'])) {
     $config['language'] = $_SESSION['user_language'];
-}else if (!empty($_COOKIE['user_language'])) {
+} else if (!empty($_COOKIE['user_language'])) {
     $config['language'] = $_COOKIE['user_language'];
-}else if(User::getID()>0){
+} else if (User::getID() > 0) {
     $lang = User::getAttribute("Language");
-    if(!empty($lang)){
+    if (!empty($lang)) {
         $config['language'] = $lang;
     }
 }
@@ -233,8 +233,12 @@ function _log($description, $type = '', $userid = '0')
     } elseif (!empty($_SERVER['HTTP_CLIENT_IP']))   //to check ip from share internet
     {
         $d->ip = $_SERVER['HTTP_CLIENT_IP'];
-    } else {
+    } else if (isset($_SERVER["REMOTE_ADDR"])) {
         $d->ip = $_SERVER["REMOTE_ADDR"];
+    } else if (php_sapi_name() == 'cli') {
+        $d->ip = 'CLI';
+    } else {
+        $d->ip = 'Unknown';
     }
     $d->save();
 }
@@ -351,7 +355,7 @@ function displayMaintenanceMessage(): void
 {
     global $config, $ui;
     $date = $config['maintenance_date'];
-    if ($date){
+    if ($date) {
         $ui->assign('date', $date);
     }
     http_response_code(503);

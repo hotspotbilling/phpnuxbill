@@ -866,5 +866,13 @@
     "Select_Balance_Package_or_Custom_Amount": "Select Balance Package or Custom Amount",
     "Note": "Note",
     "Or_custom_balance_amount_below": "Or custom balance amount below",
-    "Input_custom_balance__will_ignore_plan_above": "Input custom balance, will ignore plan above"
+    "Input_custom_balance__will_ignore_plan_above": "Input custom balance, will ignore plan above",
+    "Cron_has_not_run_for_over_1_hour__Please_check_your_setup_": "Cron has not run for over 1 hour. Please check your setup.",
+    "Hello": "Hello",
+    "your_internet_package": "your internet package",
+    "has_been_expired": "has been expired",
+    "Welcome_Message": "Welcome Message",
+    "will_be_replaced_with_Customer_password": "will be replaced with Customer password",
+    "will_be_replaced_with_Customer_Portal_URL": "will be replaced with Customer Portal URL",
+    "will_be_replaced_with_Company_Name": "will be replaced with Company Name"
 }
