@@ -475,7 +475,8 @@ class Package
         $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
         $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
-        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat(date("Y-m-d")), $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
+        $textInvoice = str_replace('[[trx_date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
         $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
         $textInvoice = str_replace('[[payment_channel]]', $channel, $textInvoice);
         $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);

@@ -235,6 +235,7 @@ class Message
         $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $trx['invoice'], $textInvoice);
         $textInvoice = str_replace('[[date]]', Lang::dateAndTimeFormat($trx['recharged_on'], $trx['recharged_time']), $textInvoice);
+        $textInvoice = str_replace('[[trx_date]]', Lang::dateAndTimeFormat($trx['recharged_on'], $trx['recharged_time']), $textInvoice);
         if (!empty($trx['note'])) {
             $textInvoice = str_replace('[[note]]', $trx['note'], $textInvoice);
         }
