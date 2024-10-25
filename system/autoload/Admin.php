@@ -40,7 +40,7 @@ class Admin
             $isValid = self::validateToken($_SESSION['aid'], $_COOKIE['aid']);
             if (!$isValid) {
                 self::removeCookie();
-                _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
+                _alert(Lang::T('Token has expired. Please log in again.') . '.'.$_SESSION['aid'], 'danger', "admin");
                 return 0;
             }
             return $_SESSION['aid'];
@@ -57,7 +57,7 @@ class Admin
                 }
                 if (!empty($_COOKIE['aid']) && !$isValid) {
                     self::removeCookie();
-                    _alert(Lang::T('Token has expired. Please log in again.'), 'danger', "admin");
+                    _alert(Lang::T('Token has expired. Please log in again.') . '..', 'danger', "admin");
                     return 0;
                 } else {
                     if (time() - $tmp[1] < 86400 * 7) {
@@ -124,7 +124,9 @@ class Admin
                 'samesite' => 'Lax',
             ]);
             session_destroy();
-            unset($_COOKIE['aid']);
+            session_unset();
+            session_start();
+            unset($_COOKIE['aid'], $_SESSION['aid']);
         }
     }
 
@@ -151,10 +153,10 @@ class Admin
     {
         global $config;
         $query =  ORM::for_table('tbl_users')->select('login_token')->findOne($aid);
-        if($config['single_session'] != 'yes'){
+        if ($config['single_session'] != 'yes') {
             return true; // For multi-session, any token is valid
         }
-        if(empty($query)){
+        if (empty($query)) {
             return true;
         }
         return $query->login_token === sha1($cookieToken);
