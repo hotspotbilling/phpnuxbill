@@ -185,8 +185,6 @@
             color: #a94442;
             background-color: #f2dede;
             border-color: #ebccd1;
-            border-bottom-right-radius: 21px;
-            border-bottom-left-radius: 21px;
         }
 
         .panel-heading {
