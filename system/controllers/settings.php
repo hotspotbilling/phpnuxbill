@@ -145,7 +145,7 @@ switch ($action) {
                 r2(U . 'settings/app', 'e', 'PHP GD is not installed');
             }
         }
-        if ($company == '') {
+        if ($_POST['general'] && $company == '') {
             r2(U . 'settings/app', 'e', Lang::T('All field is required'));
         } else {
             if ($radius_enable) {
