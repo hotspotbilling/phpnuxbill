@@ -126,7 +126,7 @@
         </div>
     </div>
     <div class="form-group text-center">
-        <button class="btn btn-primary" type="submit">{Lang::T('Save Changes')}</button>
+        <button class="btn btn-primary" onclick="return confirm('Continue the Admin change process?')" type="submit">{Lang::T('Save Changes')}</button>
         Or <a href="{$_url}settings/users">{Lang::T('Cancel')}</a>
     </div>
 </form>

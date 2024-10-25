@@ -37,7 +37,7 @@
                     </div>
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<button class="btn btn-primary" type="submit">{Lang::T('Save Changes')}</button>
+							<button class="btn btn-primary" onclick="return confirm('Continue the process of adding Ports?')" type="submit">{Lang::T('Save')}</button>
 							Or <a href="{$_url}pool/port">{Lang::T('Cancel')}</a>
 						</div>
 					</div>

@@ -18,7 +18,7 @@
 					{/foreach}
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<button class="btn btn-primary"
+							<button class="btn btn-primary" onclick="return confirm('Continue the process of adding Languages?')"
 								type="submit">{Lang::T('Save Changes')}</button>
 							Or <a href="{$_url}settings/localisation">{Lang::T('Cancel')}</a>
 						</div>

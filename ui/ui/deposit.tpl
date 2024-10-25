@@ -46,7 +46,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-md-9 col-md-offset-3">
-                            <button class="btn btn-success"
+                            <button class="btn btn-success" onclick="return confirm('Continue the Customer Balance top-up process?')"
                                 type="submit">{Lang::T('Recharge')}</button>
                             Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
                         </div>
