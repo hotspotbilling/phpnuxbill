@@ -203,7 +203,7 @@
         </div>
     </div>
     <center>
-        <button class="btn btn-primary" type="submit">
+        <button class="btn btn-primary" onclick="return confirm('Continue the process of adding Customer Data?')" type="submit">
             {Lang::T('Save Changes')}
         </button>
         <br><a href="{$_url}customers/list" class="btn btn-link">{Lang::T('Cancel')}</a>

@@ -280,7 +280,7 @@
                     {/if}
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">
-                            {if $_bill['status'] == 'on'}
+                            {if $_bill['status'] == 'on' && $_bill['prepaid'] != 'YES'}
                                 <a href="{$_url}home&deactivate={$_bill['id']}"
                                     onclick="return confirm('{Lang::T('Deactivate')}?')" class="btn btn-danger btn-xs"><i
                                         class="glyphicon glyphicon-trash"></i></a>

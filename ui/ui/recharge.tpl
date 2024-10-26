@@ -59,7 +59,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success"
+                            <button class="btn btn-success" onclick="return confirm('Continue the Recharge process?')"
                                 type="submit">{Lang::T('Recharge')}</button>
                             {Lang::T('Or')} <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
                         </div>

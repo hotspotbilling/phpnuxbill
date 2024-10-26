@@ -120,12 +120,17 @@
                     <span class="help-block col-md-4">{Lang::T('Income will reset every this
                         day')}</span>
                 </div>
-                <button class="btn btn-success btn-block" type="submit">
+                <button class="btn btn-success btn-block" name="general" type="submit">
                     {Lang::T('Save Changes')}
                 </button>
             </div>
+
         </div>
     </div>
+</form>
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="HideDashboardContent">
             <h4 class="panel-title">
@@ -161,6 +166,10 @@
             </div>
         </div>
     </div>
+</form>
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Registration">
             <h4 class="panel-title">
@@ -230,9 +239,9 @@
                     <div class="col-md-6">
                         <select name="phone_otp_type" id="phone_otp_type" class="form-control">
                             <option value="sms" {if $_c['phone_otp_type']=='sms' }selected="selected" {/if}>
-                                {Lang::T('By SMS')}
+                                {Lang::T('By SMS')}</option>
                             <option value="whatsapp" {if $_c['phone_otp_type']=='whatsapp' }selected="selected" {/if}>
-                                {Lang::T('by WhatsApp')}
+                                {Lang::T('by WhatsApp')}</option>
                             <option value="both" {if $_c['phone_otp_type']=='both' }selected="selected" {/if}>
                                 {Lang::T('By WhatsApp and SMS')}
                             </option>
@@ -247,6 +256,10 @@
             </div>
         </div>
     </div>
+</form>
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data"> 
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">   
     <div class="panel">
         <div class="panel-heading" role="tab" id="Voucher">
             <h4 class="panel-title">
@@ -310,7 +323,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="FreeRadius">
             <h4 class="panel-title">
@@ -341,7 +357,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="ExtendPostpaidExpiration">
             <h4 class="panel-title">
@@ -385,7 +404,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="CustomerBalanceSystem">
             <h4 class="panel-title">
@@ -437,7 +459,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TelegramNotification">
             <h4 class="panel-title">
@@ -477,7 +502,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="SMSNotification">
             <h4 class="panel-title">
@@ -529,7 +557,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="WhatsappNotification">
             <h4 class="panel-title">
@@ -552,7 +583,7 @@
                             placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
                     </div>
                     <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
-                        {Lang::T('it will be replaced.')}
+                        {Lang::T('it will be replaced.')}</p>
                 </div>
                 <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
                     {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">{Lang::T('Free
@@ -563,7 +594,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="EmailNotification">
             <h4 class="panel-title">
@@ -645,7 +679,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="UserNotification">
             <h4 class="panel-title">
@@ -708,7 +745,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TawkToChatWidget">
             <h4 class="panel-title">
@@ -738,7 +778,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="APIKey">
             <h4 class="panel-title">
@@ -765,7 +808,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Proxy">
             <h4 class="panel-title">
@@ -798,7 +844,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TaxSystem">
             <h4 class="panel-title">
@@ -869,7 +918,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="GithubAuthentication">
             <h4 class="panel-title">

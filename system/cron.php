@@ -207,3 +207,5 @@ unlink($lockFile);
 $timestampFile = "$UPLOAD_PATH/cron_last_run.txt";
 file_put_contents($timestampFile, time());
 
+
+run_hook('cronjob_end'); #HOOK
