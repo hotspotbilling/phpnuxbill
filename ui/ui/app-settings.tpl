@@ -258,8 +258,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data"> 
-    <input type="hidden" name="csrf_token" value="{$csrf_token}">   
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Voucher">
             <h4 class="panel-title">
