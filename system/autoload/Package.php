@@ -77,7 +77,7 @@ class Package
                 r2(U . 'home', 'e', Lang::T('Plan Not found'));
             }
             if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                r2(U . 'dashboard', 'e', Lang::T('Plan Not found'));
+                r2(U . 'dashboard', 'e', Lang::T('You do not have permission to access this page'));
             }
         }
 

@@ -79,7 +79,8 @@
                     }, function(error) {});
                 }
             };
-            var Tawk_LoadStart = new Date();Tawk_API.visitor = {
+            var Tawk_LoadStart = new Date();
+            Tawk_API.visitor = {
                 name : '{$_user['fullname']}',
                 email : '{$_user['email']}',
                 userId: '{$_user['id']}'
@@ -128,70 +129,69 @@
     </script>
 
 
-                        {literal}
-        <script>
-            var listAtts = document.querySelectorAll(`[api-get-text]`);
-            listAtts.forEach(function(el) {
-                $.get(el.getAttribute('api-get-text'), function(data) {
-                    el.innerHTML = data;
-                });
+{literal}
+    <script>
+        var listAtts = document.querySelectorAll(`[api-get-text]`);
+        listAtts.forEach(function(el) {
+            $.get(el.getAttribute('api-get-text'), function(data) {
+                el.innerHTML = data;
             });
-            $(document).ready(function() {
-                var listAtts = document.querySelectorAll(`button[type="submit"]`);
-                listAtts.forEach(function(el) {
-                    if (el.addEventListener) { // all browsers except IE before version 9
-                        el.addEventListener("click", function() {
+        });
+        $(document).ready(function() {
+            var listAtts = document.querySelectorAll(`button[type="submit"]`);
+            listAtts.forEach(function(el) {
+                if (el.addEventListener) { // all browsers except IE before version 9
+                    el.addEventListener("click", function() {
+                        $(this).html(
+                            `<span class="loading"></span>`
+                        );
+                        setTimeout(() => {
+                            $(this).prop("disabled", true);
+                        }, 100);
+                    }, false);
+                } else {
+                    if (el.attachEvent) { // IE before version 9
+                        el.attachEvent("click", function() {
                             $(this).html(
                                 `<span class="loading"></span>`
                             );
                             setTimeout(() => {
                                 $(this).prop("disabled", true);
                             }, 100);
-                        }, false);
-                    } else {
-                        if (el.attachEvent) { // IE before version 9
-                            el.attachEvent("click", function() {
-                                $(this).html(
-                                    `<span class="loading"></span>`
-                                );
-                                setTimeout(() => {
-                                    $(this).prop("disabled", true);
-                                }, 100);
-                            });
-                        }
+                        });
                     }
-                    $(function() {
-                        $('[data-toggle="tooltip"]').tooltip()
-                    })
-                });
+                }
+                $(function() {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
             });
+        });
 
-            function setCookie(name, value, days) {
-                var expires = "";
-                if (days) {
-                    var date = new Date();
-                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                    expires = "; expires=" + date.toUTCString();
-                }
-                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
             }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
 
-            function getCookie(name) {
-                var nameEQ = name + "=";
-                var ca = document.cookie.split(';');
-                for (var i = 0; i < ca.length; i++) {
-                    var c = ca[i];
-                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-                }
-                return null;
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
             }
-            setCookie('user_language', '
-                        {/literal}{$user_language}
-                        {literal}', 365);
-        </script>
-    {/literal}
+            return null;
+        }
+    </script>
+{/literal}
+<script>
+setCookie('user_language', '{$user_language}', 365);
+</script>
+</body>
 
-    </body>
-
-    </html>
+</html>

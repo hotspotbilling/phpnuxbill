@@ -875,5 +875,8 @@
     "will_be_replaced_with_Customer_password": "will be replaced with Customer password",
     "will_be_replaced_with_Customer_Portal_URL": "will be replaced with Customer Portal URL",
     "will_be_replaced_with_Company_Name": "will be replaced with Company Name",
-    "Token_has_expired__Please_log_in_again_": "Token has expired. Please log in again."
+    "Token_has_expired__Please_log_in_again_": "Token has expired. Please log in again.",
+    "Minute": "Minute",
+    "Hour": "Hour",
+    "Failed_to_connect_to_device": "Failed to connect to device"
 }
