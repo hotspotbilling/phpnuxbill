@@ -745,5 +745,11 @@
     "Limit": "Membatasi",
     "Create_expired_Internet_Package": "Buat Paket Internet yang Kedaluwarsa",
     "When_customer_expired__you_can_move_it_to_Expired_Internet_Package": "Ketika pelanggan telah kedaluwarsa, Anda dapat memindahkannya ke Paket Internet Kedaluwarsa",
-    "Miscellaneous_Settings": "Pengaturan Lain-Lain"
+    "Miscellaneous_Settings": "Pengaturan Lain-Lain",
+    "Minute": "Menit",
+    "Hour": "Jam",
+    "Buy_Balance_Plans": "Beli Paket Saldo",
+    "New_Voucher_for_10mbps_Created": "Voucher Baru untuk 10mbps Dibuat",
+    "Previous": "Sebelumnya",
+    "Share": "Membagikan"
 }

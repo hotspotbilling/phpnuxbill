@@ -22,7 +22,7 @@ switch ($do) {
         $password = _post('password');
         $cpassword = _post('cpassword');
         $address = _post('address');
-        
+
         // Separate phone number input if OTP is required
         if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
             $phone_number = alphanumeric(_post('phone_number'), "+_.@-");
@@ -81,7 +81,7 @@ switch ($do) {
         if ($d) {
             $msg .= Lang::T('Account already exists') . '<br>';
         }
-        
+
         if ($msg == '') {
             run_hook('register_user'); #HOOK
             $d = ORM::for_table('tbl_customers')->create();
