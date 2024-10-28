@@ -1,6 +1,7 @@
 {include file="sections/header.tpl"}
 
 <form class="form-horizontal" method="post" role="form" action="{$_url}customers/add-post">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">

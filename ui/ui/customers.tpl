@@ -17,7 +17,7 @@
             <div class="panel-heading">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}customers/csv"
+                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}customers/csv&token={$csrf_token}"
                             onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
                                 aria-hidden="true"></span> CSV</a>
                     </div>
@@ -26,6 +26,7 @@
             </div>
             <div class="panel-body">
                 <form id="site-search" method="post" action="{$_url}customers">
+                 <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                         <div class="col-lg-4">
                             <div class="input-group">
@@ -147,13 +148,13 @@
                                         <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}"
                                             style="margin: 0px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}customers/edit/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{$_url}customers/edit/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
                                             style="margin: 0px; color:black"
                                             class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Edit')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}customers/sync/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{$_url}customers/sync/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
                                             style="margin: 5px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('Sync')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}plan/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                        <a href="{$_url}plan/recharge/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}" style="margin: 0px;"
                                             class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
                                     </td>
                                 </tr>
