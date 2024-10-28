@@ -276,6 +276,10 @@
             font-weight: bold;
         }
 
+         .box.box-solid.box-primary > .box-header .btn {
+            color: inherit;
+        }
+
         .box-header>.fa,
         .box-header>.glyphicon,
         .box-header>.ion,
