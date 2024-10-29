@@ -102,6 +102,10 @@ class Package
             return self::rechargeBalance($c, $p, $gateway, $channel);
         }
 
+        if ($router_name == 'Custom Balance') {
+            return self::rechargeCustomBalance($c, $p, $gateway, $channel);
+        }
+
         /**
          * 1 Customer only can have 1 PPPOE and 1 Hotspot Plan, 1 prepaid and 1 postpaid
          */
@@ -450,6 +454,71 @@ class Package
         $t->invoice = $inv = "INV-" . Package::_raid();
         $t->username = $customer['username'];
         $t->plan_name = $plan['name_plan'];
+        $t->price = $plan['price'];
+        $t->recharged_on = date("Y-m-d");
+        $t->recharged_time = date("H:i:s");
+        $t->expiration = date("Y-m-d");
+        $t->time = date("H:i:s");
+        $t->method = "$gateway - $channel";
+        $t->routers = 'balance';
+        $t->type = "Balance";
+        $t->note = $note;
+        if ($admin) {
+            $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+        } else {
+            $t->admin_id = '0';
+        }
+        $t->save();
+
+        $balance_before = $customer['balance'];
+        Balance::plus($customer['id'], $plan['price']);
+        $balance = $customer['balance'] + $plan['price'];
+
+        $textInvoice = Lang::getNotifText('invoice_balance');
+        $textInvoice = str_replace('[[company_name]]', $config['CompanyName'], $textInvoice);
+        $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
+        $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
+        $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
+        $textInvoice = str_replace('[[trx_date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
+        $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
+        $textInvoice = str_replace('[[payment_channel]]', $channel, $textInvoice);
+        $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
+        $textInvoice = str_replace('[[plan_name]]', $plan['name_plan'], $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]', Lang::moneyFormat($plan['price']), $textInvoice);
+        $textInvoice = str_replace('[[name]]', $customer['fullname'], $textInvoice);
+        $textInvoice = str_replace('[[user_name]]', $customer['username'], $textInvoice);
+        $textInvoice = str_replace('[[user_password]]', $customer['password'], $textInvoice);
+        $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
+        $textInvoice = str_replace('[[balance_before]]', Lang::moneyFormat($balance_before), $textInvoice);
+        $textInvoice = str_replace('[[balance]]', Lang::moneyFormat($balance), $textInvoice);
+
+        if ($config['user_notification_payment'] == 'sms') {
+            Message::sendSMS($customer['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'wa') {
+            Message::sendWhatsapp($customer['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'email') {
+            Message::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' ' . $inv, $textInvoice);
+        }
+        return $t->id();
+    }
+
+     public static function rechargeCustomBalance($customer, $plan, $gateway, $channel, $note = '')
+    {
+        global $admin, $config;
+        $plan = ORM::for_table('tbl_payment_gateway')
+            ->where('username', $customer['username'])
+            ->where('routers', 'Custom Balance')
+            ->where('status', '1')
+            ->find_one();
+        if (!$plan) {
+            return false;
+        }
+        // insert table transactions
+        $t = ORM::for_table('tbl_transactions')->create();
+        $t->invoice = $inv = "INV-" . Package::_raid();
+        $t->username = $customer['username'];
+        $t->plan_name = 'Custom Balance';
         $t->price = $plan['price'];
         $t->recharged_on = date("Y-m-d");
         $t->recharged_time = date("H:i:s");
