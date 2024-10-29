@@ -416,6 +416,16 @@ switch ($action) {
             if ($tax_enable === 'yes') {
                 $ui->assign('tax', $tax);
             }
+
+            if (_post('custom') == '1') {
+                if (_post('amount') > 0) {
+                    $ui->assign('custom', '1');
+                    $ui->assign('amount', _post('amount'));
+                } else {
+                    r2(U . "order/balance", 'e', Lang::T("Please enter amount"));
+                }
+            }
+
             $ui->assign('route2', $routes[2]);
             $ui->assign('route3', $routes[3]);
             $ui->assign('add_cost', $add_cost);
@@ -445,98 +455,140 @@ switch ($action) {
         include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $gateway . '.php';
         call_user_func($gateway . '_validate_config');
 
-        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
-        if ($plan['is_radius'] == '1') {
-            $router['id'] = 0;
-            $router['name'] = 'radius';
-        } else if ($routes['2'] > 0) {
-            $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
-        } else {
-            $router['id'] = 0;
-            $router['name'] = 'balance';
-        }
-        if (empty($router) || empty($plan)) {
-            r2(U . "order/package", 'e', Lang::T("Plan Not found"));
-        }
-        $d = ORM::for_table('tbl_payment_gateway')
-            ->where('username', $user['username'])
-            ->where('status', 1)
-            ->find_one();
-        if ($d) {
-            if ($d['pg_url_payment']) {
-                r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
-            } else {
-                if ($gateway == $d['gateway']) {
-                    $id = $d['id'];
+        switch (_post('custom')) {
+            case '1':
+                $amount = _post('amount');
+                $amount = (float) $amount;
+
+                if ($amount <= 0) {
+                    r2(U . "order/gateway/" . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please enter amount"));
+                }
+
+                $d = ORM::for_table('tbl_payment_gateway')
+                    ->where('username', $user['username'])
+                    ->where('status', 1)
+                    ->find_one();
+                if ($d) {
+                    if ($d['pg_url_payment']) {
+                        r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
+                    } else {
+                        if ($gateway == $d['gateway']) {
+                            $id = $d['id'];
+                        } else {
+                            $d->status = 4;
+                            $d->save();
+                        }
+                    }
+                }
+                $d = ORM::for_table('tbl_payment_gateway')->create();
+                $d->username = $user['username'];
+                $d->gateway = $gateway;
+                $d->plan_id = 0;
+                $d->plan_name = 'Custom';
+                $d->routers_id = '0';
+                $d->routers = 'Custom Balance';
+                $d->price = $amount;
+                $d->created_date = date('Y-m-d H:i:s');
+                $d->status = 1;
+                $d->save();
+                $id = $d->id;
+                break;
+
+            default:
+                $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
+                if ($plan['is_radius'] == '1') {
+                    $router['id'] = 0;
+                    $router['name'] = 'radius';
+                } else if ($routes['2'] > 0) {
+                    $router = ORM::for_table('tbl_routers')->where('enabled', '1')->find_one($routes['2']);
                 } else {
-                    $d->status = 4;
+                    $router['id'] = 0;
+                    $router['name'] = 'balance';
+                }
+                if (empty($router) || empty($plan)) {
+                    r2(U . "order/package", 'e', Lang::T("Plan Not found"));
+                }
+                $d = ORM::for_table('tbl_payment_gateway')
+                    ->where('username', $user['username'])
+                    ->where('status', 1)
+                    ->find_one();
+                if ($d) {
+                    if ($d['pg_url_payment']) {
+                        r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
+                    } else {
+                        if ($gateway == $d['gateway']) {
+                            $id = $d['id'];
+                        } else {
+                            $d->status = 4;
+                            $d->save();
+                        }
+                    }
+                }
+                $add_cost = 0;
+                $tax = 0;
+                if ($router['name'] != 'balance') {
+                    list($bills, $add_cost) = User::getBills($id_customer);
+                }
+                // Tax calculation start
+                $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+                $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+                $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+                if ($tax_rate_setting === 'custom') {
+                    $tax_rate = $custom_tax_rate;
+                } else {
+                    $tax_rate = $tax_rate_setting;
+                }
+                if ($tax_enable === 'yes') {
+                    $tax = Package::tax($plan['price'], $tax_rate);
+                }
+                // Tax calculation stop
+                if (empty($id)) {
+                    $d = ORM::for_table('tbl_payment_gateway')->create();
+                    $d->username = $user['username'];
+                    $d->gateway = $gateway;
+                    $d->plan_id = $plan['id'];
+                    $d->plan_name = $plan['name_plan'];
+                    $d->routers_id = $router['id'];
+                    $d->routers = $router['name'];
+                    if ($plan['validity_unit'] == 'Period') {
+                        // Postpaid price from field
+                        $add_inv = User::getAttribute("Invoice", $id_customer);
+                        if (empty($add_inv) or $add_inv == 0) {
+                            $d->price = ($plan['price'] + $add_cost + $tax);
+                        } else {
+                            $d->price = ($add_inv + $add_cost + $tax);
+                        }
+                    } else {
+                        $d->price = ($plan['price'] + $add_cost + $tax);
+                    }
+                    $d->created_date = date('Y-m-d H:i:s');
+                    $d->status = 1;
+                    $d->save();
+                    $id = $d->id();
+                } else {
+                    $d->username = $user['username'];
+                    $d->gateway = $gateway;
+                    $d->plan_id = $plan['id'];
+                    $d->plan_name = $plan['name_plan'];
+                    $d->routers_id = $router['id'];
+                    $d->routers = $router['name'];
+                    if ($plan['validity_unit'] == 'Period') {
+                        // Postpaid price from field
+                        $add_inv = User::getAttribute("Invoice", $id_customer);
+                        if (empty($add_inv) or $add_inv == 0) {
+                            $d->price = ($plan['price'] + $add_cost + $tax);
+                        } else {
+                            $d->price = ($add_inv + $add_cost + $tax);
+                        }
+                    } else {
+                        $d->price = ($plan['price'] + $add_cost + $tax);
+                    }
+                    //$d->price = ($plan['price'] + $add_cost);
+                    $d->created_date = date('Y-m-d H:i:s');
+                    $d->status = 1;
                     $d->save();
                 }
-            }
-        }
-        $add_cost = 0;
-        $tax = 0;
-        if ($router['name'] != 'balance') {
-            list($bills, $add_cost) = User::getBills($id_customer);
-        }
-        // Tax calculation start
-        $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
-        $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
-        $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
-        if ($tax_rate_setting === 'custom') {
-            $tax_rate = $custom_tax_rate;
-        } else {
-            $tax_rate = $tax_rate_setting;
-        }
-        if ($tax_enable === 'yes') {
-            $tax = Package::tax($plan['price'], $tax_rate);
-        }
-        // Tax calculation stop
-        if (empty($id)) {
-            $d = ORM::for_table('tbl_payment_gateway')->create();
-            $d->username = $user['username'];
-            $d->gateway = $gateway;
-            $d->plan_id = $plan['id'];
-            $d->plan_name = $plan['name_plan'];
-            $d->routers_id = $router['id'];
-            $d->routers = $router['name'];
-            if ($plan['validity_unit'] == 'Period') {
-                // Postpaid price from field
-                $add_inv = User::getAttribute("Invoice", $id_customer);
-                if (empty($add_inv) or $add_inv == 0) {
-                    $d->price = ($plan['price'] + $add_cost + $tax);
-                } else {
-                    $d->price = ($add_inv + $add_cost + $tax);
-                }
-            } else {
-                $d->price = ($plan['price'] + $add_cost + $tax);
-            }
-            $d->created_date = date('Y-m-d H:i:s');
-            $d->status = 1;
-            $d->save();
-            $id = $d->id();
-        } else {
-            $d->username = $user['username'];
-            $d->gateway = $gateway;
-            $d->plan_id = $plan['id'];
-            $d->plan_name = $plan['name_plan'];
-            $d->routers_id = $router['id'];
-            $d->routers = $router['name'];
-            if ($plan['validity_unit'] == 'Period') {
-                // Postpaid price from field
-                $add_inv = User::getAttribute("Invoice", $id_customer);
-                if (empty($add_inv) or $add_inv == 0) {
-                    $d->price = ($plan['price'] + $add_cost + $tax);
-                } else {
-                    $d->price = ($add_inv + $add_cost + $tax);
-                }
-            } else {
-                $d->price = ($plan['price'] + $add_cost + $tax);
-            }
-            //$d->price = ($plan['price'] + $add_cost);
-            $d->created_date = date('Y-m-d H:i:s');
-            $d->status = 1;
-            $d->save();
+                break;
         }
         if (!$id) {
             r2(U . "order/package/" . $d['id'], 'e', Lang::T("Failed to create Transaction.."));
