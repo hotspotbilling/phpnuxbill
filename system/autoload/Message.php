@@ -193,11 +193,11 @@ class Message
             && !empty($message) && in_array($via, ['sms', 'wa'])
         ) {
             if ($via == 'sms') {
-                echo Message::sendSMS($customer['phonenumber'], $msg);
+                Message::sendSMS($customer['phonenumber'], $msg);
             } else if ($via == 'email') {
                 self::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Internet Plan Reminder"), $msg);
             } else if ($via == 'wa') {
-                echo Message::sendWhatsapp($customer['phonenumber'], $msg);
+                Message::sendWhatsapp($customer['phonenumber'], $msg);
             }
         }
         return "$via: $msg";
