@@ -751,5 +751,14 @@
     "Buy_Balance_Plans": "Beli Paket Saldo",
     "New_Voucher_for_10mbps_Created": "Voucher Baru untuk 10mbps Dibuat",
     "Previous": "Sebelumnya",
-    "Share": "Membagikan"
+    "Share": "Membagikan",
+    "Agent": "Agen",
+    "Sub_District": "Kecamatan",
+    "Ward": "Bangsal",
+    "Profile": "Profil",
+    "Credentials": "Kredensial",
+    "Cron_has_not_run_for_over_1_hour__Please_check_your_setup_": "Cron tidak berjalan selama lebih dari 1 jam. Harap periksa pengaturan Anda.",
+    "Photo": "Foto",
+    "just_now": "baru saja",
+    "Face_Detection": "Deteksi Wajah"
 }

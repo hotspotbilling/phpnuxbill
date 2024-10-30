@@ -1,7 +1,8 @@
 {include file="sections/header.tpl"}
 <!-- user-edit -->
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/users-edit-post">
+<form class="form-horizontal" method="post" enctype="multipart/form-data" role="form"
+    action="{$_url}settings/users-edit-post">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-sm-6 col-md-6">
@@ -10,6 +11,20 @@
                 <div class="panel-heading">{Lang::T('Profile')}</div>
                 <div class="panel-body">
                     <input type="hidden" name="id" value="{$d['id']}">
+                    <center>
+                        <img src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
+                            onerror="this.src='{$UPLOAD_PATH}/admin.default.png'" class="img-circle img-responsive" alt="Foto"
+                            onclick="return deletePhoto({$d['id']})">
+                    </center><br>
+                    <div class="form-group">
+                        <label class="col-md-3 col-xs-12 control-label">{Lang::T('Photo')}</label>
+                        <div class="col-md-6 col-xs-8">
+                            <input type="file" class="form-control" name="photo">
+                        </div>
+                        <div class="form-group col-md-3 col-xs-4">
+                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> Facedetect</label>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Full Name')}</label>
                         <div class="col-md-9">
@@ -93,7 +108,8 @@
                             <div class="col-md-9">
                                 <select name="root" id="root" class="form-control">
                                     {foreach $agents as $agent}
-                                        <option value="{$agent['id']}">{$agent['username']} | {$agent['fullname']} | {$agent['phone']}</option>
+                                        <option value="{$agent['id']}">{$agent['username']} | {$agent['fullname']} |
+                                            {$agent['phone']}</option>
                                     {/foreach}
                                 </select>
                             </div>
@@ -126,20 +142,27 @@
         </div>
     </div>
     <div class="form-group text-center">
-        <button class="btn btn-primary" onclick="return confirm('Continue the Admin change process?')" type="submit">{Lang::T('Save Changes')}</button>
+        <button class="btn btn-primary" onclick="return confirm('Continue the Admin change process?')"
+            type="submit">{Lang::T('Save Changes')}</button>
         Or <a href="{$_url}settings/users">{Lang::T('Cancel')}</a>
     </div>
 </form>
 
-{literal}
-    <script>
-        function checkUserType($field){
-            if($field.value=='Sales'){
-                $('#agentChooser').removeClass('hidden');
-            }else{
-                $('#agentChooser').addClass('hidden');
+<script>
+    function checkUserType($field) {
+        if ($field.value == 'Sales') {
+            $('#agentChooser').removeClass('hidden');
+        } else {
+            $('#agentChooser').addClass('hidden');
+        }
+    }
+
+    function deletePhoto(id) {
+        if (confirm('Delete photo?')) {
+            if (confirm('Are you sure to delete photo?')) {
+                window.location.href = '{$_url}settings/users-edit/'+id+'/deletePhoto'
             }
         }
+    }
 </script>
-{/literal}
 {include file="sections/footer.tpl"}

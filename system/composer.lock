@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a33a5e0440af423877195440decefd29",
+    "content-hash": "a5f201dce3d594a500f2b9e9a8532e66",
     "packages": [
         {
             "name": "mpdf/mpdf",
@@ -476,6 +476,48 @@
                 "source": "https://github.com/smarty-php/smarty/tree/v4.5.3"
             },
             "time": "2024-05-28T21:46:01+00:00"
+        },
+        {
+            "name": "yosiazwan/php-facedetection",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yosiazwan/php-facedetection.git",
+                "reference": "b016273ceceacd85562bbc50384fbabc947fe525"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yosiazwan/php-facedetection/zipball/b016273ceceacd85562bbc50384fbabc947fe525",
+                "reference": "b016273ceceacd85562bbc50384fbabc947fe525",
+                "shasum": ""
+            },
+            "require": {
+                "ext-gd": "*",
+                "php": ">=5.2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "FaceDetector.php",
+                    "Exception/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Maurice Svay",
+                    "homepage": "https://github.com/mauricesvay/php-facedetection/graphs/contributors"
+                }
+            ],
+            "description": "PHP class to detect one face in images. A pure PHP port of an existing JS code from Karthik Tharavad.",
+            "homepage": "https://github.com/mauricesvay/php-facedetection",
+            "support": {
+                "source": "https://github.com/yosiazwan/php-facedetection/tree/0.1.0"
+            },
+            "time": "2016-01-26T22:10:00+00:00"
         }
     ],
     "packages-dev": [],
