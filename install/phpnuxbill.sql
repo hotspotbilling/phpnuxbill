@@ -177,6 +177,7 @@ CREATE TABLE `tbl_users` (
   `ward` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'kelurahan',
   `user_type` enum('SuperAdmin','Admin','Report','Agent','Sales') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` enum('Active','Inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Active',
+  `data` TEXT NULL DEFAULT NULL COMMENT 'to put additional data',
   `last_login` datetime DEFAULT NULL,
   `login_token` VARCHAR(40),
   `creationdate` datetime NOT NULL
