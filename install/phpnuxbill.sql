@@ -166,6 +166,7 @@ DROP TABLE IF EXISTS `tbl_users`;
 CREATE TABLE `tbl_users` (
   `id` int UNSIGNED NOT NULL,
   `root` int NOT NULL DEFAULT '0' COMMENT 'for sub account',
+  `photo` VARCHAR(128) NOT NULL DEFAULT '',
   `username` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `fullname` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `password` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
