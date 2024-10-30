@@ -760,5 +760,7 @@
     "Cron_has_not_run_for_over_1_hour__Please_check_your_setup_": "Cron tidak berjalan selama lebih dari 1 jam. Harap periksa pengaturan Anda.",
     "Photo": "Foto",
     "just_now": "baru saja",
-    "Face_Detection": "Deteksi Wajah"
+    "Face_Detection": "Deteksi Wajah",
+    "Password_should_be_minimum_6_characters": "Kata sandi minimal harus 6 karakter",
+    "Username_should_be_between_3_to_45_characters": "Nama pengguna harus terdiri dari 3 hingga 45 karakter"
 }
