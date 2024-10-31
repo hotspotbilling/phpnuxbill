@@ -776,5 +776,7 @@
     "When_Expired__customer_will_be_move_to_selected_internet_package": "Jika masa berlaku habis, pelanggan akan dipindahkan ke paket internet yang dipilih",
     "Data_Change": "Perubahan Data",
     "Home_Address": "Alamat Rumah",
-    "Email_Address": "Alamat Email"
+    "Email_Address": "Alamat Email",
+    "Custom_Balance": "Saldo Kustom",
+    "Input_Desired_Amount": "Masukkan Jumlah yang Diinginkan"
 }
