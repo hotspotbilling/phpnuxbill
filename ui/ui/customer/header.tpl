@@ -811,13 +811,13 @@
                                 {else}
                                     <span>{$_user['fullname']}</span>
                                 {/if}
-                                <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
+                                <img src="{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
                                     onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="user-image"
                                     alt="User Image">
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
-                                    <img src="https://robohash.org/{$_user['id']}?set=set3&size=100x100&bgset=bg1"
+                                    <img src="{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
                                         onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="img-circle"
                                         alt="User Image">
 

@@ -767,5 +767,14 @@
     "Admin_can_only_have_single_session_login__it_will_logout_another_session": "Admin hanya dapat memiliki login satu sesi, maka akan keluar dari sesi berikutnya",
     "For_Registration_and_Update_Phone_Number": "Untuk Registrasi dan Update Nomor Telepon",
     "Login_as_Customer": "Masuk sebagai Pelanggan",
-    "Invalid_or_Expired_CSRF_Token": "Token CSRF Tidak Valid atau Kedaluwarsa"
+    "Invalid_or_Expired_CSRF_Token": "Token CSRF Tidak Valid atau Kedaluwarsa",
+    "Edit_Service_Package": "Edit Paket Layanan",
+    "Package_Type": "Tipe Paket",
+    "Package_Validity": "Validitas Paket",
+    "Expired_Internet_Package": "Paket Internet Kedaluwarsa",
+    "Default___Remove_Customer": "Default - Hapus Pelanggan",
+    "When_Expired__customer_will_be_move_to_selected_internet_package": "Jika masa berlaku habis, pelanggan akan dipindahkan ke paket internet yang dipilih",
+    "Data_Change": "Perubahan Data",
+    "Home_Address": "Alamat Rumah",
+    "Email_Address": "Alamat Email"
 }
