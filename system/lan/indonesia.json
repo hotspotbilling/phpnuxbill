@@ -808,5 +808,7 @@
     "Created_on": "Dibuat pada",
     "Expires_on": "Kedaluwarsa pada",
     "Package_Details": "Rincian Paket",
-    "Summary": "Ringkasan"
+    "Summary": "Ringkasan",
+    "Allow_Balance_custom_amount": "Izinkan Saldo jumlah khusus",
+    "Allow_Customer_buy_balance_with_any_amount": "Izinkan Pelanggan membeli saldo dengan jumlah berapa pun"
 }

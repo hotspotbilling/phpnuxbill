@@ -14,8 +14,8 @@
                 </div>
                     <div class="panel-body">
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Enable Session Timeout')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
+                            <div class="col-md-5">
                                 <label class="switch">
                                     <input type="checkbox" id="enable_session_timeout" value="1"
                                         name="enable_session_timeout" {if $_c['enable_session_timeout']==1}checked{/if}>
@@ -26,8 +26,8 @@
                                 {Lang::T('Logout Admin if not Available/Online a period of time')}</p>
                         </div>
                         <div class="form-group" id="timeout_duration_input" style="display: none;">
-                            <label class="col-md-2 control-label">{Lang::T('Timeout Duration')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Timeout Duration')}</label>
+                            <div class="col-md-5">
                                 <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
                                     name="session_timeout_duration" id="session_timeout_duration"
                                     placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
@@ -37,8 +37,8 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Single session Admin')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Single session Admin')}</label>
+                            <div class="col-md-5">
                                 <select name="single_session" id="single_session" class="form-control">
                                     <option value="no">
                                         {Lang::T('No')}</option>
@@ -52,8 +52,8 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('New Version Notification')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('New Version Notification')}</label>
+                            <div class="col-md-5">
                                 <select name="new_version_notify" id="new_version_notify" class="form-control">
                                     <option value="enable" {if $_c['new_version_notify']=='enable' }selected="selected"
                                         {/if}>{Lang::T('Enabled')}
@@ -68,8 +68,8 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Router Check')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Router Check')}</label>
+                            <div class="col-md-5">
                                 <select name="router_check" id="router_check" class="form-control">
                                     <option value="0" {if $_c['router_check']=='0' }selected="selected" {/if}>
                                         {Lang::T('Disabled')}
@@ -85,8 +85,8 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Phone OTP Required')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Phone OTP Required')}</label>
+                            <div class="col-md-5">
                                 <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
                                     <option value="no" {if $_c['allow_phone_otp']=='no' }selected="selected" {/if}>
                                         {Lang::T('No')}</option>
@@ -100,8 +100,8 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('OTP Method')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('OTP Method')}</label>
+                            <div class="col-md-5">
                                 <select name="phone_otp_type" id="phone_otp_type" class="form-control">
                                     <option value="sms" {if $_c['phone_otp_type']=='sms' }selected="selected" {/if}>
                                         {Lang::T('By SMS')}
@@ -116,8 +116,8 @@
                             {Lang::T('For Registration and Update Phone Number')}</p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Email OTP Required')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Email OTP Required')}</label>
+                            <div class="col-md-5">
                                 <select name="allow_email_otp" id="allow_email_otp" class="form-control">
                                     <option value="no" {if $_c['allow_email_otp']=='no' }selected="selected" {/if}>
                                         {Lang::T('No')}</option>
@@ -131,8 +131,8 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Show Bandwidth Plan')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Show Bandwidth Plan')}</label>
+                            <div class="col-md-5">
                                 <select name="show_bandwidth_plan" id="show_bandwidth_plan" class="form-control">
                                     <option value="no" {if $_c['show_bandwidth_plan']=='no' }selected="selected" {/if}>
                                         {Lang::T('No')}</option>
@@ -145,8 +145,8 @@
                                 {Lang::T(' for Customer')}</p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Hotspot Auth Method')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Hotspot Auth Method')}</label>
+                            <div class="col-md-5">
                                 <select name="hs_auth_method" id="auth_method" class="form-control">
                                     <option value="api" {if $_c['hs_auth_method']=='api' }selected="selected" {/if}>
                                         {Lang::T('Api')}
@@ -164,8 +164,8 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Check if Customer Online')}</label>
-                            <div class="col-md-6">
+                            <label class="col-md-3 control-label">{Lang::T('Check if Customer Online')}</label>
+                            <div class="col-md-5">
                                 <select name="check_customer_online" id="check_customer_online" class="form-control">
                                     <option value="no">
                                         {Lang::T('No')}
@@ -178,6 +178,24 @@
                             </div>
                             <p class="help-block col-md-4">
                                 {Lang::T('This will show is Customer currently is online or not')}
+                            </p>
+                        </div>
+                        <div class="form-group has-error">
+                            <label class="col-md-3 control-label">{Lang::T('Allow Balance custom amount')}</label>
+                            <div class="col-md-5">
+                                <select name="allow_balance_custom" id="allow_balance_custom" class="form-control">
+                                    <option value="no">
+                                        {Lang::T('No')}
+                                    </option>
+                                    <option value="yes" {if $_c['allow_balance_custom']=='yes' }selected="selected"
+                                        {/if}>
+                                        {Lang::T('Yes')}
+                                    </option>
+                                </select>
+                            </div>
+                            <p class="help-block col-md-4">
+                                {Lang::T('Allow Customer buy balance with any amount')}
+                                <br>*Maybe still have bug
                             </p>
                         </div>
                     </div>
