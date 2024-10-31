@@ -5,7 +5,8 @@
         <div class="box box-{if $d['status']=='Active'}primary{else}danger{/if}">
             <div class="box-body box-profile">
                 <img class="profile-user-img img-responsive img-circle"
-                    src="https://robohash.org/{$d['id']}?set=set3&size=100x100&bgset=bg1"
+                    onclick="window.location.href = '{$UPLOAD_PATH}{$d['photo']}'"
+                    src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg"
                     onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" alt="avatar">
                 <h3 class="profile-username text-center">{$d['fullname']}</h3>
                 <ul class="list-group list-group-unbordered">

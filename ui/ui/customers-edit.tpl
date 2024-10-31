@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}customers/edit-post">
+<form class="form-horizontal" enctype="multipart/form-data" method="post" role="form" action="{$_url}customers/edit-post">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-md-6">
@@ -8,7 +8,21 @@
                 class="panel panel-{if $d['status']=='Active'}primary{else}danger{/if} panel-hovered panel-stacked mb30">
                 <div class="panel-heading">{Lang::T('Edit Contact')}</div>
                 <div class="panel-body">
+                    <center>
+                        <img src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
+                            onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="img-circle img-responsive"
+                            alt="Foto" onclick="return deletePhoto({$d['id']})">
+                    </center><br>
                     <input type="hidden" name="id" value="{$d['id']}">
+                    <div class="form-group">
+                        <label class="col-md-3 col-xs-12 control-label">{Lang::T('Photo')}</label>
+                        <div class="col-md-6 col-xs-8">
+                            <input type="file" class="form-control" name="photo">
+                        </div>
+                        <div class="form-group col-md-3 col-xs-4">
+                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> Facedetect</label>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Username')}</label>
                         <div class="col-md-9">
@@ -121,7 +135,8 @@
                 <div class="panel-heading">PPPOE</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Username')} <span class="label label-danger" id="warning_username"></span></label>
+                        <label class="col-md-3 control-label">{Lang::T('Username')} <span class="label label-danger"
+                                id="warning_username"></span></label>
                         <div class="col-md-9">
                             <input type="username" class="form-control" id="pppoe_username" name="pppoe_username"
                                 onkeyup="checkUsername(this, {$d['id']})" value="{$d['pppoe_username']}">
@@ -137,7 +152,8 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">Remote IP <span class="label label-danger" id="warning_ip"></span></label>
+                        <label class="col-md-3 control-label">Remote IP <span class="label label-danger"
+                                id="warning_ip"></span></label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
                                 onkeyup="checkIP(this, {$d['id']})" value="{$d['pppoe_ip']}">
@@ -227,7 +243,8 @@
         </div>
     </div>
     <center>
-        <button class="btn btn-primary" onclick="return confirm('Continue the Customer Data change process?')" type="submit">
+        <button class="btn btn-primary" onclick="return confirm('Continue the Customer Data change process?')"
+            type="submit">
             {Lang::T('Save Changes')}
         </button>
         <br><a href="{$_url}customers/list" class="btn btn-link">{Lang::T('Cancel')}</a>
@@ -310,5 +327,15 @@
         }
     </script>
 {/literal}
+
+<script>
+    function deletePhoto(id) {
+        if (confirm('Delete photo?')) {
+            if (confirm('Are you sure to delete photo?')) {
+                window.location.href = '{$_url}customers/edit/'+id+'/deletePhoto'
+            }
+        }
+    }
+</script>
 
 {include file="sections/footer.tpl"}

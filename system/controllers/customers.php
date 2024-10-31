@@ -305,8 +305,6 @@ switch ($action) {
             $customer = ORM::for_table('tbl_customers')->find_one($id);
         }
         if ($customer) {
-
-
             // Fetch the Customers Attributes values from the tbl_customer_custom_fields table
             $customFields = ORM::for_table('tbl_customers_fields')
                 ->where('customer_id', $customer['id'])
@@ -341,10 +339,6 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id = $routes['2'];
-        $csrf_token = _req('token');
-        if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/view/' . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
-        }
         run_hook('edit_customer'); #HOOK
         $d = ORM::for_table('tbl_customers')->find_one($id);
         // Fetch the Customers Attributes values from the tbl_customers_fields table
@@ -352,6 +346,23 @@ switch ($action) {
             ->where('customer_id', $id)
             ->find_many();
         if ($d) {
+            if(isset($routes['3']) && $routes['3'] == 'deletePhoto'){
+                if($d['photo'] != '' && $d['photo'] != '/user.default.jpg'){
+                    if(file_exists($UPLOAD_PATH.$d['photo'])){
+                        unlink($UPLOAD_PATH.$d['photo']);
+                        if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){
+                            unlink($UPLOAD_PATH.$d['photo'].'.thumb.jpg');
+                        }
+                    }
+                    $d->photo = '/user.default.jpg';
+                    $d->save();
+                    $ui->assign('notify_t', 's');
+                    $ui->assign('notify', 'You have successfully deleted the photo');
+                }else{
+                    $ui->assign('notify_t', 'e');
+                    $ui->assign('notify', 'No photo found to delete');
+                }
+            }
             $ui->assign('d', $d);
             $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
             $ui->assign('customFields', $customFields);
@@ -617,6 +628,54 @@ switch ($action) {
         }
 
         if ($msg == '') {
+            if (!empty($_FILES['photo']['name'])) {
+                if (function_exists('imagecreatetruecolor')) {
+                    $hash = md5_file($_FILES['photo']['tmp_name']);
+                    $subfolder = substr($hash, 0, 2);
+                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos'. DIRECTORY_SEPARATOR;
+                    if(!file_exists($folder)){
+                        mkdir($folder);
+                    }
+                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos'. DIRECTORY_SEPARATOR. $subfolder. DIRECTORY_SEPARATOR;
+                    if(!file_exists($folder)){
+                        mkdir($folder);
+                    }
+                    $imgPath = $folder . $hash . '.jpg';
+                    if (!file_exists($imgPath)){
+                        File::resizeCropImage($_FILES['photo']['tmp_name'], $imgPath, 1600, 1600, 100);
+                    }
+                    if (!file_exists($imgPath.'.thumb.jpg')){
+                        if(_post('faceDetect') == 'yes'){
+                            try{
+                                $detector = new svay\FaceDetector();
+                                $detector->setTimeout(5000);
+                                $detector->faceDetect($imgPath);
+                                $detector->cropFaceToJpeg($imgPath.'.thumb.jpg', false);
+                            }catch (Exception $e) {
+                                File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                            } catch (Throwable $e) {
+                                File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                            }
+                        }else{
+                            File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                        }
+                    }
+                    if(file_exists($imgPath)){
+                        if($c['photo'] != ''){
+                            if(file_exists($UPLOAD_PATH.$d['photo'])){
+                                unlink($UPLOAD_PATH.$d['photo']);
+                                if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){
+                                    unlink($UPLOAD_PATH.$d['photo'].'.thumb.jpg');
+                                }
+                            }
+                        }
+                        $c->photo = '/photos/'. $subfolder. '/'. $hash. '.jpg';
+                    }
+                    if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
+                } else {
+                    r2(U . 'settings/app', 'e', 'PHP GD is not installed');
+                }
+            }
             if ($userDiff) {
                 $c->username = $username;
             }

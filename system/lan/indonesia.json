@@ -765,5 +765,7 @@
     "Username_should_be_between_3_to_45_characters": "Nama pengguna harus terdiri dari 3 hingga 45 karakter",
     "Single_session_Admin": "Sesi Tunggal Admin",
     "Admin_can_only_have_single_session_login__it_will_logout_another_session": "Admin hanya dapat memiliki login satu sesi, maka akan keluar dari sesi berikutnya",
-    "For_Registration_and_Update_Phone_Number": "Untuk Registrasi dan Update Nomor Telepon"
+    "For_Registration_and_Update_Phone_Number": "Untuk Registrasi dan Update Nomor Telepon",
+    "Login_as_Customer": "Masuk sebagai Pelanggan",
+    "Invalid_or_Expired_CSRF_Token": "Token CSRF Tidak Valid atau Kedaluwarsa"
 }
