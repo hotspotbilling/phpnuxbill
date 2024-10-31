@@ -9,7 +9,7 @@
         </div>
     </div>
     {/if}
-    <div class="{if file_exists(" $PAGES_PATH/Payment_Info.html")}col-md-6{else}col-md-6 col-md-offset-3{/if}">
+    <div class="{if file_exists("$PAGES_PATH/Payment_Info.html")}col-md-6{else}col-md-6 col-md-offset-3{/if}">
         <div class="panel panel-success panel-hovered">
             <div class="panel-heading">{Lang::T('Available Payment Gateway')}</div>
             <div class="panel-footer">
