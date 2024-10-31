@@ -131,19 +131,6 @@
                             </p>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>
-                            <div class="col-md-6">
-                                <select name="extend_expiry" id="extend_expiry" class="form-control">
-                                    <option value="yes" {if $_c['extend_expiry']!='no' }selected="selected" {/if}>
-                                        {Lang::T('Yes')}</option>
-                                    <option value="no" {if $_c['extend_expiry']=='no' }selected="selected" {/if}>
-                                        {Lang::T('No')}</option>
-                                </select>
-                            </div>
-                            <p class="help-block col-md-4">
-                                {Lang::T('If user buy same internet plan, expiry date will extend')}</p>
-                        </div>
-                        <div class="form-group">
                             <label class="col-md-2 control-label">{Lang::T('Show Bandwidth Plan')}</label>
                             <div class="col-md-6">
                                 <select name="show_bandwidth_plan" id="show_bandwidth_plan" class="form-control">

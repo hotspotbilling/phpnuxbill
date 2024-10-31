@@ -341,12 +341,11 @@ class Radius
             // expired user
             if ($expired != '') {
                 //extend session time only if the plan are the same
-                if ($plan['plan_id'] == $p['plan_id'] && $config['extend_expiry'] != 'no') {
-                    // session timeout [it reset everyday, am still making my research] we can use it for something like 1H/Day - since it reset daily, and Max-All-Session clear everything
-                    //$this->upsertCustomer($customer['username'], 'Session-Timeout', 3600); // 3600 = 1 hour
-                    $this->upsertCustomer($customer['username'], 'Max-All-Session', strtotime($expired) - time());
-                    $this->upsertCustomer($customer['username'], 'Expiration', date('d M Y H:i:s', strtotime($expired)));
-                }
+                // session timeout [it reset everyday, am still making my research] we can use it for something like 1H/Day - since it reset daily, and Max-All-Session clear everything
+                //$this->upsertCustomer($customer['username'], 'Session-Timeout', 3600); // 3600 = 1 hour
+                $this->upsertCustomer($customer['username'], 'Max-All-Session', strtotime($expired) - time());
+                $this->upsertCustomer($customer['username'], 'Expiration', date('d M Y H:i:s', strtotime($expired)));
+
                 // Mikrotik Spesific
                 $this->upsertCustomer(
                     $customer['username'],
@@ -372,7 +371,7 @@ class Radius
 				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Address', '0.0.0.0', ':=');
 				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Netmask', '255.255.255.0', ':=');
 				}
-            } 
+            }
 
 
             return true;

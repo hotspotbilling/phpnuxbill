@@ -762,5 +762,8 @@
     "just_now": "baru saja",
     "Face_Detection": "Deteksi Wajah",
     "Password_should_be_minimum_6_characters": "Kata sandi minimal harus 6 karakter",
-    "Username_should_be_between_3_to_45_characters": "Nama pengguna harus terdiri dari 3 hingga 45 karakter"
+    "Username_should_be_between_3_to_45_characters": "Nama pengguna harus terdiri dari 3 hingga 45 karakter",
+    "Single_session_Admin": "Sesi Tunggal Admin",
+    "Admin_can_only_have_single_session_login__it_will_logout_another_session": "Admin hanya dapat memiliki login satu sesi, maka akan keluar dari sesi berikutnya",
+    "For_Registration_and_Update_Phone_Number": "Untuk Registrasi dan Update Nomor Telepon"
 }
