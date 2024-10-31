@@ -26,7 +26,7 @@
             </div>
             <div class="panel-body">
                 <form id="site-search" method="post" action="{$_url}customers">
-                 <input type="hidden" name="csrf_token" value="{$csrf_token}">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                         <div class="col-lg-4">
                             <div class="input-group">
@@ -96,6 +96,7 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Username')}</th>
+                                <th>Photo</th>
                                 <th>{Lang::T('Account Type')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Balance')}</th>
@@ -113,6 +114,11 @@
                                 <tr {if $ds['status'] != 'Active'}class="danger" {/if}>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
+                                    <td>
+                                        <a href="{$UPLOAD_PATH}{$ds['photo']}" target="photo">
+                                            <img src="{$UPLOAD_PATH}{$ds['photo']}.thumb.jpg" width="32" alt="">
+                                        </a>
+                                    </td>
                                     <td>{$ds['account_type']}</td>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor: pointer;">{$ds['fullname']}</td>
@@ -120,8 +126,7 @@
                                     <td align="center">
                                         {if $ds['phonenumber']}
                                             <a href="tel:{$ds['phonenumber']}" class="btn btn-default btn-xs"
-                                                title="{$ds['phonenumber']}"><i
-                                                    class="glyphicon glyphicon-earphone"></i></a>
+                                                title="{$ds['phonenumber']}"><i class="glyphicon glyphicon-earphone"></i></a>
                                         {/if}
                                         {if $ds['email']}
                                             <a href="mailto:{$ds['email']}" class="btn btn-default btn-xs"
@@ -139,7 +144,7 @@
                                     <td>{$ds['service_type']}</td>
                                     <td>
                                         {$ds['pppoe_username']}
-                                    {if !empty($ds['pppoe_username']) && !empty($ds['pppoe_ip'])}:{/if}
+                                        {if !empty($ds['pppoe_username']) && !empty($ds['pppoe_ip'])}:{/if}
                                         {$ds['pppoe_ip']}
                                     </td>
                                     <td>{Lang::T($ds['status'])}</td>
@@ -154,8 +159,8 @@
                                         <a href="{$_url}customers/sync/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
                                             style="margin: 5px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('Sync')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}plan/recharge/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}" style="margin: 0px;"
-                                            class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
+                                        <a href="{$_url}plan/recharge/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
+                                            style="margin: 0px;" class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
                                     </td>
                                 </tr>
                             {/foreach}

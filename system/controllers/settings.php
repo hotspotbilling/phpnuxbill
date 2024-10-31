@@ -475,8 +475,8 @@ switch ($action) {
         }
         if ($d) {
             if(isset($routes['3']) && $routes['3'] == 'deletePhoto'){
-                if($d['photo'] != '' && $d['photo'] != '/admin.default.png'){
-                    if(file_exists($UPLOAD_PATH.$d['photo'])){
+                if($d['photo'] != '' && strpos($d['photo'], 'default') === false){
+                    if(file_exists($UPLOAD_PATH.$d['photo']) && strpos($d['photo'], 'default') === false){
                         unlink($UPLOAD_PATH.$d['photo']);
                         if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){
                             unlink($UPLOAD_PATH.$d['photo'].'.thumb.jpg');
@@ -653,7 +653,7 @@ switch ($action) {
         }
         run_hook('edit_admin'); #HOOK
         if ($msg == '') {
-            if (!empty($_FILES['photo']['name'])) {
+            if (!empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
                 if (function_exists('imagecreatetruecolor')) {
                     $hash = md5_file($_FILES['photo']['tmp_name']);
                     $subfolder = substr($hash, 0, 2);
@@ -686,7 +686,7 @@ switch ($action) {
                         }
                     }
                     if(file_exists($imgPath)){
-                        if($d['photo'] != ''){
+                        if($d['photo'] != ''  && strpos($d['photo'], 'default') === false){
                             if(file_exists($UPLOAD_PATH.$d['photo'])){
                                 unlink($UPLOAD_PATH.$d['photo']);
                                 if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){

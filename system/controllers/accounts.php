@@ -96,7 +96,7 @@ switch ($action) {
         }
 
         if (empty($msg)) {
-            if (!empty($_FILES['photo']['name'])) {
+            if (!empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
                 if (function_exists('imagecreatetruecolor')) {
                     $hash = md5_file($_FILES['photo']['tmp_name']);
                     $subfolder = substr($hash, 0, 2);
@@ -129,11 +129,11 @@ switch ($action) {
                         }
                     }
                     if (file_exists($imgPath)) {
-                        if ($user['photo'] != '') {
-                            if (file_exists($UPLOAD_PATH . $d['photo'])) {
-                                unlink($UPLOAD_PATH . $d['photo']);
-                                if (file_exists($UPLOAD_PATH . $d['photo'] . '.thumb.jpg')) {
-                                    unlink($UPLOAD_PATH . $d['photo'] . '.thumb.jpg');
+                        if ($user['photo'] != '' && strpos($user['photo'], 'default') === false) {
+                            if (file_exists($UPLOAD_PATH . $user['photo'])) {
+                                unlink($UPLOAD_PATH . $user['photo']);
+                                if (file_exists($UPLOAD_PATH . $user['photo'] . '.thumb.jpg')) {
+                                    unlink($UPLOAD_PATH . $user['photo'] . '.thumb.jpg');
                                 }
                             }
                         }

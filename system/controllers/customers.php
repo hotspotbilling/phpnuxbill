@@ -347,8 +347,8 @@ switch ($action) {
             ->find_many();
         if ($d) {
             if(isset($routes['3']) && $routes['3'] == 'deletePhoto'){
-                if($d['photo'] != '' && $d['photo'] != '/user.default.jpg'){
-                    if(file_exists($UPLOAD_PATH.$d['photo'])){
+                if($d['photo'] != '' && strpos($d['photo'], 'default') === false){
+                    if(file_exists($UPLOAD_PATH.$d['photo']) && strpos($d['photo'], 'default') === false){
                         unlink($UPLOAD_PATH.$d['photo']);
                         if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){
                             unlink($UPLOAD_PATH.$d['photo'].'.thumb.jpg');
@@ -628,7 +628,7 @@ switch ($action) {
         }
 
         if ($msg == '') {
-            if (!empty($_FILES['photo']['name'])) {
+            if (!empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
                 if (function_exists('imagecreatetruecolor')) {
                     $hash = md5_file($_FILES['photo']['tmp_name']);
                     $subfolder = substr($hash, 0, 2);
@@ -661,11 +661,11 @@ switch ($action) {
                         }
                     }
                     if(file_exists($imgPath)){
-                        if($c['photo'] != ''){
-                            if(file_exists($UPLOAD_PATH.$d['photo'])){
-                                unlink($UPLOAD_PATH.$d['photo']);
-                                if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){
-                                    unlink($UPLOAD_PATH.$d['photo'].'.thumb.jpg');
+                        if($c['photo'] != '' && strpos($c['photo'], 'default') === false){
+                            if(file_exists($UPLOAD_PATH.$c['photo'])){
+                                unlink($UPLOAD_PATH.$c['photo']);
+                                if(file_exists($UPLOAD_PATH.$c['photo'].'.thumb.jpg')){
+                                    unlink($UPLOAD_PATH.$c['photo'].'.thumb.jpg');
                                 }
                             }
                         }

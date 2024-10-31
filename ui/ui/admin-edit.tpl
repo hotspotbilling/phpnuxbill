@@ -21,7 +21,7 @@
                         <div class="col-md-6 col-xs-8">
                             <input type="file" class="form-control" name="photo" accept="image/*">
                         </div>
-                        <div class="form-group col-md-3 col-xs-4">
+                        <div class="form-group col-md-3 col-xs-4" title="Not always Working">
                             <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> Facedetect</label>
                         </div>
                     </div>

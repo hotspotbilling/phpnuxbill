@@ -180,12 +180,12 @@ class FaceDetector
      *
      * @throws NoFaceException
      */
-    public function cropFaceToJpeg($outFileName = null, $resize = false, $width = 200)
+    public function cropFaceToJpeg($outFileName = null, $width = 200)
     {
         if (empty($this->face)) {
             throw new NoFaceException('No face detected');
         }
-        if (!$resize) {
+        // if (!$resize) {
             $x = ($a = $this->face['x'] - $this->face['w'] / 2) > 0 ? $a : 0;
             $y = ($b = $this->face['y'] - $this->face['w'] / 2) > 0 ? $b : 0;
             $im_width = imagesx($this->canvas);
@@ -193,24 +193,24 @@ class FaceDetector
             $w = ($w = $this->face['w'] * 2) > $im_width ? $im_width : $w;
             $h = ($h = $w) > $im_height ? $im_height : $h;
 
-            $canvas = imagecreatetruecolor($w, $h);
+            $canvas = imagecreatetruecolor($width, $width);
             imagecopy($canvas, $this->canvas, 0, 0, $x, $y, $w, $h);
             // $canvas = imagecreatetruecolor($this->face['w'], $this->face['w']);
             // imagecopy($canvas, $this->canvas, 0, 0, $this->face['x'], $this->face['y'], $this->face['w'], $this->face['w']);
-        } else {
-            $x = ($a = $this->face['x'] - $width / 2) > 0 ? $a : 0;
-            $y = ($b = $this->face['y'] - $width / 2) > 0 ? $b : 0;
-            $im_width = imagesx($this->canvas);
-            $im_height = imagesy($this->canvas);
-            $w = ($w = $width * 2) > $im_width ? $im_width : $w;
-            $h = ($h = $w) > $im_height ? $im_height : $h;
+        // } else {
+        //     $x = ($a = $this->face['x'] - $width / 2) > 0 ? $a : 0;
+        //     $y = ($b = $this->face['y'] - $width / 2) > 0 ? $b : 0;
+        //     $im_width = imagesx($this->canvas);
+        //     $im_height = imagesy($this->canvas);
+        //     $w = ($w = $width * 2) > $im_width ? $im_width : $w;
+        //     $h = ($h = $w) > $im_height ? $im_height : $h;
 
-            $canvas = imagecreatetruecolor($w, $h);
-            imagecopy($canvas, $this->canvas, 0, 0, $x, $y, $w, $h);
+        //     $canvas = imagecreatetruecolor($w, $h);
+        //     imagecopy($canvas, $this->canvas, 0, 0, $width, $width, $w, $h);
 
-            // $canvas = imagecreatetruecolor($width, $width);
-            // imagecopyresized($canvas, $this->canvas, 0, 0, $this->face['x'], $this->face['y'], $width, $width, $this->face['w'], $this->face['w']);
-        }
+        //     // $canvas = imagecreatetruecolor($width, $width);
+        //     // imagecopyresized($canvas, $this->canvas, 0, 0, $this->face['x'], $this->face['y'], $width, $width, $this->face['w'], $this->face['w']);
+        // }
 
         if ($outFileName === null) {
             header('Content-type: image/jpeg');

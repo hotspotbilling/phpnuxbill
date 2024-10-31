@@ -810,5 +810,20 @@
     "Package_Details": "Rincian Paket",
     "Summary": "Ringkasan",
     "Allow_Balance_custom_amount": "Izinkan Saldo jumlah khusus",
-    "Allow_Customer_buy_balance_with_any_amount": "Izinkan Pelanggan membeli saldo dengan jumlah berapa pun"
+    "Allow_Customer_buy_balance_with_any_amount": "Izinkan Pelanggan membeli saldo dengan jumlah berapa pun",
+    "Or": "Atau",
+    "Filter": "Menyaring",
+    "Show_chart": "Tampilkan grafik",
+    "Start_Date": "Tanggal Mulai",
+    "Start_time": "Waktu mulai",
+    "End_Date": "Tanggal Akhir",
+    "End_Time": "Akhir Zaman",
+    "Internet_Plans": "Paket Internet",
+    "Methods": "Metode",
+    "Hap_Lite": "Hap Lite",
+    "balance": "keseimbangan",
+    "radius": "radius",
+    "Max_30_days": "Maksimal 30 hari",
+    "Information": "Informasi",
+    "Export_and_Print_will_show_all_data_without_pagination": "Ekspor dan Cetak akan menampilkan semua data tanpa pagination"
 }
