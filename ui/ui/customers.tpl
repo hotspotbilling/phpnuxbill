@@ -36,6 +36,10 @@
                                         <select class="form-control" id="order" name="order">
                                             <option value="username" {if $order eq 'username' }selected{/if}>
                                                 {Lang::T('Username')}</option>
+                                            <option value="fullname" {if $order eq 'fullname' }selected{/if}>
+                                                {Lang::T('First Name')}</option>
+                                            <option value="lastname" {if $order eq 'lastname' }selected{/if}>
+                                                {Lang::T('Last Name')}</option>
                                             <option value="created_at" {if $order eq 'created_at' }selected{/if}>
                                                 {Lang::T('Created Date')}</option>
                                             <option value="balance" {if $order eq 'balance' }selected{/if}>
@@ -68,15 +72,12 @@
                         </div>
                         <div class="col-lg-4">
                             <div class="input-group">
-                                <div class="input-group-addon">
-                                    <span class="fa fa-search"></span>
-                                </div>
                                 <input type="text" name="search" class="form-control"
                                     placeholder="{Lang::T('Search')}..." value="{$search}">
                                 <div class="input-group-btn">
                                     <button class="btn btn-primary" type="submit"><span
-                                            class="fa fa-search"></span></button>
-                                    <button class="btn btn-primary" type="submit" name="export" value="csv">
+                                            class="fa fa-search"></span> {Lang::T('Search')}</button>
+                                    <button class="btn btn-info" type="submit" name="export" value="csv">
                                         <span class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV
                                     </button>
                                 </div>

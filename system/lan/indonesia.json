@@ -825,5 +825,7 @@
     "radius": "radius",
     "Max_30_days": "Maksimal 30 hari",
     "Information": "Informasi",
-    "Export_and_Print_will_show_all_data_without_pagination": "Ekspor dan Cetak akan menampilkan semua data tanpa pagination"
+    "Export_and_Print_will_show_all_data_without_pagination": "Ekspor dan Cetak akan menampilkan semua data tanpa pagination",
+    "First_Name": "Nama depan",
+    "Last_Name": "Nama Belakang"
 }

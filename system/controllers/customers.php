@@ -809,10 +809,14 @@ switch ($action) {
             $query = ORM::for_table('tbl_customers');
             $query->where("status", $filter);
         }
-        if ($orderby == 'asc') {
-            $query->order_by_asc($order);
-        } else {
-            $query->order_by_desc($order);
+        if($order == 'lastname') {
+            $query->order_by_expr("SUBSTR(fullname, INSTR(fullname, ' ')) $orderby");
+        }else{
+            if ($orderby == 'asc') {
+                $query->order_by_asc($order);
+            } else {
+                $query->order_by_desc($order);
+            }
         }
         if (_post('export', '') == 'csv') {
             $csrf_token = _post('csrf_token');
