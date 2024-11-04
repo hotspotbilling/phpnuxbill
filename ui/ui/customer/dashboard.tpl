@@ -325,7 +325,7 @@
                     <script>
                         setTimeout(() => {
                             $.ajax({
-                                url: "index.php?_route=autoload_user/isLogin/{$_bill['id']}",
+                                url: "?_route=autoload_user/isLogin/{$_bill['id']}",
                                 cache: false,
                                 success: function(msg) {
                                     $("#login_status_{$_bill['id']}").html(msg);

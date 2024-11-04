@@ -170,7 +170,7 @@
                     document.getElementById("routers").required = false;
                     document.getElementById("routers").disabled = true;
                     $.ajax({
-                        url: "index.php?_route=autoload/pool",
+                        url: "?_route=autoload/pool",
                         data: "routers=radius",
                         cache: false,
                         success: function(msg) {

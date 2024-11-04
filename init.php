@@ -87,7 +87,7 @@ if ($_app_stage != 'Live') {
 if ($isApi) {
     define('U', APP_URL . '/system/api.php?r=');
 } else {
-    define('U', APP_URL . '/index.php?_route=');
+    define('U', APP_URL . '/?_route=');
 }
 
 // notification message

@@ -281,7 +281,7 @@ function deleteFolder($path)
                                     PHPNuxBill has been updated to Version <b><?= $version ?></b>
                                 </div>
                             </div>
-                            <meta http-equiv="refresh" content="5; ./index.php?_route=dashboard">
+                            <meta http-equiv="refresh" content="5; ./?_route=dashboard">
                         <?php } ?>
                     <?php } ?>
                 </div>

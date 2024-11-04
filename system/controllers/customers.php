@@ -507,7 +507,7 @@ switch ($action) {
                 $welcomeMessage = str_replace('[[name]]', $d['fullname'], $welcomeMessage);
                 $welcomeMessage = str_replace('[[username]]', $d['username'], $welcomeMessage);
                 $welcomeMessage = str_replace('[[password]]', $d['password'], $welcomeMessage);
-                $welcomeMessage = str_replace('[[url]]', APP_URL . '/index.php?_route=login', $welcomeMessage);
+                $welcomeMessage = str_replace('[[url]]', APP_URL . '/?_route=login', $welcomeMessage);
 
                 $emailSubject = "Welcome to " . $config['CompanyName'];
 

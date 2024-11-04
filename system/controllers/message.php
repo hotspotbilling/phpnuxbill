@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
         ajax: {
             url: function(params) {
                 if(params.term != undefined){
-                    return './index.php?_route=autoload/customer_select2&s='+params.term;
+                    return './?_route=autoload/customer_select2&s='+params.term;
                 }else{
-                    return './index.php?_route=autoload/customer_select2';
+                    return './?_route=autoload/customer_select2';
                 }
             }
         }

@@ -843,5 +843,6 @@
     "Settings_For_Cron_Reminder": "Pengaturan Untuk Pengingat Cron",
     "Security": "Keamanan",
     "Enable_CSRF_Validation": "Aktifkan Validasi CSRF",
-    "Cross_site_request_forgery": "Pemalsuan permintaan lintas situs"
+    "Cross_site_request_forgery": "Pemalsuan permintaan lintas situs",
+    "Forgot_Password": "Lupa Kata Sandi"
 }

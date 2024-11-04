@@ -157,10 +157,15 @@ class User
         return [];
     }
 
-    public static function generateToken($uid)
+    public static function generateToken($uid, $validDays = 30)
     {
         global $db_pass;
-        $time = time();
+        if($validDays>=30){
+            $time = time();
+        }else{
+            $time = strtotime("+ $validDays days");
+        }
+
         return [
             'time' => $time,
             'token' => $uid . '.' . $time . '.' . sha1($uid . '.' . $time . '.' . $db_pass)
