@@ -188,6 +188,20 @@ class Message
         } else {
             $msg = str_replace('[[expired_date]]', "", $msg);
         }
+
+        if(strpos($msg, '[[payment_link]]')!== false){
+            // token only valid for 1 day, for security reason
+            $token = User::generateToken($customer['id'], 1);
+            $tur = ORM::for_table('tbl_user_recharges')
+                ->where('customer_id', $customer['id'])
+                ->where('namebp', $package)
+                ->find_one();
+            if($tur){
+                $url = APP_URL . '?_route=home&recharge='. $tur.'uid='. $token;
+                $msg = str_replace('[[payment_link]]', $url, $msg);
+            }
+        }
+
         if (
             !empty($customer['phonenumber']) && strlen($customer['phonenumber']) > 5
             && !empty($message) && in_array($via, ['sms', 'wa'])

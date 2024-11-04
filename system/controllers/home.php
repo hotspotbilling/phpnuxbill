@@ -143,19 +143,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             $routers = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
             $router = $routers['id'];
         }
-        if ($config['enable_balance'] == 'yes') {
-            $plan = ORM::for_table('tbl_plans')->find_one($bill['plan_id']);
-            if (!$plan['enabled']) {
-                r2(U . "home", 'e', 'Plan is not exists');
-            }
-            if ($user['balance'] > $plan['price']) {
-                r2(U . "order/pay/$router/$bill[plan_id]&stoken=" . _get('stoken'), 'e', 'Order Plan');
-            } else {
-                r2(U . "order/buy/$router/$bill[plan_id]", 'e', 'Order Plan');
-            }
-        } else {
-            r2(U . "order/buy/$router/$bill[plan_id]", 'e', 'Order Plan');
-        }
+        r2(U. "order/gateway/$router/$bill[plan_id]");
     }
 } else if (!empty(_get('extend'))) {
     if ($user['status'] != 'Active') {

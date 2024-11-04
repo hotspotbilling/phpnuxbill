@@ -30,13 +30,9 @@ class Balance
     public static function min($id_customer, $amount)
     {
         $c = ORM::for_table('tbl_customers')->where('id', $id_customer)->find_one();
-        if ($c && $c['balance'] >= $amount) {
-            $c->balance = $c['balance'] - $amount;
-            $c->save();
-            return true;
-        } else {
-            return false;
-        }
+        $c->balance = $c['balance'] - $amount;
+        $c->save();
+        return true;
     }
 
     public static function plusByPhone($phone_customer, $amount)

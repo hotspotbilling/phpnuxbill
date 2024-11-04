@@ -878,5 +878,12 @@
     "Token_has_expired__Please_log_in_again_": "Token has expired. Please log in again.",
     "Minute": "Minute",
     "Hour": "Hour",
-    "Failed_to_connect_to_device": "Failed to connect to device"
+    "Failed_to_connect_to_device": "Failed to connect to device",
+    "Custom_Balance": "Custom Balance",
+    "Input_Desired_Amount": "Input Desired Amount",
+    "Security": "Security",
+    "Enable_CSRF_Validation": "Enable CSRF Validation",
+    "Cross_site_request_forgery": "Cross-site request forgery",
+    "Validity_Periode": "Validity Periode",
+    "Insufficient_balance": "Insufficient balance"
 }

@@ -35,8 +35,9 @@
                                                         <td>{Lang::T('Price')}</td>
                                                         <td>{Lang::moneyFormat($plan['price'])}
                                                             {if !empty($plan['price_old'])}
-                                                                <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                    {/if}
+                                                                <sup
+                                                                    style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                            {/if}
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -48,18 +49,67 @@
                                         </div>
                                     </div>
                                     <div class="box-body">
-                                        <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                            <a href="{$_url}order/gateway/radius/{$plan['id']}&stoken={App::getToken()}"
-                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                            {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                                <a href="{$_url}order/pay/radius/{$plan['id']}&stoken={App::getToken()}"
-                                                    onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                    class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                            {/if}
+                                        <a href="{$_url}order/gateway/radius/{$plan['id']}&stoken={App::getToken()}"
+                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
+                                            <a href="{$_url}order/send/radius/{$plan['id']}&stoken={App::getToken()}"
+                                                onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
+                                                class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        {/foreach}
+                    </div>
+                {/if}
+            {elseif $_user['service_type'] == 'Hotspot'}
+                {if Lang::arrayCount($radius_hotspot)>0}
+                    <ol class="breadcrumb">
+                        <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
+                        <li>{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}</li>
+                    </ol>
+                    <div class="row">
+                        {foreach $radius_hotspot as $plan}
+                            <div class="col col-md-4">
+                                <div class="box box-primary">
+                                    <div class="box-header text-bold">{$plan['name_plan']}</div>
+                                    <div class="table-responsive">
+                                        <div style="margin-left: 5px; margin-right: 5px;">
+                                            <table class="table table-bordered table-striped">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>{Lang::T('Type')}</td>
+                                                        <td>{$plan['type']}</td>
+                                                    </tr>
+                                                    {if $_c['show_bandwidth_plan'] == 'yes'}
+                                                        <tr>
+                                                            <td>{Lang::T('Bandwidth')}</td>
+                                                            <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
+                                                        </tr>
+                                                    {/if}
+                                                    <tr>
+                                                        <td>{Lang::T('Price')}</td>
+                                                        <td>{Lang::moneyFormat($plan['price'])}
+                                                            {if !empty($plan['price_old'])}
+                                                                <sup
+                                                                    style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                            {/if}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>{Lang::T('Validity')}</td>
+                                                        <td>{$plan['validity']} {$plan['validity_unit']}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                                                                                                        $_user['balance']>=$plan['price']}
+                                    </div>
+                                    <div class="box-body">
+                                        <a href="{$_url}order/gateway/radius/{$plan['id']}&stoken={App::getToken()}"
+                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
                                         <a href="{$_url}order/send/radius/{$plan['id']}&stoken={App::getToken()}"
                                             onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                             class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -70,14 +120,15 @@
                     {/foreach}
                 </div>
             {/if}
-        {elseif $_user['service_type'] == 'Hotspot'}
-            {if Lang::arrayCount($radius_hotspot)>0}
-                <ol class="breadcrumb">
-                    <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
-                    <li>{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}</li>
-                </ol>
+            {elseif $_user['service_type'] == 'Others' || $_user['service_type'] == '' && (Lang::arrayCount($radius_pppoe)>0
+                    || Lang::arrayCount($radius_hotspot)>0)}
+            <ol class="breadcrumb">
+                <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
+                <li>{if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}</li>
+            </ol>
+            {if Lang::arrayCount($radius_pppoe)>0}
                 <div class="row">
-                    {foreach $radius_hotspot as $plan}
+                    {foreach $radius_pppoe as $plan}
                         <div class="col col-md-4">
                             <div class="box box-primary">
                                 <div class="box-header text-bold">{$plan['name_plan']}</div>
@@ -99,8 +150,9 @@
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
                                                         {if !empty($plan['price_old'])}
-                                                            <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                {/if}
+                                                            <sup
+                                                                style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                        {/if}
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -112,19 +164,11 @@
                                     </div>
                                 </div>
                                 <div class="box-body">
-                                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                        <a href="{$_url}order/gateway/radius/{$plan['id']}&stoken={App::getToken()}"
-                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                        {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                            <a href="{$_url}order/pay/radius/{$plan['id']}&stoken={App::getToken()}"
-                                                onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                        {/if}
-                                    </div>
-                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                                                            $_user['balance']>=$plan['price']}
-                                    <a href="{$_url}order/send/radius/{$plan['id']}&stoken={App::getToken()}"
+                                    <a href="{$_url}order/gateway/pppoe/{$plan['id']}&stoken={App::getToken()}"
+                                        onclick="return confirm('{Lang::T('Buy this? your active package will be overwritten')}')"
+                                        class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
+                                    <a href="{$_url}order/send/pppoe/{$plan['id']}&stoken={App::getToken()}"
                                         onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                         class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
                                 {/if}
@@ -133,71 +177,6 @@
                     </div>
                 {/foreach}
             </div>
-        {/if}
-        {elseif $_user['service_type'] == 'Others' || $_user['service_type'] == '' && (Lang::arrayCount($radius_pppoe)>0
-        || Lang::arrayCount($radius_hotspot)>0)}
-        <ol class="breadcrumb">
-            <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
-            <li>{if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}</li>
-        </ol>
-        {if Lang::arrayCount($radius_pppoe)>0}
-            <div class="row">
-                {foreach $radius_pppoe as $plan}
-                    <div class="col col-md-4">
-                        <div class="box box-primary">
-                            <div class="box-header text-bold">{$plan['name_plan']}</div>
-                            <div class="table-responsive">
-                                <div style="margin-left: 5px; margin-right: 5px;">
-                                    <table class="table table-bordered table-striped">
-                                        <tbody>
-                                            <tr>
-                                                <td>{Lang::T('Type')}</td>
-                                                <td>{$plan['type']}</td>
-                                            </tr>
-                                            {if $_c['show_bandwidth_plan'] == 'yes'}
-                                                <tr>
-                                                    <td>{Lang::T('Bandwidth')}</td>
-                                                    <td api-get-text="{$_url}autoload_user/bw_name/{$plan['id_bw']}"></td>
-                                                </tr>
-                                            {/if}
-                                            <tr>
-                                                <td>{Lang::T('Price')}</td>
-                                                <td>{Lang::moneyFormat($plan['price'])}
-                                                    {if !empty($plan['price_old'])}
-                                                        <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                            {/if}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>{Lang::T('Validity')}</td>
-                                                <td>{$plan['validity']} {$plan['validity_unit']}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <div class="box-body">
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$_url}order/gateway/pppoe/{$plan['id']}&stoken={App::getToken()}"
-                                        onclick="return confirm('{Lang::T('Buy this? your active package will be overwritten')}')"
-                                        class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                    {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                        <a href="{$_url}order/pay/pppoe/{$plan['id']}&stoken={App::getToken()}"
-                                            onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwritten')}')"
-                                            class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                    {/if}
-                                </div>
-                                {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                $_user['balance']>=$plan['price']}
-                                <a href="{$_url}order/send/pppoe/{$plan['id']}&stoken={App::getToken()}"
-                                    onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
-                                    class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
-                            {/if}
-                        </div>
-                    </div>
-                </div>
-            {/foreach}
-        </div>
         {/if}
         {if Lang::arrayCount($radius_hotspot)>0}
             <ol class="breadcrumb">
@@ -227,8 +206,9 @@
                                                 <td>{Lang::T('Price')}</td>
                                                 <td>{Lang::moneyFormat($plan['price'])}
                                                     {if !empty($plan['price_old'])}
-                                                        <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                            {/if}
+                                                        <sup
+                                                            style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                    {/if}
                                                 </td>
                                             </tr>
                                             <tr>
@@ -240,18 +220,11 @@
                                 </div>
                             </div>
                             <div class="box-body">
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$_url}order/gateway/hotspot/{$plan['id']}&stoken={App::getToken()}"
-                                        onclick="return confirm('{Lang::T('Buy this? your active package will be overwritten')}')"
-                                        class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                    {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                        <a href="{$_url}order/pay/hotspot/{$plan['id']}&stoken={App::getToken()}"
-                                            onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwritten')}')"
-                                            class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                    {/if}
-                                </div>
+                                <a href="{$_url}order/gateway/hotspot/{$plan['id']}&stoken={App::getToken()}"
+                                    onclick="return confirm('{Lang::T('Buy this? your active package will be overwritten')}')"
+                                    class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
                                 {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                $_user['balance']>=$plan['price']}
+                                                                                                                                        $_user['balance']>=$plan['price']}
                                 <a href="{$_url}order/send/hotspot/{$plan['id']}&stoken={App::getToken()}"
                                     onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                     class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -266,8 +239,8 @@
         {/if}
         {foreach $routers as $router}
             {if Validator::isRouterHasPlan($plans_hotspot, $router['name']) || Validator::isRouterHasPlan($plans_pppoe,
-                                                    $router['name']) || Validator::isRouterHasPlan($plans_vpn,
-                                                    $router['name'])}
+                                                                $router['name']) || Validator::isRouterHasPlan($plans_vpn,
+                                                                $router['name'])}
             <div class="box box-solid box-primary bg-gray">
                 <div class="box-header text-white text-bold">{$router['name']}</div>
                 {if $router['description'] != ''}
@@ -302,8 +275,9 @@
                                                             <td>{Lang::T('Price')}</td>
                                                             <td>{Lang::moneyFormat($plan['price'])}
                                                                 {if !empty($plan['price_old'])}
-                                                                    <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                        {/if}
+                                                                    <sup
+                                                                        style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                                {/if}
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -315,18 +289,10 @@
                                             </div>
                                         </div>
                                         <div class="box-body">
-                                            <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                                <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                    onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                                    class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                                {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                                    <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                        onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                        class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                                {/if}
-                                            </div>
-                                            {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                                                                                                            $_user['balance']>=$plan['price']}
+                                            <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
+                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                                class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                            {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
                                             <a href="{$_url}order/send/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
                                                 onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                                 class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -364,8 +330,9 @@
                                                         <td>{Lang::T('Price')}</td>
                                                         <td>{Lang::moneyFormat($plan['price'])}
                                                             {if !empty($plan['price_old'])}
-                                                                <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                    {/if}
+                                                                <sup
+                                                                    style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                            {/if}
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -377,18 +344,10 @@
                                         </div>
                                     </div>
                                     <div class="box-body">
-                                        <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                            <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                            {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                                <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                    onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                    class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                            {/if}
-                                        </div>
-                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                                                                $_user['balance']>=$plan['price']}
+                                        <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
+                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
                                         <a href="{$_url}order/send/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
                                             onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                             class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -426,8 +385,9 @@
                                                         <td>{Lang::T('Price')}</td>
                                                         <td>{Lang::moneyFormat($plan['price'])}
                                                             {if !empty($plan['price_old'])}
-                                                                <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                    {/if}
+                                                                <sup
+                                                                    style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                            {/if}
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -439,18 +399,10 @@
                                         </div>
                                     </div>
                                     <div class="box-body">
-                                        <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                            <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                            {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                                <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                    onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                    class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                            {/if}
-                                        </div>
-                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                                                                $_user['balance']>=$plan['price']}
+                                        <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
+                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                        {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
                                         <a href="{$_url}order/send/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
                                             onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                             class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -492,8 +444,9 @@
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
                                                         {if !empty($plan['price_old'])}
-                                                            <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                {/if}
+                                                            <sup
+                                                                style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                        {/if}
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -505,18 +458,10 @@
                                     </div>
                                 </div>
                                 <div class="box-body">
-                                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                        <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                        {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                            <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                        {/if}
-                                    </div>
-                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                    $_user['balance']>=$plan['price']}
+                                    <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
+                                        onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                        class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
                                     <a href="{$_url}order/send/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
                                         onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                         class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -552,8 +497,9 @@
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
                                                         {if !empty($plan['price_old'])}
-                                                            <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                {/if}
+                                                            <sup
+                                                                style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                        {/if}
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -565,18 +511,10 @@
                                     </div>
                                 </div>
                                 <div class="box-body">
-                                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                        <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                        {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                            <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                        {/if}
-                                    </div>
-                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                    $_user['balance']>=$plan['price']}
+                                    <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
+                                        onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                        class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
                                     <a href="{$_url}order/send/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
                                         onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                         class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -612,8 +550,9 @@
                                                     <td>{Lang::T('Price')}</td>
                                                     <td>{Lang::moneyFormat($plan['price'])}
                                                         {if !empty($plan['price_old'])}
-                                                            <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                                                {/if}
+                                                            <sup
+                                                                style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                                                        {/if}
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -625,18 +564,10 @@
                                     </div>
                                 </div>
                                 <div class="box-body">
-                                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                        <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                            onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
-                                            class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
-                                        {if $_c['enable_balance'] == 'yes' && $_user['balance']>=$plan['price']}
-                                            <a href="{$_url}order/pay/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
-                                                onclick="return confirm('{Lang::T('Pay this with Balance? your active package will be overwrite')}')"
-                                                class="btn btn-sm btn-block btn-success">{Lang::T('Pay With Balance')}</a>
-                                        {/if}
-                                    </div>
-                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                    $_user['balance']>=$plan['price']}
+                                    <a href="{$_url}order/gateway/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
+                                        onclick="return confirm('{Lang::T('Buy this? your active package will be overwrite')}')"
+                                        class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
+                                    {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
                                     <a href="{$_url}order/send/{$router['id']}/{$plan['id']}&stoken={App::getToken()}"
                                         onclick="return confirm('{Lang::T('Buy this for friend account?')}')"
                                         class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>

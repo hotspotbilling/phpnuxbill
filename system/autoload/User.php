@@ -163,7 +163,8 @@ class User
         if($validDays>=30){
             $time = time();
         }else{
-            $time = strtotime("+ $validDays days");
+            // for customer, deafult expired is 30 days
+            $time = strtotime('+ '.(30 - $validDays).' days');
         }
 
         return [

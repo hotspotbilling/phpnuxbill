@@ -205,15 +205,13 @@ switch ($action) {
         if ($user['status'] != 'Active') {
             _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
         }
-        $plan = ORM::for_table('tbl_plans')->where('enabled', '1')->find_one($routes['3']);
-        if (empty($plan)) {
+        $plan = ORM::for_table('tbl_plans')->find_one($routes[3]);
+        if (!$plan) {
             r2(U . "order/package", 'e', Lang::T("Plan Not found"));
-        }
-        if (!$plan['enabled']) {
-            r2(U . "home", 'e', 'Plan is not exists');
         }
         if ($plan['is_radius'] == '1') {
             $router_name = 'radius';
+            $router = 'radius';
         } else {
             $router_name = $plan['routers'];
         }
@@ -237,21 +235,21 @@ switch ($action) {
             $tax = 0;
         }
         // Tax calculation stop
-
-        if ($plan && $plan['enabled'] && $user['balance'] >= $plan['price'] + $tax) {
+        $total_cost = $plan['price'] + $add_cost + $tax;
+        if ($plan && $plan['enabled'] && $user['balance'] >= $total_cost) {
             if (Package::rechargeUser($user['id'], $router_name, $plan['id'], 'Customer', 'Balance')) {
                 // if success, then get the balance
-                Balance::min($user['id'], $plan['price'] + $add_cost + $tax);
+                Balance::min($user['id'], $total_cost);
                 App::setToken($_GET['stoken'], "success");
                 r2(U . "voucher/invoice/", 's', Lang::T("Success to buy package"));
             } else {
                 r2(U . "order/package", 'e', Lang::T("Failed to buy package"));
                 Message::sendTelegram("Buy Package with Balance Failed\n\n#u$c[username] #buy \n" . $plan['name_plan'] .
                     "\nRouter: " . $router_name .
-                    "\nPrice: " . $plan['price'] + $tax);
+                    "\nPrice: " . $total_cost);
             }
         } else {
-            r2(U . "home", 'e', 'Plan is not exists');
+            r2(U . "order/gateway/$routes[2]/$routes[3]", 'e', Lang::T("Insufficient balance"));
         }
         break;
 
@@ -440,6 +438,11 @@ switch ($action) {
         }
     case 'buy':
         $gateway = _post('gateway');
+        print_r($routes);
+        if($gateway == 'balance') {
+            unset($_SESSION['gateway']);
+            r2(U . 'order/pay/' . $routes[2] . '/' . $routes[3]);
+        }
         if (empty($gateway) && !empty($_SESSION['gateway'])) {
             $gateway = $_SESSION['gateway'];
         } else if (!empty($gateway)) {
