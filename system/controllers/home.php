@@ -326,7 +326,6 @@ $vpn = ORM::for_table('tbl_port_pool')
 $ui->assign('cf', $tcf);
 $ui->assign('vpn', $vpn);
 
-$unpaids = [];
 $unpaid = ORM::for_table('tbl_payment_gateway')
     ->where('username', $user['username'])
     ->where('status', 1)
@@ -354,7 +353,7 @@ if ($unpaid) {
     }
 }
 
-$ui->assign('unpaid', $unpaids);
+$ui->assign('unpaid', $unpaid);
 $ui->assign('code', alphanumeric(_get('code'), "-"));
 
 $abills = User::getAttributes("Bill");
