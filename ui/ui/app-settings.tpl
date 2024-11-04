@@ -258,6 +258,82 @@
     </div>
 </form>
 
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
+    <div class="panel">
+        <div class="panel-heading" role="tab" id="Security">
+            <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseSecurity" aria-expanded="false" aria-controls="collapseSecurity">
+                    {Lang::T('Security')}
+                </a>
+            </h4>
+        </div>
+        <div id="collapseSecurity" class="panel-collapse collapse" role="tabpanel">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
+                    <div class="col-md-5">
+                        <label class="switch">
+                            <input type="checkbox" id="enable_session_timeout" value="1"
+                                name="enable_session_timeout" {if $_c['enable_session_timeout']==1}checked{/if}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                </div>
+                <div class="form-group" id="timeout_duration_input" style="display: none;">
+                    <label class="col-md-3 control-label">{Lang::T('Timeout Duration')}</label>
+                    <div class="col-md-5">
+                        <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
+                            name="session_timeout_duration" id="session_timeout_duration"
+                            placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
+                    </div>
+                    <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx
+                            minutes')}
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Single session Admin')}</label>
+                    <div class="col-md-5">
+                        <select name="single_session" id="single_session" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}</option>
+                            <option value="yes" {if $_c['single_session']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Admin can only have single session login, it will logout another session')}
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Enable CSRF Validation')}</label>
+                    <div class="col-md-5">
+                        <select name="csrf_enabled" id="csrf_enabled" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}</option>
+                            <option value="yes" {if $_c['csrf_enabled']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank">{Lang::T('Cross-site request forgery')}</a>
+                    </p>
+                </div>
+                <button class="btn btn-success btn-block" type="submit">
+                    {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
 <form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">

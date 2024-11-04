@@ -827,5 +827,21 @@
     "Information": "Informasi",
     "Export_and_Print_will_show_all_data_without_pagination": "Ekspor dan Cetak akan menampilkan semua data tanpa pagination",
     "First_Name": "Nama depan",
-    "Last_Name": "Nama Belakang"
+    "Last_Name": "Nama Belakang",
+    "General": "Umum",
+    "Registration": "Pendaftaran",
+    "Allow_Registration": "Izinkan Registrasi",
+    "Voucher_Only": "Hanya Voucher",
+    "No_Registration": "Tidak Ada Registrasi",
+    "Registration_Username": "Nama Pengguna Registrasi",
+    "Customer_Registration_need_to_validate_using_OTP": "Registrasi Pelanggan perlu divalidasi menggunakan OTP",
+    "SMS_Notification": "Pemberitahuan SMS",
+    "Tax_Rates_by_percentage": "Tarif Pajak Berdasarkan Persentase",
+    "Settings_For_Mikrotik": "Pengaturan Untuk Mikrotik",
+    "Settings_For_Cron_Expired": "Pengaturan Untuk Cron Kedaluwarsa",
+    "Choose_one__above_or_below": "Pilih salah satu, di atas atau di bawah",
+    "Settings_For_Cron_Reminder": "Pengaturan Untuk Pengingat Cron",
+    "Security": "Keamanan",
+    "Enable_CSRF_Validation": "Aktifkan Validasi CSRF",
+    "Cross_site_request_forgery": "Pemalsuan permintaan lintas situs"
 }
