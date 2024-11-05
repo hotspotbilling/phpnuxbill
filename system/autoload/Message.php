@@ -191,13 +191,14 @@ class Message
 
         if(strpos($msg, '[[payment_link]]')!== false){
             // token only valid for 1 day, for security reason
-            $token = User::generateToken($customer['id'], 1);
+            $tokenArray = User::generateToken($customer['id'], 1);
+            $token = isset($tokenArray['token']) ? $tokenArray['token'] : '';
             $tur = ORM::for_table('tbl_user_recharges')
                 ->where('customer_id', $customer['id'])
                 ->where('namebp', $package)
                 ->find_one();
             if($tur){
-                $url = APP_URL . '?_route=home&recharge='. $tur.'uid='. $token;
+                $url = APP_URL . '/?_route=home&recharge='. $tur['id'] .'&uid='. urlencode($token);
                 $msg = str_replace('[[payment_link]]', $url, $msg);
             }
         }
