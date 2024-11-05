@@ -438,7 +438,6 @@ switch ($action) {
         }
     case 'buy':
         $gateway = _post('gateway');
-        print_r($routes);
         if($gateway == 'balance') {
             unset($_SESSION['gateway']);
             r2(U . 'order/pay/' . $routes[2] . '/' . $routes[3]);
