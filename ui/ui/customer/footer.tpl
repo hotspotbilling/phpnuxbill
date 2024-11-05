@@ -59,31 +59,23 @@
         var isLoggedIn = false;
         var Tawk_API = {
             onLoad: function() {
-                if (!isLoggedIn) {
-                    isLoggedIn = true;
-                    window.Tawk_API.login({
-                        name: '{$_user['fullname']}',
-                        email: '{$_user['email']}',
-                        userId: '{$_user['id']}'
-                    }, function(error) {
-                        //do something if there's an error
-                        });
-                    }
-                    Tawk_API.setAttributes({
-                        'id'    : '{$_user['id']}',
-                        'username'    : '{$_user['username']}',
-                        'service_type'    : '{$_user['service_type']}',
-                        'balance'    : '{$_user['balance']}',
-                        'account_type'    : '{$_user['account_type']}',
-                        'phone'    : '{$_user['phonenumber']}'
-                    }, function(error) {});
+                Tawk_API.setAttributes({
+                    'username'    : '{$_user['username']}',
+                    'service'    : '{$_user['service_type']}',
+                    'balance'    : '{$_user['balance']}',
+                    'account'    : '{$_user['account_type']}',
+                    'phone'    : '{$_user['phonenumber']}'
+                }, function(error) {
+                    console.log(error)
+                });
+
                 }
             };
             var Tawk_LoadStart = new Date();
             Tawk_API.visitor = {
-                name : '{$_user['fullname']}',
-                email : '{$_user['email']}',
-                userId: '{$_user['id']}'
+                name: '{$_user['fullname']}',
+                email: '{$_user['email']}',
+                phone: '{$_user['phonenumber']}'
             };
             (function() {
                 var s1 = document.createElement("script"),

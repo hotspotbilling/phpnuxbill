@@ -105,9 +105,7 @@
                             placeholder="{Lang::T('Cash')}, {Lang::T('Bank Transfer')}">
                     </div>
                     <p class="help-block col-md-4">
-                        {Lang::T('This used for admin to select payment in recharge, using comma for
-                        every new
-                        options')}
+                        {Lang::T('This used for admin to select payment in recharge, using comma for every new options')}
                     </p>
                 </div>
 
@@ -843,6 +841,13 @@
                             placeholder="62f1ca7037898912e961f5/1ga07df">
                     </div>
                     <p class="help-block col-md-4">{Lang::T('From Direct Chat Link.')}</p>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label">Tawk.to Javascript API key</label>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="tawkto_api_key" name="tawkto_api_key" value="{$_c['tawkto_api_key']}"
+                            placeholder="39e52264cxxxxxxxxxxxxxdd078af5342e8">
+                    </div>
                 </div>
                 <label class="col-md-2"></label>
                 <p class="col-md-6 help-block">/ip hotspot walled-garden<br>

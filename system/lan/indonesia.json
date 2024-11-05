@@ -845,5 +845,6 @@
     "Enable_CSRF_Validation": "Aktifkan Validasi CSRF",
     "Cross_site_request_forgery": "Pemalsuan permintaan lintas situs",
     "Forgot_Password": "Lupa Kata Sandi",
-    "Validity_Periode": "Periode Validitas"
+    "Validity_Periode": "Periode Validitas",
+    "Transaction_History_List": "Daftar Riwayat Transaksi"
 }

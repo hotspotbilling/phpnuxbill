@@ -26,6 +26,15 @@ class User
         return 0;
     }
 
+    public static function getTawkToHash($email)
+    {
+        global $config;
+        if (!empty($config['tawkto_api_key']) && !Empty($email)) {
+            return hash_hmac('sha256', $email, $config['tawkto_api_key']);
+        }
+        return '';
+    }
+
     public static function getBills($id = 0)
     {
         if (!$id) {
