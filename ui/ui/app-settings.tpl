@@ -1060,14 +1060,15 @@
     <p>
         # {Lang::T('Expired Cronjob Every 5 Minutes')}<br>
         */5 * * * * cd {$dir} && {$php} cron.php
+        <br><br>
+        # {Lang::T('Expired Cronjob Every 1 Hour')}<br>
+        0 * * * * cd {$dir} && {$php} cron.php
     </p>
     <br>
     <h4><b>{Lang::T('Settings For Cron Reminder')}</b></h4>
     <p>
         # {Lang::T('Reminder Cronjob Every 7 AM')}<br>
         0 7 * * * cd {$dir} && {$php} cron_reminder.php
-        # {Lang::T('Reminder Cronjob Every 1 Hour')}
-        0 * * * * cd {$dir} && {$php} cron_reminder.php
     </p>
 </div>
 
