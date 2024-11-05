@@ -1049,31 +1049,27 @@
     </div>
 </form>
 
-<div class="well well-sm">
-    <legend>{Lang::T('Settings For Mikrotik')}</legend>
-    <pre>/ip hotspot walled-garden
-    add dst-host={$_domain}
-    add dst-host=*.{$_domain}</pre>
-
-    <legend>{Lang::T('Settings For Cron Expired')}</legend>
-    <pre>
-    # {Lang::T('Expired Cronjob Every 5 Minutes')}
-    */5 * * * * cd {$dir} && {$php} cron.php
-</pre>
-    {Lang::T('Choose one, above or below')}
-    <pre>
-    # {Lang::T('Expired Cronjob Every 1 Hour')}
-    0 * * * * cd {$dir} && {$php} cron.php
-</pre>
-
-    <legend>{Lang::T('Settings For Cron Reminder')}</legend>
-    <pre>
-    # {Lang::T('Reminder Cronjob Every 7 AM')}
-    0 7 * * * cd {$dir} && {$php} cron_reminder.php
-</pre>
+<div class="bs-callout bs-callout-info" id="callout-navbar-role">
+    <h4><b>{Lang::T('Settings For Mikrotik')}</b></h4>
+    <p>/ip hotspot walled-garden <br>
+        add dst-host={$_domain} <br>
+        add dst-host=*.{$_domain}
+    </p>
+    <br>
+    <h4><b>{Lang::T('Settings For Cron Expired')}</b></h4>
+    <p>
+        # {Lang::T('Expired Cronjob Every 5 Minutes')}<br>
+        */5 * * * * cd {$dir} && {$php} cron.php
+    </p>
+    <br>
+    <h4><b>{Lang::T('Settings For Cron Reminder')}</b></h4>
+    <p>
+        # {Lang::T('Reminder Cronjob Every 7 AM')}<br>
+        0 7 * * * cd {$dir} && {$php} cron_reminder.php
+        # {Lang::T('Reminder Cronjob Every 1 Hour')}
+        0 * * * * cd {$dir} && {$php} cron_reminder.php
+    </p>
 </div>
-
-
 
 <script>
     function testWa() {
