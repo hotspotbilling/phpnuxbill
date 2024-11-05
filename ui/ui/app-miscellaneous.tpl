@@ -186,37 +186,4 @@
     </div>
     </div>
 </form>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var sectionTimeoutCheckbox = document.getElementById('enable_session_timeout');
-        var timeoutDurationInput = document.getElementById('timeout_duration_input');
-        var timeoutDurationField = document.getElementById('session_timeout_duration');
-
-        if (sectionTimeoutCheckbox.checked) {
-            timeoutDurationInput.style.display = 'block';
-            timeoutDurationField.required = true;
-        }
-
-        sectionTimeoutCheckbox.addEventListener('change', function () {
-            if (this.checked) {
-                timeoutDurationInput.style.display = 'block';
-                timeoutDurationField.required = true;
-            } else {
-                timeoutDurationInput.style.display = 'none';
-                timeoutDurationField.required = false;
-            }
-        });
-
-        document.querySelector('form').addEventListener('submit', function (event) {
-            if (sectionTimeoutCheckbox.checked && (!timeoutDurationField.value || isNaN(
-                timeoutDurationField.value))) {
-                event.preventDefault();
-                alert('Please enter a valid session timeout duration.');
-                timeoutDurationField.focus();
-            }
-        });
-    });
-</script>
 {include file="sections/footer.tpl"}
