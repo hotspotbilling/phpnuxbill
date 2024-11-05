@@ -1058,7 +1058,7 @@
     <br>
     <h4><b>{Lang::T('Settings For Cron Expired')}</b></h4>
     <p>
-        # {Lang::T('Expired Cronjob Every 5 Minutes')}<br>
+        # {Lang::T('Expired Cronjob Every 5 Minutes [Recommended]')}<br>
         */5 * * * * cd {$dir} && {$php} cron.php
         <br><br>
         # {Lang::T('Expired Cronjob Every 1 Hour')}<br>
