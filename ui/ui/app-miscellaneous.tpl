@@ -24,8 +24,9 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">{Lang::T('This is to notify you when new updates is
-                        available')}
+                    <p class="help-block col-md-4"><small>
+                        {Lang::T('This is to notify you when new updates is
+                        available')}</small>
                     </p>
                 </div>
                 <div class="form-group">
@@ -40,9 +41,10 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('If enabled, the system will notify Admin when router goes Offline, If admin
-                        have 10 or more router and many customers, it will get overlapping, you can disabled')}
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T('If enabled, the system will notify Admin when router goes Offline, If admin
+                            have 10 or more router and many customers, it will get overlapping, you can disabled')}
+                        </small>
                     </p>
                 </div>
                 <div class="form-group">
@@ -56,8 +58,8 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('OTP is required when user want to change phone number and registration')}
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T('OTP is required when user want to change phone number and registration')}</small>
                     </p>
                 </div>
                 <div class="form-group">
@@ -73,8 +75,8 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">{Lang::T('The method which OTP will be sent to user')}<br>
-                        {Lang::T('For Registration and Update Phone Number')}</p>
+                    <p class="help-block col-md-4"><small>{Lang::T('The method which OTP will be sent to user')}<br>
+                            {Lang::T('For Registration and Update Phone Number')}</small></p>
                 </div>
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Email OTP Required')}</label>
@@ -87,8 +89,9 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('OTP is required when user want to change Email Address')}
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T('OTP is required when user want to change Email Address')}
+                        </small>
                     </p>
                 </div>
                 <div class="form-group">
@@ -101,8 +104,8 @@
                                 {Lang::T('Yes')}</option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T(' for Customer')}</p>
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T(' for Customer')}</small></p>
                 </div>
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Hotspot Auth Method')}</label>
@@ -116,11 +119,11 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Hotspot Authentication Method. Make sure you have changed your hotspot login
-                        page.')}<br><a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot"
-                            target="_blank">Download
-                            phpnuxbill-login-hotspot</a>
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T('Hotspot Authentication Method. Make sure you have changed your hotspot login
+                            page.')}<br><a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot"
+                                target="_blank">Download
+                                phpnuxbill-login-hotspot</a></small>
                     </p>
                 </div>
                 <div class="form-group">
@@ -135,13 +138,13 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('This will show is Customer currently is online or not')}
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T('This will show is Customer currently is online or not')}</small>
                     </p>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>
-                    <div class="col-md-6">
+                    <label class="col-md-3 control-label">{Lang::T('Extend Package Expiry')}</label>
+                    <div class="col-md-5">
                         <select name="extend_expiry" id="extend_expiry" class="form-control">
                             <option value="yes" {if $_c['extend_expiry']!='no' }selected="selected" {/if}>
                                 {Lang::T('Yes')}</option>
@@ -150,7 +153,8 @@
                         </select>
                     </div>
                     <p class="help-block col-md-4">
-                       <small> {Lang::T('If user buy same internet plan, expiry date will extend')}</small></p>
+                        <small> {Lang::T('If user buy same internet plan, expiry date will extend')}</small>
+                    </p>
                 </div>
                 <div class="form-group has-error">
                     <label class="col-md-3 control-label">{Lang::T('Allow Balance custom amount')}</label>
@@ -164,9 +168,9 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Allow Customer buy balance with any amount')}
-                        <br>*Please report any issue or bugs
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T('Allow Customer buy balance with any amount')}
+                            <br>*Please report any issue or bugs</small>
                     </p>
                 </div>
             </div>
