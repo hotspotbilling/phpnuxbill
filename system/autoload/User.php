@@ -177,8 +177,8 @@ class User
     {
         global $db_pass;
         if (isset($uid)) {
-            list($time, $token) = self::generateToken($uid);
-            setcookie('uid', $token, time() + 86400 * 30);
+            $token = self::generateToken($uid);
+            setcookie('uid', $token['token'], time() + 86400 * 30);
             return $token;
         } else {
             return false;
