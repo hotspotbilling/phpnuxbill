@@ -189,17 +189,20 @@ class Message
             $msg = str_replace('[[expired_date]]', "", $msg);
         }
 
-        if(strpos($msg, '[[payment_link]]')!== false){
+        if (strpos($msg, '[[payment_link]]') !== false) {
             // token only valid for 1 day, for security reason
-            $tokenArray = User::generateToken($customer['id'], 1);
-            $token = isset($tokenArray['token']) ? $tokenArray['token'] : '';
-            $tur = ORM::for_table('tbl_user_recharges')
-                ->where('customer_id', $customer['id'])
-                ->where('namebp', $package)
-                ->find_one();
-            if($tur){
-                $url = APP_URL . '/?_route=home&recharge='. $tur['id'] .'&uid='. urlencode($token);
-                $msg = str_replace('[[payment_link]]', $url, $msg);
+            list($time, $token) = User::generateToken($customer['id'], 1);
+            if(!empty($token)){
+                $tur = ORM::for_table('tbl_user_recharges')
+                    ->where('customer_id', $customer['id'])
+                    ->where('namebp', $package)
+                    ->find_one();
+                if ($tur) {
+                    $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token);
+                    $msg = str_replace('[[payment_link]]', $url, $msg);
+                }
+            }else{
+                $msg = str_replace('[[payment_link]]', '', $msg);
             }
         }
 
@@ -279,7 +282,8 @@ class Message
     }
 
 
-    public static function addToInbox($to_customer_id, $subject, $body, $from = 'System'){
+    public static function addToInbox($to_customer_id, $subject, $body, $from = 'System')
+    {
         $v = ORM::for_table('tbl_customers_inbox')->create();
         $v->from = $from;
         $v->customer_id = $to_customer_id;
