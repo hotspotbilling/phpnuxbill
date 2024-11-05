@@ -25,7 +25,8 @@
                             <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
                             <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>
@@ -42,7 +43,8 @@
                             <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>
@@ -59,7 +61,8 @@
                             <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>
@@ -76,7 +79,8 @@
                             <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
-                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.
+                            <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>
