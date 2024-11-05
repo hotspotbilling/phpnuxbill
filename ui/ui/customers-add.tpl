@@ -115,7 +115,7 @@
                         <label class="col-md-3 control-label">Remote IP <span class="label label-danger" id="warning_ip"></span></label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip" onkeyup="checkIP(this, '0')">
-                            <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
+                            <span class="help-block">{Lang::T('Also Working for freeradius')}</span>
                         </div>
                     </div>
                     <span class="help-block">
@@ -139,7 +139,7 @@
                             {Lang::T('SMS')}</label>
                         <label class="col-md-2 control-label"><input type="checkbox" name="wa" value="1">
                             {Lang::T('WA')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="email" value="1">
+                        <label class="col-md-2 control-label"><input type="checkbox" name="mail" value="1">
                             {Lang::T('Email')}</label>
                     </div>
                 </div>

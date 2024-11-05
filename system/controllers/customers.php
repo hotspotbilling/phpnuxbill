@@ -523,7 +523,7 @@ switch ($action) {
                         'args' => [$d['phonenumber'], $welcomeMessage]
                     ],
                     'email' => [
-                        'enabled' => isset($_POST['email']),
+                        'enabled' => isset($_POST['mail']),
                         'method' => 'Message::sendEmail',
                         'args' => [$d['email'], $emailSubject, $welcomeMessage, $d['email']]
                     ]
