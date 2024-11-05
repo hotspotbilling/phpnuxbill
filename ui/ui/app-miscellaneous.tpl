@@ -19,13 +19,13 @@
                             <option value="enable" {if $_c['new_version_notify']=='enable' }selected="selected" {/if}>
                                 {Lang::T('Enabled')}
                             </option>
-                            <option value="disable" {if $_c['new_version_notify']=='disable'
-                                        }selected="selected" {/if}>{Lang::T('Disabled')}
+                            <option value="disable" {if $_c['new_version_notify']=='disable' }selected="selected" {/if}>
+                                {Lang::T('Disabled')}
                             </option>
                         </select>
                     </div>
                     <p class="help-block col-md-4">{Lang::T('This is to notify you when new updates is
-                                available')}
+                        available')}
                     </p>
                 </div>
                 <div class="form-group">
@@ -42,7 +42,7 @@
                     </div>
                     <p class="help-block col-md-4">
                         {Lang::T('If enabled, the system will notify Admin when router goes Offline, If admin
-                                have 10 or more router and many customers, it will get overlapping, you can disabled')}
+                        have 10 or more router and many customers, it will get overlapping, you can disabled')}
                     </p>
                 </div>
                 <div class="form-group">
@@ -118,7 +118,7 @@
                     </div>
                     <p class="help-block col-md-4">
                         {Lang::T('Hotspot Authentication Method. Make sure you have changed your hotspot login
-                                page.')}<br><a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot"
+                        page.')}<br><a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot"
                             target="_blank">Download
                             phpnuxbill-login-hotspot</a>
                     </p>
@@ -139,6 +139,19 @@
                         {Lang::T('This will show is Customer currently is online or not')}
                     </p>
                 </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('Extend Package Expiry')}</label>
+                    <div class="col-md-6">
+                        <select name="extend_expiry" id="extend_expiry" class="form-control">
+                            <option value="yes" {if $_c['extend_expiry']!='no' }selected="selected" {/if}>
+                                {Lang::T('Yes')}</option>
+                            <option value="no" {if $_c['extend_expiry']=='no' }selected="selected" {/if}>
+                                {Lang::T('No')}</option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                       <small> {Lang::T('If user buy same internet plan, expiry date will extend')}</small></p>
+                </div>
                 <div class="form-group has-error">
                     <label class="col-md-3 control-label">{Lang::T('Allow Balance custom amount')}</label>
                     <div class="col-md-5">
@@ -153,7 +166,7 @@
                     </div>
                     <p class="help-block col-md-4">
                         {Lang::T('Allow Customer buy balance with any amount')}
-                        <br>*Maybe still have bug
+                        <br>*Please report any issue or bugs
                     </p>
                 </div>
             </div>
@@ -172,7 +185,7 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var sectionTimeoutCheckbox = document.getElementById('enable_session_timeout');
         var timeoutDurationInput = document.getElementById('timeout_duration_input');
         var timeoutDurationField = document.getElementById('session_timeout_duration');
@@ -182,7 +195,7 @@
             timeoutDurationField.required = true;
         }
 
-        sectionTimeoutCheckbox.addEventListener('change', function() {
+        sectionTimeoutCheckbox.addEventListener('change', function () {
             if (this.checked) {
                 timeoutDurationInput.style.display = 'block';
                 timeoutDurationField.required = true;
@@ -192,9 +205,9 @@
             }
         });
 
-        document.querySelector('form').addEventListener('submit', function(event) {
+        document.querySelector('form').addEventListener('submit', function (event) {
             if (sectionTimeoutCheckbox.checked && (!timeoutDurationField.value || isNaN(
-                    timeoutDurationField.value))) {
+                timeoutDurationField.value))) {
                 event.preventDefault();
                 alert('Please enter a valid session timeout duration.');
                 timeoutDurationField.focus();
