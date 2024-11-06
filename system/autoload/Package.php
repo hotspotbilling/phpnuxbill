@@ -149,24 +149,18 @@ class Package
             $exp_date->modify('first day of next month');
             $exp_date->setDate($exp_date->format('Y'), $exp_date->format('m'), $day_exp);
 
-            $min_days = 7;
-            $max_days = 35;
-
-            // If validity is more than 2 months, multiply the limit days
-            if ($p['validity'] >= 2) {
-                $min_days *= $p['validity'];
-                $max_days *= $p['validity'];
-            }
+            $min_days = 7 * $p['validity'];
+            $max_days = 35 * $p['validity'];
 
             $days_until_exp = $exp_date->diff($current_date)->days;
 
-            // If less than min_days away, move to the next month
+            // If less than min_days away, move to the next period
             while ($days_until_exp < $min_days) {
                 $exp_date->modify('+1 month');
                 $days_until_exp = $exp_date->diff($current_date)->days;
             }
 
-            // If more than max_days away, move to the previous month
+            // If more than max_days away, move to the previous period
             while ($days_until_exp > $max_days) {
                 $exp_date->modify('-1 month');
                 $days_until_exp = $exp_date->diff($current_date)->days;
@@ -175,6 +169,11 @@ class Package
             // Final check to ensure we're not less than min_days or in the past
             if ($days_until_exp < $min_days || $exp_date <= $current_date) {
                 $exp_date->modify('+1 month');
+            }
+
+            // Adjust for multiple periods
+            if ($p['validity'] > 1) {
+                $exp_date->modify('+' . ($p['validity'] - 1) . ' months');
             }
 
             $date_exp = $exp_date->format('Y-m-d');
