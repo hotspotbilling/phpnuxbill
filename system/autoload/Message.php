@@ -48,7 +48,7 @@ class Message
                     }
                 } else {
                     try {
-                        self::sendSMS($config['sms_url'], $phone, $txt);
+                        self::MikrotikSendSMS($config['sms_url'], $phone, $txt);
                     } catch (Exception $e) {
                         // ignore, add to logs
                         _log("Failed to send SMS using Mikrotik.\n" . $e->getMessage(), 'SMS', 0);
