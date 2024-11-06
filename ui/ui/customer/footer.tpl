@@ -161,6 +161,10 @@
 
         function ask(field, text){
             if (confirm(text)) {
+                setTimeout(() => {
+                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, '');
+                    field.removeAttribute("disabled");
+                }, 5000);
                 return true;
             } else {
                 setTimeout(() => {
