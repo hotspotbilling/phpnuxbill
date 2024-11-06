@@ -7,12 +7,12 @@
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                 <div class="btn-group pull-right">
                     <a class="btn btn-primary btn-xs" title="save" href="{$_url}plan/sync"
-                        onclick="return confirm('This will sync/send Caustomer active plan to Mikrotik?')"><span
+                        onclick="return ask(this, 'This will sync/send Caustomer active plan to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>
                 {* <div class="btn-group pull-right">
                     <a class="btn btn-info btn-xs" title="save" href="{$_url}plan/csv{$append_url}"
-                        onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                        onclick="return ask(this, 'This will export to CSV?')"><span class="glyphicon glyphicon-download"
                             aria-hidden="true"></span> CSV</a>
                 </div> *}
                 {/if}
@@ -116,7 +116,7 @@
                                         style="color: black;">{Lang::T('Edit')}</a>
                                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                                     <a href="{$_url}plan/delete/{$ds['id']}" id="{$ds['id']}"
-                                        onclick="return confirm('{Lang::T('Delete')}?')"
+                                        onclick="return ask(this, '{Lang::T('Delete')}?')"
                                         class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     {/if}
                                     {if $ds['status']=='off' && $_c['extend_expired']}

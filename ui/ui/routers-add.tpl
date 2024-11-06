@@ -61,7 +61,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-primary" onclick="return confirm('Continue the process of adding Routers?')"
+                            <button class="btn btn-primary" onclick="return ask(this, 'Continue the process of adding Routers?')"
                                 type="submit">{Lang::T('Save')}</button>
                             Or <a href="{$_url}routers/list">{Lang::T('Cancel')}</a>
                         </div>

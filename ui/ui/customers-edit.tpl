@@ -243,7 +243,7 @@
         </div>
     </div>
     <center>
-        <button class="btn btn-primary" onclick="return confirm('Continue the Customer Data change process?')"
+        <button class="btn btn-primary" onclick="return ask(this, 'Continue the Customer Data change process?')"
             type="submit">
             {Lang::T('Save Changes')}
         </button>

@@ -8,7 +8,7 @@
                     {if $action!='Voucher'}
                         <div class="btn-group pull-right">
                             <a class="btn btn-danger btn-xs" title="Reset File" href="{$_url}pages/{$PageFile}-reset"
-                                onclick="return confirm('Reset File?')"><span class="glyphicon glyphicon-refresh"
+                                onclick="return ask(this, 'Reset File?')"><span class="glyphicon glyphicon-refresh"
                                     aria-hidden="true"></span></a>
                         </div>
                     {/if}

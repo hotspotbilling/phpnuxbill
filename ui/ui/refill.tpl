@@ -24,7 +24,7 @@
 
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success" onclick="return confirm('Continue the Refill process?')"
+                            <button class="btn btn-success" onclick="return ask(this, 'Continue the Refill process?')"
                                 type="submit">{Lang::T('Recharge')}</button>
                             Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
                         </div>

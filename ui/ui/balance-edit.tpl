@@ -55,7 +55,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success" onclick="return confirm('Continue the process of changing the balance contents?')" type="submit">{Lang::T('Save Changes')}</button>
+                            <button class="btn btn-success" onclick="return ask(this, 'Continue the process of changing the balance contents?')" type="submit">{Lang::T('Save Changes')}</button>
                             Or <a href="{$_url}services/balance">{Lang::T('Cancel')}</a>
                         </div>
                     </div>

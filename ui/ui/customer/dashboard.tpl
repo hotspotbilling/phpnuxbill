@@ -35,7 +35,7 @@
                     <div class="btn-group btn-group-justified mb15">
                         <div class="btn-group">
                             <a href="{$_url}order/view/{$unpaid['id']}/cancel" class="btn btn-danger btn-sm"
-                                onclick="return confirm('{Lang::T('Cancel it?')}')">
+                                onclick="return ask(this, '{Lang::T('Cancel it?')}')">
                                 <span class="glyphicon glyphicon-trash"></span>
                                 {Lang::T('Cancel')}
                             </a>
@@ -103,11 +103,11 @@
                                 {Lang::moneyFormat($_user['balance'])}
                                 {if $_user['auto_renewal'] == 1}
                                     <a class="label label-success pull-right" href="{$_url}home&renewal=0"
-                                        onclick="return confirm('{Lang::T('Disable auto renewal?')}')">{Lang::T('Auto Renewal
+                                        onclick="return ask(this, '{Lang::T('Disable auto renewal?')}')">{Lang::T('Auto Renewal
                                 On')}</a>
                                 {else}
                                     <a class="label label-danger pull-right" href="{$_url}home&renewal=1"
-                                        onclick="return confirm('{Lang::T('Enable auto renewal?')}')">{Lang::T('Auto Renewal
+                                        onclick="return ask(this, '{Lang::T('Enable auto renewal?')}')">{Lang::T('Auto Renewal
                                 Off')}</a>
                                 {/if}
                             </td>
@@ -272,7 +272,7 @@
                                 Online, Check Status')}</a>
                                 {else}
                                     <a href="{$_url}home&mikrotik=login"
-                                        onclick="return confirm('{Lang::T('Connect to Internet')}')"
+                                        onclick="return ask(this, '{Lang::T('Connect to Internet')}')"
                                         class="btn btn-danger btn-xs btn-block">{Lang::T('Not Online, Login now?')}</a>
                                 {/if}
                             </td>
@@ -282,7 +282,7 @@
                         <td class="small text-primary text-uppercase text-normal">
                             {if $_bill['status'] == 'on' && $_bill['prepaid'] != 'YES'}
                                 <a href="{$_url}home&deactivate={$_bill['id']}"
-                                    onclick="return confirm('{Lang::T('Deactivate')}?')" class="btn btn-danger btn-xs"><i
+                                    onclick="return ask(this, '{Lang::T('Deactivate')}?')" class="btn btn-danger btn-xs"><i
                                         class="glyphicon glyphicon-trash"></i></a>
                             {/if}
                         </td>
@@ -290,14 +290,14 @@
                             {if $_bill['status'] != 'on' && $_bill['prepaid'] != 'yes' && $_c['extend_expired']}
                                 <a class="btn btn-warning text-black btn-sm"
                                     href="{$_url}home&extend={$_bill['id']}&stoken={App::getToken()}"
-                                    onclick="return confirm('{Text::toHex($_c['extend_confirmation'])}')">{Lang::T('Extend')}</a>
+                                    onclick="return ask(this, '{Text::toHex($_c['extend_confirmation'])}')">{Lang::T('Extend')}</a>
                             {/if}
                             <a class="btn btn-primary pull-right btn-sm"
                                 href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
-                                onclick="return confirm('{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
+                                onclick="return ask(this, '{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
                             <a class="btn btn-warning text-black pull-right btn-sm"
                                 href="{$_url}home&sync={$_bill['id']}&stoken={App::getToken()}"
-                                onclick="return confirm('{Lang::T('Sync account if you failed login to internet')}?')"
+                                onclick="return ask(this, '{Lang::T('Sync account if you failed login to internet')}?')"
                                 data-toggle="tooltip" data-placement="top"
                                 title="{Lang::T('Sync account if you failed login to internet')}"><span
                                     class="glyphicon glyphicon-refresh" aria-hidden="true"></span> {Lang::T('Sync')}</a>
@@ -354,7 +354,7 @@
                             </div>
                             <div class="form-group col-sm-2" align="center">
                                 <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
-                                    onclick="return confirm('{Lang::T(" Are You Sure?")}')" value="balance"><i
+                                    onclick="return ask(this, '{Lang::T(" Are You Sure?")}')" value="balance"><i
                                         class="glyphicon glyphicon-send"></i></button>
                             </div>
                         </div>
@@ -383,7 +383,7 @@
                             </div>
                             <div class="form-group col-sm-2" align="center">
                                 <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
-                                    onclick="return confirm('{Lang::T(" Are You Sure?")}')" value="plan"><i
+                                    onclick="return ask(this, '{Lang::T(" Are You Sure?")}')" value="plan"><i
                                         class="glyphicon glyphicon-send"></i></button>
                             </div>
                         </div>

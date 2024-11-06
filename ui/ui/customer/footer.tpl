@@ -159,6 +159,18 @@
             });
         });
 
+        function ask(field, text){
+            if (confirm(text)) {
+                return true;
+            } else {
+                setTimeout(() => {
+                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, '');
+                    field.removeAttribute("disabled");
+                }, 500);
+                return false;
+            }
+        }
+
         function setCookie(name, value, days) {
             var expires = "";
             if (days) {

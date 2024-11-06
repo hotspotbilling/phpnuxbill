@@ -22,7 +22,7 @@
                                             </div>
                                             <div class="btn-group" role="group">
                                                 <a href="{$_url}paymentgateway/delete/{$pg}"
-                                                    onclick="return confirm('{Lang::T('Delete')} {$pg}?')"
+                                                    onclick="return ask(this, '{Lang::T('Delete')} {$pg}?')"
                                                     class="btn btn-danger"><i class="glyphicon glyphicon-trash"></i></a>
                                             </div>
                                         </div>

@@ -73,7 +73,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success" onclick="return confirm('Continue the Voucher creation process?')" type="submit">{Lang::T('Generate')}</button>
+                            <button class="btn btn-success" onclick="return ask(this, 'Continue the Voucher creation process?')" type="submit">{Lang::T('Generate')}</button>
                         </div>
                     </div>
                 </form>

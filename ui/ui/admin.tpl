@@ -63,7 +63,7 @@
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         {if ($_admin['id']) neq ($ds['id'])}
                                             <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
-                                                class="btn btn-danger btn-xs" onclick="return confirm('{Lang::T('Delete')}?')"><i class="glyphicon glyphicon-trash"></i></a>
+                                                class="btn btn-danger btn-xs" onclick="return ask(this, '{Lang::T('Delete')}?')"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}
                                     </td>
                                     <td>{$ds['id']}</td>

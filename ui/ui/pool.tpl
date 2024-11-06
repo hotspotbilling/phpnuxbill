@@ -6,7 +6,7 @@
             <div class="panel-heading">
                 <div class="btn-group pull-right">
                     <a class="btn btn-primary btn-xs" title="save" href="{$_url}pool/sync"
-                        onclick="return confirm('This will sync/send IP Pool to Mikrotik?')"><span
+                        onclick="return ask(this, 'This will sync/send IP Pool to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>
                 {Lang::T('IP Pool')}
@@ -54,7 +54,7 @@
                                     <td align="center">
                                         <a href="{$_url}pool/edit/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         <a href="{$_url}pool/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{Lang::T('Delete')}?')"
+                                            onclick="return ask(this, '{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
                                     <td>{$ds['id']}</td>

@@ -144,7 +144,7 @@
                 </div>
                 <div class="panel-footer">
                     <a href="{$_url}order/view/{$trx['id']}/cancel" class="btn btn-danger"
-                        onclick="return confirm('{Lang::T('Cancel it?')}')">{Lang::T('Cancel')}</a>
+                        onclick="return ask(this, '{Lang::T('Cancel it?')}')">{Lang::T('Cancel')}</a>
                 </div>
             {/if}
         </div>

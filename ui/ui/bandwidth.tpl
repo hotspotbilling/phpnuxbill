@@ -47,7 +47,7 @@
 											class="btn btn-sm btn-warning">{Lang::T('Edit')}</a>
 										<a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}"
 											class="btn btn-danger btn-sm"
-											onclick="return confirm('{Lang::T('Delete')}?')"><i
+											onclick="return ask(this, '{Lang::T('Delete')}?')"><i
 												class="glyphicon glyphicon-trash"></i></a>
 									</td>
 								</tr>

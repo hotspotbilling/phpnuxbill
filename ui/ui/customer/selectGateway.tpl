@@ -120,7 +120,7 @@
                 </ul>
                 <center>
                     <button type="submit" class="btn btn-primary"
-                        onclick="return confirm('{Lang::T("Are You Sure?")}')">{Lang::T('Pay Now')}</button><br>
+                        onclick="return ask(this, '{Lang::T("Are You Sure?")}')">{Lang::T('Pay Now')}</button><br>
                     <a class="btn btn-link" href="{$_url}home">{Lang::T('Cancel')}</a>
                 </center>
                 </form>
@@ -153,7 +153,7 @@
                     </ul>
                     <center>
                         <button type="submit" class="btn btn-primary"
-                            onclick="return confirm('{Lang::T("Are You Sure?")}')">{Lang::T('Pay Now')}</button><br>
+                            onclick="return ask(this, '{Lang::T("Are You Sure?")}')">{Lang::T('Pay Now')}</button><br>
                         <a class="btn btn-link" href="{$_url}home">{Lang::T('Cancel')}</a>
                     </center>
                 </form>
