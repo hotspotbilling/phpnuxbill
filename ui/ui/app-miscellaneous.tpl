@@ -112,7 +112,7 @@
                             </select>
                         </div>
                         <p class="help-block col-md-4"><small>
-                                {Lang::T(' for Customer')}</small></p>
+                                {Lang::T('Display bandwidth plan for customer')}</small></p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Hotspot Auth Method')}</label>
@@ -129,7 +129,7 @@
                         <p class="help-block col-md-4"><small>
                                 {Lang::T('Hotspot Authentication Method. Make sure you have changed your
                                 hotspot login
-                                page.')}<br><a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot"
+                                page.')} <a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot"
                                     target="_blank">Download
                                     phpnuxbill-login-hotspot</a></small>
                         </p>
