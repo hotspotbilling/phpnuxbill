@@ -13,7 +13,7 @@
                         <div class="panel-body" style="overflow-y: scroll;">
                             <div style="max-height: 50px; min-height: 50px;">{nl2br(strip_tags($d['description']))}</div>
                         </div>
-                        <div class="panel-footer" style="overflow-y: scroll;">
+                        <div class="panel-footer">
                             <center style="max-height: 40px; min-height: 40px;">
                                 <span class="label label-default">{$d['file']}</span>
                                 {foreach $d['url']  as $name => $url}
