@@ -1,6 +1,7 @@
 {
     "require": {
         "mpdf/mpdf": "^8.1",
-        "smarty/smarty": "=4.5.3"
+        "smarty/smarty": "=4.5.3",
+        "yosiazwan/php-facedetection": "^0.1.0"
     }
 }

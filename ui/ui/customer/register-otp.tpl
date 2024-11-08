@@ -16,12 +16,13 @@
                 <div class="panel-heading">1. {Lang::T('Register as Member')}</div>
                 <div class="panel-body">
                     <div class="form-container">
+                        <!-- Phone Number Field -->
                         <div class="form-group">
                             <label>{Lang::T('Phone Number')}</label>
                             <div class="input-group">
                                 <span class="input-group-addon" id="basic-addon1"><i
                                             class="glyphicon glyphicon-phone-alt"></i></span>
-                                <input type="text" class="form-control" name="username" value="{$username}"
+                                <input type="text" class="form-control" name="phone_number" value="{$phone_number}" readonly
                                     placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Phone Number')}{/if}">
                             </div>
                         </div>
@@ -50,9 +51,15 @@
         </div>
         <div class="col-md-4">
             <div class="panel panel-primary">
-                <div class="panel-heading">2. {Lang::T('Password')}</div>
+                <div class="panel-heading">2. {Lang::T('Username & Password')}</div>
                 <div class="panel-body">
                     <div class="form-container">
+                        <!-- Username Field -->
+                        <div class="form-group">
+                            <label>{Lang::T('Username')}</label>
+                            <input type="text" required class="form-control" id="username" name="username" placeholder="{Lang::T('Choose a Username')}">
+                        </div>
+                        <!-- Password Fields -->
                         <div class="form-group">
                             <label>{Lang::T('Password')}</label>
                             <input type="password" required class="form-control" id="password" name="password">
@@ -114,4 +121,5 @@
     </script>
     <!--End of Tawk.to Script-->
 {/if}
+
 {include file="customer/footer-public.tpl"}

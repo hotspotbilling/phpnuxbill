@@ -214,7 +214,7 @@ class MikrotikHotspot
     function getClient($ip, $user, $pass)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $iport = explode(":", $ip);
@@ -224,7 +224,7 @@ class MikrotikHotspot
     function removeHotspotUser($client, $username)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $printRequest = new RouterOS\Request(
@@ -242,7 +242,7 @@ class MikrotikHotspot
     function addHotspotUser($client, $plan, $customer)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $addRequest = new RouterOS\Request('/ip/hotspot/user/add');
@@ -310,7 +310,7 @@ class MikrotikHotspot
     function setHotspotUser($client, $user, $pass)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
@@ -327,7 +327,7 @@ class MikrotikHotspot
     function setHotspotUserPackage($client, $username, $plan_name)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $printRequest = new RouterOS\Request('/ip/hotspot/user/print');
@@ -344,7 +344,7 @@ class MikrotikHotspot
     function removeHotspotActiveUser($client, $username)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $onlineRequest = new RouterOS\Request('/ip/hotspot/active/print');
@@ -360,7 +360,7 @@ class MikrotikHotspot
     function getIpHotspotUser($client, $username)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $printRequest = new RouterOS\Request(

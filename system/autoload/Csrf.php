@@ -22,18 +22,22 @@ class Csrf
 
     public static function check($token)
     {
-        if (isset($_SESSION['csrf_token'], $_SESSION['csrf_token_time'], $token)) {
-            $storedToken = $_SESSION['csrf_token'];
-            $tokenTime = $_SESSION['csrf_token_time'];
+        global $config;
+        if($config['csrf_enabled'] == 'yes') {
+            if (isset($_SESSION['csrf_token'], $_SESSION['csrf_token_time'], $token)) {
+                $storedToken = $_SESSION['csrf_token'];
+                $tokenTime = $_SESSION['csrf_token_time'];
 
-            if (time() - $tokenTime > self::$tokenExpiration) {
-                self::clearToken();
-                return false;
+                if (time() - $tokenTime > self::$tokenExpiration) {
+                    self::clearToken();
+                    return false;
+                }
+
+                return self::validateToken($token, $storedToken);
             }
-
-            return self::validateToken($token, $storedToken);
+            return false;
         }
-        return false;
+        return true;
     }
 
     public static function generateAndStoreToken()

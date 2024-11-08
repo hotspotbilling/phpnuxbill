@@ -26,6 +26,15 @@ class User
         return 0;
     }
 
+    public static function getTawkToHash($email)
+    {
+        global $config;
+        if (!empty($config['tawkto_api_key']) && !Empty($email)) {
+            return hash_hmac('sha256', $email, $config['tawkto_api_key']);
+        }
+        return '';
+    }
+
     public static function getBills($id = 0)
     {
         if (!$id) {
@@ -157,12 +166,31 @@ class User
         return [];
     }
 
+    public static function generateToken($uid, $validDays = 30)
+    {
+        global $db_pass;
+        if($validDays>=30){
+            $time = time();
+        }else{
+            // for customer, deafult expired is 30 days
+            $time = strtotime('+ '.(30 - $validDays).' days');
+        }
+
+        return [
+            'time' => $time,
+            'token' => $uid . '.' . $time . '.' . sha1($uid . '.' . $time . '.' . $db_pass)
+        ];
+    }
+
     public static function setCookie($uid)
     {
         global $db_pass;
         if (isset($uid)) {
-            $time = time();
-            setcookie('uid', $uid . '.' . $time . '.' . sha1($uid . '.' . $time . '.' . $db_pass), time() + 86400 * 30);
+            $token = self::generateToken($uid);
+            setcookie('uid', $token['token'], time() + 86400 * 30);
+            return $token;
+        } else {
+            return false;
         }
     }
 
@@ -210,7 +238,8 @@ class User
         return $d;
     }
 
-    public static function isUserVoucher($kode) {
+    public static function isUserVoucher($kode)
+    {
         $regex = '/^GC\d+C.{10}$/';
         return preg_match($regex, $kode);
     }
@@ -223,11 +252,21 @@ class User
         $d = ORM::for_table('tbl_user_recharges')
             ->select('tbl_user_recharges.id', 'id')
             ->selects([
-                'customer_id', 'username', 'plan_id', 'namebp', 'recharged_on', 'recharged_time', 'expiration', 'time',
-                'status', 'method', 'plan_type',
+                'customer_id',
+                'username',
+                'plan_id',
+                'namebp',
+                'recharged_on',
+                'recharged_time',
+                'expiration',
+                'time',
+                'status',
+                'method',
+                'plan_type',
                 ['tbl_user_recharges.routers', 'routers'],
                 ['tbl_user_recharges.type', 'type'],
-                'admin_id', 'prepaid'
+                'admin_id',
+                'prepaid'
             ])
             ->left_outer_join('tbl_plans', ['tbl_plans.id', '=', 'tbl_user_recharges.plan_id'])
             ->left_outer_join('tbl_bandwidth', ['tbl_bandwidth.id', '=', 'tbl_plans.id_bw'])

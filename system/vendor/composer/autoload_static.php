@@ -229,6 +229,8 @@ class ComposerStaticInit405fa5c7a0972c286ef93b1161b83367
         'Smarty_Variable' => __DIR__ . '/..' . '/smarty/smarty/libs/sysplugins/smarty_variable.php',
         'TPC_yyStackEntry' => __DIR__ . '/..' . '/smarty/smarty/libs/sysplugins/smarty_internal_configfileparser.php',
         'TP_yyStackEntry' => __DIR__ . '/..' . '/smarty/smarty/libs/sysplugins/smarty_internal_templateparser.php',
+        'svay\\Exception\\NoFaceException' => __DIR__ . '/..' . '/yosiazwan/php-facedetection/Exception/NoFaceException.php',
+        'svay\\FaceDetector' => __DIR__ . '/..' . '/yosiazwan/php-facedetection/FaceDetector.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

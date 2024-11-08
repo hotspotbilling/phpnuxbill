@@ -13,31 +13,36 @@
         <div class="panel panel-success panel-hovered">
             <div class="panel-heading">{Lang::T('Available Payment Gateway')}</div>
             <div class="panel-footer">
-                <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
-                    <div class="form-group row">
-                        <label class="col-md-4">{Lang::T('Payment Gateway')}</label>
-                        <div class="col-md-8">
-                            <select name="gateway" id="gateway" class="form-control">
-                                {foreach $pgs as $pg}
-                                    <option value="{$pg}">
-                                        {ucwords($pg)}</option>
-                                {/foreach}
-                            </select>
+                {if !$custom}
+                    <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
+                        <div class="form-group row">
+                            <label class="col-md-4">{Lang::T('Payment Gateway')}</label>
+                            <div class="col-md-8">
+                                <select name="gateway" id="gateway" class="form-control">
+                                    {if $_c['enable_balance'] == 'yes'}
+                                        <option value="balance">{Lang::T('Balance')} {Lang::moneyFormat($_user['balance'])}
+                                        </option>
+                                    {/if}
+                                    {foreach $pgs as $pg}
+                                        <option value="{$pg}">{ucwords($pg)}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
                         </div>
-                    </div>
-            </div>
-            <div class="panel-body">
-                <center><b>{Lang::T('Package Details')}</b></center>
-                <ul class="list-group list-group-unbordered">
-                    <li class="list-group-item">
-                        <b>{Lang::T('Plan Name')}</b> <span class="pull-right">{$plan['name_plan']}</span>
-                    </li>
-                    {if $plan['is_radius'] or $plan['routers']}
+                </div>
+                <div class="panel-body">
+                    <center><b>{Lang::T('Package Details')}</b></center>
+
+                    <ul class="list-group list-group-unbordered">
                         <li class="list-group-item">
-                            <b>{Lang::T('Location')}</b> <span class="pull-right">{if
-                                $plan['is_radius']}Radius{else}{$plan['routers']}
-                            {/if}</span>
-                    </li>
+                            <b>{Lang::T('Plan Name')}</b> <span class="pull-right">{$plan['name_plan']}</span>
+                        </li>
+                        {if $plan['is_radius'] or $plan['routers']}
+                            <li class="list-group-item">
+                                <b>{Lang::T('Location')}</b> <span class="pull-right">{if
+                                    $plan['is_radius']}Radius{else}{$plan['routers']}
+                                {/if}</span>
+                        </li>
                     {/if}
                     <li class="list-group-item">
                         <b>{Lang::T('Type')}</b> <span class="pull-right">{if $plan['prepaid'] eq
@@ -47,10 +52,11 @@
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Plan Price')}</b> <span class="pull-right">
-                        {if !empty($plan['price_old'])}
-                            <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
-                                {/if}
-                        {Lang::moneyFormat($plan['price'])}
+                            {if !empty($plan['price_old'])}
+                                <sup
+                                    style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
+                            {/if}
+                            {Lang::moneyFormat($plan['price'])}
                         </span>
                     </li>
                     {if $plan['validity']}
@@ -113,10 +119,46 @@
                     {/if}
                 </ul>
                 <center>
-                    <button type="submit" class="btn btn-primary">{Lang::T('Pay Now')}</button><br>
+                    <button type="submit" class="btn btn-primary"
+                        onclick="return ask(this, '{Lang::T("Are You Sure?")}')">{Lang::T('Pay Now')}</button><br>
                     <a class="btn btn-link" href="{$_url}home">{Lang::T('Cancel')}</a>
                 </center>
                 </form>
+                {else}
+                <br>
+                <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
+                    <div class="form-group row">
+                        <label class="col-md-4">{Lang::T('Payment Gateway')}</label>
+                        <div class="col-md-8">
+                            <select name="gateway" id="gateway" class="form-control">
+                                {foreach $pgs as $pg}
+                                    <option value="{$pg}">
+                                        {ucwords($pg)}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
+                    <ul class="list-group list-group-unbordered">
+                        <input type="hidden" name="custom" value="1">
+                        <input type="hidden" name="amount" value="{$amount}">
+                        <li class="list-group-item">
+                            <b>{Lang::T('Custom Balance')}</b> <span
+                                class="pull-right">{Lang::moneyFormat($amount)}</span>
+                        </li>
+                        <br> <br> <br>
+                        <li class="list-group-item">
+                            <b>{Lang::T('Total')}</b> <span class="pull-right"
+                                style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($amount)}</span>
+                        </li>
+                    </ul>
+                    <center>
+                        <button type="submit" class="btn btn-primary"
+                            onclick="return ask(this, '{Lang::T("Are You Sure?")}')">{Lang::T('Pay Now')}</button><br>
+                        <a class="btn btn-link" href="{$_url}home">{Lang::T('Cancel')}</a>
+                    </center>
+                </form>
+                {/if}
+                <br>
             </div>
         </div>
     </div>

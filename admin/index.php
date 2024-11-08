@@ -5,4 +5,4 @@
  **/
 
 
-header('location: ../index.php?_route=admin/');
+header('location: ../?_route=admin/');

@@ -85,7 +85,7 @@
                                         <a href="{$_url}routers/edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         <a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return confirm('{Lang::T('Delete')}?')"
+                                            onclick="return ask(this, '{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
                                     <td>{$ds['id']}</td>

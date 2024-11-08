@@ -147,7 +147,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
-                            <button class="btn btn-primary" type="submit">{Lang::T('Save Changes')}</button>
+                            <button class="btn btn-primary" onclick="return ask(this, 'Continue the process of adding the PPPoE Package?')" type="submit">{Lang::T('Save Changes')}</button>
                             Or <a href="{$_url}services/pppoe">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
@@ -183,7 +183,7 @@
                     document.getElementById("routers").required = false;
                     document.getElementById("routers").disabled = true;
                     $.ajax({
-                        url: "index.php?_route=autoload/pool",
+                        url: "?_route=autoload/pool",
                         data: "routers=radius",
                         cache: false,
                         success: function(msg) {

@@ -19,7 +19,7 @@
         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
         <div class="btn-group pull-right">
             <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{$_url}plan/remove-voucher"
-                onclick="return confirm('Delete all used voucher code more than 3 months?')"><span
+                onclick="return ask(this, 'Delete all used voucher code more than 3 months?')"><span
                     class="glyphicon glyphicon-trash" aria-hidden="true"></span> {Lang::T('Delete')} &gt; {Lang::T('3
                 Months')}</a>
         </div>
@@ -133,7 +133,7 @@
                             {/if}
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                             <a href="{$_url}plan/voucher-delete/{$ds['id']}" id="{$ds['id']}"
-                                class="btn btn-danger btn-xs" onclick="return confirm('{Lang::T('Delete')}?')"><i
+                                class="btn btn-danger btn-xs" onclick="return ask(this, '{Lang::T('Delete')}?')"><i
                                     class="glyphicon glyphicon-trash"></i></a>
                             {/if}
                         </td>

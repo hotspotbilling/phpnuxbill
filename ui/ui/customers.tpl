@@ -17,8 +17,8 @@
             <div class="panel-heading">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}customers/csv"
-                            onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}customers/csv&token={$csrf_token}"
+                            onclick="return ask(this, 'This will export to CSV?')"><span class="glyphicon glyphicon-download"
                                 aria-hidden="true"></span> CSV</a>
                     </div>
                 {/if}
@@ -26,6 +26,7 @@
             </div>
             <div class="panel-body">
                 <form id="site-search" method="post" action="{$_url}customers">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                         <div class="col-lg-4">
                             <div class="input-group">
@@ -35,6 +36,10 @@
                                         <select class="form-control" id="order" name="order">
                                             <option value="username" {if $order eq 'username' }selected{/if}>
                                                 {Lang::T('Username')}</option>
+                                            <option value="fullname" {if $order eq 'fullname' }selected{/if}>
+                                                {Lang::T('First Name')}</option>
+                                            <option value="lastname" {if $order eq 'lastname' }selected{/if}>
+                                                {Lang::T('Last Name')}</option>
                                             <option value="created_at" {if $order eq 'created_at' }selected{/if}>
                                                 {Lang::T('Created Date')}</option>
                                             <option value="balance" {if $order eq 'balance' }selected{/if}>
@@ -67,15 +72,12 @@
                         </div>
                         <div class="col-lg-4">
                             <div class="input-group">
-                                <div class="input-group-addon">
-                                    <span class="fa fa-search"></span>
-                                </div>
                                 <input type="text" name="search" class="form-control"
                                     placeholder="{Lang::T('Search')}..." value="{$search}">
                                 <div class="input-group-btn">
                                     <button class="btn btn-primary" type="submit"><span
-                                            class="fa fa-search"></span></button>
-                                    <button class="btn btn-primary" type="submit" name="export" value="csv">
+                                            class="fa fa-search"></span> {Lang::T('Search')}</button>
+                                    <button class="btn btn-info" type="submit" name="export" value="csv">
                                         <span class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV
                                     </button>
                                 </div>
@@ -95,6 +97,7 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Username')}</th>
+                                <th>Photo</th>
                                 <th>{Lang::T('Account Type')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Balance')}</th>
@@ -112,6 +115,11 @@
                                 <tr {if $ds['status'] != 'Active'}class="danger" {/if}>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
+                                    <td>
+                                        <a href="{$UPLOAD_PATH}{$ds['photo']}" target="photo">
+                                            <img src="{$UPLOAD_PATH}{$ds['photo']}.thumb.jpg" width="32" alt="">
+                                        </a>
+                                    </td>
                                     <td>{$ds['account_type']}</td>
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor: pointer;">{$ds['fullname']}</td>
@@ -119,8 +127,7 @@
                                     <td align="center">
                                         {if $ds['phonenumber']}
                                             <a href="tel:{$ds['phonenumber']}" class="btn btn-default btn-xs"
-                                                title="{$ds['phonenumber']}"><i
-                                                    class="glyphicon glyphicon-earphone"></i></a>
+                                                title="{$ds['phonenumber']}"><i class="glyphicon glyphicon-earphone"></i></a>
                                         {/if}
                                         {if $ds['email']}
                                             <a href="mailto:{$ds['email']}" class="btn btn-default btn-xs"
@@ -138,7 +145,7 @@
                                     <td>{$ds['service_type']}</td>
                                     <td>
                                         {$ds['pppoe_username']}
-                                    {if !empty($ds['pppoe_username']) && !empty($ds['pppoe_ip'])}:{/if}
+                                        {if !empty($ds['pppoe_username']) && !empty($ds['pppoe_ip'])}:{/if}
                                         {$ds['pppoe_ip']}
                                     </td>
                                     <td>{Lang::T($ds['status'])}</td>
@@ -147,14 +154,14 @@
                                         <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}"
                                             style="margin: 0px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}customers/edit/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{$_url}customers/edit/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
                                             style="margin: 0px; color:black"
                                             class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Edit')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}customers/sync/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{$_url}customers/sync/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
                                             style="margin: 5px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('Sync')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}plan/recharge/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
-                                            class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
+                                        <a href="{$_url}plan/recharge/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
+                                            style="margin: 0px;" class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
                                     </td>
                                 </tr>
                             {/foreach}

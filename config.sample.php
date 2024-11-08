@@ -1,9 +1,14 @@
 <?php
 
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-$host = $_SERVER['HTTP_HOST'];
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || 
+             (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
+
+// Check if HTTP_HOST is set, otherwise use a default value or SERVER_NAME
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'localhost');
+
 $baseDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 define('APP_URL', $protocol . $host . $baseDir);
+
 
 $_app_stage = 'Live'; # Do not change this
 

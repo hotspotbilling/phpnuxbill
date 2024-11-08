@@ -105,9 +105,7 @@
                             placeholder="{Lang::T('Cash')}, {Lang::T('Bank Transfer')}">
                     </div>
                     <p class="help-block col-md-4">
-                        {Lang::T('This used for admin to select payment in recharge, using comma for
-                        every new
-                        options')}
+                        {Lang::T('This used for admin to select payment in recharge, using comma for every new options')}
                     </p>
                 </div>
 
@@ -120,12 +118,17 @@
                     <span class="help-block col-md-4">{Lang::T('Income will reset every this
                         day')}</span>
                 </div>
-                <button class="btn btn-success btn-block" type="submit">
+                <button class="btn btn-success btn-block" name="general" type="submit">
                     {Lang::T('Save Changes')}
                 </button>
             </div>
+
         </div>
     </div>
+</form>
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="HideDashboardContent">
             <h4 class="panel-title">
@@ -161,6 +164,10 @@
             </div>
         </div>
     </div>
+</form>
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Registration">
             <h4 class="panel-title">
@@ -230,9 +237,9 @@
                     <div class="col-md-6">
                         <select name="phone_otp_type" id="phone_otp_type" class="form-control">
                             <option value="sms" {if $_c['phone_otp_type']=='sms' }selected="selected" {/if}>
-                                {Lang::T('By SMS')}
+                                {Lang::T('By SMS')}</option>
                             <option value="whatsapp" {if $_c['phone_otp_type']=='whatsapp' }selected="selected" {/if}>
-                                {Lang::T('by WhatsApp')}
+                                {Lang::T('by WhatsApp')}</option>
                             <option value="both" {if $_c['phone_otp_type']=='both' }selected="selected" {/if}>
                                 {Lang::T('By WhatsApp and SMS')}
                             </option>
@@ -247,6 +254,86 @@
             </div>
         </div>
     </div>
+</form>
+
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
+    <div class="panel">
+        <div class="panel-heading" role="tab" id="Security">
+            <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseSecurity" aria-expanded="false" aria-controls="collapseSecurity">
+                    {Lang::T('Security')}
+                </a>
+            </h4>
+        </div>
+        <div id="collapseSecurity" class="panel-collapse collapse" role="tabpanel">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
+                    <div class="col-md-5">
+                        <label class="switch">
+                            <input type="checkbox" id="enable_session_timeout" value="1"
+                                name="enable_session_timeout" {if $_c['enable_session_timeout']==1}checked{/if}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                </div>
+                <div class="form-group" id="timeout_duration_input" style="display: none;">
+                    <label class="col-md-3 control-label">{Lang::T('Timeout Duration')}</label>
+                    <div class="col-md-5">
+                        <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
+                            name="session_timeout_duration" id="session_timeout_duration"
+                            placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
+                    </div>
+                    <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx
+                            minutes')}
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Single Admin Session')}</label>
+                    <div class="col-md-5">
+                        <select name="single_session" id="single_session" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}</option>
+                            <option value="yes" {if $_c['single_session']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Admin can only have single session login, it will logout another session')}
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Enable CSRF Validation')}</label>
+                    <div class="col-md-5">
+                        <select name="csrf_enabled" id="csrf_enabled" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}</option>
+                            <option value="yes" {if $_c['csrf_enabled']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank">{Lang::T('Cross-site request forgery')}</a>
+                    </p>
+                </div>
+                <button class="btn btn-success btn-block" type="submit">
+                    {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Voucher">
             <h4 class="panel-title">
@@ -310,7 +397,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="FreeRadius">
             <h4 class="panel-title">
@@ -341,7 +431,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="ExtendPostpaidExpiration">
             <h4 class="panel-title">
@@ -385,7 +478,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="CustomerBalanceSystem">
             <h4 class="panel-title">
@@ -437,7 +533,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TelegramNotification">
             <h4 class="panel-title">
@@ -477,7 +576,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="SMSNotification">
             <h4 class="panel-title">
@@ -529,7 +631,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="WhatsappNotification">
             <h4 class="panel-title">
@@ -552,7 +657,7 @@
                             placeholder="https://domain/?param_number=[number]&param_text=[text]&secret=">
                     </div>
                     <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
-                        {Lang::T('it will be replaced.')}
+                        {Lang::T('it will be replaced.')}</p>
                 </div>
                 <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
                     {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">{Lang::T('Free
@@ -563,7 +668,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="EmailNotification">
             <h4 class="panel-title">
@@ -645,7 +753,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="UserNotification">
             <h4 class="panel-title">
@@ -708,7 +819,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TawkToChatWidget">
             <h4 class="panel-title">
@@ -728,6 +842,13 @@
                     </div>
                     <p class="help-block col-md-4">{Lang::T('From Direct Chat Link.')}</p>
                 </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label">Tawk.to Javascript API key</label>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="tawkto_api_key" name="tawkto_api_key" value="{$_c['tawkto_api_key']}"
+                            placeholder="39e52264cxxxxxxxxxxxxxdd078af5342e8">
+                    </div>
+                </div>
                 <label class="col-md-2"></label>
                 <p class="col-md-6 help-block">/ip hotspot walled-garden<br>
                     add dst-host=tawk.to<br>
@@ -738,7 +859,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="APIKey">
             <h4 class="panel-title">
@@ -765,7 +889,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Proxy">
             <h4 class="panel-title">
@@ -798,7 +925,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TaxSystem">
             <h4 class="panel-title">
@@ -869,7 +999,10 @@
             </div>
         </div>
     </div>
+</form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="GithubAuthentication">
             <h4 class="panel-title">
@@ -916,31 +1049,28 @@
     </div>
 </form>
 
-<div class="well well-sm">
-    <legend>{Lang::T('Settings For Mikrotik')}</legend>
-    <pre>/ip hotspot walled-garden
-    add dst-host={$_domain}
-    add dst-host=*.{$_domain}</pre>
-
-    <legend>{Lang::T('Settings For Cron Expired')}</legend>
-    <pre>
-    # {Lang::T('Expired Cronjob Every 5 Minutes')}
-    */5 * * * * cd {$dir} && {$php} cron.php
-</pre>
-    {Lang::T('Choose one, above or below')}
-    <pre>
-    # {Lang::T('Expired Cronjob Every 1 Hour')}
-    0 * * * * cd {$dir} && {$php} cron.php
-</pre>
-
-    <legend>{Lang::T('Settings For Cron Reminder')}</legend>
-    <pre>
-    # {Lang::T('Reminder Cronjob Every 7 AM')}
-    0 7 * * * cd {$dir} && {$php} cron_reminder.php
-</pre>
+<div class="bs-callout bs-callout-info" id="callout-navbar-role">
+    <h4><b>{Lang::T('Settings For Mikrotik')}</b></h4>
+    <p>/ip hotspot walled-garden <br>
+        add dst-host={$_domain} <br>
+        add dst-host=*.{$_domain}
+    </p>
+    <br>
+    <h4><b>{Lang::T('Settings For Cron Expired')}</b></h4>
+    <p>
+        # {Lang::T('Expired Cronjob Every 5 Minutes [Recommended]')}<br>
+        */5 * * * * cd {$dir} && {$php} cron.php
+        <br><br>
+        # {Lang::T('Expired Cronjob Every 1 Hour')}<br>
+        0 * * * * cd {$dir} && {$php} cron.php
+    </p>
+    <br>
+    <h4><b>{Lang::T('Settings For Cron Reminder')}</b></h4>
+    <p>
+        # {Lang::T('Reminder Cronjob Every 7 AM')}<br>
+        0 7 * * * cd {$dir} && {$php} cron_reminder.php
+    </p>
 </div>
-
-
 
 <script>
     function testWa() {
@@ -968,6 +1098,39 @@
     function testTg() {
         window.location.href = '{$_url}settings/app&testTg=test';
     }
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var sectionTimeoutCheckbox = document.getElementById('enable_session_timeout');
+        var timeoutDurationInput = document.getElementById('timeout_duration_input');
+        var timeoutDurationField = document.getElementById('session_timeout_duration');
+
+        if (sectionTimeoutCheckbox.checked) {
+            timeoutDurationInput.style.display = 'block';
+            timeoutDurationField.required = true;
+        }
+
+        sectionTimeoutCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                timeoutDurationInput.style.display = 'block';
+                timeoutDurationField.required = true;
+            } else {
+                timeoutDurationInput.style.display = 'none';
+                timeoutDurationField.required = false;
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function (event) {
+            if (sectionTimeoutCheckbox.checked && (!timeoutDurationField.value || isNaN(
+                timeoutDurationField.value))) {
+                event.preventDefault();
+                alert('Please enter a valid session timeout duration.');
+                timeoutDurationField.focus();
+            }
+        });
+    });
 </script>
 
 <script>

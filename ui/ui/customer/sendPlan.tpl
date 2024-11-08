@@ -53,7 +53,7 @@
                         </div>
                         <div class="form-group col-sm-3" align="center">
                             <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
-                                onclick="return confirm('{Lang::T("Are You Sure?")}')" value="plan"><i
+                                onclick="return ask(this, '{Lang::T("Are You Sure?")}')" value="plan"><i
                                     class="glyphicon glyphicon-send"></i></button>
                         </div>
                     </div>

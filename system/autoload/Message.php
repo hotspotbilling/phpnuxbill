@@ -48,7 +48,7 @@ class Message
                     }
                 } else {
                     try {
-                        self::sendSMS($config['sms_url'], $phone, $txt);
+                        self::MikrotikSendSMS($config['sms_url'], $phone, $txt);
                     } catch (Exception $e) {
                         // ignore, add to logs
                         _log("Failed to send SMS using Mikrotik.\n" . $e->getMessage(), 'SMS', 0);
@@ -188,16 +188,34 @@ class Message
         } else {
             $msg = str_replace('[[expired_date]]', "", $msg);
         }
+
+        if (strpos($msg, '[[payment_link]]') !== false) {
+            // token only valid for 1 day, for security reason
+            $token = User::generateToken($customer['id'], 1);
+            if(!empty($token['token'])){
+                $tur = ORM::for_table('tbl_user_recharges')
+                    ->where('customer_id', $customer['id'])
+                    ->where('namebp', $package)
+                    ->find_one();
+                if ($tur) {
+                    $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
+                    $msg = str_replace('[[payment_link]]', $url, $msg);
+                }
+            }else{
+                $msg = str_replace('[[payment_link]]', '', $msg);
+            }
+        }
+
         if (
             !empty($customer['phonenumber']) && strlen($customer['phonenumber']) > 5
             && !empty($message) && in_array($via, ['sms', 'wa'])
         ) {
             if ($via == 'sms') {
-                echo Message::sendSMS($customer['phonenumber'], $msg);
+                Message::sendSMS($customer['phonenumber'], $msg);
             } else if ($via == 'email') {
                 self::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Internet Plan Reminder"), $msg);
             } else if ($via == 'wa') {
-                echo Message::sendWhatsapp($customer['phonenumber'], $msg);
+                Message::sendWhatsapp($customer['phonenumber'], $msg);
             }
         }
         return "$via: $msg";
@@ -235,6 +253,7 @@ class Message
         $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $trx['invoice'], $textInvoice);
         $textInvoice = str_replace('[[date]]', Lang::dateAndTimeFormat($trx['recharged_on'], $trx['recharged_time']), $textInvoice);
+        $textInvoice = str_replace('[[trx_date]]', Lang::dateAndTimeFormat($trx['recharged_on'], $trx['recharged_time']), $textInvoice);
         if (!empty($trx['note'])) {
             $textInvoice = str_replace('[[note]]', $trx['note'], $textInvoice);
         }
@@ -263,7 +282,8 @@ class Message
     }
 
 
-    public static function addToInbox($to_customer_id, $subject, $body, $from = 'System'){
+    public static function addToInbox($to_customer_id, $subject, $body, $from = 'System')
+    {
         $v = ORM::for_table('tbl_customers_inbox')->create();
         $v->from = $from;
         $v->customer_id = $to_customer_id;

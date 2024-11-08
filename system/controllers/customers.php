@@ -25,6 +25,10 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        $csrf_token = _req('token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
 
         $cs = ORM::for_table('tbl_customers')
             ->select('tbl_customers.id', 'id')
@@ -153,6 +157,7 @@ switch ($action) {
         }
         $ui->assign('xheader', $leafletpickerHeader);
         run_hook('view_add_customer'); #HOOK
+        $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
         $ui->display('customers-add.tpl');
         break;
     case 'recharge':
@@ -161,6 +166,10 @@ switch ($action) {
         }
         $id_customer = $routes['2'];
         $plan_id = $routes['3'];
+        $csrf_token = _req('token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers/view/' . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
             $gateway = 'Recharge';
@@ -199,6 +208,7 @@ switch ($action) {
             $ui->assign('channel', $channel);
             $ui->assign('server', $b['routers']);
             $ui->assign('plan', $plan);
+            $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('recharge-confirm.tpl');
         } else {
             r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
@@ -210,6 +220,10 @@ switch ($action) {
         }
         $id_customer = $routes['2'];
         $plan_id = $routes['3'];
+        $csrf_token = _req('token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers/view/' . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
             $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
@@ -238,6 +252,10 @@ switch ($action) {
         break;
     case 'sync':
         $id_customer = $routes['2'];
+        $csrf_token = _req('token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers/view/' . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $bs = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->findMany();
         if ($bs) {
             $routers = [];
@@ -266,8 +284,12 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id = $routes['2'];
+        $csrf_token = _req('token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers/view/' . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $customer = ORM::for_table('tbl_customers')->find_one($id);
-        if($customer){
+        if ($customer) {
             $_SESSION['uid'] = $id;
             User::setCookie($id);
             _alert("You are logging in as $customer[fullname],<br>don't logout just close tab.", 'info', "home", 10);
@@ -283,8 +305,6 @@ switch ($action) {
             $customer = ORM::for_table('tbl_customers')->find_one($id);
         }
         if ($customer) {
-
-
             // Fetch the Customers Attributes values from the tbl_customer_custom_fields table
             $customFields = ORM::for_table('tbl_customers_fields')
                 ->where('customer_id', $customer['id'])
@@ -308,6 +328,7 @@ switch ($action) {
             $ui->assign('d', $customer);
             $ui->assign('customFields', $customFields);
             $ui->assign('xheader', $leafletpickerHeader);
+            $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('customers-view.tpl');
         } else {
             r2(U . 'customers/list', 'e', Lang::T('Account Not Found'));
@@ -325,10 +346,28 @@ switch ($action) {
             ->where('customer_id', $id)
             ->find_many();
         if ($d) {
+            if(isset($routes['3']) && $routes['3'] == 'deletePhoto'){
+                if($d['photo'] != '' && strpos($d['photo'], 'default') === false){
+                    if(file_exists($UPLOAD_PATH.$d['photo']) && strpos($d['photo'], 'default') === false){
+                        unlink($UPLOAD_PATH.$d['photo']);
+                        if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){
+                            unlink($UPLOAD_PATH.$d['photo'].'.thumb.jpg');
+                        }
+                    }
+                    $d->photo = '/user.default.jpg';
+                    $d->save();
+                    $ui->assign('notify_t', 's');
+                    $ui->assign('notify', 'You have successfully deleted the photo');
+                }else{
+                    $ui->assign('notify_t', 'e');
+                    $ui->assign('notify', 'No photo found to delete');
+                }
+            }
             $ui->assign('d', $d);
             $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
             $ui->assign('customFields', $customFields);
             $ui->assign('xheader', $leafletpickerHeader);
+            $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('customers-edit.tpl');
         } else {
             r2(U . 'customers/list', 'e', Lang::T('Account Not Found'));
@@ -340,6 +379,10 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $id = $routes['2'];
+        $csrf_token = _req('token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers/view/' . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         run_hook('delete_customer'); #HOOK
         $c = ORM::for_table('tbl_customers')->find_one($id);
         if ($c) {
@@ -375,6 +418,11 @@ switch ($action) {
         break;
 
     case 'add-post':
+
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers/add', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
         $password = trim(_post('password'));
@@ -459,7 +507,7 @@ switch ($action) {
                 $welcomeMessage = str_replace('[[name]]', $d['fullname'], $welcomeMessage);
                 $welcomeMessage = str_replace('[[username]]', $d['username'], $welcomeMessage);
                 $welcomeMessage = str_replace('[[password]]', $d['password'], $welcomeMessage);
-                $welcomeMessage = str_replace('[[url]]', APP_URL . '/index.php?_route=login', $welcomeMessage);
+                $welcomeMessage = str_replace('[[url]]', APP_URL . '/?_route=login', $welcomeMessage);
 
                 $emailSubject = "Welcome to " . $config['CompanyName'];
 
@@ -475,7 +523,7 @@ switch ($action) {
                         'args' => [$d['phonenumber'], $welcomeMessage]
                     ],
                     'email' => [
-                        'enabled' => isset($_POST['email']),
+                        'enabled' => isset($_POST['mail']),
                         'method' => 'Message::sendEmail',
                         'args' => [$d['email'], $emailSubject, $welcomeMessage, $d['email']]
                     ]
@@ -499,6 +547,11 @@ switch ($action) {
         break;
 
     case 'edit-post':
+        $id = _post('id');
+        $csrf_token = _post('csrf_token');
+        if (!Csrf::check($csrf_token)) {
+            r2(U . 'customers/edit/' . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
         $account_type = _post('account_type');
@@ -526,7 +579,6 @@ switch ($action) {
             $msg .= 'Full Name should be between 2 to 25 characters' . '<br>';
         }
 
-        $id = _post('id');
         $c = ORM::for_table('tbl_customers')->find_one($id);
 
         if (!$c) {
@@ -551,8 +603,8 @@ switch ($action) {
             if (ORM::for_table('tbl_customers')->where('username', $username)->find_one()) {
                 $msg .= Lang::T('Username already used by another customer') . '<br>';
             }
-            if(ORM::for_table('tbl_customers')->where('pppoe_username', $username)->find_one()){
-                $msg.= Lang::T('Username already used by another pppoe username customer') . '<br>';
+            if (ORM::for_table('tbl_customers')->where('pppoe_username', $username)->find_one()) {
+                $msg .= Lang::T('Username already used by another pppoe username customer') . '<br>';
             }
             $userDiff = true;
         }
@@ -576,6 +628,54 @@ switch ($action) {
         }
 
         if ($msg == '') {
+            if (!empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
+                if (function_exists('imagecreatetruecolor')) {
+                    $hash = md5_file($_FILES['photo']['tmp_name']);
+                    $subfolder = substr($hash, 0, 2);
+                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos'. DIRECTORY_SEPARATOR;
+                    if(!file_exists($folder)){
+                        mkdir($folder);
+                    }
+                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos'. DIRECTORY_SEPARATOR. $subfolder. DIRECTORY_SEPARATOR;
+                    if(!file_exists($folder)){
+                        mkdir($folder);
+                    }
+                    $imgPath = $folder . $hash . '.jpg';
+                    if (!file_exists($imgPath)){
+                        File::resizeCropImage($_FILES['photo']['tmp_name'], $imgPath, 1600, 1600, 100);
+                    }
+                    if (!file_exists($imgPath.'.thumb.jpg')){
+                        if(_post('faceDetect') == 'yes'){
+                            try{
+                                $detector = new svay\FaceDetector();
+                                $detector->setTimeout(5000);
+                                $detector->faceDetect($imgPath);
+                                $detector->cropFaceToJpeg($imgPath.'.thumb.jpg', false);
+                            }catch (Exception $e) {
+                                File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                            } catch (Throwable $e) {
+                                File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                            }
+                        }else{
+                            File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                        }
+                    }
+                    if(file_exists($imgPath)){
+                        if($c['photo'] != '' && strpos($c['photo'], 'default') === false){
+                            if(file_exists($UPLOAD_PATH.$c['photo'])){
+                                unlink($UPLOAD_PATH.$c['photo']);
+                                if(file_exists($UPLOAD_PATH.$c['photo'].'.thumb.jpg')){
+                                    unlink($UPLOAD_PATH.$c['photo'].'.thumb.jpg');
+                                }
+                            }
+                        }
+                        $c->photo = '/photos/'. $subfolder. '/'. $hash. '.jpg';
+                    }
+                    if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
+                } else {
+                    r2(U . 'settings/app', 'e', 'PHP GD is not installed');
+                }
+            }
             if ($userDiff) {
                 $c->username = $username;
             }
@@ -659,13 +759,13 @@ switch ($action) {
                                     (new $p['device'])->change_username($p, $oldusername, $username);
                                 }
                                 if ($pppoeDiff && $tur['type'] == 'PPPOE') {
-                                    if(empty($oldPppoeUsername) && !empty($pppoe_username)){
+                                    if (empty($oldPppoeUsername) && !empty($pppoe_username)) {
                                         // admin just add pppoe username
                                         (new $p['device'])->change_username($p, $username, $pppoe_username);
-                                    }else if(empty($pppoe_username) && !empty($oldPppoeUsername)){
+                                    } else if (empty($pppoe_username) && !empty($oldPppoeUsername)) {
                                         // admin want to use customer username
                                         (new $p['device'])->change_username($p, $oldPppoeUsername, $username);
-                                    }else{
+                                    } else {
                                         // regular change pppoe username
                                         (new $p['device'])->change_username($p, $oldPppoeUsername, $pppoe_username);
                                     }
@@ -709,12 +809,20 @@ switch ($action) {
             $query = ORM::for_table('tbl_customers');
             $query->where("status", $filter);
         }
-        if ($orderby == 'asc') {
-            $query->order_by_asc($order);
-        } else {
-            $query->order_by_desc($order);
+        if($order == 'lastname') {
+            $query->order_by_expr("SUBSTR(fullname, INSTR(fullname, ' ')) $orderby");
+        }else{
+            if ($orderby == 'asc') {
+                $query->order_by_asc($order);
+            } else {
+                $query->order_by_desc($order);
+            }
         }
         if (_post('export', '') == 'csv') {
+            $csrf_token = _post('csrf_token');
+            if (!Csrf::check($csrf_token)) {
+                r2(U . 'customers', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
             $d = $query->findMany();
             $h = false;
             set_time_limit(-1);
@@ -764,6 +872,7 @@ switch ($action) {
         $ui->assign('order', $order);
         $ui->assign('order_pos', $order_pos[$order]);
         $ui->assign('orderby', $orderby);
+        $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
         $ui->display('customers.tpl');
         break;
 }

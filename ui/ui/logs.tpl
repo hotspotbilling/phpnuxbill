@@ -7,7 +7,7 @@
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
                         <a class="btn btn-primary btn-xs" title="save" href="{$_url}logs/list-csv"
-                            onclick="return confirm('This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                            onclick="return ask(this, 'This will export to CSV?')"><span class="glyphicon glyphicon-download"
                                 aria-hidden="true"></span> CSV</a>
                     </div>
                 {/if}
@@ -37,7 +37,7 @@
                                 <span class="input-group-addon">{Lang::T('Days')}</span>
                             </div>
                             <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return confirm('Clear old logs?')">{Lang::T('Clean Logs')}</button>
+                                onclick="return ask(this, 'Clear old logs?')">{Lang::T('Clean Logs')}</button>
                         </form>
                     </div>&nbsp;
                 </div>

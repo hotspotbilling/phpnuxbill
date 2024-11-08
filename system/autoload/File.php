@@ -1,4 +1,5 @@
 <?php
+
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -93,6 +94,48 @@ class File
         return file_exists($dst_dir);
     }
 
+    public static function makeThumb($srcFile, $thumbFile, $thumbSize = 200)
+    {
+        /* Determine the File Type */
+        $type = substr($srcFile, strrpos($srcFile, '.') + 1);
+        $imgsize = getimagesize($srcFile);
+        $oldW = $imgsize[0];
+        $oldH = $imgsize[1];
+        $mime = $imgsize['mime'];
+        switch ($mime) {
+            case 'image/gif':
+                $src = imagecreatefromgif($srcFile);
+                break;
+
+            case 'image/png':
+                $src = imagecreatefrompng($srcFile);
+                break;
+
+            case 'image/jpeg':
+                $src = imagecreatefromjpeg($srcFile);
+                break;
+
+            default:
+                return false;
+                break;
+        }
+        /* Calculate the New Image Dimensions */
+        $limiting_dim = 0;
+        if ($oldH > $oldW) {
+            /* Portrait */
+            $limiting_dim = $oldW;
+        } else {
+            /* Landscape */
+            $limiting_dim = $oldH;
+        }
+        /* Create the New Image */
+        $new = imagecreatetruecolor($thumbSize, $thumbSize);
+        /* Transcribe the Source Image into the New (Square) Image */
+        imagecopyresampled($new, $src, 0, 0, ($oldW - $limiting_dim) / 2, ($oldH - $limiting_dim) / 2, $thumbSize, $thumbSize, $limiting_dim, $limiting_dim);
+        imagejpeg($new, $thumbFile, 100);
+        imagedestroy($new);
+        return file_exists($thumbFile);
+    }
 
     /**
      * file path fixer

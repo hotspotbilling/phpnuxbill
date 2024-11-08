@@ -19,6 +19,9 @@ class App{
     }
 
     public static function getTokenValue($key){
+        if(empty($key)){
+            return "";
+        }
         if(isset($_SESSION[$key])){
             return $_SESSION[$key];
         }else{

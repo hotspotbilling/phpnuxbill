@@ -5,7 +5,8 @@
         <div class="box box-{if $d['status']=='Active'}primary{else}danger{/if}">
             <div class="box-body box-profile">
                 <img class="profile-user-img img-responsive img-circle"
-                    src="https://robohash.org/{$d['id']}?set=set3&size=100x100&bgset=bg1"
+                    onclick="window.location.href = '{$UPLOAD_PATH}{$d['photo']}'"
+                    src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg"
                     onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" alt="avatar">
                 <h3 class="profile-username text-center">{$d['fullname']}</h3>
                 <ul class="list-group list-group-unbordered">
@@ -111,12 +112,12 @@
                 </ul>
                 <div class="row">
                     <div class="col-xs-4">
-                        <a href="{$_url}customers/delete/{$d['id']}" id="{$d['id']}"
+                        <a href="{$_url}customers/delete/{$d['id']}&token={$csrf_token}" id="{$d['id']}"
                             class="btn btn-danger btn-block btn-sm"
-                            onclick="return confirm('{Lang::T('Delete')}?')"><span class="fa fa-trash"></span></a>
+                            onclick="return ask(this, '{Lang::T('Delete')}?')"><span class="fa fa-trash"></span></a>
                     </div>
                     <div class="col-xs-8">
-                        <a href="{$_url}customers/edit/{$d['id']}"
+                        <a href="{$_url}customers/edit/{$d['id']}&token={$csrf_token}"
                             class="btn btn-warning btn-sm btn-block">{Lang::T('Edit')}</a>
                     </div>
                 </div>
@@ -239,12 +240,12 @@
                         </ul>
                         <div class="row">
                             <div class="col-xs-4">
-                                <a href="{$_url}customers/deactivate/{$d['id']}/{$package['plan_id']}" id="{$d['id']}"
+                                <a href="{$_url}customers/deactivate/{$d['id']}/{$package['plan_id']}&token={$csrf_token}" id="{$d['id']}"
                                     class="btn btn-danger btn-block btn-sm"
-                                    onclick="return confirm('This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
+                                    onclick="return ask(this, 'This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
                             </div>
                             <div class="col-xs-8">
-                                <a href="{$_url}customers/recharge/{$d['id']}/{$package['plan_id']}"
+                                <a href="{$_url}customers/recharge/{$d['id']}/{$package['plan_id']}&token={$csrf_token}"
                                     class="btn btn-success btn-sm btn-block">{Lang::T('Recharge')}</a>
                             </div>
                         </div>
@@ -261,16 +262,16 @@
         <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block">{Lang::T('Back')}</a>
     </div>
     <div class="col-xs-6 col-md-3">
-        <a href="{$_url}customers/sync/{$d['id']}" onclick="return confirm('This will sync Customer to Mikrotik?')"
+        <a href="{$_url}customers/sync/{$d['id']}&token={$csrf_token}" onclick="return ask(this, 'This will sync Customer to Mikrotik?')"
             class="btn btn-info btn-sm btn-block">{Lang::T('Sync')}</a>
     </div>
     <div class="col-xs-6 col-md-3">
-        <a href="{$_url}message/send/{$d['id']}" class="btn btn-success btn-sm btn-block">
+        <a href="{$_url}message/send/{$d['id']}&token={$csrf_token}" class="btn btn-success btn-sm btn-block">
             {Lang::T('Send Message')}
         </a>
     </div>
     <div class="col-xs-6 col-md-3">
-        <a href="{$_url}customers/login/{$d['id']}" target="_blank" class="btn btn-warning btn-sm btn-block">
+        <a href="{$_url}customers/login/{$d['id']}&token={$csrf_token}" target="_blank" class="btn btn-warning btn-sm btn-block">
             {Lang::T('Login as Customer')}
         </a>
     </div>

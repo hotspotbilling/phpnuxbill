@@ -6,7 +6,7 @@
 {/if}
 
 <form method="post" enctype="multipart/form-data"
-    onsubmit="return confirm('Warning, installing unknown source can damage your server, continue?')"
+    onsubmit="return ask(this, 'Warning, installing unknown source can damage your server, continue?')"
     action="{$_url}pluginmanager/dlinstall">
     <div class="panel panel-primary panel-hovered">
         <div class="panel-heading">
@@ -74,10 +74,10 @@
                                 </div>
                                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
                                     <a href="{$_url}pluginmanager/delete/plugin/{$plugin['id']}"
-                                        onclick="return confirm('{Lang::T('Delete')}?')" class="btn btn-danger"><i
+                                        onclick="return ask(this, '{Lang::T('Delete')}?')" class="btn btn-danger"><i
                                             class="glyphicon glyphicon-trash"></i> Delete</a>
                                     <a {if $zipExt } href="{$_url}pluginmanager/install/plugin/{$plugin['id']}"
-                                            onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
+                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
                                         {else} href="#" onclick="alert('PHP ZIP extension is not installed')"
                                         {/if}
                                         style="color: black;" class="btn btn-success"><i
@@ -112,7 +112,7 @@
                                     <a href="{$pg['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
                                             class="glyphicon glyphicon-align-left"></i> Source</a>
                                     <a {if $zipExt } href="{$_url}pluginmanager/install/payment/{$pg['id']}"
-                                            onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
+                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
                                         {else} href="#" onclick="alert('PHP ZIP extension is not available')"
                                         {/if}
                                         style="color: black;" class="btn btn-success"><i
@@ -147,7 +147,7 @@
                                     <a href="{$dvc['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
                                             class="glyphicon glyphicon-align-left"></i> Source</a>
                                     <a {if $zipExt } href="{$_url}pluginmanager/install/device/{$dvc['id']}"
-                                            onclick="return confirm('Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
+                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
                                         {else} href="#" onclick="alert('PHP ZIP extension is not available')"
                                         {/if}
                                         style="color: black;" class="btn btn-success"><i

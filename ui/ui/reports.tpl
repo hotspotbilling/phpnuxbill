@@ -25,25 +25,25 @@
                     <label>{Lang::T('End Time')}</label>
                     <input type="time" class="form-control" name="te" value="{$te}">
                     <label>{Lang::T('Type')}</label>
-                    <select class="form-control" name="tps[]" multiple>
+                    <select class="form-control select2" name="tps[]" multiple>
                         {foreach $types as $type}
                             <option value="{$type}" {if in_array($type, $tps)}selected{/if}>{$type}</option>
                         {/foreach}
                     </select>
                     <label>{Lang::T('Internet Plans')}</label>
-                    <select class="form-control" name="plns[]" multiple>
+                    <select class="form-control select2" name="plns[]" multiple>
                         {foreach $plans as $plan}
                             <option value="{$plan}" {if in_array($plan, $plns)}selected{/if}>{$plan}</option>
                         {/foreach}
                     </select>
                     <label>{Lang::T('Methods')}</label>
-                    <select class="form-control" name="mts[]" multiple>
+                    <select class="form-control select2" name="mts[]" multiple>
                         {foreach $methods as $method}
                             <option value="{$method}" {if in_array($method, $mts)}selected{/if}>{$method}</option>
                         {/foreach}
                     </select>
                     <label>{Lang::T('Routers')}</label>
-                    <select class="form-control" name="rts[]" multiple>
+                    <select class="form-control select2" name="rts[]" multiple>
                         {foreach $routers as $router}
                             <option value="{$router}" {if in_array($router, $rts)}selected{/if}>{Lang::T($router)}</option>
                         {/foreach}

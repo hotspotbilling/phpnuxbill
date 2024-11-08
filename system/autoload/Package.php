@@ -77,7 +77,7 @@ class Package
                 r2(U . 'home', 'e', Lang::T('Plan Not found'));
             }
             if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                r2(U . 'dashboard', 'e', Lang::T('Plan Not found'));
+                r2(U . 'dashboard', 'e', Lang::T('You do not have permission to access this page'));
             }
         }
 
@@ -100,6 +100,10 @@ class Package
 
         if ($router_name == 'balance') {
             return self::rechargeBalance($c, $p, $gateway, $channel);
+        }
+
+        if ($router_name == 'Custom Balance') {
+            return self::rechargeCustomBalance($c, $p, $gateway, $channel);
         }
 
         /**
@@ -140,17 +144,40 @@ class Package
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
         } else if ($p['validity_unit'] == 'Period') {
-            $date_tmp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
-            $dt1 = new DateTime("$date_only");
-            $dt2 = new DateTime("$date_tmp");
-            $diff = $dt2->diff($dt1);
-            $sum =  $diff->format("%a"); // => 453
-            if ($sum >= 35 * $p['validity']) {
-                $date_exp = date("Y-m-$day_exp", strtotime('+0 month'));
-            } else {
-                $date_exp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
-            };
-            $time = date("23:59:00");
+            $current_date = new DateTime($date_only);
+            $exp_date = clone $current_date;
+            $exp_date->modify('first day of next month');
+            $exp_date->setDate($exp_date->format('Y'), $exp_date->format('m'), $day_exp);
+
+            $min_days = 7 * $p['validity'];
+            $max_days = 35 * $p['validity'];
+
+            $days_until_exp = $exp_date->diff($current_date)->days;
+
+            // If less than min_days away, move to the next period
+            while ($days_until_exp < $min_days) {
+                $exp_date->modify('+1 month');
+                $days_until_exp = $exp_date->diff($current_date)->days;
+            }
+
+            // If more than max_days away, move to the previous period
+            while ($days_until_exp > $max_days) {
+                $exp_date->modify('-1 month');
+                $days_until_exp = $exp_date->diff($current_date)->days;
+            }
+
+            // Final check to ensure we're not less than min_days or in the past
+            if ($days_until_exp < $min_days || $exp_date <= $current_date) {
+                $exp_date->modify('+1 month');
+            }
+
+            // Adjust for multiple periods
+            if ($p['validity'] > 1) {
+                $exp_date->modify('+' . ($p['validity'] - 1) . ' months');
+            }
+
+            $date_exp = $exp_date->format('Y-m-d');
+            $time = "23:59:59";
         } else if ($p['validity_unit'] == 'Days') {
             $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' day')));
             $date_exp = $datetime[0];
@@ -168,35 +195,39 @@ class Package
         if ($b) {
             $lastExpired = Lang::dateAndTimeFormat($b['expiration'], $b['time']);
             $isChangePlan = false;
-            if ($config['extend_expiry'] != 'no') {
-                if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on') {
-                    // if it same internet plan, expired will extend
-                    if ($p['validity_unit'] == 'Months') {
+            if ($b['namebp'] == $p['name_plan'] && $b['status'] == 'on' && $config['extend_expiry'] == 'yes') {
+                // if it same internet plan, expired will extend
+                switch ($p['validity_unit']) {
+                    case 'Months':
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Period') {
+                        break;
+                    case 'Period':
                         $date_exp = date("Y-m-$day_exp", strtotime($b['expiration'] . ' +' . $p['validity'] . ' months'));
                         $time = date("23:59:00");
-                    } else if ($p['validity_unit'] == 'Days') {
+                        break;
+                    case 'Days':
                         $date_exp = date("Y-m-d", strtotime($b['expiration'] . ' +' . $p['validity'] . ' days'));
                         $time = $b['time'];
-                    } else if ($p['validity_unit'] == 'Hrs') {
+                        break;
+                    case 'Hrs':
                         $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' hours')));
                         $date_exp = $datetime[0];
                         $time = $datetime[1];
-                    } else if ($p['validity_unit'] == 'Mins') {
+                        break;
+                    case 'Mins':
                         $datetime = explode(' ', date("Y-m-d H:i:s", strtotime($b['expiration'] . ' ' . $b['time'] . ' +' . $p['validity'] . ' minutes')));
                         $date_exp = $datetime[0];
                         $time = $datetime[1];
-                    }
-                } else {
-                    $isChangePlan = true;
+                        break;
                 }
+            } else {
+                $isChangePlan = true;
             }
 
             //if ($b['status'] == 'on') {
             $dvc = Package::getDevice($p);
-            if ($_app_stage != 'demo') {
+            if ($_app_stage != 'Demo') {
                 try {
                     if (file_exists($dvc)) {
                         require_once $dvc;
@@ -206,7 +237,7 @@ class Package
                     }
                 } catch (Throwable $e) {
                     Message::sendTelegram(
-                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                        "System Error. When activate Package. You need to sync manually\n" .
                             "Router: $router_name\n" .
                             "Customer: u$c[username]\n" .
                             "Plan: p$p[name_plan]\n" .
@@ -215,7 +246,7 @@ class Package
                     );
                 } catch (Exception $e) {
                     Message::sendTelegram(
-                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                        "System Error. When activate Package. You need to sync manually\n" .
                             "Router: $router_name\n" .
                             "Customer: u$c[username]\n" .
                             "Plan: p$p[name_plan]\n" .
@@ -311,7 +342,7 @@ class Package
         } else {
             // active plan not exists
             $dvc = Package::getDevice($p);
-            if ($_app_stage != 'demo') {
+            if ($_app_stage != 'Demo') {
                 try {
                     if (file_exists($dvc)) {
                         require_once $dvc;
@@ -321,7 +352,7 @@ class Package
                     }
                 } catch (Throwable $e) {
                     Message::sendTelegram(
-                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                        "System Error. When activate Package. You need to sync manually\n" .
                             "Router: $router_name\n" .
                             "Customer: u$c[username]\n" .
                             "Plan: p$p[name_plan]\n" .
@@ -330,7 +361,7 @@ class Package
                     );
                 } catch (Exception $e) {
                     Message::sendTelegram(
-                        "Sistem Error. When activate Package. You need to sync manually\n" .
+                        "System Error. When activate Package. You need to sync manually\n" .
                             "Router: $router_name\n" .
                             "Customer: u$c[username]\n" .
                             "Plan: p$p[name_plan]\n" .
@@ -475,7 +506,73 @@ class Package
         $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
         $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
         $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
-        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat(date("Y-m-d")), $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
+        $textInvoice = str_replace('[[trx_date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
+        $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
+        $textInvoice = str_replace('[[payment_channel]]', $channel, $textInvoice);
+        $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);
+        $textInvoice = str_replace('[[plan_name]]', $plan['name_plan'], $textInvoice);
+        $textInvoice = str_replace('[[plan_price]]', Lang::moneyFormat($plan['price']), $textInvoice);
+        $textInvoice = str_replace('[[name]]', $customer['fullname'], $textInvoice);
+        $textInvoice = str_replace('[[user_name]]', $customer['username'], $textInvoice);
+        $textInvoice = str_replace('[[user_password]]', $customer['password'], $textInvoice);
+        $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
+        $textInvoice = str_replace('[[balance_before]]', Lang::moneyFormat($balance_before), $textInvoice);
+        $textInvoice = str_replace('[[balance]]', Lang::moneyFormat($balance), $textInvoice);
+
+        if ($config['user_notification_payment'] == 'sms') {
+            Message::sendSMS($customer['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'wa') {
+            Message::sendWhatsapp($customer['phonenumber'], $textInvoice);
+        } else if ($config['user_notification_payment'] == 'email') {
+            Message::sendEmail($customer['email'], '[' . $config['CompanyName'] . '] ' . Lang::T("Invoice") . ' ' . $inv, $textInvoice);
+        }
+        return $t->id();
+    }
+
+    public static function rechargeCustomBalance($customer, $plan, $gateway, $channel, $note = '')
+    {
+        global $admin, $config;
+        $plan = ORM::for_table('tbl_payment_gateway')
+            ->where('username', $customer['username'])
+            ->where('routers', 'Custom Balance')
+            ->where('status', '1')
+            ->find_one();
+        if (!$plan) {
+            return false;
+        }
+        // insert table transactions
+        $t = ORM::for_table('tbl_transactions')->create();
+        $t->invoice = $inv = "INV-" . Package::_raid();
+        $t->username = $customer['username'];
+        $t->plan_name = 'Custom Balance';
+        $t->price = $plan['price'];
+        $t->recharged_on = date("Y-m-d");
+        $t->recharged_time = date("H:i:s");
+        $t->expiration = date("Y-m-d");
+        $t->time = date("H:i:s");
+        $t->method = "$gateway - $channel";
+        $t->routers = 'balance';
+        $t->type = "Balance";
+        $t->note = $note;
+        if ($admin) {
+            $t->admin_id = ($admin['id']) ? $admin['id'] : '0';
+        } else {
+            $t->admin_id = '0';
+        }
+        $t->save();
+
+        $balance_before = $customer['balance'];
+        Balance::plus($customer['id'], $plan['price']);
+        $balance = $customer['balance'] + $plan['price'];
+
+        $textInvoice = Lang::getNotifText('invoice_balance');
+        $textInvoice = str_replace('[[company_name]]', $config['CompanyName'], $textInvoice);
+        $textInvoice = str_replace('[[address]]', $config['address'], $textInvoice);
+        $textInvoice = str_replace('[[phone]]', $config['phone'], $textInvoice);
+        $textInvoice = str_replace('[[invoice]]', $inv, $textInvoice);
+        $textInvoice = str_replace('[[date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
+        $textInvoice = str_replace('[[trx_date]]', Lang::dateTimeFormat(date("Y-m-d H:i:s")), $textInvoice);
         $textInvoice = str_replace('[[payment_gateway]]', $gateway, $textInvoice);
         $textInvoice = str_replace('[[payment_channel]]', $channel, $textInvoice);
         $textInvoice = str_replace('[[type]]', 'Balance', $textInvoice);

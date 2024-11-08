@@ -39,10 +39,17 @@ switch ($do) {
                 }
                 if (Password::_uverify($password, $d_pass) == true) {
                     $_SESSION['uid'] = $d['id'];
-                    User::setCookie($d['id']);
+                    $token = User::setCookie($d['id']);
                     $d->last_login = date('Y-m-d H:i:s');
                     $d->save();
                     _log($username . ' ' . Lang::T('Login Successful'), 'User', $d['id']);
+                    if ($isApi) {
+                        if ($token) {
+                            showResult(true, Lang::T('Login Successful'), ['token' => "u." . $token]);
+                        } else {
+                            showResult(false, Lang::T('Invalid Username or Password'));
+                        }
+                    }
                     _alert(Lang::T('Login Successful'), 'success', "home");
                 } else {
                     _msglog('e', Lang::T('Invalid Username or Password'));

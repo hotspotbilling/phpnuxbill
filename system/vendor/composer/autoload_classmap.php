@@ -176,4 +176,6 @@ return array(
     'Smarty_Variable' => $vendorDir . '/smarty/smarty/libs/sysplugins/smarty_variable.php',
     'TPC_yyStackEntry' => $vendorDir . '/smarty/smarty/libs/sysplugins/smarty_internal_configfileparser.php',
     'TP_yyStackEntry' => $vendorDir . '/smarty/smarty/libs/sysplugins/smarty_internal_templateparser.php',
+    'svay\\Exception\\NoFaceException' => $vendorDir . '/yosiazwan/php-facedetection/Exception/NoFaceException.php',
+    'svay\\FaceDetector' => $vendorDir . '/yosiazwan/php-facedetection/FaceDetector.php',
 );

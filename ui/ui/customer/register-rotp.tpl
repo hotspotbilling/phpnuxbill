@@ -25,8 +25,8 @@
                         <div class="input-group">
                             <span class="input-group-addon" id="basic-addon1"><i
                                         class="glyphicon glyphicon-phone-alt"></i></span>
-                            <input type="text" class="form-control" name="username"
-                                placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Phone Number')}{/if}">
+                            <input type="text" class="form-control" name="phone_number"
+                                placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Phone Number')}{/if}"inputmode="numeric" pattern="[0-9]*">
                         </div>
                     </div>
                     <div class="btn-group btn-group-justified mb15">

@@ -59,30 +59,23 @@
         var isLoggedIn = false;
         var Tawk_API = {
             onLoad: function() {
-                if (!isLoggedIn) {
-                    isLoggedIn = true;
-                    window.Tawk_API.login({
-                        name: '{$_user['fullname']}',
-                        email: '{$_user['email']}',
-                        userId: '{$_user['id']}'
-                    }, function(error) {
-                        //do something if there's an error
-                        });
-                    }
-                    Tawk_API.setAttributes({
-                        'id'    : '{$_user['id']}',
-                        'username'    : '{$_user['username']}',
-                        'service_type'    : '{$_user['service_type']}',
-                        'balance'    : '{$_user['balance']}',
-                        'account_type'    : '{$_user['account_type']}',
-                        'phone'    : '{$_user['phonenumber']}'
-                    }, function(error) {});
+                Tawk_API.setAttributes({
+                    'username'    : '{$_user['username']}',
+                    'service'    : '{$_user['service_type']}',
+                    'balance'    : '{$_user['balance']}',
+                    'account'    : '{$_user['account_type']}',
+                    'phone'    : '{$_user['phonenumber']}'
+                }, function(error) {
+                    console.log(error)
+                });
+
                 }
             };
-            var Tawk_LoadStart = new Date();Tawk_API.visitor = {
-                name : '{$_user['fullname']}',
-                email : '{$_user['email']}',
-                userId: '{$_user['id']}'
+            var Tawk_LoadStart = new Date();
+            Tawk_API.visitor = {
+                name: '{$_user['fullname']}',
+                email: '{$_user['email']}',
+                phone: '{$_user['phonenumber']}'
             };
             (function() {
                 var s1 = document.createElement("script"),
@@ -128,70 +121,85 @@
     </script>
 
 
-                        {literal}
-        <script>
-            var listAtts = document.querySelectorAll(`[api-get-text]`);
-            listAtts.forEach(function(el) {
-                $.get(el.getAttribute('api-get-text'), function(data) {
-                    el.innerHTML = data;
-                });
+{literal}
+    <script>
+        var listAtts = document.querySelectorAll(`[api-get-text]`);
+        listAtts.forEach(function(el) {
+            $.get(el.getAttribute('api-get-text'), function(data) {
+                el.innerHTML = data;
             });
-            $(document).ready(function() {
-                var listAtts = document.querySelectorAll(`button[type="submit"]`);
-                listAtts.forEach(function(el) {
-                    if (el.addEventListener) { // all browsers except IE before version 9
-                        el.addEventListener("click", function() {
+        });
+        $(document).ready(function() {
+            var listAtts = document.querySelectorAll(`button[type="submit"]`);
+            listAtts.forEach(function(el) {
+                if (el.addEventListener) { // all browsers except IE before version 9
+                    el.addEventListener("click", function() {
+                        $(this).html(
+                            `<span class="loading"></span>`
+                        );
+                        setTimeout(() => {
+                            $(this).prop("disabled", true);
+                        }, 100);
+                    }, false);
+                } else {
+                    if (el.attachEvent) { // IE before version 9
+                        el.attachEvent("click", function() {
                             $(this).html(
                                 `<span class="loading"></span>`
                             );
                             setTimeout(() => {
                                 $(this).prop("disabled", true);
                             }, 100);
-                        }, false);
-                    } else {
-                        if (el.attachEvent) { // IE before version 9
-                            el.attachEvent("click", function() {
-                                $(this).html(
-                                    `<span class="loading"></span>`
-                                );
-                                setTimeout(() => {
-                                    $(this).prop("disabled", true);
-                                }, 100);
-                            });
-                        }
+                        });
                     }
-                    $(function() {
-                        $('[data-toggle="tooltip"]').tooltip()
-                    })
-                });
+                }
+                $(function() {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
             });
+        });
 
-            function setCookie(name, value, days) {
-                var expires = "";
-                if (days) {
-                    var date = new Date();
-                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                    expires = "; expires=" + date.toUTCString();
-                }
-                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        function ask(field, text){
+            if (confirm(text)) {
+                setTimeout(() => {
+                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, '');
+                    field.removeAttribute("disabled");
+                }, 5000);
+                return true;
+            } else {
+                setTimeout(() => {
+                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, '');
+                    field.removeAttribute("disabled");
+                }, 500);
+                return false;
             }
+        }
 
-            function getCookie(name) {
-                var nameEQ = name + "=";
-                var ca = document.cookie.split(';');
-                for (var i = 0; i < ca.length; i++) {
-                    var c = ca[i];
-                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-                }
-                return null;
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
             }
-            setCookie('user_language', '
-                        {/literal}{$user_language}
-                        {literal}', 365);
-        </script>
-    {/literal}
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
 
-    </body>
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+    </script>
+{/literal}
+<script>
+setCookie('user_language', '{$user_language}', 365);
+</script>
+</body>
 
-    </html>
+</html>

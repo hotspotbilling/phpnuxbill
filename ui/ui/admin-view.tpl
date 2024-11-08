@@ -8,6 +8,12 @@
                     class="panel panel-{if $d['status'] != 'Active'}danger{else}primary{/if} panel-hovered panel-stacked mb30">
                     <div class="panel-heading">{$d['fullname']}</div>
                     <div class="panel-body">
+                        <center>
+                            <a href="{$UPLOAD_PATH}{$d['photo']}" target="foto">
+                                <img src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
+                                    onerror="this.src='{$UPLOAD_PATH}/admin.default.png'" class="img-circle img-responsive" alt="Foto">
+                            </a>
+                        </center><br>
                         <ul class="list-group list-group-unbordered">
                             <li class="list-group-item">
                                 <b>{Lang::T('Username')}</b> <span class="pull-right">{$d['username']}</span>
@@ -47,10 +53,12 @@
                         <div class="panel-body">
                             <ul class="list-group list-group-unbordered">
                                 <li class="list-group-item">
-                                    <b>{Lang::T('Phone Number')}</b> <span class="pull-right"><a href="tel:{$agent['phone']}">{$agent['phone']}</a></span>
+                                    <b>{Lang::T('Phone Number')}</b> <span class="pull-right"><a
+                                            href="tel:{$agent['phone']}">{$agent['phone']}</a></span>
                                 </li>
                                 <li class="list-group-item">
-                                    <b>{Lang::T('Email')}</b> <span class="pull-right"><a href="mailto:{$agent['email']}">{$agent['email']}</a></span>
+                                    <b>{Lang::T('Email')}</b> <span class="pull-right"><a
+                                            href="mailto:{$agent['email']}">{$agent['email']}</a></span>
                                 </li>
                                 <li class="list-group-item">
                                     <b>{Lang::T('City')}</b> <span class="pull-right">{$agent['city']}</span>
