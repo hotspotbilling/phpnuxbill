@@ -82,11 +82,11 @@ switch ($action) {
         }
         $ui->assign('logo', $logo);
 
-        $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png';
+        $login_logo = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.default.png';
         $ui->assign('login_logo', $login_logo);
-        $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png';
+        $wallpaper = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.default.png';
         $ui->assign('wallpaper', $wallpaper);
-        $favicon = (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png' : $root . DIRECTORY_SEPARATOR . 'ui/ui/images/logo.png';
+        $favicon = (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.default.png';
         $ui->assign('favicon', $favicon);
 
         $themes = [];
@@ -245,8 +245,8 @@ switch ($action) {
             r2(U . 'settings/app', 'e', 'Login page title must not exceed 25 characters');
             return;
         }
-        if (strlen($login_page_description) > 160) {
-            r2(U . 'settings/app', 'e', 'Login page description must not exceed 160 characters');
+        if (strlen($login_page_description) > 50) {
+            r2(U . 'settings/app', 'e', 'Login page description must not exceed 50 characters');
             return;
         }
 
@@ -261,7 +261,7 @@ switch ($action) {
             $favicon_type = $_FILES['login_page_favicon']['type'];
             if (in_array($favicon_type, ['image/jpeg', 'image/png']) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_favicon']['name'])) {
                 $favicon_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png';
-                File::resizeCropImage($_FILES['login_page_favicon']['tmp_name'], $favicon_path, 30, 30, 100);
+                File::resizeCropImage($_FILES['login_page_favicon']['tmp_name'], $favicon_path, 16, 16, 100);
                 $image_paths['favicon'] = $favicon_path;
                 if (file_exists($_FILES['login_page_favicon']['tmp_name'])) unlink($_FILES['login_page_favicon']['tmp_name']);
             } else {

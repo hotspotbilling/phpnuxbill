@@ -314,11 +314,11 @@ switch ($do) {
             $ui->display('customer/login-noreg.tpl');
         } else {
             $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
-            $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png';
+            $login_logo = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.default.png';
             $ui->assign('login_logo', $login_logo);
-            $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png';
+            $wallpaper = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.default.png';
             $ui->assign('wallpaper', $wallpaper);
-            $favicon = (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png' : $root . DIRECTORY_SEPARATOR . 'ui/ui/images/logo.png';
+            $favicon = (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.default.png';
             $ui->assign('favicon', $favicon);
             $ui->assign('csrf_token', $csrf_token);
             $ui->assign('_title', Lang::T('Login'));
@@ -331,5 +331,6 @@ switch ($do) {
                     break;
             }
         }
+
         break;
 }

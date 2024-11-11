@@ -535,7 +535,7 @@
                         {/if}
                         <footer>
                             © {$smarty.now|date_format:"%Y"} {$_c['CompanyName']}. All rights reserved. <br> <a
-                                href="">Privacy</a> | <a href="">Terms
+                                href="pages/Privacy_Policy.html">Privacy</a> | <a href="pages/Terms_and_Conditions.html">Terms
                                 &amp;
                                 Conditions</a>
                         </footer>
