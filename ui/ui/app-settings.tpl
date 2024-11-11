@@ -166,6 +166,94 @@
     </div>
 </form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/login-page-post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
+    <div class="panel" id="accordion" role="tablist" aria-multiselectable="true">
+        <div class="panel-heading" role="tab" id="LoginPage">
+            <h3 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseLoginPage" aria-expanded="true" aria-controls="collapseLoginPage">
+                    {Lang::T('Customer Login Page Settings')}
+                </a>
+            </h3>
+        </div>
+        <div id="collapseLoginPage" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('Choose Template')}</label>
+                    <div class="col-md-6">
+                        <select name="login_page_type" id="login_page_type" class="form-control">
+                            <option value="default" {if $_c['login_page_type']=='default' }selected="selected"{/if}>{Lang::T('Default')}</option>
+                            <option value="custom" {if $_c['login_page_type']=='custom' }selected="selected"{/if}>{Lang::T('Custom')}</option>
+                        </select>
+                    </div>
+                    <span class="help-block col-md-4"><small>{Lang::T('Select your login template type')}</small></span>
+                </div>
+                <div id="customFields" style="display: none;">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Select Login Page')}</label>
+                        <div class="col-md-6">
+                            <select name="login_Page_template" id="login_Page_template" class="form-control">
+                                {foreach $template_files as $template}
+                                <option value="{$template.value|escape}" {if $_c['login_Page_template'] eq $template.value}selected="selected" {/if}>{$template.name|escape}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <span class="help-block col-md-4"><small>{Lang::T('Select your preferred login template')}</small></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Page Heading / Company Name')}</label>
+                        <div class="col-md-6">
+                            <input type="text" required class="form-control" id="login_page_head" name="login_page_head" value="{$_c['login_page_head']}">
+                        </div>
+                        <span class="help-block col-md-4"><small>{Lang::T('This Name will be shown on the login wallpaper')}</small></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Page Description')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="login_page_description" name="login_page_description" rows="3">{Lang::htmlspecialchars($_c['login_page_description'])}</textarea>
+                        </div>
+                        <span class="help-block col-md-4"><small>{Lang::T('This will also display on wallpaper, You can use html tag')}</small></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Favicon')}</label>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="login_page_favicon" name="login_page_favicon" accept="image/*">
+                            <span class="help-block"><small>{Lang::T('Best size 30 x 30 | uploaded image will be autosize')}</small></span>
+                        </div>
+                        <span class="help-block col-md-4">
+                            <a href="./{$favicon}" target="_blank"><img src="./{$favicon}" height="48" alt="Favicon"></a>
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Login Page Logo')}</label>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="login_page_logo" name="login_page_logo" accept="image/*">
+                            <span class="help-block"><small>{Lang::T('Best size 300 x 60 | uploaded image will be autosize')}</small></span>
+                        </div>
+                        <span class="help-block col-md-4">
+                            <a href="./{$login_logo}" target="_blank"><img src="./{$login_logo}" height="48" alt="Logo"></a>
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Login Page Wallpaper')}</label>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="login_page_wallpaper" name="login_page_wallpaper" accept="image/*">
+                            <span class="help-block"><small>{Lang::T('Best size 1920 x 1080 | uploaded image will be autosize')}</small></span>
+                        </div>
+                        <span class="help-block col-md-4">
+                            <a href="./{$wallpaper}" target="_blank"><img src="./{$wallpaper}" height="48" alt="Wallpaper"></a>
+                        </span>
+                    </div>
+                </div>
+
+                <button class="btn btn-success btn-block" name="general" type="submit">
+                    {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
 <form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
@@ -1153,5 +1241,18 @@
         // Call the function whenever the tax rate dropdown value changes
         document.getElementById("tax_rate").addEventListener("change", toggleCustomTaxRate);
     });
+</script>
+<script>
+    document.getElementById('login_page_type').addEventListener('change', function() {
+        var selectedValue = this.value;
+        var customFields = document.getElementById('customFields');
+        
+        if (selectedValue === 'custom') {
+            customFields.style.display = 'block';
+        } else {
+            customFields.style.display = 'none'; 
+        }
+    });
+    document.getElementById('login_page_type').dispatchEvent(new Event('change'));
 </script>
 {include file="sections/footer.tpl"}
