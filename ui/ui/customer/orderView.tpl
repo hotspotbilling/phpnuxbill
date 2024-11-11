@@ -123,11 +123,13 @@
                                     <td>{Lang::T('Validity Periode')}</td>
                                     <td>{$plan['validity']} {$plan['validity_unit']}</td>
                                 </tr>
-                                <tr>
-                                    <td>{Lang::T('Bandwidth Plans')}</td>
-                                    <td>{$bandw['name_bw']}<br>{$bandw['rate_down']}{$bandw['rate_down_unit']}/{$bandw['rate_up']}{$bandw['rate_up_unit']}
-                                    </td>
-                                </tr>
+                                {if $_c['show_bandwidth_plan'] == 'yes'}
+                                    <tr>
+                                        <td>{Lang::T('Bandwidth Plans')}</td>
+                                        <td>{$bandw['name_bw']}<br>{$bandw['rate_down']}{$bandw['rate_down_unit']}/{$bandw['rate_up']}{$bandw['rate_up_unit']}
+                                        </td>
+                                    </tr>
+                                {/if}
                             {/if}
                         </tbody>
                     </table>
