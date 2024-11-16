@@ -4,7 +4,12 @@
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
  **/
-
+if ($_app_stage != 'Live') {
+    _alert(Lang::T('You do not have permission to access this page in demo mode'), 'danger', "login");
+}
+if ($_c['disable_registration'] == 'noreg') {
+    _alert(Lang::T('Registration Disabled'), 'danger', "login");
+}
 if (isset($routes['1'])) {
     $do = $routes['1'];
 } else {
