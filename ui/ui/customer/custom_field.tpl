@@ -1,6 +1,6 @@
 {if $register}
     <div class="form-group">
-        <label>{ucwords($field['name'])}</label>
+        <label>{ucwords(str_replace('_',' ', $field['name']))}</label>
         {if $field['type'] == 'option'}
             <select class="form-control" {if $field['required'] == 1} required{/if} name="{$field['name']}" style="width: 100%">
                 {assign var="opts" value=explode(',', $field['value'])}
@@ -18,7 +18,7 @@
     </div>
 {else}
     <div class="form-group">
-        <label class="col-md-3 control-label">{ucwords($field['name'])}</label>
+        <label class="col-md-3 control-label">{ucwords(str_replace('_',' ', $field['name']))}</label>
         <div class="col-md-9">
             {if $field['type'] == 'option'}
                 <select class="form-control" {if $field['required'] == 1} required{/if} name="{$field['name']}"

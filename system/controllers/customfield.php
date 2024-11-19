@@ -23,7 +23,7 @@ switch ($action) {
             if(!empty($_POST['name'][$n])){
                 $datas[] = [
                     'order' => $_POST['order'][$n],
-                    'name' => $_POST['name'][$n],
+                    'name' => Text::alphanumeric(strtolower(str_replace(" ", "_", $_POST['name'][$n])), "_"),
                     'type' => $_POST['type'][$n],
                     'placeholder' => $_POST['placeholder'][$n],
                     'value' => $_POST['value'][$n],

@@ -911,5 +911,9 @@
     "Don_t_have_an_account_": "Don&#39;t have an account?",
     "You_do_not_have_permission_to_access_this_page_in_demo_mode": "You do not have permission to access this page in demo mode",
     "Custom_Fields": "Custom Fields",
-    "New_Field": "New Field"
+    "New_Field": "New Field",
+    "Data_Change": "Data Change",
+    "Photo": "Photo",
+    "Home_Address": "Home Address",
+    "Email_Address": "Email Address"
 }
