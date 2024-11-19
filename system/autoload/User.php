@@ -275,4 +275,46 @@ class User
             ->find_many();
         return $d;
     }
+
+    public static function setFormCustomField($uid = 0){
+        global $UPLOAD_PATH;
+        $fieldPath = $UPLOAD_PATH . DIRECTORY_SEPARATOR . "customer_field.json";
+        if(!file_exists($fieldPath)){
+            return '';
+        }
+        $fields = json_decode(file_get_contents($fieldPath), true);
+        foreach($fields as $field){
+            if(!empty(_post($field['name']))){
+                self::setAttribute($field['name'], _post($field['name']), $uid);
+            }
+        }
+    }
+
+    public static function getFormCustomField($ui, $register = false, $uid = 0){
+        global $UPLOAD_PATH;
+        $fieldPath = $UPLOAD_PATH . DIRECTORY_SEPARATOR . "customer_field.json";
+        if(!file_exists($fieldPath)){
+            return '';
+        }
+        $fields = json_decode(file_get_contents($fieldPath), true);
+        $attrs = [];
+        if(!$register){
+            $attrs = self::getAttributes('', $uid);
+            $ui->assign('attrs', $attrs);
+        }
+        $html = '';
+        $ui->assign('register', $register);
+        foreach($fields as $field){
+            if($register){
+                if($field['register']){
+                    $ui->assign('field', $field);
+                    $html .= $ui->fetch('customer/custom_field.tpl');
+                }
+            }else{
+                $ui->assign('field', $field);
+                $html .= $ui->fetch('customer/custom_field.tpl');
+            }
+        }
+        return $html;
+    }
 }

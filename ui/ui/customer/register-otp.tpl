@@ -10,7 +10,7 @@
             </div>
         </div>
     </div>
-    <form action="{$_url}register/post" method="post">
+    <form enctype="multipart/form-data" action="{$_url}register/post" method="post">
         <div class="col-md-4">
             <div class="panel panel-primary">
                 <div class="panel-heading">1. {Lang::T('Register as Member')}</div>
@@ -45,6 +45,7 @@
                             <label>{Lang::T('Address')}</label>
                             <input type="text" name="address" id="address" value="{$address}" class="form-control">
                         </div>
+                        {$customFields}
                     </div>
                 </div>
             </div>

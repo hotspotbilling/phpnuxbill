@@ -86,7 +86,6 @@ switch ($do) {
         }
 
         if ($msg == '') {
-            run_hook('register_user'); #HOOK
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = alphanumeric($username, "+_.@-");
             $d->password = $password;
@@ -96,6 +95,8 @@ switch ($do) {
             $d->phonenumber = $phone_number;
             if ($d->save()) {
                 $user = $d->id();
+                User::setFormCustomField($user);
+                run_hook('register_user'); #HOOK
                 r2(U . 'login', 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);
@@ -163,6 +164,7 @@ switch ($do) {
                     $ui->assign('notify', 'Registration code has been sent to your phone');
                     $ui->assign('notify_t', 's');
                     $ui->assign('_title', Lang::T('Register'));
+                    $ui->assign('customFields', User::getFormCustomField($ui, true));
                     $ui->display('customer/register-otp.tpl');
                 }
             } else {
@@ -171,6 +173,7 @@ switch ($do) {
                 $ui->display('customer/register-rotp.tpl');
             }
         } else {
+            $ui->assign('customFields', User::getFormCustomField($ui, true));
             $ui->assign('username', "");
             $ui->assign('fullname', "");
             $ui->assign('address', "");

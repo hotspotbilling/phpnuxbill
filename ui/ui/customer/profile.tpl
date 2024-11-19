@@ -109,6 +109,7 @@
                             </div>
                         </div>
                     {/if}
+                    {$customFields}
                     <div class="form-group">
                         <div class="col-md-offset-3 col-md-9">
                             <button class="btn btn-success btn-block" type="submit">

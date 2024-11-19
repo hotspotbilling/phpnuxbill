@@ -909,5 +909,7 @@
     "Login_Page_Settings_Saved_Successfully": "Login Page Settings Saved Successfully",
     "Sign_in_into_your_account": "Sign in into your account",
     "Don_t_have_an_account_": "Don&#39;t have an account?",
-    "You_do_not_have_permission_to_access_this_page_in_demo_mode": "You do not have permission to access this page in demo mode"
+    "You_do_not_have_permission_to_access_this_page_in_demo_mode": "You do not have permission to access this page in demo mode",
+    "Custom_Fields": "Custom Fields",
+    "New_Field": "New Field"
 }
