@@ -41,6 +41,12 @@
                                     placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{elseif $_c['registration_username'] == 'email'}{Lang::T('Email')}{else}{Lang::T('Username')}{/if}">
                             </div>
                         </div>
+                        {if $_c['photo_register'] == 'yes'}
+                            <div class="form-group">
+                                <label>{Lang::T('Photo')}</label>
+                                <input type="file" required class="form-control" id="photo" name="photo" accept="image/*">
+                            </div>
+                        {/if}
                         <div class="form-group">
                             <label>{Lang::T('Full Name')}</label>
                             <input type="text" required class="form-control" id="fullname" value="{$fullname}"

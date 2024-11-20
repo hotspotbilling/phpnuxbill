@@ -915,5 +915,8 @@
     "Data_Change": "Data Change",
     "Photo": "Photo",
     "Home_Address": "Home Address",
-    "Email_Address": "Email Address"
+    "Email_Address": "Email Address",
+    "Photo_Required": "Photo Required",
+    "Customer_Registration_need_to_upload_their_photo": "Customer Registration need to upload their photo",
+    "Account_already_exists": "Account already exists"
 }

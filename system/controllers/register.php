@@ -95,6 +95,25 @@ switch ($do) {
             $d->phonenumber = $phone_number;
             if ($d->save()) {
                 $user = $d->id();
+                if ($config['photo_register'] == 'yes' && !empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
+                    if (function_exists('imagecreatetruecolor')) {
+                        $hash = md5_file($_FILES['photo']['tmp_name']);
+                        $subfolder = substr($hash, 0, 2);
+                        $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos' . DIRECTORY_SEPARATOR;
+                        if (!file_exists($folder)) {
+                            mkdir($folder);
+                        }
+                        $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos' . DIRECTORY_SEPARATOR . $subfolder . DIRECTORY_SEPARATOR;
+                        if (!file_exists($folder)) {
+                            mkdir($folder);
+                        }
+                        $imgPath = $folder . $hash . '.jpg';
+                        File::resizeCropImage($_FILES['photo']['tmp_name'], $imgPath, 1600, 1600, 100);
+                        $d->photo = '/photos/' . $subfolder . '/' . $hash . '.jpg';
+                        $d->save();
+                    }
+                }
+                if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
                 User::setFormCustomField($user);
                 run_hook('register_user'); #HOOK
                 r2(U . 'login', 's', Lang::T('Register Success! You can login now'));

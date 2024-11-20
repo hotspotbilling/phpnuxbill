@@ -36,7 +36,7 @@
                                 <option value="time">Time</option>
                                 <option value="number">Number</option>
                                 <option value="option">Option</option>
-                                <option value="image">Image</option>
+                                {* <option value="image">Image</option> *}
                             </select>
                         </div>
                     </div>
@@ -109,7 +109,7 @@
                                     <option value="time" {if $field['type'] == 'time'}selected{/if}>Time</option>
                                     <option value="number" {if $field['type'] == 'number'}selected{/if}>Number</option>
                                     <option value="option" {if $field['type'] == 'option'}selected{/if}>Option</option>
-                                    <option value="image" {if $field['type'] == 'image'}selected{/if}>Image</option>
+                                    {* <option value="image" {if $field['type'] == 'image'}selected{/if}>Image</option> *}
                                 </select>
                             </div>
                         </div>
