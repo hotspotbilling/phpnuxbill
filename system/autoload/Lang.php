@@ -24,7 +24,7 @@ class Lang
             return $_L[$key];
         } else {
             $iso = Lang::getIsoLang()[$config['language']];
-            if (empty($iso)) {
+            if (empty($iso) || $iso == 'en') {
                 return $val;
             }
             if (!empty($iso) && !empty($val)) {
