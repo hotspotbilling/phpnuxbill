@@ -199,23 +199,6 @@ switch ($action) {
                     $d->save();
                 }
             }
-            //checkbox
-            $checks = ['hide_mrc', 'hide_tms', 'hide_aui', 'hide_al', 'hide_uet', 'hide_vs', 'hide_pg'];
-            foreach ($checks as $check) {
-                if (!isset($_POST[$check])) {
-                    $d = ORM::for_table('tbl_appconfig')->where('setting', $check)->find_one();
-                    if ($d) {
-                        $d->value = 'no';
-                        $d->save();
-                    } else {
-                        $d = ORM::for_table('tbl_appconfig')->create();
-                        $d->setting = $check;
-                        $d->value = 'no';
-                        $d->save();
-                    }
-                }
-            }
-
             _log('[' . $admin['username'] . ']: ' . Lang::T('Settings Saved Successfully'), $admin['user_type'], $admin['id']);
 
             r2(U . 'settings/app', 's', Lang::T('Settings Saved Successfully'));
