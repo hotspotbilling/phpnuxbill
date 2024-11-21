@@ -133,6 +133,9 @@ switch ($action) {
                 $d->save();
             }
         }
+        if(empty($config['mikrotik_sms_command'])){
+            $config['mikrotik_sms_command'] = "/tool sms send";
+        }
         $ui->assign('template_files', $templates);
         $ui->assign('_c', $config);
         $ui->assign('php', $php);
