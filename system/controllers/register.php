@@ -27,7 +27,7 @@ switch ($do) {
         $address = _post('address');
 
         // Separate phone number input if OTP is required
-        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
+        if ($config['sms_otp_registration'] == 'yes') {
             $phone_number = alphanumeric(_post('phone_number'), "+_.@-");
         } else {
             $phone_number = $username; // When OTP is not required, treat username as phone number
@@ -51,7 +51,7 @@ switch ($do) {
         }
 
         // OTP verification if OTP is enabled
-        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
+        if ($_c['sms_otp_registration'] == 'yes') {
             $otpPath .= sha1($phone_number . $db_pass) . ".txt";
             run_hook('validate_otp'); #HOOK
             // Expire after 10 minutes
@@ -150,7 +150,7 @@ switch ($do) {
         break;
 
     default:
-        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
+        if ($_c['sms_otp_registration'] == 'yes') {
             $phone_number = _post('phone_number');
             if (!empty($phone_number)) {
                 $d = ORM::for_table('tbl_customers')->where('username', $phone_number)->find_one();
