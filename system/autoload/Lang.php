@@ -24,10 +24,10 @@ class Lang
             return $_L[$key];
         } else {
             $iso = Lang::getIsoLang()[$config['language']];
-            if (empty($iso) || $iso == 'en') {
+            if (empty($iso)) {
                 return $val;
             }
-            if (!empty($iso) && !empty($val)) {
+            if (!empty($iso) && !empty($val) && $iso != 'en') {
                 $temp = Lang::translate($val, $iso);
                 if (!empty($temp)) {
                     $val = $temp;
