@@ -130,14 +130,15 @@
 
         function apiGetText(){
             var el = listAttApi[posAttApi];
-            $.get(el.getAttribute('api-get-text'), function(data) {
-                el.innerHTML = data;
-                posAttApi++;
-                if(posAttApi < listAttApi.length){
-                    apiGetText();
-                }
-            });
-
+            if(el != undefined){
+                $.get(el.getAttribute('api-get-text'), function(data) {
+                    el.innerHTML = data;
+                    posAttApi++;
+                    if(posAttApi < listAttApi.length){
+                        apiGetText();
+                    }
+                });
+            }
         }
 
         function setKolaps() {
