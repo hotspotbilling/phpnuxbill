@@ -313,9 +313,24 @@ switch ($do) {
             $ui->assign('code', alphanumeric(_get('code'), "-"));
             $ui->display('customer/login-noreg.tpl');
         } else {
+            $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
+            $login_logo = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.default.png';
+            $ui->assign('login_logo', $login_logo);
+            $wallpaper = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.default.png';
+            $ui->assign('wallpaper', $wallpaper);
+            $favicon = (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.default.png';
+            $ui->assign('favicon', $favicon);
             $ui->assign('csrf_token', $csrf_token);
             $ui->assign('_title', Lang::T('Login'));
-            $ui->display('customer/login.tpl');
+            switch ($config['login_page_type']) {
+                case 'custom':
+                    $ui->display('customer/login-custom-' . $config['login_Page_template'] . '.tpl');
+                    break;
+                default:
+                    $ui->display('customer/login.tpl');
+                    break;
+            }
         }
+
         break;
 }

@@ -166,8 +166,8 @@
                         </p>
                     </div>
                     <div class="form-group has-error">
-                        <label class="col-md-3 control-label">{Lang::T('Allow Balance custom
-                            amount')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Allow Balance Custom
+                            Amount')}</label>
                         <div class="col-md-5">
                             <select name="allow_balance_custom" id="allow_balance_custom" class="form-control">
                                 <option value="no">

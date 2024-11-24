@@ -5,6 +5,9 @@
  *  by https://t.me/ibnux
  **/
 
+if ($_c['disable_registration'] == 'noreg') {
+    _alert(Lang::T('Registration Disabled'), 'danger', "login");
+}
 if (isset($routes['1'])) {
     $do = $routes['1'];
 } else {
@@ -24,7 +27,7 @@ switch ($do) {
         $address = _post('address');
 
         // Separate phone number input if OTP is required
-        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
+        if ($config['sms_otp_registration'] == 'yes') {
             $phone_number = alphanumeric(_post('phone_number'), "+_.@-");
         } else {
             $phone_number = $username; // When OTP is not required, treat username as phone number
@@ -48,7 +51,7 @@ switch ($do) {
         }
 
         // OTP verification if OTP is enabled
-        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
+        if ($_c['sms_otp_registration'] == 'yes') {
             $otpPath .= sha1($phone_number . $db_pass) . ".txt";
             run_hook('validate_otp'); #HOOK
             // Expire after 10 minutes
@@ -83,7 +86,6 @@ switch ($do) {
         }
 
         if ($msg == '') {
-            run_hook('register_user'); #HOOK
             $d = ORM::for_table('tbl_customers')->create();
             $d->username = alphanumeric($username, "+_.@-");
             $d->password = $password;
@@ -93,6 +95,27 @@ switch ($do) {
             $d->phonenumber = $phone_number;
             if ($d->save()) {
                 $user = $d->id();
+                if ($config['photo_register'] == 'yes' && !empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
+                    if (function_exists('imagecreatetruecolor')) {
+                        $hash = md5_file($_FILES['photo']['tmp_name']);
+                        $subfolder = substr($hash, 0, 2);
+                        $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos' . DIRECTORY_SEPARATOR;
+                        if (!file_exists($folder)) {
+                            mkdir($folder);
+                        }
+                        $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos' . DIRECTORY_SEPARATOR . $subfolder . DIRECTORY_SEPARATOR;
+                        if (!file_exists($folder)) {
+                            mkdir($folder);
+                        }
+                        $imgPath = $folder . $hash . '.jpg';
+                        File::resizeCropImage($_FILES['photo']['tmp_name'], $imgPath, 1600, 1600, 100);
+                        $d->photo = '/photos/' . $subfolder . '/' . $hash . '.jpg';
+                        $d->save();
+                    }
+                }
+                if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
+                User::setFormCustomField($user);
+                run_hook('register_user'); #HOOK
                 r2(U . 'login', 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);
@@ -127,7 +150,7 @@ switch ($do) {
         break;
 
     default:
-        if (!empty($config['sms_url']) && $_c['sms_otp_registration'] == 'yes') {
+        if ($_c['sms_otp_registration'] == 'yes') {
             $phone_number = _post('phone_number');
             if (!empty($phone_number)) {
                 $d = ORM::for_table('tbl_customers')->where('username', $phone_number)->find_one();
@@ -160,6 +183,7 @@ switch ($do) {
                     $ui->assign('notify', 'Registration code has been sent to your phone');
                     $ui->assign('notify_t', 's');
                     $ui->assign('_title', Lang::T('Register'));
+                    $ui->assign('customFields', User::getFormCustomField($ui, true));
                     $ui->display('customer/register-otp.tpl');
                 }
             } else {
@@ -168,6 +192,7 @@ switch ($do) {
                 $ui->display('customer/register-rotp.tpl');
             }
         } else {
+            $ui->assign('customFields', User::getFormCustomField($ui, true));
             $ui->assign('username', "");
             $ui->assign('fullname', "");
             $ui->assign('address', "");

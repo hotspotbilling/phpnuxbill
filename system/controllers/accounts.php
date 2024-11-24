@@ -75,6 +75,7 @@ switch ($action) {
         run_hook('customer_view_edit_profile'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
+        $ui->assign('customFields', User::getFormCustomField($ui, false, $user['id']));
         $ui->display('customer/profile.tpl');
         break;
     case 'edit-profile-post':
@@ -153,6 +154,8 @@ switch ($action) {
             if ($_c['allow_email_otp'] != 'yes') {
                 $user->email = $email;
             }
+
+            User::setFormCustomField($user['id']);
 
             $user->save();
 

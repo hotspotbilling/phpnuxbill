@@ -1416,6 +1416,8 @@
                                         href="{$_url}settings/app">{Lang::T('General Settings')}</a></li>
                                 <li {if $_routes[1] eq 'localisation' }class="active" {/if}><a
                                         href="{$_url}settings/localisation">{Lang::T('Localisation')}</a></li>
+                                <li {if $_routes[0] eq 'customfield' }class="active" {/if}><a
+                                    href="{$_url}customfield">{Lang::T('Custom Fields')}</a></li>
                                 <li {if $_routes[1] eq 'miscellaneous' }class="active" {/if}><a
                                             href="{$_url}settings/miscellaneous">{Lang::T('Miscellaneous')}</a></li>
                                 <li {if $_routes[1] eq 'maintenance' }class="active" {/if}><a

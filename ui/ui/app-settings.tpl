@@ -20,23 +20,19 @@
         <div id="collapseGeneral" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body">
                 <div class="form-group">
-                    <label class="col-md-2 control-label">{Lang::T('Application Name / Company
-                        Name')}</label>
+                    <label class="col-md-2 control-label">{Lang::T('Application Name / Company Name')}</label>
                     <div class="col-md-6">
                         <input type="text" required class="form-control" id="CompanyName" name="CompanyName"
                             value="{$_c['CompanyName']}">
                     </div>
-                    <span class="help-block col-md-4">{Lang::T('This Name will be shown on the
-                        Title')}</span>
+                    <span class="help-block col-md-4">{Lang::T('This Name will be shown on the Title')}</span>
                 </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('Company Logo')}</label>
                     <div class="col-md-6">
                         <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
-                        <span class="help-block">{Lang::T('For PDF Reports | Best size 1078 x 200 |
-                            uploaded image
-                            will be
-                            autosize')}</span>
+                        <span
+                            class="help-block">{Lang::T('For PDF Reports | Best size 1078 x 200 | uploaded image will be autosize')}</span>
                     </div>
                     <span class="help-block col-md-4">
                         <a href="./{$logo}" target="_blank"><img src="./{$logo}" height="48" alt="logo for PDF"></a>
@@ -166,6 +162,114 @@
     </div>
 </form>
 
+<form class="form-horizontal" method="post" role="form" action="{$_url}settings/login-page-post"
+    enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{$csrf_token}">
+    <div class="panel" id="accordion" role="tablist" aria-multiselectable="true">
+        <div class="panel-heading" role="tab" id="LoginPage">
+            <h3 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseLoginPage"
+                    aria-expanded="true" aria-controls="collapseLoginPage">
+                    {Lang::T('Customer Login Page Settings')}
+                </a>
+            </h3>
+        </div>
+        <div id="collapseLoginPage" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('Choose Template')}</label>
+                    <div class="col-md-6">
+                        <select name="login_page_type" id="login_page_type" class="form-control">
+                            <option value="default" {if $_c['login_page_type']=='default' }selected="selected" {/if}>
+                                {Lang::T('Default')}</option>
+                            <option value="custom" {if $_c['login_page_type']=='custom' }selected="selected" {/if}>
+                                {Lang::T('Custom')}</option>
+                        </select>
+                    </div>
+                    <span class="help-block col-md-4"><small>{Lang::T('Select your login template type')}</small></span>
+                </div>
+                <div id="customFields" style="display: none;">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Select Login Page')}</label>
+                        <div class="col-md-6">
+                            <select name="login_Page_template" id="login_Page_template" class="form-control">
+                                {foreach $template_files as $template}
+                                    <option value="{$template.value|escape}"
+                                        {if $_c['login_Page_template'] eq $template.value}selected="selected" {/if}>
+                                        {$template.name|escape}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <span
+                            class="help-block col-md-4"><small>{Lang::T('Select your preferred login template')}</small></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Page Heading / Company Name')}</label>
+                        <div class="col-md-6">
+                            <input type="text" required class="form-control" id="login_page_head" name="login_page_head"
+                                value="{$_c['login_page_head']}">
+                        </div>
+                        <span
+                            class="help-block col-md-4"><small>{Lang::T('This Name will be shown on the login wallpaper')}</small></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Page Description')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="login_page_description" name="login_page_description"
+                                rows="3">{Lang::htmlspecialchars($_c['login_page_description'])}</textarea>
+                        </div>
+                        <span
+                            class="help-block col-md-4"><small>{Lang::T('This will also display on wallpaper, You can use html tag')}</small></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Favicon')}</label>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="login_page_favicon" name="login_page_favicon"
+                                accept="image/*">
+                            <span
+                                class="help-block"><small>{Lang::T('Best size 30 x 30 | uploaded image will be autosize')}</small></span>
+                        </div>
+                        <span class="help-block col-md-4">
+                            <a href="./{$favicon}" target="_blank"><img src="./{$favicon}" height="48"
+                                    alt="Favicon"></a>
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Login Page Logo')}</label>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="login_page_logo" name="login_page_logo"
+                                accept="image/*">
+                            <span
+                                class="help-block"><small>{Lang::T('Best size 300 x 60 | uploaded image will be autosize')}</small></span>
+                        </div>
+                        <span class="help-block col-md-4">
+                            <a href="./{$login_logo}" target="_blank"><img src="./{$login_logo}" height="48"
+                                    alt="Logo"></a>
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Login Page Wallpaper')}</label>
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="login_page_wallpaper"
+                                name="login_page_wallpaper" accept="image/*">
+                            <span
+                                class="help-block"><small>{Lang::T('Best size 1920 x 1080 | uploaded image will be autosize')}</small></span>
+                        </div>
+                        <span class="help-block col-md-4">
+                            <a href="./{$wallpaper}" target="_blank"><img src="./{$wallpaper}" height="48"
+                                    alt="Wallpaper"></a>
+                        </span>
+                    </div>
+                </div>
+
+                <button class="btn btn-success btn-block" name="general" type="submit">
+                    {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
 <form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
@@ -215,6 +319,22 @@
                             </option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{Lang::T('Photo Required')}</label>
+                    <div class="col-md-6">
+                        <select name="photo_register" id="photo_register" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}
+                            </option>
+                            <option value="yes" {if $_c['photo_register']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Customer Registration need to upload their photo')}
+                    </p>
                 </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('SMS OTP Registration')}</label>
@@ -274,8 +394,8 @@
                     <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
                     <div class="col-md-5">
                         <label class="switch">
-                            <input type="checkbox" id="enable_session_timeout" value="1"
-                                name="enable_session_timeout" {if $_c['enable_session_timeout']==1}checked{/if}>
+                            <input type="checkbox" id="enable_session_timeout" value="1" name="enable_session_timeout"
+                                {if $_c['enable_session_timeout']==1}checked{/if}>
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -321,7 +441,8 @@
                         </select>
                     </div>
                     <p class="help-block col-md-4">
-                        <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank">{Lang::T('Cross-site request forgery')}</a>
+                        <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery"
+                            target="_blank">{Lang::T('Cross-site request forgery')}</a>
                     </p>
                 </div>
                 <button class="btn btn-success btn-block" type="submit">
@@ -845,8 +966,8 @@
                 <div class="form-group">
                     <label class="col-md-2 control-label">Tawk.to Javascript API key</label>
                     <div class="col-md-6">
-                        <input type="text" class="form-control" id="tawkto_api_key" name="tawkto_api_key" value="{$_c['tawkto_api_key']}"
-                            placeholder="39e52264cxxxxxxxxxxxxxdd078af5342e8">
+                        <input type="text" class="form-control" id="tawkto_api_key" name="tawkto_api_key"
+                            value="{$_c['tawkto_api_key']}" placeholder="39e52264cxxxxxxxxxxxxxdd078af5342e8">
                     </div>
                 </div>
                 <label class="col-md-2"></label>
@@ -1102,7 +1223,7 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         var sectionTimeoutCheckbox = document.getElementById('enable_session_timeout');
         var timeoutDurationInput = document.getElementById('timeout_duration_input');
         var timeoutDurationField = document.getElementById('session_timeout_duration');
@@ -1112,7 +1233,7 @@
             timeoutDurationField.required = true;
         }
 
-        sectionTimeoutCheckbox.addEventListener('change', function () {
+        sectionTimeoutCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 timeoutDurationInput.style.display = 'block';
                 timeoutDurationField.required = true;
@@ -1122,9 +1243,9 @@
             }
         });
 
-        document.querySelector('form').addEventListener('submit', function (event) {
+        document.querySelector('form').addEventListener('submit', function(event) {
             if (sectionTimeoutCheckbox.checked && (!timeoutDurationField.value || isNaN(
-                timeoutDurationField.value))) {
+                    timeoutDurationField.value))) {
                 event.preventDefault();
                 alert('Please enter a valid session timeout duration.');
                 timeoutDurationField.focus();
@@ -1153,5 +1274,18 @@
         // Call the function whenever the tax rate dropdown value changes
         document.getElementById("tax_rate").addEventListener("change", toggleCustomTaxRate);
     });
+</script>
+<script>
+    document.getElementById('login_page_type').addEventListener('change', function() {
+        var selectedValue = this.value;
+        var customFields = document.getElementById('customFields');
+
+        if (selectedValue === 'custom') {
+            customFields.style.display = 'block';
+        } else {
+            customFields.style.display = 'none';
+        }
+    });
+    document.getElementById('login_page_type').dispatchEvent(new Event('change'));
 </script>
 {include file="sections/footer.tpl"}
