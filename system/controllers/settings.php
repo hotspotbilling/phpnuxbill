@@ -82,11 +82,32 @@ switch ($action) {
         }
         $ui->assign('logo', $logo);
 
-        $login_logo = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.default.png';
+        if (!empty($config['login_page_logo']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'])) {
+            $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'];
+        } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png')) {
+            $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png';
+        } else {
+            $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.default.png';
+        }
+
+        if (!empty($config['login_page_wallpaper']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_wallpaper'])) {
+            $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_wallpaper'];
+        } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png')) {
+            $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png';
+        } else {
+            $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.default.png';
+        }
+
+        if (!empty($config['login_page_favicon']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_favicon'])) {
+            $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_favicon'];
+        } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) {
+            $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png';
+        } else {
+            $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.default.png';
+        }
+        
         $ui->assign('login_logo', $login_logo);
-        $wallpaper = (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.default.png';
         $ui->assign('wallpaper', $wallpaper);
-        $favicon = (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png' : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.default.png';
         $ui->assign('favicon', $favicon);
 
         $themes = [];
@@ -224,8 +245,6 @@ switch ($action) {
             r2(U . 'settings/app', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
 
-        $image_paths = [];
-
         if ($login_page_type == 'custom' && (empty($login_Page_template) || empty($login_page_title) || empty($login_page_description))) {
             r2(U . 'settings/app', 'e', 'Please fill all required fields');
             return;
@@ -235,7 +254,7 @@ switch ($action) {
             r2(U . 'settings/app', 'e', 'Login page title must not exceed 25 characters');
             return;
         }
-        if (strlen($login_page_description) > 50) {
+        if (strlen($login_page_description) > 100) {
             r2(U . 'settings/app', 'e', 'Login page description must not exceed 50 characters');
             return;
         }
@@ -247,12 +266,16 @@ switch ($action) {
             'login_page_type' => $login_page_type,
         ];
 
+        $image_paths = [];
+        $allowed_types = ['image/jpeg', 'image/png'];
+
         if ($_FILES['login_page_favicon']['name'] != '') {
             $favicon_type = $_FILES['login_page_favicon']['type'];
-            if (in_array($favicon_type, ['image/jpeg', 'image/png']) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_favicon']['name'])) {
-                $favicon_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'favicon.png';
+            if (in_array($favicon_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_favicon']['name'])) {
+                $extension = pathinfo($_FILES['login_page_favicon']['name'], PATHINFO_EXTENSION);
+                $favicon_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('favicon_') . '.' . $extension;
                 File::resizeCropImage($_FILES['login_page_favicon']['tmp_name'], $favicon_path, 16, 16, 100);
-                $image_paths['favicon'] = $favicon_path;
+                $settings['login_page_favicon'] = basename($favicon_path); // Save dynamic file name
                 if (file_exists($_FILES['login_page_favicon']['tmp_name'])) unlink($_FILES['login_page_favicon']['tmp_name']);
             } else {
                 r2(U . 'settings/app', 'e', 'Favicon must be a JPG, JPEG, or PNG image.');
@@ -261,10 +284,11 @@ switch ($action) {
 
         if ($_FILES['login_page_wallpaper']['name'] != '') {
             $wallpaper_type = $_FILES['login_page_wallpaper']['type'];
-            if (in_array($wallpaper_type, ['image/jpeg', 'image/png']) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_wallpaper']['name'])) {
-                $wallpaper_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png';
+            if (in_array($wallpaper_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_wallpaper']['name'])) {
+                $extension = pathinfo($_FILES['login_page_wallpaper']['name'], PATHINFO_EXTENSION);
+                $wallpaper_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('wallpaper_') . '.' . $extension;
                 File::resizeCropImage($_FILES['login_page_wallpaper']['tmp_name'], $wallpaper_path, 1920, 1080, 100);
-                $image_paths['wallpaper'] = $wallpaper_path;
+                $settings['login_page_wallpaper'] = basename($wallpaper_path); // Save dynamic file name
                 if (file_exists($_FILES['login_page_wallpaper']['tmp_name'])) unlink($_FILES['login_page_wallpaper']['tmp_name']);
             } else {
                 r2(U . 'settings/app', 'e', 'Wallpaper must be a JPG, JPEG, or PNG image.');
@@ -273,10 +297,11 @@ switch ($action) {
 
         if ($_FILES['login_page_logo']['name'] != '') {
             $logo_type = $_FILES['login_page_logo']['type'];
-            if (in_array($logo_type, ['image/jpeg', 'image/png']) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_logo']['name'])) {
-                $logo_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'login-logo.png';
+            if (in_array($logo_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_logo']['name'])) {
+                $extension = pathinfo($_FILES['login_page_logo']['name'], PATHINFO_EXTENSION);
+                $logo_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('logo_') . '.' . $extension;
                 File::resizeCropImage($_FILES['login_page_logo']['tmp_name'], $logo_path, 300, 60, 100);
-                $image_paths['logo'] = $logo_path;
+                $settings['login_page_logo'] = basename($logo_path); // Save dynamic file name
                 if (file_exists($_FILES['login_page_logo']['tmp_name'])) unlink($_FILES['login_page_logo']['tmp_name']);
             } else {
                 r2(U . 'settings/app', 'e', 'Logo must be a JPG, JPEG, or PNG image.');
