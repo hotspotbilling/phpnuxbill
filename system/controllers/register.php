@@ -116,6 +116,10 @@ switch ($do) {
                 if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
                 User::setFormCustomField($user);
                 run_hook('register_user'); #HOOK
+                $msg .= Lang::T('Registration successful') . '<br>';
+                if ($config['reg_nofify_admin'] == 'yes') {
+                    sendTelegram($config['CompanyName'] . ' - ' . Lang::T('New User Registration') . "\n\nFull Name: " . $fullname . "\nUsername: " . $username . "\nEmail: " . $email . "\nPhone Number: " . $phone_number . "\nAddress: " . $address);
+                }
                 r2(U . 'login', 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);

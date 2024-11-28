@@ -369,6 +369,22 @@
                         {Lang::T('For Registration and Update Phone Number')}</p>
                 </div>
                 <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Notify Admin')}</label>
+                    <div class="col-md-5">
+                        <select name="reg_nofify_admin" id="reg_nofify_admin" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}
+                            </option>
+                            <option value="yes" {if $_c['reg_nofify_admin']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        {Lang::T('Notify Admin upon self registration')}
+                    </p>
+                </div>
+                <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Registration Mandatory Fields')}:</label><br>
                     <label class="col-md-3 control-label">
                         <input type="checkbox" name="man_fields_email" value="yes" 
