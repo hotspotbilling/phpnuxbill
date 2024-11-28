@@ -133,7 +133,7 @@ switch ($action) {
                 $d->save();
             }
         }
-        if(empty($config['mikrotik_sms_command'])){
+        if (empty($config['mikrotik_sms_command'])) {
             $config['mikrotik_sms_command'] = "/tool sms send";
         }
         $ui->assign('template_files', $templates);
@@ -188,6 +188,10 @@ switch ($action) {
                 }
             }
             // Save all settings including tax system
+            $_POST['man_fields_email'] = isset($_POST['man_fields_email']) ? 'yes' : 'no';
+            $_POST['man_fields_fname'] = isset($_POST['man_fields_fname']) ? 'yes' : 'no';
+            $_POST['man_fields_address'] = isset($_POST['man_fields_address']) ? 'yes' : 'no';
+            $_POST['man_fields_custom'] = isset($_POST['man_fields_custom']) ? 'yes' : 'no';
             $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
             $_POST['enable_session_timeout'] = $enable_session_timeout;
             foreach ($_POST as $key => $value) {
