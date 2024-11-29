@@ -72,7 +72,7 @@
                 <table class="table table-bordered table-striped table-bordered table-hover mb-0"
                     style="margin-bottom: 0px;">
                     <tr>
-                        <td class="small text-success text-uppercase text-normal">{Lang::T('Username')}</td>
+                        <td class="small text-success text-uppercase text-normal">{Lang::T('Usernames')}</td>
                         <td class="small mb15">{$_user['username']}</td>
                     </tr>
                     <tr>
@@ -98,7 +98,7 @@
 
                     {if $_c['enable_balance'] == 'yes'}
                         <tr>
-                            <td class="small text-warning text-uppercase text-normal">{Lang::T('Balance')}</td>
+                            <td class="small text-warning text-uppercase text-normal">{Lang::T('Your Balance')}</td>
                             <td class="small mb15 text-bold">
                                 {Lang::moneyFormat($_user['balance'])}
                                 {if $_user['auto_renewal'] == 1}
@@ -183,18 +183,18 @@
                         <table class="table table-bordered table-striped table-bordered table-hover"
                             style="margin-bottom: 0px;">
                             <tr>
-                                <td class="small text-primary text-uppercase text-normal">{Lang::T('Plan Name')}</td>
+                                <td class="small text-primary text-uppercase text-normal">{Lang::T('Package Name')}</td>
                                 <td class="small mb15">
                                     {$_bill['namebp']}
                                     {if $_bill['status'] != 'on'}
                                         <a class="label label-danger pull-right"
-                                            href="{$_url}order/package">{Lang::T('expired')}</a>
+                                            href="{$_url}order/package">{Lang::T('Expired')}</a>
                                     {/if}
                                 </td>
                             </tr>
                             {if $_c['show_bandwidth_plan'] == 'yes'}
                                 <tr>
-                                    <td class="small text-primary text-uppercase text-normal">{Lang::T('Bandwidth')}</td>
+                                    <td class="small text-primary text-uppercase text-normal">Bandwidth</td>
                                     <td class="small mb15">
                                         {$_bill['name_bw']}
                                     </td>
@@ -346,11 +346,11 @@
                         <div class="form-group">
                             <div class="col-sm-5">
                                 <input type="text" id="username" name="username" class="form-control" required
-                                    placeholder="{Lang::T('Username')}">
+                                    placeholder="{Lang::T('Friend Username')}">
                             </div>
                             <div class="col-sm-5">
                                 <input type="number" id="balance" name="balance" autocomplete="off" class="form-control"
-                                    required placeholder="{Lang::T('Balance')}">
+                                    required placeholder="{Lang::T('Balance Amount')}">
                             </div>
                             <div class="form-group col-sm-2" align="center">
                                 <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
@@ -379,7 +379,7 @@
                         <div class="form-group">
                             <div class="col-sm-10">
                                 <input type="text" id="username" name="username" class="form-control" required
-                                    placeholder="{Lang::T('Username')}">
+                                    placeholder="{Lang::T('Usernames')}">
                             </div>
                             <div class="form-group col-sm-2" align="center">
                                 <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
