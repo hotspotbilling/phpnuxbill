@@ -20,11 +20,11 @@
                             <input type="file" class="form-control" name="photo" accept="image/*">
                         </div>
                         <div class="form-group col-md-3 col-xs-4" title="Not always Working">
-                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> Facedetect</label>
+                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> {Lang::T('Face Detect')}</label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Username')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Usernames')}</label>
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['registration_username'] == 'phone'}
