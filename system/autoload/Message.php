@@ -64,7 +64,7 @@ class Message
 
     public static function MikrotikSendSMS($router_name, $to, $message)
     {
-        global $_app_stage, $client_m;
+        global $_app_stage, $client_m, $config;
         if ($_app_stage == 'demo') {
             return null;
         }
@@ -73,7 +73,10 @@ class Message
             $iport = explode(":", $mikrotik['ip_address']);
             $client_m = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
         }
-        $smsRequest = new RouterOS\Request('/tool sms send');
+        if(empty($config['mikrotik_sms_command'])){
+            $config['mikrotik_sms_command'] = "/tool sms send";
+        }
+        $smsRequest = new RouterOS\Request($config['mikrotik_sms_command']);
         $smsRequest
             ->setArgument('phone-number', $to)
             ->setArgument('message', $message);
@@ -231,7 +234,7 @@ class Message
                 $msg = str_replace('[[payment_link]]', '', $msg);
             }
         }
-		
+
 
         if (
             !empty($customer['phonenumber']) && strlen($customer['phonenumber']) > 5
