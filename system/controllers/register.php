@@ -27,24 +27,24 @@ switch ($do) {
         $address = _post('address');
 
         // Separate phone number input if OTP is required
-        if ($config['sms_otp_registration'] == 'yes') {
-            $phone_number = alphanumeric(_post('phone_number'), "+_.@-");
-        } else {
-            $phone_number = $username; // When OTP is not required, treat username as phone number
-        }
+        $phone_number = ($config['sms_otp_registration'] == 'yes') ? alphanumeric(_post('phone_number'), "+_.@-") : $username;
 
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
-            $msg .= 'Username should be between 3 to 55 characters' . '<br>';
+            $msg .= "Username should be between 3 to 55 characters<br>";
         }
-        if (Validator::Length($fullname, 36, 2) == false) {
-            $msg .= 'Full Name should be between 3 to 25 characters' . '<br>';
+        if ($config['man_fields_fname'] == 'yes') {
+            if (Validator::Length($fullname, 36, 2) == false) {
+                $msg .= "Full Name should be between 3 to 25 characters<br>";
+            }
         }
         if (!Validator::Length($password, 35, 2)) {
-            $msg .= 'Password should be between 3 to 35 characters' . '<br>';
+            $msg .= "Password should be between 3 to 35 characters<br>";
         }
-        if (!Validator::Email($email)) {
-            $msg .= 'Email is not Valid<br>';
+        if ($config['man_fields_email'] == 'yes') {
+            if (!Validator::Email($email)) {
+                $msg .= 'Email is not Valid<br>';
+            }
         }
         if ($password != $cpassword) {
             $msg .= Lang::T('Passwords does not match') . '<br>';
@@ -52,7 +52,7 @@ switch ($do) {
 
         // OTP verification if OTP is enabled
         if ($_c['sms_otp_registration'] == 'yes') {
-            $otpPath .= sha1($phone_number . $db_pass) . ".txt";
+            $otpPath .= sha1("$phone_number$db_pass") . ".txt";
             run_hook('validate_otp'); #HOOK
             // Expire after 10 minutes
             if (file_exists($otpPath) && time() - filemtime($otpPath) > 1200) {
@@ -116,6 +116,10 @@ switch ($do) {
                 if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
                 User::setFormCustomField($user);
                 run_hook('register_user'); #HOOK
+                $msg .= Lang::T('Registration successful') . '<br>';
+                if ($config['reg_nofify_admin'] == 'yes') {
+                    sendTelegram($config['CompanyName'] . ' - ' . Lang::T('New User Registration') . "\n\nFull Name: " . $fullname . "\nUsername: " . $username . "\nEmail: " . $email . "\nPhone Number: " . $phone_number . "\nAddress: " . $address);
+                }
                 r2(U . 'login', 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);
@@ -171,13 +175,13 @@ switch ($do) {
                 } else {
                     $otp = rand(100000, 999999);
                     file_put_contents($otpPath, $otp);
-                    if($config['phone_otp_type'] == 'whatsapp'){
-                        Message::sendWhatsapp($phone_number, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
-                    }else if($config['phone_otp_type'] == 'both'){
-                        Message::sendWhatsapp($phone_number, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
-                        Message::sendSMS($phone_number, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
-                    }else{
-                        Message::sendSMS($phone_number, $config['CompanyName'] . "\n\n".Lang::T("Registration code")."\n$otp");
+                    if ($config['phone_otp_type'] == 'whatsapp') {
+                        Message::sendWhatsapp($phone_number, $config['CompanyName'] . "\n\n" . Lang::T("Registration code") . "\n$otp");
+                    } else if ($config['phone_otp_type'] == 'both') {
+                        Message::sendWhatsapp($phone_number, $config['CompanyName'] . "\n\n" . Lang::T("Registration code") . "\n$otp");
+                        Message::sendSMS($phone_number, $config['CompanyName'] . "\n\n" . Lang::T("Registration code") . "\n$otp");
+                    } else {
+                        Message::sendSMS($phone_number, $config['CompanyName'] . "\n\n" . Lang::T("Registration code") . "\n$otp");
                     }
                     $ui->assign('phone_number', $phone_number);
                     $ui->assign('notify', 'Registration code has been sent to your phone');
@@ -204,5 +208,3 @@ switch ($do) {
         }
         break;
 }
-
-?>

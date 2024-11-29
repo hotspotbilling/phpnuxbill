@@ -173,6 +173,7 @@
             background-color: #efeb0a;
             border-color: #efeb0a;
         }
+
         .panel-cron-danger>.panel-heading {
             border-bottom-right-radius: 21px;
             border-bottom-left-radius: 21px;
@@ -276,7 +277,7 @@
             font-weight: bold;
         }
 
-         .box.box-solid.box-primary > .box-header .btn {
+        .box.box-solid.box-primary>.box-header .btn {
             color: inherit;
         }
 
@@ -1136,12 +1137,17 @@
             border-radius: 4px;
         }
 
+        .dark-mode .container {
+            background-color: #353638;
+
+        }
+
         /* Dark Mode - Select2 Dropdown ends here */
 
         /* dark mode styles start ends here */
     </style>
     {if isset($xheader)}
-        {$xheader}
+    {$xheader}
     {/if}
 
 </head>
@@ -1232,83 +1238,83 @@
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
                     {if !in_array($_admin['user_type'],['Report'])}
-                        <li class="{if in_array($_system_menu, ['customers', 'map'])}active{/if} treeview">
-                            <a href="#">
-                                <i class="fa fa-users"></i> <span>{Lang::T('Customer')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_system_menu eq 'customers' }class="active" {/if}><a
-                                        href="{$_url}customers">{Lang::T('Lists')}</a></li>
-                                <li {if $_system_menu eq 'map' }class="active" {/if}><a
-                                        href="{$_url}map/customer">{Lang::T('Location')}</a></li>
-                                {$_MENU_CUSTOMERS}
-                            </ul>
-                        </li>
-                        {$_MENU_AFTER_CUSTOMERS}
-                        <li class="{if $_system_menu eq 'plan'}active{/if} treeview">
-                            <a href="#">
-                                <i class="fa fa-ticket"></i> <span>{Lang::T('Services')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'list' }class="active" {/if}><a
-                                        href="{$_url}plan/list">{Lang::T('Active Users')}</a></li>
-                                {if $_c['disable_voucher'] != 'yes'}
-                                    <li {if $_routes[1] eq 'voucher' }class="active" {/if}><a
-                                            href="{$_url}plan/voucher">{Lang::T('Vouchers')}</a></li>
-                                    <li {if $_routes[1] eq 'refill' }class="active" {/if}><a
-                                            href="{$_url}plan/refill">{Lang::T('Refill Customer')}</a></li>
-                                {/if}
-                                <li {if $_routes[1] eq 'recharge' }class="active" {/if}><a
-                                        href="{$_url}plan/recharge">{Lang::T('Recharge Customer')}</a></li>
-                                {if $_c['enable_balance'] == 'yes'}
-                                    <li {if $_routes[1] eq 'deposit' }class="active" {/if}><a
-                                            href="{$_url}plan/deposit">{Lang::T('Refill Balance')}</a></li>
-                                {/if}
-                                {$_MENU_SERVICES}
-                            </ul>
-                        </li>
+                    <li class="{if in_array($_system_menu, ['customers', 'map'])}active{/if} treeview">
+                        <a href="#">
+                            <i class="fa fa-users"></i> <span>{Lang::T('Customer')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_system_menu eq 'customers' }class="active" {/if}><a
+                                    href="{$_url}customers">{Lang::T('Lists')}</a></li>
+                            <li {if $_system_menu eq 'map' }class="active" {/if}><a
+                                    href="{$_url}map/customer">{Lang::T('Location')}</a></li>
+                            {$_MENU_CUSTOMERS}
+                        </ul>
+                    </li>
+                    {$_MENU_AFTER_CUSTOMERS}
+                    <li class="{if $_system_menu eq 'plan'}active{/if} treeview">
+                        <a href="#">
+                            <i class="fa fa-ticket"></i> <span>{Lang::T('Services')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[1] eq 'list' }class="active" {/if}><a
+                                    href="{$_url}plan/list">{Lang::T('Active Users')}</a></li>
+                            {if $_c['disable_voucher'] != 'yes'}
+                            <li {if $_routes[1] eq 'voucher' }class="active" {/if}><a
+                                    href="{$_url}plan/voucher">{Lang::T('Vouchers')}</a></li>
+                            <li {if $_routes[1] eq 'refill' }class="active" {/if}><a
+                                    href="{$_url}plan/refill">{Lang::T('Refill Customer')}</a></li>
+                            {/if}
+                            <li {if $_routes[1] eq 'recharge' }class="active" {/if}><a
+                                    href="{$_url}plan/recharge">{Lang::T('Recharge Customer')}</a></li>
+                            {if $_c['enable_balance'] == 'yes'}
+                            <li {if $_routes[1] eq 'deposit' }class="active" {/if}><a
+                                    href="{$_url}plan/deposit">{Lang::T('Refill Balance')}</a></li>
+                            {/if}
+                            {$_MENU_SERVICES}
+                        </ul>
+                    </li>
                     {/if}
                     {$_MENU_AFTER_SERVICES}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        <li class="{if $_system_menu eq 'services'}active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-cube"></i> <span>{Lang::T('Internet Plan')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'hotspot' }class="active" {/if}><a
-                                        href="{$_url}services/hotspot">Hotspot</a></li>
-                                <li {if $_routes[1] eq 'pppoe' }class="active" {/if}><a
-                                        href="{$_url}services/pppoe">PPPOE</a></li>
-                                <li {if $_routes[1] eq 'vpn' }class="active" {/if}><a
-                                        href="{$_url}services/vpn">VPN</a></li>
-                                <li {if $_routes[1] eq 'list' }class="active" {/if}><a
-                                        href="{$_url}bandwidth/list">Bandwidth</a></li>
-                                {if $_c['enable_balance'] == 'yes'}
-                                    <li {if $_routes[1] eq 'balance' }class="active" {/if}><a
-                                            href="{$_url}services/balance">{Lang::T('Customer Balance')}</a></li>
-                                {/if}
-                                {$_MENU_PLANS}
-                            </ul>
-                        </li>
+                    <li class="{if $_system_menu eq 'services'}active{/if} treeview">
+                        <a href="#">
+                            <i class="ion ion-cube"></i> <span>{Lang::T('Internet Plan')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[1] eq 'hotspot' }class="active" {/if}><a
+                                    href="{$_url}services/hotspot">Hotspot</a></li>
+                            <li {if $_routes[1] eq 'pppoe' }class="active" {/if}><a
+                                    href="{$_url}services/pppoe">PPPOE</a></li>
+                            <li {if $_routes[1] eq 'vpn' }class="active" {/if}><a href="{$_url}services/vpn">VPN</a>
+                            </li>
+                            <li {if $_routes[1] eq 'list' }class="active" {/if}><a
+                                    href="{$_url}bandwidth/list">Bandwidth</a></li>
+                            {if $_c['enable_balance'] == 'yes'}
+                            <li {if $_routes[1] eq 'balance' }class="active" {/if}><a
+                                    href="{$_url}services/balance">{Lang::T('Customer Balance')}</a></li>
+                            {/if}
+                            {$_MENU_PLANS}
+                        </ul>
+                    </li>
                     {/if}
                     {$_MENU_AFTER_PLANS}
                     <li class="{if $_system_menu eq 'reports'}active{/if} treeview">
                         {if in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
-                            <a href="#">
-                                <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
+                        <a href="#">
+                            <i class="ion ion-clipboard"></i> <span>{Lang::T('Reports')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
                         {/if}
                         <ul class="treeview-menu">
                             <li {if $_routes[1] eq 'reports' }class="active" {/if}><a
@@ -1336,70 +1342,70 @@
                     </li>
                     {$_MENU_AFTER_MESSAGE}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        <li class="{if $_system_menu eq 'network'}active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-network"></i> <span>{Lang::T('Network')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[0] eq 'routers' and $_routes[1] eq '' }class="active" {/if}><a
-                                        href="{$_url}routers">Routers</a></li>
-                                <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
-                                        href="{$_url}pool/list">IP Pool</a></li>
-                                <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
-                                        href="{$_url}pool/port">Port Pool</a></li>
-                                <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'maps' }class="active" {/if}><a
-                                        href="{$_url}routers/maps">{Lang::T('Routers Maps')}</a></li>
-                                {$_MENU_NETWORK}
-                            </ul>
-                        </li>
-                        {$_MENU_AFTER_NETWORKS}
-                        {if $_c['radius_enable']}
-                            <li class="{if $_system_menu eq 'radius'}active{/if} treeview">
-                                <a href="#">
-                                    <i class="fa fa-database"></i> <span>{Lang::T('Radius')}</span>
-                                    <span class="pull-right-container">
-                                        <i class="fa fa-angle-left pull-right"></i>
-                                    </span>
-                                </a>
-                                <ul class="treeview-menu">
-                                    <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list' }class="active" {/if}><a
-                                            href="{$_url}radius/nas-list">{Lang::T('Radius NAS')}</a></li>
-                                    {$_MENU_RADIUS}
-                                </ul>
+                    <li class="{if $_system_menu eq 'network'}active{/if} treeview">
+                        <a href="#">
+                            <i class="ion ion-network"></i> <span>{Lang::T('Network')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[0] eq 'routers' and $_routes[1] eq '' }class="active" {/if}><a
+                                    href="{$_url}routers">Routers</a></li>
+                            <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
+                                    href="{$_url}pool/list">IP Pool</a></li>
+                            <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
+                                    href="{$_url}pool/port">Port Pool</a></li>
+                            <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'maps' }class="active" {/if}><a
+                                    href="{$_url}routers/maps">{Lang::T('Routers Maps')}</a></li>
+                            {$_MENU_NETWORK}
+                        </ul>
+                    </li>
+                    {$_MENU_AFTER_NETWORKS}
+                    {if $_c['radius_enable']}
+                    <li class="{if $_system_menu eq 'radius'}active{/if} treeview">
+                        <a href="#">
+                            <i class="fa fa-database"></i> <span>{Lang::T('Radius')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list' }class="active" {/if}><a
+                                    href="{$_url}radius/nas-list">{Lang::T('Radius NAS')}</a></li>
+                            {$_MENU_RADIUS}
+                        </ul>
+                    </li>
+                    {/if}
+                    {$_MENU_AFTER_RADIUS}
+                    <li class="{if $_system_menu eq 'pages'}active{/if} treeview">
+                        <a href="#">
+                            <i class="ion ion-document"></i> <span>{Lang::T("Static Pages")}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[1] eq 'Order_Voucher' }class="active" {/if}><a
+                                    href="{$_url}pages/Order_Voucher">{Lang::T('Order Voucher')}</a></li>
+                            <li {if $_routes[1] eq 'Voucher' }class="active" {/if}><a
+                                    href="{$_url}pages/Voucher">{Lang::T('Theme Voucher')}</a></li>
+                            <li {if $_routes[1] eq 'Announcement' }class="active" {/if}><a
+                                    href="{$_url}pages/Announcement">{Lang::T('Announcement')}</a></li>
+                            <li {if $_routes[1] eq 'Announcement_Customer' }class="active" {/if}><a
+                                    href="{$_url}pages/Announcement_Customer">{Lang::T('Customer Announcement')}</a>
                             </li>
-                        {/if}
-                        {$_MENU_AFTER_RADIUS}
-                        <li class="{if $_system_menu eq 'pages'}active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-document"></i> <span>{Lang::T("Static Pages")}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'Order_Voucher' }class="active" {/if}><a
-                                        href="{$_url}pages/Order_Voucher">{Lang::T('Order Voucher')}</a></li>
-                                <li {if $_routes[1] eq 'Voucher' }class="active" {/if}><a
-                                        href="{$_url}pages/Voucher">{Lang::T('Theme Voucher')}</a></li>
-                                <li {if $_routes[1] eq 'Announcement' }class="active" {/if}><a
-                                        href="{$_url}pages/Announcement">{Lang::T('Announcement')}</a></li>
-                                <li {if $_routes[1] eq 'Announcement_Customer' }class="active" {/if}><a
-                                        href="{$_url}pages/Announcement_Customer">{Lang::T('Customer Announcement')}</a>
-                                </li>
-                                <li {if $_routes[1] eq 'Registration_Info' }class="active" {/if}><a
-                                        href="{$_url}pages/Registration_Info">{Lang::T('Registration Info')}</a></li>
-                                <li {if $_routes[1] eq 'Payment_Info' }class="active" {/if}><a
-                                        href="{$_url}pages/Payment_Info">{Lang::T('Payment Info')}</a></li>
-                                <li {if $_routes[1] eq 'Privacy_Policy' }class="active" {/if}><a
-                                        href="{$_url}pages/Privacy_Policy">{Lang::T('Privacy Policy')}</a></li>
-                                <li {if $_routes[1] eq 'Terms_and_Conditions' }class="active" {/if}><a
-                                        href="{$_url}pages/Terms_and_Conditions">{Lang::T('Terms and Conditions')}</a></li>
-                                {$_MENU_PAGES}
-                            </ul>
-                        </li>
+                            <li {if $_routes[1] eq 'Registration_Info' }class="active" {/if}><a
+                                    href="{$_url}pages/Registration_Info">{Lang::T('Registration Info')}</a></li>
+                            <li {if $_routes[1] eq 'Payment_Info' }class="active" {/if}><a
+                                    href="{$_url}pages/Payment_Info">{Lang::T('Payment Info')}</a></li>
+                            <li {if $_routes[1] eq 'Privacy_Policy' }class="active" {/if}><a
+                                    href="{$_url}pages/Privacy_Policy">{Lang::T('Privacy Policy')}</a></li>
+                            <li {if $_routes[1] eq 'Terms_and_Conditions' }class="active" {/if}><a
+                                    href="{$_url}pages/Terms_and_Conditions">{Lang::T('Terms and Conditions')}</a></li>
+                            {$_MENU_PAGES}
+                        </ul>
+                    </li>
                     {/if}
                     {$_MENU_AFTER_PAGES}
                     <li
@@ -1412,80 +1418,80 @@
                         </a>
                         <ul class="treeview-menu">
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                                <li {if $_routes[1] eq 'app' }class="active" {/if}><a
-                                        href="{$_url}settings/app">{Lang::T('General Settings')}</a></li>
-                                <li {if $_routes[1] eq 'localisation' }class="active" {/if}><a
-                                        href="{$_url}settings/localisation">{Lang::T('Localisation')}</a></li>
-                                <li {if $_routes[0] eq 'customfield' }class="active" {/if}><a
+                            <li {if $_routes[1] eq 'app' }class="active" {/if}><a
+                                    href="{$_url}settings/app">{Lang::T('General Settings')}</a></li>
+                            <li {if $_routes[1] eq 'localisation' }class="active" {/if}><a
+                                    href="{$_url}settings/localisation">{Lang::T('Localisation')}</a></li>
+                            <li {if $_routes[0] eq 'customfield' }class="active" {/if}><a
                                     href="{$_url}customfield">{Lang::T('Custom Fields')}</a></li>
-                                <li {if $_routes[1] eq 'miscellaneous' }class="active" {/if}><a
-                                            href="{$_url}settings/miscellaneous">{Lang::T('Miscellaneous')}</a></li>
-                                <li {if $_routes[1] eq 'maintenance' }class="active" {/if}><a
-                                        href="{$_url}settings/maintenance">{Lang::T('Maintenance Mode')}</a></li>
-                                <li {if $_routes[1] eq 'notifications' }class="active" {/if}><a
-                                        href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
-                                <li {if $_routes[1] eq 'devices' }class="active" {/if}><a
-                                        href="{$_url}settings/devices">{Lang::T('Devices')}</a></li>
+                            <li {if $_routes[1] eq 'miscellaneous' }class="active" {/if}><a
+                                    href="{$_url}settings/miscellaneous">{Lang::T('Miscellaneous')}</a></li>
+                            <li {if $_routes[1] eq 'maintenance' }class="active" {/if}><a
+                                    href="{$_url}settings/maintenance">{Lang::T('Maintenance Mode')}</a></li>
+                            <li {if $_routes[1] eq 'notifications' }class="active" {/if}><a
+                                    href="{$_url}settings/notifications">{Lang::T('User Notification')}</a></li>
+                            <li {if $_routes[1] eq 'devices' }class="active" {/if}><a
+                                    href="{$_url}settings/devices">{Lang::T('Devices')}</a></li>
                             {/if}
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin','Agent'])}
-                                <li {if $_routes[1] eq 'users' }class="active" {/if}><a
-                                        href="{$_url}settings/users">{Lang::T('Administrator Users')}</a></li>
+                            <li {if $_routes[1] eq 'users' }class="active" {/if}><a
+                                    href="{$_url}settings/users">{Lang::T('Administrator Users')}</a></li>
                             {/if}
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                                <li {if $_routes[1] eq 'dbstatus' }class="active" {/if}><a
-                                        href="{$_url}settings/dbstatus">{Lang::T('Backup/Restore')}</a></li>
-                                <li {if $_system_menu eq 'paymentgateway' }class="active" {/if}>
-                                    <a href="{$_url}paymentgateway">
-                                        <span class="text">{Lang::T('Payment Gateway')}</span>
-                                    </a>
-                                </li>
-                                {$_MENU_SETTINGS}
-                                <li {if $_routes[0] eq 'pluginmanager' }class="active" {/if}>
-                                    <a href="{$_url}pluginmanager"><i class="glyphicon glyphicon-tasks"></i>
-                                        {Lang::T('Plugin Manager')}</a>
-                                </li>
+                            <li {if $_routes[1] eq 'dbstatus' }class="active" {/if}><a
+                                    href="{$_url}settings/dbstatus">{Lang::T('Backup/Restore')}</a></li>
+                            <li {if $_system_menu eq 'paymentgateway' }class="active" {/if}>
+                                <a href="{$_url}paymentgateway">
+                                    <span class="text">{Lang::T('Payment Gateway')}</span>
+                                </a>
+                            </li>
+                            {$_MENU_SETTINGS}
+                            <li {if $_routes[0] eq 'pluginmanager' }class="active" {/if}>
+                                <a href="{$_url}pluginmanager"><i class="glyphicon glyphicon-tasks"></i>
+                                    {Lang::T('Plugin Manager')}</a>
+                            </li>
                             {/if}
                         </ul>
                     </li>
                     {$_MENU_AFTER_SETTINGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        <li class="{if $_system_menu eq 'logs' }active{/if} treeview">
-                            <a href="#">
-                                <i class="ion ion-clock"></i> <span>{Lang::T('Logs')}</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li {if $_routes[1] eq 'list' }class="active" {/if}><a
-                                        href="{$_url}logs/phpnuxbill">PhpNuxBill</a></li>
-                                {if $_c['radius_enable']}
-                                    <li {if $_routes[1] eq 'radius' }class="active" {/if}><a
-                                            href="{$_url}logs/radius">Radius</a>
-                                    </li>
-                                {/if}
-                                {$_MENU_LOGS}
-                            </ul>
-                        </li>
+                    <li class="{if $_system_menu eq 'logs' }active{/if} treeview">
+                        <a href="#">
+                            <i class="ion ion-clock"></i> <span>{Lang::T('Logs')}</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li {if $_routes[1] eq 'list' }class="active" {/if}><a
+                                    href="{$_url}logs/phpnuxbill">PhpNuxBill</a></li>
+                            {if $_c['radius_enable']}
+                            <li {if $_routes[1] eq 'radius' }class="active" {/if}><a
+                                    href="{$_url}logs/radius">Radius</a>
+                            </li>
+                            {/if}
+                            {$_MENU_LOGS}
+                        </ul>
+                    </li>
                     {/if}
                     {$_MENU_AFTER_LOGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        <li {if $_routes[1] eq 'docs' }class="active" {/if}>
-                            <a href="{if $_c['docs_clicked'] != 'yes'}{$_url}settings/docs{else}./docs/{/if}">
-                                <i class="ion ion-ios-bookmarks"></i>
-                                <span class="text">{Lang::T('Documentation')}</span>
-                                {if $_c['docs_clicked'] != 'yes'}
-                                    <span class="pull-right-container"><small
-                                            class="label pull-right bg-green">New</small></span>
-                                {/if}
-                            </a>
-                        </li>
-                        <li {if $_system_menu eq 'community' }class="active" {/if}>
-                            <a href="{$_url}community">
-                                <i class="ion ion-chatboxes"></i>
-                                <span class="text">Community</span>
-                            </a>
-                        </li>
+                    <li {if $_routes[1] eq 'docs' }class="active" {/if}>
+                        <a href="{if $_c['docs_clicked'] != 'yes'}{$_url}settings/docs{else}./docs/{/if}">
+                            <i class="ion ion-ios-bookmarks"></i>
+                            <span class="text">{Lang::T('Documentation')}</span>
+                            {if $_c['docs_clicked'] != 'yes'}
+                            <span class="pull-right-container"><small
+                                    class="label pull-right bg-green">New</small></span>
+                            {/if}
+                        </a>
+                    </li>
+                    <li {if $_system_menu eq 'community' }class="active" {/if}>
+                        <a href="{$_url}community">
+                            <i class="ion ion-chatboxes"></i>
+                            <span class="text">Community</span>
+                        </a>
+                    </li>
                     {/if}
                     {$_MENU_AFTER_COMMUNITY}
                 </ul>
@@ -1493,11 +1499,11 @@
         </aside>
 
         {if $_c['maintenance_mode'] == 1}
-            <div class="notification-top-bar">
-                <p>{Lang::T('The website is currently in maintenance mode, this means that some or all functionality may be
+        <div class="notification-top-bar">
+            <p>{Lang::T('The website is currently in maintenance mode, this means that some or all functionality may be
                 unavailable to regular users during this time.')}<small> &nbsp;&nbsp;<a
-                            href="{$_url}settings/maintenance">{Lang::T('Turn Off')}</a></small></p>
-            </div>
+                        href="{$_url}settings/maintenance">{Lang::T('Turn Off')}</a></small></p>
+        </div>
         {/if}
 
         <div class="content-wrapper">
@@ -1509,19 +1515,19 @@
 
             <section class="content">
                 {if isset($notify)}
-                    <script>
-                        // Display SweetAlert toast notification
-                        Swal.fire({
-                            icon: '{if $notify_t == "s"}success{else}error{/if}',
-                            title: '{$notify}',
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 5000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            }
-                        });
-                    </script>
-{/if}
+                <script>
+                    // Display SweetAlert toast notification
+                    Swal.fire({
+                        icon: '{if $notify_t == "s"}success{else}error{/if}',
+                        title: '{$notify}',
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                </script>
+                {/if}
