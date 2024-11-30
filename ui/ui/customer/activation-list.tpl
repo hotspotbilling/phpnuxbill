@@ -11,8 +11,8 @@
                         <thead>
                             <tr>
                                 <th>{Lang::T('Invoice')}</th>
-                                <th>{Lang::T('Plan Name')}</th>
-                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Package Name')}</th>
+                                <th>{Lang::T('Package Price')}</th>
                                 <th>{Lang::T('Type')}</th>
                                 <th>{Lang::T('Created On')}</th>
                                 <th>{Lang::T('Expires On')}</th>
