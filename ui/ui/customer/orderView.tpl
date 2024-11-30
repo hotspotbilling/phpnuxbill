@@ -72,7 +72,7 @@
                                 </tr>
                             {/if}
                             <tr>
-                                <td>{Lang::T('Plan Name')}</td>
+                                <td>{Lang::T('Package Name')}</td>
                                 <td>{$plan['name_plan']}</td>
                             </tr>
                             {if $add_cost!=0}
@@ -88,7 +88,7 @@
                                 </tr>
                             {/if}
                             <tr>
-                                <td>{Lang::T('Plan Price')}{if $add_cost!=0}<small> +
+                                <td>{Lang::T('Package Price')}{if $add_cost!=0}<small> +
                                         {Lang::T('Additional Cost')}{/if}</small></td>
                                 <td
                                     style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">
