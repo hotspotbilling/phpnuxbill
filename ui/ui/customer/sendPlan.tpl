@@ -49,7 +49,7 @@
                     <div class="form-group">
                         <div class="col-sm-9">
                             <input type="text" id="username" name="username" class="form-control" required
-                                value="{$username}" placeholder="{Lang::T('Username')}">
+                                value="{$username}" placeholder="{Lang::T('Usernames')}">
                         </div>
                         <div class="form-group col-sm-3" align="center">
                             <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
