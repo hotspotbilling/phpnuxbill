@@ -17,11 +17,11 @@
                                 <td>{Lang::dateTimeFormat($unpaid['expired_date'])} </td>
                             </tr>
                             <tr>
-                                <td>{Lang::T('Plan Name')}</td>
+                                <td>{Lang::T('Package Name')}</td>
                                 <td>{$unpaid['plan_name']}</td>
                             </tr>
                             <tr>
-                                <td>{Lang::T('Plan Price')}</td>
+                                <td>{Lang::T('Package Price')}</td>
                                 <td>{$unpaid['price']}</td>
                             </tr>
                             <tr>
@@ -98,7 +98,7 @@
 
                     {if $_c['enable_balance'] == 'yes'}
                         <tr>
-                            <td class="small text-warning text-uppercase text-normal">{Lang::T('Your Balance')}</td>
+                            <td class="small text-warning text-uppercase text-normal">{Lang::T('Yours Balance')}</td>
                             <td class="small mb15 text-bold">
                                 {Lang::moneyFormat($_user['balance'])}
                                 {if $_user['auto_renewal'] == 1}
@@ -194,7 +194,7 @@
                             </tr>
                             {if $_c['show_bandwidth_plan'] == 'yes'}
                                 <tr>
-                                    <td class="small text-primary text-uppercase text-normal">Bandwidth</td>
+                                    <td class="small text-primary text-uppercase text-normal">{Lang::T('Bandwidth')}</td>
                                     <td class="small mb15">
                                         {$_bill['name_bw']}
                                     </td>
@@ -346,7 +346,7 @@
                         <div class="form-group">
                             <div class="col-sm-5">
                                 <input type="text" id="username" name="username" class="form-control" required
-                                    placeholder="{Lang::T('Friend Username')}">
+                                    placeholder="{Lang::T('Friend Usernames')}">
                             </div>
                             <div class="col-sm-5">
                                 <input type="number" id="balance" name="balance" autocomplete="off" class="form-control"
@@ -361,7 +361,7 @@
                     </form>
                     <script>
                         function askConfirm() {
-                            if (confirm('{Lang::T('Send your balance ? ')}')) {
+                            if (confirm('{Lang::T('Send yours balance ? ')}')) {
                             setTimeout(() => {
                                 document.getElementById('sendBtn').setAttribute('disabled', '');
                             }, 1000);
