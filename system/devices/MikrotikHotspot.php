@@ -40,6 +40,31 @@ class MikrotikHotspot
 		}
         $this->addHotspotUser($client, $plan, $customer);
     }
+	
+	function sync_customer($customer, $plan)
+	{
+		$mikrotik = $this->info($plan['routers']);
+		$client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->find_one();
+		if ($t) {
+			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
+			$printRequest->setArgument('.proplist', '.id,limit-uptime,limit-bytes-total');
+			$printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
+			$userInfo = $client->sendSync($printRequest);
+			$id = $userInfo->getProperty('.id');
+			$uptime = $userInfo->getProperty('limit-uptime');
+			$data = $userInfo->getProperty('limit-bytes-total');
+			if (!empty($id) && (!empty($uptime) || !empty($data))) {
+				$setRequest = new RouterOS\Request('/ip/hotspot/user/set');
+				$setRequest->setArgument('numbers', $id);
+				$setRequest->setArgument('profile', $t['namebp']);
+				$client->sendSync($setRequest);
+			} else {
+				$this->add_customer($customer, $plan);
+			}
+		}
+	}
+
 
     function remove_customer($customer, $plan)
     {

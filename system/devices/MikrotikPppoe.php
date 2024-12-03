@@ -77,6 +77,11 @@ class MikrotikPppoe
             }
         }
     }
+	
+	function sync_customer($customer, $plan)
+    {	
+        $this->add_customer($customer, $plan);
+    }
 
     function remove_customer($customer, $plan)
     {
