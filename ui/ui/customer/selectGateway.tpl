@@ -51,7 +51,7 @@
                             {$plan['type']}</span>
                     </li>
                     <li class="list-group-item">
-                        <b>{Lang::T('Plan Price')}</b> <span class="pull-right">
+                        <b>{Lang::T('Package Price')}</b> <span class="pull-right">
                             {if !empty($plan['price_old'])}
                                 <sup
                                     style="text-decoration: line-through; color: red">{Lang::moneyFormat($plan['price_old'])}</sup>
@@ -83,7 +83,7 @@
                                     class="pull-right">{Lang::moneyFormat($add_cost)}</span>
                             </li>
                             <li class="list-group-item">
-                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')}
+                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Package Price')}
                                     +{Lang::T('Additional Cost')})</small><span class="pull-right"
                                     style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price']+$add_cost+$tax)}</span>
                             </li>
@@ -106,7 +106,7 @@
                                     class="pull-right">{Lang::moneyFormat($add_cost)}</span>
                             </li>
                             <li class="list-group-item">
-                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Plan Price')}
+                                <b>{Lang::T('Total')}</b> <small>({Lang::T('Package Price')}
                                     +{Lang::T('Additional Cost')})</small><span class="pull-right"
                                     style="font-size: large; font-weight:bolder; font-family: 'Courier New', Courier, monospace; ">{Lang::moneyFormat($plan['price']+$add_cost)}</span>
                             </li>

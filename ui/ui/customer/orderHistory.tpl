@@ -10,11 +10,11 @@
                     <table id="datatable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Package Name')}</th>
                                 <th>{Lang::T('Payment Method')}</th>
                                 <th>Routers</th>
                                 <th>{Lang::T('Type')}</th>
-                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Package Price')}</th>
                                 <th>{Lang::T('Created on')}</th>
                                 <th>{Lang::T('Expires on')}</th>
                                 <th>{Lang::T('Date')}</th>

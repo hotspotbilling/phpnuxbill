@@ -54,7 +54,7 @@
                         {/if}
                         {if $_c['man_fields_address'] neq 'no'}
                         <div class="form-group">
-                            <label>{Lang::T('Address')}</label>
+                            <label>{Lang::T('Home Address')}</label>
                             <input type="text" name="address" id="address" value="{$address}" class="form-control">
                         </div>
                         {if $_c['man_fields_custom'] neq 'no'}
@@ -66,14 +66,14 @@
         </div>
         <div class="col-md-4">
             <div class="panel panel-primary">
-                <div class="panel-heading">2. {Lang::T('Username & Password')}</div>
+                <div class="panel-heading">2. {Lang::T('Usernames & Password')}</div>
                 <div class="panel-body">
                     <div class="form-container">
                         <!-- Username Field -->
                         <div class="form-group">
-                            <label>{Lang::T('Username')}</label>
+                            <label>{Lang::T('Usernames')}</label>
                             <input type="text" required class="form-control" id="username" name="username"
-                                placeholder="{Lang::T('Choose a Username')}">
+                                placeholder="{Lang::T('Choose a Usernames')}">
                         </div>
                         <!-- Password Fields -->
                         <div class="form-group">
