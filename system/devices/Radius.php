@@ -50,18 +50,42 @@ class Radius
 
         if ($p['validity_unit'] == 'Months') {
             $date_exp = date("Y-m-d", strtotime('+' . $p['validity'] . ' month'));
+            $time = date("H:i:s");
         } else if ($p['validity_unit'] == 'Period') {
-            $date_tmp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
-            $dt1 = new DateTime("$date_only");
-            $dt2 = new DateTime("$date_tmp");
-            $diff = $dt2->diff($dt1);
-            $sum =  $diff->format("%a"); // => 453
-            if ($sum >= 35 * $p['validity']) {
-                $date_exp = date("Y-m-$day_exp", strtotime('+0 month'));
-            } else {
-                $date_exp = date("Y-m-$day_exp", strtotime('+' . $p['validity'] . ' month'));
-            };
-            $time = date("23:59:00");
+            $current_date = new DateTime($date_only);
+            $exp_date = clone $current_date;
+            $exp_date->modify('first day of next month');
+            $exp_date->setDate($exp_date->format('Y'), $exp_date->format('m'), $day_exp);
+
+            $min_days = 7 * $p['validity'];
+            $max_days = 35 * $p['validity'];
+
+            $days_until_exp = $exp_date->diff($current_date)->days;
+
+            // If less than min_days away, move to the next period
+            while ($days_until_exp < $min_days) {
+                $exp_date->modify('+1 month');
+                $days_until_exp = $exp_date->diff($current_date)->days;
+            }
+
+            // If more than max_days away, move to the previous period
+            while ($days_until_exp > $max_days) {
+                $exp_date->modify('-1 month');
+                $days_until_exp = $exp_date->diff($current_date)->days;
+            }
+
+            // Final check to ensure we're not less than min_days or in the past
+            if ($days_until_exp < $min_days || $exp_date <= $current_date) {
+                $exp_date->modify('+1 month');
+            }
+
+            // Adjust for multiple periods
+            if ($p['validity'] > 1) {
+                $exp_date->modify('+' . ($p['validity'] - 1) . ' months');
+            }
+
+            $date_exp = $exp_date->format('Y-m-d');
+            $time = "23:59:59";
         } else if ($p['validity_unit'] == 'Days') {
             $datetime = explode(' ', date("Y-m-d H:i:s", strtotime('+' . $p['validity'] . ' day')));
             $date_exp = $datetime[0];
@@ -79,6 +103,14 @@ class Radius
         if ($p) {
             $this->customerAddPlan($customer, $plan, $date_exp . ' ' . $time);
         }
+    }
+	
+	function sync_customer($customer, $plan)
+    {	
+		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->findOne();
+        $date_exp = $t['expiration'];
+        $time = $t['time'];
+        $this->customerAddPlan($customer, $plan, $date_exp . ' ' . $time);
     }
 
     function remove_customer($customer, $plan)

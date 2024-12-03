@@ -284,7 +284,7 @@ switch ($action) {
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            (new $p['device'])->add_customer($c, $p);
+                            (new $p['device'])->sync_customer($c, $p);
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
                         }

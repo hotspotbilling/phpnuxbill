@@ -21,6 +21,11 @@ class RadiusRest {
     function add_customer($customer, $plan)
     {
     }
+	
+	function sync_customer($customer, $plan)
+    {	
+        $this->add_customer($customer, $plan);
+    }
 
     // Remove Customer to Mikrotik/Device
     function remove_customer($customer, $plan)
