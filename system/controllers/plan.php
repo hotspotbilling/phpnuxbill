@@ -49,7 +49,11 @@ switch ($action) {
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            (new $p['device'])->sync_customer($c, $p);
+                            if (method_exists($dvc, 'sync_customer')) {
+                                (new $p['device'])->sync_customer($c, $p);
+                            }else{
+                                (new $p['device'])->add_customer($c, $p);
+                            }
                         } else {
                             new Exception(Lang::T("Devices Not Found"));
                         }
@@ -101,7 +105,7 @@ switch ($action) {
             $cust = User::_info($id_customer);
             $plan = ORM::for_table('tbl_plans')->find_one($planId);
             list($bills, $add_cost) = User::getBills($id_customer);
-			
+
 			// Tax calculation start
 			$tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
 			$tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
@@ -120,7 +124,7 @@ switch ($action) {
 			}
 			// Tax calculation stop
 			$total_cost = $plan['price'] + $add_cost + $tax;
-			
+
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
                     r2(U . 'plan/recharge', 'e', Lang::T('Customer not found'));
@@ -169,7 +173,7 @@ switch ($action) {
         $planId = _post('plan');
         $using = _post('using');
         $stoken = _post('stoken');
-		
+
 		$plan = ORM::for_table('tbl_plans')->find_one($planId);
 
         if (!empty(App::getTokenValue($stoken))) {
@@ -190,7 +194,7 @@ switch ($action) {
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
             list($bills, $add_cost) = User::getBills($id_customer);
-			
+
 			// Tax calculation start
 			$tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
 			$tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
@@ -209,7 +213,7 @@ switch ($action) {
 			}
 			// Tax calculation stop
 			$total_cost = $plan['price'] + $add_cost + $tax;
-			
+
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 //$plan = ORM::for_table('tbl_plans')->find_one($planId);
                 if (!$cust) {
