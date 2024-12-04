@@ -41,10 +41,16 @@ switch ($action) {
 
     case 'list-activated':
         $ui->assign('_system_menu', 'list-activated');
-        $query = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id');
+        $query = ORM::for_table('tbl_transactions')->where('user_id', $user['id'])->order_by_desc('id');
         $d = Paginator::findMany($query);
 
+        if (empty($d) || $d < 5) {
+            $query = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id');
+            $d = Paginator::findMany($query);
+        }
+
         $ui->assign('d', $d);
+        $ui->assign('_title', Lang::T('Activation History'));
         run_hook('customer_view_activation_list'); #HOOK
         $ui->display('customer/activation-list.tpl');
 

@@ -176,19 +176,19 @@ switch ($action) {
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
             $plan = ORM::for_table('tbl_plans')->find_one($b['plan_id']);
-			$tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
-			$tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
-			$custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
-			if ($tax_rate_setting === 'custom') {
-				$tax_rate = $custom_tax_rate;
-			} else {
-				$tax_rate = $tax_rate_setting;
-			}
-			if ($tax_enable === 'yes') {
-				$tax = Package::tax($plan['price'], $tax_rate);
-			} else {
-				$tax = 0;
-			}
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+            $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+            if ($tax_rate_setting === 'custom') {
+                $tax_rate = $custom_tax_rate;
+            } else {
+                $tax_rate = $tax_rate_setting;
+            }
+            if ($tax_enable === 'yes') {
+                $tax = Package::tax($plan['price'], $tax_rate);
+            } else {
+                $tax = 0;
+            }
             list($bills, $add_cost) = User::getBills($id_customer);
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
@@ -212,7 +212,7 @@ switch ($action) {
                 $usings[] = Lang::T('Cash');
             }
             $abills = User::getAttributes("Bill");
-			if ($tax_enable === 'yes') {
+            if ($tax_enable === 'yes') {
                 $ui->assign('tax', $tax);
             }
             $ui->assign('usings', $usings);
@@ -333,15 +333,30 @@ switch ($action) {
             if (empty($v)) {
                 $v = 'activation';
             }
-            if ($v == 'order') {
-                $v = 'order';
-                $query = ORM::for_table('tbl_payment_gateway')->where('username', $customer['username'])->order_by_desc('id');
-                $order = Paginator::findMany($query);
-                $ui->assign('order', $order);
-            } else if ($v == 'activation') {
-                $query = ORM::for_table('tbl_transactions')->where('username', $customer['username'])->order_by_desc('id');
-                $activation = Paginator::findMany($query);
-                $ui->assign('activation', $activation);
+            switch ($v) {
+                case 'order':
+                    $v = 'order';
+                    $query = ORM::for_table('tbl_payment_gateway')->where('user_id', $customer['id'])->order_by_desc('id');
+                    $order = Paginator::findMany($query);
+
+                    if (empty($order) || $order < 5) {
+                        $query = ORM::for_table('tbl_payment_gateway')->where('username', $customer['username'])->order_by_desc('id');
+                        $order = Paginator::findMany($query);
+                    }
+
+                    $ui->assign('order', $order);
+                    break;
+                case 'activation':
+                    $query = ORM::for_table('tbl_transactions')->where('user_id', $customer['id'])->order_by_desc('id');
+                    $activation = Paginator::findMany($query);
+
+                    if (empty($activation) || $activation < 5) {
+                        $query = ORM::for_table('tbl_transactions')->where('username', $customer['username'])->order_by_desc('id');
+                        $activation = Paginator::findMany($query);
+                    }
+
+                    $ui->assign('activation', $activation);
+                    break;
             }
             $ui->assign('packages', User::_billing($customer['id']));
             $ui->assign('v', $v);
@@ -366,19 +381,19 @@ switch ($action) {
             ->where('customer_id', $id)
             ->find_many();
         if ($d) {
-            if(isset($routes['3']) && $routes['3'] == 'deletePhoto'){
-                if($d['photo'] != '' && strpos($d['photo'], 'default') === false){
-                    if(file_exists($UPLOAD_PATH.$d['photo']) && strpos($d['photo'], 'default') === false){
-                        unlink($UPLOAD_PATH.$d['photo']);
-                        if(file_exists($UPLOAD_PATH.$d['photo'].'.thumb.jpg')){
-                            unlink($UPLOAD_PATH.$d['photo'].'.thumb.jpg');
+            if (isset($routes['3']) && $routes['3'] == 'deletePhoto') {
+                if ($d['photo'] != '' && strpos($d['photo'], 'default') === false) {
+                    if (file_exists($UPLOAD_PATH . $d['photo']) && strpos($d['photo'], 'default') === false) {
+                        unlink($UPLOAD_PATH . $d['photo']);
+                        if (file_exists($UPLOAD_PATH . $d['photo'] . '.thumb.jpg')) {
+                            unlink($UPLOAD_PATH . $d['photo'] . '.thumb.jpg');
                         }
                     }
                     $d->photo = '/user.default.jpg';
                     $d->save();
                     $ui->assign('notify_t', 's');
                     $ui->assign('notify', 'You have successfully deleted the photo');
-                }else{
+                } else {
                     $ui->assign('notify_t', 'e');
                     $ui->assign('notify', 'No photo found to delete');
                 }
@@ -652,44 +667,44 @@ switch ($action) {
                 if (function_exists('imagecreatetruecolor')) {
                     $hash = md5_file($_FILES['photo']['tmp_name']);
                     $subfolder = substr($hash, 0, 2);
-                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos'. DIRECTORY_SEPARATOR;
-                    if(!file_exists($folder)){
+                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos' . DIRECTORY_SEPARATOR;
+                    if (!file_exists($folder)) {
                         mkdir($folder);
                     }
-                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos'. DIRECTORY_SEPARATOR. $subfolder. DIRECTORY_SEPARATOR;
-                    if(!file_exists($folder)){
+                    $folder = $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'photos' . DIRECTORY_SEPARATOR . $subfolder . DIRECTORY_SEPARATOR;
+                    if (!file_exists($folder)) {
                         mkdir($folder);
                     }
                     $imgPath = $folder . $hash . '.jpg';
-                    if (!file_exists($imgPath)){
+                    if (!file_exists($imgPath)) {
                         File::resizeCropImage($_FILES['photo']['tmp_name'], $imgPath, 1600, 1600, 100);
                     }
-                    if (!file_exists($imgPath.'.thumb.jpg')){
-                        if(_post('faceDetect') == 'yes'){
-                            try{
+                    if (!file_exists($imgPath . '.thumb.jpg')) {
+                        if (_post('faceDetect') == 'yes') {
+                            try {
                                 $detector = new svay\FaceDetector();
                                 $detector->setTimeout(5000);
                                 $detector->faceDetect($imgPath);
-                                $detector->cropFaceToJpeg($imgPath.'.thumb.jpg', false);
-                            }catch (Exception $e) {
-                                File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                                $detector->cropFaceToJpeg($imgPath . '.thumb.jpg', false);
+                            } catch (Exception $e) {
+                                File::makeThumb($imgPath, $imgPath . '.thumb.jpg', 200);
                             } catch (Throwable $e) {
-                                File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                                File::makeThumb($imgPath, $imgPath . '.thumb.jpg', 200);
                             }
-                        }else{
-                            File::makeThumb($imgPath, $imgPath.'.thumb.jpg', 200);
+                        } else {
+                            File::makeThumb($imgPath, $imgPath . '.thumb.jpg', 200);
                         }
                     }
-                    if(file_exists($imgPath)){
-                        if($c['photo'] != '' && strpos($c['photo'], 'default') === false){
-                            if(file_exists($UPLOAD_PATH.$c['photo'])){
-                                unlink($UPLOAD_PATH.$c['photo']);
-                                if(file_exists($UPLOAD_PATH.$c['photo'].'.thumb.jpg')){
-                                    unlink($UPLOAD_PATH.$c['photo'].'.thumb.jpg');
+                    if (file_exists($imgPath)) {
+                        if ($c['photo'] != '' && strpos($c['photo'], 'default') === false) {
+                            if (file_exists($UPLOAD_PATH . $c['photo'])) {
+                                unlink($UPLOAD_PATH . $c['photo']);
+                                if (file_exists($UPLOAD_PATH . $c['photo'] . '.thumb.jpg')) {
+                                    unlink($UPLOAD_PATH . $c['photo'] . '.thumb.jpg');
                                 }
                             }
                         }
-                        $c->photo = '/photos/'. $subfolder. '/'. $hash. '.jpg';
+                        $c->photo = '/photos/' . $subfolder . '/' . $hash . '.jpg';
                     }
                     if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
                 } else {
@@ -829,9 +844,9 @@ switch ($action) {
             $query = ORM::for_table('tbl_customers');
             $query->where("status", $filter);
         }
-        if($order == 'lastname') {
+        if ($order == 'lastname') {
             $query->order_by_expr("SUBSTR(fullname, INSTR(fullname, ' ')) $orderby");
-        }else{
+        } else {
             if ($orderby == 'asc') {
                 $query->order_by_asc($order);
             } else {

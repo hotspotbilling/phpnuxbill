@@ -174,5 +174,9 @@
     ],
     "2024.10.31" : [
         "ALTER TABLE `tbl_customers` ADD `photo` VARCHAR(128) NOT NULL DEFAULT '/user.default.jpg' AFTER `password`;"
+    ],
+    "2024.12.5" : [
+        "ALTER TABLE `tbl_transactions` ADD `user_id` INT(11) NULL AFTER `username`;",
+        "ALTER TABLE `tbl_payment_gateway` ADD `user_id` INT(11) NULL AFTER `username`;"
     ]
 }
