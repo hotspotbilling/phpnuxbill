@@ -271,6 +271,7 @@ class User
             ->left_outer_join('tbl_plans', ['tbl_plans.id', '=', 'tbl_user_recharges.plan_id'])
             ->left_outer_join('tbl_bandwidth', ['tbl_bandwidth.id', '=', 'tbl_plans.id_bw'])
             ->select('tbl_bandwidth.name_bw', 'name_bw')
+            ->select('tbl_plans.price', 'price')
             ->where('customer_id', $id)
             ->find_many();
         return $d;

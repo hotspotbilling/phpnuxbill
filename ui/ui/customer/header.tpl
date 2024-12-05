@@ -752,6 +752,23 @@
         .dark-mode .navbar-nav>.user-menu>.dropdown-menu>.user-footer {
             background-color: #1a202c;
         }
+
+        .dark-mode .ticket-container {
+            background-color: #222020;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .dark-mode .ticket-label {
+            flex: 0 0 150px;
+            font-weight: bold;
+            color: inherit;
+            margin-right: -59px;
+        }
     </style>
 
     {if isset($xheader)}
