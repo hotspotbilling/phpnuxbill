@@ -283,6 +283,7 @@ class Package
             $t = ORM::for_table('tbl_transactions')->create();
             $t->invoice = $inv = "INV-" . Package::_raid();
             $t->username = $c['username'];
+            $t->user_id = $c['id'];
             $t->plan_name = $p['name_plan'];
             if ($gateway == 'Voucher' && User::isUserVoucher($channel)) {
                 //its already paid
@@ -398,6 +399,7 @@ class Package
             $t = ORM::for_table('tbl_transactions')->create();
             $t->invoice = $inv = "INV-" . Package::_raid();
             $t->username = $c['username'];
+            $t->user_id = $c['id'];
             $t->plan_name = $p['name_plan'];
             if ($gateway == 'Voucher' && User::isUserVoucher($channel)) {
                 $t->price = 0;
@@ -480,6 +482,7 @@ class Package
         $t = ORM::for_table('tbl_transactions')->create();
         $t->invoice = $inv = "INV-" . Package::_raid();
         $t->username = $customer['username'];
+        $t->user_id = $customer['id'];
         $t->plan_name = $plan['name_plan'];
         $t->price = $plan['price'];
         $t->recharged_on = date("Y-m-d");
@@ -545,6 +548,7 @@ class Package
         $t = ORM::for_table('tbl_transactions')->create();
         $t->invoice = $inv = "INV-" . Package::_raid();
         $t->username = $customer['username'];
+        $t->user_id = $customer['id'];
         $t->plan_name = 'Custom Balance';
         $t->price = $plan['price'];
         $t->recharged_on = date("Y-m-d");

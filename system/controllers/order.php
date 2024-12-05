@@ -19,8 +19,14 @@ switch ($action) {
         break;
     case 'history':
         $ui->assign('_system_menu', 'history');
-        $query = ORM::for_table('tbl_payment_gateway')->where('username', $user['username'])->order_by_desc('id');
+        $query = ORM::for_table('tbl_payment_gateway')->where('user_id', $user['id'])->order_by_desc('id');
         $d = Paginator::findMany($query);
+
+        if (empty($order) || $order < 5) {
+            $query = ORM::for_table('tbl_payment_gateway')->where('username', $user['username'])->order_by_desc('id');
+            $d = Paginator::findMany($query);
+        }
+        
         $ui->assign('d', $d);
         $ui->assign('_title', Lang::T('Order History'));
         run_hook('customer_view_order_history'); #HOOK
@@ -329,6 +335,7 @@ switch ($action) {
                 //sender
                 $d = ORM::for_table('tbl_payment_gateway')->create();
                 $d->username = $user['username'];
+                $d->user_id = $user['id'];
                 $d->gateway = $target['username'];
                 $d->plan_id = $plan['id'];
                 $d->plan_name = $plan['name_plan'];
@@ -348,6 +355,7 @@ switch ($action) {
                 //receiver
                 $d = ORM::for_table('tbl_payment_gateway')->create();
                 $d->username = $target['username'];
+                $d->user_id = $target['id'];
                 $d->gateway = $user['username'];
                 $d->plan_id = $plan['id'];
                 $d->plan_name = $plan['name_plan'];
@@ -438,7 +446,7 @@ switch ($action) {
         }
     case 'buy':
         $gateway = _post('gateway');
-        if($gateway == 'balance') {
+        if ($gateway == 'balance') {
             unset($_SESSION['gateway']);
             r2(U . 'order/pay/' . $routes[2] . '/' . $routes[3]);
         }
@@ -484,6 +492,7 @@ switch ($action) {
                 }
                 $d = ORM::for_table('tbl_payment_gateway')->create();
                 $d->username = $user['username'];
+                $d->user_id = $user['id'];
                 $d->gateway = $gateway;
                 $d->plan_id = 0;
                 $d->plan_name = 'Custom';
@@ -547,6 +556,7 @@ switch ($action) {
                 if (empty($id)) {
                     $d = ORM::for_table('tbl_payment_gateway')->create();
                     $d->username = $user['username'];
+                    $d->user_id = $user['id'];
                     $d->gateway = $gateway;
                     $d->plan_id = $plan['id'];
                     $d->plan_name = $plan['name_plan'];
@@ -569,6 +579,7 @@ switch ($action) {
                     $id = $d->id();
                 } else {
                     $d->username = $user['username'];
+                    $d->user_id = $user['id'];
                     $d->gateway = $gateway;
                     $d->plan_id = $plan['id'];
                     $d->plan_name = $plan['name_plan'];
