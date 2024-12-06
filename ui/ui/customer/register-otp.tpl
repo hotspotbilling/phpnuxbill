@@ -33,33 +33,27 @@
                                 placeholder="{Lang::T('Verification Code')}" name="otp_code">
                         </div>
                         {if $_c['photo_register'] == 'yes'}
-                        <div class="form-group">
-                            <label>{Lang::T('Photo')}</label>
-                            <input type="file" required class="form-control" id="photo" name="photo" accept="image/*">
-                        </div>
+                            <div class="form-group">
+                                <label>{Lang::T('Photo')}</label>
+                                <input type="file" required class="form-control" id="photo" name="photo" accept="image/*">
+                            </div>
                         {/if}
-                        {if $_c['man_fields_fname'] neq 'no'}
                         <div class="form-group">
                             <label>{Lang::T('Full Name')}</label>
-                            <input type="text" required class="form-control" id="fullname" value="{$fullname}"
-                                name="fullname">
+                            <input type="text" {if $_c['man_fields_fname'] neq 'no'}required{/if} class="form-control"
+                                id="fullname" value="{$fullname}" name="fullname">
                         </div>
-                        {/if}
-                        {if $_c['man_fields_address'] neq 'no'}
                         <div class="form-group">
                             <label>{Lang::T('Email')}</label>
-                            <input type="text" class="form-control" placeholder="xxxxxx@xxx.xx" id="email"
-                                value="{$email}" name="email">
+                            <input type="text" class="form-control" {if $_c['man_fields_email'] neq 'no'}required{/if}
+                                placeholder="xxxxxx@xxx.xx" id="email" value="{$email}" name="email">
                         </div>
-                        {/if}
-                        {if $_c['man_fields_address'] neq 'no'}
                         <div class="form-group">
                             <label>{Lang::T('Home Address')}</label>
-                            <input type="text" name="address" id="address" value="{$address}" class="form-control">
+                            <input type="text" name="address" {if $_c['man_fields_address'] neq 'no'}required{/if}
+                                id="address" value="{$address}" class="form-control">
                         </div>
-                        {if $_c['man_fields_custom'] neq 'no'}
                         {$customFields}
-                        {/if}
                     </div>
                 </div>
             </div>
@@ -121,21 +115,21 @@
     </div>
 </div>
 {if $_c['tawkto'] != ''}
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-    var Tawk_API = Tawk_API || {},
-        Tawk_LoadStart = new Date();
-    (function () {
-        var s1 = document.createElement("script"),
-            s0 = document.getElementsByTagName("script")[0];
-        s1.async = true;
-        s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
-        s1.charset = 'UTF-8';
-        s1.setAttribute('crossorigin', '*');
-        s0.parentNode.insertBefore(s1, s0);
-    })();
-</script>
-<!--End of Tawk.to Script-->
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <!--End of Tawk.to Script-->
 {/if}
 
 {include file="customer/footer-public.tpl"}

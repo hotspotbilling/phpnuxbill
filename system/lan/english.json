@@ -918,5 +918,10 @@
     "Email_Address": "Email Address",
     "Photo_Required": "Photo Required",
     "Customer_Registration_need_to_upload_their_photo": "Customer Registration need to upload their photo",
-    "Account_already_exists": "Account already exists"
+    "Account_already_exists": "Account already exists",
+    "Notify_Admin": "Notify Admin",
+    "Notify_Admin_upon_self_registration": "Notify Admin upon self registration",
+    "Registration_Mandatory_Fields": "Registration Mandatory Fields",
+    "Mikrotik_SMS_Command": "Mikrotik SMS Command",
+    "Mandatory_Fields": "Mandatory Fields"
 }

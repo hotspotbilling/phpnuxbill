@@ -385,28 +385,23 @@
                     </p>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Registration Mandatory Fields')}:</label><br>
+                    <label class="col-md-3 control-label">{Lang::T('Mandatory Fields')}:</label><br>
                     <label class="col-md-3 control-label">
-                        <input type="checkbox" name="man_fields_email" value="yes" 
+                        <input type="checkbox" name="man_fields_email" value="yes"
                             {if !isset($_c['man_fields_email']) || $_c['man_fields_email'] neq 'no'}checked{/if}>
                         {Lang::T('Email')}
                     </label>
                     <label class="col-md-3 control-label">
-                        <input type="checkbox" name="man_fields_fname" value="yes" 
+                        <input type="checkbox" name="man_fields_fname" value="yes"
                             {if !isset($_c['man_fields_fname']) || $_c['man_fields_fname'] neq 'no'}checked{/if}>
                         {Lang::T('Full Name')}
                     </label>
                     <label class="col-md-3 control-label">
-                        <input type="checkbox" name="man_fields_address" value="yes" 
+                        <input type="checkbox" name="man_fields_address" value="yes"
                             {if !isset($_c['man_fields_address']) || $_c['man_fields_address'] neq 'no'}checked{/if}>
                         {Lang::T('Address')}
                     </label>
-                    <label class="col-md-3 control-label">
-                        <input type="checkbox" name="man_fields_custom" value="yes" 
-                            {if !isset($_c['man_fields_custom']) || $_c['man_fields_custom'] neq 'no'}checked{/if}>
-                        {Lang::T('Custom Fields')}
-                    </label>
-                </div>                
+                </div>
                 <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
                 </button>
