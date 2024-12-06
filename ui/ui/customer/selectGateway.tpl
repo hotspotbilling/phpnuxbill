@@ -20,7 +20,7 @@
                             <div class="col-md-8">
                                 <select name="gateway" id="gateway" class="form-control">
                                     {if $_c['enable_balance'] == 'yes'}
-                                        <option value="balance">{Lang::T('Balance')} {Lang::moneyFormat($_user['balance'])}
+                                        <option value="balance">{Lang::T('Your Balance')} {Lang::moneyFormat($_user['balance'])}
                                         </option>
                                     {/if}
                                     {foreach $pgs as $pg}
@@ -35,7 +35,7 @@
 
                     <ul class="list-group list-group-unbordered">
                         <li class="list-group-item">
-                            <b>{Lang::T('Plan Name')}</b> <span class="pull-right">{$plan['name_plan']}</span>
+                            <b>{Lang::T('Package Name')}</b> <span class="pull-right">{$plan['name_plan']}</span>
                         </li>
                         {if $plan['is_radius'] or $plan['routers']}
                             <li class="list-group-item">
@@ -61,7 +61,7 @@
                     </li>
                     {if $plan['validity']}
                         <li class="list-group-item">
-                            <b>{Lang::T('Validity Periode')}</b> <span class="pull-right">{$plan['validity']}
+                            <b>{Lang::T('Package Validity Period')}</b> <span class="pull-right">{$plan['validity']}
                                 {$plan['validity_unit']}</span>
                         </li>
                     {/if}
@@ -142,7 +142,7 @@
                         <input type="hidden" name="custom" value="1">
                         <input type="hidden" name="amount" value="{$amount}">
                         <li class="list-group-item">
-                            <b>{Lang::T('Custom Balance')}</b> <span
+                            <b>{Lang::T('Custom Balanc')}</b> <span
                                 class="pull-right">{Lang::moneyFormat($amount)}</span>
                         </li>
                         <br> <br> <br>
