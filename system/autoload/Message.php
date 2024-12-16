@@ -17,12 +17,15 @@ require $root_path . 'system/autoload/mail/SMTP.php';
 class Message
 {
 
-    public static function sendTelegram($txt)
+    public static function sendTelegram($txt, $chat_id = null)
     {
         global $config;
-        run_hook('send_telegram', [$txt]); #HOOK
-        if (!empty($config['telegram_bot']) && !empty($config['telegram_target_id'])) {
-            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $config['telegram_target_id'] . '&text=' . urlencode($txt));
+        run_hook('send_telegram', [$txt, $chat_id = null]); #HOOK
+        if (!empty($config['telegram_bot'])) {
+            if (empty($chat_id)) {
+                $chat_id = $config['telegram_target_id'];
+            }
+            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $chat_id . '&text=' . urlencode($txt));
         }
     }
 
@@ -73,7 +76,7 @@ class Message
             $iport = explode(":", $mikrotik['ip_address']);
             $client_m = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
         }
-        if(empty($config['mikrotik_sms_command'])){
+        if (empty($config['mikrotik_sms_command'])) {
             $config['mikrotik_sms_command'] = "/tool sms send";
         }
         $smsRequest = new RouterOS\Request($config['mikrotik_sms_command']);
@@ -185,7 +188,7 @@ class Message
         // Add bills to the note if there are any additional costs
         if ($add_cost != 0) {
             foreach ($bills as $k => $v) {
-            $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
+                $note .= $k . " : " . Lang::moneyFormat($v) . "\n";
             }
             $total += $add_cost;
         }
@@ -221,7 +224,7 @@ class Message
         if (strpos($msg, '[[payment_link]]') !== false) {
             // token only valid for 1 day, for security reason
             $token = User::generateToken($customer['id'], 1);
-            if(!empty($token['token'])){
+            if (!empty($token['token'])) {
                 $tur = ORM::for_table('tbl_user_recharges')
                     ->where('customer_id', $customer['id'])
                     ->where('namebp', $package)
@@ -230,7 +233,7 @@ class Message
                     $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
                     $msg = str_replace('[[payment_link]]', $url, $msg);
                 }
-            }else{
+            } else {
                 $msg = str_replace('[[payment_link]]', '', $msg);
             }
         }

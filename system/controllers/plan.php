@@ -412,7 +412,7 @@ switch ($action) {
         break;
 
     case 'voucher':
-        $ui->assign('_title', Lang::T('Vouchers'));
+        $ui->assign('_title', Lang::T('Voucher Cards'));
         $search = _req('search');
         $router = _req('router');
         $customer = _req('customer');
@@ -422,6 +422,7 @@ switch ($action) {
         $ui->assign('customer', $customer);
         $ui->assign('status', $status);
         $ui->assign('plan', $plan);
+        $ui->assign('_system_menu', 'cards');
 
         $query = ORM::for_table('tbl_plans')
             ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'));

@@ -26,7 +26,7 @@ switch ($action) {
             $query = ORM::for_table('tbl_payment_gateway')->where('username', $user['username'])->order_by_desc('id');
             $d = Paginator::findMany($query);
         }
-        
+
         $ui->assign('d', $d);
         $ui->assign('_title', Lang::T('Order History'));
         run_hook('customer_view_order_history'); #HOOK
@@ -410,6 +410,78 @@ switch ($action) {
         if ($router['name'] != 'balance') {
             list($bills, $add_cost) = User::getBills($id_customer);
         }
+
+        if (!isset($_SESSION['coupon_attempts'])) {
+            $_SESSION['coupon_attempts'] = 0;
+        }
+
+        if ($_SESSION['coupon_attempts'] >= 5) {
+            r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Too many invalid attempts. Please try again later."));
+        }
+
+        if (_post('coupon')) {
+
+            if ($plan['routers'] === 'balance') {
+                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon not available for Balance"));
+            }
+
+            $coupon = ORM::for_table('tbl_coupons')->where('code', _post('coupon'))->find_one();
+
+            if (!$coupon) {
+                $_SESSION['coupon_attempts']++;
+                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon not found"));
+            }
+
+            if ($coupon['status'] != 'active') {
+                $_SESSION['coupon_attempts']++;
+                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon is not active"));
+            }
+
+            $today = date('Y-m-d');
+            if ($today < $coupon['start_date'] || $today > $coupon['end_date']) {
+                $_SESSION['coupon_attempts']++;
+                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon is not valid for today"));
+            }
+
+            if ($coupon['usage_count'] >= $coupon['max_usage']) {
+                $_SESSION['coupon_attempts']++;
+                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon usage limit reached"));
+            }
+
+            if ($plan['price'] < $coupon['min_order_amount']) {
+                $_SESSION['coupon_attempts']++;
+                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("The order amount does not meet the minimum requirement for this coupon"));
+            }
+
+            $_SESSION['coupon_attempts'] = 0;
+
+            // Calculate discount value
+            $discount = 0;
+            switch ($coupon['type']) {
+                case 'percent':
+                    $discount = ($coupon['value'] / 100) * $plan['price'];
+                    if ($discount > $coupon['max_discount_amount']) {
+                        $discount = $coupon['max_discount_amount'];
+                    }
+                    break;
+                case 'fixed':
+                    $discount = $coupon['value'];
+                    break;
+            }
+
+            // Ensure discount does not exceed the plan price
+            if ($discount >= $plan['price']) {
+                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Discount value exceeds the plan price"));
+            }
+
+            $plan['price'] -= $discount;
+            $coupon->usage_count = $coupon['usage_count'] + 1;
+            $coupon->save();
+            $ui->assign('discount', $discount);
+            $ui->assign('notify', Lang::T("Coupon applied successfully. You saved " . Lang::moneyFormat($discount)));
+            $ui->assign('notify_t', 's');
+        }
+
         $tax = Package::tax($plan['price'] + $add_cost, $tax_rate);
         $pgs = array_values(explode(',', $config['payment_gateway']));
         if (count($pgs) == 0) {
@@ -446,6 +518,7 @@ switch ($action) {
         }
     case 'buy':
         $gateway = _post('gateway');
+        $discount = _post('discount') ?: 0;
         if ($gateway == 'balance') {
             unset($_SESSION['gateway']);
             r2(U . 'order/pay/' . $routes[2] . '/' . $routes[3]);
@@ -566,12 +639,12 @@ switch ($action) {
                         // Postpaid price from field
                         $add_inv = User::getAttribute("Invoice", $id_customer);
                         if (empty($add_inv) or $add_inv == 0) {
-                            $d->price = ($plan['price'] + $add_cost + $tax);
+                            $d->price = $plan['price'] + $add_cost + $tax - $discount;
                         } else {
-                            $d->price = ($add_inv + $add_cost + $tax);
+                            $d->price = $add_inv + $add_cost + $tax - $discount;
                         }
                     } else {
-                        $d->price = ($plan['price'] + $add_cost + $tax);
+                        $d->price = $plan['price'] + $add_cost + $tax - $discount;
                     }
                     $d->created_date = date('Y-m-d H:i:s');
                     $d->status = 1;
@@ -589,12 +662,12 @@ switch ($action) {
                         // Postpaid price from field
                         $add_inv = User::getAttribute("Invoice", $id_customer);
                         if (empty($add_inv) or $add_inv == 0) {
-                            $d->price = ($plan['price'] + $add_cost + $tax);
+                            $d->price = ($plan['price'] + $add_cost + $tax - $discount);
                         } else {
-                            $d->price = ($add_inv + $add_cost + $tax);
+                            $d->price = ($add_inv + $add_cost + $tax - $discount);
                         }
                     } else {
-                        $d->price = ($plan['price'] + $add_cost + $tax);
+                        $d->price = ($plan['price'] + $add_cost + $tax - $discount);
                     }
                     //$d->price = ($plan['price'] + $add_cost);
                     $d->created_date = date('Y-m-d H:i:s');
