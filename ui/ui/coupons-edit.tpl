@@ -56,9 +56,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Max Usage')}</label>
                         <div class="col-md-6">
-                            <input type="number" class="form-control" name="max_usage" min="1" required value="{$coupon['max_usage']}">
-                            <p class="help-block"><small>{Lang::T('Maximum number of times this coupon can be
-                                    used')}</small></p>
+                            <input type="number" class="form-control" name="max_usage" required value="{$coupon['max_usage']}">
+                            <p class="help-block"><small>{Lang::T('Maximum number of times this coupon can be used 0 is Unlimited')}</small></p>
                         </div>
                     </div>
 
