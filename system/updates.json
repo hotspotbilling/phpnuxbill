@@ -181,5 +181,8 @@
     ],
     "2024.12.16": [
         "CREATE TABLE `tbl_coupons` ( `id` INT AUTO_INCREMENT PRIMARY KEY, `code` VARCHAR(50) NOT NULL UNIQUE, `type` ENUM('fixed', 'percent') NOT NULL, `value` DECIMAL(10,2) NOT NULL, `description` TEXT NOT NULL, `max_usage` INT NOT NULL DEFAULT 1,`usage_count` INT NOT NULL DEFAULT 0,`status` ENUM('active', 'inactive') NOT NULL, `min_order_amount` DECIMAL(10,2) NOT NULL, `max_discount_amount` DECIMAL(10,2) NOT NULL, `start_date` DATE NOT NULL,`end_date` DATE NOT NULL, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);"
+    ],
+	"2024.12.20": [
+        "ALTER TABLE `tbl_voucher` ADD `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `status`;"
     ]
 }

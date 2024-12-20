@@ -552,6 +552,7 @@ switch ($action) {
         $pagebreak = _post('pagebreak');
         $limit = _post('limit');
         $vpl = _post('vpl');
+		$selected_datetime = _post('selected_datetime');
         if (empty($vpl)) {
             $vpl = 3;
         }
@@ -616,6 +617,11 @@ switch ($action) {
             $v = $v->where_in('generated_by', $sales)->find_many();
             $vc = $vc->where_in('generated_by', $sales)->count();
         }
+		if (!empty($selected_datetime)) {
+            $v = ORM::for_table('tbl_voucher')
+                ->where('created_at', $selected_datetime)
+                ->find_many();
+		}
         $template = file_get_contents("pages/Voucher.html");
         $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
 
@@ -628,6 +634,14 @@ switch ($action) {
         $ui->assign('plans', $plans);
         $ui->assign('limit', $limit);
         $ui->assign('planid', $planid);
+		
+		$createdate = ORM::for_table('tbl_voucher')
+            ->select_expr('DISTINCT created_at', 'created_datetime')
+            ->where_not_equal('created_at', '0')
+            ->order_by_desc('created_at')
+            ->find_array();
+
+		$ui->assign('createdate', $createdate);
 
         $voucher = [];
         $n = 1;
@@ -644,6 +658,7 @@ switch ($action) {
 
         $ui->assign('voucher', $voucher);
         $ui->assign('vc', $vc);
+		$ui->assign('selected_datetime', $selected_datetime);
 
         //for counting pagebreak
         $ui->assign('jml', 0);
