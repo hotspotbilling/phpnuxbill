@@ -72,7 +72,7 @@ DROP TABLE IF EXISTS `tbl_payment_gateway`;
 CREATE TABLE `tbl_payment_gateway` (
   `id` int NOT NULL,
   `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` int(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
+  `user_id` int(11),
   `gateway` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'xendit | midtrans',
   `gateway_trx_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `plan_id` int NOT NULL,
