@@ -76,6 +76,14 @@
                                 </option>
                             {/foreach}
                         </select></td>
+					<td>Date <select id="selected_datetime" name="selected_datetime" style="width:50px">
+                            <option value="">--all--</option>
+                            {foreach $createdate as $date}
+                                <option value="{$date.created_datetime}" {if $date.created_datetime eq $selected_datetime}selected{/if}>
+                                    {$date.created_datetime}
+                                </option>
+                            {/foreach}
+                        </select></td>
                     <td><button type="submit">submit</button></td>
                 </tr>
             </table>
