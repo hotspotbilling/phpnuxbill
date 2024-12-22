@@ -18,7 +18,7 @@
                 {if !$custom}
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>{Lang::T('Plan Name')}</b>
+                        <b>{Lang::T('Package Name')}</b>
                         <span class="pull-right">{$plan['name_plan']}</span>
                     </li>
 
@@ -59,7 +59,7 @@
                 {else}
                 <ul class="list-group list-group-unbordered">
                     <li class="list-group-item">
-                        <b>{Lang::T('Plan Name')}</b>
+                        <b>{Lang::T('Package Name')}</b>
                         <span class="pull-right">{Lang::T('Custom Balance')}</span>
                     </li>
 
