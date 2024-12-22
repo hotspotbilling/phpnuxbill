@@ -162,14 +162,16 @@ try {
                         }
                     }
                 } else {
-                    $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
+                    $c = ORM::for_table('tbl_customers')->select('password')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
                     if ($c) {
                         if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                             $password = $c['password'];
+                            $username = $c['username'];
                             $isVoucher = false;
                             $isCHAP = true;
                         } else if (!empty($c['pppoe_password']) && Password::chap_verify($c['pppoe_password'], $CHAPassword, $CHAPchallenge)) {
                             $password = $c['pppoe_password'];
+                            $username = $c['username'];
                             $isVoucher = false;
                             $isCHAP = true;
                         } else {
@@ -202,6 +204,12 @@ try {
                 }
             }
             $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+            if (!$tur) {
+                // if check if pppoe_username
+                $c = ORM::for_table('tbl_customers')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
+                $username = $c['username'];
+                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+            }
             if ($tur) {
                 if (!$isVoucher && !$isCHAP) {
                     $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
