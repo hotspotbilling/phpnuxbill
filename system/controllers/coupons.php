@@ -39,7 +39,7 @@ switch ($action) {
         $type = _post('type', '');
         $value = floatval(_post('value', ''));
         $description = _post('description', '');
-        $max_usage = _post('max_usage', '');
+        $max_usage = _post('max_usage', '0');
         $min_order_amount = _post('min_order_amount', '');
         $max_discount_amount = intval(_post('max_discount_amount', ''));
         $status = _post('status', 'active');
@@ -59,8 +59,8 @@ switch ($action) {
         if (empty($description)) {
             $error[] = Lang::T('Coupon Description is required');
         }
-        if (empty($max_usage)) {
-            $error[] = Lang::T('Coupon Maximum Usage is required');
+        if ($max_usage < 0) {
+            $error[] = Lang::T('Coupon Maximum Usage must be greater than or equal to 0');
         }
         if (empty($min_order_amount)) {
             $error[] = Lang::T('Coupon Minimum Order Amount is required');
@@ -170,8 +170,8 @@ switch ($action) {
         if (empty($description)) {
             $error[] = Lang::T('Coupon description is required');
         }
-        if (empty($max_usage)) {
-            $error[] = Lang::T('Coupon maximum usage is required');
+        if ($max_usage < 0) {
+            $error[] = Lang::T('Coupon Maximum Usage must be greater than or equal to 0');
         }
         if (empty($min_order_amount)) {
             $error[] = Lang::T('Coupon minimum order amount is required');
@@ -251,7 +251,7 @@ switch ($action) {
             $couponId = $_GET['coupon_id'] ?? '';
             $csrf_token =  $_GET['csrf_token'] ?? '';
             $status = $_GET['status'] ?? '';
-            if (empty($couponId) || empty($csrf_token) || !hotspot_validateCsrfToken($csrf_token) || empty($status)) {
+            if (empty($couponId) || empty($csrf_token) || !Csrf::check($csrf_token) || empty($status)) {
                 r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Invalid request"));
                 exit;
             }
