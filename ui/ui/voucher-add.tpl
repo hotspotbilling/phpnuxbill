@@ -71,6 +71,14 @@
                             <input type="text" class="form-control" name="lengthcode" value="12">
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label for="inputSkills" class="col-sm-2 control-label">{Lang::T('Print Now')}</label>
+
+                        <div class="col-sm-10">
+                            <input type="checkbox" id="print_now" name="print_now" class="iCheck" value="yes">
+                        </div>
+                    </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success" onclick="return ask(this, 'Continue the Voucher creation process?')" type="submit">{Lang::T('Generate')}</button>
