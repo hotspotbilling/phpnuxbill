@@ -251,7 +251,7 @@ switch ($action) {
             $couponId = $_GET['coupon_id'] ?? '';
             $csrf_token =  $_GET['csrf_token'] ?? '';
             $status = $_GET['status'] ?? '';
-            if (empty($couponId) || empty($csrf_token) || !hotspot_validateCsrfToken($csrf_token) || empty($status)) {
+            if (empty($couponId) || empty($csrf_token) || !Csrf::check($csrf_token) || empty($status)) {
                 r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Invalid request"));
                 exit;
             }
