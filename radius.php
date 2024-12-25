@@ -272,7 +272,7 @@ try {
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY username = '$username' AND acctsessionid = '"._post('acctsessionid')."'")
+                ->whereRaw("BINARY username = '$username' AND acctsessionid = '"._post('acctSessionId')."'")
                 ->findOne();
             if (!$d) {
                 $d = ORM::for_table('rad_acct')->create();
@@ -286,7 +286,7 @@ try {
                 $d->acctOutputOctets = 0;
                 $d->acctInputOctets = 0;
             }
-            $d->acctSessionId = _post('acctSessionId');
+            $d->acctsessionid = _post('acctSessionId');
             $d->username = $username;
             $d->realm = _post('realm');
             $d->nasipaddress = _post('nasip');
