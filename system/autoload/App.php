@@ -29,4 +29,23 @@ class App{
         }
     }
 
+    public static function getVoucher(){
+        return md5(microtime());
+    }
+
+    public static function setVoucher($token, $value){
+        $_SESSION[$token] = $value;
+    }
+
+    public static function getVoucherValue($key){
+        if(empty($key)){
+            return "";
+        }
+        if(isset($_SESSION[$key])){
+            return $_SESSION[$key];
+        }else{
+            return "";
+        }
+    }
+
 }
