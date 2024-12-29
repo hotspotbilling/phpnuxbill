@@ -135,6 +135,16 @@
                         </p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Radius Rest Interim-Update')}</label>
+                        <div class="col-md-5">
+                            <input type="number" class="form-control" id="frrest_interim_update" name="frrest_interim_update"
+                                value="{if $_c['frrest_interim_update']}{$_c['frrest_interim_update']}{else}0{/if}">
+                        </div>
+                        <p class="help-block col-md-4"><small>
+                                {Lang::T('in minutes, leave 0 to disable this feature.')}</small>
+                        </p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Check if Customer Online')}</label>
                         <div class="col-md-5">
                             <select name="check_customer_online" id="check_customer_online" class="form-control">
