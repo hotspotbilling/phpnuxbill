@@ -316,6 +316,7 @@ try {
                         }
                     }
                 }
+                process_radiust_rest($tur, 200);
             }
             show_radius_result([
                 "control:Auth-Type" => "Accept",
