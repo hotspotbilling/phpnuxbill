@@ -595,6 +595,17 @@ switch ($action) {
                 ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where_gt('tbl_voucher.id', $from_id);
+        } else if ($from_id > 0 && $planid == 0 && $selected_datetime != '') {
+            $v = ORM::for_table('tbl_plans')
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->where('tbl_voucher.status', '0')
+                ->where_raw("DATE(created_at) = ?", [$selected_datetime])
+                ->where_gt('tbl_voucher.id', $from_id)
+                ->limit($limit);
+            $vc = ORM::for_table('tbl_plans')
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->where('tbl_voucher.status', '0')
+                ->where_gt('tbl_voucher.id', $from_id);
         } else {
             $v = ORM::for_table('tbl_plans')
                 ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
@@ -617,11 +628,7 @@ switch ($action) {
             $v = $v->where_in('generated_by', $sales)->find_many();
             $vc = $vc->where_in('generated_by', $sales)->count();
         }
-        if (!empty($selected_datetime)) {
-            $v = ORM::for_table('tbl_voucher')
-                ->where('created_at', $selected_datetime)
-                ->find_many();
-        }
+
         $template = file_get_contents("pages/Voucher.html");
         $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
 
@@ -636,9 +643,14 @@ switch ($action) {
         $ui->assign('planid', $planid);
 
         $createdate = ORM::for_table('tbl_voucher')
-            ->select_expr('DISTINCT created_at', 'created_datetime')
+            ->select_expr(
+                "CASE WHEN DATE(created_at) = CURDATE() THEN 'Today' ELSE DATE(created_at) END",
+                'created_datetime'
+            )
             ->where_not_equal('created_at', '0')
-            ->order_by_desc('created_at')
+            ->select_expr('COUNT(*)', 'voucher_count') 
+            ->group_by('created_datetime')
+            ->order_by_desc('created_datetime')
             ->find_array();
 
         $ui->assign('createdate', $createdate);
@@ -678,6 +690,7 @@ switch ($action) {
         $numbervoucher = _post('numbervoucher');
         $lengthcode = _post('lengthcode');
         $printNow = _post('print_now', 'no');
+        $voucherPerPage = _post('voucher_per_page', '36');
 
         $msg = '';
         if (empty($type) || empty($plan) || empty($server) || empty($numbervoucher) || empty($lengthcode)) {
@@ -768,7 +781,7 @@ switch ($action) {
                 $ui->assign('jml', 0);
                 $ui->assign('from_id', 0);
                 $ui->assign('vpl', '3');
-                $ui->assign('pagebreak', '12');
+                $ui->assign('pagebreak', $voucherPerPage);
                 $ui->display('print-voucher.tpl');
             }
 

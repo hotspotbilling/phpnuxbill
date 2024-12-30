@@ -930,5 +930,15 @@
     "Send_yours_balance___": "Send yours balance ? ",
     "Cards": "Cards",
     "CRM": "CRM",
-    "Coupons": "Coupons"
+    "Coupons": "Coupons",
+    "Voucher_Cards": "Voucher Cards",
+    "Create_Date": "Create Date",
+    "Delete_Selected": "Delete Selected",
+    "Print_Now": "Print Now",
+    "Vouchers_Per_Page": "Vouchers Per Page",
+    "Save_as_template": "Save as template",
+    "Template_Name": "Template Name",
+    "Voucher_Code": "Voucher Code",
+    "Voucher_Package": "Voucher Package",
+    "Counter": "Counter"
 }
