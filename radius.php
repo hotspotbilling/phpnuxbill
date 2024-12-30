@@ -256,7 +256,7 @@ try {
                             show_radius_result(['Reply-Message' => 'Voucher Expired...'], 401);
                         }
                     } else {
-                        show_radius_result(['Reply-Message' => 'Voucher Expired..'], 401);
+                        show_radius_result(['Reply-Message' => 'Invalid Voucher..'], 401);
                     }
                 } else {
                     show_radius_result(['Reply-Message' => 'Internet Plan Expired..'], 401);
