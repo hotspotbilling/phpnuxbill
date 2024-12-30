@@ -274,7 +274,7 @@ try {
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY username = '$username' AND acctsessionid = '"._post('acctSessionId')."'")
+                ->whereRaw("BINARY username = '$username' AND macaddr = '"._post('macAddr')."' AND nasid = '"._post('nasid')."'")
                 ->findOne();
             if (!$d) {
                 $d = ORM::for_table('rad_acct')->create();
@@ -296,23 +296,24 @@ try {
             $d->nasportid = _post('nasPortId');
             $d->nasporttype = _post('nasPortType');
             $d->framedipaddress = _post('framedIPAddress');
-		if (_post('acctStatusType') == 'Start') {
-            $d->acctstatustype = 'Interim-Update';
-		} else {
-	    $d->acctstatustype = _post('acctStatusType');	
-			}
+            if(in_array(_post('acctStatusType'), ['Start', 'Stop'])){
+                $d->acctstatustype = _post('acctStatusType');
+            }
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
-            $d->save();
-            if (_post('acctStatusType') == 'Start') {
-                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND `routers` = 'radius'")->find_one();
-                $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
-                if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
-                    $totalUsage = $d['acctOutputOctets'] + $d['acctInputOctets'];
-                    $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
-                    if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
-                        $attrs['reply:Mikrotik-Total-Limit'] = 0;
-                        show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+            // pastikan data akunting yang disimpan memang customer aktif phpnuxbill
+            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND `routers` = 'radius'")->find_one();
+            if($tur){
+                $d->save();
+                if (_post('acctStatusType') == 'Start') {
+                    $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+                    if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
+                        $totalUsage = $d['acctOutputOctets'] + $d['acctInputOctets'];
+                        $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
+                        if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
+                            $attrs['reply:Mikrotik-Total-Limit'] = 0;
+                            show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+                        }
                     }
                 }
             }
@@ -347,10 +348,12 @@ function process_radiust_rest($tur, $code)
     $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
     // Count User Onlines
 	$USRon = ORM::for_table('rad_acct')
-        ->whereRaw("BINARY username = '".$tur['username']."'")
-        ->where("acctStatusType", 'Interim-Update')
-        ->count();
-	if ($USRon >= $plan['shared_users'] && $plan['type'] == 'Hotspot') {
+        ->whereRaw("BINARY username = '".$tur['username']."' AND acctStatusType = 'Start'")
+        ->find_array();
+    // get all the IP
+    $ips = array_column($USRon, 'framedipaddress');
+    // check if user reach shared_users limit but IP is not in the list active
+	if (count($USRon) >= $plan['shared_users'] && $plan['type'] == 'Hotspot' && !in_array(_post('framedIPAddress'), $ips)) {
 		show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You are already logged in - access denied ('.$USRon.')'], 401);
 	}
     if ($bw['rate_down_unit'] == 'Kbps') {
