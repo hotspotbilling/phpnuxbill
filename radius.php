@@ -296,7 +296,11 @@ try {
             $d->nasportid = _post('nasPortId');
             $d->nasporttype = _post('nasPortType');
             $d->framedipaddress = _post('framedIPAddress');
-            $d->acctstatustype = _post('acctStatusType');
+		if (_post('acctStatusType') == 'Start') {
+            $d->acctstatustype = 'Interim-Update';
+		} else {
+	    $d->acctstatustype = _post('acctStatusType');	
+			}
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
             $d->save();
@@ -344,7 +348,7 @@ function process_radiust_rest($tur, $code)
     // Count User Onlines
 	$USRon = ORM::for_table('rad_acct')
         ->whereRaw("BINARY username = '".$tur['username']."'")
-        ->where("acctStatusType", 'Start')
+        ->where("acctStatusType", 'Interim-Update')
         ->count();
 	if ($USRon >= $plan['shared_users'] && $plan['type'] == 'Hotspot') {
 		show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You are already logged in - access denied ('.$USRon.')'], 401);
