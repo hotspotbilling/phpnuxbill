@@ -283,7 +283,7 @@ class Package
             $t = ORM::for_table('tbl_transactions')->create();
             $t->invoice = $inv = "INV-" . Package::_raid();
             $t->username = $c['username'];
-            $t->user_id = $c['id'];
+            $t->user_id = $id_customer;
             $t->plan_name = $p['name_plan'];
             if ($gateway == 'Voucher' && User::isUserVoucher($channel)) {
                 //its already paid
@@ -399,7 +399,7 @@ class Package
             $t = ORM::for_table('tbl_transactions')->create();
             $t->invoice = $inv = "INV-" . Package::_raid();
             $t->username = $c['username'];
-            $t->user_id = $c['id'];
+            $t->user_id = $id_customer;
             $t->plan_name = $p['name_plan'];
             if ($gateway == 'Voucher' && User::isUserVoucher($channel)) {
                 $t->price = 0;
