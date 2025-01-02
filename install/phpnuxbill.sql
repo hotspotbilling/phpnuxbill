@@ -72,7 +72,7 @@ DROP TABLE IF EXISTS `tbl_payment_gateway`;
 CREATE TABLE `tbl_payment_gateway` (
   `id` int NOT NULL,
   `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` int(11),
+  `user_id` int(11) INT NOT NULL DEFAULT 0,
   `gateway` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'xendit | midtrans',
   `gateway_trx_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `plan_id` int NOT NULL,
@@ -151,7 +151,7 @@ CREATE TABLE `tbl_transactions` (
   `id` int NOT NULL,
   `invoice` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` int(11),
+  `user_id` int(11) INT NOT NULL DEFAULT 0,
   `plan_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `price` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `recharged_on` date NOT NULL,
@@ -213,6 +213,7 @@ CREATE TABLE `tbl_voucher` (
   `code` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `used_date` DATETIME NULL DEFAULT NULL,
   `generated_by` int NOT NULL DEFAULT '0' COMMENT 'id admin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -257,6 +258,23 @@ CREATE TABLE IF NOT EXISTS `tbl_meta` (
   `value` mediumtext COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='This Table to add additional data for any table';
+
+CREATE TABLE `tbl_coupons` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `code` VARCHAR(50) NOT NULL UNIQUE,
+    `type` ENUM('fixed', 'percent') NOT NULL,
+    `value` DECIMAL(10,2) NOT NULL,
+    `description` TEXT NOT NULL,
+    `max_usage` INT NOT NULL DEFAULT 1,
+    `usage_count` INT NOT NULL DEFAULT 0,
+    `status` ENUM('active', 'inactive') NOT NULL,
+    `min_order_amount` DECIMAL(10,2) NOT NULL,
+    `max_discount_amount` DECIMAL(10,2) NOT NULL,
+    `start_date` DATE NOT NULL,
+    `end_date` DATE NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 ALTER TABLE `rad_acct`
   ADD PRIMARY KEY (`id`),

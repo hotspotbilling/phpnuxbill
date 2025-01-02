@@ -34,9 +34,9 @@ switch ($action) {
         die();
     case 'balance':
         $balance = ORM::for_table('tbl_customers')->select("balance")->find_one($routes['2'])['balance'];
-        if($routes['3']=='1'){
+        if ($routes['3'] == '1') {
             echo Lang::moneyFormat($balance);
-        }else{
+        } else {
             echo $balance;
         }
         die();
@@ -76,16 +76,26 @@ switch ($action) {
         $server = _post('server');
         $jenis = _post('jenis');
         if (in_array($admin['user_type'], array('SuperAdmin', 'Admin'))) {
-            if ($server == 'radius') {
-                $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->find_many();
-            } else {
-                $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->find_many();
+            switch ($server) {
+                case 'radius':
+                    $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->find_many();
+                    break;
+                case '':
+                    break;
+                default:
+                    $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->find_many();
+                    break;
             }
         } else {
-            if ($server == 'radius') {
-                $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->where('enabled', '1')->find_many();
-            } else {
-                $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->where('enabled', '1')->find_many();
+            switch ($server) {
+                case 'radius':
+                    $d = ORM::for_table('tbl_plans')->where('is_radius', 1)->where('type', $jenis)->find_many();
+                    break;
+                case '':
+                    break;
+                default:
+                    $d = ORM::for_table('tbl_plans')->where('routers', $server)->where('type', $jenis)->find_many();
+                    break;
             }
         }
         $ui->assign('d', $d);
@@ -97,7 +107,7 @@ switch ($action) {
             $c = ORM::for_table('tbl_customers')->where('username', $routes['2'])->find_one();
             $p = ORM::for_table('tbl_plans')->find_one($routes['3']);
             $dvc = Package::getDevice($p);
-            if ($_app_stage != 'demo') {
+            if ($_app_stage != 'Demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
                     try {
@@ -124,7 +134,7 @@ switch ($action) {
                         $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
                         $dvc = Package::getDevice($p);
                         $status = "";
-                        if ($_app_stage != 'demo') {
+                        if ($_app_stage != 'Demo') {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
                                 try {

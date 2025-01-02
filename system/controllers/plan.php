@@ -51,7 +51,7 @@ switch ($action) {
                             require_once $dvc;
                             if (method_exists($dvc, 'sync_customer')) {
                                 (new $p['device'])->sync_customer($c, $p);
-                            }else{
+                            } else {
                                 (new $p['device'])->add_customer($c, $p);
                             }
                         } else {
@@ -106,24 +106,24 @@ switch ($action) {
             $plan = ORM::for_table('tbl_plans')->find_one($planId);
             list($bills, $add_cost) = User::getBills($id_customer);
 
-			// Tax calculation start
-			$tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
-			$tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
-			$custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+            // Tax calculation start
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+            $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
 
-			if ($tax_rate_setting === 'custom') {
-				$tax_rate = $custom_tax_rate;
-			} else {
-				$tax_rate = $tax_rate_setting;
-			}
+            if ($tax_rate_setting === 'custom') {
+                $tax_rate = $custom_tax_rate;
+            } else {
+                $tax_rate = $tax_rate_setting;
+            }
 
-			if ($tax_enable === 'yes') {
-				$tax = Package::tax($plan['price'], $tax_rate);
-			} else {
-				$tax = 0;
-			}
-			// Tax calculation stop
-			$total_cost = $plan['price'] + $add_cost + $tax;
+            if ($tax_enable === 'yes') {
+                $tax = Package::tax($plan['price'], $tax_rate);
+            } else {
+                $tax = 0;
+            }
+            // Tax calculation stop
+            $total_cost = $plan['price'] + $add_cost + $tax;
 
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
@@ -146,7 +146,7 @@ switch ($action) {
             if (count($usings) == 0) {
                 $usings[] = Lang::T('Cash');
             }
-			if ($tax_enable === 'yes') {
+            if ($tax_enable === 'yes') {
                 $ui->assign('tax', $tax);
             }
             $ui->assign('usings', $usings);
@@ -172,12 +172,12 @@ switch ($action) {
         $server = _post('server');
         $planId = _post('plan');
         $using = _post('using');
-        $stoken = _post('stoken');
+        $svoucher = _post('svoucher');
 
-		$plan = ORM::for_table('tbl_plans')->find_one($planId);
+        $plan = ORM::for_table('tbl_plans')->find_one($planId);
 
-        if (!empty(App::getTokenValue($stoken))) {
-            $username = App::getTokenValue($stoken);
+        if (!empty(App::getVoucherValue($svoucher))) {
+            $username = App::getVoucherValue($svoucher);
             $in = ORM::for_table('tbl_transactions')->where('username', $username)->order_by_desc('id')->find_one();
             Package::createInvoice($in);
             $ui->display('invoice.tpl');
@@ -195,24 +195,24 @@ switch ($action) {
             $cust = User::_info($id_customer);
             list($bills, $add_cost) = User::getBills($id_customer);
 
-			// Tax calculation start
-			$tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
-			$tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
-			$custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+            // Tax calculation start
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+            $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
 
-			if ($tax_rate_setting === 'custom') {
-				$tax_rate = $custom_tax_rate;
-			} else {
-				$tax_rate = $tax_rate_setting;
-			}
+            if ($tax_rate_setting === 'custom') {
+                $tax_rate = $custom_tax_rate;
+            } else {
+                $tax_rate = $tax_rate_setting;
+            }
 
-			if ($tax_enable === 'yes') {
-				$tax = Package::tax($plan['price'], $tax_rate);
-			} else {
-				$tax = 0;
-			}
-			// Tax calculation stop
-			$total_cost = $plan['price'] + $add_cost + $tax;
+            if ($tax_enable === 'yes') {
+                $tax = Package::tax($plan['price'], $tax_rate);
+            } else {
+                $tax = 0;
+            }
+            // Tax calculation stop
+            $total_cost = $plan['price'] + $add_cost + $tax;
 
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 //$plan = ORM::for_table('tbl_plans')->find_one($planId);
@@ -238,7 +238,7 @@ switch ($action) {
                 }
                 $in = ORM::for_table('tbl_transactions')->where('username', $cust['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
-                App::setToken($stoken, $cust['username']);
+                App::setVoucher($svoucher, $cust['username']);
                 $ui->display('invoice.tpl');
                 _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $cust['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
             } else {
@@ -277,7 +277,7 @@ switch ($action) {
             $ui->assign('content', $content);
         } else {
             $id = _post('id');
-            if(empty($id)) {
+            if (empty($id)) {
                 $id = $routes['2'];
             }
             $d = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
@@ -412,7 +412,7 @@ switch ($action) {
         break;
 
     case 'voucher':
-        $ui->assign('_title', Lang::T('Vouchers'));
+        $ui->assign('_title', Lang::T('Voucher Cards'));
         $search = _req('search');
         $router = _req('router');
         $customer = _req('customer');
@@ -422,9 +422,10 @@ switch ($action) {
         $ui->assign('customer', $customer);
         $ui->assign('status', $status);
         $ui->assign('plan', $plan);
+        $ui->assign('_system_menu', 'cards');
 
         $query = ORM::for_table('tbl_plans')
-            ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'));
+            ->inner_join('tbl_voucher', ['tbl_plans.id', '=', 'tbl_voucher.id_plan']);
 
         if (!empty($router)) {
             $query->where('tbl_voucher.routers', $router);
@@ -551,6 +552,7 @@ switch ($action) {
         $pagebreak = _post('pagebreak');
         $limit = _post('limit');
         $vpl = _post('vpl');
+        $selected_datetime = _post('selected_datetime');
         if (empty($vpl)) {
             $vpl = 3;
         }
@@ -593,6 +595,17 @@ switch ($action) {
                 ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0')
                 ->where_gt('tbl_voucher.id', $from_id);
+        } else if ($from_id > 0 && $planid == 0 && $selected_datetime != '') {
+            $v = ORM::for_table('tbl_plans')
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->where('tbl_voucher.status', '0')
+                ->where_raw("DATE(created_at) = ?", [$selected_datetime])
+                ->where_gt('tbl_voucher.id', $from_id)
+                ->limit($limit);
+            $vc = ORM::for_table('tbl_plans')
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->where('tbl_voucher.status', '0')
+                ->where_gt('tbl_voucher.id', $from_id);
         } else {
             $v = ORM::for_table('tbl_plans')
                 ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
@@ -615,6 +628,7 @@ switch ($action) {
             $v = $v->where_in('generated_by', $sales)->find_many();
             $vc = $vc->where_in('generated_by', $sales)->count();
         }
+
         $template = file_get_contents("pages/Voucher.html");
         $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
 
@@ -627,6 +641,19 @@ switch ($action) {
         $ui->assign('plans', $plans);
         $ui->assign('limit', $limit);
         $ui->assign('planid', $planid);
+
+        $createdate = ORM::for_table('tbl_voucher')
+            ->select_expr(
+                "CASE WHEN DATE(created_at) = CURDATE() THEN 'Today' ELSE DATE(created_at) END",
+                'created_datetime'
+            )
+            ->where_not_equal('created_at', '0')
+            ->select_expr('COUNT(*)', 'voucher_count') 
+            ->group_by('created_datetime')
+            ->order_by_desc('created_datetime')
+            ->find_array();
+
+        $ui->assign('createdate', $createdate);
 
         $voucher = [];
         $n = 1;
@@ -643,6 +670,7 @@ switch ($action) {
 
         $ui->assign('voucher', $voucher);
         $ui->assign('vc', $vc);
+        $ui->assign('selected_datetime', $selected_datetime);
 
         //for counting pagebreak
         $ui->assign('jml', 0);
@@ -653,6 +681,7 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+
         $type = _post('type');
         $plan = _post('plan');
         $voucher_format = _post('voucher_format');
@@ -660,18 +689,22 @@ switch ($action) {
         $server = _post('server');
         $numbervoucher = _post('numbervoucher');
         $lengthcode = _post('lengthcode');
+        $printNow = _post('print_now', 'no');
+        $voucherPerPage = _post('voucher_per_page', '36');
 
         $msg = '';
-        if ($type == '' or $plan == '' or $server == '' or $numbervoucher == '' or $lengthcode == '') {
-            $msg .= Lang::T('All field is required') . '<br>';
+        if (empty($type) || empty($plan) || empty($server) || empty($numbervoucher) || empty($lengthcode)) {
+            $msg .= Lang::T('All fields are required') . '<br>';
         }
-        if (Validator::UnsignedNumber($numbervoucher) == false) {
+        if (!Validator::UnsignedNumber($numbervoucher)) {
             $msg .= 'The Number of Vouchers must be a number' . '<br>';
         }
-        if (Validator::UnsignedNumber($lengthcode) == false) {
+        if (!Validator::UnsignedNumber($lengthcode)) {
             $msg .= 'The Length Code must be a number' . '<br>';
         }
+
         if ($msg == '') {
+            // Update or create voucher prefix
             if (!empty($prefix)) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_prefix')->find_one();
                 if ($d) {
@@ -684,11 +717,14 @@ switch ($action) {
                     $d->save();
                 }
             }
-            run_hook('create_voucher'); #HOOK
+
+            run_hook('create_voucher'); // HOOK
             $vouchers = [];
+            $newVoucherIds = [];
+
             if ($voucher_format == 'numbers') {
-                if (strlen($lengthcode) < 6) {
-                    $msg .= 'The Length Code must be a more than 6 for numbers' . '<br>';
+                if ($lengthcode < 6) {
+                    $msg .= 'The Length Code must be more than 6 for numbers' . '<br>';
                 }
                 $vouchers = generateUniqueNumericVouchers($numbervoucher, $lengthcode);
             } else {
@@ -708,12 +744,47 @@ switch ($action) {
                 $d->type = $type;
                 $d->routers = $server;
                 $d->id_plan = $plan;
-                $d->code = $prefix . $code;
+                $d->code = "$prefix$code";
                 $d->user = '0';
                 $d->status = '0';
                 $d->generated_by = $admin['id'];
                 $d->save();
+                $newVoucherIds[] = $d->id();
             }
+
+            if ($printNow == 'yes' && count($newVoucherIds) > 0) {
+                $template = file_get_contents("pages/Voucher.html");
+                $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
+
+                $vouchersToPrint = ORM::for_table('tbl_voucher')
+                    ->left_outer_join('tbl_plans', ['tbl_plans.id', '=', 'tbl_voucher.id_plan'])
+                    ->where_in('tbl_voucher.id', $newVoucherIds)
+                    ->find_many();
+
+                $voucherHtmls = [];
+                $n = 1;
+
+                foreach ($vouchersToPrint as $vs) {
+                    $temp = $template;
+                    $temp = str_replace('[[qrcode]]', '<img src="qrcode/?data=' . $vs['code'] . '">', $temp);
+                    $temp = str_replace('[[price]]', Lang::moneyFormat($vs['price']), $temp);
+                    $temp = str_replace('[[voucher_code]]', $vs['code'], $temp);
+                    $temp = str_replace('[[plan]]', $vs['name_plan'], $temp);
+                    $temp = str_replace('[[counter]]', $n, $temp);
+                    $voucherHtmls[] = $temp;
+                    $n++;
+                }
+
+                $vc = count($voucherHtmls);
+                $ui->assign('voucher', $voucherHtmls);
+                $ui->assign('vc', $vc);
+                $ui->assign('jml', 0);
+                $ui->assign('from_id', 0);
+                $ui->assign('vpl', '3');
+                $ui->assign('pagebreak', $voucherPerPage);
+                $ui->display('print-voucher.tpl');
+            }
+
             if ($numbervoucher == 1) {
                 r2(U . 'plan/voucher-view/' . $d->id(), 's', Lang::T('Create Vouchers Successfully'));
             }
@@ -721,6 +792,43 @@ switch ($action) {
             r2(U . 'plan/voucher', 's', Lang::T('Create Vouchers Successfully'));
         } else {
             r2(U . 'plan/add-voucher/' . $id, 'e', $msg);
+        }
+        break;
+
+    case 'voucher-delete-many':
+        header('Content-Type: application/json');
+
+        $admin = Admin::_info();
+
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            echo json_encode(['status' => 'error', 'message' => Lang::T('You do not have permission to access this page')]);
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $voucherIds = json_decode($_POST['voucherIds'], true);
+
+            if (is_array($voucherIds) && !empty($voucherIds)) {
+                $voucherIds = array_map('intval', $voucherIds);
+
+                try {
+                    ORM::for_table('tbl_voucher')
+                        ->where_in('id', $voucherIds)
+                        ->delete_many();
+                } catch (Exception $e) {
+                    echo json_encode(['status' => 'error', 'message' => Lang::T('Failed to delete vouchers.')]);
+                    exit;
+                }
+
+                // Return success response
+                echo json_encode(['status' => 'success', 'message' => Lang::T("Vouchers Deleted Successfully.")]);
+                exit;
+            } else {
+                echo json_encode(['status' => 'error', 'message' => Lang::T("Invalid or missing voucher IDs.")]);
+                exit;
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => Lang::T("Invalid request method.")]);
         }
         break;
 
@@ -849,17 +957,17 @@ switch ($action) {
         $amount = _post('amount');
         $plan = _post('id_plan');
         $note = _post('note');
-        $stoken = _req('stoken');
+        $svoucher = _req('svoucher');
         $c = ORM::for_table('tbl_customers')->find_one($user);
-        if (App::getTokenValue($stoken)) {
-            $in = ORM::for_table('tbl_transactions')->find_one(App::getTokenValue($stoken));
+        if (App::getVoucherValue($svoucher)) {
+            $in = ORM::for_table('tbl_transactions')->find_one(App::getVoucherValue($svoucher));
             Package::createInvoice($in);
             $ui->display('invoice.tpl');
             die();
         }
 
         run_hook('deposit_customer'); #HOOK
-        if (!empty($user) && strlen($amount)>0 && $amount != 0) {
+        if (!empty($user) && strlen($amount) > 0 && $amount != 0) {
             $plan = [];
             $plan['name_plan'] = Lang::T('Balance');
             $plan['price'] = $amount;
@@ -867,21 +975,21 @@ switch ($action) {
             if ($trxId > 0) {
                 $in = ORM::for_table('tbl_transactions')->find_one($trxId);
                 Package::createInvoice($in);
-                if (!empty($stoken)) {
-                    App::setToken($stoken, $trxId);
+                if (!empty($svoucher)) {
+                    App::setVoucher($svoucher, $trxId);
                 }
                 $ui->display('invoice.tpl');
             } else {
                 r2(U . 'plan/refill', 'e', "Failed to refill account");
             }
-        }else if (!empty($user) && !empty($plan)) {
+        } else if (!empty($user) && !empty($plan)) {
             $p = ORM::for_table('tbl_plans')->find_one($plan);
             $trxId = Package::rechargeBalance($c, $p, "Deposit", $admin['fullname'], $note);
             if ($trxId > 0) {
                 $in = ORM::for_table('tbl_transactions')->find_one($trxId);
                 Package::createInvoice($in);
-                if (!empty($stoken)) {
-                    App::setToken($stoken, $trxId);
+                if (!empty($svoucher)) {
+                    App::setVoucher($svoucher, $trxId);
                 }
                 $ui->display('invoice.tpl');
             } else {
@@ -894,8 +1002,8 @@ switch ($action) {
     case 'extend':
         $id = $routes[2];
         $days = $routes[3];
-        $stoken = $_GET['stoken'];
-        if (App::getTokenValue($stoken)) {
+        $svoucher = $_GET['svoucher'];
+        if (App::getVoucherValue($svoucher)) {
             r2(U . 'plan', 's', "Extend already done");
         }
         $tur = ORM::for_table('tbl_user_recharges')->find_one($id);
@@ -908,7 +1016,7 @@ switch ($action) {
                 //expired
                 $expiration = date('Y-m-d', strtotime(" +$days day"));
             }
-            App::setToken($stoken, $id);
+            App::setVoucher($svoucher, $id);
             $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
             if ($c) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);

@@ -41,16 +41,15 @@
                         <label class="col-md-2 control-label">{Lang::T('Voucher Format')}</label>
                         <div class="col-md-6">
                             <select name="voucher_format" id="voucher_format" class="form-control">
-                                <option value="numbers" {if $_c['voucher_format'] == 'numbers'}selected="selected"
-                                    {/if}>
+                                <option value="numbers" {if $_c['voucher_format']=='numbers' }selected="selected" {/if}>
                                     Numbers
                                 </option>
-                                <option value="up" {if $_c['voucher_format'] == 'up'}selected="selected" {/if}>UPPERCASE
+                                <option value="up" {if $_c['voucher_format']=='up' }selected="selected" {/if}>UPPERCASE
                                 </option>
-                                <option value="low" {if $_c['voucher_format'] == 'low'}selected="selected" {/if}>
+                                <option value="low" {if $_c['voucher_format']=='low' }selected="selected" {/if}>
                                     lowercase
                                 </option>
-                                <option value="rand" {if $_c['voucher_format'] == 'rand'}selected="selected" {/if}>
+                                <option value="rand" {if $_c['voucher_format']=='rand' }selected="selected" {/if}>
                                     RaNdoM
                                 </option>
                             </select>
@@ -60,8 +59,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Voucher Prefix')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="prefix" placeholder="NUX-"
-                                value="{$_c['voucher_prefix']}">
+                            <input type="text" class="form-control" name="prefix" placeholder="NUX-" value="{$_c['voucher_prefix']}">
                         </div>
                         <p class="help-block col-md-4">NUX-VoUCHeRCOdE</p>
                     </div>
@@ -70,6 +68,24 @@
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="lengthcode" value="12">
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputSkills" class="col-sm-2 control-label">{Lang::T('Print Now')}</label>
+
+                        <div class="col-sm-10">
+                            <input type="checkbox" id="print_now" name="print_now" class="iCheck" value="yes" onclick="showVouchersPerPage()">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="printers" style="display:none;">
+                        <label class="col-md-2 control-label">{Lang::T('Vouchers Per Page')}</label>
+                        <div class="col-md-6">
+                            <input type="text" id="voucher-print" class="form-control" name="voucher_per_page" value="36" placeholder="Vouchers Per Page (default 36)">
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('Vouchers Per Page')} (default 36)
+                        </p>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
@@ -82,5 +98,23 @@
         </div>
     </div>
 </div>
+
+<!-- /voucher-add -->
+
+<script>
+    function showVouchersPerPage() {
+        var printNow = document.getElementById('print_now');
+        var printers = document.getElementById('printers');
+        var voucherPrint = document.getElementById('voucher-print');
+
+        voucherPrint.required = false;
+        if (printNow.checked) {
+            printers.style.display = 'block';
+            voucherPrint.required = true;
+        } else {
+            printers.style.display = 'none';
+        }
+    }
+</script>
 
 {include file="sections/footer.tpl"}

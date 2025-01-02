@@ -923,5 +923,22 @@
     "Notify_Admin_upon_self_registration": "Notify Admin upon self registration",
     "Registration_Mandatory_Fields": "Registration Mandatory Fields",
     "Mikrotik_SMS_Command": "Mikrotik SMS Command",
-    "Mandatory_Fields": "Mandatory Fields"
+    "Mandatory_Fields": "Mandatory Fields",
+    "Usernames": "Usernames",
+    "Yours_Balance": "Yours Balance",
+    "Friend_Usernames": "Friend Usernames",
+    "Send_yours_balance___": "Send yours balance ? ",
+    "Cards": "Cards",
+    "CRM": "CRM",
+    "Coupons": "Coupons",
+    "Voucher_Cards": "Voucher Cards",
+    "Create_Date": "Create Date",
+    "Delete_Selected": "Delete Selected",
+    "Print_Now": "Print Now",
+    "Vouchers_Per_Page": "Vouchers Per Page",
+    "Save_as_template": "Save as template",
+    "Template_Name": "Template Name",
+    "Voucher_Code": "Voucher Code",
+    "Voucher_Package": "Voucher Package",
+    "Counter": "Counter"
 }
