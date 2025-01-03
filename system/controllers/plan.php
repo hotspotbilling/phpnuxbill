@@ -604,6 +604,17 @@ switch ($action) {
                 ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0');
         }
+        if (!empty($selected_datetime)) {
+            $v = ORM::for_table('tbl_plans')
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->where('tbl_voucher.status', '0')
+				->where('tbl_voucher.created_at', $selected_datetime)
+                ->limit($limit);
+            $vc = ORM::for_table('tbl_plans')
+                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+                ->where('tbl_voucher.status', '0');
+			
+        }
         if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             $v = $v->find_many();
             $vc = $vc->count();
@@ -616,11 +627,6 @@ switch ($action) {
             $sales[] = $admin['id'];
             $v = $v->where_in('generated_by', $sales)->find_many();
             $vc = $vc->where_in('generated_by', $sales)->count();
-        }
-        if (!empty($selected_datetime)) {
-            $v = ORM::for_table('tbl_voucher')
-                ->where('created_at', $selected_datetime)
-                ->find_many();
         }
         $template = file_get_contents("pages/Voucher.html");
         $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
