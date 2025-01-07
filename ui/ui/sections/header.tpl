@@ -1272,7 +1272,7 @@
                             <li {if $_routes[1] eq 'voucher' }class="active" {/if}><a
                                     href="{$_url}plan/voucher">{Lang::T('Vouchers')}</a></li>
                             {/if}
-                            {if $_c['disable_coupons'] != 'yes'}
+                            {if $_c['enable_coupons'] == 'yes'}
                             <li {if $_routes[0] eq 'coupons' }class="active" {/if}><a
                                     href="{$_url}coupons">{Lang::T('Coupons')}</a></li>
                             {/if}
