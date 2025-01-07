@@ -943,5 +943,10 @@
     "No_coupons_found_": "No coupons found.",
     "Delete_Selected": "Delete Selected",
     "Voucher_Cards": "Voucher Cards",
-    "Create_Date": "Create Date"
+    "Create_Date": "Create Date",
+    "Message_Results": "Message Results",
+    "Total_SMS_Sent": "Total SMS Sent",
+    "Total_SMS_Failed": "Total SMS Failed",
+    "Total_WhatsApp_Sent": "Total WhatsApp Sent",
+    "Total_WhatsApp_Failed": "Total WhatsApp Failed"
 }
