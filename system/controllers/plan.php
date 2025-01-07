@@ -624,7 +624,6 @@ switch ($action) {
             $vc = ORM::for_table('tbl_plans')
                 ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
                 ->where('tbl_voucher.status', '0');
-
         }
         if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             $v = $v->find_many();
