@@ -948,5 +948,10 @@
     "Total_SMS_Sent": "Total SMS Sent",
     "Total_SMS_Failed": "Total SMS Failed",
     "Total_WhatsApp_Sent": "Total WhatsApp Sent",
-    "Total_WhatsApp_Failed": "Total WhatsApp Failed"
+    "Total_WhatsApp_Failed": "Total WhatsApp Failed",
+    "First_Name": "First Name",
+    "Last_Name": "Last Name",
+    "Not_Working_with_Freeradius_Mysql": "Not Working with Freeradius Mysql",
+    "Radius_Rest_Interim_Update": "Radius Rest Interim-Update",
+    "in_minutes__leave_0_to_disable_this_feature_": "in minutes, leave 0 to disable this feature."
 }

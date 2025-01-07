@@ -114,10 +114,12 @@ switch ($action) {
                         //don't wait more than 5 seconds for response from device, otherwise we get timeout error.
                         ini_set('default_socket_timeout', 5);
                         if ((new $p['device'])->online_customer($c, $p['routers'])) {
-                            echo '<span class="label label-success" title="online">&nbsp;</span>';
+                            echo '<span style="color: green;" title="online">&bull;</span>';
+                        }else{
+                            echo '<span style="color: yellow;" title="offline">&bull;</span>';
                         }
                     } catch (Exception $e) {
-                        echo '<span class="label label-danger" title="error">&nbsp;</span>';
+                        echo '<span style="color: red;" title="'.$e->getMessage().'">&bull;</span>';
                     }
                 }
             }
@@ -141,10 +143,12 @@ switch ($action) {
                                     //don't wait more than 5 seconds for response from device, otherwise we get timeout error.
                                     ini_set('default_socket_timeout', 5);
                                     if ((new $p['device'])->online_customer($c, $p['routers'])) {
-                                        $status = '<span class="label label-success" title="online">&nbsp;</span>';
+                                        $status = '<span style="color: green;" title="online">&bull;</span>';
+                                    }else{
+                                        $status = '<span style="color: yellow;" title="offline">&bull;</span>';
                                     }
                                 } catch (Exception $e) {
-                                    $status = '<span class="label label-danger" title="error">&nbsp;</span>';
+                                    $status = '<span style="color: red;" title="'.$e->getMessage().'">&bull;</span>';
                                 }
                             }
                         }
