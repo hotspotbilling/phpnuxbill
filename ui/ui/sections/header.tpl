@@ -1263,7 +1263,7 @@
                         </a>
                         <ul class="treeview-menu">
                             <li {if $_routes[1] eq 'list' }class="active" {/if}><a
-                                    href="{$_url}plan/list">{Lang::T('Active Users')}</a></li>
+                                    href="{$_url}plan/list">{Lang::T('Active Customers')}</a></li>
                             {if $_c['disable_voucher'] != 'yes'}
                             <li {if $_routes[1] eq 'refill' }class="active" {/if}><a
                                     href="{$_url}plan/refill">{Lang::T('Refill Customer')}</a></li>
