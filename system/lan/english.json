@@ -930,5 +930,18 @@
     "Send_yours_balance___": "Send yours balance ? ",
     "Cards": "Cards",
     "CRM": "CRM",
-    "Coupons": "Coupons"
+    "Coupons": "Coupons",
+    "Search_Coupons": "Search Coupons",
+    "Add_Coupon": "Add Coupon",
+    "Value": "Value",
+    "Max_Usage": "Max Usage",
+    "Usage_Count": "Usage Count",
+    "Min_Order": "Min Order",
+    "Max_Discount": "Max Discount",
+    "Updated_Date": "Updated Date",
+    "Action": "Action",
+    "No_coupons_found_": "No coupons found.",
+    "Delete_Selected": "Delete Selected",
+    "Voucher_Cards": "Voucher Cards",
+    "Create_Date": "Create Date"
 }
