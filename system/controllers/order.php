@@ -411,89 +411,91 @@ switch ($action) {
             list($bills, $add_cost) = User::getBills($id_customer);
         }
 
-        if (!isset($_SESSION['coupon_attempts'])) {
-            $_SESSION['coupon_attempts'] = 0;
-            $_SESSION['last_attempt_time'] = time();
-        }
-
-        if ($_SESSION['coupon_attempts'] >= 5) {
-            $timeout = 10 * 60; // 10 minutes in seconds
-            $time_diff = time() - $_SESSION['last_attempt_time'];
-
-            if ($time_diff >= $timeout) {
+        if($config['enable_coupons']){
+            if (!isset($_SESSION['coupon_attempts'])) {
                 $_SESSION['coupon_attempts'] = 0;
                 $_SESSION['last_attempt_time'] = time();
-            } else {
-                $remaining_time = ceil(($timeout - $time_diff) / 60);
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Too many invalid attempts. Please try again after $remaining_time minutes."));
-            }
-        }
-
-        if (_post('coupon')) {
-            if ($plan['routers'] === 'balance') {
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon not available for Balance"));
             }
 
-            $coupon = ORM::for_table('tbl_coupons')->where('code', _post('coupon'))->find_one();
+            if ($_SESSION['coupon_attempts'] >= 5) {
+                $timeout = 10 * 60; // 10 minutes in seconds
+                $time_diff = time() - $_SESSION['last_attempt_time'];
 
-            if (!$coupon) {
-                $_SESSION['coupon_attempts']++;
+                if ($time_diff >= $timeout) {
+                    $_SESSION['coupon_attempts'] = 0;
+                    $_SESSION['last_attempt_time'] = time();
+                } else {
+                    $remaining_time = ceil(($timeout - $time_diff) / 60);
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Too many invalid attempts. Please try again after $remaining_time minutes."));
+                }
+            }
+
+            if (_post('coupon')) {
+                if ($plan['routers'] === 'balance') {
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon not available for Balance"));
+                }
+
+                $coupon = ORM::for_table('tbl_coupons')->where('code', _post('coupon'))->find_one();
+
+                if (!$coupon) {
+                    $_SESSION['coupon_attempts']++;
+                    $_SESSION['last_attempt_time'] = time();
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon not found"));
+                }
+
+                if ($coupon['status'] != 'active') {
+                    $_SESSION['coupon_attempts']++;
+                    $_SESSION['last_attempt_time'] = time();
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon is not active"));
+                }
+
+                // Reset attempts after a successful coupon validation
+                $_SESSION['coupon_attempts'] = 0;
                 $_SESSION['last_attempt_time'] = time();
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon not found"));
+
+                $today = date('Y-m-d');
+                if ($today < $coupon['start_date'] || $today > $coupon['end_date']) {
+                    $_SESSION['coupon_attempts']++;
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon is not valid for today"));
+                }
+
+                if ($coupon['max_usage'] > 0 && $coupon['usage_count'] >= $coupon['max_usage']) {
+                    $_SESSION['coupon_attempts']++;
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon usage limit reached"));
+                }
+
+                if ($plan['price'] < $coupon['min_order_amount']) {
+                    $_SESSION['coupon_attempts']++;
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("The order amount does not meet the minimum requirement for this coupon"));
+                }
+
+                // Calculate discount value
+                $discount = 0;
+                switch ($coupon['type']) {
+                    case 'percent':
+                        $discount = ($coupon['value'] / 100) * $plan['price'];
+                        if ($discount > $coupon['max_discount_amount']) {
+                            $discount = $coupon['max_discount_amount'];
+                        }
+                        break;
+                    case 'fixed':
+                        $discount = $coupon['value'];
+                        break;
+                }
+
+                // Ensure discount does not exceed the plan price
+                if ($discount >= $plan['price']) {
+                    r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Discount value exceeds the plan price"));
+                }
+
+                $plan['price'] -= $discount;
+                $coupon->usage_count = $coupon['usage_count'] + 1;
+                $coupon->save();
+
+                $ui->assign('discount', $discount);
+                $ui->assign('notify', Lang::T("Coupon applied successfully. You saved " . Lang::moneyFormat($discount)));
+                $ui->assign('notify_t', 's');
             }
-
-            if ($coupon['status'] != 'active') {
-                $_SESSION['coupon_attempts']++;
-                $_SESSION['last_attempt_time'] = time();
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon is not active"));
-            }
-
-            // Reset attempts after a successful coupon validation
-            $_SESSION['coupon_attempts'] = 0;
-            $_SESSION['last_attempt_time'] = time();
-
-            $today = date('Y-m-d');
-            if ($today < $coupon['start_date'] || $today > $coupon['end_date']) {
-                $_SESSION['coupon_attempts']++;
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon is not valid for today"));
-            }
-
-            if ($coupon['max_usage'] > 0 && $coupon['usage_count'] >= $coupon['max_usage']) {
-                $_SESSION['coupon_attempts']++;
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Coupon usage limit reached"));
-            }            
-
-            if ($plan['price'] < $coupon['min_order_amount']) {
-                $_SESSION['coupon_attempts']++;
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("The order amount does not meet the minimum requirement for this coupon"));
-            }
-
-            // Calculate discount value
-            $discount = 0;
-            switch ($coupon['type']) {
-                case 'percent':
-                    $discount = ($coupon['value'] / 100) * $plan['price'];
-                    if ($discount > $coupon['max_discount_amount']) {
-                        $discount = $coupon['max_discount_amount'];
-                    }
-                    break;
-                case 'fixed':
-                    $discount = $coupon['value'];
-                    break;
-            }
-
-            // Ensure discount does not exceed the plan price
-            if ($discount >= $plan['price']) {
-                r2($_SERVER['HTTP_REFERER'], 'e', Lang::T("Discount value exceeds the plan price"));
-            }
-
-            $plan['price'] -= $discount;
-            $coupon->usage_count = $coupon['usage_count'] + 1;
-            $coupon->save();
-
-            $ui->assign('discount', $discount);
-            $ui->assign('notify', Lang::T("Coupon applied successfully. You saved " . Lang::moneyFormat($discount)));
-            $ui->assign('notify_t', 's');
         }
 
         $tax = Package::tax($plan['price'] + $add_cost, $tax_rate);
