@@ -226,7 +226,8 @@
     <option value="Hrs">{Lang::T('Hrs')}</option>
     <option value="Days">{Lang::T('Days')}</option>
     <option value="Months">{Lang::T('Months')}</option>`;
-    var postOpt = `<option value="Period">{Lang::T('Period')}</option>`;
+    var postOpt = `<option value="Period">{Lang::T('Period')}</option>
+    <option value="Months">{Lang::T('Months')}</option>`;
     function prePaid() {
         $("#validity_unit").html(preOpt);
         $('#expired_date').addClass('hidden');
