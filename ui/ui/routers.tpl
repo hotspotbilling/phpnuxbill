@@ -96,8 +96,8 @@
                 </div>
                 {include file="pagination.tpl"}
                 <div class="bs-callout bs-callout-info" id="callout-navbar-role">
-                    <h4>{Lang::T('Check if Mikrotik Online?')}</h4>
-                    <p>{Lang::T('To check if Mikrotik is Online or not, go to Settings, set Router Check Enabled')}</p>
+                    <h4>{Lang::T('Check if Router Online?')}</h4>
+                    <p>{Lang::T('To check whether the Router is online or not, please visit the following page')} <a href="{$_url}settings/miscellaneous#router_check" target="_blank" class="btn btn-link">{Lang::T('Cek Now')}</a></p>
                 </div>
             </div>
         </div>
