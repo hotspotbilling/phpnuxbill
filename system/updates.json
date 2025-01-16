@@ -175,9 +175,9 @@
     "2024.10.31": [
         "ALTER TABLE `tbl_customers` ADD `photo` VARCHAR(128) NOT NULL DEFAULT '/user.default.jpg' AFTER `password`;"
     ],
-    "2024.12.5": [
-        "ALTER TABLE `tbl_transactions` ADD `user_id` INT(11) INT NOT NULL DEFAULT 0, AFTER `username`;",
-        "ALTER TABLE `tbl_payment_gateway` ADD `user_id` INT(11) INT NOT NULL DEFAULT 0, AFTER `username`;"
+    "2024.12.5.1": [
+        "ALTER TABLE `tbl_transactions` ADD `user_id` INT(11) NOT NULL DEFAULT 0 AFTER `username`;",
+        "ALTER TABLE `tbl_payment_gateway` ADD `user_id` INT(11) NOT NULL DEFAULT 0 AFTER `username`;"
     ],
     "2024.12.16": [
         "CREATE TABLE `tbl_coupons` ( `id` INT AUTO_INCREMENT PRIMARY KEY, `code` VARCHAR(50) NOT NULL UNIQUE, `type` ENUM('fixed', 'percent') NOT NULL, `value` DECIMAL(10,2) NOT NULL, `description` TEXT NOT NULL, `max_usage` INT NOT NULL DEFAULT 1,`usage_count` INT NOT NULL DEFAULT 0,`status` ENUM('active', 'inactive') NOT NULL, `min_order_amount` DECIMAL(10,2) NOT NULL, `max_discount_amount` DECIMAL(10,2) NOT NULL, `start_date` DATE NOT NULL,`end_date` DATE NOT NULL, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);"

@@ -72,7 +72,7 @@ DROP TABLE IF EXISTS `tbl_payment_gateway`;
 CREATE TABLE `tbl_payment_gateway` (
   `id` int NOT NULL,
   `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` int(11) INT NOT NULL DEFAULT 0,
+  `user_id` int(11) NOT NULL DEFAULT 0,
   `gateway` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'xendit | midtrans',
   `gateway_trx_id` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
   `plan_id` int NOT NULL,
@@ -151,7 +151,7 @@ CREATE TABLE `tbl_transactions` (
   `id` int NOT NULL,
   `invoice` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_id` int(11) INT NOT NULL DEFAULT 0,
+  `user_id` int(11) NOT NULL DEFAULT 0,
   `plan_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `price` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `recharged_on` date NOT NULL,
@@ -259,7 +259,7 @@ CREATE TABLE IF NOT EXISTS `tbl_meta` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='This Table to add additional data for any table';
 
-CREATE TABLE `tbl_coupons` (
+CREATE TABLE IF NOT EXISTS  `tbl_coupons` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `code` VARCHAR(50) NOT NULL UNIQUE,
     `type` ENUM('fixed', 'percent') NOT NULL,
