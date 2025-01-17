@@ -953,5 +953,8 @@
     "Last_Name": "Last Name",
     "Not_Working_with_Freeradius_Mysql": "Not Working with Freeradius Mysql",
     "Radius_Rest_Interim_Update": "Radius Rest Interim-Update",
-    "in_minutes__leave_0_to_disable_this_feature_": "in minutes, leave 0 to disable this feature."
+    "in_minutes__leave_0_to_disable_this_feature_": "in minutes, leave 0 to disable this feature.",
+    "Check_if_Router_Online_": "Check if Router Online?",
+    "To_check_whether_the_Router_is_online_or_not__please_visit_the_following_page": "To check whether the Router is online or not, please visit the following page",
+    "Cek_Now": "Cek Now"
 }

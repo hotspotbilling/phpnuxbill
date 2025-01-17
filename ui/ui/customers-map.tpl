@@ -40,10 +40,8 @@
 
             var customers = {/literal}{$customers|json_encode}{literal};
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
-            attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                subdomains: 'abcd',
+                L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                 maxZoom: 20
             }).addTo(map);
 

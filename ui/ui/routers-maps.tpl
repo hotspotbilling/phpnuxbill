@@ -7,8 +7,7 @@
         <div class="input-group-addon">
             <span class="fa fa-search"></span>
         </div>
-        <input type="text" name="name" class="form-control" value="{$name}"
-            placeholder="{Lang::T('Search')}...">
+        <input type="text" name="name" class="form-control" value="{$name}" placeholder="{Lang::T('Search')}...">
         <div class="input-group-btn">
             <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
         </div>
@@ -40,41 +39,39 @@
 
             var routers = {/literal}{$d|json_encode}{literal};
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
-            attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                subdomains: 'abcd',
+            L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                 maxZoom: 20
-            }).addTo(map);
+        }).addTo(map);
 
-            routers.forEach(function(router) {
-                var name = router.name;
-                var info = router.description;
-                var coordinates = router.coordinates;
-                console.log(coordinates.split(","))
-                // Create a popup for the marker
-                var popupContent = "<strong>Name</strong>: " + name + "<br>" +
-                    "<strong>Info</strong>: " + info + "<br>"
-                    "<a href='{/literal}{$_url}{literal}routers/edit/"+ router.id +"'>More Info</a> &bull; " +
-                    "<a href='https://www.google.com/maps/dir//" + coordinates + "' target='maps'>Get Direction</a><br>";
+        routers.forEach(function(router) {
+            var name = router.name;
+            var info = router.description;
+            var coordinates = router.coordinates;
+            console.log(coordinates.split(","))
+            // Create a popup for the marker
+            var popupContent = "<strong>Name</strong>: " + name + "<br>" +
+                "<strong>Info</strong>: " + info + "<br>"
+            "<a href='{/literal}{$_url}{literal}routers/edit/"+ router.id +"'>More Info</a> &bull; " +
+            "<a href='https://www.google.com/maps/dir//" + coordinates + "' target='maps'>Get Direction</a><br>";
 
-                // Add marker to map
-                if(router.enabled == 1){
-                    var circle = L.circle(coordinates.split(","), router.coverage*1, {
-                        color: 'blue',
-                        fillOpacity: 0.1
-                        }).addTo(map);
-                }else{
-                    var circle = L.circle(coordinates.split(","), router.coverage*1, {
-                        color: 'red',
-                        fillOpacity: 0.1
-                        }).addTo(map);
-                }
-                var marker = L.marker(coordinates.split(",")).addTo(group);
-                marker.bindTooltip(name, { permanent: true }).bindPopup(popupContent);
-            });
+            // Add marker to map
+            if (router.enabled == 1) {
+                var circle = L.circle(coordinates.split(","), router.coverage * 1, {
+                    color: 'blue',
+                    fillOpacity: 0.1
+                }).addTo(map);
+            } else {
+                var circle = L.circle(coordinates.split(","), router.coverage * 1, {
+                    color: 'red',
+                    fillOpacity: 0.1
+                }).addTo(map);
+            }
+            var marker = L.marker(coordinates.split(",")).addTo(group);
+            marker.bindTooltip(name, { permanent: true }).bindPopup(popupContent);
+        });
 
-            map.fitBounds(group.getBounds());
+        map.fitBounds(group.getBounds());
         }
         window.onload = function() {
             getLocation();

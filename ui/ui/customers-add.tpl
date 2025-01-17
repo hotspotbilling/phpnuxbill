@@ -290,10 +290,8 @@
 
         function setupMap(lat, lon) {
             var map = L.map('map').setView([lat, lon], 13);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png', {
-            attribution:
-                'SIMITA',
-                subdomains: 'abcd',
+            L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                 maxZoom: 20
         }).addTo(map);
         var marker = L.marker([lat, lon]).addTo(map);
