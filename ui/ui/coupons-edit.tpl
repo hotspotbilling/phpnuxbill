@@ -134,11 +134,11 @@
 
         if (type === 'percent') {
             valueInput.setAttribute('max', '100');
-            valueInput.setAttribute('placeholder', 'Enter percentage');
+            valueInput.setAttribute('placeholder', '{Lang::T("Enter percentage")}');
             helpText.textContent = '{Lang::T('Value of the discount(percentage, max 100)')}';
         } else {
             valueInput.removeAttribute('max');
-            valueInput.setAttribute('placeholder', 'Enter amount');
+            valueInput.setAttribute('placeholder', '{Lang::T("Enter amount")}');
             helpText.textContent = '{Lang::T('Value of the discount(amount)')}';
         }
     }
