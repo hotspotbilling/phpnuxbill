@@ -10,7 +10,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Status')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Customer cannot buy disabled Package, but admin can recharge it, use it if you want only admin recharge it">?</a>
+                                data-content="Lang::T("Customer cannot buy disabled Package, but admin can recharge it, use it if you want only admin recharge it")">?</a>
                         </label>
                         <div class="col-md-10">
                             <input type="radio" name="enabled" value="1" checked> {Lang::T('Active')}
