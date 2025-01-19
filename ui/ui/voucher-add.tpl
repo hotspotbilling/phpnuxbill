@@ -81,7 +81,7 @@
                     <div class="form-group" id="printers" style="display:none;">
                         <label class="col-md-2 control-label">{Lang::T('Vouchers Per Page')}</label>
                         <div class="col-md-6">
-                            <input type="text" id="voucher-print" class="form-control" name="voucher_per_page" value="36" placeholder="Vouchers Per Page (default 36)">
+                            <input type="text" id="voucher-print" class="form-control" name="voucher_per_page" value="36" placeholder="{Lang::T("Vouchers Per Page")} (default 36)">
                         </div>
                         <p class="help-block col-md-4">
                             {Lang::T('Vouchers Per Page')} (default 36)
@@ -89,7 +89,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success" onclick="return ask(this, 'Continue the Voucher creation process?')" type="submit">{Lang::T('Generate')}</button>
+                            <button class="btn btn-success" onclick="return ask(this, '{Lang::T("Continue the Voucher creation process?")}')" type="submit">{Lang::T('Generate')}</button>
                         </div>
                     </div>
                 </form>
