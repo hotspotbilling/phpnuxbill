@@ -10,7 +10,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Status')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Lang::T("Customer cannot buy disabled Package, but admin can recharge it, use it if you want only admin recharge it")">?</a>
+                                data-content="{Lang::T("Customer cannot buy disabled Package, but admin can recharge it, use it if you want only admin recharge it")}">?</a>
                         </label>
                         <div class="col-md-10">
                             <input type="radio" name="enabled" value="1" checked> {Lang::T('Active')}
@@ -21,7 +21,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Type')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Postpaid will have fix expired date">?</a>
+                                data-content="{Lang::T("Postpaid will have fix expired date")}">?</a>
                         </label>
                         <div class="col-md-10">
                             <input type="radio" name="prepaid" onclick="prePaid()" value="yes" checked> {Lang::T('Prepaid')}
@@ -33,7 +33,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Package Type')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Personal Plan will only show to personal Customer, Business package will only show to Business Customer">?</a>
+                                data-content="{Lang::T("Personal Plan will only show to personal Customer, Business package will only show to Business Customer")}">?</a>
                         </label>
                         <div class="col-md-10">
                             <input type="radio" name="plan_type" value="Personal" checked> {Lang::T('Personal')}
@@ -45,7 +45,7 @@
                             <label class="col-md-2 control-label">Radius
                                 <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                     data-trigger="focus" data-container="body"
-                                    data-content="If you enable Radius, choose device to radius, except if you have custom device.">?</a>
+                                    data-content="{Lang::T("If you enable Radius, choose device to radius, except if you have custom device.")}">?</a>
                             </label>
                             <div class="col-md-6">
                                 <label class="radio-inline">
@@ -59,7 +59,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Device')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="This Device are the logic how PHPNuxBill Communicate with Mikrotik or other Devices">?</a>
+                                data-content="{Lang::T("This Device are the logic how PHPNuxBill Communicate with Mikrotik or other Devices")}">?</a>
                         </label>
                         <div class="col-md-6">
                             <select class="form-control" id="device" name="device">
@@ -158,7 +158,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Shared Users')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="How many devices can online in one Customer account">?</a>
+                                data-content="{Lang::T("How many devices can online in one Customer account")}">?</a>
                         </label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="sharedusers" name="sharedusers" value="1">
@@ -180,7 +180,7 @@
                         <label class="col-md-2 control-label">{Lang::T('Expired Date')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
                                 data-trigger="focus" data-container="body"
-                                data-content="Expired will be this date every month">?</a>
+                                data-content="{Lang::T("Expired will be this date every month")}">?</a>
                         </label>
                         <div class="col-md-6">
                             <input type="number" class="form-control" name="expired_date" maxlength="2" value="20" min="1" max="28" step="1" >
@@ -203,7 +203,7 @@
                     </span>
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
-                            <button class="btn btn-success" onclick="return ask(this, 'Continue the Hotspot Package creation process?')" type="submit">{Lang::T('Save Changes')}</button>
+                            <button class="btn btn-success" onclick="return ask(this, '{Lang::T("Continue the Hotspot Package creation process?")}')" type="submit">{Lang::T('Save Changes')}</button>
                             Or <a href="{$_url}services/hotspot">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
