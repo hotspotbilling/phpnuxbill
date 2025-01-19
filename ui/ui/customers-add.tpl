@@ -19,7 +19,7 @@
                                             class="glyphicon glyphicon-user"></i></span>
                                 {/if}
                                 <input type="text" class="form-control" name="username" required
-                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Usernames')}{/if}">
                             </div>
                         </div>
                     </div>
@@ -59,7 +59,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Address')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Home Address')}</label>
                         <div class="col-md-9">
                             <textarea name="address" id="address" class="form-control"></textarea>
                         </div>
@@ -72,7 +72,7 @@
                                 </option>
                                 <option value="PPPoE">PPPoE</option>
                                 <option value="VPN">VPN</option>
-                                <option value="Others">{Lang::T('Others')}</option>
+                                <option value="Others">{Lang::T('Other')}</option>
                             </select>
                         </div>
                     </div>
@@ -95,10 +95,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">PPPOE</div>
+                <div class="panel-heading">PPPoE</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Username')} <span class="label label-danger" id="warning_username"></span></label>
+                        <label class="col-md-3 control-label">{Lang::T('Usernames')} <span class="label label-danger" id="warning_username"></span></label>
                         <div class="col-md-9">
                             <input type="username" class="form-control" id="pppoe_username" name="pppoe_username" onkeyup="checkUsername(this, '0')">
                             <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
@@ -125,7 +125,7 @@
                 <div class="panel-heading"></div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Send Welcome Message')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Send welcome message')}</label>
                         <div class="col-md-9">
                             <label class="switch">
                                 <input type="checkbox" id="send_welcome_message" value="1" name="send_welcome_message">
@@ -134,7 +134,7 @@
                         </div>
                     </div>
                     <div class="form-group" id="method" style="display: none;">
-                        <label class="col-md-3 control-label">{Lang::T('Method')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Notification via')}</label>
                         <label class="col-md-3 control-label"><input type="checkbox" name="sms" value="1">
                             {Lang::T('SMS')}</label>
                         <label class="col-md-2 control-label"><input type="checkbox" name="wa" value="1">
@@ -204,7 +204,7 @@
         </div>
     </div>
     <center>
-        <button class="btn btn-primary" onclick="return ask(this, 'Continue the process of adding Customer Data?')" type="submit">
+        <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the process of adding Customer Data?")}')" type="submit">
             {Lang::T('Save Changes')}
         </button>
         <br><a href="{$_url}customers/list" class="btn btn-link">{Lang::T('Cancel')}</a>
@@ -236,7 +236,7 @@
 
                     if (!oneChecked) {
                         event.preventDefault();
-                        alert('Please choose at least one method.');
+                        alert('Please choose at least one method notification.');
                         methodSection.focus();
                     }
                 }
