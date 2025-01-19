@@ -11,7 +11,7 @@
                     <center>
                         <img src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
                             onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="img-circle img-responsive"
-                            alt="Foto" onclick="return deletePhoto({$d['id']})">
+                            alt="Photo" onclick="return deletePhoto({$d['id']})">
                     </center><br>
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
@@ -20,11 +20,11 @@
                             <input type="file" class="form-control" name="photo" accept="image/*">
                         </div>
                         <div class="form-group col-md-3 col-xs-4" title="Not always Working">
-                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> Facedetect</label>
+                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> {Lang::T("Face Detection")}</label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Username')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Usernames')}</label>
                         <div class="col-md-9">
                             <div class="input-group">
                                 {if $_c['country_code_phone']!= ''}
@@ -36,7 +36,7 @@
                                 {/if}
                                 <input type="text" class="form-control" name="username" value="{$d['username']}"
                                     required
-                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
+                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Usernames')}{/if}">
                             </div>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Address')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Home Address')}</label>
                         <div class="col-md-9">
                             <textarea name="address" id="address" class="form-control">{$d['address']}</textarea>
                         </div>
@@ -91,7 +91,7 @@
                                 </option>
                                 <option value="PPPoE" {if $d['service_type'] eq 'PPPoE' }selected{/if}>PPPoE</option>
                                 <option value="VPN" {if $d['service_type'] eq 'VPN' }selected{/if}>VPN</option>
-                                <option value="Others" {if $d['service_type'] eq 'Others' }selected{/if}>Others</option>
+                                <option value="Others" {if $d['service_type'] eq 'Others' }selected{/if}>{Lang::T("Other")}</option>
                             </select>
                         </div>
                     </div>
@@ -99,9 +99,9 @@
                         <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
                         <div class="col-md-9">
                             <select class="form-control" id="account_type" name="account_type">
-                                <option value="Personal" {if $d['account_type'] eq 'Personal' }selected{/if}>Personal
+                                <option value="Personal" {if $d['account_type'] eq 'Personal' }selected{/if}>{Lang::T("Personal")}
                                 </option>
-                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>Business
+                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>{Lang::T("Business")}
                                 </option>
                             </select>
                         </div>
@@ -126,16 +126,16 @@
                             <span class="help-block">
                                 {Lang::T('Banned')}: {Lang::T('Customer cannot login again')}.<br>
                                 {Lang::T('Disabled')}:
-                                {Lang::T('Customer can login but cannot buy internet plan, Admin cannot recharge customer')}.<br>
-                                {Lang::T('Don\'t forget to deactivate all active plan too')}.
+                                {Lang::T('Customer can login but cannot buy internet package, Admin cannot recharge customer')}.<br>
+                                {Lang::T("Don't forget to deactivate all active package too")}.
                             </span>
                         </div>
                     </div>
                 </div>
-                <div class="panel-heading">PPPOE</div>
+                <div class="panel-heading">PPPoE</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Username')} <span class="label label-danger"
+                        <label class="col-md-3 control-label">{Lang::T('Usernames')} <span class="label label-danger"
                                 id="warning_username"></span></label>
                         <div class="col-md-9">
                             <input type="username" class="form-control" id="pppoe_username" name="pppoe_username"
@@ -232,7 +232,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Zip')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Zip Code')}</label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="zip" name="zip" value="{$d['zip']}">
                             <small class="form-text text-muted">{Lang::T('Zip Code')}</small>
@@ -243,7 +243,7 @@
         </div>
     </div>
     <center>
-        <button class="btn btn-primary" onclick="return ask(this, 'Continue the Customer Data change process?')"
+        <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Customer Data change process?")}')"
             type="submit">
             {Lang::T('Save Changes')}
         </button>
