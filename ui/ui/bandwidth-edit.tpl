@@ -81,13 +81,13 @@
 					</div>
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<small>{Lang::T('Editing Bandwidth will not automatically update the plan, you need to edit the plan then save again')}</small>
+							<small>{Lang::T('Editing Bandwidth will not automatically update the package, you need to edit the package then save again')}</small>
 						</div>
 					</div>
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<button class="btn btn-primary" onclick="return ask(this, 'Continue the Bandwidth change process?')" type="submit">{Lang::T('Save Change')}</button>
-							Or <a href="{$_url}bandwidth/list">{Lang::T('Cancel')}</a>
+							<button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Bandwidth change process?")}')" type="submit">{Lang::T('Save Change')}</button>
+							{Lang::T("Or")} <a href="{$_url}bandwidth/list">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
 				</form>
