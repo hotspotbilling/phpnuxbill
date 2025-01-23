@@ -291,7 +291,8 @@ try {
             $d->acctsessionid = _post('acctSessionId');
             $d->username = $username;
             $d->realm = _post('realm');
-            $d->nasipaddress = _post('nasip');
+            $d->nasipaddress = _post('nasIpAddress');
+	    $d->acctsessiontime = intval(_post('acctSessionTime'));
             $d->nasid = _post('nasid');
             $d->nasportid = _post('nasPortId');
             $d->nasporttype = _post('nasPortType');
