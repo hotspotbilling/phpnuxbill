@@ -230,6 +230,7 @@ CREATE TABLE `rad_acct` (
   `nasportid` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `nasporttype` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `framedipaddress` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `acctsessiontime` BIGINT NOT NULL DEFAULT '0',
   `acctinputoctets` BIGINT NOT NULL DEFAULT '0',
   `acctoutputoctets` BIGINT NOT NULL DEFAULT '0',
   `acctstatustype` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
