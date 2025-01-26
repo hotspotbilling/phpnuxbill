@@ -184,5 +184,8 @@
     ],
 	"2024.12.20": [
         "ALTER TABLE `tbl_voucher` ADD `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `status`;"
+    ],
+	"2025.1.23": [
+        "ALTER TABLE `rad_acct` ADD `acctsessiontime` BIGINT(12) NOT NULL DEFAULT '0' AFTER `framedipaddress`;"
     ]
 }
