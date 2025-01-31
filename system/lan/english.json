@@ -956,5 +956,11 @@
     "in_minutes__leave_0_to_disable_this_feature_": "in minutes, leave 0 to disable this feature.",
     "Check_if_Router_Online_": "Check if Router Online?",
     "To_check_whether_the_Router_is_online_or_not__please_visit_the_following_page": "To check whether the Router is online or not, please visit the following page",
-    "Cek_Now": "Cek Now"
+    "Cek_Now": "Cek Now",
+    "Pretty_URL": "Pretty URL",
+    "rename__htaccess_firewall_to__htaccess": "rename .htaccess_firewall to .htaccess",
+    "Show_chart": "Show chart",
+    "Max_30_days": "Max 30 days",
+    "Information": "Information",
+    "Export_and_Print_will_show_all_data_without_pagination": "Export and Print will show all data without pagination"
 }

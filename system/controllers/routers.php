@@ -204,7 +204,7 @@ switch ($action) {
         break;
 
     default:
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/routers.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/routers.js"></script>');
 
         $name = _post('name');
         $name = _post('name');

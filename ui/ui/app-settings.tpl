@@ -104,15 +104,30 @@
                         {Lang::T('This used for admin to select payment in recharge, using comma for every new options')}
                     </p>
                 </div>
-
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Income reset date')}</label>
                     <div class="col-md-5">
                         <input type="number" required class="form-control" id="reset_day" placeholder="20" min="1"
                             max="28" step="1" name="reset_day" value="{$_c['reset_day']}">
                     </div>
-                    <span class="help-block col-md-4">{Lang::T('Income will reset every this
-                        day')}</span>
+                    <span class="help-block col-md-4">{Lang::T('Income will reset every this day')}</span>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Pretty URL')}</label>
+                    <div class="col-md-5">
+                        <select name="url_canonical" id="url_canonical" class="form-control">
+                            <option value="no" {if $_c['url_canonical']=='no' }selected="selected" {/if}>
+                                {Lang::T('No')}
+                            </option>
+                            <option value="yes" {if $_c['url_canonical']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                        <p class="help-block">
+                            <b>?_route=settings/app&foo=bar</b> will be <b>/settings/app?foo=bar</b>
+                        </p>
+                    </div>
+                    <span class="help-block col-md-4">{Lang::T('rename .htaccess_firewall to .htaccess')}</span>
                 </div>
                 <button class="btn btn-success btn-block" name="general" type="submit">
                     {Lang::T('Save Changes')}
@@ -779,8 +794,8 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Mikrotik SMS Command')}</label>
                     <div class="col-md-5">
-                        <input type="text" class="form-control" id="mikrotik_sms_command" name="mikrotik_sms_command" value="{$_c['mikrotik_sms_command']}"
-                        placeholder="mikrotik_sms_command">
+                        <input type="text" class="form-control" id="mikrotik_sms_command" name="mikrotik_sms_command"
+                            value="{$_c['mikrotik_sms_command']}" placeholder="mikrotik_sms_command">
                     </div>
                 </div>
                 <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp

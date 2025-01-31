@@ -53,7 +53,7 @@ switch ($action) {
         }
         r2(getUrl('services/hotspot'), 'w', 'Unknown command');
     case 'hotspot':
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/hotspot.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/hotspot.js"></script>');
         $name = _req('name');
         $type1 = _req('type1');
         $type2 = _req('type2');
@@ -428,7 +428,7 @@ switch ($action) {
 
     case 'pppoe':
         $ui->assign('_title', Lang::T('PPPOE Plans'));
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pppoe.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/pppoe.js"></script>');
 
         $name = _post('name');
         $name = _req('name');
@@ -921,7 +921,7 @@ switch ($action) {
         break;
     case 'vpn':
         $ui->assign('_title', Lang::T('VPN Plans'));
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pppoe.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/pppoe.js"></script>');
 
         $name = _post('name');
         $name = _req('name');

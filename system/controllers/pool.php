@@ -20,7 +20,7 @@ require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . 'MikrotikPppoe' . '.php';
 
 switch ($action) {
     case 'list':
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pool.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/pool.js"></script>');
 
         $name = _post('name');
         if ($name != '') {
@@ -149,7 +149,7 @@ switch ($action) {
         }
 
     case 'port':
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/pool.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/pool.js"></script>');
 
         $name = _post('name');
         if ($name != '') {

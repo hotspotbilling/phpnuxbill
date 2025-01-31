@@ -173,6 +173,7 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $csrf_token = _post('csrf_token');
+
         if (!Csrf::check($csrf_token)) {
             r2(getUrl('settings/app'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }

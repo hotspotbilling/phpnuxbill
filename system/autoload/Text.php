@@ -113,7 +113,7 @@ class Text
     public static function url(...$data){
         global $config;
         $url = implode("", $data);
-        if ($config['url_canonical'] != 'Yes') {
+        if ($config['url_canonical'] == 'yes') {
             $u = str_replace('?_route=', '', U);
             $pos = strpos($url, '&');
             if ($pos === false) {

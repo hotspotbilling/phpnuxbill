@@ -18,7 +18,7 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
 
 switch ($action) {
     case 'list':
-        $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/bandwidth.js"></script>');
+        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/bandwidth.js"></script>');
         run_hook('view_list_bandwidth'); #HOOK
         $name = _post('name');
         if ($name != '') {

@@ -266,7 +266,7 @@ function showResult($success, $message = '', $result = [], $meta = [])
  */
 function getUrl($url)
 {
-    Text::url($url);
+    return Text::url($url);
 }
 
 function generateUniqueNumericVouchers($totalVouchers, $length = 8)

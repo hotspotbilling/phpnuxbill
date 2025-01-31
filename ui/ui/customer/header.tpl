@@ -780,7 +780,7 @@
 <body class="hold-transition modern-skin-dark sidebar-mini">
     <div class="wrapper">
         <header class="main-header" style="position:fixed; width: 100%">
-            <a href="{$_url}home" class="logo">
+            <a href="{Text::url('home')}" class="logo">
                 <span class="logo-mini"><b>N</b>uX</span>
                 <span class="logo-lg">{$_c['CompanyName']}</span>
             </a>
@@ -802,7 +802,7 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <!-- inner menu: contains the actual data -->
-                                    <ul class="menu" api-get-text="{$_url}autoload_user/language&select={$user_language}"></ul>
+                                    <ul class="menu" api-get-text="{Text::url('autoload_user/language&select=',$user_language)}"></ul>
                                 </li>
                             </ul>
                         </li>
@@ -810,14 +810,14 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <i class="fa fa-envelope-o"></i>
                                 <span class="label label-warning"
-                                    api-get-text="{$_url}autoload_user/inbox_unread"></span>
+                                    api-get-text="{Text::url('autoload_user/inbox_unread')}"></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
                                     <!-- inner menu: contains the actual data -->
-                                    <ul class="menu" api-get-text="{$_url}autoload_user/inbox"></ul>
+                                    <ul class="menu" api-get-text="{Text::url('autoload_user/inbox')}"></ul>
                                 </li>
-                                <li class="footer"><a href="{$_url}mail">{Lang::T('Inbox')}</a></li>
+                                <li class="footer"><a href="{Text::url('mail')}">{Lang::T('Inbox')}</a></li>
                             </ul>
                         </li>
                         <li class="dropdown user user-menu">
@@ -847,18 +847,18 @@
                                 <li class="user-body">
                                     <div class="row">
                                         <div class="col-xs-7 text-center text-sm">
-                                            <a href="{$_url}accounts/change-password"><i class="ion ion-settings"></i>
+                                            <a href="{Text::url('accounts/change-password')}"><i class="ion ion-settings"></i>
                                                 {Lang::T('Change Password')}</a>
                                         </div>
                                         <div class="col-xs-5 text-center text-sm">
-                                            <a href="{$_url}accounts/profile"><i class="ion ion-person"></i>
+                                            <a href="{Text::url('accounts/profile')}"><i class="ion ion-person"></i>
                                                 {Lang::T('My Account')}</a>
                                         </div>
                                     </div>
                                 </li>
                                 <li class="user-footer">
                                     <div class="pull-right">
-                                        <a href="{$_url}logout" class="btn btn-default btn-flat"><i
+                                        <a href="{Text::url('logout')}" class="btn btn-default btn-flat"><i
                                                 class="ion ion-power"></i> {Lang::T('Logout')}</a>
                                     </div>
                                 </li>
@@ -873,14 +873,14 @@
             <section class="sidebar">
                 <ul class="sidebar-menu" data-widget="tree">
                     <li {if $_system_menu eq 'home'}class="active" {/if}>
-                        <a href="{$_url}home">
+                        <a href="{Text::url('home')}">
                             <i class="ion ion-monitor"></i>
                             <span>{Lang::T('Dashboard')}</span>
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
                     <li {if $_system_menu eq 'inbox'}class="active" {/if}>
-                        <a href="{$_url}mail">
+                        <a href="{Text::url('mail')}">
                             <i class="fa fa-envelope"></i>
                             <span>{Lang::T('Inbox')}</span>
                         </a>
@@ -888,7 +888,7 @@
                     {$_MENU_AFTER_INBOX}
                     {if $_c['disable_voucher'] != 'yes'}
                         <li {if $_system_menu eq 'voucher'}class="active" {/if}>
-                            <a href="{$_url}voucher/activation">
+                            <a href="{Text::url('voucher/activation')}">
                                 <i class="fa fa-ticket"></i>
                                 <span>Voucher</span>
                             </a>
@@ -897,20 +897,20 @@
                     {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
                         {if $_c['enable_balance'] == 'yes'}
                             <li {if $_system_menu eq 'balance'}class="active" {/if}>
-                                <a href="{$_url}order/balance">
+                                <a href="{Text::url('order/balance')}">
                                     <i class="ion ion-ios-cart"></i>
                                     <span>{Lang::T('Buy Balance')}</span>
                                 </a>
                             </li>
                         {/if}
                         <li {if $_system_menu eq 'package'}class="active" {/if}>
-                            <a href="{$_url}order/package">
+                            <a href="{Text::url('order/package')}">
                                 <i class="ion ion-ios-cart"></i>
                                 <span>{Lang::T('Buy Package')}</span>
                             </a>
                         </li>
                         <li {if $_system_menu eq 'history'}class="active" {/if}>
-                            <a href="{$_url}order/history">
+                            <a href="{Text::url('order/history')}">
                                 <i class="fa fa-file-text"></i>
                                 <span>{Lang::T('Order History')}</span>
                             </a>
@@ -918,7 +918,7 @@
                     {/if}
                     {$_MENU_AFTER_ORDER}
                     <li {if $_system_menu eq 'list-activated'}class="active" {/if}>
-                        <a href="{$_url}voucher/list-activated">
+                        <a href="{Text::url('voucher/list-activated')}">
                             <i class="fa fa-list-alt"></i>
                             <span>{Lang::T('Activation History')}</span>
                         </a>

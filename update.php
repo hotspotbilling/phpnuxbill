@@ -151,6 +151,7 @@ function pathFixer($path)
 
 function r2($to, $ntype = 'e', $msg = '')
 {
+
     if ($msg == '') {
         header("location: $to");
         die();
