@@ -23,18 +23,18 @@ if (_post('send') == 'balance') {
         }
         $target = ORM::for_table('tbl_customers')->where('username', _post('username'))->find_one();
         if (!$target) {
-            r2(U . 'home', 'd', Lang::T('Username not found'));
+            r2(getUrl('home'), 'd', Lang::T('Username not found'));
         }
         $username = _post('username');
         $balance = _post('balance');
         if ($user['balance'] < $balance) {
-            r2(U . 'home', 'd', Lang::T('insufficient balance'));
+            r2(getUrl('home'), 'd', Lang::T('insufficient balance'));
         }
         if (!empty($config['minimum_transfer']) && intval($balance) < intval($config['minimum_transfer'])) {
-            r2(U . 'home', 'd', Lang::T('Minimum Transfer') . ' ' . Lang::moneyFormat($config['minimum_transfer']));
+            r2(getUrl('home'), 'd', Lang::T('Minimum Transfer') . ' ' . Lang::moneyFormat($config['minimum_transfer']));
         }
         if ($user['username'] == $target['username']) {
-            r2(U . 'home', 'd', Lang::T('Cannot send to yourself'));
+            r2(getUrl('home'), 'd', Lang::T('Cannot send to yourself'));
         }
         if (Balance::transfer($user['id'], $username, $balance)) {
             //sender
@@ -75,10 +75,10 @@ if (_post('send') == 'balance') {
             Message::sendBalanceNotification($user, $target, $balance, ($user['balance'] - $balance), Lang::getNotifText('balance_send'), $config['user_notification_payment']);
             Message::sendBalanceNotification($target, $user, $balance, ($target['balance'] + $balance), Lang::getNotifText('balance_received'), $config['user_notification_payment']);
             Message::sendTelegram("#u$user[username] send balance to #u$target[username] \n" . Lang::moneyFormat($balance));
-            r2(U . 'home', 's', Lang::T('Sending balance success'));
+            r2(getUrl('home'), 's', Lang::T('Sending balance success'));
         }
     } else {
-        r2(U . 'home', 'd', Lang::T('Failed, balance is not available'));
+        r2(getUrl('home'), 'd', Lang::T('Failed, balance is not available'));
     }
 } else if (_post('send') == 'plan') {
     if ($user['status'] != 'Active') {
@@ -90,10 +90,10 @@ if (_post('send') == 'balance') {
     foreach ($actives as $active) {
         $router = ORM::for_table('tbl_routers')->where('name', $active['routers'])->find_one();
         if ($router) {
-            r2(U . "order/send/$router[id]/$active[plan_id]&u=" . trim(_post('username')), 's', Lang::T('Review package before recharge'));
+            r2(getUrl('order/send/$router[id]/$active[plan_id]&u=') . trim(_post('username')), 's', Lang::T('Review package before recharge'));
         }
     }
-    r2(U . 'home', 'w', Lang::T('Your friend do not have active package'));
+    r2(getUrl('home'), 'w', Lang::T('Your friend do not have active package'));
 }
 $_bill = User::_billing();
 $ui->assign('_bills', $_bill);
@@ -128,7 +128,7 @@ if (isset($_GET['sync']) && !empty($_GET['sync'])) {
             }
         }
     }
-    r2(U . 'home', 's', $log);
+    r2(getUrl('home'), 's', $log);
 }
 
 if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
@@ -136,7 +136,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
     }
     if (!empty(App::getTokenValue(_get('stoken')))) {
-        r2(U . "voucher/invoice/");
+        r2(getUrl('voucher/invoice/'));
         die();
     }
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['recharge'])->where('username', $user['username'])->findOne();
@@ -147,17 +147,17 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             $routers = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
             $router = $routers['id'];
         }
-        r2(U. "order/gateway/$router/$bill[plan_id]");
+        r2(getUrl('order/gateway/$router/$bill[plan_id]'));
     }
 } else if (!empty(_get('extend'))) {
     if ($user['status'] != 'Active') {
         _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
     }
     if (!$config['extend_expired']) {
-        r2(U . 'home', 'e', "cannot extend");
+        r2(getUrl('home'), 'e', "cannot extend");
     }
     if (!empty(App::getTokenValue(_get('stoken')))) {
-        r2(U . 'home', 'e', "You already extend");
+        r2(getUrl('home'), 'e', "You already extend");
     }
     $id = _get('extend');
     $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->where('id', $id)->find_one();
@@ -172,7 +172,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             // is already extend
             $last = file_get_contents($path);
             if ($last == $m) {
-                r2(U . 'home', 'e', "You already extend for this month");
+                r2(getUrl('home'), 'e', "You already extend for this month");
             }
         }
         if ($tur['status'] != 'on') {
@@ -202,12 +202,12 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 "\nLocation: " . $p['routers'] .
                 "\nCustomer: " . $user['fullname'] .
                 "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
-            r2(U . 'home', 's', "Extend until $expiration");
+            r2(getUrl('home'), 's', "Extend until $expiration");
         } else {
-            r2(U . 'home', 'e', "Plan is not expired");
+            r2(getUrl('home'), 'e', "Plan is not expired");
         }
     } else {
-        r2(U . 'home', 'e', "Plan Not Found or Not Active");
+        r2(getUrl('home'), 'e', "Plan Not Found or Not Active");
     }
 } else if (isset($_GET['deactivate']) && !empty($_GET['deactivate'])) {
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['deactivate'])->where('username', $user['username'])->findOne();
@@ -228,9 +228,9 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         $bill->save();
         _log('User ' . $bill['username'] . ' Deactivate ' . $bill['namebp'], 'Customer', $bill['customer_id']);
         Message::sendTelegram('User u' . $bill['username'] . ' Deactivate ' . $bill['namebp']);
-        r2(U . 'home', 's', 'Success deactivate ' . $bill['namebp']);
+        r2(getUrl('home'), 's', 'Success deactivate ' . $bill['namebp']);
     } else {
-        r2(U . 'home', 'e', 'No Active Plan');
+        r2(getUrl('home'), 'e', 'No Active Plan');
     }
 }
 
@@ -245,10 +245,10 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && $_c['hs_auth_m
             require_once $dvc;
             if ($_GET['mikrotik'] == 'login') {
                 (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
-                r2(U . 'home', 's', Lang::T('Login Request successfully'));
+                r2(getUrl('home'), 's', Lang::T('Login Request successfully'));
             } else if ($_GET['mikrotik'] == 'logout') {
                 (new $p['device'])->disconnect_customer($user, $bill['routers']);
-                r2(U . 'home', 's', Lang::T('Logout Request successfully'));
+                r2(getUrl('home'), 's', Lang::T('Logout Request successfully'));
             }
         } else {
             new Exception(Lang::T("Devices Not Found"));
@@ -269,16 +269,16 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
     $ui->assign('logged', $_GET['logged']);
     if ($_app_stage != 'demo') {
         if ($_GET['mikrotik'] == 'login') {
-            r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
+            r2(getUrl('home&hchap=true'), 's', Lang::T('Login Request successfully'));
         }
         $getmsg = $_GET['msg'];
         ///get auth notification from mikrotik
         if ($getmsg == 'Connected') {
             $msg .= Lang::T($getmsg);
-            r2(U . 'home&logged=1', 's', $msg);
+            r2(getUrl('home&logged=1'), 's', $msg);
         } else if ($getmsg) {
             $msg .= Lang::T($getmsg);
-            r2(U . 'home', 's', $msg);
+            r2(getUrl('home'), 's', $msg);
         }
     }
 }
@@ -296,16 +296,16 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
     $ui->assign('logged', $_GET['logged']);
     if ($_app_stage != 'demo') {
         if ($_GET['mikrotik'] == 'login') {
-            r2(U . 'home&hchap=true', 's', Lang::T('Login Request successfully'));
+            r2(getUrl('home&hchap=true'), 's', Lang::T('Login Request successfully'));
         }
         $getmsg = $_GET['msg'];
         ///get auth notification from mikrotik
         if ($getmsg == 'Connected') {
             $msg .= Lang::T($getmsg);
-            r2(U . 'home&logged=1', 's', $msg);
+            r2(getUrl('home&logged=1'), 's', $msg);
         } else if ($getmsg) {
             $msg .= Lang::T($getmsg);
-            r2(U . 'home', 's', $msg);
+            r2(getUrl('home'), 's', $msg);
         }
     }
 }

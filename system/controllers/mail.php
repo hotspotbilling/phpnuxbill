@@ -14,7 +14,7 @@ switch ($action) {
     case 'view':
         $mail = ORM::for_table('tbl_customers_inbox')->where('customer_id', $user['id'])->find_one($routes['2']);
         if(!$mail){
-            r2(U. 'mail', 'e', Lang::T('Message Not Found'));
+            r2(getUrl('mail'), 'e', Lang::T('Message Not Found'));
         }
         if($mail['date_read'] == null){
             $mail->date_read = date('Y-m-d H:i:s');
@@ -34,9 +34,9 @@ switch ($action) {
     case 'delete':
         if($routes['2']){
             if(ORM::for_table('tbl_customers_inbox')->where('customer_id', $user['id'])->where('id', $routes['2'])->find_one()->delete()){
-                r2(U. 'mail', 's', Lang::T('Mail Deleted Successfully'));
+                r2(getUrl('mail'), 's', Lang::T('Mail Deleted Successfully'));
             }else{
-                r2(U. 'home', 'e', Lang::T('Failed to Delete Message'));
+                r2(getUrl('home'), 'e', Lang::T('Failed to Delete Message'));
             }
             break;
         }

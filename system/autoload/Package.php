@@ -74,10 +74,10 @@ class Package
 
         if (!$p['enabled']) {
             if (!isset($admin) || !isset($admin['id']) || empty($admin['id'])) {
-                r2(U . 'home', 'e', Lang::T('Plan Not found'));
+                r2(getUrl('home'), 'e', Lang::T('Plan Not found'));
             }
             if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                r2(U . 'dashboard', 'e', Lang::T('You do not have permission to access this page'));
+                r2(getUrl('dashboard'), 'e', Lang::T('You do not have permission to access this page'));
             }
         }
 

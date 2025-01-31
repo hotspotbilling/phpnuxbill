@@ -57,7 +57,7 @@ switch ($do) {
             // Expire after 10 minutes
             if (file_exists($otpPath) && time() - filemtime($otpPath) > 1200) {
                 unlink($otpPath);
-                r2(U . 'register', 's', 'Verification code expired');
+                r2(getUrl('register'), 's', 'Verification code expired');
             } else if (file_exists($otpPath)) {
                 $code = file_get_contents($otpPath);
                 if ($code != $otp_code) {
@@ -75,7 +75,7 @@ switch ($do) {
                     unlink($otpPath);
                 }
             } else {
-                r2(U . 'register', 's', 'No Verification code');
+                r2(getUrl('register'), 's', 'No Verification code');
             }
         }
 
@@ -120,7 +120,7 @@ switch ($do) {
                 if ($config['reg_nofify_admin'] == 'yes') {
                     sendTelegram($config['CompanyName'] . ' - ' . Lang::T('New User Registration') . "\n\nFull Name: " . $fullname . "\nUsername: " . $username . "\nEmail: " . $email . "\nPhone Number: " . $phone_number . "\nAddress: " . $address);
                 }
-                r2(U . 'login', 's', Lang::T('Register Success! You can login now'));
+                r2(getUrl('login'), 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);
                 $ui->assign('fullname', $fullname);
@@ -159,7 +159,7 @@ switch ($do) {
             if (!empty($phone_number)) {
                 $d = ORM::for_table('tbl_customers')->where('username', $phone_number)->find_one();
                 if ($d) {
-                    r2(U . 'register', 's', Lang::T('Account already exists'));
+                    r2(getUrl('register'), 's', Lang::T('Account already exists'));
                 }
                 if (!file_exists($otpPath)) {
                     mkdir($otpPath);

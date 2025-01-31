@@ -27,7 +27,7 @@ switch ($action) {
         $password = _post('password');
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'accounts/change-password', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('accounts/change-password'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         run_hook('customer_change_password'); #HOOK
         if ($password != '') {
@@ -36,10 +36,10 @@ switch ($action) {
             $cnpass = _post('cnpass');
             if ($password == $d_pass) {
                 if (!Validator::Length($password, 36, 2)) {
-                    r2(U . 'accounts/change-password', 'e', 'New Password must be 2 to 35 character');
+                    r2(getUrl('accounts/change-password'), 'e', 'New Password must be 2 to 35 character');
                 }
                 if ($npass != $cnpass) {
-                    r2(U . 'accounts/change-password', 'e', 'Both Password should be same');
+                    r2(getUrl('accounts/change-password'), 'e', 'Both Password should be same');
                 }
                 $user->password = $npass;
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->find_many();
@@ -64,10 +64,10 @@ switch ($action) {
                 _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);
                 _alert(Lang::T('Password changed successfully, Please login again'), 'success', "login");
             } else {
-                r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
+                r2(getUrl('accounts/change-password'), 'e', Lang::T('Incorrect Current Password'));
             }
         } else {
-            r2(U . 'accounts/change-password', 'e', Lang::T('Incorrect Current Password'));
+            r2(getUrl('accounts/change-password'), 'e', Lang::T('Incorrect Current Password'));
         }
         break;
 
@@ -81,7 +81,7 @@ switch ($action) {
     case 'edit-profile-post':
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'accounts/profile', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('accounts/profile'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $fullname = _post('fullname');
         $address = _post('address');
@@ -142,7 +142,7 @@ switch ($action) {
                     }
                     if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
                 } else {
-                    r2(U . 'settings/app', 'e', 'PHP GD is not installed');
+                    r2(getUrl('settings/app'), 'e', 'PHP GD is not installed');
                 }
             }
 
@@ -160,9 +160,9 @@ switch ($action) {
             $user->save();
 
             _log('[' . $user['username'] . ']: ' . Lang::T('User Updated Successfully'), 'User', $user['id']);
-            r2(U . 'accounts/profile', 's', Lang::T('User Updated Successfully'));
+            r2(getUrl('accounts/profile'), 's', Lang::T('User Updated Successfully'));
         }else{
-            r2(U . 'accounts/profile', 'e', $msg);
+            r2(getUrl('accounts/profile'), 'e', $msg);
         }
         break;
 
@@ -177,7 +177,7 @@ switch ($action) {
     case 'phone-update-otp':
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $phone = Lang::phoneFormat(_post('phone'));
         $username = $user['username'];
@@ -185,16 +185,16 @@ switch ($action) {
         $_SESSION['new_phone'] = $phone;
         // Validate the phone number format
         if (!preg_match('/^[0-9]{10,}$/', $phone) || empty($phone)) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid phone number format'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Invalid phone number format'));
         }
 
         if (empty($config['sms_url'])) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('SMS server not Available, Please try again later'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('SMS server not Available, Please try again later'));
         }
 
         $d = ORM::for_table('tbl_customers')->whereNotEqual('username', $username)->where('phonenumber', $phone)->find_one();
         if ($d) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Phone number already registered by another customer'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Phone number already registered by another customer'));
         }
         if (!file_exists($otpPath)) {
             mkdir($otpPath);
@@ -205,7 +205,7 @@ switch ($action) {
 
         // expired 10 minutes
         if (file_exists($otpFile) && time() - filemtime($otpFile) < 600) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Please wait ') . (600 - (time() - filemtime($otpFile))) . Lang::T(' seconds before sending another SMS'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Please wait ') . (600 - (time() - filemtime($otpFile))) . Lang::T(' seconds before sending another SMS'));
         } else {
             $otp = rand(100000, 999999);
             file_put_contents($otpFile, $otp);
@@ -220,7 +220,7 @@ switch ($action) {
                 Message::sendWhatsapp($phone, $config['CompanyName'] . "\n\n" . Lang::T("Verification code") . "\n$otp");
             }
             //redirect after sending OTP
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code has been sent to your phone'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Verification code has been sent to your phone'));
         }
 
         break;
@@ -228,7 +228,7 @@ switch ($action) {
     case 'phone-update-post':
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $phone = Lang::phoneFormat(_post('phone'));
         $otp_code = _post('otp');
@@ -237,11 +237,11 @@ switch ($action) {
 
         // Validate the phone number format
         if (!preg_match('/^[0-9]{10,}$/', $phone)) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Invalid phone number format'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Invalid phone number format'));
         }
 
         if (empty($config['sms_url'])) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('SMS server not Available, Please try again later'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('SMS server not Available, Please try again later'));
         }
 
         $otpFile = $otpPath . sha1($username . $db_pass) . ".txt";
@@ -249,7 +249,7 @@ switch ($action) {
 
         // Check if OTP file exists
         if (!file_exists($otpFile)) {
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Please request OTP first'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Please request OTP first'));
             exit();
         }
 
@@ -257,21 +257,21 @@ switch ($action) {
         if (time() - filemtime($otpFile) > 1200) {
             unlink($otpFile);
             unlink($phoneFile);
-            r2(U . 'accounts/phone-update', 'e', Lang::T('Verification code expired'));
+            r2(getUrl('accounts/phone-update'), 'e', Lang::T('Verification code expired'));
             exit();
         } else {
             $code = file_get_contents($otpFile);
 
             // Check if OTP code matches
             if ($code != $otp_code) {
-                r2(U . 'accounts/phone-update', 'e', Lang::T('Wrong Verification code'));
+                r2(getUrl('accounts/phone-update'), 'e', Lang::T('Wrong Verification code'));
                 exit();
             }
 
             // Check if the phone number matches the one that requested the OTP
             $savedPhone = file_get_contents($phoneFile);
             if ($savedPhone !== $phone) {
-                r2(U . 'accounts/phone-update', 'e', Lang::T('The phone number does not match the one that requested the OTP'));
+                r2(getUrl('accounts/phone-update'), 'e', Lang::T('The phone number does not match the one that requested the OTP'));
                 exit();
             }
 
@@ -284,7 +284,7 @@ switch ($action) {
         $user->phonenumber = Lang::phoneFormat($phone);
         $user->save();
 
-        r2(U . 'accounts/profile', 's', Lang::T('Phone number updated successfully'));
+        r2(getUrl('accounts/profile'), 's', Lang::T('Phone number updated successfully'));
         break;
 
     case 'email-update':
@@ -296,7 +296,7 @@ switch ($action) {
     case 'email-update-otp':
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $email = trim(_post('email'));
         $username = $user['username'];
@@ -304,16 +304,16 @@ switch ($action) {
         $_SESSION['new_email'] = $email;
         // Validate the phone number format
         if (!Validator::Email($email)) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Invalid Email address format'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Invalid Email address format'));
         }
 
         if (empty($config['smtp_host'])) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Email server not Available, Please ask admin to configure it'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Email server not Available, Please ask admin to configure it'));
         }
 
         $d = ORM::for_table('tbl_customers')->whereNotEqual('username', $username)->where('email', $email)->find_one();
         if ($d) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Email already used by another Customer'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Email already used by another Customer'));
         }
         if (!file_exists($otpPath)) {
             mkdir($otpPath);
@@ -324,7 +324,7 @@ switch ($action) {
 
         // expired 10 minutes
         if (file_exists($otpFile) && time() - filemtime($otpFile) < 600) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Please wait ') . (600 - (time() - filemtime($otpFile))) . Lang::T(' seconds before sending another Email'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Please wait ') . (600 - (time() - filemtime($otpFile))) . Lang::T(' seconds before sending another Email'));
         } else {
             $otp = rand(100000, 999999);
             file_put_contents($otpFile, $otp);
@@ -333,7 +333,7 @@ switch ($action) {
             $body = Lang::T("Hello") . ' ' . $user['fullname'] . ",\n\n" . Lang::T("Your Email Verification Code is:") . " $otp";
             Message::sendEmail($email, Lang::T('Change Email Verification Code'), $body);
             //redirect after sending OTP
-            r2(U . 'accounts/email-update', 'e', Lang::T('Verification code has been sent to your email. Check Spam folder if not found.'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Verification code has been sent to your email. Check Spam folder if not found.'));
         }
 
         break;
@@ -341,7 +341,7 @@ switch ($action) {
     case 'email-update-post':
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $email = trim(_post('email'));
         $otp_code = _post('otp');
@@ -349,12 +349,12 @@ switch ($action) {
         $otpPath = $CACHE_PATH . '/email/';
         // Validate the phone number format
         if (!Validator::Email($email)) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Invalid Email address format'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Invalid Email address format'));
             exit();
         }
 
         if (empty($config['smtp_host'])) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Email server not Available, Please ask admin to configure it'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Email server not Available, Please ask admin to configure it'));
         }
 
         $otpFile = $otpPath . sha1($username . $db_pass) . ".txt";
@@ -362,7 +362,7 @@ switch ($action) {
 
         // Check if OTP file exists
         if (!file_exists($otpFile)) {
-            r2(U . 'accounts/email-update', 'e', Lang::T('Please request OTP first'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Please request OTP first'));
             exit();
         }
 
@@ -370,21 +370,21 @@ switch ($action) {
         if (time() - filemtime($otpFile) > 1200) {
             unlink($otpFile);
             unlink($emailFile);
-            r2(U . 'accounts/email-update', 'e', Lang::T('Verification code expired'));
+            r2(getUrl('accounts/email-update'), 'e', Lang::T('Verification code expired'));
             exit();
         } else {
             $code = file_get_contents($otpFile);
 
             // Check if OTP code matches
             if ($code != $otp_code) {
-                r2(U . 'accounts/email-update', 'e', Lang::T('Wrong Verification code'));
+                r2(getUrl('accounts/email-update'), 'e', Lang::T('Wrong Verification code'));
                 exit();
             }
 
             // Check if the phone number matches the one that requested the OTP
             $savedEmail = file_get_contents($emailFile);
             if ($savedEmail !== $email) {
-                r2(U . 'accounts/email-update', 'e', Lang::T('The Email Address does not match the one that requested the OTP'));
+                r2(getUrl('accounts/email-update'), 'e', Lang::T('The Email Address does not match the one that requested the OTP'));
                 exit();
             }
 
@@ -396,7 +396,7 @@ switch ($action) {
         $user->email = $email;
         $user->save();
 
-        r2(U . 'accounts/profile', 's', Lang::T('Email Address updated successfully'));
+        r2(getUrl('accounts/profile'), 's', Lang::T('Email Address updated successfully'));
         break;
 
     case 'language-update-post':

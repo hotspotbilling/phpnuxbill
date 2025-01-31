@@ -34,7 +34,7 @@ switch ($action) {
         break;
     case 'balance':
         if (strpos($user['email'], '@') === false) {
-            r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
+            r2(getUrl('accounts/profile'), 'e', Lang::T("Please enter your email address"));
         }
         $ui->assign('_title', 'Top Up');
         $ui->assign('_system_menu', 'balance');
@@ -44,7 +44,7 @@ switch ($action) {
         break;
     case 'package':
         if (strpos($user['email'], '@') === false) {
-            r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
+            r2(getUrl('accounts/profile'), 'e', Lang::T("Please enter your email address"));
         }
         $ui->assign('_title', 'Order Plan');
         $ui->assign('_system_menu', 'package');
@@ -144,12 +144,12 @@ switch ($action) {
         r_find_unpaid'); #HOOK
         if ($d) {
             if (empty($d['pg_url_payment'])) {
-                r2(U . "order/buy/" . $trx['routers_id'] . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
+                r2(getUrl('order/buy/') . $trx['routers_id'] . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
             } else {
-                r2(U . "order/view/" . $d['id'] . '/check/', 's', Lang::T("You have unpaid transaction"));
+                r2(getUrl('order/view/') . $d['id'] . '/check/', 's', Lang::T("You have unpaid transaction"));
             }
         } else {
-            r2(U . "order/package/", 's', Lang::T("You have no unpaid transaction"));
+            r2(getUrl('order/package/'), 's', Lang::T("You have no unpaid transaction"));
         }
         break;
     case 'view':
@@ -160,15 +160,15 @@ switch ($action) {
         run_hook('customer_view_payment'); #HOOK
         // jika tidak ditemukan, berarti punya orang lain
         if (empty($trx)) {
-            r2(U . "order/package", 'w', Lang::T("Payment not found"));
+            r2(getUrl('order/package'), 'w', Lang::T("Payment not found"));
         }
         // jika url kosong, balikin ke buy, kecuali cancel
         if ($trx['status'] == 1 && empty($trx['pg_url_payment']) && $routes['3'] != 'cancel') {
-            r2(U . "order/buy/" . (($trx['routers_id'] == 0) ? $trx['routers'] : $trx['routers_id']) . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
+            r2(getUrl('order/buy/') . (($trx['routers_id'] == 0) ? $trx['routers'] : $trx['routers_id']) . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
         }
         if ($routes['3'] == 'check') {
             if (!file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $trx['gateway'] . '.php')) {
-                r2(U . 'order/view/' . $trxid, 'e', Lang::T("No Payment Gateway Available"));
+                r2(getUrl('order/view/') . $trxid, 'e', Lang::T("No Payment Gateway Available"));
             }
             run_hook('customer_check_payment_status'); #HOOK
             include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $trx['gateway'] . '.php';
@@ -185,7 +185,7 @@ switch ($action) {
                 ->find_one($trxid);
         }
         if (empty($trx)) {
-            r2(U . "order/package", 'e', Lang::T("Transaction Not found"));
+            r2(getUrl('order/package'), 'e', Lang::T("Transaction Not found"));
         }
 
         $router = ORM::for_table('tbl_routers')->where('name', $trx['routers'])->find_one();
@@ -202,10 +202,10 @@ switch ($action) {
         break;
     case 'pay':
         if ($config['enable_balance'] != 'yes') {
-            r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
+            r2(getUrl('order/package'), 'e', Lang::T("Balance not enabled"));
         }
         if (!empty(App::getTokenValue($_GET['stoken']))) {
-            r2(U . "voucher/invoice/");
+            r2(getUrl('voucher/invoice/'));
             die();
         }
         if ($user['status'] != 'Active') {
@@ -213,7 +213,7 @@ switch ($action) {
         }
         $plan = ORM::for_table('tbl_plans')->find_one($routes[3]);
         if (!$plan) {
-            r2(U . "order/package", 'e', Lang::T("Plan Not found"));
+            r2(getUrl('order/package'), 'e', Lang::T("Plan Not found"));
         }
         if ($plan['is_radius'] == '1') {
             $router_name = 'radius';
@@ -247,21 +247,21 @@ switch ($action) {
                 // if success, then get the balance
                 Balance::min($user['id'], $total_cost);
                 App::setToken($_GET['stoken'], "success");
-                r2(U . "voucher/invoice/", 's', Lang::T("Success to buy package"));
+                r2(getUrl('voucher/invoice/'), 's', Lang::T("Success to buy package"));
             } else {
-                r2(U . "order/package", 'e', Lang::T("Failed to buy package"));
+                r2(getUrl('order/package'), 'e', Lang::T("Failed to buy package"));
                 Message::sendTelegram("Buy Package with Balance Failed\n\n#u$c[username] #buy \n" . $plan['name_plan'] .
                     "\nRouter: " . $router_name .
                     "\nPrice: " . $total_cost);
             }
         } else {
-            r2(U . "order/gateway/$routes[2]/$routes[3]", 'e', Lang::T("Insufficient balance"));
+            r2(getUrl('order/gateway/$routes[2]/$routes[3]'), 'e', Lang::T("Insufficient balance"));
         }
         break;
 
     case 'send':
         if ($config['enable_balance'] != 'yes') {
-            r2(U . "order/package", 'e', Lang::T("Balance not enabled"));
+            r2(getUrl('order/package'), 'e', Lang::T("Balance not enabled"));
         }
         if ($user['status'] != 'Active') {
             _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
@@ -270,10 +270,10 @@ switch ($action) {
         $ui->assign('_system_menu', 'package');
         $plan = ORM::for_table('tbl_plans')->find_one($routes['3']);
         if (empty($plan)) {
-            r2(U . "order/package", 'e', Lang::T("Plan Not found"));
+            r2(getUrl('order/package'), 'e', Lang::T("Plan Not found"));
         }
         if (!$plan['enabled']) {
-            r2(U . "home", 'e', 'Plan is not exists');
+            r2(getUrl('home'), 'e', 'Plan is not exists');
         }
         if ($plan['is_radius'] == '1') {
             $routes['2'] = 0;
@@ -312,13 +312,13 @@ switch ($action) {
             }
 
             if (!$target) {
-                r2(U . 'home', 'd', Lang::T('Username not found'));
+                r2(getUrl('home'), 'd', Lang::T('Username not found'));
             }
             if ($user['balance'] < $plan['price']) {
-                r2(U . 'home', 'd', Lang::T('insufficient balance'));
+                r2(getUrl('home'), 'd', Lang::T('insufficient balance'));
             }
             if ($user['username'] == $target['username']) {
-                r2(U . "order/pay/$routes[2]/$routes[3]", 's', '^_^ v');
+                r2(getUrl('order/pay/$routes[2]/$routes[3]'), 's', '^_^ v');
             }
             $active = ORM::for_table('tbl_user_recharges')
                 ->where('username', _post('username'))
@@ -326,7 +326,7 @@ switch ($action) {
                 ->find_one();
 
             if ($active && $active['plan_id'] != $plan['id']) {
-                r2(U . "order/package", 'e', Lang::T("Target has active plan, different with current plant.") . " [ <b>$active[namebp]</b> ]");
+                r2(getUrl('order/package'), 'e', Lang::T("Target has active plan, different with current plant.") . " [ <b>$active[namebp]</b> ]");
             }
             $result = Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['username'], 'Balance');
             if (!empty($result)) {
@@ -371,7 +371,7 @@ switch ($action) {
                 $d->trx_invoice = $result;
                 $d->status = 2;
                 $d->save();
-                r2(U . "order/view/$trx_id", 's', Lang::T("Success to send package"));
+                r2(getUrl('order/view/$trx_id'), 's', Lang::T("Success to send package"));
             } else {
                 $errorMessage = "Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .
                     "\nRouter: " . $router_name .
@@ -381,7 +381,7 @@ switch ($action) {
                     $errorMessage .= "\nTax: " . $tax;
                 }
 
-                r2(U . "order/package", 'e', Lang::T("Failed to Send package"));
+                r2(getUrl('order/package'), 'e', Lang::T("Failed to Send package"));
                 Message::sendTelegram($errorMessage);
             }
         }
@@ -395,7 +395,7 @@ switch ($action) {
         $ui->assign('_title', Lang::T('Select Payment Gateway'));
         $ui->assign('_system_menu', 'package');
         if (strpos($user['email'], '@') === false) {
-            r2(U . 'accounts/profile', 'e', Lang::T("Please enter your email address"));
+            r2(getUrl('accounts/profile'), 'e', Lang::T("Please enter your email address"));
         }
         $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
         $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
@@ -503,7 +503,7 @@ switch ($action) {
         if (count($pgs) == 0) {
             sendTelegram("Payment Gateway not set, please set it in Settings");
             _log(Lang::T("Payment Gateway not set, please set it in Settings"));
-            r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
+            r2(getUrl('home'), 'e', Lang::T("Failed to create Transaction.."));
         }
         if (count($pgs) > 0) {
             $ui->assign('pgs', $pgs);
@@ -516,7 +516,7 @@ switch ($action) {
                     $ui->assign('custom', '1');
                     $ui->assign('amount', _post('amount'));
                 } else {
-                    r2(U . "order/balance", 'e', Lang::T("Please enter amount"));
+                    r2(getUrl('order/balance'), 'e', Lang::T("Please enter amount"));
                 }
             }
 
@@ -530,14 +530,14 @@ switch ($action) {
         } else {
             sendTelegram("Payment Gateway not set, please set it in Settings");
             _log(Lang::T("Payment Gateway not set, please set it in Settings"));
-            r2(U . "home", 'e', Lang::T("Failed to create Transaction.."));
+            r2(getUrl('home'), 'e', Lang::T("Failed to create Transaction.."));
         }
     case 'buy':
         $gateway = _post('gateway');
         $discount = _post('discount') ?: 0;
         if ($gateway == 'balance') {
             unset($_SESSION['gateway']);
-            r2(U . 'order/pay/' . $routes[2] . '/' . $routes[3]);
+            r2(getUrl('order/pay/') . $routes[2] . '/' . $routes[3]);
         }
         if (empty($gateway) && !empty($_SESSION['gateway'])) {
             $gateway = $_SESSION['gateway'];
@@ -548,7 +548,7 @@ switch ($action) {
             _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
         }
         if (empty($gateway)) {
-            r2(U . 'order/gateway/' . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please select Payment Gateway"));
+            r2(getUrl('order/gateway/') . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please select Payment Gateway"));
         }
         run_hook('customer_buy_plan'); #HOOK
         include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $gateway . '.php';
@@ -560,7 +560,7 @@ switch ($action) {
                 $amount = (float) $amount;
 
                 if ($amount <= 0) {
-                    r2(U . "order/gateway/" . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please enter amount"));
+                    r2(getUrl('order/gateway/') . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please enter amount"));
                 }
 
                 $d = ORM::for_table('tbl_payment_gateway')
@@ -569,7 +569,7 @@ switch ($action) {
                     ->find_one();
                 if ($d) {
                     if ($d['pg_url_payment']) {
-                        r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
+                        r2(getUrl('order/view/') . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
                     } else {
                         if ($gateway == $d['gateway']) {
                             $id = $d['id'];
@@ -606,7 +606,7 @@ switch ($action) {
                     $router['name'] = 'balance';
                 }
                 if (empty($router) || empty($plan)) {
-                    r2(U . "order/package", 'e', Lang::T("Plan Not found"));
+                    r2(getUrl('order/package'), 'e', Lang::T("Plan Not found"));
                 }
                 $d = ORM::for_table('tbl_payment_gateway')
                     ->where('username', $user['username'])
@@ -614,7 +614,7 @@ switch ($action) {
                     ->find_one();
                 if ($d) {
                     if ($d['pg_url_payment']) {
-                        r2(U . "order/view/" . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
+                        r2(getUrl('order/view/') . $d['id'], 'w', Lang::T("You already have unpaid transaction, cancel it or pay it."));
                     } else {
                         if ($gateway == $d['gateway']) {
                             $id = $d['id'];
@@ -693,11 +693,11 @@ switch ($action) {
                 break;
         }
         if (!$id) {
-            r2(U . "order/package/" . $d['id'], 'e', Lang::T("Failed to create Transaction.."));
+            r2(getUrl('order/package/') . $d['id'], 'e', Lang::T("Failed to create Transaction.."));
         } else {
             call_user_func($gateway . '_create_transaction', $d, $user);
         }
         break;
     default:
-        r2(U . "order/package/", 's', '');
+        r2(getUrl('order/package/'), 's', '');
 }

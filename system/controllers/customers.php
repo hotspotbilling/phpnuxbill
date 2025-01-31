@@ -27,7 +27,7 @@ switch ($action) {
         }
         $csrf_token = _req('token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
 
         $cs = ORM::for_table('tbl_customers')
@@ -168,7 +168,7 @@ switch ($action) {
         $plan_id = $routes['3'];
         $csrf_token = _req('token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/view/' . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
@@ -192,13 +192,13 @@ switch ($action) {
             list($bills, $add_cost) = User::getBills($id_customer);
             if ($using == 'balance' && $config['enable_balance'] == 'yes') {
                 if (!$cust) {
-                    r2(U . 'plan/recharge', 'e', Lang::T('Customer not found'));
+                    r2(getUrl('plan/recharge'), 'e', Lang::T('Customer not found'));
                 }
                 if (!$plan) {
-                    r2(U . 'plan/recharge', 'e', Lang::T('Plan not found'));
+                    r2(getUrl('plan/recharge'), 'e', Lang::T('Plan not found'));
                 }
                 if ($cust['balance'] < ($plan['price'] + $add_cost + $tax)) {
-                    r2(U . 'plan/recharge', 'e', Lang::T('insufficient balance'));
+                    r2(getUrl('plan/recharge'), 'e', Lang::T('insufficient balance'));
                 }
                 $gateway = 'Recharge Balance';
             }
@@ -227,7 +227,7 @@ switch ($action) {
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('recharge-confirm.tpl');
         } else {
-            r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
+            r2(getUrl('customers/view/') . $id_customer, 'e', 'Cannot find active plan');
         }
         break;
     case 'deactivate':
@@ -238,7 +238,7 @@ switch ($action) {
         $plan_id = $routes['3'];
         $csrf_token = _req('token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/view/' . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $b = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('plan_id', $plan_id)->find_one();
         if ($b) {
@@ -261,16 +261,16 @@ switch ($action) {
                 $b->save();
                 _log('Admin ' . $admin['username'] . ' Deactivate ' . $b['namebp'] . ' for ' . $b['username'], 'User', $b['customer_id']);
                 Message::sendTelegram('Admin ' . $admin['username'] . ' Deactivate ' . $b['namebp'] . ' for u' . $b['username']);
-                r2(U . 'customers/view/' . $id_customer, 's', 'Success deactivate customer to Mikrotik');
+                r2(getUrl('customers/view/') . $id_customer, 's', 'Success deactivate customer to Mikrotik');
             }
         }
-        r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
+        r2(getUrl('customers/view/') . $id_customer, 'e', 'Cannot find active plan');
         break;
     case 'sync':
         $id_customer = $routes['2'];
         $csrf_token = _req('token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/view/' . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $bs = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->findMany();
         if ($bs) {
@@ -295,9 +295,9 @@ switch ($action) {
                     }
                 }
             }
-            r2(U . 'customers/view/' . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
+            r2(getUrl('customers/view/') . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
         }
-        r2(U . 'customers/view/' . $id_customer, 'e', 'Cannot find active plan');
+        r2(getUrl('customers/view/') . $id_customer, 'e', 'Cannot find active plan');
         break;
     case 'login':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
@@ -306,7 +306,7 @@ switch ($action) {
         $id = $routes['2'];
         $csrf_token = _req('token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/view/' . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers/view/') . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $customer = ORM::for_table('tbl_customers')->find_one($id);
         if ($customer) {
@@ -366,7 +366,7 @@ switch ($action) {
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('customers-view.tpl');
         } else {
-            r2(U . 'customers/list', 'e', Lang::T('Account Not Found'));
+            r2(getUrl('customers/list'), 'e', Lang::T('Account Not Found'));
         }
         break;
     case 'edit':
@@ -405,7 +405,7 @@ switch ($action) {
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('customers-edit.tpl');
         } else {
-            r2(U . 'customers/list', 'e', Lang::T('Account Not Found'));
+            r2(getUrl('customers/list'), 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -416,7 +416,7 @@ switch ($action) {
         $id = $routes['2'];
         $csrf_token = _req('token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/view/' . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers/view/') . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         run_hook('delete_customer'); #HOOK
         $c = ORM::for_table('tbl_customers')->find_one($id);
@@ -448,7 +448,7 @@ switch ($action) {
                 $c->delete();
             } catch (Exception $e) {
             }
-            r2(U . 'customers/list', 's', Lang::T('User deleted Successfully'));
+            r2(getUrl('customers/list'), 's', Lang::T('User deleted Successfully'));
         }
         break;
 
@@ -456,7 +456,7 @@ switch ($action) {
 
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/add', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers/add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
@@ -575,9 +575,9 @@ switch ($action) {
                     }
                 }
             }
-            r2(U . 'customers/list', 's', Lang::T('Account Created Successfully'));
+            r2(getUrl('customers/list'), 's', Lang::T('Account Created Successfully'));
         } else {
-            r2(U . 'customers/add', 'e', $msg);
+            r2(getUrl('customers/add'), 'e', $msg);
         }
         break;
 
@@ -585,7 +585,7 @@ switch ($action) {
         $id = _post('id');
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(U . 'customers/edit/' . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('customers/edit/') . $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $username = alphanumeric(_post('username'), ":+_.@-");
         $fullname = _post('fullname');
@@ -708,7 +708,7 @@ switch ($action) {
                     }
                     if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
                 } else {
-                    r2(U . 'settings/app', 'e', 'PHP GD is not installed');
+                    r2(getUrl('settings/app'), 'e', 'PHP GD is not installed');
                 }
             }
             if ($userDiff) {
@@ -815,9 +815,9 @@ switch ($action) {
                     $tur->save();
                 }
             }
-            r2(U . 'customers/view/' . $id, 's', 'User Updated Successfully');
+            r2(getUrl('customers/view/') . $id, 's', 'User Updated Successfully');
         } else {
-            r2(U . 'customers/edit/' . $id, 'e', $msg);
+            r2(getUrl('customers/edit/') . $id, 'e', $msg);
         }
         break;
 
@@ -856,7 +856,7 @@ switch ($action) {
         if (_post('export', '') == 'csv') {
             $csrf_token = _post('csrf_token');
             if (!Csrf::check($csrf_token)) {
-                r2(U . 'customers', 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+                r2(getUrl('customers'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
             }
             $d = $query->findMany();
             $h = false;

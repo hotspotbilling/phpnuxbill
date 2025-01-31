@@ -109,4 +109,20 @@ class Text
         }
         return $result;
     }
+
+    public static function url(...$data){
+        global $config;
+        $url = implode("", $data);
+        if ($config['url_canonical'] != 'Yes') {
+            $u = str_replace('?_route=', '', U);
+            $pos = strpos($url, '&');
+            if ($pos === false) {
+                return $u . $url;
+            } else {
+                return $u . substr($url, 0, $pos) . '?' . substr($url, $pos + 1);
+            }
+        } else {
+            return U . $url;
+        }
+    }
 }

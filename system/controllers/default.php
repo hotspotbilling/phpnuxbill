@@ -5,9 +5,9 @@
  **/
 
 if(Admin::getID()){
-    r2(U.'dashboard');
+    r2(getUrl('dashboard'));
 }if(User::getID()){
-    r2(U.'home');
+    r2(getUrl('home'));
 }else{
-    r2(U.'login');
+    r2(getUrl('login'));
 }

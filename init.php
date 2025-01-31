@@ -42,7 +42,7 @@ spl_autoload_register('_autoloader');
 if (!file_exists($root_path . 'config.php')) {
     $root_path .= '..' . DIRECTORY_SEPARATOR;
     if (!file_exists($root_path . 'config.php')) {
-        r2('install');
+        r2(getUrl('install'));
     }
 }
 
@@ -196,7 +196,7 @@ function _auth($login = true)
         return true;
     } else {
         if ($login) {
-            r2(U . 'login');
+            r2(getUrl('login'));
         } else {
             return false;
         }
@@ -209,7 +209,7 @@ function _admin($login = true)
         return true;
     } else {
         if ($login) {
-            r2(U . 'login');
+            r2(getUrl('login'));
         } else {
             return false;
         }
@@ -261,6 +261,13 @@ function showResult($success, $message = '', $result = [], $meta = [])
     die();
 }
 
+/**
+ * make url canonical or standar
+ */
+function getUrl($url)
+{
+    Text::url($url);
+}
 
 function generateUniqueNumericVouchers($totalVouchers, $length = 8)
 {
@@ -333,10 +340,10 @@ function _alert($text, $type = 'success', $url = "home", $time = 3)
     if (!isset($ui)) return;
     if (strlen($url) > 4) {
         if (substr($url, 0, 4) != "http") {
-            $url = U . $url;
+            $url = getUrl($url);
         }
     } else {
-        $url = U . $url;
+        $url = getUrl($url);
     }
     $ui->assign('text', $text);
     $ui->assign('type', $type);

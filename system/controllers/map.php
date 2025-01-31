@@ -49,6 +49,6 @@ switch ($action) {
         break;
 
     default:
-        r2(U . 'map/customer', 'e', 'action not defined');
+        r2(getUrl('map/customer'), 'e', 'action not defined');
         break;
 }

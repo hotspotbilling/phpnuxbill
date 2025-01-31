@@ -26,7 +26,7 @@ if (strpos($action, "-reset") !== false) {
     } else {
         file_put_contents($path, Http::getData('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/pages_template/' . $action . '.html'));
     }
-    r2(U . 'pages/' . $action);
+    r2(getUrl('pages/') . $action);
 } else if (strpos($action, "-post") === false) {
     if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
         _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
@@ -78,9 +78,9 @@ if (strpos($action, "-reset") !== false) {
                     file_put_contents("$PAGES_PATH/vouchers/" . _post('template_name') . '.html', $html);
                 }
             }
-            r2(U . 'pages/' . $action, 's', Lang::T("Saving page success"));
+            r2(getUrl('pages/') . $action, 's', Lang::T("Saving page success"));
         } else {
-            r2(U . 'pages/' . $action, 'e', Lang::T("Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>"));
+            r2(getUrl('pages/') . $action, 'e', Lang::T("Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>"));
         }
     } else
         $ui->display('a404.tpl');

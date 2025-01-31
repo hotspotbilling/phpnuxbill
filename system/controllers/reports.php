@@ -257,7 +257,7 @@ switch ($action) {
         $keep = _post('keep');
         if (!empty($keep)) {
             ORM::raw_execute("DELETE FROM tbl_transactions WHERE date < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))");
-            r2(U . "logs/list/", 's', "Delete logs older than $keep days");
+            r2(getUrl('logs/list/'), 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
             $query = ORM::for_table('tbl_transactions')->where_like('invoice', '%' . $q . '%')->order_by_desc('id');

@@ -30,12 +30,12 @@ switch ($action) {
                 $v1->used_date = date('Y-m-d H:i:s');
                 $v1->user = $user['username'];
                 $v1->save();
-                r2(U . "voucher/list-activated", 's', Lang::T('Activation Vouchers Successfully'));
+                r2(getUrl('voucher/list-activated'), 's', Lang::T('Activation Vouchers Successfully'));
             } else {
-                r2(U . 'voucher/activation', 'e', "Failed to refill account");
+                r2(getUrl('voucher/activation'), 'e', "Failed to refill account");
             }
         } else {
-            r2(U . 'voucher/activation', 'e', Lang::T('Voucher Not Valid'));
+            r2(getUrl('voucher/activation'), 'e', Lang::T('Voucher Not Valid'));
         }
         break;
 
@@ -66,7 +66,7 @@ switch ($action) {
             Package::createInvoice($in);
             $ui->display('customer/invoice-customer.tpl');
         } else {
-            r2(U . 'voucher/list-activated', 'e', Lang::T('Not Found'));
+            r2(getUrl('voucher/list-activated'), 'e', Lang::T('Not Found'));
         }
         break;
     default:

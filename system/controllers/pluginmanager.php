@@ -25,7 +25,7 @@ if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
     $json = json_decode($txt, true);
     if (empty($json['plugins']) && empty($json['payment_gateway'])) {
         unlink($cache);
-        r2(U . 'pluginmanager');
+        r2(getUrl('pluginmanager'));
     }
 } else {
     $data = Http::getData($plugin_repository);
@@ -35,23 +35,23 @@ if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
 switch ($action) {
     case 'refresh':
         if (file_exists($cache)) unlink($cache);
-        r2(U . "pluginmanager", 's', 'Refresh success');
+        r2(getUrl('pluginmanager'), 's', 'Refresh success');
         break;
     case 'dlinstall':
         if ($_app_stage == 'demo') {
-            r2(U . "pluginmanager", 'e', 'Demo Mode cannot install as it Security risk');
+            r2(getUrl('pluginmanager'), 'e', 'Demo Mode cannot install as it Security risk');
         }
         if (!is_writeable($CACHE_PATH)) {
-            r2(U . "pluginmanager", 'e', 'Folder cache/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder cache/ is not writable');
         }
         if (!is_writeable($PLUGIN_PATH)) {
-            r2(U . "pluginmanager", 'e', 'Folder plugin/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder plugin/ is not writable');
         }
         if (!is_writeable($DEVICE_PATH)) {
-            r2(U . "pluginmanager", 'e', 'Folder devices/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder devices/ is not writable');
         }
         if (!is_writeable($UI_PATH . DIRECTORY_SEPARATOR . 'themes')) {
-            r2(U . "pluginmanager", 'e', 'Folder themes/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder themes/ is not writable');
         }
         $cache = $CACHE_PATH . DIRECTORY_SEPARATOR . 'installer' . DIRECTORY_SEPARATOR;
         if (!file_exists($cache)) {
@@ -97,7 +97,7 @@ switch ($action) {
             }
             //Cleaning
             File::deleteFolder($cache);
-            r2(U . "pluginmanager", 's', 'Installation success');
+            r2(getUrl('pluginmanager'), 's', 'Installation success');
         } else if (_post('gh_url', '') != '') {
             $ghUrl = _post('gh_url', '');
             if (!empty($config['github_token']) && !empty($config['github_username'])) {
@@ -155,17 +155,17 @@ switch ($action) {
                 }
             }
             File::deleteFolder($cache);
-            r2(U . "pluginmanager", 's', 'Installation success');
+            r2(getUrl('pluginmanager'), 's', 'Installation success');
         } else {
-            r2(U . 'pluginmanager', 'e', 'Nothing Installed');
+            r2(getUrl('pluginmanager'), 'e', 'Nothing Installed');
         }
         break;
     case 'delete':
         if (!is_writeable($CACHE_PATH)) {
-            r2(U . "pluginmanager", 'e', 'Folder cache/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder cache/ is not writable');
         }
         if (!is_writeable($PLUGIN_PATH)) {
-            r2(U . "pluginmanager", 'e', 'Folder plugin/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder plugin/ is not writable');
         }
         set_time_limit(-1);
         $tipe = $routes['2'];
@@ -199,12 +199,12 @@ switch ($action) {
                         $folder = $CACHE_PATH . File::pathFixer('/' . $plugin . '-master/');
                     }
                     if (!file_exists($folder)) {
-                        r2(U . "pluginmanager", 'e', 'Extracted Folder is unknown');
+                        r2(getUrl('pluginmanager'), 'e', 'Extracted Folder is unknown');
                     }
                     scanAndRemovePath($folder, $PLUGIN_PATH . DIRECTORY_SEPARATOR);
                     File::deleteFolder($folder);
                     unlink($file);
-                    r2(U . "pluginmanager", 's', 'Plugin ' . $plugin . ' has been deleted');
+                    r2(getUrl('pluginmanager'), 's', 'Plugin ' . $plugin . ' has been deleted');
                     break;
                 }
             }
@@ -213,10 +213,10 @@ switch ($action) {
         break;
     case 'install':
         if (!is_writeable($CACHE_PATH)) {
-            r2(U . "pluginmanager", 'e', 'Folder cache/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder cache/ is not writable');
         }
         if (!is_writeable($PLUGIN_PATH)) {
-            r2(U . "pluginmanager", 'e', 'Folder plugin/ is not writable');
+            r2(getUrl('pluginmanager'), 'e', 'Folder plugin/ is not writable');
         }
         set_time_limit(-1);
         $tipe = $routes['2'];
@@ -250,12 +250,12 @@ switch ($action) {
                         $folder = $CACHE_PATH . File::pathFixer('/' . $plugin . '-master/');
                     }
                     if (!file_exists($folder)) {
-                        r2(U . "pluginmanager", 'e', 'Extracted Folder is unknown');
+                        r2(getUrl('pluginmanager'), 'e', 'Extracted Folder is unknown');
                     }
                     File::copyFolder($folder, $PLUGIN_PATH . DIRECTORY_SEPARATOR, ['README.md', 'LICENSE']);
                     File::deleteFolder($folder);
                     unlink($file);
-                    r2(U . "pluginmanager", 's', 'Plugin ' . $plugin . ' has been installed');
+                    r2(getUrl('pluginmanager'), 's', 'Plugin ' . $plugin . ' has been installed');
                     break;
                 }
             }
@@ -287,12 +287,12 @@ switch ($action) {
                         $folder = $CACHE_PATH . File::pathFixer('/' . $plugin . '-master/');
                     }
                     if (!file_exists($folder)) {
-                        r2(U . "pluginmanager", 'e', 'Extracted Folder is unknown');
+                        r2(getUrl('pluginmanager'), 'e', 'Extracted Folder is unknown');
                     }
                     File::copyFolder($folder, $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR, ['README.md', 'LICENSE']);
                     File::deleteFolder($folder);
                     unlink($file);
-                    r2(U . "paymentgateway", 's', 'Payment Gateway ' . $plugin . ' has been installed');
+                    r2(getUrl('paymentgateway'), 's', 'Payment Gateway ' . $plugin . ' has been installed');
                     break;
                 }
             }
@@ -324,12 +324,12 @@ switch ($action) {
                         $folder = $CACHE_PATH . File::pathFixer('/' . $plugin . '-master/');
                     }
                     if (!file_exists($folder)) {
-                        r2(U . "pluginmanager", 'e', 'Extracted Folder is unknown');
+                        r2(getUrl('pluginmanager'), 'e', 'Extracted Folder is unknown');
                     }
                     File::copyFolder($folder, $DEVICE_PATH . DIRECTORY_SEPARATOR, ['README.md', 'LICENSE']);
                     File::deleteFolder($folder);
                     unlink($file);
-                    r2(U . "settings/devices", 's', 'Device ' . $plugin . ' has been installed');
+                    r2(getUrl('settings/devices'), 's', 'Device ' . $plugin . ' has been installed');
                     break;
                 }
             }

@@ -55,7 +55,7 @@ switch ($action) {
             run_hook('view_router_edit'); #HOOK
             $ui->display('routers-edit.tpl');
         } else {
-            r2(U . 'routers/list', 'e', Lang::T('Account Not Found'));
+            r2(getUrl('routers/list'), 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -65,7 +65,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_routers')->find_one($id);
         if ($d) {
             $d->delete();
-            r2(U . 'routers/list', 's', Lang::T('Data Deleted Successfully'));
+            r2(getUrl('routers/list'), 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -109,9 +109,9 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->save();
 
-            r2(U . 'routers/edit/' . $d->id(), 's', Lang::T('Data Created Successfully'));
+            r2(getUrl('routers/edit/') . $d->id(), 's', Lang::T('Data Created Successfully'));
         } else {
-            r2(U . 'routers/add', 'e', $msg);
+            r2(getUrl('routers/add'), 'e', $msg);
         }
         break;
 
@@ -197,9 +197,9 @@ switch ($action) {
                 $p->set('routers', $name);
                 $p->save();
             }
-            r2(U . 'routers/list', 's', Lang::T('Data Updated Successfully'));
+            r2(getUrl('routers/list'), 's', Lang::T('Data Updated Successfully'));
         } else {
-            r2(U . 'routers/edit/' . $id, 'e', $msg);
+            r2(getUrl('routers/edit/') . $id, 'e', $msg);
         }
         break;
 

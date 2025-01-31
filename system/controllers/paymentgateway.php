@@ -16,7 +16,7 @@ switch ($action) {
         if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $pg . '.php')) {
             deleteFile($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR, $pg);
         }
-        r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway Deleted'));
+        r2(getUrl('paymentgateway'), 's', Lang::T('Payment Gateway Deleted'));
 
     case 'audit':
         $pg = alphanumeric($routes[2]);
@@ -61,7 +61,7 @@ switch ($action) {
                 $d->value = $pgs;
                 $d->save();
             }
-            r2(U . 'paymentgateway', 's', Lang::T('Payment Gateway saved successfully'));
+            r2(getUrl('paymentgateway'), 's', Lang::T('Payment Gateway saved successfully'));
         }
 
         if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) {
@@ -81,7 +81,7 @@ switch ($action) {
             }
         } else {
             if (!empty($action)) {
-                r2(U . 'paymentgateway', 'w', Lang::T('Payment Gateway Not Found'));
+                r2(getUrl('paymentgateway'), 'w', Lang::T('Payment Gateway Not Found'));
             } else {
                 $files = scandir($PAYMENTGATEWAY_PATH);
                 foreach ($files as $file) {

@@ -62,7 +62,7 @@ EOT;
 
         // Check if fields are empty
         if ($id_customer == '' or $message == '' or $via == '') {
-            r2(U . 'message/send', 'e', Lang::T('All field is required'));
+            r2(getUrl('message/send'), 'e', Lang::T('All field is required'));
         } else {
             // Get customer details from the database
             $c = ORM::for_table('tbl_customers')->find_one($id_customer);
@@ -84,9 +84,9 @@ EOT;
             }
 
             if (isset($smsSent) || isset($waSent)) {
-                r2(U . 'message/send', 's', Lang::T('Message Sent Successfully'));
+                r2(getUrl('message/send'), 's', Lang::T('Message Sent Successfully'));
             } else {
-                r2(U . 'message/send', 'e', Lang::T('Failed to send message'));
+                r2(getUrl('message/send'), 'e', Lang::T('Failed to send message'));
             }
         }
         break;
@@ -114,7 +114,7 @@ EOT;
         if (_req('send') == 'now') {
             // Check if fields are empty
             if ($group == '' || $message == '' || $via == '') {
-                r2(U . 'message/send_bulk', 'e', Lang::T('All fields are required'));
+                r2(getUrl('message/send_bulk'), 'e', Lang::T('All fields are required'));
             } else {
                 // Get customer details from the database based on the selected group
                 if ($group == 'all') {
@@ -234,5 +234,5 @@ EOT;
         break;
 
     default:
-        r2(U . 'message/send_sms', 'e', 'action not defined');
+        r2(getUrl('message/send_sms'), 'e', 'action not defined');
 }

@@ -10,7 +10,7 @@ header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
 header("Pragma: no-cache");
 
 if (Admin::getID()) {
-    r2(U . 'dashboard', "s", Lang::T("You are already logged in"));
+    r2(getUrl('dashboard'), "s", Lang::T("You are already logged in"));
 }
 
 if (isset($routes['1'])) {

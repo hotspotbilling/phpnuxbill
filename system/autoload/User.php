@@ -206,7 +206,7 @@ class User
         global $config;
         if ($config['maintenance_mode'] == true) {
             if ($config['maintenance_mode_logout'] == true) {
-                r2(U . 'logout', 'd', '');
+                r2(getUrl('logout'), 'd', '');
             } else {
                 displayMaintenanceMessage();
             }
@@ -226,7 +226,7 @@ class User
         global $config;
         if ($config['maintenance_mode'] == true) {
             if ($config['maintenance_mode_logout'] == true) {
-                r2(U . 'logout', 'd', '');
+                r2(getUrl('logout'), 'd', '');
             } else {
                 displayMaintenanceMessage();
             }

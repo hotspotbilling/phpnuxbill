@@ -2,7 +2,7 @@
 
 $query = isset($_GET['query']) ? trim($_GET['query']) : '';
 
-if (!empty($query)) {    
+if (!empty($query)) {
     $results = ORM::for_table('tbl_customers')
         ->where_like('username', "%$query%")
         ->find_many();

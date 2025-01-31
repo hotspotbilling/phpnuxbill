@@ -14,7 +14,7 @@ class Paginator
         $adjacents = "2";
         $page = _get('p', 1);
         $page = (empty($page) ? 1 : $page);
-        $url = U . implode('/', $routes);
+        $url = getUrl(implode('/', $routes));
         if (count($search) > 0) {
             $url .= '&' . http_build_query($search);
         }
@@ -83,7 +83,7 @@ class Paginator
     {
         global $routes;
         global $_L;
-        $url = U . implode('/', $routes);
+        $url = getUrl(implode('/', $routes));
         $query = urlencode($query);
         $adjacents = "2";
         $page = (int)(empty(_get('p')) ? 1 : _get('p'));
@@ -169,7 +169,7 @@ class Paginator
     {
         global $routes;
         global $_L;
-        $url = U . $routes['0'] . '/' . $routes['1'] . '/';
+        $url = getUrl($routes['0'] . '/' . $routes['1'] . '/');
         $adjacents = "2";
         $page = (int)(!isset($routes['2']) ? 1 : $routes['2']);
         $pagination = "";
@@ -277,7 +277,7 @@ class Paginator
     {
         global $routes;
         global $_L;
-        $url = U . $routes['0'] . '/' . $routes['1'] . '/';
+        $url = getUrl($routes['0'] . '/' . $routes['1'] . '/');
         $adjacents = "2";
         $page = (int)(!isset($routes['2']) ? 1 : $routes['2']);
         $pagination = "";

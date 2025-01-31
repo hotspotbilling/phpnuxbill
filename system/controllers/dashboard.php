@@ -17,7 +17,7 @@ if (isset($_GET['refresh'])) {
             unlink($CACHE_PATH . DIRECTORY_SEPARATOR . $file);
         }
     }
-    r2(U . 'dashboard', 's', 'Data Refreshed');
+    r2(getUrl('dashboard'), 's', 'Data Refreshed');
 }
 
 $reset_day = $config['reset_day'];

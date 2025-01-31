@@ -33,7 +33,7 @@ switch ($action) {
                     }
                 }
             }
-            r2(U . 'services/hotspot', 's', $log);
+            r2(getUrl('services/hotspot'), 's', $log);
         } else if ($routes['2'] == 'pppoe') {
             $plans = ORM::for_table('tbl_plans')->where('type', 'PPPOE')->find_many();
             $log = '';
@@ -49,9 +49,9 @@ switch ($action) {
                     }
                 }
             }
-            r2(U . 'services/pppoe', 's', $log);
+            r2(getUrl('services/pppoe'), 's', $log);
         }
-        r2(U . 'services/hotspot', 'w', 'Unknown command');
+        r2(getUrl('services/hotspot'), 'w', 'Unknown command');
     case 'hotspot':
         $ui->assign('xfooter', '<script type="text/javascript" src="ui/lib/c/hotspot.js"></script>');
         $name = _req('name');
@@ -193,7 +193,7 @@ switch ($action) {
             run_hook('view_edit_plan'); #HOOK
             $ui->display('hotspot-edit.tpl');
         } else {
-            r2(U . 'services/hotspot', 'e', Lang::T('Account Not Found'));
+            r2(getUrl('services/hotspot'), 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -214,7 +214,7 @@ switch ($action) {
             }
             $d->delete();
 
-            r2(U . 'services/hotspot', 's', Lang::T('Data Deleted Successfully'));
+            r2(getUrl('services/hotspot'), 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -307,9 +307,9 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
-            r2(U . 'services/edit/' . $d->id(), 's', Lang::T('Data Created Successfully'));
+            r2(getUrl('services/edit/') . $d->id(), 's', Lang::T('Data Created Successfully'));
         } else {
-            r2(U . 'services/add', 'e', $msg);
+            r2(getUrl('services/add'), 'e', $msg);
         }
         break;
 
@@ -420,9 +420,9 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
-            r2(U . 'services/hotspot', 's', Lang::T('Data Updated Successfully'));
+            r2(getUrl('services/hotspot'), 's', Lang::T('Data Updated Successfully'));
         } else {
-            r2(U . 'services/edit/' . $id, 'e', $msg);
+            r2(getUrl('services/edit/') . $id, 'e', $msg);
         }
         break;
 
@@ -580,7 +580,7 @@ switch ($action) {
             run_hook('view_edit_ppoe'); #HOOK
             $ui->display('pppoe-edit.tpl');
         } else {
-            r2(U . 'services/pppoe', 'e', Lang::T('Account Not Found'));
+            r2(getUrl('services/pppoe'), 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -602,7 +602,7 @@ switch ($action) {
             }
             $d->delete();
 
-            r2(U . 'services/pppoe', 's', Lang::T('Data Deleted Successfully'));
+            r2(getUrl('services/pppoe'), 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -700,9 +700,9 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
-            r2(U . 'services/pppoe', 's', Lang::T('Data Created Successfully'));
+            r2(getUrl('services/pppoe'), 's', Lang::T('Data Created Successfully'));
         } else {
-            r2(U . 'services/pppoe-add', 'e', $msg);
+            r2(getUrl('services/pppoe-add'), 'e', $msg);
         }
         break;
 
@@ -801,9 +801,9 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
-            r2(U . 'services/pppoe', 's', Lang::T('Data Updated Successfully'));
+            r2(getUrl('services/pppoe'), 's', Lang::T('Data Updated Successfully'));
         } else {
-            r2(U . 'services/pppoe-edit/' . $id, 'e', $msg);
+            r2(getUrl('services/pppoe-edit/') . $id, 'e', $msg);
         }
         break;
     case 'balance':
@@ -841,7 +841,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_balance'); #HOOK
             $d->delete();
-            r2(U . 'services/balance', 's', Lang::T('Data Deleted Successfully'));
+            r2(getUrl('services/balance'), 's', Lang::T('Data Deleted Successfully'));
         }
         break;
     case 'balance-edit-post':
@@ -877,9 +877,9 @@ switch ($action) {
             $d->prepaid = 'yes';
             $d->save();
 
-            r2(U . 'services/balance', 's', Lang::T('Data Updated Successfully'));
+            r2(getUrl('services/balance'), 's', Lang::T('Data Updated Successfully'));
         } else {
-            r2(U . 'services/balance-edit/' . $id, 'e', $msg);
+            r2(getUrl('services/balance-edit/') . $id, 'e', $msg);
         }
         break;
     case 'balance-add-post':
@@ -914,9 +914,9 @@ switch ($action) {
             $d->prepaid = 'yes';
             $d->save();
 
-            r2(U . 'services/balance', 's', Lang::T('Data Created Successfully'));
+            r2(getUrl('services/balance'), 's', Lang::T('Data Created Successfully'));
         } else {
-            r2(U . 'services/balance-add', 'e', $msg);
+            r2(getUrl('services/balance-add'), 'e', $msg);
         }
         break;
     case 'vpn':
@@ -1073,7 +1073,7 @@ switch ($action) {
             run_hook('view_edit_vpn'); #HOOK
             $ui->display('vpn-edit.tpl');
         } else {
-            r2(U . 'services/vpn', 'e', Lang::T('Account Not Found'));
+            r2(getUrl('services/vpn'), 'e', Lang::T('Account Not Found'));
         }
         break;
 
@@ -1095,7 +1095,7 @@ switch ($action) {
             }
             $d->delete();
 
-            r2(U . 'services/vpn', 's', Lang::T('Data Deleted Successfully'));
+            r2(getUrl('services/vpn'), 's', Lang::T('Data Deleted Successfully'));
         }
         break;
 
@@ -1193,9 +1193,9 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
-            r2(U . 'services/vpn', 's', Lang::T('Data Created Successfully'));
+            r2(getUrl('services/vpn'), 's', Lang::T('Data Created Successfully'));
         } else {
-            r2(U . 'services/vpn-add', 'e', $msg);
+            r2(getUrl('services/vpn-add'), 'e', $msg);
         }
         break;
 
@@ -1294,9 +1294,9 @@ switch ($action) {
                     new Exception(Lang::T("Devices Not Found"));
                 }
             }
-            r2(U . 'services/vpn', 's', Lang::T('Data Updated Successfully'));
+            r2(getUrl('services/vpn'), 's', Lang::T('Data Updated Successfully'));
         } else {
-            r2(U . 'services/vpn-edit/' . $id, 'e', $msg);
+            r2(getUrl('services/vpn-edit/') . $id, 'e', $msg);
         }
         break;
     default:

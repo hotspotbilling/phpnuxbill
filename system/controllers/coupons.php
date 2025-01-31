@@ -79,14 +79,14 @@ switch ($action) {
         }
 
         if (!empty($error)) {
-            r2(U . 'coupons/add', 'e', implode('<br>', $error));
+            r2(getUrl('coupons/add'), 'e', implode('<br>', $error));
             exit;
         }
 
         //check if coupon code already exists
         $coupon = ORM::for_table('tbl_coupons')->where('code', $code)->find_one();
         if ($coupon) {
-            r2(U . 'coupons/add', 'e', Lang::T('Coupon Code already exists'));
+            r2(getUrl('coupons/add'), 'e', Lang::T('Coupon Code already exists'));
             exit;
         }
 
@@ -104,10 +104,10 @@ switch ($action) {
         $coupon->created_at = date('Y-m-d H:i:s');
         try {
             $coupon->save();
-            r2(U . 'coupons', 's', Lang::T('Coupon has been added successfully'));
+            r2(getUrl('coupons'), 's', Lang::T('Coupon has been added successfully'));
         } catch (Exception $e) {
             _log(Lang::T('Error adding coupon: ' . $e->getMessage()));
-            r2(U . 'coupons/add', 'e', Lang::T('Error adding coupon: ' . $e->getMessage()));
+            r2(getUrl('coupons/add'), 'e', Lang::T('Error adding coupon: ' . $e->getMessage()));
         }
         break;
 
@@ -120,12 +120,12 @@ switch ($action) {
 
         $coupon_id = intval($routes['2']);
         if (empty($coupon_id)) {
-            r2(U . 'coupons', 'e', Lang::T('Invalid Coupon ID'));
+            r2(getUrl('coupons'), 'e', Lang::T('Invalid Coupon ID'));
             exit;
         }
         $coupon = ORM::for_table('tbl_coupons')->find_one($coupon_id);
         if (!$coupon) {
-            r2(U . 'coupons', 'e', Lang::T('Coupon Not Found'));
+            r2(getUrl('coupons'), 'e', Lang::T('Coupon Not Found'));
             exit;
         }
         $ui->assign('coupon', $coupon);
@@ -189,7 +189,7 @@ switch ($action) {
             $error[] = Lang::T('Coupon end date is required');
         }
         if (!empty($error)) {
-            r2(U . 'coupons/edit/' . $coupon_id, 'e', implode('<br>', $error));
+            r2(getUrl('coupons/edit/') . $coupon_id, 'e', implode('<br>', $error));
             exit;
         }
         $coupon = ORM::for_table('tbl_coupons')->find_one($coupon_id);
@@ -206,10 +206,10 @@ switch ($action) {
         $coupon->updated_at = date('Y-m-d H:i:s');
         try {
             $coupon->save();
-            r2(U . 'coupons', 's', Lang::T('Coupon has been updated successfully'));
+            r2(getUrl('coupons'), 's', Lang::T('Coupon has been updated successfully'));
         } catch (Exception $e) {
             _log(Lang::T('Error updating coupon: ') . $e->getMessage());
-            r2(U . 'coupons/edit/' . $coupon_id, 'e', Lang::T('Error updating coupon: ') . $e->getMessage());
+            r2(getUrl('coupons/edit/') . $coupon_id, 'e', Lang::T('Error updating coupon: ') . $e->getMessage());
         }
         break;
 

@@ -58,12 +58,12 @@ switch ($action) {
         if ($msg == '') {
             require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "Radius.php";
             if ((new Radius())->nasAdd($shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community) > 0) {
-                r2(U . 'radius/nas-list/', 's', "NAS Added");
+                r2(getUrl('radius/nas-list/'), 's', "NAS Added");
             } else {
-                r2(U . 'radius/nas-add/', 'e', "NAS Added Failed");
+                r2(getUrl('radius/nas-add/'), 'e', "NAS Added Failed");
             }
         } else {
-            r2(U . 'radius/nas-add', 'e', $msg);
+            r2(getUrl('radius/nas-add'), 'e', $msg);
         }
         break;
     case 'nas-edit':
@@ -80,7 +80,7 @@ switch ($action) {
             $ui->assign('d', $d);
             $ui->display('radius-nas-edit.tpl');
         } else {
-            r2(U . 'radius/list', 'e', Lang::T('Account Not Found'));
+            r2(getUrl('radius/list'), 'e', Lang::T('Account Not Found'));
         }
 
         break;
@@ -115,12 +115,12 @@ switch ($action) {
         if ($msg == '') {
             require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . "Radius.php";
             if ((new Radius())->nasUpdate($id, $shortname, $nasname, $ports, $secret, $routers, $description, $type, $server, $community)) {
-                r2(U . 'radius/list/', 's', "NAS Saved");
+                r2(getUrl('radius/list/'), 's', "NAS Saved");
             } else {
-                r2(U . 'radius/nas-add', 'e', 'NAS NOT Exists');
+                r2(getUrl('radius/nas-add'), 'e', 'NAS NOT Exists');
             }
         } else {
-            r2(U . 'radius/nas-add', 'e', $msg);
+            r2(getUrl('radius/nas-add'), 'e', $msg);
         }
         break;
     case 'nas-delete':
@@ -129,7 +129,7 @@ switch ($action) {
         if ($d) {
             $d->delete();
         } else {
-            r2(U . 'radius/nas-list', 'e', 'NAS Not found');
+            r2(getUrl('radius/nas-list'), 'e', 'NAS Not found');
         }
     default:
         $ui->assign('_system_menu', 'radius');
