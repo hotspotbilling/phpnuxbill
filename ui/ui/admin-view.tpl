@@ -9,9 +9,9 @@
                     <div class="panel-heading">{$d['fullname']}</div>
                     <div class="panel-body">
                         <center>
-                            <a href="{$UPLOAD_PATH}{$d['photo']}" target="foto">
-                                <img src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
-                                    onerror="this.src='{$UPLOAD_PATH}/admin.default.png'" class="img-circle img-responsive" alt="Foto">
+                            <a href="{$app_url}/{$UPLOAD_PATH}{$d['photo']}" target="foto">
+                                <img src="{$app_url}/{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
+                                    onerror="this.src='{$app_url}/{$UPLOAD_PATH}/admin.default.png'" class="img-circle img-responsive" alt="Foto">
                             </a>
                         </center><br>
                         <ul class="list-group list-group-unbordered">

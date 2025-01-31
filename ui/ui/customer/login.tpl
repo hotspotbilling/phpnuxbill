@@ -55,7 +55,7 @@
                     </div>
 
                     <div class="clearfix hidden">
-                        <div class="ui-checkbox ui-checkbox-primary right">
+                        <div class="{$app_url}/ui-checkbox ui-checkbox-primary right">
                             <label>
                                 <input type="checkbox">
                                 <span>Remember me</span>

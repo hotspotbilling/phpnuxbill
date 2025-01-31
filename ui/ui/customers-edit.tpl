@@ -9,8 +9,8 @@
                 <div class="panel-heading">{Lang::T('Edit Contact')}</div>
                 <div class="panel-body">
                     <center>
-                        <img src="{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
-                            onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="img-circle img-responsive"
+                        <img src="{$app_url}/{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
+                            onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'" class="img-circle img-responsive"
                             alt="Photo" onclick="return deletePhoto({$d['id']})">
                     </center><br>
                     <input type="hidden" name="id" value="{$d['id']}">

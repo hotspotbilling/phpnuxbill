@@ -10,8 +10,8 @@
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <input type="hidden" name="id" value="{$_user['id']}">
                     <center>
-                        <img src="{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg" width="200"
-                            onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="img-circle img-responsive"
+                        <img src="{$app_url}/{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg" width="200"
+                            onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'" class="img-circle img-responsive"
                             alt="Foto" onclick="return deletePhoto({$d['id']})">
                     </center><br>
                     <div class="form-group">

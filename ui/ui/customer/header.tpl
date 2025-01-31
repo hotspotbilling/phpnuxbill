@@ -5,15 +5,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{$_title} - {$_c['CompanyName']}</title>
-    <link rel="shortcut icon" href="ui/ui/images/logo.png" type="image/x-icon" />
+    <link rel="shortcut icon" href="{$app_url}/ui/ui/images/logo.png" type="image/x-icon" />
 
-    <link rel="stylesheet" href="ui/ui/styles/bootstrap.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/bootstrap.min.css">
 
-    <link rel="stylesheet" href="ui/ui/fonts/ionicons/css/ionicons.min.css">
-    <link rel="stylesheet" href="ui/ui/fonts/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/modern-AdminLTE.min.css">
-    <link rel="stylesheet" href="ui/ui/styles/sweetalert2.min.css" />
-    <script src="ui/ui/scripts/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/ionicons/css/ionicons.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/modern-AdminLTE.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
+    <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
 
 
     <style>
@@ -828,14 +828,14 @@
                                 {else}
                                     <span>{$_user['fullname']}</span>
                                 {/if}
-                                <img src="{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
-                                    onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="user-image"
+                                <img src="{$app_url}/{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
+                                    onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'" class="user-image"
                                     alt="User Image">
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
-                                    <img src="{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
-                                        onerror="this.src='{$UPLOAD_PATH}/user.default.jpg'" class="img-circle"
+                                    <img src="{$app_url}/{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
+                                        onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'" class="img-circle"
                                         alt="User Image">
 
                                     <p>

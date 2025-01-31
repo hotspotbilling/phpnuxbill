@@ -116,8 +116,8 @@
                                     <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
                                     <td>
-                                        <a href="{$UPLOAD_PATH}{$ds['photo']}" target="photo">
-                                            <img src="{$UPLOAD_PATH}{$ds['photo']}.thumb.jpg" width="32" alt="">
+                                        <a href="{$app_url}/{$UPLOAD_PATH}{$ds['photo']}" target="photo">
+                                            <img src="{$app_url}/{$UPLOAD_PATH}{$ds['photo']}.thumb.jpg" width="32" alt="">
                                         </a>
                                     </td>
                                     <td>{$ds['account_type']}</td>

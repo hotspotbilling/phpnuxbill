@@ -7,13 +7,13 @@
         target="_blank">AdminLTE</a>
 </footer>
 </div>
-<script src="ui/ui/scripts/jquery.min.js"></script>
-<script src="ui/ui/scripts/bootstrap.min.js"></script>
-<script src="ui/ui/scripts/adminlte.min.js"></script>
-<script src="ui/ui/scripts/plugins/select2.min.js"></script>
-<script src="ui/ui/scripts/pace.min.js"></script>
-<script src="ui/ui/summernote/summernote.min.js"></script>
-<script src="ui/ui/scripts/custom.js"></script>
+<script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/bootstrap.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/adminlte.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/plugins/select2.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/pace.min.js"></script>
+<script src="{$app_url}/ui/ui/summernote/summernote.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/custom.js"></script>
 
 <script>
     document.getElementById('openSearch').addEventListener('click', function () {

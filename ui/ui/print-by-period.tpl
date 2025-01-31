@@ -4,8 +4,8 @@
     <title>{$_title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="ui/ui/styles/bootstrap.min.css" rel="stylesheet">
-    <link rel="shortcut icon" type="image/x-icon" href="ui/ui/images/favicon.ico">
+    <link href="{$app_url}/ui/ui/styles/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/x-icon" href="{$app_url}/ui/ui/images/favicon.ico">
 
     <style type="text/css">
         @media print
@@ -55,8 +55,8 @@
         <button type="button" id="actprint" class="btn btn-default btn-sm no-print">{Lang::T('Click Here to Print')}</button>
     </div>
 </div>
-<script src="ui/ui/scripts/jquery.min.js"></script>
-<script src="ui/ui/scripts/bootstrap.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/bootstrap.min.js"></script>
 {if isset($xfooter)}
     {$xfooter}
 {/if}
