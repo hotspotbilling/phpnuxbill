@@ -43,7 +43,7 @@
                         </section>
                         <div class="box-body" style="font-size: larger;">
                             <center>
-                            <img src="./ui/ui/images/error.png" class="img-responsive hidden-sm hidden-xs"></center>
+                            <img src="{$app_url}/ui/ui/images/error.png" class="img-responsive hidden-sm hidden-xs"></center>
                             <br>
                             {$error_message}
                             <br>
@@ -75,7 +75,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <img src="./ui/ui/images/error.png" class="img-responsive hidden-md hidden-lg">
+                    <img src="{$app_url}/ui/ui/images/error.png" class="img-responsive hidden-md hidden-lg">
                 </div>
             </div>
         </section>
