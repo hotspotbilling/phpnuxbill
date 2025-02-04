@@ -5,7 +5,7 @@
 <div class="row">
 	<div class="col-sm-12 col-md-12">
 		{if $page>0 && $totalCustomers>0}
-			<div class="alert alert-info" role="alert">{Lang::T("Sending message in progress. Don't close this page.")}</div>
+			<div class="alert alert-info" role="alert"><span class="loading"></span> {Lang::T("Sending message in progress. Don't close this page.")}</div>
 		{/if}
 		<div class="panel panel-primary panel-hovered panel-stacked mb30 {if $page>0 && $totalCustomers >0}hidden{/if}">
 			<div class="panel-heading">{Lang::T('Send Bulk Message')}</div>
@@ -57,7 +57,7 @@
 						<label class="col-md-2 control-label">{Lang::T('Delay')}</label>
 						<div class="col-md-6">
 							<select class="form-control" name="delay" id="delay">
-								<option value="0" {if $delay == '0'}selected{/if}>{Lang::T('No Delay')}</option>
+								<option value="1" {if $delay == '1'}selected{/if}>{Lang::T('No Delay')}</option>
 								<option value="5" {if $delay == '5'}selected{/if}>{Lang::T('5 Seconds')}</option>
 								<option value="10" {if $delay == '10'}selected{/if}>{Lang::T('10 Seconds')}</option>
 								<option value="15" {if $delay == '15'}selected{/if}>{Lang::T('15 Seconds')}</option>
@@ -156,7 +156,7 @@
 	{if $page>0 && $totalCustomers >0}
 		setTimeout(() => {
 			document.getElementById('submit').click();
-		}, 2000);
+		}, {$delay}000);
 	{/if}
 	{if $page>0 && $totalCustomers==0}
 		Swal.fire({

@@ -163,80 +163,75 @@ EOT;
                 $totalCustomers = count($customers);
                 $totalBatches = ceil($totalCustomers / $batchSize);
 
-                // Loop through batches
-                for ($batchIndex = 0; $batchIndex < $totalBatches; $batchIndex++) {
-                    // Get the starting and ending index for the current batch
-                    $start = $batchIndex * $batchSize;
-                    $end = min(($batchIndex + 1) * $batchSize, $totalCustomers);
-                    $batchCustomers = array_slice($customers, $start, $end - $start);
+                // Loop through customers in the current batch and send messages
+                foreach ($customers as $customer) {
+                    // Create a copy of the original message for each customer and save it as currentMessage
+                    $currentMessage = $message;
+                    $currentMessage = str_replace('[[name]]', $customer['fullname'], $currentMessage);
+                    $currentMessage = str_replace('[[user_name]]', $customer['username'], $currentMessage);
+                    $currentMessage = str_replace('[[phone]]', $customer['phonenumber'], $currentMessage);
+                    $currentMessage = str_replace('[[company_name]]', $config['CompanyName'], $currentMessage);
 
-                    // Loop through customers in the current batch and send messages
-                    foreach ($batchCustomers as $customer) {
-                        // Create a copy of the original message for each customer and save it as currentMessage
-                        $currentMessage = $message;
-                        $currentMessage = str_replace('[[name]]', $customer['fullname'], $currentMessage);
-                        $currentMessage = str_replace('[[user_name]]', $customer['username'], $currentMessage);
-                        $currentMessage = str_replace('[[phone]]', $customer['phonenumber'], $currentMessage);
-                        $currentMessage = str_replace('[[company_name]]', $config['CompanyName'], $currentMessage);
-
-                        // Send the message based on the selected method
-                        if ($test === 'yes') {
-                            // Only for testing, do not send messages to customers
-                            $batchStatus[] = [
-                                'name' => $customer['fullname'],
-                                'phone' => $customer['phonenumber'],
-                                'message' => $currentMessage,
-                                'status' => 'Test Mode - Message not sent'
-                            ];
-                        } else {
-                            // Send the actual messages
-                            if ($via == 'sms' || $via == 'both') {
-                                $smsSent = Message::sendSMS($customer['phonenumber'], $currentMessage);
-                                if ($smsSent) {
-                                    $totalSMSSent++;
-                                    $batchStatus[] = [
-                                        'name' => $customer['fullname'],
-                                        'phone' => $customer['phonenumber'],
-                                        'message' => $currentMessage,
-                                        'status' => 'SMS Message Sent'
-                                    ];
-                                } else {
-                                    $totalSMSFailed++;
-                                    $batchStatus[] = [
-                                        'name' => $customer['fullname'],
-                                        'phone' => $customer['phonenumber'],
-                                        'message' => $currentMessage,
-                                        'status' => 'SMS Message Failed'
-                                    ];
-                                }
-                            }
-
-                            if ($via == 'wa' || $via == 'both') {
-                                $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentMessage);
-                                if ($waSent) {
-                                    $totalWhatsappSent++;
-                                    $batchStatus[] = [
-                                        'name' => $customer['fullname'],
-                                        'phone' => $customer['phonenumber'],
-                                        'message' => $currentMessage,
-                                        'status' => 'WhatsApp Message Sent'
-                                    ];
-                                } else {
-                                    $totalWhatsappFailed++;
-                                    $batchStatus[] = [
-                                        'name' => $customer['fullname'],
-                                        'phone' => $customer['phonenumber'],
-                                        'message' => $currentMessage,
-                                        'status' => 'WhatsApp Message Failed'
-                                    ];
-                                }
+                    if(empty($customer['phonenumber'])){
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'phone' => $customer['phonenumber'],
+                            'message' => $currentMessage,
+                            'status' => 'No Phone Number'
+                        ];
+                    }else
+                    // Send the message based on the selected method
+                    if ($test === 'yes') {
+                        // Only for testing, do not send messages to customers
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'phone' => $customer['phonenumber'],
+                            'message' => $currentMessage,
+                            'status' => 'Test Mode - Message not sent'
+                        ];
+                    } else {
+                        // Send the actual messages
+                        if ($via == 'sms' || $via == 'both') {
+                            $smsSent = Message::sendSMS($customer['phonenumber'], $currentMessage);
+                            if ($smsSent) {
+                                $totalSMSSent++;
+                                $batchStatus[] = [
+                                    'name' => $customer['fullname'],
+                                    'phone' => $customer['phonenumber'],
+                                    'message' => $currentMessage,
+                                    'status' => 'SMS Message Sent'
+                                ];
+                            } else {
+                                $totalSMSFailed++;
+                                $batchStatus[] = [
+                                    'name' => $customer['fullname'],
+                                    'phone' => $customer['phonenumber'],
+                                    'message' => $currentMessage,
+                                    'status' => 'SMS Message Failed'
+                                ];
                             }
                         }
-                    }
 
-                    // Introduce a delay between each batch
-                    if ($batchIndex < $totalBatches - 1) {
-                        sleep($delay);
+                        if ($via == 'wa' || $via == 'both') {
+                            $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentMessage);
+                            if ($waSent) {
+                                $totalWhatsappSent++;
+                                $batchStatus[] = [
+                                    'name' => $customer['fullname'],
+                                    'phone' => $customer['phonenumber'],
+                                    'message' => $currentMessage,
+                                    'status' => 'WhatsApp Message Sent'
+                                ];
+                            } else {
+                                $totalWhatsappFailed++;
+                                $batchStatus[] = [
+                                    'name' => $customer['fullname'],
+                                    'phone' => $customer['phonenumber'],
+                                    'message' => $currentMessage,
+                                    'status' => 'WhatsApp Message Failed'
+                                ];
+                            }
+                        }
                     }
                 }
             }
