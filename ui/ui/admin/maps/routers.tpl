@@ -51,9 +51,9 @@
             console.log(coordinates.split(","))
             // Create a popup for the marker
             var popupContent = "<strong>Name</strong>: " + name + "<br>" +
-                "<strong>Info</strong>: " + info + "<br>"
-            "<a href='{/literal}{$_url}{literal}routers/edit/"+ router.id +"'>More Info</a> &bull; " +
-            "<a href='https://www.google.com/maps/dir//" + coordinates + "' target='maps'>Get Direction</a><br>";
+                "<strong>Info</strong>: " + info + "<br>" +
+                "<a href='{/literal}{$_url}{literal}routers/edit/"+ router.id +"'>More Info</a> &bull; " +
+                "<a href='https://www.google.com/maps/dir//" + coordinates + "' target='maps'>Get Direction</a><br>";
 
             // Add marker to map
             if (router.enabled == 1) {
