@@ -225,7 +225,7 @@ switch ($action) {
             $ui->assign('server', $b['routers']);
             $ui->assign('plan', $plan);
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
-            $ui->display('recharge-confirm.tpl');
+            $ui->display('admin/plan/recharge-confirm.tpl');
         } else {
             r2(getUrl('customers/view/') . $id_customer, 'e', 'Cannot find active plan');
         }

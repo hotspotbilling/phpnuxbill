@@ -79,5 +79,5 @@ switch ($action) {
         }
         die();
     default:
-        $ui->display('404.tpl');
+        die();
 }
