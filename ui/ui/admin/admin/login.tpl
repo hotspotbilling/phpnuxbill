@@ -10,7 +10,29 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/bootstrap.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/modern-AdminLTE.min.css">
 
-
+    <style>
+        .login-box-body {
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .login-box-msg {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .btn {
+            margin-bottom: 20px;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 
 <body class="hold-transition login-page">
@@ -34,7 +56,7 @@
                     <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block btn-flat">{Lang::T('Login')}</button>
-                <a href="{$_url}login">{Lang::T('Go Back')}</a>
+                <a href="{$_url}login" class="back-link">{Lang::T('Go Back')}</a>
             </form>
         </div>
     </div>
