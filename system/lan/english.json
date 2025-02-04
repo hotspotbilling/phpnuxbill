@@ -977,5 +977,10 @@
     "Continue_the_process_of_adding_the_PPPoE_Package_": "Continue the process of adding the PPPoE Package?",
     "Personal_Package_will_only_show_to_personal_Customer__Business_Package_will_only_show_to_Business_Customer": "Personal Package will only show to personal Customer, Business Package will only show to Business Customer",
     "Continue_the_PPPoE_Package_change_process_": "Continue the PPPoE Package change process?",
-    "Sending_message_in_progress__Don_t_close_this_page_": "Sending message in progress. Don't close this page."
+    "Sending_message_in_progress__Don_t_close_this_page_": "Sending message in progress. Don't close this page.",
+    "Port_Pool": "Port Pool",
+    "New_port": "New port",
+    "Port_Name": "Port Name",
+    "Public_IP": "Public IP",
+    "Range_Port": "Range Port"
 }

@@ -244,8 +244,6 @@
                                         href="{Text::url('pool/list')}">IP Pool</a></li>
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
                                         href="{Text::url('pool/port')}">Port Pool</a></li>
-                                <li {if $_routes[0] eq 'routers' and $_routes[1] eq 'maps' }class="active" {/if}><a
-                                        href="{Text::url('routers/maps')}">{Lang::T('Routers Maps')}</a></li>
                                 {$_MENU_NETWORK}
                             </ul>
                         </li>
