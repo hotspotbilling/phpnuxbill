@@ -139,7 +139,7 @@ switch ($action) {
         $d = Paginator::findMany($query, ['name' => $name], 20, $append_url);
         $ui->assign('d', $d);
         run_hook('view_list_plans'); #HOOK
-        $ui->display('hotspot.tpl');
+        $ui->display('admin/hotspot/list.tpl');
         break;
     case 'add':
         $d = ORM::for_table('tbl_bandwidth')->find_many();
@@ -156,7 +156,7 @@ switch ($action) {
         }
         $ui->assign('devices', $devices);
         run_hook('view_add_plan'); #HOOK
-        $ui->display('hotspot-add.tpl');
+        $ui->display('admin/hotspot/add.tpl');
         break;
 
     case 'edit':
@@ -191,7 +191,7 @@ switch ($action) {
             }
             $ui->assign('exps', $exps);
             run_hook('view_edit_plan'); #HOOK
-            $ui->display('hotspot-edit.tpl');
+            $ui->display('admin/hotspot/edit.tpl');
         } else {
             r2(getUrl('services/hotspot'), 'e', Lang::T('Account Not Found'));
         }
@@ -819,12 +819,12 @@ switch ($action) {
 
         $ui->assign('d', $d);
         run_hook('view_list_balance'); #HOOK
-        $ui->display('balance.tpl');
+        $ui->display('admin/balance/list.tpl');
         break;
     case 'balance-add':
         $ui->assign('_title', Lang::T('Balance Plans'));
         run_hook('view_add_balance'); #HOOK
-        $ui->display('balance-add.tpl');
+        $ui->display('admin/balance/add.tpl');
         break;
     case 'balance-edit':
         $ui->assign('_title', Lang::T('Balance Plans'));
@@ -832,7 +832,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_plans')->find_one($id);
         $ui->assign('d', $d);
         run_hook('view_edit_balance'); #HOOK
-        $ui->display('balance-edit.tpl');
+        $ui->display('admin/balance/edit.tpl');
         break;
     case 'balance-delete':
         $id = $routes['2'];

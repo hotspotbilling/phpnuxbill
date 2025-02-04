@@ -22,7 +22,7 @@ switch ($action) {
         }
         $ui->assign('_title', Lang::T('Add Coupon'));
         $ui->assign('csrf_token', Csrf::generateAndStoreToken());
-        $ui->display('coupons-add.tpl');
+        $ui->display('admin/coupons/add.tpl');
         break;
 
     case 'add-post':
@@ -131,7 +131,7 @@ switch ($action) {
         $ui->assign('coupon', $coupon);
         $ui->assign('_title', Lang::T('Edit Coupon: ' . $coupon['code']));
         $ui->assign('csrf_token', Csrf::generateAndStoreToken());
-        $ui->display('coupons-edit.tpl');
+        $ui->display('admin/coupons/edit.tpl');
         break;
 
     case 'edit-post':
@@ -310,6 +310,6 @@ switch ($action) {
         $coupons = Paginator::findMany($couponsData, ['search' => $search], 5, '');
         $ui->assign('csrf_token', Csrf::generateAndStoreToken());
         $ui->assign('coupons', $coupons);
-        $ui->display('coupons.tpl');
+        $ui->display('admin/coupons/list.tpl');
         break;
 }

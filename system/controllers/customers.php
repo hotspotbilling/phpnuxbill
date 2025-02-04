@@ -158,7 +158,7 @@ switch ($action) {
         $ui->assign('xheader', $leafletpickerHeader);
         run_hook('view_add_customer'); #HOOK
         $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
-        $ui->display('customers-add.tpl');
+        $ui->display('admin/customers/add.tpl');
         break;
     case 'recharge':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
@@ -364,7 +364,7 @@ switch ($action) {
             $ui->assign('customFields', $customFields);
             $ui->assign('xheader', $leafletpickerHeader);
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
-            $ui->display('customers-view.tpl');
+            $ui->display('admin/customers/view.tpl');
         } else {
             r2(getUrl('customers/list'), 'e', Lang::T('Account Not Found'));
         }
@@ -403,7 +403,7 @@ switch ($action) {
             $ui->assign('customFields', $customFields);
             $ui->assign('xheader', $leafletpickerHeader);
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
-            $ui->display('customers-edit.tpl');
+            $ui->display('admin/customers/edit.tpl');
         } else {
             r2(getUrl('customers/list'), 'e', Lang::T('Account Not Found'));
         }
@@ -908,6 +908,6 @@ switch ($action) {
         $ui->assign('order_pos', $order_pos[$order]);
         $ui->assign('orderby', $orderby);
         $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
-        $ui->display('customers.tpl');
+        $ui->display('admin/customers/list.tpl');
         break;
 }

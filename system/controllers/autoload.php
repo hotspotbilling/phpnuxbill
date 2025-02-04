@@ -26,7 +26,7 @@ switch ($action) {
         }
         $ui->assign('routers', $routers);
         $ui->assign('d', $d);
-        $ui->display('autoload-pool.tpl');
+        $ui->display('admin/autoload/pool.tpl');
         break;
     case 'bw_name':
         $bw = ORM::for_table('tbl_bandwidth')->select("name_bw")->find_one($routes['2']);
@@ -44,7 +44,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('d', $d);
 
-        $ui->display('autoload-server.tpl');
+        $ui->display('admin/autoload/server.tpl');
         break;
     case 'pppoe_ip_used':
         if (!empty(_get('ip'))) {
@@ -100,7 +100,7 @@ switch ($action) {
         }
         $ui->assign('d', $d);
 
-        $ui->display('autoload.tpl');
+        $ui->display('admin/autoload/plan.tpl');
         break;
     case 'customer_is_active':
         if ($config['check_customer_online'] == 'yes') {

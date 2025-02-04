@@ -349,7 +349,7 @@ function _alert($text, $type = 'success', $url = "home", $time = 3)
     $ui->assign('type', $type);
     $ui->assign('time', $time);
     $ui->assign('url', $url);
-    $ui->display('alert.tpl');
+    $ui->display('admin/alert.tpl');
     die();
 }
 

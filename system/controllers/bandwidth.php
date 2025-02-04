@@ -30,7 +30,7 @@ switch ($action) {
         }
 
         $ui->assign('d', $d);
-        $ui->display('bandwidth.tpl');
+        $ui->display('admin/bandwidth/list.tpl');
         break;
 
     case 'add':
@@ -38,7 +38,7 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         run_hook('view_add_bandwidth'); #HOOK
-        $ui->display('bandwidth-add.tpl');
+        $ui->display('admin/bandwidth/add.tpl');
         break;
 
     case 'edit':
@@ -51,7 +51,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('burst', explode(" ", $d['burst']));
             $ui->assign('d', $d);
-            $ui->display('bandwidth-edit.tpl');
+            $ui->display('admin/bandwidth/edit.tpl');
         } else {
             r2(getUrl('bandwidth/list'), 'e', Lang::T('Account Not Found'));
         }

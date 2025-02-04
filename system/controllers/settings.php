@@ -50,7 +50,7 @@ switch ($action) {
             }
         }
         $ui->assign('devices', $devices);
-        $ui->display('app-devices.tpl');
+        $ui->display('admin/settings/devices.tpl');
         break;
     case 'app':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
@@ -165,7 +165,7 @@ switch ($action) {
         run_hook('view_app_settings'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
-        $ui->display('app-settings.tpl');
+        $ui->display('admin/settings/app.tpl');
         break;
 
     case 'app-post':
@@ -352,7 +352,7 @@ switch ($action) {
         run_hook('view_localisation'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
-        $ui->display('app-localisation.tpl');
+        $ui->display('admin/settings/localisation.tpl');
         break;
 
     case 'localisation-post':
@@ -869,7 +869,7 @@ switch ($action) {
         run_hook('view_change_password'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
-        $ui->display('change-password.tpl');
+        $ui->display('admin/change-password.tpl');
         break;
 
     case 'change-password-post':
@@ -926,7 +926,7 @@ switch ($action) {
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_default', json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'notifications.default.json'), true));
-        $ui->display('app-notifications.tpl');
+        $ui->display('admin/settings/notifications.tpl');
         break;
     case 'notifications-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
@@ -1127,7 +1127,7 @@ switch ($action) {
         $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_c', $config);
         $ui->assign('_title', Lang::T('Miscellaneous Settings'));
-        $ui->display('app-miscellaneous.tpl');
+        $ui->display('admin/settings/miscellaneous.tpl');
         break;
 
     default:

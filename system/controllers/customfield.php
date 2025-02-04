@@ -48,6 +48,6 @@ switch ($action) {
             $fields = json_decode(file_get_contents($fieldPath), true);
         }
         $ui->assign('fields', $fields);
-        $ui->display('customfield.tpl');
+        $ui->display('admin/settings/customfield.tpl');
         break;
 }
