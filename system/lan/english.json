@@ -967,5 +967,15 @@
     "Create_Bandwidth_Package_for_expired_Internet_Package": "Create Bandwidth Package for expired Internet Package",
     "Maps": "Maps",
     "Enable": "Enable",
-    "Continue_the_process_of_changing_Routers_": "Continue the process of changing Routers?"
+    "Continue_the_process_of_changing_Routers_": "Continue the process of changing Routers?",
+    "Customer_cannot_buy_disabled_Package__but_admin_can_recharge_it__use_it_if_you_want_only_admin_recharge_it": "Customer cannot buy disabled Package, but admin can recharge it, use it if you want only admin recharge it",
+    "Postpaid_will_have_fix_expired_date": "Postpaid will have fix expired date",
+    "Personal_Package_will_only_show_to_personal_Customer__Business_package_will_only_show_to_Business_Customer": "Personal Package will only show to personal Customer, Business package will only show to Business Customer",
+    "If_you_enable_Radius__choose_device_to_radius__except_if_you_have_custom_device_": "If you enable Radius, choose device to radius, except if you have custom device.",
+    "This_Device_are_the_logic_how_PHPNuxBill_Communicate_with_Mikrotik_or_other_Devices": "This Device are the logic how PHPNuxBill Communicate with Mikrotik or other Devices",
+    "Expired_will_be_this_date_every_month": "Expired will be this date every month",
+    "Continue_the_process_of_adding_the_PPPoE_Package_": "Continue the process of adding the PPPoE Package?",
+    "Personal_Package_will_only_show_to_personal_Customer__Business_Package_will_only_show_to_Business_Customer": "Personal Package will only show to personal Customer, Business Package will only show to Business Customer",
+    "Continue_the_PPPoE_Package_change_process_": "Continue the PPPoE Package change process?",
+    "Sending_message_in_progress__Don_t_close_this_page_": "Sending message in progress. Don't close this page."
 }

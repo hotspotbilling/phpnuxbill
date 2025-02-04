@@ -95,49 +95,65 @@ EOT;
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-
-        // Get form data
-        $group = $_POST['group'];
-        $message = $_POST['message'];
-        $via = $_POST['via'];
-        $test = isset($_POST['test']) && $_POST['test'] === 'on' ? 'yes' : 'no';
-        $batch = $_POST['batch'];
-        $delay = $_POST['delay'];
-
+        set_time_limit(0);
         // Initialize counters
         $totalSMSSent = 0;
         $totalSMSFailed = 0;
         $totalWhatsappSent = 0;
         $totalWhatsappFailed = 0;
-        $batchStatus = [];
+        $totalCustomers = 0;
+        $batchStatus = $_SESSION['batchStatus'];
+        $page = _req('page', -1);
 
         if (_req('send') == 'now') {
+            // Get form data
+            $group = $_REQUEST['group'];
+            $message = $_REQUEST['message'];
+            $via = $_REQUEST['via'];
+            $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on' ? 'yes' : 'no';
+            $batch = $_REQUEST['batch'];
+            $delay = $_REQUEST['delay'];
+
+            $ui->assign('group', $group);
+            $ui->assign('message', $message);
+            $ui->assign('via', $via);
+            $ui->assign('test', $test);
+            $ui->assign('batch', $batch);
+            $ui->assign('delay', $delay);
+            if($page<0){
+                $batchStatus = [];
+                $page = 0;
+            }
+            $startpoint = $page * $batch;
+            $page++;
             // Check if fields are empty
             if ($group == '' || $message == '' || $via == '') {
                 r2(getUrl('message/send_bulk'), 'e', Lang::T('All fields are required'));
             } else {
                 // Get customer details from the database based on the selected group
                 if ($group == 'all') {
-                    $customers = ORM::for_table('tbl_customers')->find_many()->as_array();
+                    $customers = ORM::for_table('tbl_customers')
+                    ->offset($startpoint)
+                    ->limit($batch)->find_array();
                 } elseif ($group == 'new') {
                     // Get customers created just a month ago
-                    $customers = ORM::for_table('tbl_customers')->where_raw("DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)")->find_many()->as_array();
+                    $customers = ORM::for_table('tbl_customers')->where_raw("DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)")
+                    ->offset($startpoint)->limit($batch)
+                    ->find_array();
                 } elseif ($group == 'expired') {
                     // Get expired user recharges where status is 'off'
-                    $expired = ORM::for_table('tbl_user_recharges')->where('status', 'off')->find_many();
-                    $customer_ids = [];
-                    foreach ($expired as $recharge) {
-                        $customer_ids[] = $recharge->customer_id;
-                    }
-                    $customers = ORM::for_table('tbl_customers')->where_in('id', $customer_ids)->find_many()->as_array();
+                    $expired = ORM::for_table('tbl_user_recharges')->select('customer_id')->where('status', 'off')
+                    ->offset($startpoint)->limit($batch)
+                    ->find_array();
+                    $customer_ids = array_column($expired, 'customer_id');
+                    $customers = ORM::for_table('tbl_customers')->where_in('id', $customer_ids)->find_array();
                 } elseif ($group == 'active') {
                     // Get active user recharges where status is 'on'
-                    $active = ORM::for_table('tbl_user_recharges')->where('status', 'on')->find_many();
-                    $customer_ids = [];
-                    foreach ($active as $recharge) {
-                        $customer_ids[] = $recharge->customer_id;
-                    }
-                    $customers = ORM::for_table('tbl_customers')->where_in('id', $customer_ids)->find_many()->as_array();
+                    $active = ORM::for_table('tbl_user_recharges')->select('customer_id')->where('status', 'on')
+                    ->offset($startpoint)->limit($batch)
+                    ->find_array();
+                    $customer_ids = array_column($active, 'customer_id');
+                    $customers = ORM::for_table('tbl_customers')->where_in('id', $customer_ids)->find_array();
                 }
 
                 // Set the batch size
@@ -225,6 +241,9 @@ EOT;
                 }
             }
         }
+        $ui->assign('page', $page);
+        $ui->assign('totalCustomers', $totalCustomers);
+        $_SESSION['batchStatus'] = $batchStatus;
         $ui->assign('batchStatus', $batchStatus);
         $ui->assign('totalSMSSent', $totalSMSSent);
         $ui->assign('totalSMSFailed', $totalSMSFailed);

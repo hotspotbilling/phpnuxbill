@@ -160,15 +160,16 @@
         });
 
         function ask(field, text){
+            var txt = field.innerHTML;
             if (confirm(text)) {
                 setTimeout(() => {
-                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, '');
+                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, txt);
                     field.removeAttribute("disabled");
                 }, 5000);
                 return true;
             } else {
                 setTimeout(() => {
-                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, '');
+                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, txt);
                     field.removeAttribute("disabled");
                 }, 500);
                 return false;
