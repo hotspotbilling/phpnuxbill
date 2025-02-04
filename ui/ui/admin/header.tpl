@@ -93,7 +93,7 @@
                                 </li>
                                 <li class="user-footer">
                                     <div class="pull-right">
-                                        <a href="{Text::url('belum')}logout" class="btn btn-default btn-flat"><i
+                                        <a href="{Text::url('logout')}" class="btn btn-default btn-flat"><i
                                                 class="ion ion-power"></i> {Lang::T('Logout')}</a>
                                     </div>
                                 </li>
