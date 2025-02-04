@@ -23,21 +23,6 @@ $leafletpickerHeader = <<<EOT
 EOT;
 
 switch ($action) {
-    case 'maps':
-        $name = _post('name');
-        $query = ORM::for_table('tbl_routers')->where_not_equal('coordinates', '')->order_by_desc('id');
-        $query->selects(['id', 'name', 'coordinates', 'description', 'coverage', 'enabled']);
-        if ($name != '') {
-            $query->where_like('name', '%' . $name . '%');
-        }
-        $d = Paginator::findMany($query, ['name' => $name], '20', '', true);
-        $ui->assign('name', $name);
-        $ui->assign('d', $d);
-        $ui->assign('_title', Lang::T('Routers Geo Location Information'));
-        $ui->assign('xheader', $leafletpickerHeader);
-        $ui->assign('xfooter', '<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>');
-        $ui->display('admin/routers/maps.tpl');
-        break;
     case 'add':
         run_hook('view_add_routers'); #HOOK
         $ui->display('admin/routers/add.tpl');
@@ -204,7 +189,6 @@ switch ($action) {
         break;
 
     default:
-        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/routers.js"></script>');
 
         $name = _post('name');
         $name = _post('name');

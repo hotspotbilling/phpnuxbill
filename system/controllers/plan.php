@@ -1061,7 +1061,6 @@ switch ($action) {
         }
         break;
     default:
-        $ui->assign('xfooter', '<script type="text/javascript" src="'.APP_URL.'/ui/lib/c/plan.js"></script>');
         $ui->assign('_title', Lang::T('Customer'));
         $search = _post('search');
         $status = _req('status');

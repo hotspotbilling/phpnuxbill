@@ -59,7 +59,7 @@ $(document).ready(function(){
   $("#routers").change(function(){
     var routers = $("#routers").val();
     $.ajax({
-        url: "index.php?_route=autoload/pool",
+        url: "?_route=autoload/pool",
         data: "routers="+routers,
         cache: false,
         success: function(msg){
@@ -76,7 +76,7 @@ $(function() {
 				$.ajax({
 					type: "POST",
 					dataType: "html",
-					url: "index.php?_route=autoload/server",
+					url: "?_route=autoload/server",
 					success: function(msg){
 						$("#server").html(msg);
 					}
@@ -88,7 +88,7 @@ $(function() {
 					$.ajax({
 						type: "POST",
 						dataType: "html",
-						url: "index.php?_route=autoload/plan",
+						url: "?_route=autoload/plan",
 						data: "jenis=Hotspot&server="+server,
 						success: function(msg){
 							$("#plan").html(msg);
@@ -100,7 +100,7 @@ $(function() {
 				$.ajax({
 					type: "POST",
 					dataType: "html",
-					url: "index.php?_route=autoload/server",
+					url: "?_route=autoload/server",
 					success: function(msg){
 						$("#server").html(msg);
 					}
@@ -110,7 +110,7 @@ $(function() {
 					$.ajax({
 						type: "POST",
 						dataType: "html",
-						url: "index.php?_route=autoload/plan",
+						url: "?_route=autoload/plan",
 						data: "jenis=PPPOE&server="+server,
 						success: function(msg){
 							$("#plan").html(msg);
@@ -121,7 +121,7 @@ $(function() {
 				$.ajax({
 					type: "POST",
 					dataType: "html",
-					url: "index.php?_route=autoload/server",
+					url: "?_route=autoload/server",
 					success: function(msg){
 						$("#server").html(msg);
 					}
@@ -131,7 +131,7 @@ $(function() {
 					$.ajax({
 						type: "POST",
 						dataType: "html",
-						url: "index.php?_route=autoload/plan",
+						url: "?_route=autoload/plan",
 						data: "jenis=VPN&server="+server,
 						success: function(msg){
 							$("#plan").html(msg);

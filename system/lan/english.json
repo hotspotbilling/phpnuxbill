@@ -964,5 +964,8 @@
     "Information": "Information",
     "Export_and_Print_will_show_all_data_without_pagination": "Export and Print will show all data without pagination",
     "Free_Internet_Plan_updated_successfully_": "Free Internet Plan updated successfully!",
-    "Create_Bandwidth_Package_for_expired_Internet_Package": "Create Bandwidth Package for expired Internet Package"
+    "Create_Bandwidth_Package_for_expired_Internet_Package": "Create Bandwidth Package for expired Internet Package",
+    "Maps": "Maps",
+    "Enable": "Enable",
+    "Continue_the_process_of_changing_Routers_": "Continue the process of changing Routers?"
 }
