@@ -63,6 +63,6 @@ switch ($do) {
         run_hook('view_login'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
-        $ui->display('admin-login.tpl');
+        $ui->display('admin/admin/login.tpl');
         break;
 }

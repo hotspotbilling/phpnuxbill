@@ -70,13 +70,13 @@ switch ($action) {
                 if (function_exists($action . '_save_config')) {
                     call_user_func($action . '_save_config');
                 } else {
-                    $ui->display('a404.tpl');
+                    $ui->display('admin/404.tpl');
                 }
             } else {
                 if (function_exists($action . '_show_config')) {
                     call_user_func($action . '_show_config');
                 } else {
-                    $ui->display('a404.tpl');
+                    $ui->display('admin/404.tpl');
                 }
             }
         } else {

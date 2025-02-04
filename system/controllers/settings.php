@@ -527,7 +527,7 @@ switch ($action) {
         run_hook('view_list_admin'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
-        $ui->display('admin.tpl');
+        $ui->display('list.tpl');
         break;
 
     case 'users-add':
@@ -538,7 +538,7 @@ switch ($action) {
         $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_title', Lang::T('Add User'));
         $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
-        $ui->display('admin-add.tpl');
+        $ui->display('admin/admin/add.tpl');
         break;
     case 'users-view':
         $ui->assign('_title', Lang::T('Edit User'));
@@ -567,7 +567,7 @@ switch ($action) {
             $ui->assign('_title', $d['username']);
             $csrf_token = Csrf::generateAndStoreToken();
             $ui->assign('csrf_token', $csrf_token);
-            $ui->display('admin-view.tpl');
+            $ui->display('admin/admin/view.tpl');
         } else {
             r2(getUrl('settings/users'), 'e', Lang::T('Account Not Found'));
         }
@@ -623,7 +623,7 @@ switch ($action) {
             run_hook('view_edit_admin'); #HOOK
             $csrf_token = Csrf::generateAndStoreToken();
             $ui->assign('csrf_token', $csrf_token);
-            $ui->display('admin-edit.tpl');
+            $ui->display('admin/admin/edit.tpl');
         } else {
             r2(getUrl('settings/users'), 'e', Lang::T('Account Not Found'));
         }
@@ -1131,5 +1131,5 @@ switch ($action) {
         break;
 
     default:
-        $ui->display('a404.tpl');
+        $ui->display('admin/404.tpl');
 }

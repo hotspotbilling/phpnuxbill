@@ -181,5 +181,5 @@ switch ($action) {
         echo json_encode(['results' => $json]);
         die();
     default:
-        $ui->display('a404.tpl');
+        $ui->display('admin/404.tpl');
 }

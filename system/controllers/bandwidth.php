@@ -186,5 +186,5 @@ switch ($action) {
         break;
 
     default:
-        $ui->display('a404.tpl');
+        $ui->display('admin/404.tpl');
 }

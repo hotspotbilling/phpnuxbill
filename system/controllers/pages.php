@@ -62,7 +62,7 @@ if (strpos($action, "-reset") !== false) {
         $ui->assign("PageFile", $action);
         $ui->display('page-edit.tpl');
     } else
-        $ui->display('a404.tpl');
+        $ui->display('admin/404.tpl');
 } else {
     if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
         _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
@@ -83,5 +83,5 @@ if (strpos($action, "-reset") !== false) {
             r2(getUrl('pages/') . $action, 'e', Lang::T("Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>"));
         }
     } else
-        $ui->display('a404.tpl');
+        $ui->display('admin/404.tpl');
 }
