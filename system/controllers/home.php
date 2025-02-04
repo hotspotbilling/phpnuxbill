@@ -147,7 +147,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             $routers = ORM::for_table('tbl_routers')->where('name', $bill['routers'])->find_one();
             $router = $routers['id'];
         }
-        r2(getUrl('order/gateway/$router/$bill[plan_id]'));
+        r2(getUrl("order/gateway/$router/$bill[plan_id]"));
     }
 } else if (!empty(_get('extend'))) {
     if ($user['status'] != 'Active') {
