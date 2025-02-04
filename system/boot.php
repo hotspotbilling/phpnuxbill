@@ -141,7 +141,7 @@ try {
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->display('error.tpl');
+    $ui->display('admin/error.tpl');
     die();
 } catch (Exception $e) {
     Message::sendTelegram(
@@ -154,6 +154,6 @@ try {
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
-    $ui->display('error.tpl');
+    $ui->display('admin/error.tpl');
     die();
 }

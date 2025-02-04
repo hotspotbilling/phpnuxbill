@@ -97,7 +97,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('q', $q);
-        $ui->display('logs.tpl');
+        $ui->display('admin/logs/system.tpl');
         break;
     case 'radius':
         $q = (_post('q') ? _post('q') : _get('q'));
@@ -116,7 +116,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         $ui->assign('q', $q);
-        $ui->display('logs-radius.tpl');
+        $ui->display('admin/logs/radius.tpl');
         break;
 
 

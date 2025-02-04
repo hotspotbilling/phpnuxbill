@@ -83,7 +83,7 @@ switch ($action) {
         $ui->assign('mdate', $mdate);
         $ui->assign('recharged_on', $mdate);
         run_hook('print_by_date'); #HOOK
-        $ui->display('print-by-date.tpl');
+        $ui->display('admin/print/by-date.tpl');
         break;
 
     case 'pdf-by-date':
@@ -281,7 +281,7 @@ EOF;
         $ui->assign('tdate', $tdate);
         $ui->assign('stype', $stype);
         run_hook('print_by_period'); #HOOK
-        $ui->display('print-by-period.tpl');
+        $ui->display('admin/print/by-period.tpl');
         break;
 
 

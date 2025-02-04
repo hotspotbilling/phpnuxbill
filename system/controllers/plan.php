@@ -82,7 +82,7 @@ switch ($action) {
         }
         $ui->assign('usings', $usings);
         run_hook('view_recharge'); #HOOK
-        $ui->display('recharge.tpl');
+        $ui->display('admin/plan/recharge.tpl');
         break;
 
     case 'recharge-confirm':
@@ -158,7 +158,7 @@ switch ($action) {
             $ui->assign('server', $server);
             $ui->assign('using', $using);
             $ui->assign('plan', $plan);
-            $ui->display('recharge-confirm.tpl');
+            $ui->display('admin/plan/recharge-confirm.tpl');
         } else {
             r2(getUrl('plan/recharge'), 'e', $msg);
         }
@@ -180,7 +180,7 @@ switch ($action) {
             $username = App::getVoucherValue($svoucher);
             $in = ORM::for_table('tbl_transactions')->where('username', $username)->order_by_desc('id')->find_one();
             Package::createInvoice($in);
-            $ui->display('invoice.tpl');
+            $ui->display('admin/plan/invoice.tpl');
             die();
         }
 
@@ -239,7 +239,7 @@ switch ($action) {
                 $in = ORM::for_table('tbl_transactions')->where('username', $cust['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
                 App::setVoucher($svoucher, $cust['username']);
-                $ui->display('invoice.tpl');
+                $ui->display('admin/plan/invoice.tpl');
                 _log('[' . $admin['username'] . ']: ' . 'Recharge ' . $cust['username'] . ' [' . $in['plan_name'] . '][' . Lang::moneyFormat($in['price']) . ']', $admin['user_type'], $admin['id']);
             } else {
                 r2(getUrl('plan/recharge'), 'e', "Failed to recharge account");
@@ -263,7 +263,7 @@ switch ($action) {
         }
         Package::createInvoice($in);
         $ui->assign('_title', 'View Invoice');
-        $ui->display('invoice.tpl');
+        $ui->display('admin/plan/invoice.tpl');
         break;
 
 
@@ -285,7 +285,7 @@ switch ($action) {
             $ui->assign('date', Lang::dateAndTimeFormat($d['recharged_on'], $d['recharged_time']));
         }
         run_hook('print_invoice'); #HOOK
-        $ui->display('invoice-print.tpl');
+        $ui->display('admin/plan/invoice-print.tpl');
         break;
 
     case 'edit':
@@ -312,7 +312,7 @@ switch ($action) {
             $ui->assign('p', $ps);
             run_hook('view_edit_customer_plan'); #HOOK
             $ui->assign('_title', 'Edit Plan');
-            $ui->display('plan-edit.tpl');
+            $ui->display('admin/plan/edit.tpl');
         } else {
             r2(getUrl('plan/list'), 'e', Lang::T('Account Not Found'));
         }
@@ -510,7 +510,7 @@ switch ($action) {
         $ui->assign('search', $search);
         $ui->assign('page', $page);
         run_hook('view_list_voucher'); #HOOK
-        $ui->display('voucher.tpl');
+        $ui->display('admin/voucher/list.tpl');
         break;
 
     case 'add-voucher':
@@ -525,7 +525,7 @@ switch ($action) {
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
         run_hook('view_add_voucher'); #HOOK
-        $ui->display('voucher-add.tpl');
+        $ui->display('admin/voucher/add.tpl');
         break;
 
     case 'remove-voucher':
@@ -684,7 +684,7 @@ switch ($action) {
         //for counting pagebreak
         $ui->assign('jml', 0);
         run_hook('view_print_voucher'); #HOOK
-        $ui->display('print-voucher.tpl');
+        $ui->display('admin/print/voucher.tpl');
         break;
     case 'voucher-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
@@ -916,7 +916,7 @@ switch ($action) {
         $ui->assign('xfooter', $select2_customer);
         $ui->assign('_title', Lang::T('Refill Account'));
         run_hook('view_refill'); #HOOK
-        $ui->display('refill.tpl');
+        $ui->display('admin/plan/refill.tpl');
 
         break;
 
@@ -936,7 +936,7 @@ switch ($action) {
                 $v1->save();
                 $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
-                $ui->display('invoice.tpl');
+                $ui->display('admin/plan/invoice.tpl');
             } else {
                 r2(getUrl('plan/refill'), 'e', "Failed to refill account");
             }
@@ -956,7 +956,7 @@ switch ($action) {
             $ui->assign('p', ORM::for_table('tbl_plans')->where('enabled', '1')->where('type', 'Balance')->find_many());
         }
         run_hook('view_deposit'); #HOOK
-        $ui->display('deposit.tpl');
+        $ui->display('admin/plan/deposit.tpl');
         break;
     case 'deposit-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
@@ -971,7 +971,7 @@ switch ($action) {
         if (App::getVoucherValue($svoucher)) {
             $in = ORM::for_table('tbl_transactions')->find_one(App::getVoucherValue($svoucher));
             Package::createInvoice($in);
-            $ui->display('invoice.tpl');
+            $ui->display('admin/plan/invoice.tpl');
             die();
         }
 
@@ -987,7 +987,7 @@ switch ($action) {
                 if (!empty($svoucher)) {
                     App::setVoucher($svoucher, $trxId);
                 }
-                $ui->display('invoice.tpl');
+                $ui->display('admin/plan/invoice.tpl');
             } else {
                 r2(getUrl('plan/refill'), 'e', "Failed to refill account");
             }
@@ -1000,7 +1000,7 @@ switch ($action) {
                 if (!empty($svoucher)) {
                     App::setVoucher($svoucher, $trxId);
                 }
-                $ui->display('invoice.tpl');
+                $ui->display('admin/plan/invoice.tpl');
             } else {
                 r2(getUrl('plan/refill'), 'e', "Failed to refill account");
             }
@@ -1102,6 +1102,6 @@ switch ($action) {
         $d = Paginator::findMany($query, ['search' => $search], 25, $append_url);
         run_hook('view_list_billing'); #HOOK
         $ui->assign('d', $d);
-        $ui->display('plan.tpl');
+        $ui->display('admin/plan/active.tpl');
         break;
 }

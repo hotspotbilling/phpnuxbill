@@ -230,4 +230,4 @@ $ui->assign('stocks', $stocks);
 $ui->assign('plans', $plans);
 
 run_hook('view_dashboard'); #HOOK
-$ui->display('dashboard.tpl');
+$ui->display('admin/dashboard.tpl');

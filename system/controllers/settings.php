@@ -205,7 +205,7 @@ switch ($action) {
                     $ui->assign("error_message", "Radius table not found.<br><br>" .
                         $e->getMessage() .
                         "<br><br>Download <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/Development/install/radius.sql\">here</a> or <a href=\"https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/install/radius.sql\">here</a> and import it to database.<br><br>Check config.php for radius connection details");
-                    $ui->display('error.tpl');
+                    $ui->display('admin/error.tpl');
                     die();
                 }
             }
@@ -527,7 +527,7 @@ switch ($action) {
         run_hook('view_list_admin'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
-        $ui->display('list.tpl');
+        $ui->display('admin/admin/list.tpl');
         break;
 
     case 'users-add':
@@ -953,7 +953,7 @@ switch ($action) {
             }
             $ui->assign('tables', $tables);
             run_hook('view_database'); #HOOK
-            $ui->display('dbstatus.tpl');
+            $ui->display('admin/settings/dbstatus.tpl');
         }
         break;
 
@@ -1043,7 +1043,7 @@ switch ($action) {
         }
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
-        $ui->display('language-add.tpl');
+        $ui->display('admin/settings/language-add.tpl');
         break;
 
     case 'lang-post':
@@ -1095,7 +1095,7 @@ switch ($action) {
         $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_c', $config);
         $ui->assign('_title', Lang::T('Maintenance Mode Settings'));
-        $ui->display('maintenance-mode.tpl');
+        $ui->display('admin/settings/maintenance-mode.tpl');
         break;
 
     case 'miscellaneous':

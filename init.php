@@ -367,7 +367,7 @@ function displayMaintenanceMessage(): void
     }
     http_response_code(503);
     $ui->assign('companyName', $config['CompanyName']);
-    $ui->display('maintenance.tpl');
+    $ui->display('admin/maintenance.tpl');
     die();
 }
 

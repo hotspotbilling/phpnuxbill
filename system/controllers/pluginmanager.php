@@ -345,7 +345,7 @@ switch ($action) {
         $ui->assign('plugins', $json['plugins']);
         $ui->assign('pgs', $json['payment_gateway']);
         $ui->assign('dvcs', $json['devices']);
-        $ui->display('plugin-manager.tpl');
+        $ui->display('admin/settings/plugin-manager.tpl');
 }
 
 

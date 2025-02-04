@@ -36,11 +36,11 @@ switch ($action) {
         $ui->assign('_title', Lang::T('Routers Geo Location Information'));
         $ui->assign('xheader', $leafletpickerHeader);
         $ui->assign('xfooter', '<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>');
-        $ui->display('routers-maps.tpl');
+        $ui->display('admin/routers/maps.tpl');
         break;
     case 'add':
         run_hook('view_add_routers'); #HOOK
-        $ui->display('routers-add.tpl');
+        $ui->display('admin/routers/add.tpl');
         break;
 
     case 'edit':
@@ -53,7 +53,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('d', $d);
             run_hook('view_router_edit'); #HOOK
-            $ui->display('routers-edit.tpl');
+            $ui->display('admin/routers/edit.tpl');
         } else {
             r2(getUrl('routers/list'), 'e', Lang::T('Account Not Found'));
         }
@@ -215,6 +215,6 @@ switch ($action) {
         $d = Paginator::findMany($query, ['name' => $name]);
         $ui->assign('d', $d);
         run_hook('view_list_routers'); #HOOK
-        $ui->display('routers.tpl');
+        $ui->display('admin/routers/list.tpl');
         break;
 }

@@ -33,14 +33,14 @@ switch ($action) {
 
         $ui->assign('d', $d);
         run_hook('view_pool'); #HOOK
-        $ui->display('pool.tpl');
+        $ui->display('admin/pool/list.tpl');
         break;
 
     case 'add':
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
         run_hook('view_add_pool'); #HOOK
-        $ui->display('pool-add.tpl');
+        $ui->display('admin/pool/add.tpl');
         break;
 
     case 'edit':
@@ -49,7 +49,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('d', $d);
             run_hook('view_edit_pool'); #HOOK
-            $ui->display('pool-edit.tpl');
+            $ui->display('admin/pool/edit.tpl');
         } else {
             r2(getUrl('pool/list'), 'e', Lang::T('Account Not Found'));
         }
@@ -162,14 +162,14 @@ switch ($action) {
 
         $ui->assign('d', $d);
         run_hook('view_port'); #HOOK
-        $ui->display('port.tpl');
+        $ui->display('admin/port/list.tpl');
         break;
 
     case 'add-port':
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
         run_hook('view_add_port'); #HOOK
-        $ui->display('port-add.tpl');
+        $ui->display('admin/port/add.tpl');
         break;
 
     case 'edit-port':
@@ -178,7 +178,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('d', $d);
             run_hook('view_edit_port'); #HOOK
-            $ui->display('port-edit.tpl');
+            $ui->display('admin/port/edit.tpl');
         } else {
             r2(getUrl('pool/port'), 'e', Lang::T('Account Not Found'));
         }

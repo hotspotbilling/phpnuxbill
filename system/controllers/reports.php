@@ -269,7 +269,7 @@ switch ($action) {
 
         $ui->assign('activation', $d);
         $ui->assign('q', $q);
-        $ui->display('reports-activation.tpl');
+        $ui->display('admin/reports/activation.tpl');
         break;
 
     case 'by-period':
@@ -277,7 +277,7 @@ switch ($action) {
         $ui->assign('mtime', $mtime);
         $ui->assign('tdate', $tdate);
         run_hook('view_reports_by_period'); #HOOK
-        $ui->display('reports-period.tpl');
+        $ui->display('admin/reports/period.tpl');
         break;
 
     case 'period-view':
@@ -310,7 +310,7 @@ switch ($action) {
         $ui->assign('tdate', $tdate);
         $ui->assign('stype', $stype);
         run_hook('view_reports_period'); #HOOK
-        $ui->display('reports-period-view.tpl');
+        $ui->display('admin/reports/period-view.tpl');
         break;
 
     case 'daily-report':
@@ -384,6 +384,6 @@ switch ($action) {
         $ui->assign('dr', $dr);
         $ui->assign('mdate', $mdate);
         run_hook('view_daily_reports'); #HOOK
-        $ui->display('reports.tpl');
+        $ui->display('admin/reports/list.tpl');
         break;
 }

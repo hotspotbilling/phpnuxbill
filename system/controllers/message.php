@@ -46,7 +46,7 @@ EOT;
         $id = $routes['2'];
         $ui->assign('id', $id);
         $ui->assign('xfooter', $select2_customer);
-        $ui->display('message.tpl');
+        $ui->display('admin/message/single.tpl');
         break;
 
     case 'send-post':
@@ -230,7 +230,7 @@ EOT;
         $ui->assign('totalSMSFailed', $totalSMSFailed);
         $ui->assign('totalWhatsappSent', $totalWhatsappSent);
         $ui->assign('totalWhatsappFailed', $totalWhatsappFailed);
-        $ui->display('message-bulk.tpl');
+        $ui->display('admin/message/bulk.tpl');
         break;
 
     default:

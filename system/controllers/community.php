@@ -19,8 +19,8 @@ switch ($action) {
 
         $ui->assign('masters', $masters);
         $ui->assign('devs', $devs);
-        $ui->display('community-rollback.tpl');
+        $ui->display('admin/rollback.tpl');
         break;
     default:
-        $ui->display('community.tpl');
+        $ui->display('admin/community.tpl');
 }

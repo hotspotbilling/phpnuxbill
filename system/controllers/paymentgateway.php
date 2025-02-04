@@ -34,7 +34,7 @@ switch ($action) {
         $ui->assign('pgs', $pgs);
         $ui->assign('pg', $pg);
         $ui->assign('q', $q);
-        $ui->display('paymentgateway-audit.tpl');
+        $ui->display('admin/paymentgateway/audit.tpl');
         break;
     case 'auditview':
         $pg = alphanumeric($routes[2]);
@@ -43,7 +43,7 @@ switch ($action) {
         $d['pg_paid_response'] = (!empty($d['pg_paid_response']))? Text::jsonArray21Array(json_decode($d['pg_paid_response'], true)) : [];
         $ui->assign('_title', 'Payment Gateway Audit View');
         $ui->assign('pg', $d);
-        $ui->display('paymentgateway-audit-view.tpl');
+        $ui->display('admin/paymentgateway/audit-view.tpl');
         break;
     default:
         if (_post('save') == 'actives') {
@@ -92,7 +92,7 @@ switch ($action) {
                 $ui->assign('_title', 'Payment Gateway Settings');
                 $ui->assign('pgs', $pgs);
                 $ui->assign('actives', explode(',', $config['payment_gateway']));
-                $ui->display('paymentgateway.tpl');
+                $ui->display('admin/paymentgateway/list.tpl');
             }
         }
 }

@@ -22,7 +22,7 @@ switch ($action) {
         $ui->assign('_system_menu', 'radius');
         $ui->assign('_title', "Network Access Server");
         $ui->assign('routers', ORM::for_table('tbl_routers')->find_many());
-        $ui->display('radius-nas-add.tpl');
+        $ui->display('admin/radius/nas-add.tpl');
         break;
     case 'nas-add-post':
         $shortname = _post('shortname');
@@ -78,7 +78,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('routers', ORM::for_table('tbl_routers')->find_many());
             $ui->assign('d', $d);
-            $ui->display('radius-nas-edit.tpl');
+            $ui->display('admin/radius/nas-edit.tpl');
         } else {
             r2(getUrl('radius/list'), 'e', Lang::T('Account Not Found'));
         }
@@ -147,5 +147,5 @@ switch ($action) {
         }
         $ui->assign('name', $name);
         $ui->assign('nas', $nas);
-        $ui->display('radius-nas.tpl');
+        $ui->display('admin/radius/nas.tpl');
 }

@@ -516,7 +516,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         run_hook('view_list_ppoe'); #HOOK
-        $ui->display('pppoe.tpl');
+        $ui->display('admin/pppoe/list.tpl');
         break;
 
     case 'pppoe-add':
@@ -535,7 +535,7 @@ switch ($action) {
         }
         $ui->assign('devices', $devices);
         run_hook('view_add_ppoe'); #HOOK
-        $ui->display('pppoe-add.tpl');
+        $ui->display('admin/pppoe/add.tpl');
         break;
 
     case 'pppoe-edit':
@@ -578,7 +578,7 @@ switch ($action) {
             }
             $ui->assign('exps', $exps);
             run_hook('view_edit_ppoe'); #HOOK
-            $ui->display('pppoe-edit.tpl');
+            $ui->display('admin/pppoe/edit.tpl');
         } else {
             r2(getUrl('services/pppoe'), 'e', Lang::T('Account Not Found'));
         }
@@ -1009,7 +1009,7 @@ switch ($action) {
 
         $ui->assign('d', $d);
         run_hook('view_list_vpn'); #HOOK
-        $ui->display('vpn.tpl');
+        $ui->display('admin/vpn/list.tpl');
         break;
 
     case 'vpn-add':
@@ -1028,7 +1028,7 @@ switch ($action) {
         }
         $ui->assign('devices', $devices);
         run_hook('view_add_vpn'); #HOOK
-        $ui->display('vpn-add.tpl');
+        $ui->display('admin/vpn/add.tpl');
         break;
 
     case 'vpn-edit':
@@ -1071,7 +1071,7 @@ switch ($action) {
             }
             $ui->assign('exps', $exps);
             run_hook('view_edit_vpn'); #HOOK
-            $ui->display('vpn-edit.tpl');
+            $ui->display('admin/vpn/edit.tpl');
         } else {
             r2(getUrl('services/vpn'), 'e', Lang::T('Account Not Found'));
         }
