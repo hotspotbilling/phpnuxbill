@@ -1009,5 +1009,6 @@
     "Payment_Date": "Payment Date",
     "Plan_Expiry_Date": "Plan Expiry Date",
     "Make_Payment": "Make Payment",
-    "Validity_Period": "Validity Period"
+    "Validity_Period": "Validity Period",
+    "Buy_Balance_Package": "Buy Balance Package"
 }

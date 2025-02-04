@@ -791,7 +791,7 @@ switch ($action) {
                 $ui->assign('from_id', 0);
                 $ui->assign('vpl', '3');
                 $ui->assign('pagebreak', $voucherPerPage);
-                $ui->display('print-voucher.tpl');
+                $ui->display('admin/print/voucher.tpl');
             }
 
             if ($numbervoucher == 1) {
@@ -891,7 +891,7 @@ switch ($action) {
             $content .= Lang::pad($config['note'], ' ', 2) . "\n";
             $ui->assign('_title', Lang::T('View'));
             $ui->assign('whatsapp', urlencode("```$content```"));
-            $ui->display('voucher-view.tpl');
+            $ui->display('admin/voucher/view.tpl');
         } else {
             r2(getUrl('plan/voucher/'), 'e', Lang::T('Voucher Not Found'));
         }
