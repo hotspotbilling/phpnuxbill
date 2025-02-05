@@ -184,7 +184,7 @@
                     document.getElementById("routers").required = false;
                     document.getElementById("routers").disabled = true;
                     $.ajax({
-                        url: "?_route=autoload/pool",
+                        url: "{/literal}{Text::url('autoload/pool')}{literal}",
                         data: "routers=radius",
                         cache: false,
                         success: function(msg) {
