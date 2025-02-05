@@ -4,25 +4,66 @@
 <head>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QRCode Scanner</title>
+    <title>QR Code Scanner</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #qr-reader {
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        #qr-reader-results {
+            padding: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
         button {
             margin-top: 30px;
             margin-bottom: 30px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 
 <body>
-    <div id="qr-reader" style="width:100%; height:auto"></div>
-    <div id="qr-reader-results"></div>
+    <div id="container">
+        <h2>QR Code Scanner</h2>
+        <div id="qr-reader"></div>
+        <div id="qr-reader-results"></div>
+        <button id="camera-button">Open Camera</button>
+    </div>
     <script src="qrcode.min.js"></script>
     <script>
         function docReady(fn) {
-            // see if DOM is already available
+            // lihat apakah DOM sudah tersedia
             if (document.readyState === "complete" ||
                 document.readyState === "interactive") {
-                // call on next available tick
+                // panggil di detik berikutnya yang tersedia
                 setTimeout(fn, 1);
             } else {
                 document.addEventListener("DOMContentLoaded", fn);
@@ -51,6 +92,9 @@
         docReady(function() {
             var resultContainer = document.getElementById('qr-reader-results');
             var lastResult, countResults = 0;
+            var html5QrcodeScanner;
+            var isCameraOpen = false;
+
             function onScanSuccess(decodedText, decodedResult) {
                 if (decodedText !== lastResult) {
                     ++countResults;
@@ -67,12 +111,24 @@
                 }
             }
 
-            var html5QrcodeScanner = new Html5QrcodeScanner(
-                "qr-reader", {
-                    fps: 10,
-                    qrbox: 250
-                });
-            html5QrcodeScanner.render(onScanSuccess);
+            function toggleCamera() {
+                if (isCameraOpen) {
+                    html5QrcodeScanner.clear();
+                    document.getElementById('camera-button').textContent = "Open Camera";
+                    isCameraOpen = false;
+                } else {
+                    html5QrcodeScanner = new Html5QrcodeScanner(
+                        "qr-reader", {
+                            fps: 10,
+                            qrbox: 250
+                        });
+                    html5QrcodeScanner.render(onScanSuccess);
+                    document.getElementById('camera-button').textContent = "Close Camera";
+                    isCameraOpen = true;
+                }
+            }
+
+            document.getElementById('camera-button').addEventListener('click', toggleCamera);
         });
     </script>
 </body>
