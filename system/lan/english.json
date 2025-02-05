@@ -1016,5 +1016,13 @@
     "Dont_select_logs_if_it_failed": "Dont select logs if it failed",
     "Download_Backup": "Download Backup",
     "Restore": "Restore",
-    "Restoring_database_will_clean_up_data_and_then_restore_all_the_data": "Restoring database will clean up data and then restore all the data"
+    "Restoring_database_will_clean_up_data_and_then_restore_all_the_data": "Restoring database will clean up data and then restore all the data",
+    "Transaction": "Transaction",
+    "Face_Detection": "Face Detection",
+    "Other": "Other",
+    "Customer_can_login_but_cannot_buy_internet_package__Admin_cannot_recharge_customer": "Customer can login but cannot buy internet package, Admin cannot recharge customer",
+    "Don_t_forget_to_deactivate_all_active_package_too": "Don't forget to deactivate all active package too",
+    "Continue_the_Customer_Data_change_process_": "Continue the Customer Data change process?",
+    "Oops__The_page_you_are_looking_for_was_not_found": "Oops! The page you are looking for was not found",
+    "Back_to_Dashboard": "Back to Dashboard"
 }
