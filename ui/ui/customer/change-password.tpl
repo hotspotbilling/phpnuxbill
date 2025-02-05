@@ -6,7 +6,8 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Change Password')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}accounts/change-password-post">
+                <form class="form-horizontal" method="post" role="form"
+                    action="{Text::url('accounts/change-password-post')}">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Current Password')}</label>
@@ -29,9 +30,8 @@
 
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success"
-                                type="submit">{Lang::T('Save Changes')}</button>
-                            Or <a href="{$_url}home">{Lang::T('Cancel')}</a>
+                            <button class="btn btn-success" type="submit">{Lang::T('Save Changes')}</button>
+                            Or <a href="{Text::url('home')}">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

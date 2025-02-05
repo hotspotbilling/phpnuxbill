@@ -34,14 +34,14 @@
                 <div class="box-footer p-2">
                     <div class="btn-group btn-group-justified mb15">
                         <div class="btn-group">
-                            <a href="{$_url}order/view/{$unpaid['id']}/cancel" class="btn btn-danger btn-sm"
+                            <a href="{Text::url('order/view/', $unpaid['id'], '/cancel')}" class="btn btn-danger btn-sm"
                                 onclick="return ask(this, '{Lang::T('Cancel it?')}')">
                                 <span class="glyphicon glyphicon-trash"></span>
                                 {Lang::T('Cancel')}
                             </a>
                         </div>
                         <div class="btn-group">
-                            <a class="btn btn-success btn-block btn-sm" href="{$_url}order/view/{$unpaid['id']}">
+                            <a class="btn btn-success btn-block btn-sm" href="{Text::url('order/view/',$unpaid['id'])}">
                                 <span class="icon"><i class="ion ion-card"></i></span>
                                 <span>{Lang::T('PAY NOW')}</span>
                             </a>
@@ -102,11 +102,11 @@
                             <td class="small mb15 text-bold">
                                 {Lang::moneyFormat($_user['balance'])}
                                 {if $_user['auto_renewal'] == 1}
-                                    <a class="label label-success pull-right" href="{$_url}home&renewal=0"
+                                    <a class="label label-success pull-right" href="{Text::url('home&renewal=0')}"
                                         onclick="return ask(this, '{Lang::T('Disable auto renewal?')}')">{Lang::T('Auto Renewal
                                 On')}</a>
                                 {else}
-                                    <a class="label label-danger pull-right" href="{$_url}home&renewal=1"
+                                    <a class="label label-danger pull-right" href="{Text::url('home&renewal=1')}"
                                         onclick="return ask(this, '{Lang::T('Enable auto renewal?')}')">{Lang::T('Auto Renewal
                                 Off')}</a>
                                 {/if}
@@ -188,7 +188,7 @@
                                     {$_bill['namebp']}
                                     {if $_bill['status'] != 'on'}
                                         <a class="label label-danger pull-right"
-                                            href="{$_url}order/package">{Lang::T('Expired')}</a>
+                                            href="{Text::url('order/package')}">{Lang::T('Expired')}</a>
                                     {/if}
                                 </td>
                             </tr>
@@ -204,7 +204,7 @@
                                 <td class="small text-info text-uppercase text-normal">{Lang::T('Created On')}</td>
                                 <td class="small mb15">
                                     {if $_bill['time'] ne
-                                    ''}{Lang::dateAndTimeFormat($_bill['recharged_on'],$_bill['recharged_time'])}
+                                                                            ''}{Lang::dateAndTimeFormat($_bill['recharged_on'],$_bill['recharged_time'])}
                                 {/if}&nbsp;</td>
                         </tr>
                         <tr>
@@ -271,7 +271,7 @@
                                 are
                                 Online, Check Status')}</a>
                                 {else}
-                                    <a href="{$_url}home&mikrotik=login"
+                                    <a href="{Text::url('home&mikrotik=login')}"
                                         onclick="return ask(this, '{Lang::T('Connect to Internet')}')"
                                         class="btn btn-danger btn-xs btn-block">{Lang::T('Not Online, Login now?')}</a>
                                 {/if}
@@ -281,7 +281,7 @@
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">
                             {if $_bill['status'] == 'on' && $_bill['prepaid'] != 'YES'}
-                                <a href="{$_url}home&deactivate={$_bill['id']}"
+                                <a href="{Text::url('home&deactivate=', $_bill['id'])}"
                                     onclick="return ask(this, '{Lang::T('Deactivate')}?')" class="btn btn-danger btn-xs"><i
                                         class="glyphicon glyphicon-trash"></i></a>
                             {/if}
@@ -289,14 +289,14 @@
                         <td class="small row">
                             {if $_bill['status'] != 'on' && $_bill['prepaid'] != 'yes' && $_c['extend_expired']}
                                 <a class="btn btn-warning text-black btn-sm"
-                                    href="{$_url}home&extend={$_bill['id']}&stoken={App::getToken()}"
+                                    href="{Text::url('home&extend=', $_bill['id'], '&stoken=', App::getToken())}"
                                     onclick="return ask(this, '{Text::toHex($_c['extend_confirmation'])}')">{Lang::T('Extend')}</a>
                             {/if}
                             <a class="btn btn-primary pull-right btn-sm"
-                                href="{$_url}home&recharge={$_bill['id']}&stoken={App::getToken()}"
+                                href="{Text::url('home&recharge=', $_bill['id'], '&stoken=', App::getToken())}"
                                 onclick="return ask(this, '{Lang::T('Recharge')}?')">{Lang::T('Recharge')}</a>
                             <a class="btn btn-warning text-black pull-right btn-sm"
-                                href="{$_url}home&sync={$_bill['id']}&stoken={App::getToken()}"
+                                href="{Text::url('home&sync=', $_bill['id'], '&stoken=', App::getToken())}"
                                 onclick="return ask(this, '{Lang::T('Sync account if you failed login to internet')}?')"
                                 data-toggle="tooltip" data-placement="top"
                                 title="{Lang::T('Sync account if you failed login to internet')}"><span
@@ -312,7 +312,7 @@
         {if $_c['disable_voucher'] == 'yes'}
             <div class="box-footer">
                 {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
-                    <a href="{$_url}order/package" class="btn btn-primary btn-block">
+                    <a href="{Text::url('order/package')}" class="btn btn-primary btn-block">
                         <i class="ion ion-ios-cart"></i>
                         {Lang::T('Order Package')}
                     </a>
@@ -342,7 +342,7 @@
                     <h4 class="box-title">{Lang::T("Transfer Balance")}</h4>
                 </div>
                 <div class="box-body p-0">
-                    <form method="post" onsubmit="return askConfirm()" role="form" action="{$_url}home">
+                    <form method="post" onsubmit="return askConfirm()" role="form" action="{Text::url('home')}">
                         <div class="form-group">
                             <div class="col-sm-5">
                                 <input type="text" id="username" name="username" class="form-control" required
@@ -375,7 +375,7 @@
                     <h4 class="box-title">{Lang::T("Recharge a friend")}</h4>
                 </div>
                 <div class="box-body p-0">
-                    <form method="post" role="form" action="{$_url}home">
+                    <form method="post" role="form" action="{Text::url('home')}">
                         <div class="form-group">
                             <div class="col-sm-10">
                                 <input type="text" id="username" name="username" class="form-control" required
@@ -398,11 +398,12 @@
                     <h3 class="box-title">{Lang::T('Voucher Activation')}</h3>
                 </div>
                 <div class="box-body">
-                    <form method="post" role="form" class="form-horizontal" action="{$_url}voucher/activation-post">
+                    <form method="post" role="form" class="form-horizontal" action="{Text::url('voucher/activation-post')}">
                         <div class="input-group">
                             <span class="input-group-btn">
-                                <a class="btn btn-default" href="{APP_URL}/scan/?back={urlencode($_url)}{urlencode("
-                                    home&code=")}"><i class="glyphicon glyphicon-qrcode"></i></a>
+                                <a class="btn btn-default"
+                                    href="{$app_url}/scan/?back={urlencode(Text::url('home&code='))}"><i
+                                        class="glyphicon glyphicon-qrcode"></i></a>
                             </span>
                             <input type="text" id="code" name="code" class="form-control"
                                 placeholder="{Lang::T('Enter voucher code here')}" value="{$code}">
@@ -414,12 +415,12 @@
                 </div>
                 <div class="box-body">
                     <div class="btn-group btn-group-justified" role="group">
-                        <a class="btn btn-default" href="{$_url}voucher/activation">
+                        <a class="btn btn-default" href="{Text::url('voucher/activation')}">
                             <i class="ion ion-ios-cart"></i>
                             {Lang::T('Order Voucher')}
                         </a>
                         {if $_c['payment_gateway'] != 'none' or $_c['payment_gateway'] == '' }
-                            <a href="{$_url}order/package" class="btn btn-default">
+                            <a href="{Text::url('order/package')}" class="btn btn-default">
                                 <i class="ion ion-ios-cart"></i>
                                 {Lang::T('Order Package')}
                             </a>

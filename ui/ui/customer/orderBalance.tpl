@@ -28,7 +28,7 @@
                                     </div>
                                 </div>
                                 <div class="box-body">
-                                    <a href="{$_url}order/gateway/0/{$plan['id']}"
+                                    <a href="{Text::url('order/gateway/0/')}{$plan['id']}"
                                         onclick="return ask(this, '{Lang::T('Buy Balance')}?')"
                                         class="btn btn-sm btn-block btn-primary">{Lang::T('Buy')}</a>
                                 </div>
@@ -37,7 +37,7 @@
                     {/foreach}
                     {if $_c['allow_balance_custom'] eq 'yes'}
                         <div class="col col-md-4">
-                            <form action="{$_url}order/gateway/0/0" method="post">
+                            <form action="{Text::url('order/gateway/0/0')}" method="post">
                                 <input type="hidden" name="custom" value="1">
                                 <div class="box box-solid box-default">
                                     <div class="box-header text-bold">{Lang::T('Custom Balance')}</div>

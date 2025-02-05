@@ -73,7 +73,7 @@
                 {/if}
                 {if $discount == '' && $plan['type'] neq 'Balance' && $custom == '' && $_c['enable_coupons'] == 'yes'}
                     <!-- Coupon Code Form -->
-                    <form action="{$_url}order/gateway/{$route2}/{$route3}" method="post">
+                    <form action="{Text::url('order/gateway/')}{$route2}/{$route3}" method="post">
                         <div class="form-group row">
                             <label class="col-md-4 control-label">{Lang::T('Coupon Code')}</label>
                             <div class="col-md-8">
@@ -143,7 +143,7 @@
                 </ul>
 
                 <!-- Payment Gateway Form -->
-                <form method="post" action="{$_url}order/buy/{$route2}/{$route3}">
+                <form method="post" action="{Text::url('order/buy/')}{$route2}/{$route3}">
                     <input type="hidden" name="coupon" value="{$discount}">
                     {if $custom == '1' && $amount neq ''}
                         <input type="hidden" name="custom" value="1">
@@ -165,9 +165,9 @@
                         </div>
                     </div>
                     <center>
-                        <button type="submit" name="pay" class="btn btn-primary" onclick="return ask(this, '{Lang::T("
-                            Are You Sure?")}')">{Lang::T('Pay Now')}</button>
-                        <a href="{$_url}home" class="btn btn-secondary">{Lang::T('Cancel')}</a>
+                        <button type="submit" name="pay" class="btn btn-primary"
+                        onclick="return ask(this, '{Lang::T("Are You Sure?")}')">{Lang::T('Pay Now')}</button>
+                        <a href="{Text::url('home')}" class="btn btn-secondary">{Lang::T('Cancel')}</a>
                     </center>
                 </form>
             </div>

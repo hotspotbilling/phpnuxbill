@@ -13,7 +13,7 @@
             </div>
         </div>
     </div>
-    <form action="{$_url}register" method="post">
+    <form action="{Text::url('register')}" method="post">
         <div class="col-md-4">
             <div class="panel panel-primary">
                 <div class="panel-heading">1. {Lang::T('Register as Member')}</div>
@@ -24,14 +24,15 @@
                         </label>
                         <div class="input-group">
                             <span class="input-group-addon" id="basic-addon1"><i
-                                        class="glyphicon glyphicon-phone-alt"></i></span>
+                                    class="glyphicon glyphicon-phone-alt"></i></span>
                             <input type="text" class="form-control" name="phone_number"
-                                placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Phone Number')}{/if}"inputmode="numeric" pattern="[0-9]*">
+                                placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Phone Number')}{/if}"
+                                inputmode="numeric" pattern="[0-9]*">
                         </div>
                     </div>
                     <div class="btn-group btn-group-justified mb15">
                         <div class="btn-group">
-                            <a href="{$_url}login" class="btn btn-warning">{Lang::T('Cancel')}</a>
+                            <a href="{Text::url('login')}" class="btn btn-warning">{Lang::T('Cancel')}</a>
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-success" type="submit">{Lang::T('Request OTP')}</button>

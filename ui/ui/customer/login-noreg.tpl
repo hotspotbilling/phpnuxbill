@@ -13,7 +13,7 @@
         <div class="panel panel-primary">
             <div class="panel-heading">{Lang::T('Login / Activate Voucher')}</div>
             <div class="panel-body">
-                <form action="{$_url}login/activation" method="post">
+                <form action="{Text::url('login/activation')}" method="post">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label>
@@ -47,7 +47,7 @@
                                 placeholder="{Lang::T('Enter voucher code here')}">
                             <span class="input-group-btn">
                                 <a class="btn btn-default"
-                                    href="{APP_URL}/scan/?back={urlencode($_url)}{urlencode("login&code=")}"><i
+                                    href="{APP_URL}/scan/?back={urlencode(Text::url('login&code='))}"><i
                                         class="glyphicon glyphicon-qrcode"></i></a>
                             </span>
                         </div>
@@ -63,7 +63,7 @@
         <div class="panel panel-primary">
             <div class="panel-heading">{Lang::T('Activate Voucher')}</div>
             <div class="panel-body">
-                <form action="{$_url}login/activation" method="post">
+                <form action="{Text::url('login/activation')}" method="post">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label>{Lang::T('Enter voucher code here')}</label>
@@ -72,7 +72,7 @@
                                 value="{$code}" placeholder="{Lang::T('Enter voucher code here')}">
                             <span class="input-group-btn">
                                 <a class="btn btn-default"
-                                    href="{APP_URL}/scan/?back={urlencode($_url)}{urlencode("login&code=")}"><i
+                                    href="{APP_URL}/scan/?back={urlencode(Text::url('login&code='))}"><i
                                         class="glyphicon glyphicon-qrcode"></i></a>
                             </span>
                         </div>

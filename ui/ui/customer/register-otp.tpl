@@ -10,7 +10,7 @@
             </div>
         </div>
     </div>
-    <form enctype="multipart/form-data" action="{$_url}register/post" method="post">
+    <form enctype="multipart/form-data" action="{Text::url('register/post')}" method="post">
         <div class="col-md-4">
             <div class="panel panel-primary">
                 <div class="panel-heading">1. {Lang::T('Register as Member')}</div>
@@ -80,7 +80,7 @@
                         </div>
                         <div class="btn-group btn-group-justified mb15">
                             <div class="btn-group">
-                                <a href="{$_url}register" class="btn btn-success">{Lang::T('Cancel')}</a>
+                                <a href="{Text::url('register')}" class="btn btn-success">{Lang::T('Cancel')}</a>
                             </div>
                             <div class="btn-group">
                                 <button class="btn btn-primary" type="submit">{Lang::T('Register')}</button>

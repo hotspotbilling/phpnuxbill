@@ -140,12 +140,12 @@
                     <div class="btn-group btn-group-justified">
                         <a href="{$trx['pg_url_payment']}" {if $trx['gateway']=='midtrans'} target="_blank" {/if}
                             class="btn btn-primary">{Lang::T('Pay Now')}</a>
-                        <a href="{$_url}order/view/{$trx['id']}/check"
+                        <a href="{Text::url('order/view/', $trx['id'], '/check')}"
                             class="btn btn-info">{Lang::T('Check for Payment')}</a>
                     </div>
                 </div>
                 <div class="panel-footer">
-                    <a href="{$_url}order/view/{$trx['id']}/cancel" class="btn btn-danger"
+                    <a href="{Text::url('order/view/', $trx['id'], '/cancel')}" class="btn btn-danger"
                         onclick="return ask(this, '{Lang::T('Cancel it?')}')">{Lang::T('Cancel')}</a>
                 </div>
             {/if}
