@@ -167,7 +167,7 @@
                     <a href="https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip" target="_blank"
                         class="btn btn-warning btn-sm btn-block text-black">{Lang::T('Download Latest Version')}</a>
                 </div>
-                <center><a href="{$_url}community/rollback" class="btn btn-link btn-sm btn-block">{Lang::T('Select Old Version')}</a>
+                <center><a href="{Text::url('community/rollback')}" class="btn btn-link btn-sm btn-block">{Lang::T('Select Old Version')}</a>
                 </center>
             </div>
             <div class="box-footer">

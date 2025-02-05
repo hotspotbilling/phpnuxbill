@@ -1,7 +1,7 @@
 {include file="sections/header.tpl"}
 <!-- user-edit -->
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/users-post">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('settings/users-post')}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-sm-6 col-md-6">
@@ -102,7 +102,7 @@
     </div>
     <div class="form-group text-center">
         <button class="btn btn-primary" onclick="return ask(this, 'Continue the process of adding Admin?')" type="submit">{Lang::T('Save Changes')}</button>
-        Or <a href="{$_url}settings/users">{Lang::T('Cancel')}</a>
+        Or <a href="{Text::url('settings/users')}">{Lang::T('Cancel')}</a>
     </div>
 </form>
 {literal}

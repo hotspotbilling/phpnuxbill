@@ -2,7 +2,7 @@
 <!-- user-edit -->
 
 <form class="form-horizontal" method="post" enctype="multipart/form-data" role="form"
-    action="{$_url}settings/users-edit-post">
+    action="{Text::url('settings/users-edit-post')}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-sm-6 col-md-6">
@@ -144,7 +144,7 @@
     <div class="form-group text-center">
         <button class="btn btn-primary" onclick="return ask(this, 'Continue the Admin change process?')"
             type="submit">{Lang::T('Save Changes')}</button>
-        Or <a href="{$_url}settings/users">{Lang::T('Cancel')}</a>
+        Or <a href="{Text::url('settings/users')}">{Lang::T('Cancel')}</a>
     </div>
 </form>
 
@@ -160,7 +160,7 @@
     function deletePhoto(id) {
         if (confirm('Delete photo?')) {
             if (confirm('Are you sure to delete photo?')) {
-                window.location.href = '{$_url}settings/users-edit/'+id+'/deletePhoto'
+                window.location.href = '{Text::url('settings/users-edit/')}'+id+'/deletePhoto'
             }
         }
     }

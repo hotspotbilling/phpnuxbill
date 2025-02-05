@@ -11,7 +11,7 @@
                 <div class="icon">
                     <i class="ion ion-clock"></i>
                 </div>
-                <a href="{$_url}reports/by-date" class="small-box-footer">{Lang::T('Income Today')}</a>
+                <a href="{Text::url('reports/by-date')}" class="small-box-footer">{Lang::T('Income Today')}</a>
             </div>
         </div>
         <div class="col-lg-3 col-xs-6">
@@ -23,7 +23,7 @@
                 <div class="icon">
                     <i class="ion ion-android-calendar"></i>
                 </div>
-                <a href="{$_url}reports/by-period" class="small-box-footer">{Lang::T('Income This Month')}</a>
+                <a href="{Text::url('reports/by-period')}" class="small-box-footer">{Lang::T('Income This Month')}</a>
             </div>
         </div>
     {/if}
@@ -35,7 +35,7 @@
             <div class="icon">
                 <i class="ion ion-person"></i>
             </div>
-            <a href="{$_url}plan/list" class="small-box-footer">{Lang::T('Active')}/{Lang::T('Expired')}</a>
+            <a href="{Text::url('plan/list')}" class="small-box-footer">{Lang::T('Active')}/{Lang::T('Expired')}</a>
         </div>
     </div>
     <div class="col-lg-3 col-xs-6">
@@ -46,7 +46,7 @@
             <div class="icon">
                 <i class="ion ion-android-people"></i>
             </div>
-            <a href="{$_url}customers/list" class="small-box-footer">{Lang::T('Customers')}</a>
+            <a href="{Text::url('customers/list')}" class="small-box-footer">{Lang::T('Customers')}</a>
         </div>
     </div>
 </div>
@@ -54,7 +54,7 @@
     <li>{Lang::dateFormat($start_date)}</li>
     <li>{Lang::dateFormat($current_date)}</li>
     {if $_c['enable_balance'] == 'yes' && in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
-        <li onclick="window.location.href = '{$_url}customers&search=&order=balance&filter=Active&orderby=desc'" style="cursor: pointer;">
+        <li onclick="window.location.href = '{Text::url('customers&search=&order=balance&filter=Active&orderby=desc')}'" style="cursor: pointer;">
             {Lang::T('Customer Balance')} <sup>{$_c['currency_code']}</sup>
             <b>{number_format($cb,0,$_c['dec_point'],$_c['thousands_sep'])}</b>
         </li>
@@ -74,7 +74,7 @@
                     <div class="box-tools pull-right">
                         <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
                         </button>
-                        <a href="{$_url}dashboard&refresh" class="btn bg-teal btn-sm"><i class="fa fa-refresh"></i>
+                        <a href="{Text::url('dashboard&refresh')}" class="btn bg-teal btn-sm"><i class="fa fa-refresh"></i>
                         </a>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                     <div class="box-tools pull-right">
                         <button type="button" class="btn bg-teal btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>
                         </button>
-                        <a href="{$_url}dashboard&refresh" class="btn bg-teal btn-sm"><i class="fa fa-refresh"></i>
+                        <a href="{Text::url('dashboard&refresh')}" class="btn bg-teal btn-sm"><i class="fa fa-refresh"></i>
                         </a>
                     </div>
                 </div>
@@ -154,7 +154,7 @@
                                 {assign var="rem_exp" value="{$expired['expiration']} {$expired['time']}"}
                                 {assign var="rem_started" value="{$expired['recharged_on']} {$expired['recharged_time']}"}
                                 <tr>
-                                    <td><a href="{$_url}customers/viewu/{$expired['username']}">{$expired['username']}</a></td>
+                                    <td><a href="{Text::url('customers/viewu/',$expired['username'])}">{$expired['username']}</a></td>
                                     <td><small data-toggle="tooltip" data-placement="top"
                                             title="{Lang::dateAndTimeFormat($expired['recharged_on'],$expired['recharged_time'])}">{Lang::timeElapsed($rem_started)}</small>
                                         /
@@ -183,7 +183,7 @@
                         <tbody>
                             {foreach $routeroffs as $ros}
                                 <tr>
-                                    <td><a href="{$_url}routers/edit/{$ros['id']}" class="text-bold text-red">{$ros['name']}</a></td>
+                                    <td><a href="{Text::url('routers/edit/',$ros['id'])}" class="text-bold text-red">{$ros['name']}</a></td>
                                     <td data-toggle="tooltip" data-placement="top" class="text-red"
                                             title="{Lang::dateTimeFormat($ros['last_seen'])}">{Lang::timeElapsed($ros['last_seen'])}
                                     </td>
@@ -229,7 +229,7 @@
         {/if}
         {if $_c['hide_al'] != 'yes'}
             <div class="panel panel-info panel-hovered mb20 activities">
-                <div class="panel-heading"><a href="{$_url}logs">{Lang::T('Activity Log')}</a></div>
+                <div class="panel-heading"><a href="{Text::url('logs')}">{Lang::T('Activity Log')}</a></div>
                 <div class="panel-body">
                     <ul class="list-unstyled">
                         {foreach $dlog as $dlogs}
@@ -438,7 +438,7 @@
                                     showConfirmButton: true,
                                     showCloseButton: true,
                                     timer: 30000,
-                                    confirmButtonText: '<a href="{$_url}community#latestVersion" style="color: white;">Update Now</a>',
+                                    confirmButtonText: '<a href="{Text::url('community')}#latestVersion" style="color: white;">Update Now</a>',
                                     timerProgressBar: true,
                                     didOpen: (toast) => {
                                         toast.addEventListener('mouseenter', Swal.stopTimer)

@@ -37,9 +37,9 @@
 
 <div class="page page-err clearfix">
     <div class="err-container">
-        <h1 class="m404 mb0">404 <a href="{$_url}dashboard" class="ion ion-forward" title="go to dashboard"></a></h1>
+        <h1 class="m404 mb0">404 <a href="{Text::url('dashboard')}" class="ion ion-forward" title="go to dashboard"></a></h1>
         <p class="error-message">{Lang::T("Oops! The page you are looking for was not found")}.</p>
-        <a href="{$_url}dashboard" class="btn btn-primary error-btn">{Lang::T("Back to Dashboard")}</a>
+        <a href="{Text::url('dashboard')}" class="btn btn-primary error-btn">{Lang::T("Back to Dashboard")}</a>
     </div>
 </div>
 
