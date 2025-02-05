@@ -8,7 +8,7 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-                        <form id="site-search" method="post" action="{$_url}settings/users/">
+                        <form id="site-search" method="post" action="{Text::url('settings/users/')}">
                             <input type="hidden" name="csrf_token" value="{$csrf_token}">
                             <div class="input-group">
                                 <div class="input-group-addon">
@@ -23,7 +23,7 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}settings/users-add" class="btn btn-primary btn-block"><i
+                        <a href="{Text::url('settings/users-add')}" class="btn btn-primary btn-block"><i
                                 class="ion ion-android-add"> </i> {Lang::T('Add New Administrator')}</a>
                     </div>&nbsp;
                 </div>
@@ -53,16 +53,16 @@
                                     <td>{$ds['user_type']}</td>
                                     <td>{$ds['city']}, {$ds['subdistrict']}, {$ds['ward']}</td>
                                 <td>{if $ds['root']}
-                                    <a href="{$_url}settings/users-view/{$ds['root']}">
+                                    <a href="{Text::url('settings/users-view/', $ds['root'])}">
                             {$admins[$ds['root']]}</a>{/if}</td>
                         <td>{if $ds['last_login']}{Lang::timeElapsed($ds['last_login'])}{/if}</td>
                                     <td>
-                                        <a href="{$_url}settings/users-view/{$ds['id']}"
+                                        <a href="{Text::url('settings/users-view/',$ds['id'])}"
                                             class="btn btn-success btn-xs">{Lang::T('View')}</a>
-                                        <a href="{$_url}settings/users-edit/{$ds['id']}"
+                                        <a href="{Text::url('settings/users-edit/',$ds['id'])}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
                                         {if ($_admin['id']) neq ($ds['id'])}
-                                            <a href="{$_url}settings/users-delete/{$ds['id']}" id="{$ds['id']}"
+                                            <a href="{Text::url('settings/users-delete/',$ds['id'])}" id="{$ds['id']}"
                                                 class="btn btn-danger btn-xs" onclick="return ask(this, '{Lang::T('Delete')}?')"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}
                                     </td>
