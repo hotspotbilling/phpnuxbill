@@ -7,7 +7,7 @@
             <div class="panel-heading">{Lang::T('Add Vouchers')}</div>
             <div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/voucher-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}plan/voucher-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-6">
@@ -59,7 +59,8 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Voucher Prefix')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="prefix" placeholder="NUX-" value="{$_c['voucher_prefix']}">
+                            <input type="text" class="form-control" name="prefix" placeholder="NUX-"
+                                value="{$_c['voucher_prefix']}">
                         </div>
                         <p class="help-block col-md-4">NUX-VoUCHeRCOdE</p>
                     </div>
@@ -74,14 +75,16 @@
                         <label for="inputSkills" class="col-sm-2 control-label">{Lang::T('Print Now')}</label>
 
                         <div class="col-sm-10">
-                            <input type="checkbox" id="print_now" name="print_now" class="iCheck" value="yes" onclick="showVouchersPerPage()">
+                            <input type="checkbox" id="print_now" name="print_now" class="iCheck" value="yes"
+                                onclick="showVouchersPerPage()">
                         </div>
                     </div>
 
                     <div class="form-group" id="printers" style="display:none;">
                         <label class="col-md-2 control-label">{Lang::T('Vouchers Per Page')}</label>
                         <div class="col-md-6">
-                            <input type="text" id="voucher-print" class="form-control" name="voucher_per_page" value="36" placeholder="{Lang::T("Vouchers Per Page")} (default 36)">
+                            <input type="text" id="voucher-print" class="form-control" name="voucher_per_page"
+                                value="36" placeholder="{Lang::T("Vouchers Per Page")} (default 36)">
                         </div>
                         <p class="help-block col-md-4">
                             {Lang::T('Vouchers Per Page')} (default 36)
@@ -89,7 +92,9 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success" onclick="return ask(this, '{Lang::T("Continue the Voucher creation process?")}')" type="submit">{Lang::T('Generate')}</button>
+                            <button class="btn btn-success"
+                                onclick="return ask(this, '{Lang::T("Continue the Voucher creation process?")}')"
+                                type="submit">{Lang::T('Generate')}</button>
                         </div>
                     </div>
                 </form>

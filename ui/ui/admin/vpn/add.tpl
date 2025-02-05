@@ -5,7 +5,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Add Service Plan')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}services/vpn-add-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}services/vpn-add-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Status')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
@@ -61,7 +61,7 @@
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label"><a
-                                href="{$_url}bandwidth/add">{Lang::T('Bandwidth Name')}</a></label>
+                                href="{Text::url('')}bandwidth/add">{Lang::T('Bandwidth Name')}</a></label>
                         <div class="col-md-6">
                             <select id="id_bw" name="id_bw" class="form-control select2">
                                 <option value="">{Lang::T('Select Bandwidth')}...</option>
@@ -113,7 +113,7 @@
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label"><a
-                                href="{$_url}routers/add">{Lang::T('Router Name')}</a></label>
+                                href="{Text::url('')}routers/add">{Lang::T('Router Name')}</a></label>
                         <div class="col-md-6">
                             <select id="routers" name="routers" required class="form-control select2">
                                 <option value=''>{Lang::T('Select Routers')}</option>
@@ -125,7 +125,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label"><a href="{$_url}pool/add">{Lang::T('IP Pool')}</a></label>
+                        <label class="col-md-2 control-label"><a href="{Text::url('')}pool/add">{Lang::T('IP Pool')}</a></label>
                         <div class="col-md-6">
                             <select id="pool_name" name="pool_name" required class="form-control select2">
                                 <option value=''>{Lang::T('Select Pool')}</option>
@@ -135,7 +135,7 @@
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
                             <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the VPN creation process?")}')" type="submit">{Lang::T('Save Changes')}</button>
-                            Or <a href="{$_url}services/pppoe">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('')}services/pppoe">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

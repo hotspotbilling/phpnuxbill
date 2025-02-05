@@ -6,7 +6,8 @@
     }
 </style>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel" id="accordion" role="tablist" aria-multiselectable="true">
         <div class="panel-heading" role="tab" id="General">
@@ -138,7 +139,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="HideDashboardContent">
@@ -177,7 +179,7 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/login-page-post"
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/login-page-post"
     enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel" id="accordion" role="tablist" aria-multiselectable="true">
@@ -285,7 +287,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Registration">
@@ -426,7 +429,8 @@
 </form>
 
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Security">
@@ -502,7 +506,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Voucher">
@@ -569,7 +574,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="FreeRadius">
@@ -603,7 +609,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="ExtendPostpaidExpiration">
@@ -650,7 +657,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="CustomerBalanceSystem">
@@ -705,7 +713,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TelegramNotification">
@@ -748,7 +757,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="SMSNotification">
@@ -810,7 +820,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="WhatsappNotification">
@@ -847,7 +858,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="EmailNotification">
@@ -932,7 +944,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="UserNotification">
@@ -998,7 +1011,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TawkToChatWidget">
@@ -1038,7 +1052,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="APIKey">
@@ -1068,7 +1083,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="Proxy">
@@ -1104,7 +1120,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="TaxSystem">
@@ -1178,7 +1195,8 @@
     </div>
 </form>
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/app-post" enctype="multipart/form-data">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+    enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="panel">
         <div class="panel-heading" role="tab" id="GithubAuthentication">

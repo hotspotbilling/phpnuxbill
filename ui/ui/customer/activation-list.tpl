@@ -21,7 +21,8 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr onclick="window.location.href = '{$_url}voucher/invoice/{$ds['id']}'" style="cursor: pointer;">
+                                <tr onclick="window.location.href = '{Text::url('voucher/invoice/')}{$ds['id']}'"
+                                    style="cursor: pointer;">
                                     <td>{$ds['invoice']}</td>
                                     <td>{$ds['plan_name']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>

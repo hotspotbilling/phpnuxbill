@@ -5,7 +5,7 @@
 		<div class="panel panel-primary panel-hovered panel-stacked mb30">
 			<div class="panel-heading">{Lang::T('Translation')}</div>
 			<div class="panel-body">
-				<form class="form-horizontal" method="post" role="form" action="{$_url}settings/lang-post">
+				<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/lang-post">
 					<input type="hidden" name="csrf_token" value="{$csrf_token}">
 					{foreach $langs as $lang}
 						<div class="form-group">
@@ -20,7 +20,7 @@
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the process of adding Languages?")}')"
 								type="submit">{Lang::T('Save Changes')}</button>
-							Or <a href="{$_url}settings/localisation">{Lang::T('Cancel')}</a>
+							Or <a href="{Text::url('')}settings/localisation">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
 				</form>
