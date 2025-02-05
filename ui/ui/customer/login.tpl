@@ -17,7 +17,7 @@
         <div class="panel panel-primary">
             <div class="panel-heading">{Lang::T('Log in to Member Panel')}</div>
             <div class="panel-body">
-                <form action="{$_url}login/post" method="post">
+                <form action="{Text::url('login/post')}" method="post">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label>
@@ -65,7 +65,7 @@
                     <div class="btn-group btn-group-justified mb15">
                         {if $_c['disable_registration'] != 'noreg'}
                             <div class="btn-group">
-                                <a href="{$_url}register" class="btn btn-success">{Lang::T('Register')}</a>
+                                <a href="{Text::url('register')}" class="btn btn-success">{Lang::T('Register')}</a>
                             </div>
                         {/if}
                         <div class="btn-group">
@@ -74,7 +74,7 @@
                     </div>
                     <br>
                     <center>
-                        <a href="{$_url}forgot" class="btn btn-link">{Lang::T('Forgot Password')}</a>
+                        <a href="{Text::url('forgot')}" class="btn btn-link">{Lang::T('Forgot Password')}</a>
                         <br>
                         <a href="javascript:showPrivacy()">Privacy</a>
                         &bull;

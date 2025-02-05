@@ -24,7 +24,7 @@
                         <tbody>
                             {foreach $d as $ds}
                                 <tr>
-                                    <td><a href="{$_url}order/view/{$ds['id']}">{$ds['plan_name']}</a></td>
+                                    <td><a href="{Text::url('order/view/')}{$ds['id']}">{$ds['plan_name']}</a></td>
                                     <td>{$ds['gateway']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td>{$ds['payment_channel']}</td>

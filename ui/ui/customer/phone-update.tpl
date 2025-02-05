@@ -18,15 +18,15 @@
                     </div>
                 </div>
             </div>
-            <form method="post" role="form" action="{$_url}accounts/phone-update-otp">
+            <form method="post" role="form" action="{Text::url('accounts/phone-update-otp')}">
                 <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('New Number')}</label>
                     <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-addon" id="basic-addon1">+</span>
-                            <input type="number" class="form-control" name="phone" id="phone" value="{$new_phone}" required
-                                placeholder="{Lang::T('Input your phone number')}">
+                            <input type="number" class="form-control" name="phone" id="phone" value="{$new_phone}"
+                                required placeholder="{Lang::T('Input your phone number')}">
                             <span class="input-group-btn">
                                 <button type="submit" class="btn btn-info btn-flat">{Lang::T('Request OTP')}</button>
                             </span>
@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </form>
-            <form method="post" role="form" action="{$_url}accounts/phone-update-post">
+            <form method="post" role="form" action="{Text::url('accounts/phone-update-post')}">
                 <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <!-- Form 2 -->
                 <div class="form-group">
@@ -52,7 +52,7 @@
                     <div class="col-md-offset-3 col-m2-6">
                         <button class="btn btn-success" type="submit"
                             onclick="return validateForm()">{Lang::T('Update')}</button>
-                        Or <a href="{$_url}home">{Lang::T('Cancel')}</a>
+                        Or <a href="{Text::url('home')}">{Lang::T('Cancel')}</a>
                     </div>
                 </div>
             </form>

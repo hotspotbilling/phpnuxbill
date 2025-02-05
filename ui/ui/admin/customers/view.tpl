@@ -150,7 +150,7 @@
                         </thead>
                         <tbody>
                             {foreach $activation as $ds}
-                                <tr onclick="window.location.href = '{Text::url('plan/view/'), $ds['id']}'"
+                                <tr onclick="window.location.href = '{Text::url('plan/view/', $ds['id'])}'"
                                     style="cursor:pointer;">
                                     <td>{$ds['invoice']}</td>
                                     <td>{$ds['username']}</td>

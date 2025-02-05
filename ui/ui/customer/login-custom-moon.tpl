@@ -460,18 +460,18 @@
 
 <body>
     {if isset($notify)}
-    <script>
-        // Display SweetAlert toast notification
-        document.body.style.overflow = 'hidden';
-        Swal.fire({
-            icon: '{if $notify_t == "s"}success{else}warning{/if}',
-            title: '{if $notify_t == "s"}Success{else}Error{/if}',
-            text: '{$notify}',
-            backdrop: 'rgba(0, 0, 0, 0.5)',
-        }).then(() => {
-            document.body.style.overflow = '';
-        });
-    </script>
+        <script>
+            // Display SweetAlert toast notification
+            document.body.style.overflow = 'hidden';
+            Swal.fire({
+                icon: '{if $notify_t == "s"}success{else}warning{/if}',
+                title: '{if $notify_t == "s"}Success{else}Error{/if}',
+                text: '{$notify}',
+                backdrop: 'rgba(0, 0, 0, 0.5)',
+            }).then(() => {
+                document.body.style.overflow = '';
+            });
+        </script>
     {/if}
     <!-- partial:index.partial.html -->
     <div class="login-fg">
@@ -503,7 +503,7 @@
                             <span>Or</span>
                         </div> -->
                         <div class="form-container">
-                            <form id="login-form" method="POST" action="{$_url}login/post">
+                            <form id="login-form" method="POST" action="{Text::url('login/post')}">
                                 <input type="hidden" name="csrf_token" value="{$csrf_token}">
                                 <div>
                                     <input type="text" name="username"
@@ -520,7 +520,7 @@
                                             Remember me
                                         </label>
                                     </div> -->
-                                    <a href="{$_url}forgot">{Lang::T('Forgot Password')}?</a>
+                                    <a href="{Text::url('forgot')}">{Lang::T('Forgot Password')}?</a>
                                 </div>
                                 <div class="form-group mt-2">
                                     <button id="login-btn" type="submit" class="submit-btn">
@@ -530,12 +530,13 @@
                             </form>
                         </div>
                         {if $_c['disable_registration'] != 'noreg'}
-                        <p>{Lang::T('Don\'t have an account?')} <a href="{$_url}register"
-                                class="linkButton">{Lang::T('Register')}</a></p>
+                            <p>{Lang::T('Don\'t have an account?')} <a href="{Text::url('register')}"
+                                    class="linkButton">{Lang::T('Register')}</a></p>
                         {/if}
                         <footer>
                             © {$smarty.now|date_format:"%Y"} {$_c['CompanyName']}. All rights reserved. <br> <a
-                                href="pages/Privacy_Policy.html">Privacy</a> | <a href="pages/Terms_and_Conditions.html">Terms
+                                href="pages/Privacy_Policy.html">Privacy</a> | <a
+                                href="pages/Terms_and_Conditions.html">Terms
                                 &amp;
                                 Conditions</a>
                         </footer>
@@ -550,25 +551,25 @@
         const loginBtn = document.getElementById('login-btn');
         const loginText = document.getElementById('login-text');
 
-        loginForm.addEventListener('submit', function (event) {
+        loginForm.addEventListener('submit', function(event) {
             loginBtn.classList.add('loading');
             loginText.textContent = 'Please Wait...';
         });
     </script>
     {if $_c['tawkto'] != ''}
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-        var isLoggedIn = false;
-        var Tawk_API = {
-            onLoad: function () {
-                if (!isLoggedIn) {
-                    isLoggedIn = true;
-                    window.Tawk_API.login({
-                        name: '{$_user['fullname']}',
-                        email: '{$_user['email']}',
-                        userId: '{$_user['id']}'
-                    }, function (error) {
-                        //do something if there's an error
+        <!--Start of Tawk.to Script-->
+        <script type="text/javascript">
+            var isLoggedIn = false;
+            var Tawk_API = {
+                onLoad: function() {
+                    if (!isLoggedIn) {
+                        isLoggedIn = true;
+                        window.Tawk_API.login({
+                            name: '{$_user['fullname']}',
+                            email: '{$_user['email']}',
+                            userId: '{$_user['id']}'
+                        }, function(error) {
+                            //do something if there's an error
                     });
                 }
                 Tawk_API.setAttributes({
@@ -578,7 +579,7 @@
                     'balance': '{$_user['balance']}',
                     'account_type': '{$_user['account_type']}',
                     'phone': '{$_user['phonenumber']}'
-                    }, function (error) { });
+                }, function(error) {});
             }
         };
         var Tawk_LoadStart = new Date();
@@ -586,18 +587,18 @@
             name: '{$_user['fullname']}',
             email: '{$_user['email']}',
             userId: '{$_user['id']}'
-            };
-        (function () {
+        };
+        (function() {
             var s1 = document.createElement("script"),
                 s0 = document.getElementsByTagName("script")[0];
             s1.async = true;
             s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
             s1.charset = 'UTF-8';
             s1.setAttribute('crossorigin', '*');
-            s0.parentNode.insertBefore(s1, s0);
-        })();
-    </script>
-    <!--End of Tawk.to Script-->
+                s0.parentNode.insertBefore(s1, s0);
+            })();
+        </script>
+        <!--End of Tawk.to Script-->
     {/if}
 </body>
 

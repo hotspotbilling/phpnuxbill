@@ -13,20 +13,20 @@
                 <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-addon" id="basic-addon1">+</span>
-                        <input type="text" class="form-control" name="email"
-                            value="{$_user['email']}" readonly placeholder="{Lang::T('Email')}">
+                        <input type="text" class="form-control" name="email" value="{$_user['email']}" readonly
+                            placeholder="{Lang::T('Email')}">
                     </div>
                 </div>
             </div>
-            <form method="post" role="form" action="{$_url}accounts/email-update-otp">
+            <form method="post" role="form" action="{Text::url('accounts/email-update-otp')}">
                 <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <div class="form-group">
                     <label class="col-md-2 control-label">{Lang::T('New Email')}</label>
                     <div class="col-md-6">
                         <div class="input-group">
                             <span class="input-group-addon" id="basic-addon1">+</span>
-                            <input type="text" class="form-control" name="email" id="email" value="{$new_email}" required
-                                placeholder="{Lang::T('Input your Email')}">
+                            <input type="text" class="form-control" name="email" id="email" value="{$new_email}"
+                                required placeholder="{Lang::T('Input your Email')}">
                             <span class="input-group-btn">
                                 <button type="submit" class="btn btn-info btn-flat">{Lang::T('Request OTP')}</button>
                             </span>
@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </form>
-            <form method="post" role="form" action="{$_url}accounts/email-update-post">
+            <form method="post" role="form" action="{Text::url('accounts/email-update-post')}">
                 <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <!-- Form 2 -->
                 <div class="form-group">
@@ -49,9 +49,9 @@
                 <input type="hidden" name="email" id="hidden_email">
 
                 <center>
-                        <button class="btn btn-success" type="submit"
-                            onclick="return validateForm()">{Lang::T('Update')}</button>
-                        Or <a href="{$_url}home">{Lang::T('Cancel')}</a>
+                    <button class="btn btn-success" type="submit"
+                        onclick="return validateForm()">{Lang::T('Update')}</button>
+                    Or <a href="{Text::url('home')}">{Lang::T('Cancel')}</a>
                 </center>
             </form>
 

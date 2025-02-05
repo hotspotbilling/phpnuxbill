@@ -1,7 +1,7 @@
 {include file="customer/header-public.tpl"}
 
 <div class="hidden-xs" style="height:100px"></div>
-<form action="{$_url}forgot&step={$step+1}" method="post">
+<form action="{Text::url('forgot&step=')}{$step+1}" method="post">
     <div class="row">
         <div class="col-sm-4 col-sm-offset-4">
             {if $step == 1}
@@ -29,7 +29,7 @@
                     </div>
                     <div class="panel-footer">
                         <button type="submit" class="btn btn-block btn-primary">{Lang::T('Validate')}</button>
-                        <a href="{$_url}forgot&step=-1" class="btn btn-block btn-link">{Lang::T('Cancel')}</a>
+                        <a href="{Text::url('forgot&step=-1')}" class="btn btn-block btn-link">{Lang::T('Cancel')}</a>
                     </div>
                 </div>
             {elseif $step == 2}
@@ -54,7 +54,7 @@
                             {Lang::T('Use the password to login, and change the password from password change page')}</p>
                     </div>
                     <div class="panel-footer">
-                        <a href="{$_url}login" class="btn btn-block btn-primary">{Lang::T('Back')}</a>
+                        <a href="{Text::url('login')}" class="btn btn-block btn-primary">{Lang::T('Back')}</a>
                     </div>
                 </div>
             {elseif $step == 6}
@@ -66,7 +66,7 @@
                     </div>
                     <div class="panel-footer">
                         <button type="submit" class="btn btn-block btn-primary">{Lang::T('Validate')}</button>
-                        <a href="{$_url}forgot" class="btn btn-block btn-link">{Lang::T('Back')}</a>
+                        <a href="{Text::url('forgot')}" class="btn btn-block btn-link">{Lang::T('Back')}</a>
                     </div>
                 </div>
             {else}
@@ -88,8 +88,9 @@
                     </div>
                     <div class="panel-footer">
                         <button type="submit" class="btn btn-block btn-primary">{Lang::T('Validate')}</button>
-                        <a href="{$_url}forgot&step=6" class="btn btn-block btn-link">{Lang::T('Forgot Usernames')}</a>
-                        <a href="{$_url}login" class="btn btn-block btn-link">{Lang::T('Back')}</a>
+                        <a href="{Text::url('forgot&step=6')}"
+                            class="btn btn-block btn-link">{Lang::T('Forgot Usernames')}</a>
+                        <a href="{Text::url('login')}" class="btn btn-block btn-link">{Lang::T('Back')}</a>
                     </div>
                 </div>
             {/if}
