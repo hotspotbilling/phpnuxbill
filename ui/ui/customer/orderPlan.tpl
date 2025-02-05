@@ -121,7 +121,7 @@
                     </div>
                 {/if}
                 {elseif $_user['service_type'] == 'Others' || $_user['service_type'] == '' && (Lang::arrayCount($radius_pppoe)>0
-                                                                                                            || Lang::arrayCount($radius_hotspot)>0)}
+                                                                                                                    || Lang::arrayCount($radius_hotspot)>0)}
                 <ol class="breadcrumb">
                     <li>{if $_c['radius_plan']==''}Radius Plan{else}{$_c['radius_plan']}{/if}</li>
                     <li>{if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}</li>
@@ -224,7 +224,7 @@
                                             onclick="return ask(this, '{Lang::T('Buy this? your active package will be overwritten')}')"
                                             class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
                                         {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' &&
-                                                                                                                                                                                                                                                                                                                        $_user['balance']>=$plan['price']}
+                                                                                                                                                                                                                                                                                                                                        $_user['balance']>=$plan['price']}
                                         <a href="{Text::url('order/send/hotspot/', $plan['id'], '&stoken=', App::getToken())}"
                                             onclick="return ask(this, '{Lang::T('Buy this for friend account?')}')"
                                             class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
@@ -239,8 +239,8 @@
         {/if}
         {foreach $routers as $router}
             {if Validator::isRouterHasPlan($plans_hotspot, $router['name']) || Validator::isRouterHasPlan($plans_pppoe,
-                                                                                                            $router['name']) || Validator::isRouterHasPlan($plans_vpn,
-                                                                                                            $router['name'])}
+                                                                                                                $router['name']) || Validator::isRouterHasPlan($plans_vpn,
+                                                                                                                $router['name'])}
             <div class="box box-solid box-primary bg-gray">
                 <div class="box-header text-white text-bold">{$router['name']}</div>
                 {if $router['description'] != ''}
@@ -290,7 +290,7 @@
                                             </div>
                                         </div>
                                         <div class="box-body">
-                                            <a href="{Text::url('order/gateway/', $router['id'],'/',$plan['id'], '&stoken=' App::getToken())}"
+                                            <a href="{Text::url('order/gateway/', $router['id'],'/',$plan['id'], '&stoken=', App::getToken())}"
                                                 onclick="return ask(this, '{Lang::T('Buy this? your active package will be overwrite')}')"
                                                 class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
                                             {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
@@ -402,11 +402,11 @@
                                             </div>
                                         </div>
                                         <div class="box-body">
-                                            <a href="{Text::url('order/gateway/',$router['id'],'/',$plan['id'],'&stoken=',App::getToken())}"
+                                            <a href="{Text::url('order/gateway/',$router['id'],'/',$plan['id'],'&stoken=', App::getToken())}"
                                                 onclick="return ask(this, '{Lang::T('Buy this? your active package will be overwrite')}')"
                                                 class="btn btn-sm btn-block btn-warning text-black">{Lang::T('Buy')}</a>
                                             {if $_c['enable_balance'] == 'yes' && $_c['allow_balance_transfer'] == 'yes' && $_user['balance']>=$plan['price']}
-                                                <a href="{Text::url('order/send/',$router['id'],'/', $plan['id'], '&stoken='App::getToken())}"
+                                                <a href="{Text::url('order/send/',$router['id'],'/', $plan['id'], '&stoken=', App::getToken())}"
                                                     onclick="return ask(this, '{Lang::T('Buy this for friend account?')}')"
                                                     class="btn btn-sm btn-block btn-primary">{Lang::T('Buy for friend')}</a>
                                             {/if}
@@ -418,9 +418,9 @@
                     </div>
                 {/if}
                 {if $_user['service_type'] == 'Others' || $_user['service_type'] == '' &&
-                                                        (Validator::countRouterPlan($plans_hotspot, $router['name'])>0 || Validator::countRouterPlan($plans_pppoe,
-                                                        $router['name'])>0 || Validator::countRouterPlan($plans_vpn,
-                                                        $router['name'])>0)}
+                                                            (Validator::countRouterPlan($plans_hotspot, $router['name'])>0 || Validator::countRouterPlan($plans_pppoe,
+                                                            $router['name'])>0 || Validator::countRouterPlan($plans_vpn,
+                                                            $router['name'])>0)}
                 <div class="box-header text-white">{if $_c['hotspot_plan']==''}Hotspot Plan{else}{$_c['hotspot_plan']}{/if}
                 </div>
                 <div class="box-body row">
