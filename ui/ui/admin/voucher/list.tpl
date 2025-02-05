@@ -4,11 +4,11 @@
     <div class="col-lg-3 col-lg-offset-9">
         <div class="btn-group btn-group-justified" role="group">
             <div class="btn-group" role="group">
-                <a href="{$_url}plan/add-voucher" class="btn btn-primary"><i class="ion ion-android-add"></i>
+                <a href="{Text::url('')}plan/add-voucher" class="btn btn-primary"><i class="ion ion-android-add"></i>
                     {Lang::T('Vouchers')}</a>
             </div>
             <div class="btn-group" role="group">
-                <a href="{$_url}plan/print-voucher" target="print_voucher" class="btn btn-info"><i
+                <a href="{Text::url('')}plan/print-voucher" target="print_voucher" class="btn btn-info"><i
                         class="ion ion-android-print"></i> {Lang::T('Print')}</a>
             </div>
         </div>
@@ -17,17 +17,17 @@
 <div class="panel panel-hovered mb20 panel-primary">
     <div class="panel-heading">
         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-        <div class="btn-group pull-right">
-            <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{$_url}plan/remove-voucher"
-                onclick="return ask(this, 'Delete all used voucher code more than 3 months?')"><span
-                    class="glyphicon glyphicon-trash" aria-hidden="true"></span> {Lang::T('Delete')} &gt; {Lang::T('3
+            <div class="btn-group pull-right">
+                <a class="btn btn-danger btn-xs" title="Remove used Voucher" href="{Text::url('')}plan/remove-voucher"
+                    onclick="return ask(this, 'Delete all used voucher code more than 3 months?')"><span
+                        class="glyphicon glyphicon-trash" aria-hidden="true"></span> {Lang::T('Delete')} &gt; {Lang::T('3
                 Months')}</a>
-        </div>
+            </div>
         {/if}
         &nbsp;
     </div>
     <div class="panel-body">
-        <form id="site-search" method="post" action="{$_url}plan/voucher/">
+        <form id="site-search" method="post" action="{Text::url('')}plan/voucher/">
             <div class="row" style="padding: 5px">
                 <div class="col-lg-2">
                     <div class="input-group">
@@ -42,8 +42,8 @@
                     <select class="form-control" id="router" name="router">
                         <option value="">{Lang::T('Location')}</option>
                         {foreach $routers as $r}
-                        <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
-                        </option>
+                            <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
+                            </option>
                         {/foreach}
                     </select>
                 </div>
@@ -51,7 +51,7 @@
                     <select class="form-control" id="plan" name="plan">
                         <option value="">{Lang::T('Plan Name')}</option>
                         {foreach $plans as $p}
-                        <option value="{$p['id']}" {if $plan eq $p['id'] }selected{/if}>{$p['name_plan']}</option>
+                            <option value="{$p['id']}" {if $plan eq $p['id'] }selected{/if}>{$p['name_plan']}</option>
                         {/foreach}
                     </select>
                 </div>
@@ -66,7 +66,7 @@
                     <select class="form-control" id="customer" name="customer">
                         <option value="">{Lang::T('Customer')}</option>
                         {foreach $customers as $c}
-                        <option value="{$c['user']}" {if $customer eq $c['user'] }selected{/if}>{$c['user']}</option>
+                            <option value="{$c['user']}" {if $customer eq $c['user'] }selected{/if}>{$c['user']}</option>
                         {/foreach}
                     </select>
                 </div>
@@ -78,7 +78,8 @@
                         </div>
                         <div class="btn-group" role="group">
                             <a class="btn btn-warning btn-block" title="Clear Search Query"
-                                href="{$_url}plan/voucher/"><span class="glyphicon glyphicon-remove-circle"></span></a>
+                                href="{Text::url('')}plan/voucher/"><span
+                                    class="glyphicon glyphicon-remove-circle"></span></a>
                         </div>
                     </div>
                 </div>
@@ -106,42 +107,42 @@
                 </thead>
                 <tbody>
                     {foreach $d as $ds}
-                    <tr {if $ds['status'] eq '1' }class="danger" {/if}>
-                        <td><input type="checkbox" name="voucher_ids[]" value="{$ds['id']}"></td>
-                        <td>{$ds['id']}</td>
-                        <td>{$ds['type']}</td>
-                        <td>{$ds['routers']}</td>
-                        <td>{$ds['name_plan']}</td>
-                        <td style="background-color: black; color: black;"
-                            onmouseleave="this.style.backgroundColor = 'black';"
-                            onmouseenter="this.style.backgroundColor = 'white';">
-                            {$ds['code']}</td>
-                        <td>{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success"> Not Use
-                            </label> {else} <label class="btn-tag btn-tag-danger">Used</label>
-                            {/if}</td>
-                        <td>{if $ds['user'] eq '0'} -
-                            {else}<a href="{$_url}customers/viewu/{$ds['user']}">{$ds['user']}</a>
-                            {/if}</td>
-                        <td>{if $ds['created_at']}{Lang::dateTimeFormat($ds['created_at'])}{/if}</td>
-                        <td>{if $ds['used_date']}{Lang::dateTimeFormat($ds['used_date'])}{/if}</td>
-                        <td>{if $ds['generated_by']}
-                            <a
-                                href="{$_url}settings/users-view/{$ds['generated_by']}">{$admins[$ds['generated_by']]}</a>
-                            {else} -
-                            {/if}
-                        </td>
-                        <td>
-                            {if $ds['status'] neq '1'}
-                            <a href="{$_url}plan/voucher-view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
-                                class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
-                            {/if}
-                            {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                            <a href="{$_url}plan/voucher-delete/{$ds['id']}" id="{$ds['id']}"
-                                class="btn btn-danger btn-xs" onclick="return ask(this, '{Lang::T('Delete')}?')"><i
-                                    class="glyphicon glyphicon-trash"></i></a>
-                            {/if}
-                        </td>
-                    </tr>
+                        <tr {if $ds['status'] eq '1' }class="danger" {/if}>
+                            <td><input type="checkbox" name="voucher_ids[]" value="{$ds['id']}"></td>
+                            <td>{$ds['id']}</td>
+                            <td>{$ds['type']}</td>
+                            <td>{$ds['routers']}</td>
+                            <td>{$ds['name_plan']}</td>
+                            <td style="background-color: black; color: black;"
+                                onmouseleave="this.style.backgroundColor = 'black';"
+                                onmouseenter="this.style.backgroundColor = 'white';">
+                                {$ds['code']}</td>
+                            <td>{if $ds['status'] eq '0'} <label class="btn-tag btn-tag-success"> Not Use
+                                </label> {else} <label class="btn-tag btn-tag-danger">Used</label>
+                                {/if}</td>
+                            <td>{if $ds['user'] eq '0'} -
+                                {else}<a href="{Text::url('')}customers/viewu/{$ds['user']}">{$ds['user']}</a>
+                                {/if}</td>
+                            <td>{if $ds['created_at']}{Lang::dateTimeFormat($ds['created_at'])}{/if}</td>
+                            <td>{if $ds['used_date']}{Lang::dateTimeFormat($ds['used_date'])}{/if}</td>
+                            <td>{if $ds['generated_by']}
+                                    <a
+                                        href="{Text::url('')}settings/users-view/{$ds['generated_by']}">{$admins[$ds['generated_by']]}</a>
+                                {else} -
+                                {/if}
+                            </td>
+                            <td>
+                                {if $ds['status'] neq '1'}
+                                    <a href="{Text::url('')}plan/voucher-view/{$ds['id']}" id="{$ds['id']}" style="margin: 0px;"
+                                        class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
+                                {/if}
+                                {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                                    <a href="{Text::url('')}plan/voucher-delete/{$ds['id']}" id="{$ds['id']}"
+                                        class="btn btn-danger btn-xs" onclick="return ask(this, '{Lang::T('Delete')}?')"><i
+                                            class="glyphicon glyphicon-trash"></i></a>
+                                {/if}
+                            </td>
+                        </tr>
                     {/foreach}
                 </tbody>
             </table>
@@ -153,7 +154,7 @@
         <div class="btn-group btn-group-justified" role="group">
             <div class="btn-group" role="group">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                <button id="deleteSelectedVouchers" class="btn btn-danger">{Lang::T('Delete
+                    <button id="deleteSelectedVouchers" class="btn btn-danger">{Lang::T('Delete
                     Selected')}</button>
                 {/if}
             </div>
@@ -175,9 +176,9 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '{$_url}plan/voucher-delete-many', true);
+                    xhr.open('POST', '{Text::url('')}plan/voucher-delete-many', true);
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    xhr.onload = function () {
+                    xhr.onload = function() {
                         if (xhr.status === 200) {
                             var response = JSON.parse(xhr.responseText);
 
@@ -221,9 +222,9 @@
     }
 
     // Example usage for selected vouchers
-    document.getElementById('deleteSelectedVouchers').addEventListener('click', function () {
+    document.getElementById('deleteSelectedVouchers').addEventListener('click', function() {
         var selectedVouchers = [];
-        document.querySelectorAll('input[name="voucher_ids[]"]:checked').forEach(function (checkbox) {
+        document.querySelectorAll('input[name="voucher_ids[]"]:checked').forEach(function(checkbox) {
             selectedVouchers.push(checkbox.value);
         });
 
@@ -239,8 +240,8 @@
         }
     });
 
-    document.querySelectorAll('.delete-voucher').forEach(function (button) {
-        button.addEventListener('click', function () {
+    document.querySelectorAll('.delete-voucher').forEach(function(button) {
+        button.addEventListener('click', function() {
             var voucherId = this.getAttribute('data-id');
             deleteVouchers([voucherId]);
         });
@@ -248,7 +249,7 @@
 
 
     // Select or deselect all checkboxes
-    document.getElementById('select-all').addEventListener('change', function () {
+    document.getElementById('select-all').addEventListener('change', function() {
         var checkboxes = document.querySelectorAll('input[name="voucher_ids[]"]');
         for (var checkbox of checkboxes) {
             checkbox.checked = this.checked;

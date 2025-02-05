@@ -6,7 +6,7 @@
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">{Lang::T('Routers')}
                 <div class="btn-group pull-right">
-                    <a class="btn btn-primary btn-xs" title="save" href="{$_url}routers/maps">
+                    <a class="btn btn-primary btn-xs" title="save" href="{Text::url('')}routers/maps">
                         <span class="glyphicon glyphicon-map-marker"></span></a>
                 </div>
             </div>
@@ -14,7 +14,7 @@
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
 
-                        <form id="site-search" method="post" action="{$_url}routers/list/">
+                        <form id="site-search" method="post" action="{Text::url('')}routers/list/">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -28,7 +28,8 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}routers/add" class="btn btn-primary btn-block"><i class="ion ion-android-add">
+                        <a href="{Text::url('')}routers/add" class="btn btn-primary btn-block"><i
+                                class="ion ion-android-add">
                             </i> {Lang::T('New Router')}</a>
                     </div>&nbsp;
                 </div>
@@ -82,9 +83,9 @@
                                     {/if}
                                     <td>{if $ds['enabled'] == 1}{Lang::T('Enabled')}{else}{Lang::T('Disabled')}{/if}</td>
                                     <td>
-                                        <a href="{$_url}routers/edit/{$ds['id']}"
+                                        <a href="{Text::url('')}routers/edit/{$ds['id']}"
                                             class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                        <a href="{$_url}routers/delete/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{Text::url('')}routers/delete/{$ds['id']}" id="{$ds['id']}"
                                             onclick="return ask(this, '{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
@@ -97,7 +98,9 @@
                 {include file="pagination.tpl"}
                 <div class="bs-callout bs-callout-info" id="callout-navbar-role">
                     <h4>{Lang::T('Check if Router Online?')}</h4>
-                    <p>{Lang::T('To check whether the Router is online or not, please visit the following page')} <a href="{$_url}settings/miscellaneous#router_check" target="_blank" class="btn btn-link">{Lang::T('Cek Now')}</a></p>
+                    <p>{Lang::T('To check whether the Router is online or not, please visit the following page')} <a
+                            href="{Text::url('')}settings/miscellaneous#router_check" target="_blank"
+                            class="btn btn-link">{Lang::T('Cek Now')}</a></p>
                 </div>
             </div>
         </div>

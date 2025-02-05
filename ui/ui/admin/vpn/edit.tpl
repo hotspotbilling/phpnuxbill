@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}services/edit-vpn-post">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('services/edit-vpn-post')}">
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">
@@ -14,8 +14,10 @@
                                 data-content="{Lang::T("Customer cannot buy disabled Package, but admin can recharge it, use it if you want only admin recharge it")}">?</a>
                         </label>
                         <div class="col-md-9">
-                            <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}> {Lang::T('Enable')}
-                            <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}> {Lang::T('Disable')}
+                            <input type="radio" name="enabled" value="1" {if $d['enabled'] == 1}checked{/if}>
+                            {Lang::T('Enable')}
+                            <input type="radio" name="enabled" value="0" {if $d['enabled'] == 0}checked{/if}>
+                            {Lang::T('Disable')}
                         </div>
                     </div>
                     <div class="form-group">
@@ -81,7 +83,7 @@
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label"><a
-                                href="{$_url}bandwidth/add">{Lang::T('Bandwidth Name')}</a></label>
+                                href="{Text::url('bandwidth/add')}">{Lang::T('Bandwidth Name')}</a></label>
                         <div class="col-md-9">
                             <select id="id_bw" name="id_bw" class="form-control select2">
                                 {foreach $b as $bs}
@@ -116,7 +118,9 @@
                                 <span class="input-group-addon">{$_c['currency_code']}</span>
                                 <input type="number" class="form-control" name="price_old" value="{$d['price_old']}">
                             </div>
-                            <p class="help-block">{Lang::T('For Discount Rate, this is price before get discount, must be more expensive with real price')}</p>
+                            <p class="help-block">
+                                {Lang::T('For Discount Rate, this is price before get discount, must be more expensive with real price')}
+                            </p>
                         </div>
                     </div>
                     <div class="form-group">
@@ -158,7 +162,8 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><a href="{$_url}pool/add">{Lang::T('IP Pool')}</a></label>
+                        <label class="col-md-3 control-label"><a
+                                href="{Text::url('pool/add')}">{Lang::T('IP Pool')}</a></label>
                         <div class="col-md-9">
                             <select id="pool_name" name="pool_name" required class="form-control select2">
                                 {foreach $p as $ps}
@@ -214,8 +219,10 @@
     </div>
     <div class="form-group">
         <div class="col-lg-offset-2 col-lg-10">
-            <button class="btn btn-success" onclick="return ask(this, '{Lang::T("Continue the VPN creation process?")}')" type="submit">{Lang::T('Save Changes')}</button>
-            Or <a href="{$_url}services/vpn">{Lang::T('Cancel')}</a>
+            <button class="btn btn-success"
+                onclick="return ask(this, '{Lang::T("Continue the VPN creation process?")}')"
+                type="submit">{Lang::T('Save Changes')}</button>
+            Or <a href="{Text::url('services/vpn')}">{Lang::T('Cancel')}</a>
         </div>
     </div>
 </form>

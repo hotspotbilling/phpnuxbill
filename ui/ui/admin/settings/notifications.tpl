@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}settings/notifications-post">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/notifications-post">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-sm-12 col-md-12">
@@ -26,7 +26,8 @@
                             <b>[[package]]</b> - {Lang::T('will be replaced with Package name')}.<br>
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
-                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link"
+                                target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>
@@ -44,7 +45,8 @@
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
-                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link"
+                                target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>
@@ -62,7 +64,8 @@
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
-                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link"
+                                target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>
@@ -80,7 +83,8 @@
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
-                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
+                            <b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link"
+                                target="_blank">read documentation</a>.
                         </p>
                     </div>
                 </div>

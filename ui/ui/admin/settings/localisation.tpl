@@ -5,14 +5,15 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">
                 <div class="btn-group pull-right">
-                        <button class="btn btn-primary btn-xs" title="save" type="submit"><span
-                                class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
+                    <button class="btn btn-primary btn-xs" title="save" type="submit"><span
+                            class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span></button>
                 </div>
-            {Lang::T('Localisation')}
+                {Lang::T('Localisation')}
             </div>
-            
+
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}settings/localisation-post">
+                <form class="form-horizontal" method="post" role="form"
+                    action="{Text::url('')}settings/localisation-post">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Timezone')}</label>
@@ -55,7 +56,8 @@
                         <div class="col-md-6">
                             <select class="form-control" name="lan" id="lan">
                                 {foreach $lani as $lanis}
-                                    <option value="{$lanis@key}" {if $_c['language'] eq $lanis@key} selected="selected" {/if}>
+                                    <option value="{$lanis@key}" {if $_c['language'] eq $lanis@key} selected="selected"
+                                        {/if}>
                                         {$lanis@key}
                                     </option>
                                 {/foreach}
@@ -68,7 +70,7 @@
                             </select>
                         </div>
                         <div class="col-md-4 help-block">
-                            <a href="{$_url}settings/language">{Lang::T('Language Editor')}</a>
+                            <a href="{Text::url('')}settings/language">{Lang::T('Language Editor')}</a>
                         </div>
                     </div>
                     <div class="form-group">
@@ -139,8 +141,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-primary"
-                                type="submit">{Lang::T('Save Changes')}</button>
+                            <button class="btn btn-primary" type="submit">{Lang::T('Save Changes')}</button>
                         </div>
                     </div>
                 </form>

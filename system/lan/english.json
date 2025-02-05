@@ -1010,5 +1010,11 @@
     "Plan_Expiry_Date": "Plan Expiry Date",
     "Make_Payment": "Make Payment",
     "Validity_Period": "Validity Period",
-    "Buy_Balance_Package": "Buy Balance Package"
+    "Buy_Balance_Package": "Buy Balance Package",
+    "Backup_Database": "Backup Database",
+    "Choose": "Choose",
+    "Dont_select_logs_if_it_failed": "Dont select logs if it failed",
+    "Download_Backup": "Download Backup",
+    "Restore": "Restore",
+    "Restoring_database_will_clean_up_data_and_then_restore_all_the_data": "Restoring database will clean up data and then restore all the data"
 }

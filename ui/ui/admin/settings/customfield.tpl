@@ -1,11 +1,11 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}customfield/save">
-<div class="row">
-    <div class="col-md-6">
-        <div class="panel panel-success panel-hovered panel-stacked mb30">
-            <div class="panel-heading">{Lang::T('New Field')}</div>
-            <div class="panel-body">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('')}customfield/save">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-success panel-hovered panel-stacked mb30">
+                <div class="panel-heading">{Lang::T('New Field')}</div>
+                <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-4 control-label">Order</label>
                         <div class="col-md-8">
@@ -72,18 +72,18 @@
                             <span class="help-block">To delete, empty the name</span>
                         </div>
                     </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        {foreach $fields as $field}
-            <div class="panel panel-primary">
-                <div class="panel-body">
+        <div class="col-md-6">
+            {foreach $fields as $field}
+                <div class="panel panel-primary">
+                    <div class="panel-body">
                         <div class="form-group">
                             <label class="col-md-4 control-label">Order</label>
                             <div class="col-md-8">
-                                <input type="number" class="form-control" name="order[]" style="width: 100%" value="{$field['order']}"
-                                    placeholder="99">
+                                <input type="number" class="form-control" name="order[]" style="width: 100%"
+                                    value="{$field['order']}" placeholder="99">
                             </div>
                         </div>
                         <div class="form-group">
@@ -130,21 +130,21 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group {if $field['required'] == 1}has-error{/if}"">
-                            <label class="col-md-4 control-label">Required</label>
-                            <div class="col-md-8">
-                                <select class="form-control" name="required[]" style="width: 100%">
-                                    <option value="1" {if $field['required'] == 1}selected{/if}>Yes</option>
-                                    <option value="0" {if $field['required'] != 1}selected{/if}>No</option>
-                                </select>
-                            </div>
+    <div class="form-group {if $field['required'] == 1}has-error{/if}"">
+                            <label class=" col-md-4 control-label">Required</label>
+                        <div class="col-md-8">
+                            <select class="form-control" name="required[]" style="width: 100%">
+                                <option value="1" {if $field['required'] == 1}selected{/if}>Yes</option>
+                                <option value="0" {if $field['required'] != 1}selected{/if}>No</option>
+                            </select>
                         </div>
+                    </div>
                 </div>
             </div>
-        {/foreach}
-        <button class="btn btn-success btn-sm btn-block" type="submit">{Lang::T('Save')}</button>
+            {/foreach}
+            <button class="btn btn-success btn-sm btn-block" type="submit">{Lang::T('Save')}</button>
+        </div>
     </div>
-</div>
 
 </form>
 
