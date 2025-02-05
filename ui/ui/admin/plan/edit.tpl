@@ -7,7 +7,7 @@
                 <h3 class="panel-title">Edit Plan</h3>
             </div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/edit-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}plan/edit-post">
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Select Account')}</label>
@@ -59,7 +59,7 @@
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success" onclick="return ask(this, 'Continue the package change process?')" type="submit">{Lang::T('Edit')}</button>
-                            Or <a href="{$_url}plan/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('')}plan/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

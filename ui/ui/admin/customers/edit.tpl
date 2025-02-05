@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" enctype="multipart/form-data" method="post" role="form" action="{$_url}customers/edit-post">
+<form class="form-horizontal" enctype="multipart/form-data" method="post" role="form" action="{Text::url('customers/edit-post')}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-md-6">
@@ -247,7 +247,7 @@
             type="submit">
             {Lang::T('Save Changes')}
         </button>
-        <br><a href="{$_url}customers/list" class="btn btn-link">{Lang::T('Cancel')}</a>
+        <br><a href="{Text::url('')}customers/list" class="btn btn-link">{Lang::T('Cancel')}</a>
     </center>
 </form>
 
@@ -330,7 +330,7 @@
     function deletePhoto(id) {
         if (confirm('Delete photo?')) {
             if (confirm('Are you sure to delete photo?')) {
-                window.location.href = '{$_url}customers/edit/'+id+'/deletePhoto'
+                window.location.href = '{Text::url('')}customers/edit/'+id+'/deletePhoto'
             }
         }
     }

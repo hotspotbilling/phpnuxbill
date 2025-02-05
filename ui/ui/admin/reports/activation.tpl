@@ -9,7 +9,7 @@
             <div class="panel-body">
                 <div class="text-center" style="padding: 15px">
                     <div class="col-md-4">
-                        <form id="site-search" method="post" action="{$_url}reports/activation">
+                        <form id="site-search" method="post" action="{Text::url('')}reports/activation">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -44,10 +44,10 @@
                         <tbody>
                             {foreach $activation as $ds}
                                 <tr>
-                                    <td onclick="window.location.href = '{$_url}plan/view/{$ds['id']}'"
-                                    style="cursor:pointer;">{$ds['invoice']}</td>
-                                    <td onclick="window.location.href = '{$_url}customers/viewu/{$ds['username']}'"
-                                    style="cursor:pointer;">{$ds['username']}</td>
+                                    <td onclick="window.location.href = '{Text::url('')}plan/view/{$ds['id']}'"
+                                        style="cursor:pointer;">{$ds['invoice']}</td>
+                                    <td onclick="window.location.href = '{Text::url('')}customers/viewu/{$ds['username']}'"
+                                        style="cursor:pointer;">{$ds['username']}</td>
                                     <td>{$ds['plan_name']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['type']}</td>

@@ -5,7 +5,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Refill Account')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/refill-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}plan/refill-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Select Account')}</label>
                         <div class="col-md-6">
@@ -26,7 +26,7 @@
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success" onclick="return ask(this, 'Continue the Refill process?')"
                                 type="submit">{Lang::T('Recharge')}</button>
-                            Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('')}customers/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

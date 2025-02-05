@@ -5,19 +5,19 @@
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
                 <div class="btn-group pull-right">
-                    <a class="btn btn-primary btn-xs" title="save" href="{$_url}services/sync/pppoe"
+                    <a class="btn btn-primary btn-xs" title="save" href="{Text::url('')}services/sync/pppoe"
                         onclick="return ask(this, 'This will sync/send PPPOE plan to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>{Lang::T('PPPOE Package')}
             </div>
-            <form id="site-search" method="post" action="{$_url}services/pppoe">
+            <form id="site-search" method="post" action="{Text::url('')}services/pppoe">
                 <div class="panel-body">
                     <div class="row row-no-gutters" style="padding: 5px">
                         <div class="col-lg-2">
                             <div class="input-group">
                                 <div class="input-group-btn">
                                     <a class="btn btn-danger" title="Clear Search Query"
-                                        href="{$_url}services/pppoe"><span
+                                        href="{Text::url('')}services/pppoe"><span
                                             class="glyphicon glyphicon-remove-circle"></span></a>
                                 </div>
                                 <input type="text" name="name" class="form-control"
@@ -97,7 +97,7 @@
                                     class="fa fa-search"></span></button>
                         </div>
                         <div class="col-lg-1 col-xs-4">
-                            <a href="{$_url}services/pppoe-add" class="btn btn-primary btn-block"
+                            <a href="{Text::url('')}services/pppoe-add" class="btn btn-primary btn-block"
                                 title="{Lang::T('New Service Plan')}"><i class="ion ion-android-add"></i></a>
                         </div>
                     </div>
@@ -118,13 +118,13 @@
                             <tr>
                                 <th>{Lang::T('Name')}</th>
                                 <th>{Lang::T('Type')}</th>
-                                <th><a href="{$_url}bandwidth/list">{Lang::T('Bandwidth')}</a></th>
+                                <th><a href="{Text::url('')}bandwidth/list">{Lang::T('Bandwidth')}</a></th>
                                 <th>{Lang::T('Price')}</th>
                                 <th>{Lang::T('Validity')}</th>
-                                <th><a href="{$_url}pool/list">{Lang::T('IP Pool')}</a></th>
+                                <th><a href="{Text::url('')}pool/list">{Lang::T('IP Pool')}</a></th>
                                 <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Plan')}</th>
                                 <th style="background-color: rgb(243, 241, 172);">{Lang::T('Date')}</th>
-                                <th><a href="{$_url}routers/list">{Lang::T('Location')}</a></th>
+                                <th><a href="{Text::url('')}routers/list">{Lang::T('Location')}</a></th>
                                 <th>{Lang::T('Device')}</th>
                                 <th>{Lang::T('Manage')}</th>
                                 <th>ID</th>
@@ -135,19 +135,20 @@
                                 <tr {if $ds['enabled'] !=1}class="danger" title="disabled" {/if}>
                                     <td>{$ds['name_plan']}</td>
                                     <td>{$ds['plan_type']} {if $ds['prepaid'] !=
-                                    'yes'}<b>{Lang::T('Postpaid')}</b>
+                                        'yes'}<b>{Lang::T('Postpaid')}</b>
                                     {else}
                                         {Lang::T('Prepaid')}
                                     {/if}</td>
                                 <td>{$ds['name_bw']}</td>
                                 <td>{Lang::moneyFormat($ds['price'])}{if !empty($ds['price_old'])}
-                                        <sup style="text-decoration: line-through; color: red">{Lang::moneyFormat($ds['price_old'])}</sup>
-                                            {/if}
+                                        <sup
+                                            style="text-decoration: line-through; color: red">{Lang::moneyFormat($ds['price_old'])}</sup>
+                                    {/if}
                                 </td>
                                 <td>{$ds['validity']} {$ds['validity_unit']}</td>
                                 <td>{$ds['pool']}</td>
                                 <td>{if $ds['plan_expired']}<a
-                                        href="{$_url}services/pppoe-edit/{$ds['plan_expired']}">{Lang::T('Yes')}</a>{else}{Lang::T('No')}
+                                        href="{Text::url('')}services/pppoe-edit/{$ds['plan_expired']}">{Lang::T('Yes')}</a>{else}{Lang::T('No')}
                                     {/if}</td>
                                 <td>{if $ds['prepaid'] == no}{$ds['expired_date']}{/if}</td>
                                 <td>
@@ -155,15 +156,15 @@
                                         <span class="label label-primary">RADIUS</span>
                                     {else}
                                         {if $ds['routers']!=''}
-                                            <a href="{$_url}routers/edit/0&name={$ds['routers']}">{$ds['routers']}</a>
+                                            <a href="{Text::url('routers/edit/0&name=')}{$ds['routers']}">{$ds['routers']}</a>
                                         {/if}
                                     {/if}
                                 </td>
                                 <td>{$ds['device']}</td>
                                 <td>
-                                    <a href="{$_url}services/pppoe-edit/{$ds['id']}"
+                                    <a href="{Text::url('')}services/pppoe-edit/{$ds['id']}"
                                         class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                    <a href="{$_url}services/pppoe-delete/{$ds['id']}"
+                                    <a href="{Text::url('')}services/pppoe-delete/{$ds['id']}"
                                         onclick="return ask(this, '{Lang::T('Delete')}?')" id="{$ds['id']}"
                                         class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                 </td>

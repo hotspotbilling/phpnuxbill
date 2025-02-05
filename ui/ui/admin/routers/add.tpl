@@ -7,7 +7,7 @@
             <div class="panel-heading">{Lang::T('Add Router')}</div>
             <div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}routers/add-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}routers/add-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Status')}</label>
                         <div class="col-md-10">
@@ -63,7 +63,7 @@
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the process of adding Routers?")}')"
                                 type="submit">{Lang::T('Save')}</button>
-                            Or <a href="{$_url}routers/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('')}routers/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

@@ -1,7 +1,7 @@
 {include file="sections/header.tpl"}
 
 
-<form id="site-search" method="post" action="{$_url}routers/maps">
+<form id="site-search" method="post" action="{Text::url('')}routers/maps">
     <input type="hidden" name="_route" value="routers/maps">
     <div class="input-group">
         <div class="input-group-addon">
@@ -52,8 +52,9 @@
             // Create a popup for the marker
             var popupContent = "<strong>Name</strong>: " + name + "<br>" +
                 "<strong>Info</strong>: " + info + "<br>" +
-                "<a href='{/literal}{$_url}{literal}routers/edit/"+ router.id +"'>More Info</a> &bull; " +
-                "<a href='https://www.google.com/maps/dir//" + coordinates + "' target='maps'>Get Direction</a><br>";
+                "<a href='{/literal}{Text::url('routers/edit/')}{literal}"+ router.id +"'>More Info</a> &bull; " +
+                "<a href='https://www.google.com/maps/dir//" + coordinates +
+                "' target='maps'>Get Direction</a><br>";
 
             // Add marker to map
             if (router.enabled == 1) {

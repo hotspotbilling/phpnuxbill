@@ -96,7 +96,7 @@
 									type="submit" name=send value=now>
 									{Lang::T('Send Message')}</button>
 							{/if}
-							<a href="{$_url}dashboard" class="btn btn-default">{Lang::T('Cancel')}</a>
+							<a href="{Text::url('dashboard')}" class="btn btn-default">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
 				</form>

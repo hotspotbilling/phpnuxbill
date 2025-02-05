@@ -9,7 +9,7 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-                        <form id="site-search" method="post" action="{$_url}radius/nas-list">
+                        <form id="site-search" method="post" action="{Text::url('')}radius/nas-list">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -23,7 +23,7 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}radius/nas-add" class="btn btn-primary btn-block"><i
+                        <a href="{Text::url('')}radius/nas-add" class="btn btn-primary btn-block"><i
                                 class="ion ion-android-add"> </i> {Lang::T('New NAS')}</a>
                     </div>&nbsp;
                 </div>
@@ -53,8 +53,9 @@
                                     <td>{$ds['community']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td align="center">
-                                        <a href="{$_url}radius/nas-edit/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                        <a href="{$_url}radius/nas-delete/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{Text::url('')}radius/nas-edit/{$ds['id']}"
+                                            class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
+                                        <a href="{Text::url('')}radius/nas-delete/{$ds['id']}" id="{$ds['id']}"
                                             onclick="return ask(this, '{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
@@ -67,7 +68,8 @@
                 {include file="pagination.tpl"}
                 <div class="bs-callout bs-callout-info" id="callout-navbar-role">
                     <h4>RADIUS REST</h4>
-                    <p>{Lang::T("For Radius REST, you don't need to add NAS, NAS need to add to client.conf manually")}</p>
+                    <p>{Lang::T("For Radius REST, you don't need to add NAS, NAS need to add to client.conf manually")}
+                    </p>
                 </div>
             </div>
         </div>

@@ -6,9 +6,9 @@
             <div class="panel-heading">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}logs/radius-csv"
-                            onclick="return ask(this, 'This will export to CSV?')"><span class="glyphicon glyphicon-download"
-                                aria-hidden="true"></span> CSV</a>
+                        <a class="btn btn-primary btn-xs" title="save" href="{Text::url('logs/radius-csv')}"
+                            onclick="return ask(this, 'This will export to CSV?')"><span
+                                class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
                     </div>
                 {/if}
                 Radius
@@ -16,7 +16,7 @@
             <div class="panel-body">
                 <div class="text-center" style="padding: 15px">
                     <div class="col-md-4">
-                        <form id="site-search" method="post" action="{$_url}logs/radius/">
+                        <form id="site-search" method="post" action="{Text::url('logs/radius/')}">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -30,7 +30,7 @@
                         </form>
                     </div>
                     <div class="col-md-8">
-                        <form class="form-inline" method="post" action="{$_url}logs/radius/">
+                        <form class="form-inline" method="post" action="{Text::url('logs/radius/')}">
                             <div class="input-group has-error">
                                 <span class="input-group-addon">{Lang::T('Keep Logs')} </span>
                                 <input type="text" name="keep" class="form-control" placeholder="90" value="90">

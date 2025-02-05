@@ -73,61 +73,63 @@
             </div>
             <div class="box box-primary box-solid">
                 <div class="box-header">
-                    <h3 class="box-title">{Lang::dateFormat($sd)} - {Lang::dateFormat($ed)} <sup>{Lang::T('Max 30 days')}</sup></h3>
+                    <h3 class="box-title">{Lang::dateFormat($sd)} - {Lang::dateFormat($ed)}
+                        <sup>{Lang::T('Max 30 days')}</sup>
+                    </h3>
                 </div>
                 <div class="box-body row" style="height: 300px;">
                     <canvas id="line_cart"></canvas>
                 </div>
             </div>
         </span>
-     <div class="box box-primary box-solid">
-        <div class="table-responsive">&nbsp;&nbsp;
-            <div style="margin-left: 5px; margin-right: 5px;">
-                <table class="table table-bordered table-condensed">
-                    <thead>
-                        <tr>
-                            <th>
-                                <a href="{$_url}export/print-by-date&{$filter}" class="btn btn-default"
-                                    target="_blank"><i class="ion ion-printer"></i></a>
-                                <a href="{$_url}export/pdf-by-date&{$filter}" class="btn btn-default"><i
-                                        class="fa fa-file-pdf-o"></i></a>
-                            </th>
-                            <th colspan="7"></th>
-                        </tr>
-                        <tr>
-                            <th>{Lang::T('Username')}</th>
-                            <th>{Lang::T('Type')}</th>
-                            <th>{Lang::T('Plan Name')}</th>
-                            <th>{Lang::T('Plan Price')}</th>
-                            <th>{Lang::T('Created On')}</th>
-                            <th>{Lang::T('Expires On')}</th>
-                            <th>{Lang::T('Method')}</th>
-                            <th>{Lang::T('Routers')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {foreach $d as $ds}
+        <div class="box box-primary box-solid">
+            <div class="table-responsive">&nbsp;&nbsp;
+                <div style="margin-left: 5px; margin-right: 5px;">
+                    <table class="table table-bordered table-condensed">
+                        <thead>
                             <tr>
-                                <td>{$ds['username']}</td>
-                                <td>{$ds['type']}</td>
-                                <td>{$ds['plan_name']}</td>
-                                <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>
-                                <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
-                                <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
-                                <td>{$ds['method']}</td>
-                                <td>{$ds['routers']}</td>
+                                <th>
+                                    <a href="{Text::url('export/print-by-date&')}{$filter}" class="btn btn-default"
+                                        target="_blank"><i class="ion ion-printer"></i></a>
+                                    <a href="{Text::url('export/pdf-by-date&')}{$filter}" class="btn btn-default"><i
+                                            class="fa fa-file-pdf-o"></i></a>
+                                </th>
+                                <th colspan="7"></th>
                             </tr>
-                        {/foreach}
-                        <tr>
-                            <th>{Lang::T('Total')}</th>
-                            <td colspan="2"></td>
-                            <th class="text-right">{Lang::moneyFormat($dr)}</th>
-                            <td colspan="4"></td>
-                        </tr>
-                    </tbody>
-                </table>
+                            <tr>
+                                <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Type')}</th>
+                                <th>{Lang::T('Plan Name')}</th>
+                                <th>{Lang::T('Plan Price')}</th>
+                                <th>{Lang::T('Created On')}</th>
+                                <th>{Lang::T('Expires On')}</th>
+                                <th>{Lang::T('Method')}</th>
+                                <th>{Lang::T('Routers')}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {foreach $d as $ds}
+                                <tr>
+                                    <td>{$ds['username']}</td>
+                                    <td>{$ds['type']}</td>
+                                    <td>{$ds['plan_name']}</td>
+                                    <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>
+                                    <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
+                                    <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
+                                    <td>{$ds['method']}</td>
+                                    <td>{$ds['routers']}</td>
+                                </tr>
+                            {/foreach}
+                            <tr>
+                                <th>{Lang::T('Total')}</th>
+                                <td colspan="2"></td>
+                                <th class="text-right">{Lang::moneyFormat($dr)}</th>
+                                <td colspan="4"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
             <div class="box-footer">
                 <p class="text-center small text-info">{Lang::T('All Transactions at Date')}:
                     {Lang::dateAndTimeFormat($sd, $ts)} - {Lang::dateAndTimeFormat($ed, $te)}</p>
@@ -199,13 +201,13 @@
 
         function showChart() {
         // get cart one by one
-        $.getJSON("{/literal}{$_url}{literal}reports/ajax/type&{/literal}{$filter}{literal}", function( data ) {
+        $.getJSON("{/literal}{Text::url('reports/ajax/type&', $filter)}{literal}", function( data ) {
         create_cart('cart_type', data.labels, data.datas, options);
-        $.getJSON("{/literal}{$_url}{literal}reports/ajax/plan&{/literal}{$filter}{literal}", function( data ) {
+        $.getJSON("{/literal}{Text::url('reports/ajax/plan&', $filter)}{literal}", function( data ) {
         create_cart('cart_plan', data.labels, data.datas, options);
-        $.getJSON("{/literal}{$_url}{literal}reports/ajax/method&{/literal}{$filter}{literal}", function( data ) {
+        $.getJSON("{/literal}{Text::url('reports/ajax/method&', $filter)}{literal}", function( data ) {
         create_cart('cart_method', data.labels, data.datas, options);
-        $.getJSON("{/literal}{$_url}{literal}reports/ajax/router&{/literal}{$filter}{literal}", function( data ) {
+        $.getJSON("{/literal}{Text::url('reports/ajax/router&', $filter)}{literal}", function( data ) {
         create_cart('cart_router', data.labels, data.datas, options);
         getLineChartData();
         });
@@ -232,7 +234,7 @@
         }
 
         function getLineChartData() {
-            $.getJSON("{/literal}{$_url}{literal}reports/ajax/line&{/literal}{$filter}{literal}", function( data ) {
+            $.getJSON("{/literal}{Text::url('reports/ajax/line&', $filter)}{literal}", function( data ) {
             var linechart = new Chart(document.getElementById('line_cart'), {
                 type: 'line',
                 data: {

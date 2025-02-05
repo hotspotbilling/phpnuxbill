@@ -6,7 +6,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Edit Router')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}routers/edit-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}routers/edit-post">
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Status')}</label>
@@ -79,7 +79,7 @@
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the process of changing Routers?")}')" type="submit">{Lang::T('Save Changes')}</button>
-                            Or <a href="{$_url}routers/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('')}routers/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

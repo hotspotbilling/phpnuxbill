@@ -5,12 +5,13 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Refill Balance')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}plan/deposit-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}plan/deposit-post">
                     <input type="hidden" name="stoken" value="{App::getToken()}">
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Select Account')}</label>
                         <div class="col-md-9">
-                            <select id="personSelect" class="form-control select2" onchange="getBalance(this)" name="id_customer" style="width: 100%"
+                            <select id="personSelect" class="form-control select2" onchange="getBalance(this)"
+                                name="id_customer" style="width: 100%"
                                 data-placeholder="{Lang::T('Select a customer')}...">
                             </select>
                             <span class="help-block" id="customerBalance">-</span>
@@ -18,13 +19,15 @@
                     </div>
                     <span class="help-block">{Lang::T('Select Balance Package or Custom Amount')}</span>
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><a href="{$_url}services/balance">{Lang::T('Balance Package')}</a></label>
+                        <label class="col-md-3 control-label"><a
+                                href="{Text::url('')}services/balance">{Lang::T('Balance Package')}</a></label>
                         <div class="col-md-9">
                             <select id="planSelect" class="form-control select2" name="id_plan" style="width: 100%"
                                 data-placeholder="{Lang::T('Select Plans')}...">
                                 <option></option>
                                 {foreach $p as $pl}
-                                    <option value="{$pl['id']}">{if $pl['enabled'] neq 1}DISABLED PLAN &bull; {/if}{$pl['name_plan']} - {Lang::moneyFormat($pl['price'])}</option>
+                                    <option value="{$pl['id']}">{if $pl['enabled'] neq 1}DISABLED PLAN &bull;
+                                        {/if}{$pl['name_plan']} - {Lang::moneyFormat($pl['price'])}</option>
                                 {/foreach}
                             </select>
                             <span class="help-block">{Lang::T('Or custom balance amount below')}</span>
@@ -46,9 +49,10 @@
                     </div>
                     <div class="form-group">
                         <div class="col-md-9 col-md-offset-3">
-                            <button class="btn btn-success" onclick="return ask(this, 'Continue the Customer Balance top-up process?')"
+                            <button class="btn btn-success"
+                                onclick="return ask(this, 'Continue the Customer Balance top-up process?')"
                                 type="submit">{Lang::T('Recharge')}</button>
-                            Or <a href="{$_url}customers/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('')}customers/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>
@@ -58,11 +62,11 @@
 </div>
 
 <script>
-function getBalance(f){
-    $.get('{$_url}autoload/balance/'+f.value+'/1', function(data) {
+    function getBalance(f) {
+        $.get('{Text::url('')}autoload/balance/'+f.value+'/1', function(data) {
         document.getElementById('customerBalance').innerHTML = data;
     });
-}
+    }
 </script>
 
 {include file="sections/footer.tpl"}

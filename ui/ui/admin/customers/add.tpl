@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}customers/add-post">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('customers/add-post')}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-md-6">
@@ -207,7 +207,7 @@
         <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the process of adding Customer Data?")}')" type="submit">
             {Lang::T('Save Changes')}
         </button>
-        <br><a href="{$_url}customers/list" class="btn btn-link">{Lang::T('Cancel')}</a>
+        <br><a href="{Text::url('customers/list')}" class="btn btn-link">{Lang::T('Cancel')}</a>
     </center>
 </form>
 {literal}

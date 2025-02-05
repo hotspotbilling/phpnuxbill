@@ -5,7 +5,7 @@
 		<div class="panel panel-primary panel-hovered panel-stacked mb30">
 			<div class="panel-heading">{Lang::T('Send Personal Message')}</div>
 			<div class="panel-body">
-				<form class="form-horizontal" method="post" role="form" action="{$_url}message/send-post">
+				<form class="form-horizontal" method="post" role="form" action="{Text::url('message/send-post')}">
 					<div class="form-group">
 						<label class="col-md-2 control-label">{Lang::T('Customer')}</label>
 						<div class="col-md-6">
@@ -13,8 +13,8 @@
 								name="id_customer" style="width: 100%"
 								data-placeholder="{Lang::T('Select a customer')}...">
 								{if $cust}
-								<option value="{$cust['id']}">{$cust['username']} &bull; {$cust['fullname']} &bull;
-									{$cust['email']}</option>
+									<option value="{$cust['id']}">{$cust['username']} &bull; {$cust['fullname']} &bull;
+										{$cust['email']}</option>
 								{/if}
 							</select>
 						</div>
@@ -46,14 +46,17 @@
 							<br>
 							<b>[[company_name]]</b> - {Lang::T('Your Company Name')}
 							<br>
-							<b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link" target="_blank">read documentation</a>.
+							<b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link"
+								target="_blank">read documentation</a>.
 						</p>
 					</div>
 
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
-							<button class="btn btn-success" onclick="return ask(this, 'Continue the process of sending messages?')" type="submit">{Lang::T('Send Message')}</button>
-							<a href="{$_url}dashboard" class="btn btn-default">{Lang::T('Cancel')}</a>
+							<button class="btn btn-success"
+								onclick="return ask(this, 'Continue the process of sending messages?')"
+								type="submit">{Lang::T('Send Message')}</button>
+							<a href="{Text::url('dashboard')}" class="btn btn-default">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
 				</form>
