@@ -1253,14 +1253,14 @@
     function testWa() {
         var target = prompt("Phone number\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{$_url}settings/app&testWa=' + target;
+            window.location.href = '{Text::url('settings/app&testWa=')}' + target;
         }
     }
 
     function testSms() {
         var target = prompt("Phone number\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{$_url}settings/app&testSms=' + target;
+            window.location.href = '{Text::url('settings/app&testSms=')}' + target;
         }
     }
 
@@ -1268,12 +1268,12 @@
     function testEmail() {
         var target = prompt("Email\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{$_url}settings/app&testEmail=' + target;
+            window.location.href = '{Text::url('settings/app&testEmail=')}' + target;
         }
     }
 
     function testTg() {
-        window.location.href = '{$_url}settings/app&testTg=test';
+        window.location.href = '{Text::url('settings/app&testTg=test')}';
     }
 </script>
 
