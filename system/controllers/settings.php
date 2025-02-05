@@ -23,7 +23,7 @@ switch ($action) {
             $d->value = 'yes';
             $d->save();
         }
-        r2('./docs');
+        r2(getUrl('docs'));
         break;
     case 'devices':
         $files = scandir($DEVICE_PATH);

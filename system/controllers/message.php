@@ -22,6 +22,8 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
+$appUrl = APP_URL;
+
         $select2_customer = <<<EOT
 <script>
 document.addEventListener("DOMContentLoaded", function(event) {
@@ -30,9 +32,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
         ajax: {
             url: function(params) {
                 if(params.term != undefined){
-                    return './?_route=autoload/customer_select2&s='+params.term;
+                    return '{$appUrl}/?_route=autoload/customer_select2&s='+params.term;
                 }else{
-                    return './?_route=autoload/customer_select2';
+                    return '{$appUrl}/?_route=autoload/customer_select2';
                 }
             }
         }
