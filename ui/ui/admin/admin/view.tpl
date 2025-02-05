@@ -39,9 +39,9 @@
                         </ul>
                     </div>
                     <div class="panel-footer">
-                        <center><a href="{$_url}settings/users-edit/{$d['id']}"
+                        <center><a href="{Text::url('settings/users-edit/', $d['id'])}"
                                 class="btn btn-info btn-block">{Lang::T('Edit')}</a>
-                            <a href="{$_url}settings/users" class="btn btn-link btn-block">{Lang::T('Cancel')}</a>
+                            <a href="{Text::url('settings/users')}" class="btn btn-link btn-block">{Lang::T('Cancel')}</a>
                         </center>
                     </div>
                 </div>

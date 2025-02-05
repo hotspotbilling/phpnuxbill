@@ -120,7 +120,7 @@
     <div class="col-lg-3 col-lg-offset-9">
         <div class="btn-group btn-group-justified" role="group">
             <div class="btn-group" role="group">
-                <a href="{$_url}coupons/add" class="btn btn-primary">
+                <a href="{Text::url('coupons/add')}" class="btn btn-primary">
                     {Lang::T('Add Coupon')}</a>
             </div>
         </div>
@@ -153,66 +153,66 @@
             </thead>
             <tbody>
                 {if $coupons}
-                {foreach $coupons as $coupon}
-                <tr>
-                    <td><input type="checkbox" name="coupon_ids[]" value="{$coupon['id']}"></td>
-                    <td style="background-color: black; color: black;"
-                        onmouseleave="this.style.backgroundColor = 'black';"
-                        onmouseenter="this.style.backgroundColor = 'white';">
-                        {$coupon['code']}
-                    </td>
-                    <td>{$coupon['type']}</td>
-                    <td>{$coupon['value']}</td>
-                    <td>{$coupon['description']}</td>
-                    <td>{$coupon['max_usage']}</td>
-                    <td>{$coupon['usage_count']}</td>
-                    <td>
-                        {if $coupon['status'] == 'inactive'}
-                        <span class="label label-danger">{Lang::T('Inactive')}</span>
-                        {elseif $coupon['status'] == 'active'}
-                        <span class="label label-success">{Lang::T('Active')}</span>
-                        {else}
-                        <span class="label label-primary">{Lang::T('Unknown')}</span>
-                        {/if}
-                    </td>
-                    <td>{$coupon['min_order_amount']}</td>
-                    <td>{$coupon['max_discount_amount']}</td>
-                    <td>{$coupon['start_date']}</td>
-                    <td>{$coupon['end_date']}</td>
-                    <td>{$coupon['created_at']}</td>
-                    <td>{$coupon['updated_at']}</td>
-                    <!-- <td>{if $coupon['admin_name']}
-                        <a href="{$_url}settings/users-view/{$coupon['generated_by']}">{$coupon['admin_name']}</a>
+                    {foreach $coupons as $coupon}
+                        <tr>
+                            <td><input type="checkbox" name="coupon_ids[]" value="{$coupon['id']}"></td>
+                            <td style="background-color: black; color: black;"
+                                onmouseleave="this.style.backgroundColor = 'black';"
+                                onmouseenter="this.style.backgroundColor = 'white';">
+                                {$coupon['code']}
+                            </td>
+                            <td>{$coupon['type']}</td>
+                            <td>{$coupon['value']}</td>
+                            <td>{$coupon['description']}</td>
+                            <td>{$coupon['max_usage']}</td>
+                            <td>{$coupon['usage_count']}</td>
+                            <td>
+                                {if $coupon['status'] == 'inactive'}
+                                    <span class="label label-danger">{Lang::T('Inactive')}</span>
+                                {elseif $coupon['status'] == 'active'}
+                                    <span class="label label-success">{Lang::T('Active')}</span>
+                                {else}
+                                    <span class="label label-primary">{Lang::T('Unknown')}</span>
+                                {/if}
+                            </td>
+                            <td>{$coupon['min_order_amount']}</td>
+                            <td>{$coupon['max_discount_amount']}</td>
+                            <td>{$coupon['start_date']}</td>
+                            <td>{$coupon['end_date']}</td>
+                            <td>{$coupon['created_at']}</td>
+                            <td>{$coupon['updated_at']}</td>
+                            <!-- <td>{if $coupon['admin_name']}
+                        <a href="{Text::url('settings/users-view/', $coupon['generated_by'])}">{$coupon['admin_name']}</a>
                         {else} -
                         {/if}
                     </td> -->
-                    <td colspan="10" style="text-align: center;">
-                        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                            <a href="{$_url}coupons/edit/{$coupon['id']}&token={$csrf_token}" id="{$coupon['id']}"
-                                class="btn btn-success btn-xs">{Lang::T('Edit')}</a>
-                            {if $coupon['status'] neq 'inactive'}
-                            <a href="javascript:void(0);"
-                                onclick="confirmAction('{$_url}coupons/status/&coupon_id={$coupon['id']}&status=inactive&csrf_token={$csrf_token}', '{Lang::T('Block')}')"
-                                id="{$coupon['id']}" class="btn btn-danger btn-xs">
-                                {Lang::T('Block')}
-                            </a>
-                            {else}
-                            <a href="javascript:void(0);"
-                                onclick="confirmAction('{$_url}coupons/status/&coupon_id={$coupon['id']}&status=active&csrf_token={$csrf_token}', '{Lang::T('Unblock')}')"
-                                id="{$coupon['id']}" class="btn btn-warning btn-xs">
-                                {Lang::T('Unblock')}
-                            </a>
-                            {/if}
-                        </div>
-                    </td>
-                </tr>
-                {/foreach}
+                            <td colspan="10" style="text-align: center;">
+                                <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                                    <a href="{Text::url('coupons/edit/', $coupon['id'], '&token=', $csrf_token)}"
+                                        id="{$coupon['id']}" class="btn btn-success btn-xs">{Lang::T('Edit')}</a>
+                                    {if $coupon['status'] neq 'inactive'}
+                                        <a href="javascript:void(0);"
+                                            onclick="confirmAction('{Text::url('coupons/status/&coupon_id=',$coupon['id'], '&status=inactive&csrf_token=', $csrf_token)}', '{Lang::T('Block')}')"
+                                            id="{$coupon['id']}" class="btn btn-danger btn-xs">
+                                            {Lang::T('Block')}
+                                        </a>
+                                    {else}
+                                        <a href="javascript:void(0);"
+                                            onclick="confirmAction('{Text::url('coupons/status/&coupon_id=', $coupon['id'], '&status=active&csrf_token=', $csrf_token)}', '{Lang::T('Unblock')}')"
+                                            id="{$coupon['id']}" class="btn btn-warning btn-xs">
+                                            {Lang::T('Unblock')}
+                                        </a>
+                                    {/if}
+                                </div>
+                            </td>
+                        </tr>
+                    {/foreach}
                 {else}
-                <tr>
-                    <td colspan="11" style="text-align: center;">
-                        {Lang::T('No coupons found.')}
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="11" style="text-align: center;">
+                            {Lang::T('No coupons found.')}
+                        </td>
+                    </tr>
                 {/if}
             </tbody>
         </table>
@@ -222,7 +222,7 @@
                 <div class="btn-group btn-group-justified" role="group">
                     <div class="btn-group" role="group">
                         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                        <button id="deleteSelectedCoupons" class="btn btn-danger">{Lang::T('Delete
+                            <button id="deleteSelectedCoupons" class="btn btn-danger">{Lang::T('Delete
                             Selected')}</button>
                         {/if}
                     </div>
@@ -247,9 +247,9 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '{$_url}coupons/delete', true);
+                    xhr.open('POST', '{Text::url('coupons/delete')}', true);
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    xhr.onload = function () {
+                    xhr.onload = function() {
                         if (xhr.status === 200) {
                             var response = JSON.parse(xhr.responseText);
 
@@ -293,9 +293,9 @@
     }
 
     // Example usage for selected coupons
-    document.getElementById('deleteSelectedCoupons').addEventListener('click', function () {
+    document.getElementById('deleteSelectedCoupons').addEventListener('click', function() {
         var selectedCoupons = [];
-        document.querySelectorAll('input[name="coupon_ids[]"]:checked').forEach(function (checkbox) {
+        document.querySelectorAll('input[name="coupon_ids[]"]:checked').forEach(function(checkbox) {
             selectedCoupons.push(checkbox.value);
         });
 
@@ -312,8 +312,8 @@
     });
 
     // Example usage for single coupon deletion
-    document.querySelectorAll('.delete-coupon').forEach(function (button) {
-        button.addEventListener('click', function () {
+    document.querySelectorAll('.delete-coupon').forEach(function(button) {
+        button.addEventListener('click', function() {
             var couponId = this.getAttribute('data-id');
             deleteCoupons([couponId]);
         });
@@ -321,7 +321,7 @@
 
 
     // Select or deselect all checkboxes
-    document.getElementById('select-all').addEventListener('change', function () {
+    document.getElementById('select-all').addEventListener('change', function() {
         var checkboxes = document.querySelectorAll('input[name="coupon_ids[]"]');
         for (var checkbox of checkboxes) {
             checkbox.checked = this.checked;
@@ -329,29 +329,29 @@
     });
 </script>
 {literal}
-<script>
-    function confirmAction(url, action) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Do you really want to ${action.toLowerCase()} this coupon?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, proceed!',
-            cancelButtonText: 'No, cancel!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = url;
-            }
-        });
-    }
-</script>
+    <script>
+        function confirmAction(url, action) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you really want to ${action.toLowerCase()} this coupon?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed!',
+                cancelButtonText: 'No, cancel!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        }
+    </script>
 {/literal}
 <script>
     const $j = jQuery.noConflict();
 
-    $j(document).ready(function () {
+    $j(document).ready(function() {
         $j('#datatable').DataTable({
             "pagingType": "full_numbers",
             "order": [

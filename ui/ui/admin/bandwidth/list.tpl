@@ -7,7 +7,7 @@
 			<div class="panel-body">
 				<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
 					<div class="col-md-8">
-						<form id="site-search" method="post" action="{$_url}bandwidth/list/">
+						<form id="site-search" method="post" action="{Text::url('bandwidth/list/')}">
 							<div class="input-group">
 								<div class="input-group-addon">
 									<span class="fa fa-search"></span>
@@ -21,7 +21,8 @@
 						</form>
 					</div>
 					<div class="col-md-4">
-						<a href="{$_url}bandwidth/add" class="btn btn-primary btn-block"><i class="ion ion-android-add">
+						<a href="{Text::url('bandwidth/add')}" class="btn btn-primary btn-block"><i
+								class="ion ion-android-add">
 							</i> {Lang::T('New Bandwidth')}</a>
 					</div>&nbsp;
 				</div>
@@ -43,9 +44,9 @@
 									</td>
 									<td>{$ds['burst']}</td>
 									<td>
-										<a href="{$_url}bandwidth/edit/{$ds['id']}"
+										<a href="{Text::url('bandwidth/edit/', $ds['id'])}"
 											class="btn btn-sm btn-warning">{Lang::T('Edit')}</a>
-										<a href="{$_url}bandwidth/delete/{$ds['id']}" id="{$ds['id']}"
+										<a href="{Text::url('bandwidth/delete/', $ds['id'])}" id="{$ds['id']}"
 											class="btn btn-danger btn-sm"
 											onclick="return ask(this, '{Lang::T('Delete')}?')"><i
 												class="glyphicon glyphicon-trash"></i></a>

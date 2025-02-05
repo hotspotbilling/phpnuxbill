@@ -6,7 +6,7 @@
 			<div class="panel-heading">{Lang::T('Edit Bandwidth')}</div>
 			<div class="panel-body">
 
-				<form class="form-horizontal" method="post" role="form" action="{$_url}bandwidth/edit-post">
+				<form class="form-horizontal" method="post" role="form" action="{Text::url('bandwidth/edit-post')}">
 					<input type="hidden" name="id" value="{$d['id']}">
 					<div class="form-group">
 						<label class="col-md-3 control-label">{Lang::T('Bandwidth Name')}</label>
@@ -87,7 +87,7 @@
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Bandwidth change process?")}')" type="submit">{Lang::T('Save Change')}</button>
-							{Lang::T("Or")} <a href="{$_url}bandwidth/list">{Lang::T('Cancel')}</a>
+							{Lang::T("Or")} <a href="{Text::url('bandwidth/list')}">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
 				</form>
