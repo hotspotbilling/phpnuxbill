@@ -15,7 +15,6 @@ $ui->assign('_admin', $admin);
 $appUrl = APP_URL;
 
 $select2_customer = <<<EOT
-<-- apa ini -->
 <script>
 document.addEventListener("DOMContentLoaded", function(event) {
     $('#personSelect').select2({
