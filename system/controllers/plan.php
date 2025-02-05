@@ -12,7 +12,10 @@ $ui->assign('_system_menu', 'plan');
 $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
+$appUrl = APP_URL;
+
 $select2_customer = <<<EOT
+<-- apa ini -->
 <script>
 document.addEventListener("DOMContentLoaded", function(event) {
     $('#personSelect').select2({
@@ -20,9 +23,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
         ajax: {
             url: function(params) {
                 if(params.term != undefined){
-                    return './?_route=autoload/customer_select2&s='+params.term;
+                    return '{$appUrl}/?_route=autoload/customer_select2&s='+params.term;
                 }else{
-                    return './?_route=autoload/customer_select2';
+                    return '{$appUrl}/?_route=autoload/customer_select2';
                 }
             }
         }
@@ -30,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 });
 </script>
 EOT;
-
+getUrl('docs');
 switch ($action) {
     case 'sync':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {

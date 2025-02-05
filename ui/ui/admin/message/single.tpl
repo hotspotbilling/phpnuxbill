@@ -46,7 +46,7 @@
 							<br>
 							<b>[[company_name]]</b> - {Lang::T('Your Company Name')}
 							<br>
-							<b>[[payment_link]]</b> - <a href="./docs/#Reminder%20with%20payment%20link"
+							<b>[[payment_link]]</b> - <a href="{Text::url('docs')}/#Reminder%20with%20payment%20link"
 								target="_blank">read documentation</a>.
 						</p>
 					</div>
