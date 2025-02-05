@@ -34,6 +34,7 @@
                     <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block btn-flat">{Lang::T('Login')}</button>
+                <a href="{$_url}login">{Lang::T('Go Back')}</a>
             </form>
         </div>
     </div>
