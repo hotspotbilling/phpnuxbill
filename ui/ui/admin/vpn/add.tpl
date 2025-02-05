@@ -162,27 +162,4 @@
         prePaid()
     })
 </script>
-{if $_c['radius_enable']}
-    {literal}
-        <script>
-            function isRadius(cek) {
-                if (cek.checked) {
-                    document.getElementById("routers").required = false;
-                    document.getElementById("routers").disabled = true;
-                    $.ajax({
-                        url: "?_route=autoload/pool",
-                        data: "routers=radius",
-                        cache: false,
-                        success: function(msg) {
-                            $("#pool_name").html(msg);
-                        }
-                    });
-                } else {
-                    document.getElementById("routers").required = true;
-                    document.getElementById("routers").disabled = false;
-                }
-            }
-        </script>
-    {/literal}
-{/if}
 {include file="sections/footer.tpl"}

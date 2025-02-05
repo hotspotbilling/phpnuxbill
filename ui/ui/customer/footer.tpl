@@ -47,7 +47,7 @@
 <script src="{$app_url}/ui/ui/scripts/adminlte.min.js"></script>
 
 <script src="{$app_url}/ui/ui/scripts/plugins/select2.min.js"></script>
-<script src="{$app_url}/ui/ui/scripts/custom.js?v=2"></script>
+<script src="{$app_url}/ui/ui/scripts/custom.js?2025.2.5"></script>
 
 {if isset($xfooter)}
     {$xfooter}
