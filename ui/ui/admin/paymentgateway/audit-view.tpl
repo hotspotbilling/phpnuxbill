@@ -14,8 +14,9 @@
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Invoice')}</b> <span class="pull-right">&nbsp;
-                        <a href="{$_url}reports/activation&q={$pg['trx_invoice']}" class="text-black">{$pg['trx_invoice']}</a>
-                        &nbsp;</span>
+                            <a href="{Text::url('reports/activation&q=')}{$pg['trx_invoice']}"
+                                class="text-black">{$pg['trx_invoice']}</a>
+                            &nbsp;</span>
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Status')}</b> <span
@@ -23,7 +24,8 @@
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Username')}</b>
-                        <span class="pull-right">&nbsp;<a href="{$_url}customers/viewu/{$pg['username']}" class="text-black">{$pg['username']}</a>&nbsp;</span>
+                        <span class="pull-right">&nbsp;<a href="{Text::url('customers/viewu/')}{$pg['username']}"
+                                class="text-black">{$pg['username']}</a>&nbsp;</span>
                     </li>
                     <li class="list-group-item">
                         <b>{Lang::T('Plan Name')}</b> <span class="pull-right">&nbsp;{$pg['plan_name']}&nbsp;</span>

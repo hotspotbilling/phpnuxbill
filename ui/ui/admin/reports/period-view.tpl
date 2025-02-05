@@ -16,14 +16,14 @@
                         {date( $_c['date_format'], strtotime($tdate))}]</p>
                 </div>
                 <div class="group clearfix right">
-                    <form method="post" action="{$_url}export/print-by-period" target="_blank">
+                    <form method="post" action="{Text::url('')}export/print-by-period" target="_blank">
                         <input type="hidden" name="fdate" value="{$fdate}">
                         <input type="hidden" name="tdate" value="{$tdate}">
                         <input type="hidden" name="stype" value="{$stype}">
                         <button type="submit" class="btn btn-default"><i class="fa fa-print"></i>
                             {Lang::T('Export for Print')}</button>
                     </form>
-                    <form method="post" action="{$_url}export/pdf-by-period" target="_blank">
+                    <form method="post" action="{Text::url('')}export/pdf-by-period" target="_blank">
                         <input type="hidden" name="fdate" value="{$fdate}">
                         <input type="hidden" name="tdate" value="{$tdate}">
                         <input type="hidden" name="stype" value="{$stype}">

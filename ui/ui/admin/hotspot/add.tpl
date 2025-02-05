@@ -5,7 +5,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Add Service Package')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}services/add-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('services/add-post')}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Status')}
                             <a tabindex="0" class="btn btn-link btn-xs" role="button" data-toggle="popover"
@@ -24,7 +24,8 @@
                                 data-content="{Lang::T("Postpaid will have fix expired date")}">?</a>
                         </label>
                         <div class="col-md-10">
-                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes" checked> {Lang::T('Prepaid')}
+                            <input type="radio" name="prepaid" onclick="prePaid()" value="yes" checked>
+                            {Lang::T('Prepaid')}
                             <input type="radio" name="prepaid" onclick="postPaid()" value="no"> {Lang::T('Postpaid')}
                         </div>
                     </div>
@@ -49,7 +50,8 @@
                             </label>
                             <div class="col-md-6">
                                 <label class="radio-inline">
-                                    <input type="checkbox" name="radius" onclick="isRadius(this)" value="1"> {Lang::T('Radius Package')}
+                                    <input type="checkbox" name="radius" onclick="isRadius(this)" value="1">
+                                    {Lang::T('Radius Package')}
                                 </label>
                             </div>
                             <p class="help-block col-md-4">{Lang::T('Cannot be change after saved')}</p>
@@ -126,7 +128,7 @@
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label"><a
-                                href="{$_url}bandwidth/add">{Lang::T('Bandwidth Name')}</a></label>
+                                href="{Text::url('bandwidth/add')}">{Lang::T('Bandwidth Name')}</a></label>
                         <div class="col-md-6">
                             <select id="id_bw" name="id_bw" class="form-control select2">
                                 <option value="">{Lang::T('Select Bandwidth')}...</option>
@@ -183,13 +185,14 @@
                                 data-content="{Lang::T("Expired will be this date every month")}">?</a>
                         </label>
                         <div class="col-md-6">
-                            <input type="number" class="form-control" name="expired_date" maxlength="2" value="20" min="1" max="28" step="1" >
+                            <input type="number" class="form-control" name="expired_date" maxlength="2" value="20"
+                                min="1" max="28" step="1">
                         </div>
                     </div>
                     <span id="routerChoose" class="">
                         <div class="form-group">
                             <label class="col-md-2 control-label"><a
-                                    href="{$_url}routers/add">{Lang::T('Router Name')}</a></label>
+                                    href="{Text::url('routers/add')}">{Lang::T('Router Name')}</a></label>
                             <div class="col-md-6">
                                 <select id="routers" name="routers" required class="form-control select2">
                                     <option value=''>{Lang::T('Select Routers')}</option>
@@ -203,8 +206,10 @@
                     </span>
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
-                            <button class="btn btn-success" onclick="return ask(this, '{Lang::T("Continue the Hotspot Package creation process?")}')" type="submit">{Lang::T('Save Changes')}</button>
-                            Or <a href="{$_url}services/hotspot">{Lang::T('Cancel')}</a>
+                            <button class="btn btn-success"
+                                onclick="return ask(this, '{Lang::T("Continue the Hotspot Package creation process?")}')"
+                                type="submit">{Lang::T('Save Changes')}</button>
+                            Or <a href="{Text::url('services/hotspot')}">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

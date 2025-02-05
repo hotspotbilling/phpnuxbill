@@ -7,11 +7,12 @@
             <div class="panel-heading">Radius - {Lang::T('Add NAS')}</div>
             <div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}radius/nas-add-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}radius/nas-add-post">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Router Name')}</label>
                         <div class="col-md-6">
-                            <input type="text" required class="form-control" id="shortname" name="shortname" maxlength="32">
+                            <input type="text" required class="form-control" id="shortname" name="shortname"
+                                maxlength="32">
                             <p class="help-block">{Lang::T('Name of Area that router operated')}</p>
                         </div>
                     </div>
@@ -58,22 +59,24 @@
                         </div>
                     </div>
                     <div class="form-group">
-						<label class="col-md-2 control-label"><a href="{$_url}routers/add">{Lang::T('Routers')}</a></label>
-						<div class="col-md-6">
-							<select id="routers" name="routers" class="form-control select2">
+                        <label class="col-md-2 control-label"><a
+                                href="{Text::url('')}routers/add">{Lang::T('Routers')}</a></label>
+                        <div class="col-md-6">
+                            <select id="routers" name="routers" class="form-control select2">
                                 <option value="">No Router</option>
                                 {foreach $routers as $rs}
-									<option value="{$rs['name']}">{$rs['name']}</option>
+                                    <option value="{$rs['name']}">{$rs['name']}</option>
                                 {/foreach}
                             </select>
-						</div>
+                        </div>
                         <p class="help-block col-md-4">{Lang::T('Assign NAS to Router')}</p>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the process of adding Radius NAS?")}')"
+                            <button class="btn btn-primary"
+                                onclick="return ask(this, '{Lang::T("Continue the process of adding Radius NAS?")}')"
                                 type="submit">{Lang::T('Save Changes')}</button>
-                            Or <a href="{$_url}radius/nas-list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('')}radius/nas-list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

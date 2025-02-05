@@ -6,7 +6,7 @@
 					<div class="panel-heading">{Lang::T('Add Pool')}</div>
 						<div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{$_url}pool/add-post" >
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}pool/add-post" >
                     <div class="form-group">
 						<label class="col-md-2 control-label">{Lang::T('Name Pool')}</label>
 						<div class="col-md-6">
@@ -26,7 +26,7 @@
 						</div>
                     </div>
                     <div class="form-group">
-						<label class="col-md-2 control-label"><a href="{$_url}routers/add">{Lang::T('Routers')}</a></label>
+						<label class="col-md-2 control-label"><a href="{Text::url('')}routers/add">{Lang::T('Routers')}</a></label>
 						<div class="col-md-6">
 							<select id="routers" name="routers" class="form-control select2">
                                 {if $_c['radius_enable']}
@@ -41,7 +41,7 @@
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Pool addition process?")}')" type="submit">{Lang::T('Save Changes')}</button>
-							Or <a href="{$_url}pool/list">{Lang::T('Cancel')}</a>
+							Or <a href="{Text::url('')}pool/list">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
                 </form>

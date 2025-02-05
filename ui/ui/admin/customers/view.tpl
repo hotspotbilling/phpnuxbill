@@ -112,12 +112,12 @@
                 </ul>
                 <div class="row">
                     <div class="col-xs-4">
-                        <a href="{$_url}customers/delete/{$d['id']}&token={$csrf_token}" id="{$d['id']}"
+                        <a href="{Text::url('customers/delete/', $d['id'], '&token=', $csrf_token)}" id="{$d['id']}"
                             class="btn btn-danger btn-block btn-sm"
                             onclick="return ask(this, '{Lang::T('Delete')}?')"><span class="fa fa-trash"></span></a>
                     </div>
                     <div class="col-xs-8">
-                        <a href="{$_url}customers/edit/{$d['id']}&token={$csrf_token}"
+                        <a href="{Text::url('customers/edit/', $d['id'], '&token=', $csrf_token)}"
                             class="btn btn-warning btn-sm btn-block">{Lang::T('Edit')}</a>
                     </div>
                 </div>
@@ -128,9 +128,10 @@
         <div class="box box-info">
             <ul class="nav nav-tabs">
                 <li role="presentation" {if $v=='order' }class="active" {/if}><a
-                        href="{$_url}customers/view/{$d['id']}/order">30 {Lang::T('Order History')}</a></li>
+                        href="{Text::url('customers/view/', $d['id'], '/order')}">30 {Lang::T('Order History')}</a></li>
                 <li role="presentation" {if $v=='activation' }class="active" {/if}><a
-                        href="{$_url}customers/view/{$d['id']}/activation">30 {Lang::T('Activation History')}</a></li>
+                        href="{Text::url('customers/view/', $d['id'], '/activation')}">30
+                        {Lang::T('Activation History')}</a></li>
             </ul>
             <div class="table-responsive" style="background-color: white;">
                 <table id="datatable" class="table table-bordered table-striped">
@@ -149,7 +150,8 @@
                         </thead>
                         <tbody>
                             {foreach $activation as $ds}
-                                <tr onclick="window.location.href = '{$_url}plan/view/{$ds['id']}'" style="cursor:pointer;">
+                                <tr onclick="window.location.href = '{Text::url('plan/view/'), $ds['id']}'"
+                                    style="cursor:pointer;">
                                     <td>{$ds['invoice']}</td>
                                     <td>{$ds['username']}</td>
                                     <td>{$ds['plan_name']}</td>
@@ -210,7 +212,7 @@
                     <div class="box box-{if $package['status']=='on'}success{else}danger{/if}">
                         <div class="box-body box-profile">
                             <h4 class="text-center">{$package['type']} - {$package['namebp']} <span
-                                    api-get-text="{$_url}autoload/customer_is_active/{$package['username']}/{$package['plan_id']}"></span>
+                                    api-get-text="{Text::url('autoload/customer_is_active/')}{$package['username']}/{$package['plan_id']}"></span>
                             </h4>
                             <ul class="list-group list-group-unbordered">
                                 <li class="list-group-item">
@@ -240,12 +242,12 @@
                         </ul>
                         <div class="row">
                             <div class="col-xs-4">
-                                <a href="{$_url}customers/deactivate/{$d['id']}/{$package['plan_id']}&token={$csrf_token}" id="{$d['id']}"
-                                    class="btn btn-danger btn-block btn-sm"
+                                <a href="{Text::url('customers/deactivate/', $d['id'],'/',$package['plan_id'], '&token=', $csrf_token)}"
+                                    id="{$d['id']}" class="btn btn-danger btn-block btn-sm"
                                     onclick="return ask(this, 'This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
                             </div>
                             <div class="col-xs-8">
-                                <a href="{$_url}customers/recharge/{$d['id']}/{$package['plan_id']}&token={$csrf_token}"
+                                <a href="{Text::url('customers/recharge/', $d['id'], '/', $package['plan_id'], '&token=', $csrf_token)}"
                                     class="btn btn-success btn-sm btn-block">{Lang::T('Recharge')}</a>
                             </div>
                         </div>
@@ -259,19 +261,22 @@
 <hr>
 <div class="row">
     <div class="col-xs-6 col-md-3">
-        <a href="{$_url}customers/list" class="btn btn-primary btn-sm btn-block">{Lang::T('Back')}</a>
+        <a href="{Text::url('customers/list')}" class="btn btn-primary btn-sm btn-block">{Lang::T('Back')}</a>
     </div>
     <div class="col-xs-6 col-md-3">
-        <a href="{$_url}customers/sync/{$d['id']}&token={$csrf_token}" onclick="return ask(this, 'This will sync Customer to Mikrotik?')"
+        <a href="{Text::url('customers/sync/', $d['id'], '&token=', $csrf_token)}"
+            onclick="return ask(this, 'This will sync Customer to Mikrotik?')"
             class="btn btn-info btn-sm btn-block">{Lang::T('Sync')}</a>
     </div>
     <div class="col-xs-6 col-md-3">
-        <a href="{$_url}message/send/{$d['id']}&token={$csrf_token}" class="btn btn-success btn-sm btn-block">
+        <a href="{Text::url('message/send/', $d['id'], '&token=', $csrf_token)}"
+            class="btn btn-success btn-sm btn-block">
             {Lang::T('Send Message')}
         </a>
     </div>
     <div class="col-xs-6 col-md-3">
-        <a href="{$_url}customers/login/{$d['id']}&token={$csrf_token}" target="_blank" class="btn btn-warning btn-sm btn-block">
+        <a href="{Text::url('customers/login/', $d['id'], '&token=', $csrf_token)}" target="_blank"
+            class="btn btn-warning btn-sm btn-block">
             {Lang::T('Login as Customer')}
         </a>
     </div>
@@ -284,8 +289,8 @@
             function setupMap(lat, lon) {
                 var map = L.map('map').setView([lat, lon], 17);
                 L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga', {
-            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                maxZoom: 20
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    maxZoom: 20
             }).addTo(map);
             var marker = L.marker([lat, lon]).addTo(map);
             }

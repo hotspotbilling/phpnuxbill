@@ -1,7 +1,7 @@
 {include file="sections/header.tpl"}
 
 
-<form class="form-horizontal" method="post" role="form" action="{$_url}services/edit-post">
+<form class="form-horizontal" method="post" role="form" action="{Text::url('services/edit-post')}">
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">
@@ -141,7 +141,7 @@
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label"><a
-                                href="{$_url}bandwidth/add">{Lang::T('Bandwidth Name')}</a></label>
+                                href="{Text::url('bandwidth/add')}">{Lang::T('Bandwidth Name')}</a></label>
                         <div class="col-md-9">
                             <select id="id_bw" name="id_bw" class="form-control select2">
                                 {foreach $b as $bs}
@@ -231,7 +231,7 @@
                     <span id="routerChoose" class="{if $d['is_radius']}hidden{/if}">
                         <div class="form-group">
                             <label class="col-md-3 control-label"><a
-                                    href="{$_url}routers/add">{Lang::T('Router Name')}</a></label>
+                                    href="{Text::url('routers/add')}">{Lang::T('Router Name')}</a></label>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" id="routers" name="routers"
                                     value="{$d['routers']}" readonly>
@@ -279,7 +279,7 @@
     <div class="form-group">
         <div class="col-md-offset-2 col-md-9">
             <button class="btn btn-success" onclick="return ask(this, '{Lang::T("Continue the process of changing Hotspot Package data?")}')" type="submit">{Lang::T('Save Changes')}</button>
-            {Lang::T("Or")} <a href="{$_url}services/hotspot">{Lang::T('Cancel')}</a>
+            {Lang::T("Or")} <a href="{Text::url('services/hotspot')}">{Lang::T('Cancel')}</a>
         </div>
     </div>
 </form>

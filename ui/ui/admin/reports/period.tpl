@@ -6,7 +6,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Period Reports')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}reports/period-view">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}reports/period-view">
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('From Date')}</label>
                         <div class="col-md-9">
@@ -16,7 +16,7 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('To Date')}</label>
                         <div class="col-md-9">
-                        <input type="date" class="form-control" value="{$mdate}" name="tdate" id="tdate">
+                            <input type="date" class="form-control" value="{$mdate}" name="tdate" id="tdate">
                         </div>
                     </div>
                     <div class="form-group">
@@ -33,7 +33,8 @@
 
                     <div class="form-group">
                         <div class="col-sm-offset-3 col-sm-9">
-                            <button type="submit" id="submit" class="btn btn-primary">{Lang::T('Period Reports')}</button>
+                            <button type="submit" id="submit"
+                                class="btn btn-primary">{Lang::T('Period Reports')}</button>
                         </div>
                     </div>
                 </form>

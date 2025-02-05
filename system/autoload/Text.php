@@ -110,6 +110,12 @@ class Text
         return $result;
     }
 
+    /**
+     * ...$data means it can take any number of arguments.
+     * it can url($var1, $var2, $var3) or url($var1)
+     * and variable will be merge with implode
+     * @return string the URL with all the arguments combined.
+     */
     public static function url(...$data){
         global $config;
         $url = implode("", $data);
@@ -123,6 +129,16 @@ class Text
             }
         } else {
             return U . $url;
+        }
+    }
+
+    // this will return & or ?
+    public static function isQA(){
+        global $config;
+        if ($config['url_canonical'] == 'yes') {
+            return '?';
+        } else {
+            return '&';
         }
     }
 }

@@ -17,15 +17,16 @@
             <div class="panel-heading">
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-primary btn-xs" title="save" href="{$_url}customers/csv&token={$csrf_token}"
-                            onclick="return ask(this, 'This will export to CSV?')"><span class="glyphicon glyphicon-download"
-                                aria-hidden="true"></span> CSV</a>
+                        <a class="btn btn-primary btn-xs" title="save"
+                            href="{Text::url('customers/csv&token=', $csrf_token)}"
+                            onclick="return ask(this, 'This will export to CSV?')"><span
+                                class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
                     </div>
                 {/if}
                 {Lang::T('Manage Contact')}
             </div>
             <div class="panel-body">
-                <form id="site-search" method="post" action="{$_url}customers">
+                <form id="site-search" method="post" action="{Text::url('customers')}">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                         <div class="col-lg-4">
@@ -75,8 +76,8 @@
                                 <input type="text" name="search" class="form-control"
                                     placeholder="{Lang::T('Search')}..." value="{$search}">
                                 <div class="input-group-btn">
-                                    <button class="btn btn-primary" type="submit"><span
-                                            class="fa fa-search"></span> {Lang::T('Search')}</button>
+                                    <button class="btn btn-primary" type="submit"><span class="fa fa-search"></span>
+                                        {Lang::T('Search')}</button>
                                     <button class="btn btn-info" type="submit" name="export" value="csv">
                                         <span class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV
                                     </button>
@@ -84,7 +85,7 @@
                             </div>
                         </div>
                         <div class="col-lg-1">
-                            <a href="{$_url}customers/add" class="btn btn-success text-black btn-block"
+                            <a href="{Text::url('customers/add')}" class="btn btn-success text-black btn-block"
                                 title="{Lang::T('Add')}">
                                 <i class="ion ion-android-add"></i><i class="glyphicon glyphicon-user"></i>
                             </a>
@@ -113,7 +114,7 @@
                         <tbody>
                             {foreach $d as $ds}
                                 <tr {if $ds['status'] != 'Active'}class="danger" {/if}>
-                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
+                                    <td onclick="window.location.href = '{Text::url('customers/view/', $ds['id'])}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
                                     <td>
                                         <a href="{$app_url}/{$UPLOAD_PATH}{$ds['photo']}" target="photo">
@@ -121,7 +122,7 @@
                                         </a>
                                     </td>
                                     <td>{$ds['account_type']}</td>
-                                    <td onclick="window.location.href = '{$_url}customers/view/{$ds['id']}'"
+                                    <td onclick="window.location.href = '{Text::url('customers/view/', $ds['id'])}'"
                                         style="cursor: pointer;">{$ds['fullname']}</td>
                                     <td>{Lang::moneyFormat($ds['balance'])}</td>
                                     <td align="center">
@@ -139,7 +140,7 @@
                                                     class="glyphicon glyphicon-map-marker"></i></a>
                                         {/if}
                                     </td>
-                                    <td align="center" api-get-text="{$_url}autoload/plan_is_active/{$ds['id']}">
+                                    <td align="center" api-get-text="{Text::url('autoload/plan_is_active/')}{$ds['id']}">
                                         <span class="label label-default">&bull;</span>
                                     </td>
                                     <td>{$ds['service_type']}</td>
@@ -151,16 +152,16 @@
                                     <td>{Lang::T($ds['status'])}</td>
                                     <td>{Lang::dateTimeFormat($ds['created_at'])}</td>
                                     <td align="center">
-                                        <a href="{$_url}customers/view/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{Text::url('customers/view/')}{$ds['id']}" id="{$ds['id']}"
                                             style="margin: 0px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('View')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}customers/edit/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
-                                            style="margin: 0px; color:black"
+                                        <a href="{Text::url('customers/edit/', $ds['id'], '&token=', $csrf_token)}"
+                                            id="{$ds['id']}" style="margin: 0px; color:black"
                                             class="btn btn-info btn-xs">&nbsp;&nbsp;{Lang::T('Edit')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}customers/sync/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
-                                            style="margin: 5px; color:black"
+                                        <a href="{Text::url('customers/sync/', $ds['id'], '&token=', $csrf_token)}"
+                                            id="{$ds['id']}" style="margin: 5px; color:black"
                                             class="btn btn-success btn-xs">&nbsp;&nbsp;{Lang::T('Sync')}&nbsp;&nbsp;</a>
-                                        <a href="{$_url}plan/recharge/{$ds['id']}&token={$csrf_token}" id="{$ds['id']}"
+                                        <a href="{Text::url('plan/recharge/', $ds['id'], '&token=', $csrf_token)}" id="{$ds['id']}"
                                             style="margin: 0px;" class="btn btn-primary btn-xs">{Lang::T('Recharge')}</a>
                                     </td>
                                 </tr>

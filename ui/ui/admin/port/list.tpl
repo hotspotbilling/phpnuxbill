@@ -5,7 +5,7 @@
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
                 <div class="btn-group pull-right">
-                    <a class="btn btn-primary btn-xs" title="save" href="{$_url}pool/sync"
+                    <a class="btn btn-primary btn-xs" title="save" href="{Text::url('')}pool/sync"
                         onclick="return ask(this, 'This will sync/send IP port to Mikrotik?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>
@@ -14,7 +14,7 @@
             <div class="panel-body">
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
-                        <form id="site-search" method="post" action="{$_url}pool/port/">
+                        <form id="site-search" method="post" action="{Text::url('')}pool/port/">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <span class="fa fa-search"></span>
@@ -28,7 +28,7 @@
                         </form>
                     </div>
                     <div class="col-md-4">
-                        <a href="{$_url}pool/add-port" class="btn btn-primary btn-block"><i
+                        <a href="{Text::url('')}pool/add-port" class="btn btn-primary btn-block"><i
                                 class="ion ion-android-add"> </i> {Lang::T('New port')}</a>
                     </div>&nbsp;
                 </div>
@@ -52,8 +52,8 @@
                                     <td>{$ds['range_port']}</td>
                                     <td>{$ds['routers']}</td>
                                     <td align="center">
-                                        <a href="{$_url}pool/edit-port/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                        <a href="{$_url}pool/delete-port/{$ds['id']}" id="{$ds['id']}"
+                                        <a href="{Text::url('')}pool/edit-port/{$ds['id']}" class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
+                                        <a href="{Text::url('')}pool/delete-port/{$ds['id']}" id="{$ds['id']}"
                                             onclick="return ask(this, '{Lang::T('Delete')}?')"
                                             class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                     </td>
