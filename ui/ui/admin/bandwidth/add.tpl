@@ -5,7 +5,7 @@
 		<div class="panel panel-primary panel-hovered panel-stacked mb30">
 			<div class="panel-heading">{Lang::T('Add New Bandwidth')}</div>
 			<div class="panel-body">
-				<form class="form-horizontal" method="post" role="form" action="{$_url}bandwidth/add-post">
+				<form class="form-horizontal" method="post" role="form" action="{Text::url('bandwidth/add-post')}">
 					<div class="form-group">
 						<label class="col-md-3 control-label">{Lang::T('Bandwidth Name')}</label>
 						<div class="col-md-9">
@@ -70,7 +70,7 @@
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Bandwidth addition process?")}')" type="submit">{Lang::T('Save')}</button>
-							Or <a href="{$_url}bandwidth/list">{Lang::T('Cancel')}</a>
+							Or <a href="{Text::url('bandwidth/list')}">{Lang::T('Cancel')}</a>
 						</div>
 					</div>
 				</form>

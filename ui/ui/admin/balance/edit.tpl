@@ -5,7 +5,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Edit Service Package')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}services/balance-edit-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('services/balance-edit-post')}">
                     <input type="hidden" name="id" value="{$d['id']}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Status')}</label>
@@ -56,7 +56,7 @@
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
                             <button class="btn btn-success" onclick="return ask(this, '{Lang::T("Continue the process of changing the balance contents?")}')" type="submit">{Lang::T('Save Changes')}</button>
-                            Or <a href="{$_url}services/balance">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('services/balance')}">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

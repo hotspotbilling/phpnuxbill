@@ -6,7 +6,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Add Coupon')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}coupons/add-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('coupons/add-post')}">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
 
                     <!-- Coupon Code -->
@@ -16,7 +16,8 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" name="code" id="code" maxlength="50" required>
                                 <span class="input-group-btn">
-                                    <button type="button" class="btn btn-info btn-flat" onclick="generateRandomCode()">{Lang::T('Random')}</button>
+                                    <button type="button" class="btn btn-info btn-flat"
+                                        onclick="generateRandomCode()">{Lang::T('Random')}</button>
                                 </span>
                             </div>
                             <p class="help-block"><small>{Lang::T('Unique code for the coupon')}</small></p>
@@ -38,8 +39,11 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Discount Value')}</label>
                         <div class="col-md-6">
-                            <input type="number" class="form-control" name="value" id="value" step="0.01" placeholder="{Lang::T("Enter amoun")}" required>
-                            <p class="help-block"><small  id="value-help">{Lang::T('Value of the discount (amount or percentage)')}</small></p>
+                            <input type="number" class="form-control" name="value" id="value" step="0.01"
+                                placeholder="{Lang::T("Enter amoun")}" required>
+                            <p class="help-block"><small
+                                    id="value-help">{Lang::T('Value of the discount (amount or percentage)')}</small>
+                            </p>
                         </div>
                     </div>
 
@@ -56,8 +60,11 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Max Usage')}</label>
                         <div class="col-md-6">
-                            <input type="number" class="form-control" name="max_usage" value="0" required placeholder="0 is Unlimited">
-                            <p class="help-block"><small>{Lang::T('Maximum number of times this coupon can be used 0 is Unlimited')}</small></p>
+                            <input type="number" class="form-control" name="max_usage" value="0" required
+                                placeholder="0 is Unlimited">
+                            <p class="help-block">
+                                <small>{Lang::T('Maximum number of times this coupon can be used 0 is Unlimited')}</small>
+                            </p>
                         </div>
                     </div>
 
@@ -66,7 +73,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Minimum Order Amount')}</label>
                         <div class="col-md-6">
                             <input type="number" class="form-control" name="min_order_amount" step="0.01" required>
-                            <p class="help-block"><small>{Lang::T('Minimum cart total required to use this coupon')}</small></p>
+                            <p class="help-block">
+                                <small>{Lang::T('Minimum cart total required to use this coupon')}</small></p>
                         </div>
                     </div>
 
@@ -75,7 +83,8 @@
                         <label class="col-md-2 control-label">{Lang::T('Max Discount Amount')}</label>
                         <div class="col-md-6">
                             <input type="number" class="form-control" name="max_discount_amount" step="0.01">
-                            <p class="help-block"><small>{Lang::T('Maximum discount amount applicable (for percent type)')}</small></p>
+                            <p class="help-block">
+                                <small>{Lang::T('Maximum discount amount applicable (for percent type)')}</small></p>
                         </div>
                     </div>
 
@@ -114,7 +123,7 @@
                             <button class="btn btn-primary" type="submit">
                                 {Lang::T('Save')}
                             </button>
-                            Or <a href="{$_url}coupons/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('coupons/list')}">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>

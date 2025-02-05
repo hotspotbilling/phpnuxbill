@@ -8,7 +8,7 @@
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
             <div class="panel-heading">{Lang::T('Edit Coupon')}</div>
             <div class="panel-body">
-                <form class="form-horizontal" method="post" role="form" action="{$_url}coupons/edit-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('coupons/edit-post')}">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
 
                     <!-- Coupon Code -->
@@ -116,7 +116,7 @@
                             <button class="btn btn-primary" type="submit">
                                 {Lang::T('Save')}
                             </button>
-                            Or <a href="{$_url}coupons/list">{Lang::T('Cancel')}</a>
+                            Or <a href="{Text::url('coupons/list')}">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
                 </form>
