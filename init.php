@@ -42,7 +42,7 @@ spl_autoload_register('_autoloader');
 if (!file_exists($root_path . 'config.php')) {
     $root_path .= '..' . DIRECTORY_SEPARATOR;
     if (!file_exists($root_path . 'config.php')) {
-        r2(getUrl('install'));
+        r2('./install');
     }
 }
 
