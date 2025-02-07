@@ -29,7 +29,7 @@ class User
     public static function getTawkToHash($email)
     {
         global $config;
-        if (!empty($config['tawkto_api_key']) && !Empty($email)) {
+        if (!empty($config['tawkto_api_key']) && !empty($email)) {
             return hash_hmac('sha256', $email, $config['tawkto_api_key']);
         }
         return '';
@@ -169,11 +169,11 @@ class User
     public static function generateToken($uid, $validDays = 30)
     {
         global $db_pass;
-        if($validDays>=30){
+        if ($validDays >= 30) {
             $time = time();
-        }else{
+        } else {
             // for customer, deafult expired is 30 days
-            $time = strtotime('+ '.(30 - $validDays).' days');
+            $time = strtotime('+ ' . (30 - $validDays) . ' days');
         }
 
         return [
@@ -187,7 +187,7 @@ class User
         global $db_pass;
         if (isset($uid)) {
             $token = self::generateToken($uid);
-            setcookie('uid', $token['token'], time() + 86400 * 30);
+            setcookie('uid', $token['token'], time() + 86400 * 30, "/");
             return $token;
         } else {
             return false;
@@ -197,7 +197,7 @@ class User
     public static function removeCookie()
     {
         if (isset($_COOKIE['uid'])) {
-            setcookie('uid', '', time() - 86400);
+            setcookie('uid', '', time() - 86400, "/");
         }
     }
 
@@ -277,41 +277,43 @@ class User
         return $d;
     }
 
-    public static function setFormCustomField($uid = 0){
+    public static function setFormCustomField($uid = 0)
+    {
         global $UPLOAD_PATH;
         $fieldPath = $UPLOAD_PATH . DIRECTORY_SEPARATOR . "customer_field.json";
-        if(!file_exists($fieldPath)){
+        if (!file_exists($fieldPath)) {
             return '';
         }
         $fields = json_decode(file_get_contents($fieldPath), true);
-        foreach($fields as $field){
-            if(!empty(_post($field['name']))){
+        foreach ($fields as $field) {
+            if (!empty(_post($field['name']))) {
                 self::setAttribute($field['name'], _post($field['name']), $uid);
             }
         }
     }
 
-    public static function getFormCustomField($ui, $register = false, $uid = 0){
+    public static function getFormCustomField($ui, $register = false, $uid = 0)
+    {
         global $UPLOAD_PATH;
         $fieldPath = $UPLOAD_PATH . DIRECTORY_SEPARATOR . "customer_field.json";
-        if(!file_exists($fieldPath)){
+        if (!file_exists($fieldPath)) {
             return '';
         }
         $fields = json_decode(file_get_contents($fieldPath), true);
         $attrs = [];
-        if(!$register){
+        if (!$register) {
             $attrs = self::getAttributes('', $uid);
             $ui->assign('attrs', $attrs);
         }
         $html = '';
         $ui->assign('register', $register);
-        foreach($fields as $field){
-            if($register){
-                if($field['register']){
+        foreach ($fields as $field) {
+            if ($register) {
+                if ($field['register']) {
                     $ui->assign('field', $field);
                     $html .= $ui->fetch('customer/custom_field.tpl');
                 }
-            }else{
+            } else {
                 $ui->assign('field', $field);
                 $html .= $ui->fetch('customer/custom_field.tpl');
             }
