@@ -5,9 +5,13 @@
  **/
 
 if(Admin::getID()){
-    r2(getUrl('dashboard'));
-}if(User::getID()){
-    r2(getUrl('home'));
+    //r2(getUrl('dashboard'));
+    $handler = 'dashboard';
+}else if(User::getID()){
+    //r2(getUrl('home'));
+    $handler = 'home';
 }else{
-    r2(getUrl('login'));
+    //r2(getUrl('login'));
+    $handler = 'login';
 }
+include($root_path . File::pathFixer('system/controllers/' . $handler . '.php'));
