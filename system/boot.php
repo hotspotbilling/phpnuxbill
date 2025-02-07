@@ -67,21 +67,25 @@ if (isset($_SESSION['notify'])) {
     unset($_SESSION['ntype']);
 }
 
-if(!isset($_GET['_route'])) {
-    $req = ltrim(parse_url($_SERVER['REQUEST_URI'])['path'], '/');
-}else{
+if (!isset($_GET['_route'])) {
+    $req = ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    $len = strlen(ltrim(parse_url(APP_URL, PHP_URL_PATH), '/'));
+    if ($len > 0) {
+        $req = ltrim(substr($req, $len), '/');
+    }
+} else {
     // Routing Engine
     $req = _get('_route');
 }
+
 $routes = explode('/', $req);
 $ui->assign('_routes', $routes);
 $handler = $routes[0];
 if ($handler == '') {
     $handler = 'default';
 }
-
 try {
-    if(!empty($_GET['uid'])){
+    if (!empty($_GET['uid'])) {
         $_COOKIE['uid'] = $_GET['uid'];
     }
     $admin = Admin::_info();
@@ -137,7 +141,8 @@ try {
             $e->getTraceAsString()
     );
     if (empty($_SESSION['aid'])) {
-        $ui->display('customer/error.tpl'); die();
+        $ui->display('customer/error.tpl');
+        die();
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
@@ -150,7 +155,8 @@ try {
             $e->getTraceAsString()
     );
     if (empty($_SESSION['aid'])) {
-        $ui->display('customer/error.tpl'); die();
+        $ui->display('customer/error.tpl');
+        die();
     }
     $ui->assign("error_message", $e->getMessage() . '<br><pre>' . $e->getTraceAsString() . '</pre>');
     $ui->assign("error_title", "PHPNuxBill Crash");
