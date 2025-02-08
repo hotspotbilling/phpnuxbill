@@ -410,6 +410,10 @@ switch ($action) {
         if ($router['name'] != 'balance') {
             list($bills, $add_cost) = User::getBills($id_customer);
         }
+		$add_inv = User::getAttribute("Invoice", $id_customer);
+		if (!empty($add_inv)) {
+			$plan['price'] = $add_inv;
+		}
 
         if($config['enable_coupons']){
             if (!isset($_SESSION['coupon_attempts'])) {
