@@ -176,6 +176,10 @@ switch ($action) {
             $channel = $admin['fullname'];
             $cust = User::_info($id_customer);
             $plan = ORM::for_table('tbl_plans')->find_one($b['plan_id']);
+			$add_inv = User::getAttribute("Invoice", $id_customer);
+			if (!empty($add_inv)) {
+				$plan['price'] = $add_inv;
+			}
             $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
             $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
             $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
@@ -224,6 +228,7 @@ switch ($action) {
             $ui->assign('channel', $channel);
             $ui->assign('server', $b['routers']);
             $ui->assign('plan', $plan);
+			$ui->assign('add_inv', $add_inv);
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('admin/plan/recharge-confirm.tpl');
         } else {

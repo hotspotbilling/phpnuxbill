@@ -107,6 +107,10 @@ switch ($action) {
             $cust = User::_info($id_customer);
             $plan = ORM::for_table('tbl_plans')->find_one($planId);
             list($bills, $add_cost) = User::getBills($id_customer);
+			$add_inv = User::getAttribute("Invoice", $id_customer);
+			if (!empty($add_inv)) {
+				$plan['price'] = $add_inv;
+			}
 
             // Tax calculation start
             $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
@@ -160,6 +164,7 @@ switch ($action) {
             $ui->assign('server', $server);
             $ui->assign('using', $using);
             $ui->assign('plan', $plan);
+			$ui->assign('add_inv', $add_inv);
             $ui->display('admin/plan/recharge-confirm.tpl');
         } else {
             r2(getUrl('plan/recharge'), 'e', $msg);
