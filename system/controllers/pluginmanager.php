@@ -38,7 +38,7 @@ switch ($action) {
         r2(getUrl('pluginmanager'), 's', 'Refresh success');
         break;
     case 'dlinstall':
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             r2(getUrl('pluginmanager'), 'e', 'Demo Mode cannot install as it Security risk');
         }
         if (!is_writeable($CACHE_PATH)) {
