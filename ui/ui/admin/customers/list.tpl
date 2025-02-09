@@ -245,7 +245,7 @@
             if (selectedCustomerIds.length === 0) {
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Please select at least one customer to send a message.',
+                    text: "{Lang::T('Please select at least one customer to send a message.')}",
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
@@ -264,7 +264,7 @@
             if (!message) {
                 Swal.fire({
                     title: 'Error!',
-                    text: 'Please enter a message to send.',
+                    text: "{Lang::T('Please enter a message to send.')}",
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
@@ -272,7 +272,7 @@
             }
 
             // Disable the button and show loading text
-            $(this).prop('disabled', true).text('Sending...');
+            $(this).prop('disabled', true).text('{Lang::T('Sending...')}');
 
             $.ajax({
                 url: '?_route=message/send_bulk_selected',
@@ -288,14 +288,14 @@
                     if (response.status === 'success') {
                         Swal.fire({
                             title: 'Success!',
-                            text: 'Message sent successfully.',
+                            text: "{Lang::T('Message sent successfully.')}",
                             icon: 'success',
                             confirmButtonText: 'OK'
                         });
                     } else {
                         Swal.fire({
                             title: 'Error!',
-                            text: 'Error sending message: ' + response.message,
+                            text: "{Lang::T('Error sending message: ')}" + response.message,
                             icon: 'error',
                             confirmButtonText: 'OK'
                         });
@@ -306,7 +306,7 @@
                 error: function () {
                     Swal.fire({
                         title: 'Error!',
-                        text: 'Failed to send the message. Please try again.',
+                        text: "{Lang::T('Failed to send the message. Please try again.')}",
                         icon: 'error',
                         confirmButtonText: 'OK'
                     });
