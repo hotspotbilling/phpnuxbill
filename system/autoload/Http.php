@@ -14,14 +14,14 @@
 
 class Http
 {
-    public static function getData($url, $headers = [])
+    public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 3000)
     {
         global $http_proxy, $http_proxyauth, $admin;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 0);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 100);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 100);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $wait_timeout);
         if (is_array($headers) && count($headers) > 0) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
@@ -49,15 +49,15 @@ class Http
         return (!empty($server_output)) ? $server_output : $error_msg;
     }
 
-    public static function postJsonData($url, $array_post, $headers = [], $basic = null)
+    public static function postJsonData($url, $array_post, $headers = [], $basic = null, $connect_timeout = 3000, $wait_timeout = 3000)
     {
         global $http_proxy, $http_proxyauth, $admin;
         $headers[] = 'Content-Type: application/json';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 100);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 100);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $wait_timeout);
         curl_setopt($ch, CURLOPT_VERBOSE, false);
         curl_setopt($ch, CURLINFO_HEADER_OUT, false);
         if (!empty($http_proxy)) {
@@ -92,15 +92,15 @@ class Http
     }
 
 
-    public static function postData($url, $array_post, $headers = [], $basic = null)
+    public static function postData($url, $array_post, $headers = [], $basic = null, $connect_timeout = 3000, $wait_timeout = 3000)
     {
         global $http_proxy, $http_proxyauth, $admin;
         $headers[] = 'Content-Type: application/x-www-form-urlencoded';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 100);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 100);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $connect_timeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $wait_timeout);
         curl_setopt($ch, CURLOPT_VERBOSE, false);
         curl_setopt($ch, CURLINFO_HEADER_OUT, false);
         if (!empty($http_proxy)) {
