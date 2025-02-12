@@ -1,5 +1,6 @@
 {include file="sections/header.tpl"}
 
+<img src="/asdsad/asdasd/asdasd">
 <div class="row">
     {if in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
         <div class="col-lg-3 col-xs-6">

@@ -128,11 +128,15 @@ try {
         unset($menus, $menu_registered);
         include($sys_render);
     } else {
-        // header 404
-        header("HTTP/1.0 404 Not Found");
-        header("Content-Type: text/html; charset=utf-8");
-        echo "404 Not Found";
-        die();
+        if( empty($_SERVER["HTTP_SEC_FETCH_DEST"]) || $_SERVER["HTTP_SEC_FETCH_DEST"] != 'document' ){
+            // header 404
+            header("HTTP/1.0 404 Not Found");
+            header("Content-Type: text/html; charset=utf-8");
+            echo "404 Not Found";
+            die();
+        }else{
+            r2(getUrl('login'));
+        }
     }
 } catch (Throwable $e) {
     Message::sendTelegram(
