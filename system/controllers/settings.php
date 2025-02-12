@@ -216,6 +216,16 @@ switch ($action) {
             $_POST['man_fields_custom'] = isset($_POST['man_fields_custom']) ? 'yes' : 'no';
             $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
             $_POST['enable_session_timeout'] = $enable_session_timeout;
+
+            // hide dashboard
+            $_POST['hide_mrc'] = _post('hide_mrc', 'no');
+            $_POST['hide_tms'] = _post('hide_tms', 'no');
+            $_POST['hide_al'] = _post('hide_al', 'no');
+            $_POST['hide_uet'] = _post('hide_uet', 'no');
+            $_POST['hide_vs'] = _post('hide_vs', 'no');
+            $_POST['hide_pg'] = _post('hide_pg', 'no');
+            $_POST['hide_aui'] = _post('hide_aui', 'no');
+
             foreach ($_POST as $key => $value) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
