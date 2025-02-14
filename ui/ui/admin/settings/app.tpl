@@ -23,7 +23,7 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Application Name / Company Name')}</label>
                     <div class="col-md-5">
-                        <input type="text" required class="form-control" id="CompanyName" name="CompanyName"
+                        <input type="text" class="form-control" id="CompanyName" name="CompanyName"
                             value="{$_c['CompanyName']}">
                     </div>
                     <span class="help-block col-md-4">{Lang::T('This Name will be shown on the Title')}</span>
@@ -42,7 +42,7 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Company Footer')}</label>
                     <div class="col-md-5">
-                        <input type="text" required class="form-control" id="CompanyFooter" name="CompanyFooter"
+                        <input type="text" class="form-control" id="CompanyFooter" name="CompanyFooter"
                             value="{$_c['CompanyFooter']}">
                     </div>
                     <span class="help-block col-md-4">{Lang::T('Will show below user pages')}</span>
@@ -215,7 +215,7 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Page Heading / Company Name')}</label>
                         <div class="col-md-5">
-                            <input type="text" required class="form-control" id="login_page_head" name="login_page_head"
+                            <input type="text" class="form-control" id="login_page_head" name="login_page_head"
                                 value="{$_c['login_page_head']}">
                         </div>
                         <span
