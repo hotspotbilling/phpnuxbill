@@ -277,6 +277,18 @@ CREATE TABLE IF NOT EXISTS  `tbl_coupons` (
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `tbl_widgets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `orders` int NOT NULL DEFAULT '99',
+  `position` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1. top 2. left 3. right 4. bottom',
+  `enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `title` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `widget` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `content` text COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+COMMIT;
+
 ALTER TABLE `rad_acct`
   ADD PRIMARY KEY (`id`),
   ADD KEY `username` (`username`),

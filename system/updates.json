@@ -182,10 +182,13 @@
     "2024.12.16": [
         "CREATE TABLE `tbl_coupons` ( `id` INT AUTO_INCREMENT PRIMARY KEY, `code` VARCHAR(50) NOT NULL UNIQUE, `type` ENUM('fixed', 'percent') NOT NULL, `value` DECIMAL(10,2) NOT NULL, `description` TEXT NOT NULL, `max_usage` INT NOT NULL DEFAULT 1,`usage_count` INT NOT NULL DEFAULT 0,`status` ENUM('active', 'inactive') NOT NULL, `min_order_amount` DECIMAL(10,2) NOT NULL, `max_discount_amount` DECIMAL(10,2) NOT NULL, `start_date` DATE NOT NULL,`end_date` DATE NOT NULL, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);"
     ],
-	"2024.12.20": [
+    "2024.12.20": [
         "ALTER TABLE `tbl_voucher` ADD `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `status`;"
     ],
-	"2025.1.23": [
+    "2025.1.23": [
         "ALTER TABLE `rad_acct` ADD `acctsessiontime` BIGINT(12) NOT NULL DEFAULT '0' AFTER `framedipaddress`;"
+    ],
+    "2025.2.14": [
+        "CREATE TABLE IF NOT EXISTS `tbl_widgets` ( `id` int NOT NULL AUTO_INCREMENT, `orders` int NOT NULL DEFAULT '99', `position` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1. top 2. left 3. right 4. bottom',`enabled` tinyint(1) NOT NULL DEFAULT '1', `title` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, `widget` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `content` text COLLATE utf8mb4_general_ci NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
     ]
 }
