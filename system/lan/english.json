@@ -1027,5 +1027,12 @@
     "Back_to_Dashboard": "Back to Dashboard",
     "Continue_the_VPN_creation_process_": "Continue the VPN creation process?",
     "VPN": "VPN",
-    "Go_Back": "Go Back"
+    "Go_Back": "Go Back",
+    "Widgets": "Widgets",
+    "Order": "Order",
+    "Position": "Position",
+    "Widget": "Widget",
+    "Contents": "Contents",
+    "Please_enter_a_search_term_": "Please enter a search term.",
+    "Customers_Expired__Today": "Customers Expired, Today"
 }

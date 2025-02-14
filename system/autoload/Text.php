@@ -132,6 +132,14 @@ class Text
         }
     }
 
+    public static function fixUrl($url){
+        //if url dont have ? then add it with replace first & to ?
+        if(strpos($url, '?') === false && strpos($url, '&')!== false){
+            return substr($url, 0, strpos($url, '&')). '?'. substr($url, strpos($url, '&')+1);
+        }
+        return $url;
+    }
+
     // this will return & or ?
     public static function isQA(){
         global $config;

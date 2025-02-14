@@ -19,6 +19,7 @@ class Paginator
             $url .= '&' . http_build_query($search);
         }
         $url .= $append_url.'&p=';
+        $url = Text::fixUrl($url);
         $totalReq = $query->count();
         $lastpage = ceil($totalReq / $per_page);
         $lpm1 = $lastpage - 1;

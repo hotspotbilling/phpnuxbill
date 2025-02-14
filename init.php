@@ -56,6 +56,7 @@ $UPLOAD_PATH = $root_path . File::pathFixer('system/uploads');
 $CACHE_PATH = $root_path . File::pathFixer('system/cache');
 $PAGES_PATH = $root_path . File::pathFixer('pages');
 $PLUGIN_PATH = $root_path . File::pathFixer('system/plugin');
+$WIDGET_PATH = $root_path . File::pathFixer('system/widgets');
 $PAYMENTGATEWAY_PATH = $root_path . File::pathFixer('system/paymentgateway');
 $UI_PATH = 'ui';
 
