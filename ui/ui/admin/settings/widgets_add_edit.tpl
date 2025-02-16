@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
             <div class="panel panel-info">
-                <div class="panel-heading">{if $do == 'add'}{Lang::T('Add')}{else}{Lang::T('Edit')}{/if} Widget</div>
+                <div class="panel-heading">{if $do == 'add'}{Lang::T('Tambah')}{else}{Lang::T('Edit')}{/if} Widget</div>
                 <div class="panel-body">
                     <input type="hidden" class="form-control" required id="id" name="id" value="{$widget['id']}">
                     <div class="form-group">
@@ -16,7 +16,7 @@
                         <span class="help-block col-md-4">&nbsp;</span>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Order')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Sequence')}</label>
                         <div class="col-md-5">
                             <input type="number" class="form-control" id="orders" name="orders"
                                 value="{if empty($widget['orders'])}99{else}{$widget['orders']}{/if}">
@@ -29,7 +29,8 @@
                             <select name="position" id="position" class="form-control">
                                 {for $pos=1 to 4}
                                     <option value="{$pos}" {if $widget['position'] eq $pos}selected="selected" {/if}>
-                                        Area {$pos}</option>
+                                        Area {$pos}
+                                    </option>
                                 {/for}
                             </select>
                         </div>
@@ -49,26 +50,24 @@
                         <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Enabled')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Status')}</label>
                         <div class="col-md-5">
                             <select name="enabled" id="enabled" class="form-control">
                                 <option value="1" {if $widget['enabled'] neq 1}selected="selected" {/if}>
-                                    {Lang::T('Active')}</option>
+                                    {Lang::T('Active')}
+                                </option>
                                 <option value="0" {if $widget['enabled'] eq 0}selected="selected" {/if}>
-                                    {Lang::T('Inactive')}</option>
-                                <option value="1" {if $widget['enabled'] neq 1}selected="selected" {/if}>
-                                    {Lang::T('Active')}</option>
+                                    {Lang::T('Not Active')}
+                                </option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Contents')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Content')}</label>
                         <div class="col-md-9">
-                            <textarea name="content" rows="5" id="content"
-                                class="form-control">{$widget['content']}</textarea>
-                            <p class="help-block">Not All Widget need contents, HTML widget need content, it can be text
-                                or PHP Code, be careful</p>
+                            <textarea name="content" rows="5" id="content" class="form-control">{$widget['content']}</textarea>
+                            <p class="help-block">{Lang::T("Not all widgets require content. HTML widgets require content, either text or PHP code. Please be careful when writing this content.")}</p>
                         </div>
                     </div>
                 </div>
@@ -83,7 +82,7 @@
             </div>
             {if $do == 'edit'}
                 <a href="{Text::url('widgets/delete/', $widget['id'])}" class="btn btn-danger btn-xs"
-                    onclick="return ask(this, 'Delete this widget?')">{Lang::T('Delete')}</a>
+                    onclick="return ask(this, 'Remove this widget?')">{Lang::T('Delete')}</a>
             {/if}
         </div>
     </div>
