@@ -19,11 +19,11 @@
                 <form method="post" role="form" action="{Text::url('voucher/activation-post')}">
                     <div class="form-group">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="code" name="code" value="{$code}"
+                            <input type="text" class="form-control" id="code" name="code" value="{$code|escape:'html'}"
                                 placeholder="{Lang::T('Enter voucher code here')}">
                             <span class="input-group-btn">
                                 <a class="btn btn-default"
-                                    href="{$app_url}/scan/?back={urlencode(Text::url('voucher/activation&code='))}"><i
+                                    href="{$app_url|escape:'html'}/scan/?back={urlencode(Text::url('voucher/activation&code='))}"><i
                                         class="glyphicon glyphicon-qrcode"></i></a>
                             </span>
                         </div>
