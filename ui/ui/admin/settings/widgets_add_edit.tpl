@@ -8,6 +8,19 @@
                 <div class="panel-body">
                     <input type="hidden" class="form-control" required id="id" name="id" value="{$widget['id']}">
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Widget')}</label>
+                        <div class="col-md-5">
+                            <select name="widget" id="widget" class="form-control" onchange="changeTitle(this)">
+                                {foreach $widgets as $k => $v}
+                                    <option value="{$k}" {if $widget['widget'] eq $k}selected="selected" {/if}>
+                                        {$v}
+                                    </option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">&nbsp;</p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Title')}</label>
                         <div class="col-md-5">
                             <input type="text" class="form-control" required id="title" name="title"
@@ -19,7 +32,7 @@
                         <label class="col-md-3 control-label">{Lang::T('Sequence')}</label>
                         <div class="col-md-5">
                             <input type="number" class="form-control" id="orders" name="orders"
-                                value="{if empty($widget['orders'])}99{else}{$widget['orders']}{/if}">
+                                value="{if $widget['orders']>0}{$widget['orders']}{else}99{/if}">
                         </div>
                         <span class="help-block col-md-4">&nbsp;</span>
                     </div>
@@ -37,26 +50,13 @@
                         <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Widget')}</label>
-                        <div class="col-md-5">
-                            <select name="widget" id="widget" class="form-control">
-                                {foreach $widgets as $k => $v}
-                                    <option value="{$k}" {if $widget['widget'] eq $k}selected="selected" {/if}>
-                                        {$v}
-                                    </option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <p class="help-block col-md-4">&nbsp;</p>
-                    </div>
-                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Status')}</label>
                         <div class="col-md-5">
                             <select name="enabled" id="enabled" class="form-control">
-                                <option value="1" {if $widget['enabled'] neq 1}selected="selected" {/if}>
+                                <option value="1" {if isset($widget['enabled']) && $widget['enabled'] neq 1}selected="selected" {/if}>
                                     {Lang::T('Active')}
                                 </option>
-                                <option value="0" {if $widget['enabled'] eq 0}selected="selected" {/if}>
+                                <option value="0" {if isset($widget['enabled']) && $widget['enabled'] eq 0}selected="selected" {/if}>
                                     {Lang::T('Not Active')}
                                 </option>
                             </select>
@@ -87,5 +87,12 @@
         </div>
     </div>
 </form>
+
+<script>
+    function changeTitle(sel){
+        var name = sel.options[sel.selectedIndex].text;
+        document.getElementById('title').value = name;
+    }
+</script>
 
 {include file="sections/footer.tpl"}

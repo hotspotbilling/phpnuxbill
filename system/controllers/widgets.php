@@ -95,6 +95,14 @@ if ($action == 'add') {
     } catch (Throwable $e) {
         //nothing to do
     }
+} else if ($action == 'pos') {
+    $jml = count($_POST['orders']);
+    for ($i = 0; $i < $jml; $i++) {
+        $d = ORM::for_table('tbl_widgets')->find_one($_POST['id'][$i]);
+        $d->orders = $_POST['orders'][$i];
+        $d->save();
+    }
+    r2(getUrl('widgets'), 's', 'Widget order Saved Successfully');
 } else {
     $widgets = ORM::for_table('tbl_widgets')->selects("position", 1)->order_by_asc("orders")->find_many();
     $ui->assign('widgets', $widgets);

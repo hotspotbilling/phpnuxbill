@@ -15,7 +15,7 @@
                                     <td>
                                         <div class="input-group">
                                             <span class="input-group-addon">{Lang::T("Sequence")}</span>
-                                            <input type="number" style="width: 100px;" name="orders[]" value="{$w['id']}"
+                                            <input type="number" style="width: 100px;" name="orders[]" value="{$w['orders']}"
                                                 class="form-control" placeholder="orders">
                                         </div>
                                         <input type="hidden" name="id[]" value="{$w['id']}">
@@ -48,20 +48,16 @@
 {/function}
 
 <div class="row">
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-6 col-lg-4">
         {showWidget widgets=$widgets pos=1}
     </div>
-</div>
-<div class="row">
-    <div class="col-md-7 border">
+    <div class="col-md-6 col-lg-4">
         {showWidget widgets=$widgets pos=2}
     </div>
-    <div class="col-md-5 border">
+    <div class="col-md-6 col-lg-4">
         {showWidget widgets=$widgets pos=3}
     </div>
-</div>
-<div class="row">
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-6 col-lg-4">
         {showWidget widgets=$widgets pos=4}
     </div>
 </div>
