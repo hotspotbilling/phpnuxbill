@@ -1034,5 +1034,11 @@
     "Widget": "Widget",
     "Contents": "Contents",
     "Please_enter_a_search_term_": "Please enter a search term.",
-    "Customers_Expired__Today": "Customers Expired, Today"
+    "Customers_Expired__Today": "Customers Expired, Today",
+    "Sequence": "Sequence",
+    "Content": "Content",
+    "Not_all_widgets_require_content__HTML_widgets_require_content__either_text_or_PHP_code__Please_be_careful_when_writing_this_content_": "Not all widgets require content. HTML widgets require content, either text or PHP code. Please be careful when writing this content.",
+    "Area_Fields": "Area Fields",
+    "Add_new_widget": "Add new widget",
+    "Tambah": "Tambah"
 }
