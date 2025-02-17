@@ -33,13 +33,19 @@ if (date("d") >= $reset_day) {
 }
 
 $current_date = date('Y-m-d');
+$ui->assign('start_date', $start_date);
+$ui->assign('current_date', $current_date);
 
 $widgets = ORM::for_table('tbl_widgets')->selects("enabled", 1)->order_by_asc("orders")->findArray();
 $count = count($widgets);
 for ($i = 0; $i < $count; $i++) {
     try{
-        require_once $WIDGET_PATH . DIRECTORY_SEPARATOR . $widgets[$i]['widget'].".php";
-        $widgets[$i]['content'] = (new $widgets[$i]['widget'])->getWidget($widgets[$i]);;
+        if(file_exists($WIDGET_PATH . DIRECTORY_SEPARATOR . $widgets[$i]['widget'].".php")){
+            require_once $WIDGET_PATH . DIRECTORY_SEPARATOR . $widgets[$i]['widget'].".php";
+            $widgets[$i]['content'] = (new $widgets[$i]['widget'])->getWidget($widgets[$i]);
+        }else{
+            $widgets[$i]['content'] = "Widget not found";
+        }
     } catch (Throwable $e) {
         $widgets[$i]['content'] = $e->getMessage();
     }
@@ -48,138 +54,3 @@ for ($i = 0; $i < $count; $i++) {
 $ui->assign('widgets', $widgets);
 run_hook('view_dashboard'); #HOOK
 $ui->display('admin/dashboard_widget.tpl');
-die();
-
-//activity log
-$dlog = ORM::for_table('tbl_logs')->limit(5)->order_by_desc('id')->find_many();
-$ui->assign('dlog', $dlog);
-$log = ORM::for_table('tbl_logs')->count();
-$ui->assign('log', $log);
-
-
-if ($config['hide_vs'] != 'yes') {
-    $cacheStocksfile = $CACHE_PATH . File::pathFixer('/VoucherStocks.temp');
-    $cachePlanfile = $CACHE_PATH . File::pathFixer('/VoucherPlans.temp');
-    //Cache for 5 minutes
-    if (file_exists($cacheStocksfile) && time() - filemtime($cacheStocksfile) < 600) {
-        $stocks = json_decode(file_get_contents($cacheStocksfile), true);
-        $plans = json_decode(file_get_contents($cachePlanfile), true);
-    } else {
-        // Count stock
-        $tmp = $v = ORM::for_table('tbl_plans')->select('id')->select('name_plan')->find_many();
-        $plans = array();
-        $stocks = array("used" => 0, "unused" => 0);
-        $n = 0;
-        foreach ($tmp as $plan) {
-            $unused = ORM::for_table('tbl_voucher')
-                ->where('id_plan', $plan['id'])
-                ->where('status', 0)->count();
-            $used = ORM::for_table('tbl_voucher')
-                ->where('id_plan', $plan['id'])
-                ->where('status', 1)->count();
-            if ($unused > 0 || $used > 0) {
-                $plans[$n]['name_plan'] = $plan['name_plan'];
-                $plans[$n]['unused'] = $unused;
-                $plans[$n]['used'] = $used;
-                $stocks["unused"] += $unused;
-                $stocks["used"] += $used;
-                $n++;
-            }
-        }
-        file_put_contents($cacheStocksfile, json_encode($stocks));
-        file_put_contents($cachePlanfile, json_encode($plans));
-    }
-}
-
-$cacheMRfile = File::pathFixer('/monthlyRegistered.temp');
-//Cache for 1 hour
-if (file_exists($cacheMRfile) && time() - filemtime($cacheMRfile) < 3600) {
-    $monthlyRegistered = json_decode(file_get_contents($cacheMRfile), true);
-} else {
-    //Monthly Registered Customers
-    $result = ORM::for_table('tbl_customers')
-        ->select_expr('MONTH(created_at)', 'month')
-        ->select_expr('COUNT(*)', 'count')
-        ->where_raw('YEAR(created_at) = YEAR(NOW())')
-        ->group_by_expr('MONTH(created_at)')
-        ->find_many();
-
-    $monthlyRegistered = [];
-    foreach ($result as $row) {
-        $monthlyRegistered[] = [
-            'date' => $row->month,
-            'count' => $row->count
-        ];
-    }
-    file_put_contents($cacheMRfile, json_encode($monthlyRegistered));
-}
-
-$cacheMSfile = $CACHE_PATH . File::pathFixer('/monthlySales.temp');
-//Cache for 12 hours
-if (file_exists($cacheMSfile) && time() - filemtime($cacheMSfile) < 43200) {
-    $monthlySales = json_decode(file_get_contents($cacheMSfile), true);
-} else {
-    // Query to retrieve monthly data
-    $results = ORM::for_table('tbl_transactions')
-        ->select_expr('MONTH(recharged_on)', 'month')
-        ->select_expr('SUM(price)', 'total')
-        ->where_raw("YEAR(recharged_on) = YEAR(CURRENT_DATE())") // Filter by the current year
-        ->where_not_equal('method', 'Customer - Balance')
-        ->where_not_equal('method', 'Recharge Balance - Administrator')
-        ->group_by_expr('MONTH(recharged_on)')
-        ->find_many();
-
-    // Create an array to hold the monthly sales data
-    $monthlySales = array();
-
-    // Iterate over the results and populate the array
-    foreach ($results as $result) {
-        $month = $result->month;
-        $totalSales = $result->total;
-
-        $monthlySales[$month] = array(
-            'month' => $month,
-            'totalSales' => $totalSales
-        );
-    }
-
-    // Fill in missing months with zero sales
-    for ($month = 1; $month <= 12; $month++) {
-        if (!isset($monthlySales[$month])) {
-            $monthlySales[$month] = array(
-                'month' => $month,
-                'totalSales' => 0
-            );
-        }
-    }
-
-    // Sort the array by month
-    ksort($monthlySales);
-
-    // Reindex the array
-    $monthlySales = array_values($monthlySales);
-    file_put_contents($cacheMSfile, json_encode($monthlySales));
-}
-
-if ($config['router_check']) {
-    $routeroffs = ORM::for_table('tbl_routers')->selects(['id', 'name', 'last_seen'])->where('status', 'Offline')->where('enabled', '1')->order_by_desc('name')->find_array();
-    $ui->assign('routeroffs', $routeroffs);
-}
-
-$timestampFile = "$UPLOAD_PATH/cron_last_run.txt";
-if (file_exists($timestampFile)) {
-    $lastRunTime = file_get_contents($timestampFile);
-    $ui->assign('run_date', date('Y-m-d h:i:s A', $lastRunTime));
-}
-
-// Assign the monthly sales data to Smarty
-$ui->assign('start_date', $start_date);
-$ui->assign('current_date', $current_date);
-$ui->assign('monthlySales', $monthlySales);
-$ui->assign('xfooter', '');
-$ui->assign('monthlyRegistered', $monthlyRegistered);
-$ui->assign('stocks', $stocks);
-$ui->assign('plans', $plans);
-
-run_hook('view_dashboard'); #HOOK
-$ui->display('admin/dashboard.tpl');

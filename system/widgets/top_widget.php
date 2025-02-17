@@ -5,7 +5,7 @@ class top_widget
 {
     public function getWidget()
     {
-        global $config, $ui, $current_date, $start_date;
+        global $ui, $current_date, $start_date;
 
         $iday = ORM::for_table('tbl_transactions')
             ->where('recharged_on', $current_date)
@@ -27,11 +27,6 @@ class top_widget
             $imonth = '0.00';
         }
         $ui->assign('imonth', $imonth);
-
-        if ($config['enable_balance'] == 'yes') {
-            $cb = ORM::for_table('tbl_customers')->whereGte('balance', 0)->sum('balance');
-            $ui->assign('cb', $cb);
-        }
 
         $u_act = ORM::for_table('tbl_user_recharges')->where('status', 'on')->count();
         if (empty($u_act)) {
