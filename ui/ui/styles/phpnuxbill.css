@@ -229,7 +229,7 @@ body {
 
 .panel-footer {
     padding: 10px 15px;
-    background-color: inherit;
+    background-color: #f6f8fa;
     border-top: 1px solid transparent;
     border-bottom-right-radius: 25px;
     border-bottom-left-radius: 25px;
