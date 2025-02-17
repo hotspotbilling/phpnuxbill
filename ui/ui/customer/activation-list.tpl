@@ -21,15 +21,14 @@
                         </thead>
                         <tbody>
                             {foreach $d as $ds}
-                                <tr onclick="window.location.href = '{Text::url('voucher/invoice/')}{$ds['id']}'"
-                                    style="cursor: pointer;">
-                                    <td>{$ds['invoice']}</td>
-                                    <td>{$ds['plan_name']}</td>
-                                    <td>{Lang::moneyFormat($ds['price'])}</td>
-                                    <td>{$ds['type']}</td>
-                                    <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
-                                    <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
-                                    <td>{$ds['method']}</td>
+                                <tr onclick="window.location.href = '{Text::url('voucher/invoice/')}{$ds.id|escape:'html'}'" style="cursor: pointer;">
+                                    <td>{$ds.invoice|escape:'html'}</td>
+                                    <td>{$ds.plan_name|escape:'html'}</td>
+                                    <td>{Lang::moneyFormat($ds.price)}</td>
+                                    <td>{$ds.type|escape:'html'}</td>
+                                    <td>{Lang::dateAndTimeFormat($ds.recharged_on, $ds.recharged_time)}</td>
+                                    <td>{Lang::dateAndTimeFormat($ds.expiration, $ds.time)}</td>
+                                    <td>{$ds.method|escape:'html'}</td>
                                 </tr>
                             {/foreach}
                         </tbody>
@@ -40,6 +39,5 @@
         </div>
     </div>
 </div>
-
 
 {include file="customer/footer.tpl"}
