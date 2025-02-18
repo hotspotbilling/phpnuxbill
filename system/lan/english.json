@@ -1049,5 +1049,8 @@
     "Sending___": "Sending...",
     "Message_sent_successfully_": "Message sent successfully.",
     "Error_sending_message__": "Error sending message: ",
-    "Failed_to_send_the_message__Please_try_again_": "Failed to send the message. Please try again."
+    "Failed_to_send_the_message__Please_try_again_": "Failed to send the message. Please try again.",
+    "Dashboard_Structure": "Dashboard Structure",
+    "Read_documentation": "Read documentation",
+    "Structure": "Structure"
 }

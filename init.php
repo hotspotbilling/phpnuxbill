@@ -112,6 +112,11 @@ $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
+
+if(empty($config['dashboard_cr'])){
+    $config['dashboard_cr'] = "12.7,5.12";
+}
+
 $_c =  $config;
 if (empty($http_proxy) && !empty($config['http_proxy'])) {
     $http_proxy = $config['http_proxy'];

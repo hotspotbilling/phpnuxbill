@@ -40,7 +40,7 @@
                         <label class="col-md-3 control-label">{Lang::T('Position')}</label>
                         <div class="col-md-5">
                             <select name="position" id="position" class="form-control">
-                                {for $pos=1 to 12}
+                                {for $pos=1 to $max}
                                     <option value="{$pos}" {if $widget['position'] eq $pos}selected="selected" {/if}>
                                         Area {$pos}
                                     </option>

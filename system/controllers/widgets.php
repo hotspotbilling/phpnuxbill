@@ -11,6 +11,13 @@ $ui->assign('_system_menu', 'settings');
 $action = alphanumeric($routes['1']);
 $ui->assign('_admin', $admin);
 
+$max = ORM::for_table('tbl_widgets')->max('position');
+$max2 = substr_count($config['dashboard_cr'], '.')+substr_count($config['dashboard_cr'], ',')+1;
+if($max2>$max){
+    $max = $max2;
+}
+$ui->assign('max', $max);
+
 if ($action == 'add') {
     $pos = alphanumeric($routes['2']);
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -104,9 +111,20 @@ if ($action == 'add') {
     }
     r2(getUrl('widgets'), 's', 'Widget order Saved Successfully');
 } else {
+    if(_post("save") == 'struct'){
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'dashboard_cr')->find_one();
+        if ($d) {
+            $d->value = _post('dashboard_cr');
+            $d->save();
+        } else {
+            $d = ORM::for_table('tbl_appconfig')->create();
+            $d->setting = 'dashboard_cr';
+            $d->value = _post('dashboard_cr');
+            $d->save();
+        }
+        _alert("Dashboard Structure Saved Successfully", "success", getUrl('widgets'));
+    }
     $widgets = ORM::for_table('tbl_widgets')->selects("position", 1)->order_by_asc("orders")->find_many();
-    $max = ORM::for_table('tbl_widgets')->max('position');
     $ui->assign('widgets', $widgets);
-    $ui->assign('max', $max);
     $ui->display('admin/settings/widgets.tpl');
 }
