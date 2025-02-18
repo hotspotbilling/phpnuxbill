@@ -22,11 +22,12 @@
                                     </td>
                                     <td width="130">
                                         <div class="btn-group btn-group-justified" role="group">
-                                            <a href="{Text::url('widgets/edit/', $w['id'])}" class="btn btn-sm btn-success">{Lang::T("Edit")}</a>
                                             <a href="{Text::url('widgets/delete/', $w['id'])}"
                                                 onclick="return ask(this, 'Delete this widget?')" class="btn btn-sm btn-danger">
                                                 <i class="glyphicon glyphicon-trash"></i>
                                             </a>
+                                            <a href="{Text::url('widgets/edit/', $w['id'])}"
+                                                class="btn btn-sm btn-success">{Lang::T("Edit")}</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -48,18 +49,11 @@
 {/function}
 
 <div class="row">
-    <div class="col-md-6 col-lg-4">
-        {showWidget widgets=$widgets pos=1}
-    </div>
-    <div class="col-md-6 col-lg-4">
-        {showWidget widgets=$widgets pos=2}
-    </div>
-    <div class="col-md-6 col-lg-4">
-        {showWidget widgets=$widgets pos=3}
-    </div>
-    <div class="col-md-6 col-lg-4">
-        {showWidget widgets=$widgets pos=4}
-    </div>
+    {for $pos=1 to $max}
+        <div class="col-md-6 col-lg-4">
+            {showWidget widgets=$widgets pos=$pos}
+        </div>
+    {/for}
 </div>
 
 {include file="sections/footer.tpl"}

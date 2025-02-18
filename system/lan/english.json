@@ -1040,5 +1040,14 @@
     "Not_all_widgets_require_content__HTML_widgets_require_content__either_text_or_PHP_code__Please_be_careful_when_writing_this_content_": "Not all widgets require content. HTML widgets require content, either text or PHP code. Please be careful when writing this content.",
     "Area_Fields": "Area Fields",
     "Add_new_widget": "Add new widget",
-    "Tambah": "Tambah"
+    "Tambah": "Tambah",
+    "All": "All",
+    "Enter_your_message_here___": "Enter your message here...",
+    "Close": "Close",
+    "Please_select_at_least_one_customer_to_send_a_message_": "Please select at least one customer to send a message.",
+    "Please_enter_a_message_to_send_": "Please enter a message to send.",
+    "Sending___": "Sending...",
+    "Message_sent_successfully_": "Message sent successfully.",
+    "Error_sending_message__": "Error sending message: ",
+    "Failed_to_send_the_message__Please_try_again_": "Failed to send the message. Please try again."
 }

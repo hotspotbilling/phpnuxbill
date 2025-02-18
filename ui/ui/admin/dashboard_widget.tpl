@@ -10,17 +10,45 @@
 
 
 
-{showWidget widgets=$widgets pos=1}
-<div class="row">
-    <div class="col-md-7">
-        {showWidget widgets=$widgets pos=2}
+{if $_c['dashboard'] == '1.55.1'}
+    {showWidget widgets=$widgets pos=1}
+    <div class="row">
+        <div class="col-md-6">
+            {showWidget widgets=$widgets pos=2}
+        </div>
+        <div class="col-md-6">
+            {showWidget widgets=$widgets pos=3}
+        </div>
     </div>
-    <div class="col-md-5">
-        {showWidget widgets=$widgets pos=3}
+    {showWidget widgets=$widgets pos=4}
+{elseif $_c['dashboard'] == '1.57.1'}
+    {showWidget widgets=$widgets pos=1}
+    <div class="row">
+        <div class="col-md-5">
+            {showWidget widgets=$widgets pos=2}
+        </div>
+        <div class="col-md-7">
+            {showWidget widgets=$widgets pos=3}
+        </div>
     </div>
-</div>
-{showWidget widgets=$widgets pos=4}
-
+    {showWidget widgets=$widgets pos=4}
+{elseif $_c['dashboard'] == '1.1.1.1'}
+    {showWidget widgets=$widgets pos=1}
+    {showWidget widgets=$widgets pos=2}
+    {showWidget widgets=$widgets pos=3}
+    {showWidget widgets=$widgets pos=4}
+{else}
+    {showWidget widgets=$widgets pos=1}
+    <div class="row">
+        <div class="col-md-7">
+            {showWidget widgets=$widgets pos=2}
+        </div>
+        <div class="col-md-5">
+            {showWidget widgets=$widgets pos=3}
+        </div>
+    </div>
+    {showWidget widgets=$widgets pos=4}
+{/if}
 
 {if $_c['new_version_notify'] != 'disable'}
     <script>

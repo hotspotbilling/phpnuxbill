@@ -2,7 +2,7 @@
 
 <form method="post" action="{Text::url('widgets/', $do)}">
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
+        <div class="col-md-12">
             <div class="panel panel-info">
                 <div class="panel-heading">{if $do == 'add'}{Lang::T('Tambah')}{else}{Lang::T('Edit')}{/if} Widget</div>
                 <div class="panel-body">
@@ -40,7 +40,7 @@
                         <label class="col-md-3 control-label">{Lang::T('Position')}</label>
                         <div class="col-md-5">
                             <select name="position" id="position" class="form-control">
-                                {for $pos=1 to 4}
+                                {for $pos=1 to 12}
                                     <option value="{$pos}" {if $widget['position'] eq $pos}selected="selected" {/if}>
                                         Area {$pos}
                                     </option>
@@ -66,7 +66,7 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Content')}</label>
                         <div class="col-md-9">
-                            <textarea name="content" rows="5" id="content" class="form-control">{$widget['content']}</textarea>
+                            <textarea name="content" rows="15" id="summernote" class="form-control">{$widget['content']}</textarea>
                             <p class="help-block">{Lang::T("Not all widgets require content. HTML widgets require content, either text or PHP code. Please be careful when writing this content.")}</p>
                         </div>
                     </div>
@@ -93,6 +93,9 @@
         var name = sel.options[sel.selectedIndex].text;
         document.getElementById('title').value = name;
     }
+    document.addEventListener("DOMContentLoaded", function() {
+        $('#summernote').summernote();
+    });
 </script>
 
 {include file="sections/footer.tpl"}

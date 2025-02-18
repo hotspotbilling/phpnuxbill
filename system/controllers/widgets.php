@@ -105,6 +105,8 @@ if ($action == 'add') {
     r2(getUrl('widgets'), 's', 'Widget order Saved Successfully');
 } else {
     $widgets = ORM::for_table('tbl_widgets')->selects("position", 1)->order_by_asc("orders")->find_many();
+    $max = ORM::for_table('tbl_widgets')->max('position');
     $ui->assign('widgets', $widgets);
+    $ui->assign('max', $max);
     $ui->display('admin/settings/widgets.tpl');
 }
