@@ -105,6 +105,7 @@
                         {Lang::T('This used for admin to select payment in recharge, using comma for every new options')}
                     </p>
                 </div>
+
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Income reset date')}</label>
                     <div class="col-md-5">
@@ -112,6 +113,17 @@
                             max="28" step="1" name="reset_day" value="{$_c['reset_day']}">
                     </div>
                     <span class="help-block col-md-4">{Lang::T('Income will reset every this day')}</span>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Dashboard Structure')}</label>
+                    <div class="col-md-5">
+                        <input type="text" name="dashboard_cr" class="form-control" value="{$_c['dashboard_cr']}"
+                            placeholder="12.7,5.12">
+                    </div>
+                    <p class="help-block col-md-4">
+                        <a href="{$app_url}/docs/#Dashboard%20Structure"
+                            target="_blank">{Lang::T('Read documentation')}</a>
+                    </p>
                 </div>
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Pretty URL')}</label>
@@ -135,42 +147,6 @@
                 </button>
             </div>
 
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="panel-heading" role="tab" id="HideDashboardContent">
-            <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
-                    href="#collapseHideDashboardContent" aria-expanded="false"
-                    aria-controls="collapseHideDashboardContent">
-                    {Lang::T('Hide Dashboard Content')}
-                </a>
-            </h4>
-        </div>
-        <div id="collapseHideDashboardContent" class="panel-collapse collapse" role="tabpanel">
-            <div class="panel-body">
-                <div class="form-group">
-                    <label class="col-md-3 control-label"><input type="checkbox" name="hide_mrc" value="yes" {if
-                            $_c['hide_mrc'] eq 'yes' }checked{/if}>
-                        {Lang::T('Monthly Registered Customers')}</label>
-                    <label class="col-md-3 control-label"><input type="checkbox" name="hide_tms" value="yes" {if
-                            $_c['hide_tms'] eq 'yes' }checked{/if}> {Lang::T('Total Monthly Sales')}</label>
-                    <label class="col-md-3 control-label"><input type="checkbox" name="hide_aui" value="yes" {if
-                            $_c['hide_aui'] eq 'yes' }checked{/if}> {Lang::T('All Users Insights')}</label>
-                    <label class="col-md-3 control-label"><input type="checkbox" name="hide_al" value="yes" {if
-                            $_c['hide_al'] eq 'yes' }checked{/if}> {Lang::T('Activity Log')}</label>
-                    <label class="col-md-3 control-label"><input type="checkbox" name="hide_uet" value="yes" {if
-                            $_c['hide_uet'] eq 'yes' }checked{/if}> {Lang::T('User Expired, Today')}</label>
-                    <label class="col-md-3 control-label"><input type="checkbox" name="hide_vs" value="yes" {if
-                            $_c['hide_vs'] eq 'yes' }checked{/if}> Vouchers Stock</label>
-                    <label class="col-md-3 control-label"><input type="checkbox" name="hide_pg" value="yes" {if
-                            $_c['hide_pg'] eq 'yes' }checked{/if}> Payment Gateway</label>
-                </div>
-                <button class="btn btn-success btn-block" type="submit">
-                    {Lang::T('Save Changes')}
-                </button>
-            </div>
         </div>
     </div>
 
