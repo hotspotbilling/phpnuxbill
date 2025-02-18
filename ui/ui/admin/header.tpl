@@ -319,6 +319,8 @@
                                         href="{Text::url('settings/miscellaneous')}">{Lang::T('Miscellaneous')}</a></li>
                                 <li {if $_routes[1] eq 'maintenance' }class="active" {/if}><a
                                         href="{Text::url('settings/maintenance')}">{Lang::T('Maintenance Mode')}</a></li>
+                                <li {if $_routes[0] eq 'widgets' }class="active" {/if}><a
+                                            href="{Text::url('widgets')}">{Lang::T('Widgets')}</a></li>
                                 <li {if $_routes[1] eq 'notifications' }class="active" {/if}><a
                                         href="{Text::url('settings/notifications')}">{Lang::T('User Notification')}</a></li>
                                 <li {if $_routes[1] eq 'devices' }class="active" {/if}><a
@@ -368,7 +370,7 @@
                     {$_MENU_AFTER_LOGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li {if $_routes[1] eq 'docs' }class="active" {/if}>
-                            <a href="{if $_c['docs_clicked'] != 'yes'}{Text::url('settings/docs')}{else}{Text::url('docs')}{/if}">
+                            <a href="{if $_c['docs_clicked'] != 'yes'}{Text::url('settings/docs')}{else}{$app_url}/docs{/if}">
                                 <i class="ion ion-ios-bookmarks"></i>
                                 <span class="text">{Lang::T('Documentation')}</span>
                                 {if $_c['docs_clicked'] != 'yes'}
