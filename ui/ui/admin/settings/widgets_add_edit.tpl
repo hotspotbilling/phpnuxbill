@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-info">
-                <div class="panel-heading">{if $do == 'add'}{Lang::T('Tambah')}{else}{Lang::T('Edit')}{/if} Widget</div>
+                <div class="panel-heading">{if $do == 'add'}{Lang::T('Add')}{else}{Lang::T('Edit')}{/if} {Lang::T("Widget")}</div>
                 <div class="panel-body">
                     <input type="hidden" class="form-control" required id="id" name="id" value="{$widget['id']}">
                     <div class="form-group">
