@@ -207,7 +207,7 @@ try {
             if (!$tur) {
                 // if check if pppoe_username
                 $c = ORM::for_table('tbl_customers')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
-                if($c){
+                if ($c) {
                     $username = $c['username'];
                     $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
                 }
@@ -274,7 +274,7 @@ try {
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY username = '$username' AND macaddr = '"._post('macAddr')."' AND nasid = '"._post('nasid')."'")
+                ->whereRaw("BINARY username = '$username' AND macaddr = '" . _post('macAddr') . "' AND nasid = '" . _post('nasid') . "'")
                 ->findOne();
             if (!$d) {
                 $d = ORM::for_table('rad_acct')->create();
@@ -292,19 +292,19 @@ try {
             $d->username = $username;
             $d->realm = _post('realm');
             $d->nasipaddress = _post('nasIpAddress');
-	    $d->acctsessiontime = intval(_post('acctSessionTime'));
+            $d->acctsessiontime = intval(_post('acctSessionTime'));
             $d->nasid = _post('nasid');
             $d->nasportid = _post('nasPortId');
             $d->nasporttype = _post('nasPortType');
             $d->framedipaddress = _post('framedIPAddress');
-            if(in_array(_post('acctStatusType'), ['Start', 'Stop'])){
+            if (in_array(_post('acctStatusType'), ['Start', 'Stop'])) {
                 $d->acctstatustype = _post('acctStatusType');
             }
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
             // pastikan data akunting yang disimpan memang customer aktif phpnuxbill
             $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND `routers` = 'radius'")->find_one();
-            if($tur){
+            if ($tur) {
                 $d->save();
                 if (_post('acctStatusType') == 'Start') {
                     $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
@@ -349,15 +349,15 @@ function process_radiust_rest($tur, $code)
     $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
     $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
     // Count User Onlines
-	$USRon = ORM::for_table('rad_acct')
-        ->whereRaw("BINARY username = '".$tur['username']."' AND acctStatusType = 'Start'")
+    $USRon = ORM::for_table('rad_acct')
+        ->whereRaw("BINARY username = '" . $tur['username'] . "' AND acctStatusType = 'Start'")
         ->find_array();
     // get all the IP
     $ips = array_column($USRon, 'framedipaddress');
     // check if user reach shared_users limit but IP is not in the list active
-	if (count($USRon) >= $plan['shared_users'] && $plan['type'] == 'Hotspot' && !in_array(_post('framedIPAddress'), $ips)) {
-		show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You are already logged in - access denied ('.$USRon.')'], 401);
-	}
+    if (count($USRon) >= $plan['shared_users'] && $plan['type'] == 'Hotspot' && !in_array(_post('framedIPAddress'), $ips)) {
+        show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You are already logged in - access denied (' . $USRon . ')'], 401);
+    }
     if ($bw['rate_down_unit'] == 'Kbps') {
         $unitdown = 'K';
     } else {
