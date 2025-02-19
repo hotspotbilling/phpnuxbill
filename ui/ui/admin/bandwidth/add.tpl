@@ -82,11 +82,11 @@
 		<div class="panel-heading">{Lang::T('Burst Limit Preset')}</div>
 		<div class="list-group">
 			<a href="#" class="list-group-item active">2x</a>
-			<a href="javascript:burstIt('2M/2M 4M/4M 1536K/1536K 16/16 8 1M/1M')" class="list-group-item">2M to
+			<a href="javascript:burstIt('2M/2M 4M/4M 1536K/1536K 16/16 8 1M/1M')" class="list-group-item">2M {Lang::T('to')}
 				4M</a>
 			<a href="javascript:burstIt('3M/3M 6M/6M 2304K/2304K 16/16 8 1536K/1536K')" class="list-group-item">3M
-				to 6M</a>
-			<a href="javascript:burstIt('4M/4M 8M/8M 3M/3M 16/16 8 2M/2M')" class="list-group-item">4M to 8M</a>
+				{Lang::T('to')} 6M</a>
+			<a href="javascript:burstIt('4M/4M 8M/8M 3M/3M 16/16 8 2M/2M')" class="list-group-item">4M {Lang::T('to')} 8M</a>
 			<a href="javascript:burstIt('5M/5M 10M/10M 3840k/3840k 16/16 8 2560k/2560k')" class="list-group-item">5M to
 				10M</a>
 			<a href="javascript:burstIt('6M/6M 12M/12M 4608k/4608k 16/16 8 3M/3M')" class="list-group-item">6M to 12M</a>
