@@ -19,7 +19,7 @@
                 <div class="btn-group pull-right">
                     <a class="btn btn-primary btn-xs" title="save"
                         href="{Text::url('customers/csv&token=', $csrf_token)}"
-                        onclick="return ask(this, 'This will export to CSV?')"><span
+                        onclick="return ask(this, '{Lang::T("This will export to CSV")}?')"><span
                             class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
                 </div>
                 {/if}
@@ -31,7 +31,7 @@
                     <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                         <div class="col-lg-4">
                             <div class="input-group">
-                                <span class="input-group-addon">Order&nbsp;&nbsp;</span>
+                                <span class="input-group-addon">{Lang::T('Order ')}&nbsp;&nbsp;</span>
                                 <div class="row row-no-gutters">
                                     <div class="col-xs-8">
                                         <select class="form-control" id="order" name="order">
@@ -62,7 +62,7 @@
                         </div>
                         <div class="col-lg-3">
                             <div class="input-group">
-                                <span class="input-group-addon">Status</span>
+                                <span class="input-group-addon">{Lang::T('Status')}</span>
                                 <select class="form-control" id="filter" name="filter">
                                     {foreach $statuses as $status}
                                     <option value="{$status}" {if $filter eq $status }selected{/if}>{Lang::T($status)}

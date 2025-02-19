@@ -50,7 +50,7 @@
                     <div class="form-group">
                         <div class="col-md-9 col-md-offset-3">
                             <button class="btn btn-success"
-                                onclick="return ask(this, 'Continue the Customer Balance top-up process?')"
+                                onclick="return ask(this, '{Lang::T('Continue the Customer Balance top-up process')}?')"
                                 type="submit">{Lang::T('Recharge')}</button>
                             Or <a href="{Text::url('')}customers/list">{Lang::T('Cancel')}</a>
                         </div>
