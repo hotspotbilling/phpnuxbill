@@ -304,6 +304,14 @@ try {
             $d->dateAdded = date('Y-m-d H:i:s');
             // pastikan data akunting yang disimpan memang customer aktif phpnuxbill
             $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND `routers` = 'radius'")->find_one();
+            if (!$tur) {
+                // check if pppoe_username
+                $c = ORM::for_table('tbl_customers')->select('username')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
+                if ($c) {
+                    $username = $c['username'];
+                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+                }
+            }
             if ($tur) {
                 $d->save();
                 if (_post('acctStatusType') == 'Start') {
