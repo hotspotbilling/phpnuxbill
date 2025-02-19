@@ -50,6 +50,19 @@
                         <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('User')}</label>
+                        <div class="col-md-5">
+                            <select name="tipeUser" id="tipeUser" class="form-control">
+                                {foreach $users as $u}
+                                    <option value="{$u}" {if $tipeUser eq $u}selected="selected" {/if}>
+                                        Dashboard {$u}
+                                    </option>
+                                {/foreach}
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">&nbsp;</p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Status')}</label>
                         <div class="col-md-5">
                             <select name="enabled" id="enabled" class="form-control">

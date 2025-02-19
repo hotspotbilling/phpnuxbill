@@ -5,15 +5,23 @@
  *  by https://t.me/ibnux
  **/
 _admin();
-$ui->assign('_title', Lang::T('Widgets'));
+$ui->assign('_title', Lang::T('Dashboard Widgets'));
 $ui->assign('_system_menu', 'settings');
 
 $action = alphanumeric($routes['1']);
 $ui->assign('_admin', $admin);
+if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+    r2(getUrl('dashboard'), 'e', Lang::T('You do not have permission to access this page'));
+}
 
+$tipeUser = _req("user");
+if (empty($tipeUser)) {
+    $tipeUser = 'Admin';
+}
+$ui->assign('tipeUser', $tipeUser);
 $max = ORM::for_table('tbl_widgets')->max('position');
-$max2 = substr_count($config['dashboard_cr'], '.')+substr_count($config['dashboard_cr'], ',')+1;
-if($max2>$max){
+$max2 = substr_count($config['dashboard_' . $tipeUser], '.') + substr_count($config['dashboard_' . $tipeUser], ',') + 1;
+if ($max2 > $max) {
     $max = $max2;
 }
 $ui->assign('max', $max);
@@ -23,6 +31,7 @@ if ($action == 'add') {
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $orders = alphanumeric($_POST['orders']);
         $position = alphanumeric($_POST['position']);
+        $tipeUser = alphanumeric($_POST['tipeUser']);
         $enabled = alphanumeric($_POST['enabled']);
         $title = _post('title');
         $widget = _post('widget');
@@ -30,13 +39,14 @@ if ($action == 'add') {
         $d = ORM::for_table('tbl_widgets')->create();
         $d->orders = $orders;
         $d->position = $position;
+        $d->user = $tipeUser;
         $d->enabled = $enabled;
         $d->title = $title;
         $d->widget = $widget;
         $d->content = $content;
         $d->save();
         if ($d->id() > 0) {
-            r2(getUrl('widgets'), 's', 'Widget Added Successfully');
+            r2(getUrl('widgets&user=' . $tipeUser), 's', 'Widget Added Successfully');
         }
     }
     $files = scandir($WIDGET_PATH);
@@ -48,6 +58,7 @@ if ($action == 'add') {
         }
     }
     $widget['position'] = $pos;
+    $ui->assign('users', ORM::for_table('tbl_widgets')->getEnum("user"));
     $ui->assign('do', 'add');
     $ui->assign('widgets', $widgets);
     $ui->assign('widget', $widget);
@@ -58,6 +69,7 @@ if ($action == 'add') {
         $id = alphanumeric($_POST['id']);
         $orders = alphanumeric($_POST['orders']);
         $position = alphanumeric($_POST['position']);
+        $tipeUser = alphanumeric($_POST['tipeUser']);
         $enabled = alphanumeric($_POST['enabled']);
         $title = _post('title');
         $widget = _post('widget');
@@ -66,12 +78,13 @@ if ($action == 'add') {
         $d = ORM::for_table('tbl_widgets')->find_one($id);
         $d->orders = $orders;
         $d->position = $position;
+        $d->user = $tipeUser;
         $d->enabled = $enabled;
         $d->title = $title;
         $d->widget = $widget;
         $d->content = $content;
         $d->save();
-        r2(getUrl('widgets'), 's', 'Widget Saved Successfully');
+        r2(getUrl('widgets&user=' . $tipeUser), 's', 'Widget Saved Successfully');
     }
     $id = alphanumeric($routes['2']);
     $widget = ORM::for_table('tbl_widgets')->find_one($id);
@@ -83,6 +96,7 @@ if ($action == 'add') {
             $widgets[str_replace('.php', '', $file)] = $name;
         }
     }
+    $ui->assign('users', ORM::for_table('tbl_widgets')->getEnum("user"));
     $ui->assign('do', 'edit');
     $ui->assign('widgets', $widgets);
     $ui->assign('widget', $widget);
@@ -92,9 +106,9 @@ if ($action == 'add') {
     $d = ORM::for_table('tbl_widgets')->find_one($id);
     if ($d) {
         $d->delete();
-        r2(getUrl('widgets'), 's', 'Widget Deleted Successfully');
+        r2(getUrl('widgets&user=' . $tipeUser), 's', 'Widget Deleted Successfully');
     }
-    r2(getUrl('widgets'), 'e', 'Widget Not Found');
+    r2(getUrl('widgets&user=' . $tipeUser), 'e', 'Widget Not Found');
 } else if (!empty($action) && file_exists("system/widget/$action.php") && !empty($routes['2'])) {
     require_once "system/widget/$action.php";
     try {
@@ -109,22 +123,22 @@ if ($action == 'add') {
         $d->orders = $_POST['orders'][$i];
         $d->save();
     }
-    r2(getUrl('widgets'), 's', 'Widget order Saved Successfully');
+    r2(getUrl('widgets&user=' . $tipeUser), 's', 'Widget order Saved Successfully');
 } else {
-    if(_post("save") == 'struct'){
-        $d = ORM::for_table('tbl_appconfig')->where('setting', 'dashboard_cr')->find_one();
+    if (_post("save") == 'struct') {
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'dashboard_' . $tipeUser)->find_one();
         if ($d) {
-            $d->value = _post('dashboard_cr');
+            $d->value = _post('dashboard');
             $d->save();
         } else {
             $d = ORM::for_table('tbl_appconfig')->create();
-            $d->setting = 'dashboard_cr';
-            $d->value = _post('dashboard_cr');
+            $d->setting = 'dashboard_' . $tipeUser;
+            $d->value = _post('dashboard');
             $d->save();
         }
-        _alert("Dashboard Structure Saved Successfully", "success", getUrl('widgets'));
+        _alert("Dashboard Structure Saved Successfully", "success", getUrl('widgets&user=' . $tipeUser));
     }
-    $widgets = ORM::for_table('tbl_widgets')->selects("position", 1)->order_by_asc("orders")->find_many();
+    $widgets = ORM::for_table('tbl_widgets')->where("user", $tipeUser)->order_by_asc("orders")->find_many();
     $ui->assign('widgets', $widgets);
     $ui->display('admin/settings/widgets.tpl');
 }

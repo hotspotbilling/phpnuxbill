@@ -113,9 +113,22 @@ foreach ($result as $value) {
     $config[$value['setting']] = $value['value'];
 }
 
-if(empty($config['dashboard_cr'])){
-    $config['dashboard_cr'] = "12.7,5.12";
+if(empty($config['dashboard_Admin'])){
+    $config['dashboard_Admin'] = "12.7,5.12";
 }
+
+if(empty($config['dashboard_Agent'])){
+    $config['dashboard_Agent'] = "12.7,5.12";
+}
+
+if(empty($config['dashboard_Sales'])){
+    $config['dashboard_Sales'] = "12.7,5.12";
+}
+
+if(empty($config['dashboard_Customer'])){
+    $config['dashboard_Customer'] = "12.12";
+}
+
 
 $_c =  $config;
 if (empty($http_proxy) && !empty($config['http_proxy'])) {
