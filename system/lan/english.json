@@ -1052,5 +1052,7 @@
     "Failed_to_send_the_message__Please_try_again_": "Failed to send the message. Please try again.",
     "Dashboard_Structure": "Dashboard Structure",
     "Read_documentation": "Read documentation",
-    "Structure": "Structure"
+    "Structure": "Structure",
+    "Dashboard_Widgets": "Dashboard Widgets",
+    "User": "User"
 }

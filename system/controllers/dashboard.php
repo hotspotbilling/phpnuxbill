@@ -36,7 +36,12 @@ $current_date = date('Y-m-d');
 $ui->assign('start_date', $start_date);
 $ui->assign('current_date', $current_date);
 
-$widgets = ORM::for_table('tbl_widgets')->selects("enabled", 1)->order_by_asc("orders")->findArray();
+$tipeUser = $admin['user_type'];
+if (in_array($tipeUser, ['SuperAdmin', 'Admin'])) {
+    $tipeUser = 'Admin';
+}
+
+$widgets = ORM::for_table('tbl_widgets')->where("enabled", 1)->where('user', $tipeUser)->order_by_asc("orders")->findArray();
 $count = count($widgets);
 for ($i = 0; $i < $count; $i++) {
     try{

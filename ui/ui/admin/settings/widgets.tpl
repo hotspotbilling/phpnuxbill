@@ -1,10 +1,17 @@
 {include file="sections/header.tpl"}
-
-
-<hr>
-
+<ul class="nav nav-tabs nav-justified">
+    <li role="presentation" {if $tipeUser=='Admin'} class="active" {/if}><a
+            href="{Text::url('widgets&user=Admin')}">Admin</a></li>
+    <li role="presentation" {if $tipeUser=='Agent'} class="active" {/if}><a
+            href="{Text::url('widgets&user=Agent')}">Agent</a></li>
+    <li role="presentation" {if $tipeUser=='Sales'} class="active" {/if}><a
+            href="{Text::url('widgets&user=Sales')}">Sales</a></li>
+    <li role="presentation" {if $tipeUser=='Customer'} class="active" {/if}><a
+            href="{Text::url('widgets&user=Customer')}">Customer</a></li>
+</ul>
+<br>
 {function showWidget pos=0}
-    <form method="post" action="{Text::url('widgets/pos/')}">
+    <form method="post" action="{Text::url('widgets/pos/', '&user=', $tipeUser)}">
         <div class="panel panel-info">
             <div class="panel-heading">{Lang::T("Area Fields")} {$pos}</div>
             <div class="panel-body">
@@ -44,7 +51,7 @@
                     <div class="btn-group" role="group">
                         <button type="submit" class="btn btn-info">{Lang::T("Save sequence")}</button>
                     </div>
-                    <a href="{Text::url('widgets/add/', $pos)}" class="btn btn-primary">{Lang::T("Add new widget")}</a>
+                    <a href="{Text::url('widgets/add/', $pos, '&user=', $tipeUser)}" class="btn btn-primary">{Lang::T("Add new widget")}</a>
                 </div>
             </div>
         </div>
@@ -80,14 +87,16 @@
                 {/foreach}
             </div>
             <div class="panel-footer">
-                <form method="post" action="{Text::url('widgets')}">
+                <form method="post">
                     <div class="input-group">
                         <span class="input-group-addon"><a href="{$app_url}/docs/#Dashboard%20Structure"
-                        target="_blank">{Lang::T("Structure")}</a></span>
-                        <input type="text" name="dashboard_cr" value="{$_c['dashboard_cr']}" class="form-control"
+                                target="_blank">{Lang::T("Structure")}</a></span>
+                                {assign dtipe value="dashboard_`$tipeUser`"}
+                        <input type="text" name="dashboard" value="{$_c[$dtipe]}" class="form-control"
                             placeholder="Dashboard">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block" name="save" value="struct">{Lang::T("Save")}</button>
+                    <button type="submit" class="btn btn-primary btn-block" name="save"
+                        value="struct">{Lang::T("Save")}</button>
                 </form>
             </div>
         </div>
