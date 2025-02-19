@@ -59,7 +59,7 @@
                     {/if}
                     {if $d['pppoe_ip'] != ''}
                         <li class="list-group-item">
-                            <b>PPPOE Remote IP</b> <span class="pull-right">{$d['pppoe_ip']}</span>
+                            <b>{Lang::T('PPPoE Remote IP')}</b> <span class="pull-right">{$d['pppoe_ip']}</span>
                         </li>
                     {/if}
                     <!--Customers Attributes view start -->
@@ -222,7 +222,7 @@
                             </li>
                             <li class="list-group-item">
                                 {Lang::T('Type')} <span class="pull-right">
-                                    {if $package['prepaid'] eq yes}Prepaid{else}<b>Postpaid</b>{/if}</span>
+                                    {if $package['prepaid'] eq yes}Prepaid{else}<b>{Lang::T('Postpaid')}</b>{/if}</span>
                             </li>
                             <li class="list-group-item">
                                 {Lang::T('Bandwidth')} <span class="pull-right">
@@ -244,7 +244,7 @@
                             <div class="col-xs-4">
                                 <a href="{Text::url('customers/deactivate/', $d['id'],'/',$package['plan_id'], '&token=', $csrf_token)}"
                                     id="{$d['id']}" class="btn btn-danger btn-block btn-sm"
-                                    onclick="return ask(this, 'This will deactivate Customer Plan, and make it expired')">{Lang::T('Deactivate')}</a>
+                                    onclick="return ask(this, '{Lang::T('This will deactivate Customer Plan, and make it expired')}')">{Lang::T('Deactivate')}</a>
                             </div>
                             <div class="col-xs-8">
                                 <a href="{Text::url('customers/recharge/', $d['id'], '/', $package['plan_id'], '&token=', $csrf_token)}"
@@ -265,7 +265,7 @@
     </div>
     <div class="col-xs-6 col-md-3">
         <a href="{Text::url('customers/sync/', $d['id'], '&token=', $csrf_token)}"
-            onclick="return ask(this, 'This will sync Customer to Mikrotik?')"
+            onclick="return ask(this, '{Lang::T('This will sync Customer to Mikrotik')}?')"
             class="btn btn-info btn-sm btn-block">{Lang::T('Sync')}</a>
     </div>
     <div class="col-xs-6 col-md-3">

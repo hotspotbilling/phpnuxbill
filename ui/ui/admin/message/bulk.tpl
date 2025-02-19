@@ -79,7 +79,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button type="button" id="startBulk" class="btn btn-primary">Start Bulk Messaging</button>
+                            <button type="button" id="startBulk" class="btn btn-primary">{Lang::T('Start Bulk Messaging')}</button>
                             <a href="{Text::url('dashboard')}" class="btn btn-default">{Lang::T('Cancel')}</a>
                         </div>
                     </div>
