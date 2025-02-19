@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/system/vendor/mpdf/mpdf" />
+      <path value="$PROJECT_DIR$/system/vendor/mpdf/psr-log-aware-trait" />
+      <path value="$PROJECT_DIR$/system/vendor/paragonie/random_compat" />
+      <path value="$PROJECT_DIR$/system/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/system/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/system/vendor/composer" />
+      <path value="$PROJECT_DIR$/system/vendor/smarty/smarty" />
+      <path value="$PROJECT_DIR$/system/vendor/myclabs/deep-copy" />
+      <path value="$PROJECT_DIR$/system/vendor/setasign/fpdi" />
+      <path value="$PROJECT_DIR$/system/vendor/yosiazwan/php-facedetection" />
+    </include_path>
+  </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.0">
+    <option name="suggestChangeDefaultLanguageLevel" value="false" />
+  </component>
+</project>
