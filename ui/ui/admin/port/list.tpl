@@ -6,7 +6,7 @@
             <div class="panel-heading">
                 <div class="btn-group pull-right">
                     <a class="btn btn-primary btn-xs" title="save" href="{Text::url('')}pool/sync"
-                        onclick="return ask(this, 'This will sync/send IP port to Mikrotik?')"><span
+                        onclick="return ask(this, '{Lang::T('This will sync/send IP port to Mikrotik')}?')"><span
                             class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
                 </div>
                 {Lang::T('Port Pool')} - VPN Tunnels
