@@ -32,11 +32,11 @@
                                     </td>
                                     <td width="130">
                                         <div class="btn-group btn-group-justified" role="group">
-                                            <a href="{Text::url('widgets/delete/', $w['id'])}"
+                                            <a href="{Text::url('widgets/delete/', $w['id'], '&user=', $tipeUser)}"
                                                 onclick="return ask(this, 'Delete this widget?')" class="btn btn-sm btn-danger">
                                                 <i class="glyphicon glyphicon-trash"></i>
                                             </a>
-                                            <a href="{Text::url('widgets/edit/', $w['id'])}"
+                                            <a href="{Text::url('widgets/edit/', $w['id'], '&user=', $tipeUser)}"
                                                 class="btn btn-sm btn-success">{Lang::T("Edit")}</a>
                                         </div>
                                     </td>
@@ -51,25 +51,25 @@
                     <div class="btn-group" role="group">
                         <button type="submit" class="btn btn-info">{Lang::T("Save sequence")}</button>
                     </div>
-                    <a href="{Text::url('widgets/add/', $pos, '&user=', $tipeUser)}" class="btn btn-primary">{Lang::T("Add new widget")}</a>
+                    <a href="{Text::url('widgets/add/', $pos, '&user=', $tipeUser)}" class="btn btn-xs btn-primary">{Lang::T("Add new widget")}</a>
                 </div>
             </div>
         </div>
     </form>
 {/function}
-
+{assign dtipe value="dashboard_`$tipeUser`"}
 <div class="row">
     <div class="col-md-3">
         <div class="panel panel-info">
             <div class="panel-heading">{Lang::T("Dashboard Structure")}</div>
             <div class="panel-body">
-                {assign rows explode(".", $_c['dashboard_cr'])}
+                {assign rows explode(".", $_c[$dtipe])}
                 {assign pos 1}
                 {foreach $rows as $cols}
                     {if $cols == 12}
                         <div class="row row-no-gutters">
                             <div class="col-xs-12" style="border: 1px;">
-                                <a href="{Text::url('widgets/add/', $pos)}" class="btn btn-default btn-block">{$pos}</a>
+                                <a href="{Text::url('widgets/add/', $pos, '&user=', $tipeUser)}" class="btn btn-default btn-block">{$pos}</a>
                             </div>
                         </div>
                         {assign pos value=$pos+1}
@@ -78,7 +78,7 @@
                         <div class="row row-no-gutters">
                             {foreach $colss as $c}
                                 <div class="col-xs-{$c}">
-                                    <a href="{Text::url('widgets/add/', $pos)}" class="btn btn-default btn-block">{$pos}</a>
+                                    <a href="{Text::url('widgets/add/', $pos, '&user=', $tipeUser)}" class="btn btn-default btn-block">{$pos}</a>
                                 </div>
                                 {assign pos value=$pos+1}
                             {/foreach}
@@ -91,7 +91,6 @@
                     <div class="input-group">
                         <span class="input-group-addon"><a href="{$app_url}/docs/#Dashboard%20Structure"
                                 target="_blank">{Lang::T("Structure")}</a></span>
-                                {assign dtipe value="dashboard_`$tipeUser`"}
                         <input type="text" name="dashboard" value="{$_c[$dtipe]}" class="form-control"
                             placeholder="Dashboard">
                     </div>
