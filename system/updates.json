@@ -196,5 +196,8 @@
     ],
     "2025.2.19" : [
         "ALTER TABLE `tbl_widgets` ADD `user` ENUM('Admin','Agent','Sales','Customer') NOT NULL DEFAULT 'Admin' AFTER `position`;"
+    ],
+    "2025.2.21" : [
+        "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (50, 1, 2, 'Customer', 1, 'Account Info', 'account_info', ''),(51, 3, 1, 'Customer', 1, 'Active Internet Plan', 'active_internet_plan', ''),(52, 4, 1, 'Customer', 1, 'Balance Transfer', 'balance_transfer', ''),(53, 1, 1, 'Customer', 1, 'Unpaid Order', 'unpaid_order', ''),(55, 2, 1, 'Customer', 1, 'Announcement', 'announcement', ''),(56, 5, 1, 'Customer', 1, 'Recharge A Friend', 'recharge_a_friend', ''),(57, 2, 2, 'Customer', 1, 'Voucher Activation', 'voucher_activation', '');"
     ]
 }
