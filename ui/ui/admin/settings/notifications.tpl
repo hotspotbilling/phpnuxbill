@@ -27,7 +27,7 @@
                             <b>[[price]]</b> - {Lang::T('will be replaced with Package price')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
                             <b>[[payment_link]]</b> - <a href="{$app_url}/docs/#Reminder%20with%20payment%20link"
-                                target="_blank">read documentation</a>.
+                                target="_blank">{Lang::T("read documentation")}</a>.
                         </p>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
                             <b>[[payment_link]]</b> - <a href="{$app_url}/docs/#Reminder%20with%20payment%20link"
-                                target="_blank">read documentation</a>.
+                                target="_blank">{Lang::T("read documentation")}</a>.
                         </p>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
                             <b>[[payment_link]]</b> - <a href="{$app_url}/docs/#Reminder%20with%20payment%20link"
-                                target="_blank">read documentation</a>.
+                                target="_blank">{Lang::T("read documentation")}</a>.
                         </p>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                             <b>[[expired_date]]</b> - {Lang::T('will be replaced with Expiration date')}.<br>
                             <b>[[bills]]</b> - {Lang::T('additional bills for customers')}.<br>
                             <b>[[payment_link]]</b> - <a href="{$app_url}/docs/#Reminder%20with%20payment%20link"
-                                target="_blank">read documentation</a>.
+                                target="_blank">{Lang::T("read documentation")}</a>.
                         </p>
                     </div>
                 </div>
