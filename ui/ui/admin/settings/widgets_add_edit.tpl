@@ -54,7 +54,7 @@
                         <div class="col-md-5">
                             <select name="tipeUser" aria-readonly="" id="tipeUser" class="form-control">
                                 <option value="{$widget['user']}" {if $widget['user'] eq $u}selected="selected" {/if}>
-                                    Dashboard {$widget['user']}
+                                    {Lang::T("Dashboard")} {$widget['user']}
                                 </option>
                             </select>
                         </div>
