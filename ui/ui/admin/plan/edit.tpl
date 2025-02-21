@@ -58,7 +58,7 @@
 
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success" onclick="return ask(this, 'Continue the package change process?')" type="submit">{Lang::T('Edit')}</button>
+                            <button class="btn btn-success" onclick="return ask(this, '{Lang::T('Continue the package change process')}?')" type="submit">{Lang::T('Edit')}</button>
                             Or <a href="{Text::url('')}plan/list">{Lang::T('Cancel')}</a>
                         </div>
                     </div>

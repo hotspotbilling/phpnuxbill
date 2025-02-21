@@ -47,14 +47,14 @@
 							<b>[[company_name]]</b> - {Lang::T('Your Company Name')}
 							<br>
 							<b>[[payment_link]]</b> - <a href="{Text::url('docs')}/#Reminder%20with%20payment%20link"
-								target="_blank">read documentation</a>.
+								target="_blank">{Lang::T('Read documentation')}</a>.
 						</p>
 					</div>
 
 					<div class="form-group">
 						<div class="col-lg-offset-2 col-lg-10">
 							<button class="btn btn-success"
-								onclick="return ask(this, 'Continue the process of sending messages?')"
+								onclick="return ask(this, '{Lang::T('Continue the process of sending messages')}?')"
 								type="submit">{Lang::T('Send Message')}</button>
 							<a href="{Text::url('dashboard')}" class="btn btn-default">{Lang::T('Cancel')}</a>
 						</div>

@@ -7,11 +7,11 @@
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
                         <a class="btn btn-primary btn-xs" title="save" href="{Text::url('logs/list-csv')}"
-                            onclick="return ask(this, 'This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                            onclick="return ask(this, '{Lang::T('This will export to CSV')}?')"><span class="glyphicon glyphicon-download"
                                 aria-hidden="true"></span> CSV</a>
                     </div>
                 {/if}
-                Activity Log
+                {Lang::T('Activity Log')}
             </div>
             <div class="panel-body">
                 <div class="text-center" style="padding: 15px">
