@@ -421,4 +421,11 @@ INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `enabled`, `title`, `widg
 (8, 2, 3, 1, 'Mikrotik Cron Monitor', 'mikrotik_cron_monitor', ''),
 (9, 3, 3, 1, 'Info Payment Gateway', 'info_payment_gateway', ''),
 (10, 4, 3, 1, 'Graph Customers Insight', 'graph_customers_insight', ''),
-(11, 5, 3, 1, 'Activity Log', 'activity_log', '');
+(11, 5, 3, 1, 'Activity Log', 'activity_log', ''),
+(50, 1, 2, 'Customer', 1, 'Account Info', 'account_info', ''),
+(51, 3, 1, 'Customer', 1, 'Active Internet Plan', 'active_internet_plan', ''),
+(52, 4, 1, 'Customer', 1, 'Balance Transfer', 'balance_transfer', ''),
+(53, 1, 1, 'Customer', 1, 'Unpaid Order', 'unpaid_order', ''),
+(55, 2, 1, 'Customer', 1, 'Announcement', 'announcement', ''),
+(56, 5, 1, 'Customer', 1, 'Recharge A Friend', 'recharge_a_friend', ''),
+(57, 2, 2, 'Customer', 1, 'Voucher Activation', 'voucher_activation', '');
