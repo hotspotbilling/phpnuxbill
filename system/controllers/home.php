@@ -95,8 +95,7 @@ if (_post('send') == 'balance') {
     }
     r2(getUrl('home'), 'w', Lang::T('Your friend do not have active package'));
 }
-$_bill = User::_billing();
-$ui->assign('_bills', $_bill);
+
 
 // Sync plan to router
 if (isset($_GET['sync']) && !empty($_GET['sync'])) {
@@ -310,46 +309,25 @@ if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSI
     }
 }
 
-$tcf = ORM::for_table('tbl_customers_fields')
-    ->where('customer_id', $user['id'])
-    ->find_many();
-$vpn = ORM::for_table('tbl_port_pool')
-    ->find_one();
-$ui->assign('cf', $tcf);
-$ui->assign('vpn', $vpn);
 
-$unpaid = ORM::for_table('tbl_payment_gateway')
-    ->where('username', $user['username'])
-    ->where('status', 1)
-    ->find_one();
-
-// check expired payments
-if ($unpaid) {
-    try {
-        if (strtotime($unpaid['expired_date']) < time()) {
-            $unpaid->status = 4;
-            $unpaid->save();
-            $unpaid = [];
+$widgets = ORM::for_table('tbl_widgets')->where("enabled", 1)->where('user', 'Customer')->order_by_asc("orders")->findArray();
+$count = count($widgets);
+for ($i = 0; $i < $count; $i++) {
+    try{
+        if(file_exists($WIDGET_PATH . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR . $widgets[$i]['widget'].".php")){
+            require_once $WIDGET_PATH . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR . $widgets[$i]['widget'].".php";
+            $widgets[$i]['content'] = (new $widgets[$i]['widget'])->getWidget($widgets[$i]);
+        }else{
+            $widgets[$i]['content'] = "Widget not found";
         }
     } catch (Throwable $e) {
-    } catch (Exception $e) {
-    }
-    try {
-        if (strtotime($unpaid['created_date'], "+24 HOUR") < time()) {
-            $unpaid->status = 4;
-            $unpaid->save();
-            $unpaid = [];
-        }
-    } catch (Throwable $e) {
-    } catch (Exception $e) {
+        $widgets[$i]['content'] = $e->getMessage();
     }
 }
 
-$ui->assign('unpaid', $unpaid);
-$ui->assign('code', alphanumeric(_get('code'), "-"));
+$ui->assign('widgets', $widgets);
 
-$abills = User::getAttributes("Bill");
-$ui->assign('abills', $abills);
+$ui->assign('code', alphanumeric(_get('code'), "-"));
 
 run_hook('view_customer_dashboard'); #HOOK
 $ui->display('customer/dashboard.tpl');
