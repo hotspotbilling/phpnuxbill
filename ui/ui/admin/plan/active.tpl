@@ -7,12 +7,12 @@
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
                         <a class="btn btn-primary btn-xs" title="save" href="{Text::url('')}plan/sync"
-                            onclick="return ask(this, '{Lang::T('This will sync/send Caustomer active plan to Mikrotik')}?')"><span
-                                class="glyphicon glyphicon-refresh" aria-hidden="true"></span> {Lang::T('Sync')}</a>
+                            onclick="return ask(this, '{Lang::T("This will sync dan send Customer active package to Mikrotik")}?')"><span
+                                class="glyphicon glyphicon-refresh" aria-hidden="true"></span> {Lang::T("Sync")}</a>
                     </div>
                     {* <div class="btn-group pull-right">
                     <a class="btn btn-info btn-xs" title="save" href="{Text::url('plan/csv',$append_url)}"
-                        onclick="return ask(this, 'This will export to CSV?')"><span class="glyphicon glyphicon-download"
+                        onclick="return ask(this, '{Lang::T("This will export to CSV?")}')"><span class="glyphicon glyphicon-download"
                             aria-hidden="true"></span> CSV</a>
                 </div> *}
                 {/if}
@@ -30,12 +30,12 @@
                                             class="glyphicon glyphicon-remove-circle"></span></a>
                                 </div>
                                 <input type="text" name="search" class="form-control"
-                                    placeholder="{Lang::T('Search')}..." value="{$search}">
+                                    placeholder="{Lang::T("Search")}..." value="{$search}">
                             </div>
                         </div>
                         <div class="col-lg-2 col-xs-4">
                             <select class="form-control" id="router" name="router">
-                                <option value="">{Lang::T('Location')}</option>
+                                <option value="">{Lang::T("Location")}</option>
                                 {foreach $routers as $r}
                                     <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
                                     </option>
@@ -44,7 +44,7 @@
                         </div>
                         <div class="col-lg-2 col-xs-4">
                             <select class="form-control" id="plan" name="plan">
-                                <option value="">{Lang::T('Plan Name')}</option>
+                                <option value="">{Lang::T("Plan Name")}</option>
                                 {foreach $plans as $p}
                                     <option value="{$p['id']}" {if $plan eq $p['id'] }selected{/if}>{$p['name_plan']}
                                     </option>
@@ -53,9 +53,9 @@
                         </div>
                         <div class="col-lg-2 col-xs-4">
                             <select class="form-control" id="status" name="status">
-                                <option value="-">{Lang::T('Status')}</option>
-                                <option value="on" {if $status eq 'on' }selected{/if}>{Lang::T('Active')}</option>
-                                <option value="off" {if $status eq 'off' }selected{/if}>{Lang::T('Expired')}</option>
+                                <option value="-">{Lang::T("Status")}</option>
+                                <option value="on" {if $status eq 'on' }selected{/if}>{Lang::T("Active")}</option>
+                                <option value="off" {if $status eq 'off' }selected{/if}>{Lang::T("Expired")}</option>
                             </select>
                         </div>
                         <div class="col-md-2 col-xs-6">
@@ -65,7 +65,7 @@
                         <div class="col-md-2 col-xs-6">
                             <a href="{Text::url('')}plan/recharge" class="btn btn-primary btn-block"><i
                                     class="ion ion-android-add">
-                                </i> {Lang::T('Recharge Account')}</a>
+                                </i> {Lang::T("Recharge Account")}</a>
                         </div>
                     </div>
                 </div>
@@ -75,14 +75,14 @@
                     <table id="datatable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>{Lang::T('Username')}</th>
-                                <th>{Lang::T('Plan Name')}</th>
-                                <th>{Lang::T('Type')}</th>
-                                <th>{Lang::T('Created On')}</th>
-                                <th>{Lang::T('Expires On')}</th>
-                                <th>{Lang::T('Method')}</th>
-                                <th><a href="{Text::url('')}routers/list">{Lang::T('Location')}</a></th>
-                                <th>{Lang::T('Manage')}</th>
+                                <th>{Lang::T("Username")}</th>
+                                <th>{Lang::T("Plan Name")}</th>
+                                <th>{Lang::T("Type")}</th>
+                                <th>{Lang::T("Created On")}</th>
+                                <th>{Lang::T("Expires On")}</th>
+                                <th>{Lang::T("Method")}</th>
+                                <th><a href="{Text::url('')}routers/list">{Lang::T("Location")}</a></th>
+                                <th>{Lang::T("Manage")}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -117,15 +117,15 @@
                                     <td>{$ds['routers']}</td>
                                     <td>
                                         <a href="{Text::url('')}plan/edit/{$ds['id']}" class="btn btn-warning btn-xs"
-                                            style="color: black;">{Lang::T('Edit')}</a>
+                                            style="color: black;">{Lang::T("Edit")}</a>
                                         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                                             <a href="{Text::url('')}plan/delete/{$ds['id']}" id="{$ds['id']}"
-                                                onclick="return ask(this, '{Lang::T('Delete')}?')"
+                                                onclick="return ask(this, '{Lang::T("Delete")}?')"
                                                 class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
                                         {/if}
                                         {if $ds['status']=='off' && $_c['extend_expired']}
                                             <a href="javascript:extend('{$ds['id']}')"
-                                                class="btn btn-info btn-xs">{Lang::T('Extend')}</a>
+                                                class="btn btn-info btn-xs">{Lang::T("Extend")}</a>
                                         {/if}
                                     </td>
                                 </tr>
