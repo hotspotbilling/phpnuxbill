@@ -37,7 +37,7 @@
                                 <span class="input-group-addon">{Lang::T('Days')}</span>
                             </div>
                             <button type="submit" class="btn btn-danger btn-sm"
-                                onclick="return ask(this, 'Clear old logs?')">{Lang::T('Clean Logs')}</button>
+                                onclick="return ask(this, '{Lang::T("Clear old logs?")}')">{Lang::T('Clean up Logs')}</button>
                         </form>
                     </div>&nbsp;
                 </div>
