@@ -52,12 +52,10 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('User')}</label>
                         <div class="col-md-5">
-                            <select name="tipeUser" id="tipeUser" class="form-control">
-                                {foreach $users as $u}
-                                    <option value="{$u}" {if $tipeUser eq $u}selected="selected" {/if}>
-                                        Dashboard {$u}
-                                    </option>
-                                {/foreach}
+                            <select name="tipeUser" aria-readonly="" id="tipeUser" class="form-control">
+                                <option value="{$widget['user']}" {if $widget['user'] eq $u}selected="selected" {/if}>
+                                    Dashboard {$widget['user']}
+                                </option>
                             </select>
                         </div>
                         <p class="help-block col-md-4">&nbsp;</p>
@@ -66,10 +64,12 @@
                         <label class="col-md-3 control-label">{Lang::T('Status')}</label>
                         <div class="col-md-5">
                             <select name="enabled" id="enabled" class="form-control">
-                                <option value="1" {if isset($widget['enabled']) && $widget['enabled'] neq 1}selected="selected" {/if}>
+                                <option value="1"
+                                    {if isset($widget['enabled']) && $widget['enabled'] neq 1}selected="selected" {/if}>
                                     {Lang::T('Active')}
                                 </option>
-                                <option value="0" {if isset($widget['enabled']) && $widget['enabled'] eq 0}selected="selected" {/if}>
+                                <option value="0"
+                                    {if isset($widget['enabled']) && $widget['enabled'] eq 0}selected="selected" {/if}>
                                     {Lang::T('Not Active')}
                                 </option>
                             </select>
@@ -79,14 +79,17 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Content')}</label>
                         <div class="col-md-9">
-                            <textarea name="content" rows="15" id="summernote" class="form-control">{$widget['content']}</textarea>
-                            <p class="help-block">{Lang::T("Not all widgets require content. HTML widgets require content, either text or PHP code. Please be careful when writing this content.")}</p>
+                            <textarea name="content" rows="15" id="summernote"
+                                class="form-control">{$widget['content']}</textarea>
+                            <p class="help-block">
+                                {Lang::T("Not all widgets require content. HTML widgets require content, either text or PHP code. Please be careful when writing this content.")}
+                            </p>
                         </div>
                     </div>
                 </div>
                 <div class="panel-footer">
                     <div class="btn-group btn-group-justified" role="group">
-                        <a href="{Text::url('widgets/')}" class="btn btn-default btn-block">{Lang::T('Back')}</a>
+                        <a href="{Text::url('widgets/', '&user=', $tipeUser)}" class="btn btn-default btn-block">{Lang::T('Back')}</a>
                         <div class="btn-group" role="group">
                             <button type="submit" class="btn btn-info btn-block">{Lang::T('Save')}</button>
                         </div>
@@ -94,7 +97,7 @@
                 </div>
             </div>
             {if $do == 'edit'}
-                <a href="{Text::url('widgets/delete/', $widget['id'])}" class="btn btn-danger btn-xs"
+                <a href="{Text::url('widgets/delete/', $widget['id'], '&user=', $tipeUser)}" class="btn btn-danger btn-xs"
                     onclick="return ask(this, 'Remove this widget?')">{Lang::T('Delete')}</a>
             {/if}
         </div>
@@ -102,7 +105,7 @@
 </form>
 
 <script>
-    function changeTitle(sel){
+    function changeTitle(sel) {
         var name = sel.options[sel.selectedIndex].text;
         document.getElementById('title').value = name;
     }

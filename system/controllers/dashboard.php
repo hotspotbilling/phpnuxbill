@@ -20,6 +20,11 @@ if (isset($_GET['refresh'])) {
     r2(getUrl('dashboard'), 's', 'Data Refreshed');
 }
 
+$tipeUser = _req("user");
+if (empty($tipeUser)) {
+    $tipeUser = 'Admin';
+}
+$ui->assign('tipeUser', $tipeUser);
 
 $reset_day = $config['reset_day'];
 if (empty($reset_day)) {

@@ -18,8 +18,12 @@ $tipeUser = _req("user");
 if (empty($tipeUser)) {
     $tipeUser = 'Admin';
 }
+if($tipeUser == 'Customer') {
+    $WIDGET_PATH .= DIRECTORY_SEPARATOR. 'customer';
+}
+
 $ui->assign('tipeUser', $tipeUser);
-$max = ORM::for_table('tbl_widgets')->max('position');
+$max = ORM::for_table('tbl_widgets')->where("user", $tipeUser)->max('position');
 $max2 = substr_count($config['dashboard_' . $tipeUser], '.') + substr_count($config['dashboard_' . $tipeUser], ',') + 1;
 if ($max2 > $max) {
     $max = $max2;
@@ -36,6 +40,7 @@ if ($action == 'add') {
         $title = _post('title');
         $widget = _post('widget');
         $content = _post('content');
+        print_r($_POST);
         $d = ORM::for_table('tbl_widgets')->create();
         $d->orders = $orders;
         $d->position = $position;
@@ -58,6 +63,7 @@ if ($action == 'add') {
         }
     }
     $widget['position'] = $pos;
+    $widget['user'] = $tipeUser;
     $ui->assign('users', ORM::for_table('tbl_widgets')->getEnum("user"));
     $ui->assign('do', 'add');
     $ui->assign('widgets', $widgets);

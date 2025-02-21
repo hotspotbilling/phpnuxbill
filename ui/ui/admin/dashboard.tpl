@@ -8,8 +8,9 @@
     {/foreach}
 {/function}
 
+{assign dtipe value="dashboard_`$tipeUser`"}
 
-{assign rows explode(".", $_c['dashboard_cr'])}
+{assign rows explode(".", $_c[$dtipe])}
 {assign pos 1}
 {foreach $rows as $cols}
     {if $cols == 12}
