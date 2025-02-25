@@ -126,7 +126,7 @@ if(empty($config['dashboard_Sales'])){
 }
 
 if(empty($config['dashboard_Customer'])){
-    $config['dashboard_Customer'] = "12.12";
+    $config['dashboard_Customer'] = "6.6";
 }
 
 
