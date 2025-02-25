@@ -26,14 +26,14 @@
                                         <div class="input-group">
                                             <span class="input-group-addon">{Lang::T("Sequence")}</span>
                                             <input type="number" style="width: 100px;" name="orders[]" value="{$w['orders']}"
-                                                class="form-control" placeholder="orders">
+                                                class="form-control" placeholder="{Lang::T("Sequence")}">
                                         </div>
                                         <input type="hidden" name="id[]" value="{$w['id']}">
                                     </td>
                                     <td width="130">
                                         <div class="btn-group btn-group-justified" role="group">
                                             <a href="{Text::url('widgets/delete/', $w['id'], '&user=', $tipeUser)}"
-                                                onclick="return ask(this, 'Delete this widget?')" class="btn btn-sm btn-danger">
+                                                onclick="return ask(this, '{Lang::T("Delete this widget?")}')" class="btn btn-sm btn-danger">
                                                 <i class="glyphicon glyphicon-trash"></i>
                                             </a>
                                             <a href="{Text::url('widgets/edit/', $w['id'], '&user=', $tipeUser)}"
@@ -92,7 +92,7 @@
                         <span class="input-group-addon"><a href="{$app_url}/docs/#Dashboard%20Structure"
                                 target="_blank">{Lang::T("Structure")}</a></span>
                         <input type="text" name="dashboard" value="{$_c[$dtipe]}" class="form-control"
-                            placeholder="Dashboard">
+                            placeholder="{Lang::T("Dashboard")}">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block" name="save"
                         value="struct">{Lang::T("Save")}</button>
