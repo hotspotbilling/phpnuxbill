@@ -137,7 +137,7 @@
                             </option>
                         </select>
                         <p class="help-block">
-                            <b>?_route=settings/app&foo=bar</b> will be <b>/settings/app?foo=bar</b>
+                            <b>?_route=settings/app&foo=bar</b>{Lang::T(' will be ')}<b>/settings/app?foo=bar</b>
                         </p>
                     </div>
                     <span class="help-block col-md-4">{Lang::T('rename .htaccess_firewall to .htaccess')}</span>
