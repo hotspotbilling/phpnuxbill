@@ -9,7 +9,7 @@
                         <div class="btn-group pull-right">
                             <a class="btn btn-danger btn-xs" title="Reset File"
                                 href="{Text::url('')}pages/{$PageFile}-reset"
-                                onclick="return ask(this, 'Reset File?')"><span class="glyphicon glyphicon-refresh"
+                                onclick="return ask(this, '{Lang::T("Reset Files")}?')"><span class="glyphicon glyphicon-refresh"
                                     aria-hidden="true"></span></a>
                         </div>
                     {/if}

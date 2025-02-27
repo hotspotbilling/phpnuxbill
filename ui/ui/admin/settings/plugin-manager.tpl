@@ -15,10 +15,10 @@
             <div class="btn-group pull-right">
                 <a class="btn btn-warning btn-xs" title="info"
                     href="https://github.com/hotspotbilling/phpnuxbill/wiki/Installing-Plugin-or-Payment-Gateway"
-                    target="_blank"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> info</a>
+                    target="_blank"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> {Lang::T("Info")}</a>
                 <a class="btn btn-success btn-xs" title="refresh cache"
                     href="{Text::url('')}pluginmanager/refresh"><span class="glyphicon glyphicon-refresh"
-                        aria-hidden="true"></span> refresh</a>
+                        aria-hidden="true"></span> {Lang::T("Refresh")}</a>
             </div>
         </div>
         <div class="panel-body row">
