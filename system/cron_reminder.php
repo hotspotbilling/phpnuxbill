@@ -23,7 +23,7 @@ run_hook('cronjob_reminder'); #HOOK
 echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
 $res = ORM::raw_execute('SELECT NOW() AS WAKTU;');
 $statement = ORM::get_last_statement();
-$rows = array();
+$rows = [];
 while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
     echo "MYSQL Time\t" . $row['WAKTU'] . "\n";
 }
@@ -39,22 +39,35 @@ foreach ($d as $ds) {
         $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
         $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
         if ($p['validity_unit'] == 'Period') {
-			// Postpaid price from field
-			$add_inv = User::getAttribute("Invoice", $ds['customer_id']);
-			if (empty ($add_inv) or $add_inv == 0) {
-				$price = $p['price'];
-			} else {
-				$price = $add_inv;
-			}
-        } else {
+            // Postpaid price from field
+            $add_inv = User::getAttribute("Invoice", $ds['customer_id']);
+            if (empty($add_inv) or $add_inv == 0) {
                 $price = $p['price'];
+            } else {
+                $price = $add_inv;
+            }
+        } else {
+            $price = $p['price'];
         }
-        if ($ds['expiration'] == $day7) {
-            echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_7_day'), $config['user_notification_reminder']) . "\n";
-        } else if ($ds['expiration'] == $day3) {
-            echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_3_day'), $config['user_notification_reminder']) . "\n";
-        } else if ($ds['expiration'] == $day1) {
-            echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_1_day'), $config['user_notification_reminder']) . "\n";
+        if ($ds['expiration'] == $day7 && $config['notification_reminder_7day'] == 'yes') {
+            try {
+                echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_7_day'), $config['user_notification_reminder']) . "\n";
+            } catch (Exception $e) {
+                sendTelegram("Cron Reminder failed to send 7-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
+            }
+        } else if ($ds['expiration'] == $day3 && $config['notification_reminder_3day'] == 'yes') {
+            try {
+                echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_3_day'), $config['user_notification_reminder']) . "\n";
+            } catch (Exception $e) {
+                sendTelegram("Cron Reminder failed to send 3-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
+            }
+        } else if ($ds['expiration'] == $day1 && $config['notification_reminder_1day'] == 'yes') {
+            try {
+                echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_1_day'), $config['user_notification_reminder']) . "\n";
+            } catch (Exception $e) {
+                sendTelegram("Cron Reminder failed to send 1-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
+            }
         }
+
     }
 }

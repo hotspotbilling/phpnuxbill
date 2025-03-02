@@ -927,6 +927,24 @@
                         </select>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Reminder Notify Intervals')}</label><br>
+                    <label class="col-md-3 control-label">
+                        <input type="checkbox" name="notification_reminder_1day" value="yes"
+                            {if !isset($_c['notification_reminder_1day']) || $_c['notification_reminder_1day'] neq 'no'}checked{/if}>
+                        {Lang::T('1 Day')}
+                    </label>
+                    <label class="col-md-3 control-label">
+                        <input type="checkbox" name="notification_reminder_3days" value="yes"
+                            {if !isset($_c['notification_reminder_3days']) || $_c['notification_reminder_3days'] neq 'no'}checked{/if}>
+                        {Lang::T('3 Days')}
+                    </label>
+                    <label class="col-md-3 control-label">
+                        <input type="checkbox" name="notification_reminder_7days" value="yes"
+                            {if !isset($_c['notification_reminder_7days']) || $_c['notification_reminder_7days'] neq 'no'}checked{/if}>
+                        {Lang::T('7 Days')}
+                    </label>
+                </div>
                 <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
                 </button>
