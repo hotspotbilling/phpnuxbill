@@ -46,7 +46,11 @@ class Response extends Message
     /**
      * The last response for a request.
      */
-    const TYPE_FINAL = '!done';
+    const TYPE_FINAL = '!done';/**
+
+    * The empty response for a request.
+    */
+    const TYPE_EMPTY = '!empty';
 
     /**
      * A response with data.
@@ -246,6 +250,7 @@ class Response extends Message
     {
         switch ($type) {
         case self::TYPE_FINAL:
+        case self::TYPE_EMPTY:
         case self::TYPE_DATA:
         case self::TYPE_ERROR:
         case self::TYPE_FATAL:
