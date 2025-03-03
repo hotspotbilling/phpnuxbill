@@ -54,3 +54,4 @@ docs/**
 !docs/*.html
 !docs/*.md
 .htaccess
+.idea
