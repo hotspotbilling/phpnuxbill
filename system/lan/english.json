@@ -1116,5 +1116,8 @@
     "Reminder_Notification_Intervals": "Reminder Notification Intervals",
     "Reminder_Notify_Intervals": "Reminder Notify Intervals",
     "read_documentation": "read documentation",
-    "Day": "Day"
+    "Day": "Day",
+    "Delete_this_widget_": "Delete this widget?",
+    "Remove_this_widget_": "Remove this widget?",
+    "PPPoE_Remote_IP": "PPPoE Remote IP"
 }

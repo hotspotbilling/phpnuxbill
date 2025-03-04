@@ -39,8 +39,7 @@ if ($action == 'add') {
         $enabled = alphanumeric($_POST['enabled']);
         $title = _post('title');
         $widget = _post('widget');
-        $content = _post('content');
-        print_r($_POST);
+
         $d = ORM::for_table('tbl_widgets')->create();
         $d->orders = $orders;
         $d->position = $position;
@@ -48,7 +47,7 @@ if ($action == 'add') {
         $d->enabled = $enabled;
         $d->title = $title;
         $d->widget = $widget;
-        $d->content = $content;
+        $d->content = _post('content');
         $d->save();
         if ($d->id() > 0) {
             r2(getUrl('widgets&user=' . $tipeUser), 's', 'Widget Added Successfully');
@@ -79,8 +78,6 @@ if ($action == 'add') {
         $enabled = alphanumeric($_POST['enabled']);
         $title = _post('title');
         $widget = _post('widget');
-        $content = _post('content');
-
         $d = ORM::for_table('tbl_widgets')->find_one($id);
         $d->orders = $orders;
         $d->position = $position;
@@ -88,7 +85,7 @@ if ($action == 'add') {
         $d->enabled = $enabled;
         $d->title = $title;
         $d->widget = $widget;
-        $d->content = $content;
+        $d->content = _post('content');
         $d->save();
         r2(getUrl('widgets&user=' . $tipeUser), 's', 'Widget Saved Successfully');
     }

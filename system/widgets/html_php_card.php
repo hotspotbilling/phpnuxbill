@@ -16,6 +16,7 @@ class html_php
             echo $e->getTraceAsString();
         }
         $content = ob_get_clean();
-        return $content;
+        $ui->assign('card_body', $content);
+        return $ui->fetch('widget/card_html.tpl');
     }
 }
