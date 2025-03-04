@@ -1114,5 +1114,7 @@
     "3_Days": "3 Days",
     "7_Days": "7 Days",
     "Reminder_Notification_Intervals": "Reminder Notification Intervals",
-    "Reminder_Notify_Intervals": "Reminder Notify Intervals"
+    "Reminder_Notify_Intervals": "Reminder Notify Intervals",
+    "read_documentation": "read documentation",
+    "Day": "Day"
 }

@@ -1484,6 +1484,14 @@ class ORM implements ArrayAccess
     }
 
     /**
+     * Add any WHERE ... LIKE clause to your query.
+     */
+    public function where_likes($column = null, $values = null)
+    {
+        return $this->_addWhere('(' . implode(' LIKE ? OR ', $column) . ' LIKE ? )', $values);
+    }
+
+    /**
      * Add where WHERE ... NOT LIKE clause to your query.
      */
     public function where_not_like($column_name, $value = null)

@@ -56,7 +56,13 @@ switch ($action) {
                     if (count($mts) > 0) {
                         if (count($mts) != count($methods)) {
                             foreach ($mts as $mt) {
-                                $query->where_like('method', "$mt - %");
+                                $w = [];
+                                $v = [];
+                                foreach ($mts as $mt) {
+                                    $w[] ='method';
+                                    $v[] = "$mt - %";
+                                }
+                                $query->where_likes($w, $v);
                             }
                         }
                     }
@@ -85,7 +91,13 @@ switch ($action) {
                     if (count($mts) > 0) {
                         if (count($mts) != count($methods)) {
                             foreach ($mts as $mt) {
-                                $query->where_like('method', "$mt - %");
+                                $w = [];
+                                $v = [];
+                                foreach ($mts as $mt) {
+                                    $w[] ='method';
+                                    $v[] = "$mt - %";
+                                }
+                                $query->where_likes($w, $v);
                             }
                         }
                     }
@@ -116,9 +128,13 @@ switch ($action) {
                     }
                     if (count($mts) > 0) {
                         if (count($mts) != count($methods)) {
+                            $w = [];
+                            $v = [];
                             foreach ($mts as $mt) {
-                                $query->where_like('method', "$mt - %");
+                                $w[] ='method';
+                                $v[] = "$mt - %";
                             }
+                            $query->where_likes($w, $v);
                         }
                     }
                     $count = $query->count();
@@ -158,7 +174,13 @@ switch ($action) {
                 if (count($mts) > 0) {
                     if (count($mts) != count($methods)) {
                         foreach ($mts as $mt) {
-                            $query->where_like('method', "$mt - %");
+                            $w = [];
+                            $v = [];
+                            foreach ($mts as $mt) {
+                                $w[] ='method';
+                                $v[] = "$mt - %";
+                            }
+                            $query->where_likes($w, $v);
                         }
                     }
                 }
@@ -348,11 +370,13 @@ switch ($action) {
             $query->where_in('type', $tps);
         }
         if (count($mts) > 0) {
-            if (count($mts) != count($methods)) {
-                foreach ($mts as $mt) {
-                    $query->where_like('method', "$mt - %");
-                }
+            $w = [];
+            $v = [];
+            foreach ($mts as $mt) {
+                $w[] ='method';
+                $v[] = "$mt - %";
             }
+            $query->where_likes($w, $v);
         }
         if (count($rts) > 0) {
             $query->where_in('routers', $rts);
