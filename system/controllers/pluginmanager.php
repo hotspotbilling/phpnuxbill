@@ -34,7 +34,8 @@ if (file_exists($cache) && time() - filemtime($cache) < (24 * 60 * 60)) {
 }
 switch ($action) {
     case 'refresh':
-        if (file_exists($cache)) unlink($cache);
+        if (file_exists($cache))
+            unlink($cache);
         r2(getUrl('pluginmanager'), 's', 'Refresh success');
         break;
     case 'dlinstall':
@@ -121,7 +122,7 @@ switch ($action) {
             $zip->extractTo($cache);
             $zip->close();
             $folder = $cache . DIRECTORY_SEPARATOR . $plugin . '-main' . DIRECTORY_SEPARATOR;
-            if(!file_exists($folder)) {
+            if (!file_exists($folder)) {
                 $folder = $cache . DIRECTORY_SEPARATOR . $plugin . '-master' . DIRECTORY_SEPARATOR;
             }
             $success = 0;
@@ -161,6 +162,9 @@ switch ($action) {
         }
         break;
     case 'delete':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('pluginmanager'), 'e', 'You cannot perform this action in Demo mode');
+        }
         if (!is_writeable($CACHE_PATH)) {
             r2(getUrl('pluginmanager'), 'e', 'Folder cache/ is not writable');
         }
@@ -171,7 +175,8 @@ switch ($action) {
         $tipe = $routes['2'];
         $plugin = $routes['3'];
         $file = $CACHE_PATH . DIRECTORY_SEPARATOR . $plugin . '.zip';
-        if (file_exists($file)) unlink($file);
+        if (file_exists($file))
+            unlink($file);
         if ($tipe == 'plugin') {
             foreach ($json['plugins'] as $plg) {
                 if ($plg['id'] == $plugin) {
@@ -212,6 +217,9 @@ switch ($action) {
         }
         break;
     case 'install':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('pluginmanager'), 'e', 'You cannot perform this action in Demo mode');
+        }
         if (!is_writeable($CACHE_PATH)) {
             r2(getUrl('pluginmanager'), 'e', 'Folder cache/ is not writable');
         }
@@ -222,7 +230,8 @@ switch ($action) {
         $tipe = $routes['2'];
         $plugin = $routes['3'];
         $file = $CACHE_PATH . DIRECTORY_SEPARATOR . $plugin . '.zip';
-        if (file_exists($file)) unlink($file);
+        if (file_exists($file))
+            unlink($file);
         if ($tipe == 'plugin') {
             foreach ($json['plugins'] as $plg) {
                 if ($plg['id'] == $plugin) {
