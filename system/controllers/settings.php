@@ -58,23 +58,35 @@ switch ($action) {
         }
 
         if (!empty(_get('testWa'))) {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/app'), 'e', 'You cannot perform this action in Demo mode');
+            }
             $result = Message::sendWhatsapp(_get('testWa'), 'PHPNuxBill Test Whatsapp');
             r2(getUrl('settings/app'), 's', 'Test Whatsapp has been send<br>Result: ' . $result);
         }
         if (!empty(_get('testSms'))) {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/app'), 'e', 'You cannot perform this action in Demo mode');
+            }
             $result = Message::sendSMS(_get('testSms'), 'PHPNuxBill Test SMS');
             r2(getUrl('settings/app'), 's', 'Test SMS has been send<br>Result: ' . $result);
         }
         if (!empty(_get('testEmail'))) {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/app'), 'e', 'You cannot perform this action in Demo mode');
+            }
             Message::sendEmail(_get('testEmail'), 'PHPNuxBill Test Email', 'PHPNuxBill Test Email Body');
             r2(getUrl('settings/app'), 's', 'Test Email has been send');
         }
         if (!empty(_get('testTg'))) {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/app'), 'e', 'You cannot perform this action in Demo mode');
+            }
             $result = Message::sendTelegram('PHPNuxBill Test Telegram');
             r2(getUrl('settings/app'), 's', 'Test Telegram has been send<br>Result: ' . $result);
         }
 
-        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
+        $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
         if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
             $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time();
         } else {
@@ -169,6 +181,11 @@ switch ($action) {
         break;
 
     case 'app-post':
+
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/app'), 'e', 'You cannot perform this action in Demo mode');
+        }
+
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
@@ -186,9 +203,11 @@ switch ($action) {
         run_hook('save_settings'); #HOOK
         if (!empty($_FILES['logo']['name'])) {
             if (function_exists('imagecreatetruecolor')) {
-                if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) unlink($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png');
+                if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png'))
+                    unlink($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png');
                 File::resizeCropImage($_FILES['logo']['tmp_name'], $UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png', 1078, 200, 100);
-                if (file_exists($_FILES['logo']['tmp_name'])) unlink($_FILES['logo']['tmp_name']);
+                if (file_exists($_FILES['logo']['tmp_name']))
+                    unlink($_FILES['logo']['tmp_name']);
             } else {
                 r2(getUrl('settings/app'), 'e', 'PHP GD is not installed');
             }
@@ -248,6 +267,10 @@ switch ($action) {
         break;
 
     case 'login-page-post':
+
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/app'), 'e', 'You cannot perform this action in Demo mode');
+        }
         // Login page post
         $login_page_title = _post('login_page_head');
         $login_page_description = _post('login_page_description');
@@ -290,7 +313,8 @@ switch ($action) {
                 $favicon_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('favicon_') . '.' . $extension;
                 File::resizeCropImage($_FILES['login_page_favicon']['tmp_name'], $favicon_path, 16, 16, 100);
                 $settings['login_page_favicon'] = basename($favicon_path); // Save dynamic file name
-                if (file_exists($_FILES['login_page_favicon']['tmp_name'])) unlink($_FILES['login_page_favicon']['tmp_name']);
+                if (file_exists($_FILES['login_page_favicon']['tmp_name']))
+                    unlink($_FILES['login_page_favicon']['tmp_name']);
             } else {
                 r2(getUrl('settings/app'), 'e', 'Favicon must be a JPG, JPEG, or PNG image.');
             }
@@ -303,7 +327,8 @@ switch ($action) {
                 $wallpaper_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('wallpaper_') . '.' . $extension;
                 File::resizeCropImage($_FILES['login_page_wallpaper']['tmp_name'], $wallpaper_path, 1920, 1080, 100);
                 $settings['login_page_wallpaper'] = basename($wallpaper_path); // Save dynamic file name
-                if (file_exists($_FILES['login_page_wallpaper']['tmp_name'])) unlink($_FILES['login_page_wallpaper']['tmp_name']);
+                if (file_exists($_FILES['login_page_wallpaper']['tmp_name']))
+                    unlink($_FILES['login_page_wallpaper']['tmp_name']);
             } else {
                 r2(getUrl('settings/app'), 'e', 'Wallpaper must be a JPG, JPEG, or PNG image.');
             }
@@ -316,7 +341,8 @@ switch ($action) {
                 $logo_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('logo_') . '.' . $extension;
                 File::resizeCropImage($_FILES['login_page_logo']['tmp_name'], $logo_path, 300, 60, 100);
                 $settings['login_page_logo'] = basename($logo_path); // Save dynamic file name
-                if (file_exists($_FILES['login_page_logo']['tmp_name'])) unlink($_FILES['login_page_logo']['tmp_name']);
+                if (file_exists($_FILES['login_page_logo']['tmp_name']))
+                    unlink($_FILES['login_page_logo']['tmp_name']);
             } else {
                 r2(getUrl('settings/app'), 'e', 'Logo must be a JPG, JPEG, or PNG image.');
             }
@@ -372,9 +398,12 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/localisation'), 'e', 'You cannot perform this action in Demo mode');
+        }
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
-            r2(getUrl('settings/app'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            r2(getUrl('settings/localisation'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $tzone = _post('tzone');
         $date_format = _post('date_format');
@@ -382,7 +411,7 @@ switch ($action) {
         $lan = _post('lan');
         run_hook('save_localisation'); #HOOK
         if ($tzone == '' or $date_format == '' or $lan == '') {
-            r2(getUrl('settings/app'), 'e', Lang::T('All field is required'));
+            r2(getUrl('settings/localisation'), 'e', Lang::T('All field is required'));
         } else {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'timezone')->find_one();
             $d->value = $tzone;
@@ -485,11 +514,11 @@ switch ($action) {
             } else if ($admin['user_type'] == 'Admin') {
                 $query = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $search . '%')->where_any_is([
-                        ['user_type' => 'Report'],
-                        ['user_type' => 'Agent'],
-                        ['user_type' => 'Sales'],
-                        ['id' => $admin['id']]
-                    ])->order_by_asc('id');
+                            ['user_type' => 'Report'],
+                            ['user_type' => 'Agent'],
+                            ['user_type' => 'Sales'],
+                            ['id' => $admin['id']]
+                        ])->order_by_asc('id');
                 $d = Paginator::findMany($query, ['search' => $search]);
             } else {
                 $query = ORM::for_table('tbl_users')
@@ -555,7 +584,7 @@ switch ($action) {
         break;
     case 'users-view':
         $ui->assign('_title', Lang::T('Edit User'));
-        $id  = $routes['2'];
+        $id = $routes['2'];
         if (empty($id)) {
             $id = $admin['id'];
         }
@@ -590,7 +619,7 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         $ui->assign('_title', Lang::T('Edit User'));
-        $id  = $routes['2'];
+        $id = $routes['2'];
         if (empty($id)) {
             $id = $admin['id'];
         }
@@ -646,8 +675,10 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-
-        $id  = $routes['2'];
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/users'), 'e', 'You cannot perform this action in Demo mode');
+        }
+        $id = $routes['2'];
         if (($admin['id']) == $id) {
             r2(getUrl('settings/users'), 'e', 'Sorry You can\'t delete yourself');
         }
@@ -664,6 +695,9 @@ switch ($action) {
     case 'users-post':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+        }
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/users-add'), 'e', 'You cannot perform this action in Demo mode');
         }
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
@@ -733,6 +767,9 @@ switch ($action) {
         break;
 
     case 'users-edit-post':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/users-edit/'), 'e', 'You cannot perform this action in Demo mode');
+        }
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
             r2(getUrl('settings/users-edit/'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
@@ -826,7 +863,7 @@ switch ($action) {
                         }
                     }
                     if (file_exists($imgPath)) {
-                        if ($d['photo'] != ''  && strpos($d['photo'], 'default') === false) {
+                        if ($d['photo'] != '' && strpos($d['photo'], 'default') === false) {
                             if (file_exists($UPLOAD_PATH . $d['photo'])) {
                                 unlink($UPLOAD_PATH . $d['photo']);
                                 if (file_exists($UPLOAD_PATH . $d['photo'] . '.thumb.jpg')) {
@@ -836,7 +873,8 @@ switch ($action) {
                         }
                         $d->photo = '/photos/' . $subfolder . '/' . $hash . '.jpg';
                     }
-                    if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
+                    if (file_exists($_FILES['photo']['tmp_name']))
+                        unlink($_FILES['photo']['tmp_name']);
                 } else {
                     r2(getUrl('settings/app'), 'e', 'PHP GD is not installed');
                 }
@@ -886,6 +924,9 @@ switch ($action) {
         break;
 
     case 'change-password-post':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/change-password'), 'e', 'You cannot perform this action in Demo mode');
+        }
         $password = _post('password');
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
@@ -942,6 +983,9 @@ switch ($action) {
         $ui->display('admin/settings/notifications.tpl');
         break;
     case 'notifications-post':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/notifications'), 'e', 'You cannot perform this action in Demo mode');
+        }
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
@@ -971,6 +1015,9 @@ switch ($action) {
         break;
 
     case 'dbbackup':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/dbstatus'), 'e', 'You cannot perform this action in Demo mode');
+        }
         if (!in_array($admin['user_type'], ['SuperAdmin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
@@ -991,6 +1038,9 @@ switch ($action) {
         echo json_encode($array);
         break;
     case 'dbrestore':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/dbstatus'), 'e', 'You cannot perform this action in Demo mode');
+        }
         if (!in_array($admin['user_type'], ['SuperAdmin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
@@ -1038,7 +1088,8 @@ switch ($action) {
             } catch (Throwable $e) {
             } catch (Exception $e) {
             }
-            if (file_exists($_FILES['json']['tmp_name'])) unlink($_FILES['json']['tmp_name']);
+            if (file_exists($_FILES['json']['tmp_name']))
+                unlink($_FILES['json']['tmp_name']);
             r2(getUrl('settings/dbstatus'), 's', "Restored $suc success $fal failed");
         } else {
             r2(getUrl('settings/dbstatus'), 'e', 'Upload failed');
@@ -1060,6 +1111,9 @@ switch ($action) {
         break;
 
     case 'lang-post':
+        if ($_app_stage == 'Demo') {
+            r2(getUrl('settings/dbstatus'), 'e', 'You cannot perform this action in Demo mode');
+        }
         $csrf_token = _post('csrf_token');
         if (!Csrf::check($csrf_token)) {
             r2(getUrl('settings/language'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
@@ -1075,6 +1129,9 @@ switch ($action) {
         }
 
         if (_post('save') == 'save') {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/maintenance'), 'e', 'You cannot perform this action in Demo mode');
+            }
             $csrf_token = _post('csrf_token');
             if (!Csrf::check($csrf_token)) {
                 r2(getUrl('settings/maintenance'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
@@ -1117,6 +1174,9 @@ switch ($action) {
             exit;
         }
         if (_post('save') == 'save') {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/miscellaneous'), 'e', 'You cannot perform this action in Demo mode');
+            }
             $csrf_token = _post('csrf_token');
             if (!Csrf::check($csrf_token)) {
                 r2(getUrl('settings/miscellaneous'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
