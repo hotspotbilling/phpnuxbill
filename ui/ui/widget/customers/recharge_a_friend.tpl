@@ -7,7 +7,7 @@
             <div class="form-group">
                 <div class="col-sm-10">
                     <input type="text" id="username" name="username" class="form-control" required
-                        placeholder="{Lang::T('Usernames')}">
+                        placeholder="{Lang::T('Friend username')}">
                 </div>
                 <div class="form-group col-sm-2" align="center">
                     <button class="btn btn-success btn-block" id="sendBtn" type="submit" name="send"
