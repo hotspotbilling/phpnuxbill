@@ -31,7 +31,7 @@
 
             {if $_c['enable_balance'] == 'yes'}
                 <tr>
-                    <td class="small text-warning text-uppercase text-normal">{Lang::T('Yours Balance')}</td>
+                    <td class="small text-warning text-uppercase text-normal">{Lang::T('Yours Balances')}</td>
                     <td class="small mb15 text-bold">
                         {Lang::moneyFormat($_user['balance'])}
                         {if $_user['auto_renewal'] == 1}
