@@ -15,9 +15,23 @@
                         <div class="col-md-6">
                             <select class="form-control select2" name="router" id="router">
                                 <option value="">{Lang::T('All Routers')}</option>
+                                {if $_c['radius_enable']}
+                                <option value="radius">{Lang::T('Radius')}</option>
+                                {/if}
                                 {foreach $routers as $router}
                                 <option value="{$router['id']}">{$router['name']}</option>
                                 {/foreach}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Service Type')}</label>
+                        <div class="col-md-6">
+                            <select class="form-control" name="service" id="service">
+                                <option value="all" {if $group=='all' }selected{/if}>{Lang::T('All')}</option>
+                                <option value="PPPoE" {if $service=='PPPoE' }selected{/if}>{Lang::T('PPPoE')}</option>
+                                <option value="Hotspot" {if $service=='Hotspot' }selected{/if}>{Lang::T('Hotspot')}</option>
+                                <option value="VPN" {if $service=='VPN' }selected{/if}>{Lang::T('VPN')}</option>
                             </select>
                         </div>
                     </div>
@@ -101,6 +115,8 @@
                     <th>{Lang::T('Phone')}</th>
                     <th>{Lang::T('Status')}</th>
                     <th>{Lang::T('Message')}</th>
+                    <th>{Lang::T('Router')}</th>
+                    <th>{Lang::T('Service Type')}</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -140,7 +156,8 @@
                 batch: $('#batch').val(),
                 router: $('#router').val() || '',
                 page: page,
-                test: $('#test').is(':checked') ? 'on' : 'off'
+                test: $('#test').is(':checked') ? 'on' : 'off',
+                service: $('#service').val(),
             },
             dataType: 'json',
             beforeSend: function () {
@@ -171,7 +188,9 @@
                             msg.name,
                             msg.phone,
                             `<span class="text-${statusClass}">${msg.status}</span>`,
-                            msg.message || 'No message'
+                            msg.message || 'No message',
+                            msg.router ? msg.router : 'All Router', 
+                            msg.service == 'all' ? 'All Service' : (msg.service || 'No Service')
                         ]).draw(false); // Add row without redrawing the table
                     });
 

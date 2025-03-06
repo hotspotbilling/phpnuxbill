@@ -134,30 +134,55 @@ EOT;
         $page = $_REQUEST['page'] ?? 0;
         $router = $_REQUEST['router'] ?? null;
         $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on' ? true : false;
+        $service = $_REQUEST['service'] ?? '';
 
-        if (empty($group) || empty($message) || empty($via)) {
+        if (empty($group) || empty($message) || empty($via) || empty($service)) {
             die(json_encode(['status' => 'error', 'message' => 'All fields are required']));
         }
 
         // Get batch of customers based on group
         $startpoint = $page * $batch;
         $customers = [];
+        $totalCustomers = 0;
 
         if (isset($router) && !empty($router)) {
-            $router = ORM::for_table('tbl_routers')->find_one($router);
-            if (!$router) {
-                die(json_encode(['status' => 'error', 'message' => 'Invalid router']));
+            switch ($router) {
+                case 'radius':
+                    $routerName = 'Radius';
+                    break;
+                default:
+                    $router = ORM::for_table('tbl_routers')->find_one($router);
+                    if (!$router) {
+                        die(json_encode(['status' => 'error', 'message' => 'Invalid router']));
+                    }
+                    $routerName = $router->name;
+                    break;
             }
+        }
 
+        if (isset($router) && !empty($router)) {
             $query = ORM::for_table('tbl_user_recharges')
                 ->left_outer_join('tbl_customers', 'tbl_user_recharges.customer_id = tbl_customers.id')
-                ->where('tbl_user_recharges.routers', $router->name)
-                ->offset($startpoint)
+                ->where('tbl_user_recharges.routers', $routerName);
+
+            switch ($service) {
+                case 'all':
+                    break;
+                default:
+                    $validServices = ['PPPoE', 'Hotspot', 'VPN'];
+                    if (in_array($service, $validServices)) {
+                        $query->where('type', $service);
+                    }
+                    break;
+            }
+
+            $totalCustomers = $query->count();
+
+            $query->offset($startpoint)
                 ->limit($batch);
 
             switch ($group) {
                 case 'all':
-                    // No additional conditions needed
                     break;
                 case 'new':
                     $query->where_raw("DATE(recharged_on) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)");
@@ -170,6 +195,7 @@ EOT;
                     break;
             }
 
+            // Fetch the customers
             $query->selects([
                 ['tbl_customers.phonenumber', 'phonenumber'],
                 ['tbl_user_recharges.customer_id', 'customer_id'],
@@ -179,20 +205,74 @@ EOT;
         } else {
             switch ($group) {
                 case 'all':
-                    $customers = ORM::for_table('tbl_customers')->offset($startpoint)->limit($batch)->find_array();
+                    $totalCustomersQuery = ORM::for_table('tbl_customers');
+
+                    switch ($service) {
+                        case 'all':
+                            break;
+                        default:
+                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
+                            if (in_array($service, $validServices)) {
+                                $totalCustomersQuery->where('service_type', $service);
+                            }
+                            break;
+                    }
+                    $totalCustomers = $totalCustomersQuery->count();
+                    $customers = $totalCustomersQuery->offset($startpoint)->limit($batch)->find_array();
                     break;
+
                 case 'new':
-                    $customers = ORM::for_table('tbl_customers')
-                        ->where_raw("DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)")
-                        ->offset($startpoint)->limit($batch)->find_array();
+                    $totalCustomersQuery = ORM::for_table('tbl_customers')
+                        ->where_raw("DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)");
+
+                    switch ($service) {
+                        case 'all':
+                            break;
+                        default:
+                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
+                            if (in_array($service, $validServices)) {
+                                $totalCustomersQuery->where('service_type', $service);
+                            }
+                            break;
+                    }
+                    $totalCustomers = $totalCustomersQuery->count();
+                    $customers = $totalCustomersQuery->offset($startpoint)->limit($batch)->find_array();
                     break;
+
                 case 'expired':
-                    $customers = ORM::for_table('tbl_user_recharges')->where('status', 'off')
-                        ->select('customer_id')->offset($startpoint)->limit($batch)->find_array();
+                    $totalCustomersQuery = ORM::for_table('tbl_user_recharges')
+                        ->where('status', 'off');
+
+                    switch ($service) {
+                        case 'all':
+                            break;
+                        default:
+                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
+                            if (in_array($service, $validServices)) {
+                                $totalCustomersQuery->where('type', $service);
+                            }
+                            break;
+                    }
+                    $totalCustomers = $totalCustomersQuery->count();
+                    $customers = $totalCustomersQuery->select('customer_id')->offset($startpoint)->limit($batch)->find_array();
                     break;
+
                 case 'active':
-                    $customers = ORM::for_table('tbl_user_recharges')->where('status', 'on')
-                        ->select('customer_id')->offset($startpoint)->limit($batch)->find_array();
+                    $totalCustomersQuery = ORM::for_table('tbl_user_recharges')
+                        ->where('status', 'on');
+
+                    switch ($service) {
+                        case 'all':
+                            break;
+                        default:
+                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
+                            if (in_array($service, $validServices)) {
+                                $totalCustomersQuery->where('type', $service);
+                            }
+                            break;
+                    }
+                    $totalCustomers = $totalCustomersQuery->count();
+                    $customers = $totalCustomersQuery->select('customer_id')->offset($startpoint)->limit($batch)->find_array(); // Get customer data
                     break;
             }
         }
@@ -200,45 +280,6 @@ EOT;
         // Ensure $customers is always an array
         if (!$customers) {
             $customers = [];
-        }
-
-        // Calculate total customers for the group
-        $totalCustomers = 0;
-        if ($router) {
-            switch ($group) {
-                case 'all':
-                    $totalCustomers = ORM::for_table('tbl_user_recharges')->where('routers', $router->routers)->count();
-                    break;
-                case 'new':
-                    $totalCustomers = ORM::for_table('tbl_user_recharges')
-                        ->where_raw("DATE(recharged_on) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")
-                        ->where('routers', $router->routers)
-                        ->count();
-                    break;
-                case 'expired':
-                    $totalCustomers = ORM::for_table('tbl_user_recharges')->where('status', 'off')->where('routers', $router->routers)->count();
-                    break;
-                case 'active':
-                    $totalCustomers = ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $router->routers)->count();
-                    break;
-            }
-        } else {
-            switch ($group) {
-                case 'all':
-                    $totalCustomers = ORM::for_table('tbl_customers')->count();
-                    break;
-                case 'new':
-                    $totalCustomers = ORM::for_table('tbl_customers')
-                        ->where_raw("DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)")
-                        ->count();
-                    break;
-                case 'expired':
-                    $totalCustomers = ORM::for_table('tbl_user_recharges')->where('status', 'off')->count();
-                    break;
-                case 'active':
-                    $totalCustomers = ORM::for_table('tbl_user_recharges')->where('status', 'on')->count();
-                    break;
-            }
         }
 
         // Send messages
@@ -271,7 +312,9 @@ EOT;
                     'name' => $customer['fullname'],
                     'phone' => $customer['phonenumber'],
                     'status' => 'Test Mode',
-                    'message' => $currentMessage
+                    'message' => $currentMessage,
+                    'service' => $service,
+                    'router' => $routerName,
                 ];
             } else {
                 if ($via == 'sms' || $via == 'both') {
@@ -307,7 +350,9 @@ EOT;
             'message' => $currentMessage,
             'totalSent' => $totalSMSSent + $totalWhatsappSent,
             'totalFailed' => $totalSMSFailed + $totalWhatsappFailed,
-            'hasMore' => $hasMore
+            'hasMore' => $hasMore,
+            'service' => $service,
+            'router' => $routerName,
         ]);
         break;
 
