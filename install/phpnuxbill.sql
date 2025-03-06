@@ -289,6 +289,16 @@ CREATE TABLE IF NOT EXISTS `tbl_widgets` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE tbl_message_logs (
+    `id` SERIAL PRIMARY KEY,
+    `message_type` VARCHAR(50),
+    `recipient` VARCHAR(255),
+    `message_content` TEXT,
+    `status` VARCHAR(50),
+    `error_message` TEXT,
+    `sent_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 ALTER TABLE `rad_acct`
   ADD PRIMARY KEY (`id`),
   ADD KEY `username` (`username`),

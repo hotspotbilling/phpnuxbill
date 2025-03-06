@@ -320,4 +320,10 @@ class User
         }
         return $html;
     }
+    public static function find($id)
+    {
+        return ORM::for_table('tbl_customers')->find_one($id);
+    }
 }
+
+

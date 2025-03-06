@@ -80,6 +80,39 @@ switch ($action) {
         }
         break;
 
+    case 'message-csv':
+        $logs = ORM::for_table('tbl_message_logs')
+            ->select('id')
+            ->select('message_type')
+            ->select('recipient')
+            ->select('message_content')
+            ->select('status')
+            ->select('error_message')
+            ->select('sent_at')
+            ->order_by_asc('id')->find_array();
+        $h = false;
+        set_time_limit(-1);
+        header('Pragma: public');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header("Content-type: text/csv");
+        header('Content-Disposition: attachment;filename="message-logs_' . date('Y-m-d_H_i') . '.csv"');
+        header('Content-Transfer-Encoding: binary');
+        foreach ($logs as $log) {
+            $ks = [];
+            $vs = [];
+            foreach ($log as $k => $v) {
+                $ks[] = $k;
+                $vs[] = $v;
+            }
+            if (!$h) {
+                echo '"' . implode('";"', $ks) . "\"\n";
+                $h = true;
+            }
+            echo '"' . implode('";"', $vs) . "\"\n";
+        }
+        break;
+
     case 'list':
         $q = (_post('q') ? _post('q') : _get('q'));
         $keep = _post('keep');
@@ -119,6 +152,33 @@ switch ($action) {
         $ui->display('admin/logs/radius.tpl');
         break;
 
+    case 'message':
+        $q = _post('q') ?: _get('q');
+        $keep = (int) _post('keep');
+        if (!empty($keep)) {
+            ORM::raw_execute("DELETE FROM tbl_message_logs WHERE UNIX_TIMESTAMP(sent_at) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))");
+            r2(getUrl('logs/message/'), 's', "Deleted logs older than $keep days");
+        }
+
+        if ($q !== null && $q !== '') {
+            $query = ORM::for_table('tbl_message_logs')
+            ->whereRaw("message_type LIKE '%$q%' OR recipient LIKE '%$q%' OR message_content LIKE '%$q%' OR status LIKE '%$q%' OR error_message LIKE '%$q%'")
+                ->order_by_desc('sent_at');
+            $d = Paginator::findMany($query, ['q' => $q]);
+        } else {
+            $query = ORM::for_table('tbl_message_logs')->order_by_desc('sent_at');
+            $d = Paginator::findMany($query);
+        }
+
+        if ($d) {
+            $ui->assign('d', $d);
+        } else {
+            $ui->assign('d', []);
+        }
+
+        $ui->assign('q', $q);
+        $ui->display('admin/logs/message.tpl');
+        break;
 
     default:
         r2(getUrl('logs/list/'), 's', '');

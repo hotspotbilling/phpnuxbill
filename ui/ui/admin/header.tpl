@@ -364,6 +364,8 @@
                                             href="{Text::url('logs/radius')}">Radius</a>
                                     </li>
                                 {/if}
+                                <li {if $_routes[1] eq 'message' }class="active" {/if}><a
+                                    href="{Text::url('logs/message')}">Message</a></li>
                                 {$_MENU_LOGS}
                             </ul>
                         </li>
