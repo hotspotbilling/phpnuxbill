@@ -149,6 +149,9 @@ class MikrotikPppoe
         if(!empty(trim($bw['burst']))){
             $rate .= ' '.$bw['burst'];
         }
+		if ($bw['rate_up'] == '0' || $bw['rate_down'] == '0') {
+			$rate = '';
+		}
         $pool = ORM::for_table("tbl_pool")->where("pool_name", $plan['pool'])->find_one();
         $addRequest = new RouterOS\Request('/ppp/profile/add');
         $client->sendSync(
@@ -205,6 +208,9 @@ class MikrotikPppoe
             if(!empty(trim($bw['burst']))){
                 $rate .= ' '.$bw['burst'];
             }
+			if ($bw['rate_up'] == '0' || $bw['rate_down'] == '0') {
+				$rate = '';
+			}
             $pool = ORM::for_table("tbl_pool")->where("pool_name", $new_plan['pool'])->find_one();
             $setRequest = new RouterOS\Request('/ppp/profile/set');
             $client->sendSync(
