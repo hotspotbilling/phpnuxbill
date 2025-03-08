@@ -122,6 +122,9 @@ class MikrotikHotspot
         if (!empty(trim($bw['burst']))) {
             $rate .= ' ' . $bw['burst'];
         }
+		if ($bw['rate_up'] == '0' || $bw['rate_down'] == '0') {
+			$rate = '';
+		}
         $addRequest = new RouterOS\Request('/ip/hotspot/user/profile/add');
         $client->sendSync(
             $addRequest
@@ -202,6 +205,9 @@ class MikrotikHotspot
             if (!empty(trim($bw['burst']))) {
                 $rate .= ' ' . $bw['burst'];
             }
+			if ($bw['rate_up'] == '0' || $bw['rate_down'] == '0') {
+				$rate = '';
+			}
             $setRequest = new RouterOS\Request('/ip/hotspot/user/profile/set');
             $client->sendSync(
                 $setRequest
