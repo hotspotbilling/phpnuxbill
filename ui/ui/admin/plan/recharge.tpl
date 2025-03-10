@@ -56,7 +56,9 @@
                                 {if $_c['enable_balance'] eq 'yes'}
                                     <option value="balance">{Lang::T('Customer Balance')}</option>
                                 {/if}
-                                <option value="zero">{$_c['currency_code']} 0</option>
+                                {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                                    <option value="zero">{$_c['currency_code']} 0</option>
+                                {/if}
                             </select>
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Postpaid Recharge for the first time use')}
@@ -64,7 +66,8 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
-                            <button class="btn btn-success" onclick="return ask(this, '{Lang::T('Continue the Recharge process')}?')"
+                            <button class="btn btn-success"
+                                onclick="return ask(this, '{Lang::T('Continue the Recharge process')}?')"
                                 type="submit">{Lang::T('Recharge')}</button>
                             {Lang::T('Or')} <a href="{Text::url('')}customers/list">{Lang::T('Cancel')}</a>
                         </div>

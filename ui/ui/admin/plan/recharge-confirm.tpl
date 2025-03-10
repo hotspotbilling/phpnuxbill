@@ -66,8 +66,10 @@
                                         <option value="balance" {if $using eq 'balance'}selected{/if}>
                                             {Lang::T('Customer Balance')}</option>
                                     {/if}
-                                    <option value="zero" {if $using eq 'zero'}selected{/if}>{$_c['currency_code']} 0
-                                    </option>
+                                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                                        <option value="zero" {if $using eq 'zero'}selected{/if}>{$_c['currency_code']} 0
+                                        </option>
+                                    {/if}
                                 </select>
                             </span>
                         </li>
