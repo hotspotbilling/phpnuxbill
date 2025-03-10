@@ -17,15 +17,18 @@ require $root_path . 'system/autoload/mail/SMTP.php';
 class Message
 {
 
-    public static function sendTelegram($txt, $chat_id = null)
+    public static function sendTelegram($txt, $chat_id = null, $topik = '')
     {
         global $config;
-        run_hook('send_telegram', [$txt, $chat_id = null]); #HOOK
+        run_hook('send_telegram', [$txt, $chat_id, $topik]); #HOOK
         if (!empty($config['telegram_bot'])) {
             if (empty($chat_id)) {
                 $chat_id = $config['telegram_target_id'];
             }
-            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?chat_id=' . $chat_id . '&text=' . urlencode($txt));
+            if (!empty($topik)) {
+                $topik = "message_thread_id=$topik&";
+            }
+            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?'.$topik.'chat_id=' . $chat_id . '&text=' . urlencode($txt));
         }
     }
 
