@@ -130,7 +130,7 @@
                 <h3 class="box-title">{Lang::T('WhatsApp Gateway and Free Telegram Bot')}</h3>
             </div>
             <div class="box-body">
-                {Lang::T('Use WhatsApp Gateway to easily connect your services to WhatsApp. Also, enjoy the ease of creating Telegram bots with the help of the wizard available here.')}
+                {Lang::T('Connect your PHPNuxBill to WhatsApp efficiently using WhatsApp Gateway. Also, create Telegram bots easily and practically.')}
             </div>
             <div class="box-footer">
                 <a href="https://wa.nux.my.id/login" target="_blank"
