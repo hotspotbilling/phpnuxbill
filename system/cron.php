@@ -89,7 +89,13 @@ foreach ($d as $ds) {
 
             // Send notification and update user status
             try {
-                echo Message::sendPackageNotification($c, $u['namebp'], $p['price'], $textExpired, $config['user_notification_expired']) . "\n";
+                echo Message::sendPackageNotification(
+                    $c,
+                    $u['namebp'],
+                    $p['price'],
+                    Message::getMessageType($p['type'], $textExpired),
+                    $config['user_notification_expired']
+                ) . "\n";
                 $u->status = 'off';
                 $u->save();
             } catch (Throwable $e) {
