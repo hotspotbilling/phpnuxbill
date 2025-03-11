@@ -384,6 +384,7 @@
     "Vouchers": "Voucher",
     "Refill_Customer": "Isi Ulang Voucher",
     "Recharge_Customer": "Isi Ulang Paket",
+    "Plan": "Paket",
     "Plans": "Paket",
     "PPPOE": "PPPOE",
     "Bandwidth": "Bandwidth",
@@ -911,5 +912,7 @@
     "Mandatory_Fields": "Bidang yang wajib diisi",
     "Single_Admin_Session": "Sesi Admin Tunggal",
     "Mikrotik_SMS_Command": "Perintah SMS Mikrotik",
-    "Expired_Cronjob_Every_5_Minutes__Recommended_": "Cronjob Kedaluwarsa Setiap 5 Menit [Direkomendasikan]"
+    "Expired_Cronjob_Every_5_Minutes__Recommended_": "Cronjob Kedaluwarsa Setiap 5 Menit [Direkomendasikan]",
+    "Visit": "Kunjungi",
+    "sync": "Sinkron"
 }
