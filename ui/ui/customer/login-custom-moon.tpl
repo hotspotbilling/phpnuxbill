@@ -3,13 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{$_title} - {$_c['CompanyName']}</title>
     <link rel="shortcut icon" href="./{$favicon}" type="image/x-icon" />
     <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css' />
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css' />
-    <!-- SweetAlert CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
-    <!-- SweetAlert JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <style>
         .login-fg .form-container {
@@ -364,28 +363,6 @@
             color: #db4437;
         }
 
-        @media (max-width: 1200px) {
-            .login-fg .info h1 {
-                font-size: 45px;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .login-fg .bg {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .login-fg .login-section .social li a {
-                width: 100px;
-            }
-
-            .login-fg .logo a {
-                font-size: 26px;
-            }
-        }
-
         footer {
             position: absolute;
             bottom: 0;
@@ -429,6 +406,47 @@
             background-color: #00f2fe;
         }
 
+        .submit-btn {
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .logo img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            inputmode: "verbatim";
+        }
+
+        @media (max-width: 1200px) {
+            .login-fg .info h1 {
+                font-size: 45px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .login-fg .bg {
+                display: none;
+            }
+        }
+
         @media (max-width: 768px) {
 
             input,
@@ -436,14 +454,76 @@
                 padding: 12px;
                 font-size: 15px;
             }
+
+            .login-fg .login-section {
+                padding: 15px;
+                max-width: 100%;
+            }
+
+            .login-fg .logo img {
+                max-width: 200px;
+                height: auto;
+            }
+
+            .login-fg .info h1 {
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
+
+            .login-fg .info p {
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            footer {
+                position: relative;
+                margin-top: 20px;
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .login-fg .login-section h4 {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+
+            .login-fg .login-section .social li a {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .checkbox a {
+                display: block;
+                text-align: right;
+                margin-top: 10px;
+            }
+
+            .login-fg .login-section .social li a {
+                width: 100px;
+            }
+
+            .login-fg .logo a {
+                font-size: 26px;
+            }
         }
 
         @media (max-width: 480px) {
+            .login-fg .login {
+                padding: 15px;
+            }
 
             input,
             .submit-btn {
                 padding: 10px;
-                font-size: 14px;
+                font-size: 15px;
+            }
+
+            .login-fg .login-section h4 {
+                font-size: 16px;
+            }
+
+            footer {
+                font-size: 11px;
             }
         }
 
@@ -460,18 +540,18 @@
 
 <body>
     {if isset($notify)}
-        <script>
-            // Display SweetAlert toast notification
-            document.body.style.overflow = 'hidden';
-            Swal.fire({
-                icon: '{if $notify_t == "s"}success{else}warning{/if}',
-                title: '{if $notify_t == "s"}Success{else}Error{/if}',
-                text: '{$notify}',
-                backdrop: 'rgba(0, 0, 0, 0.5)',
-            }).then(() => {
-                document.body.style.overflow = '';
-            });
-        </script>
+    <script>
+        // Display SweetAlert toast notification
+        document.body.style.overflow = 'hidden';
+        Swal.fire({
+            icon: '{if $notify_t == "s"}success{else}warning{/if}',
+            title: '{if $notify_t == "s"}Success{else}Error{/if}',
+            text: '{$notify}',
+            backdrop: 'rgba(0, 0, 0, 0.5)',
+        }).then(() => {
+            document.body.style.overflow = '';
+        });
+    </script>
     {/if}
     <!-- partial:index.partial.html -->
     <div class="login-fg">
@@ -530,8 +610,8 @@
                             </form>
                         </div>
                         {if $_c['disable_registration'] != 'noreg'}
-                            <p>{Lang::T('Don\'t have an account?')} <a href="{Text::url('register')}"
-                                    class="linkButton">{Lang::T('Register')}</a></p>
+                        <p>{Lang::T('Don\'t have an account?')} <a href="{Text::url('register')}"
+                                class="linkButton">{Lang::T('Register')}</a></p>
                         {/if}
                         <footer>
                             © {$smarty.now|date_format:"%Y"} {$_c['CompanyName']}. All rights reserved. <br> <a
@@ -551,25 +631,25 @@
         const loginBtn = document.getElementById('login-btn');
         const loginText = document.getElementById('login-text');
 
-        loginForm.addEventListener('submit', function(event) {
+        loginForm.addEventListener('submit', function (event) {
             loginBtn.classList.add('loading');
             loginText.textContent = 'Please Wait...';
         });
     </script>
     {if $_c['tawkto'] != ''}
-        <!--Start of Tawk.to Script-->
-        <script type="text/javascript">
-            var isLoggedIn = false;
-            var Tawk_API = {
-                onLoad: function() {
-                    if (!isLoggedIn) {
-                        isLoggedIn = true;
-                        window.Tawk_API.login({
-                            name: '{$_user['fullname']}',
-                            email: '{$_user['email']}',
-                            userId: '{$_user['id']}'
-                        }, function(error) {
-                            //do something if there's an error
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var isLoggedIn = false;
+        var Tawk_API = {
+            onLoad: function () {
+                if (!isLoggedIn) {
+                    isLoggedIn = true;
+                    window.Tawk_API.login({
+                        name: '{$_user['fullname']}',
+                        email: '{$_user['email']}',
+                        userId: '{$_user['id']}'
+                        }, function (error) {
+                        //do something if there's an error
                     });
                 }
                 Tawk_API.setAttributes({
@@ -579,7 +659,7 @@
                     'balance': '{$_user['balance']}',
                     'account_type': '{$_user['account_type']}',
                     'phone': '{$_user['phonenumber']}'
-                }, function(error) {});
+                }, function (error) { });
             }
         };
         var Tawk_LoadStart = new Date();
@@ -588,18 +668,44 @@
             email: '{$_user['email']}',
             userId: '{$_user['id']}'
         };
-        (function() {
+        (function () {
             var s1 = document.createElement("script"),
                 s0 = document.getElementsByTagName("script")[0];
             s1.async = true;
             s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
             s1.charset = 'UTF-8';
             s1.setAttribute('crossorigin', '*');
-                s0.parentNode.insertBefore(s1, s0);
-            })();
-        </script>
-        <!--End of Tawk.to Script-->
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <!--End of Tawk.to Script-->
     {/if}
+    <script>
+        document.body.classList.add('touch-device');
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let metaViewport = document.querySelector('meta[name="viewport"]');
+            const originalContent = metaViewport.content;
+
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('focus', () => {
+                    metaViewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0';
+                });
+
+                input.addEventListener('blur', () => {
+                    metaViewport.content = originalContent;
+                });
+            });
+
+            // Touch detection
+            if ('ontouchstart' in window) {
+                document.body.classList.add('touch-device');
+            } else {
+                document.body.classList.add('no-touch');
+            }
+        });
+    </script>
 </body>
 
 </html>
