@@ -48,7 +48,28 @@ $ui = new class($key)
     }
     function getAll()
     {
-        return $this->assign;
+
+        $result = [];
+        foreach ($this->assign as $key => $value) {
+            if($value instanceof ORM){
+                $result[$key] = $value->as_array();
+            }else if($value instanceof IdiormResultSet){
+                $count = count($value);
+                for($n=0;$n<$count;$n++){
+                    foreach ($value[$n] as $k=>$v) {
+                        $result[$key][$n][$k] = $v;
+                    }
+                }
+            }else{
+                $result[$key] = $value;
+            }
+        }
+        return $result;
+    }
+
+    function fetch()
+    {
+        return "";
     }
 };
 

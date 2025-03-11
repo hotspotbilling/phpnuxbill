@@ -90,7 +90,7 @@
                         <label class="col-md-3 control-label">{Lang::T('Coordinates')}</label>
                         <div class="col-md-9">
                             <input name="coordinates" id="coordinates" class="form-control" value=""
-                                placeholder="6.465422, 3.406448">
+                                placeholder="-6.465422, 3.406448">
                             <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
                         </div>
                     </div>
@@ -98,9 +98,11 @@
                 <div class="panel-heading">PPPoE</div>
                 <div class="panel-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Usernames')} <span class="label label-danger" id="warning_username"></span></label>
+                        <label class="col-md-3 control-label">{Lang::T('Usernames')} <span class="label label-danger"
+                                id="warning_username"></span></label>
                         <div class="col-md-9">
-                            <input type="username" class="form-control" id="pppoe_username" name="pppoe_username" onkeyup="checkUsername(this, '0')">
+                            <input type="username" class="form-control" id="pppoe_username" name="pppoe_username"
+                                onkeyup="checkUsername(this, '0')">
                             <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
                         </div>
                     </div>
@@ -112,9 +114,11 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">Remote IP <span class="label label-danger" id="warning_ip"></span></label>
+                        <label class="col-md-3 control-label">Remote IP <span class="label label-danger"
+                                id="warning_ip"></span></label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip" onkeyup="checkIP(this, '0')">
+                            <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
+                                onkeyup="checkIP(this, '0')">
                             <span class="help-block">{Lang::T('Also Working for freeradius')}</span>
                         </div>
                     </div>
@@ -204,7 +208,8 @@
         </div>
     </div>
     <center>
-        <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the process of adding Customer Data?")}')" type="submit">
+        <button class="btn btn-primary"
+            onclick="return ask(this, '{Lang::T("Continue the process of adding Customer Data?")}')" type="submit">
             {Lang::T('Save Changes')}
         </button>
         <br><a href="{Text::url('customers/list')}" class="btn btn-link">{Lang::T('Cancel')}</a>

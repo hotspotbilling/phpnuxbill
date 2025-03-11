@@ -22,8 +22,8 @@ class Csrf
 
     public static function check($token)
     {
-        global $config;
-        if($config['csrf_enabled'] == 'yes') {
+        global $config, $isApi;
+        if($config['csrf_enabled'] == 'yes' && !$isApi) {
             if (isset($_SESSION['csrf_token'], $_SESSION['csrf_token_time'], $token)) {
                 $storedToken = $_SESSION['csrf_token'];
                 $tokenTime = $_SESSION['csrf_token_time'];
