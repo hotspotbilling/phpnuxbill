@@ -51,23 +51,40 @@ foreach ($d as $ds) {
         }
         if ($ds['expiration'] == $day7 && $config['notification_reminder_7day'] !== 'no') {
             try {
-                echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_7_day'), $config['user_notification_reminder']) . "\n";
+                echo Message::sendPackageNotification(
+                    $c,
+                    $p['name_plan'],
+                    $price,
+                    Message::getMessageType($p['type'], Lang::getNotifText('reminder_7_day')),
+                    $config['user_notification_reminder']
+                ) . "\n";
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 7-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
         } else if ($ds['expiration'] == $day3 && $config['notification_reminder_3day'] !== 'no') {
             try {
-                echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_3_day'), $config['user_notification_reminder']) . "\n";
+                echo Message::sendPackageNotification(
+                    $c,
+                    $p['name_plan'],
+                    $price,
+                    Message::getMessageType($p['type'], Lang::getNotifText('reminder_3_day')),
+                    $config['user_notification_reminder']
+                ) . "\n";
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 3-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
         } else if ($ds['expiration'] == $day1 && $config['notification_reminder_1day'] !== 'no') {
             try {
-                echo Message::sendPackageNotification($c, $p['name_plan'], $price, Lang::getNotifText('reminder_1_day'), $config['user_notification_reminder']) . "\n";
+                echo Message::sendPackageNotification(
+                    $c,
+                    $p['name_plan'],
+                    $price,
+                    Message::getMessageType($p['type'], Lang::getNotifText('reminder_1_day')),
+                    $config['user_notification_reminder']
+                ) . "\n";
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 1-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
         }
-
     }
 }

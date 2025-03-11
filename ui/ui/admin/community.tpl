@@ -35,18 +35,6 @@
                 </div>
             </div>
         </div>
-        <div class="box box-hovered mb20 box-primary">
-            <div class="box-header">
-                <h3 class="box-title">{Lang::T('')}Feedback</h3>
-            </div>
-            <div class="box-body">
-                {Lang::T('Feedback and Bug Report')}
-            </div>
-            <div class="box-footer">
-                <a href="https://github.com/hotspotbilling/phpnuxbill/issues" target="_blank"
-                    class="btn btn-primary btn-sm btn-block"><i class="ion ion-chatboxes"></i> {Lang::T('Give Feedback')}</a>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -131,7 +119,9 @@
             <div class="box-header">
                 <h3 class="box-title">{Lang::T('Chat with me')}</h3>
             </div>
-            <div class="box-body">{Lang::T('$50 Paid Support')}<br>{Lang::T('donation confirmation?')}<br>{Lang::T('Or ask any Donation Alternative')}</div>
+            <div class="box-body">
+                {Lang::T('$50 Paid Support')}<br>{Lang::T('donation confirmation?')}<br>{Lang::T('Or ask any Donation Alternative')}
+            </div>
             <div class="box-footer">
                 <a href="https://t.me/ibnux" target="_blank" class="btn btn-primary btn-sm btn-block">Telegram</a>
             </div>
@@ -155,7 +145,8 @@
                 <h3 class="box-title">PHPNUXBILL</h3>
             </div>
             <div class="box-body">
-                <b>PHPNuxBill</b> {Lang::T('is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate
+                <b>PHPNuxBill</b>
+                {Lang::T('is a billing Hotspot and PPPOE for Mikrotik using PHP and Mikrotik API to comunicate
                 with router. If you get more profit with this application, please donate us.')}<br>{Lang::T('Watch project')} <a
                     href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">{Lang::T('in here')}</a>
             </div>
@@ -163,16 +154,19 @@
             <div class="box-footer" id="latestVersion">ver</div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                    <a href="./update.php" class="btn btn-success btn-sm btn-block">{Lang::T('Install Latest Version')}</a>
+                    <a href="./update.php"
+                        class="btn btn-success btn-sm btn-block">{Lang::T('Install Latest Version')}</a>
                     <a href="https://github.com/hotspotbilling/phpnuxbill/archive/refs/heads/master.zip" target="_blank"
                         class="btn btn-warning btn-sm btn-block text-black">{Lang::T('Download Latest Version')}</a>
                 </div>
-                <center><a href="{Text::url('community/rollback')}" class="btn btn-link btn-sm btn-block">{Lang::T('Select Old Version')}</a>
+                <center><a href="{Text::url('community/rollback')}"
+                        class="btn btn-link btn-sm btn-block">{Lang::T('Select Old Version')}</a>
                 </center>
             </div>
             <div class="box-footer">
                 <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                    <a href="./CHANGELOG.md" target="_blank" class="btn btn-default btn-sm btn-block">{Lang::T('Current Changelog')}</a>
+                    <a href="./CHANGELOG.md" target="_blank"
+                        class="btn btn-default btn-sm btn-block">{Lang::T('Current Changelog')}</a>
                     <a href="https://github.com/hotspotbilling/phpnuxbill/blob/master/CHANGELOG.md" target="_blank"
                         class="btn btn-default btn-sm btn-block">{Lang::T('Repo Changelog')}</a>
                 </div>
@@ -181,6 +175,44 @@
                 {Lang::T('If you Download manual the update file, sometime update change database, after uploading, click this
                 button to update database structure.')}
                 <a href="./update.php?step=4" class="btn btn-default btn-sm btn-block">{Lang::T('Update Database')}</a>
+            </div>
+        </div>
+
+        <div class="box box-hovered mb20 box-primary">
+            <div class="box-header">
+                <h3 class="box-title">{Lang::T('Credits')}</h3>
+            </div>
+            <table class="table table-sm">
+                <tr>
+                    <td>
+                        <ul>
+                            <li>Bootstrap V3 <a href="https://getbootstrap.com/docs/3.4/" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                            <li>Admin LTE V3 <a href="https://adminlte.io/themes/v3/" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                            <li>Smarty Template V4 <a href="https://www.smarty.net/" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                            <li>PHP IdiORM <a href="https://idiorm.readthedocs.io/" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                            <li>PHP mPDF <a href="https://mpdf.github.io/" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>PHP QRCode <a href="http://phpqrcode.sourceforge.net/" target="_blank"><i
+                                    class="glyphicon glyphicon-globe"></i></a></li>
+                            <li>PHP Net_RouterOS<a href="https://github.com/pear2/Net_RouterOS" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                            <li>Summernote <a href="https://summernote.org/" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                            <li>PHP Mailer <a href="https://github.com/PHPMailer/PHPMailer/" target="_blank"><i
+                                        class="glyphicon glyphicon-globe"></i></a></li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+            <div class="box-body">
             </div>
         </div>
     </div>

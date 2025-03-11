@@ -393,6 +393,18 @@ class Message
         }
     }
 
+    public static function getMessageType($type, $message){
+        if(strpos($message, "<divider>") === false){
+            return $message;
+        }
+        $msgs = explode("<divider>", $message);
+        if($type == "PPPOE"){
+            return $msgs[1];
+        }else{
+            return $msgs[0];
+        }
+    }
+
     public static function logMessage($messageType, $recipient, $messageContent, $status, $errorMessage = null)
     {
         $log = ORM::for_table('tbl_message_logs')->create();
