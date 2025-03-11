@@ -113,7 +113,8 @@ switch ($do) {
                         $d->save();
                     }
                 }
-                if (file_exists($_FILES['photo']['tmp_name'])) unlink($_FILES['photo']['tmp_name']);
+                if (file_exists($_FILES['photo']['tmp_name']))
+                    unlink($_FILES['photo']['tmp_name']);
                 User::setFormCustomField($user);
                 run_hook('register_user'); #HOOK
                 $msg .= Lang::T('Registration successful') . '<br>';
@@ -147,8 +148,45 @@ switch ($do) {
                 // Display register-otp.tpl if OTP is enabled
                 $ui->display('customer/register-otp.tpl');
             } else {
-                // Display register.tpl if OTP is not enabled
-                $ui->display('customer/register.tpl');
+                $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
+                if (!empty($config['login_page_logo']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'])) {
+                    $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'];
+                } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png')) {
+                    $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png';
+                } else {
+                    $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.default.png';
+                }
+
+                if (!empty($config['login_page_wallpaper']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_wallpaper'])) {
+                    $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_wallpaper'];
+                } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png')) {
+                    $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png';
+                } else {
+                    $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.default.png';
+                }
+
+                if (!empty($config['login_page_favicon']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_favicon'])) {
+                    $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_favicon'];
+                } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) {
+                    $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png';
+                } else {
+                    $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.default.png';
+                }
+
+                $ui->assign('login_logo', $login_logo);
+                $ui->assign('wallpaper', $wallpaper);
+                $ui->assign('favicon', $favicon);
+                $ui->assign('csrf_token', $csrf_token);
+                $ui->assign('_title', Lang::T('Login'));
+                $ui->assign('customFields', User::getFormCustomField($ui, true));
+                switch ($config['login_page_type']) {
+                    case 'custom':
+                        $ui->display('customer/reg-login-custom-' . $config['login_Page_template'] . '.tpl');
+                        break;
+                    default:
+                        $ui->display('customer/register.tpl');
+                        break;
+                }
             }
         }
         break;
@@ -196,6 +234,36 @@ switch ($do) {
                 $ui->display('customer/register-rotp.tpl');
             }
         } else {
+            $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
+            if (!empty($config['login_page_logo']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'])) {
+                $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'];
+            } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png')) {
+                $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.png';
+            } else {
+                $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'login-logo.default.png';
+            }
+
+            if (!empty($config['login_page_wallpaper']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_wallpaper'])) {
+                $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_wallpaper'];
+            } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png')) {
+                $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.png';
+            } else {
+                $wallpaper = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'wallpaper.default.png';
+            }
+
+            if (!empty($config['login_page_favicon']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_favicon'])) {
+                $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_favicon'];
+            } elseif (file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png')) {
+                $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.png';
+            } else {
+                $favicon = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'favicon.default.png';
+            }
+
+            $ui->assign('login_logo', $login_logo);
+            $ui->assign('wallpaper', $wallpaper);
+            $ui->assign('favicon', $favicon);
+            $ui->assign('csrf_token', $csrf_token);
+            $ui->assign('_title', Lang::T('Login'));
             $ui->assign('customFields', User::getFormCustomField($ui, true));
             $ui->assign('username', "");
             $ui->assign('fullname', "");
@@ -204,7 +272,15 @@ switch ($do) {
             $ui->assign('otp', false);
             $ui->assign('_title', Lang::T('Register'));
             run_hook('view_register'); #HOOK
-            $ui->display('customer/register.tpl');
+            switch ($config['login_page_type']) {
+                case 'custom':
+                    $ui->display('customer/reg-login-custom-' . $config['login_Page_template'] . '.tpl');
+                    break;
+                default:
+                    $ui->display('customer/register.tpl');
+                    break;
+            }
+
         }
         break;
 }

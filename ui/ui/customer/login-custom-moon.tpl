@@ -476,7 +476,7 @@
             }
 
             footer {
-                position: relative;
+                position: fixed;
                 margin-top: 20px;
                 padding: 8px;
                 font-size: 12px;
