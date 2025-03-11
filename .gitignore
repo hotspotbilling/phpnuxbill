@@ -55,3 +55,4 @@ docs/**
 !docs/*.md
 .htaccess
 .idea
+!docs/insomnia.rest.json
