@@ -11,6 +11,21 @@ class customer_expired
 
         //user expire
         $query = ORM::for_table('tbl_user_recharges')
+        ->table_alias('tur')
+        ->selects([
+            'tur.id',
+            'tur.username',
+            'c.fullname',
+            'c.phonenumber',
+            'c.email',
+            'tur.expiration',
+            'tur.time',
+            'tur.recharged_on',
+            'tur.recharged_time',
+            'tur.namebp',
+            'tur.routers'
+        ])
+        ->join('tbl_customers', ['tur.customer_id', '=', 'c.id'], 'c')
         ->where_lte('expiration', $current_date)
         ->order_by_desc('expiration');
         $expire = Paginator::findMany($query);
@@ -25,6 +40,7 @@ class customer_expired
 
         // Assign the pagination HTML to the template variable
         $ui->assign('expire', $expire);
+        $ui->assign('cookie', $_COOKIE);
         return $ui->fetch('widget/customer_expired.tpl');
     }
 }

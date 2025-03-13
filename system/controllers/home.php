@@ -196,8 +196,8 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             $tur->save();
             App::setToken(_get('stoken'), $id);
             file_put_contents($path, $m);
-            _log("Customer $tur[customer_id] $tur[username] extend for $days days", "Customer", $user['id']);
-            Message::sendTelegram("#u$user[username] #extend #" . $p['type'] . " \n" . $p['name_plan'] .
+            _log("Customer $tur[customer_id] $user[fullname] ($tur[username]) extend for $days days", "Customer", $user['id']);
+            Message::sendTelegram("#u$user[username] ($user[fullname]) #id$tur[customer_id] #extend #" . $p['type'] . " \n" . $p['name_plan'] .
                 "\nLocation: " . $p['routers'] .
                 "\nCustomer: " . $user['fullname'] .
                 "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
