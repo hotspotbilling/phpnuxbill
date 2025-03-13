@@ -28,7 +28,7 @@ class Message
             if (!empty($topik)) {
                 $topik = "message_thread_id=$topik&";
             }
-            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?'.$topik.'chat_id=' . $chat_id . '&text=' . urlencode($txt));
+            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?' . $topik . 'chat_id=' . $chat_id . '&text=' . urlencode($txt));
         }
     }
 
@@ -120,7 +120,7 @@ class Message
         }
     }
 
-    public static function sendEmail($to, $subject, $body)
+    public static function sendEmail($to, $subject, $body, $attachmentPath = null)
     {
         global $config, $PAGES_PATH, $debug_mail;
         if (empty($body)) {
@@ -130,7 +130,6 @@ class Message
             return "";
         }
         run_hook('send_email', [$to, $subject, $body]); #HOOK
-        self::logMessage('Email', $to, $body, 'Success');
         if (empty($config['smtp_host'])) {
             $attr = "";
             if (!empty($config['mail_from'])) {
@@ -140,6 +139,7 @@ class Message
                 $attr .= "Reply-To: " . $config['mail_reply_to'] . "\r\n";
             }
             mail($to, $subject, $body, $attr);
+            self::logMessage('Email', $to, $body, 'Success');
         } else {
             $mail = new PHPMailer();
             $mail->isSMTP();
@@ -161,6 +161,10 @@ class Message
 
             $mail->addAddress($to);
             $mail->Subject = $subject;
+            // Attachments
+            if (!empty($attachmentPath)) {
+                $mail->addAttachment($attachmentPath);
+            }
 
             if (!file_exists($PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
                 if (!copy($PAGES_PATH . '_template' . DIRECTORY_SEPARATOR . 'Email.html', $PAGES_PATH . DIRECTORY_SEPARATOR . 'Email.html')) {
@@ -175,6 +179,7 @@ class Message
                 $html = str_replace('[[Company_Name]]', nl2br($config['CompanyName']), $html);
                 $html = str_replace('[[Body]]', nl2br($body), $html);
                 $mail->isHTML(true);
+                $mail->Body = $html;
                 $mail->Body = $html;
             } else {
                 $mail->isHTML(false);
@@ -328,7 +333,7 @@ class Message
         $textInvoice = str_replace('[[password]]', $cust['password'], $textInvoice);
         $textInvoice = str_replace('[[expired_date]]', Lang::dateAndTimeFormat($trx['expiration'], $trx['time']), $textInvoice);
         $textInvoice = str_replace('[[footer]]', $config['note'], $textInvoice);
-		// Calculate bills and additional costs
+        // Calculate bills and additional costs
         list($bills, $add_cost) = User::getBills($cust['id']);
 
         // Initialize note and total variables
@@ -362,7 +367,7 @@ class Message
         // Add total to the note
         $note .= "Total : " . Lang::moneyFormat($total) . "\n";
 
-		// Replace placeholders in the message
+        // Replace placeholders in the message
         $textInvoice = str_replace('[[bills]]', $note, $textInvoice);
 
         if ($config['user_notification_payment'] == 'sms') {
@@ -393,14 +398,15 @@ class Message
         }
     }
 
-    public static function getMessageType($type, $message){
-        if(strpos($message, "<divider>") === false){
+    public static function getMessageType($type, $message)
+    {
+        if (strpos($message, "<divider>") === false) {
             return $message;
         }
         $msgs = explode("<divider>", $message);
-        if($type == "PPPOE"){
+        if ($type == "PPPOE") {
             return $msgs[1];
-        }else{
+        } else {
             return $msgs[0];
         }
     }
