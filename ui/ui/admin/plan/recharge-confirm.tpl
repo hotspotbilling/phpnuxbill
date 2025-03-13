@@ -55,7 +55,7 @@
                                 {$plan['validity_unit']}</span>
                         </li>
                         <li class="list-group-item">
-                            <b>{Lang::T('Using')}</b> <span class="pull-right">
+                            <b>{Lang::T('Payment via')}</b> <span class="pull-right">
                                 <select name="using"
                                     style="background-color: white;outline: 1px;border: 1px solid #b7b7b7;">
                                     {foreach $usings as $us}
