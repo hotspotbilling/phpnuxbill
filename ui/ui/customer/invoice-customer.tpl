@@ -14,7 +14,7 @@
                     <input type="hidden" name="id" value="{$in['id']}">
                     <a href="{Text::url('voucher/list-activated')}" class="btn btn-default btn-sm"><i
                             class="ion-reply-all"></i>{Lang::T('Finish')}</a>
-                    <a href="javascript:download()" class="btn btn-success btn-sm">
+                    <a href="javascript:download()" class="btn btn-success btn-sm text-black">
                         <i class="glyphicon glyphicon-share"></i> Download</a>
                     <a href="https://api.whatsapp.com/send/?text={$whatsapp}" class="btn btn-primary btn-sm">
                         <i class="glyphicon glyphicon-share"></i> WhatsApp</a>
@@ -30,12 +30,11 @@
     var text = document.getElementById("content").innerHTML;
     var lines = text.split(/\r\n|\r|\n/).length;
     var meas = ctx.measureText("A");
-    let width = Math.round({$_c['printer_cols']} * 9.6); //Math.round(meas.width * {$_c['printer_cols']});
-    var height = Math.round((14 *
-        lines)); //.round((meas.actualBoundingBoxAscent + meas.actualBoundingBoxDescent) * lines);
+    let width = Math.round({$_c['printer_cols']} * 9.6);
+    var height = Math.round((14 * lines));
     console.log(width, height, lines);
     var paid = new Image();
-    paid.src = '{$app_url}/system/uploads/pasid.png';
+    paid.src = '{$app_url}/system/uploads/paid.png';
     {if !empty($logo)}
         var img = new Image();
         img.src = '{$app_url}/{$logo}';

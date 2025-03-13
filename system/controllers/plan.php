@@ -269,6 +269,17 @@ switch ($action) {
             r2(getUrl('plan/view/') . $id, 'd', "Customer not found");
         }
         Package::createInvoice($in);
+        $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
+        $logo = '';
+        if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
+            $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png';
+            $imgsize = getimagesize($logo);
+            $width = $imgsize[0];
+            $height = $imgsize[1];
+            $ui->assign('wlogo', $width);
+            $ui->assign('hlogo', $height);
+        }
+        $ui->assign('logo', $logo);
         $ui->assign('_title', 'View Invoice');
         $ui->display('admin/plan/invoice.tpl');
         break;
