@@ -87,7 +87,7 @@ class File
         $src_img = $image_create($source_file);
         imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $nwidth, $nheight, $width, $height);
 
-        $image($dst_img, $dst_dir, $quality);
+        imagepng($dst_img, $dst_dir);
 
         if ($dst_img) imagedestroy($dst_img);
         if ($src_img) imagedestroy($src_img);

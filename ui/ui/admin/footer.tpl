@@ -85,22 +85,32 @@
             listAtts.forEach(function(el) {
                 if (el.addEventListener) { // all browsers except IE before version 9
                     el.addEventListener("click", function() {
+                        var txt = $(this).html();
                         $(this).html(
                             `<span class="loading"></span>`
                         );
                         setTimeout(() => {
                             $(this).prop("disabled", true);
                         }, 100);
+                        setTimeout(() => {
+                            $(this).html(txt);
+                            $(this).prop("disabled", false);
+                        }, 5000);
                     }, false);
                 } else {
                     if (el.attachEvent) { // IE before version 9
                         el.attachEvent("click", function() {
+                            var txt = $(this).html();
                             $(this).html(
                                 `<span class="loading"></span>`
                             );
                             setTimeout(() => {
                                 $(this).prop("disabled", true);
                             }, 100);
+                            setTimeout(() => {
+                                $(this).html(txt);
+                                $(this).prop("disabled", false);
+                            }, 5000);
                         });
                     }
                 }

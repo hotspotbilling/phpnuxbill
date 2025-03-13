@@ -1145,5 +1145,7 @@
     "If_you_Download_manual_the_update_file__sometime_update_change_database__after_uploading__click_this_button_to_update_database_structure_": "If you Download manual the update file, sometime update change database, after uploading, click this button to update database structure.",
     "Update_Database": "Update Database",
     "Credits": "Credits",
-    "Continue_the_process_of_sending_messages": "Continue the process of sending messages"
+    "Continue_the_process_of_sending_messages": "Continue the process of sending messages",
+    "Yours_Balances": "Yours Balances",
+    "Friend_username": "Friend username"
 }
