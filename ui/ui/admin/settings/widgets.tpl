@@ -26,7 +26,7 @@
                                     <td width="130">
                                         <div class="btn-group btn-group-justified" role="group">
                                             <a href="{Text::url('widgets/delete/', $w['id'])}"
-                                                onclick="return ask(this, 'Delete this widget?')" class="btn btn-sm btn-danger">
+                                                onclick="return ask(this, '{Lang::T('Delete this widget')}?')" class="btn btn-sm btn-danger">
                                                 <i class="glyphicon glyphicon-trash"></i>
                                             </a>
                                             <a href="{Text::url('widgets/edit/', $w['id'])}"
@@ -42,7 +42,7 @@
             <div class="panel-footer">
                 <div class="btn-group btn-group-justified" role="group">
                     <div class="btn-group" role="group">
-                        <button type="submit" class="btn btn-info">Save sequence</button>
+                        <button type="submit" class="btn btn-info">{Lang::T('Save sequence')}</button>
                     </div>
                     <a href="{Text::url('widgets/add/', $pos)}" class="btn btn-primary">{Lang::T("Add new widget")}</a>
                 </div>
@@ -54,7 +54,7 @@
 <div class="row">
     <div class="col-md-3">
         <div class="panel panel-info">
-            <div class="panel-heading">Dashboard Structure</div>
+            <div class="panel-heading">{Lang::T('Dashboard Structure')}</div>
             <div class="panel-body">
                 {assign rows explode(".", $_c['dashboard_cr'])}
                 {assign pos 1}

@@ -291,13 +291,13 @@
                     <div class="col-md-5">
                         <select name="registration_username" id="voucher_format" class="form-control">
                             <option value="username" {if $_c['registration_username']=='username' }selected="selected"
-                                {/if}>Username
+                                {/if}>{Lang::T('Username')}
                             </option>
                             <option value="email" {if $_c['registration_username']=='email' }selected="selected" {/if}>
-                                Email
+                                {Lang::T('Email')}
                             </option>
                             <option value="phone" {if $_c['registration_username']=='phone' }selected="selected" {/if}>
-                                Phone Number
+                                {Lang::T('Phone Number')}
                             </option>
                         </select>
                     </div>
@@ -470,7 +470,7 @@
             <h4 class="panel-title">
                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
                     href="#collapseVoucher" aria-expanded="false" aria-controls="collapseVoucher">
-                    Voucher
+                    {Lang::T('Voucher')}
                 </a>
             </h4>
         </div>
@@ -796,8 +796,7 @@
                     href="#collapseEmailNotification" aria-expanded="false" aria-controls="collapseEmailNotification">
                     {Lang::T('Email Notification')}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test
-                            Email</a>
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">{Lang::T('Test Email')}</a>
                     </div>
                 </a>
             </h4>
