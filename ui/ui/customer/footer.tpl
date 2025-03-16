@@ -96,19 +96,19 @@
         const savedMode = localStorage.getItem('mode');
         if (savedMode === 'dark') {
             body.classList.add('dark-mode');
-            toggleIcon.textContent = '🌜';
+            toggleIcon.textContent = '🌞';
         }
-
+    
         function setMode(mode) {
             if (mode === 'dark') {
                 body.classList.add('dark-mode');
-                toggleIcon.textContent = '🌜';
+                toggleIcon.textContent = '🌞';
             } else {
                 body.classList.remove('dark-mode');
-                toggleIcon.textContent = '🌞';
+                toggleIcon.textContent = '🌜';
             }
         }
-
+    
         toggleIcon.addEventListener('click', () => {
             if (body.classList.contains('dark-mode')) {
                 setMode('light');

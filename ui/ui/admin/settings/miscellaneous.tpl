@@ -175,24 +175,6 @@
                                 extend')}</small>
                         </p>
                     </div>
-                    <div class="form-group has-error">
-                        <label class="col-md-3 control-label">{Lang::T('Allow Balance Custom
-                            Amount')}</label>
-                        <div class="col-md-5">
-                            <select name="allow_balance_custom" id="allow_balance_custom" class="form-control">
-                                <option value="no">
-                                    {Lang::T('No')}
-                                </option>
-                                <option value="yes" {if $_c['allow_balance_custom']=='yes' }selected="selected" {/if}>
-                                    {Lang::T('Yes')}
-                                </option>
-                            </select>
-                        </div>
-                        <p class="help-block col-md-4"><small>
-                                {Lang::T('Allow Customer buy balance with any amount')}
-                                <br>*Please report any issue or bugs</small>
-                        </p>
-                    </div>
                 </div>
             </div>
 

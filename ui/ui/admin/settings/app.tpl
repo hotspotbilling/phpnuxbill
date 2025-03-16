@@ -649,6 +649,24 @@
                             value="{$_c['minimum_transfer']}">
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Allow Balance Custom
+                        Amount')}</label>
+                    <div class="col-md-5">
+                        <select name="allow_balance_custom" id="allow_balance_custom" class="form-control">
+                            <option value="no">
+                                {Lang::T('No')}
+                            </option>
+                            <option value="yes" {if $_c['allow_balance_custom']=='yes' }selected="selected" {/if}>
+                                {Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4"><small>
+                            {Lang::T('Allow Customer buy balance with any amount')}
+                        </small>
+                    </p>
+                </div>
                 <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
                 </button>
