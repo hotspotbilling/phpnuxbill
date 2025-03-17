@@ -4,11 +4,47 @@
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
  **/
-_auth();
+
 $ui->assign('_title', Lang::T('Voucher'));
 $ui->assign('_system_menu', 'voucher');
 
 $action = $routes['1'];
+if(!_auth(false)){
+    if($action== 'invoice'){
+        $id = $routes[2];
+        $sign = $routes[3];
+        if($sign != md5($id. $db_pass)) {
+            die("beda");
+        }
+        if (empty($id)) {
+            $in = ORM::for_table('tbl_transactions')->order_by_desc('id')->find_one();
+        } else {
+            $in = ORM::for_table('tbl_transactions')->where('id', $id)->find_one();
+        }
+        if ($in) {
+            Package::createInvoice($in);
+            $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
+            $logo = '';
+            if (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) {
+                $logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png';
+                $imgsize = getimagesize($logo);
+                $width = $imgsize[0];
+                $height = $imgsize[1];
+                $ui->assign('wlogo', $width);
+                $ui->assign('hlogo', $height);
+            }
+            $ui->assign('public_url', getUrl("voucher/invoice/$id/".md5($id. $db_pass)));
+            $ui->assign('logo', $logo);
+            $ui->display('customer/invoice-customer.tpl');
+            die();
+        } else {
+            r2(getUrl('voucher/list-activated'), 'e', Lang::T('Not Found'));
+        }
+    }else{
+        r2(getUrl('login'));
+    }
+}
+
 $user = User::_info();
 $ui->assign('_user', $user);
 
@@ -74,6 +110,7 @@ switch ($action) {
                 $ui->assign('wlogo', $width);
                 $ui->assign('hlogo', $height);
             }
+            $ui->assign('public_url', getUrl("voucher/invoice/$id/".md5($id. $db_pass)));
             $ui->assign('logo', $logo);
             $ui->display('customer/invoice-customer.tpl');
         } else {

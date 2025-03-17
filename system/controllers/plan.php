@@ -279,6 +279,8 @@ switch ($action) {
             $ui->assign('wlogo', $width);
             $ui->assign('hlogo', $height);
         }
+
+        $ui->assign('public_url', getUrl("voucher/invoice/$id/".md5($id. $db_pass)));
         $ui->assign('logo', $logo);
         $ui->assign('_title', 'View Invoice');
         $ui->display('admin/plan/invoice.tpl');
