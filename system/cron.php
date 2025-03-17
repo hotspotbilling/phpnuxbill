@@ -75,13 +75,7 @@ foreach ($d as $ds) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    try {
-                        (new $p['device'])->remove_customer($c, $p);
-                    } catch (Throwable $e) {
-                        _log($e->getMessage());
-                        sendTelegram($e->getMessage());
-                        echo "Error: " . $e->getMessage() . "\n";
-                    }
+                    (new $p['device'])->remove_customer($c, $p);
                 } else {
                     throw new Exception("Cron error: Devices " . $p['device'] . "not found, cannot disconnect ".$c['username']."\n");
                 }
