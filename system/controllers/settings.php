@@ -248,6 +248,75 @@ switch ($action) {
             $_POST['hide_pg'] = _post('hide_pg', 'no');
             $_POST['hide_aui'] = _post('hide_aui', 'no');
 
+            // Login page post
+            $login_page_title = _post('login_page_head');
+            $login_page_description = _post('login_page_description');
+            $login_Page_template = _post('login_Page_template');
+            $login_page_type = _post('login_page_type');
+            $csrf_token = _post('csrf_token');
+
+            if (!Csrf::check($csrf_token)) {
+                r2(getUrl('settings/app'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
+
+            if ($login_page_type == 'custom' && (empty($login_Page_template) || empty($login_page_title) || empty($login_page_description))) {
+                r2(getUrl('settings/app'), 'e', 'Please fill all required fields');
+                return;
+            }
+
+            if (strlen($login_page_title) > 25) {
+                r2(getUrl('settings/app'), 'e', 'Login page title must not exceed 25 characters');
+                return;
+            }
+            if (strlen($login_page_description) > 100) {
+                r2(getUrl('settings/app'), 'e', 'Login page description must not exceed 50 characters');
+                return;
+            }
+
+            $image_paths = [];
+            $allowed_types = ['image/jpeg', 'image/png'];
+
+            if ($_FILES['login_page_favicon']['name'] != '') {
+                $favicon_type = $_FILES['login_page_favicon']['type'];
+                if (in_array($favicon_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_favicon']['name'])) {
+                    $extension = pathinfo($_FILES['login_page_favicon']['name'], PATHINFO_EXTENSION);
+                    $favicon_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('favicon_') . '.' . $extension;
+                    File::resizeCropImage($_FILES['login_page_favicon']['tmp_name'], $favicon_path, 16, 16, 100);
+                    $_POST['login_page_favicon'] = basename($favicon_path); // Save dynamic file name
+                    if (file_exists($_FILES['login_page_favicon']['tmp_name']))
+                        unlink($_FILES['login_page_favicon']['tmp_name']);
+                } else {
+                    r2(getUrl('settings/app'), 'e', 'Favicon must be a JPG, JPEG, or PNG image.');
+                }
+            }
+
+            if ($_FILES['login_page_wallpaper']['name'] != '') {
+                $wallpaper_type = $_FILES['login_page_wallpaper']['type'];
+                if (in_array($wallpaper_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_wallpaper']['name'])) {
+                    $extension = pathinfo($_FILES['login_page_wallpaper']['name'], PATHINFO_EXTENSION);
+                    $wallpaper_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('wallpaper_') . '.' . $extension;
+                    File::resizeCropImage($_FILES['login_page_wallpaper']['tmp_name'], $wallpaper_path, 1920, 1080, 100);
+                    $_POST['login_page_wallpaper'] = basename($wallpaper_path); // Save dynamic file name
+                    if (file_exists($_FILES['login_page_wallpaper']['tmp_name']))
+                        unlink($_FILES['login_page_wallpaper']['tmp_name']);
+                } else {
+                    r2(getUrl('settings/app'), 'e', 'Wallpaper must be a JPG, JPEG, or PNG image.');
+                }
+            }
+
+            if ($_FILES['login_page_logo']['name'] != '') {
+                $logo_type = $_FILES['login_page_logo']['type'];
+                if (in_array($logo_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_logo']['name'])) {
+                    $extension = pathinfo($_FILES['login_page_logo']['name'], PATHINFO_EXTENSION);
+                    $logo_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('logo_') . '.' . $extension;
+                    File::resizeCropImage($_FILES['login_page_logo']['tmp_name'], $logo_path, 300, 60, 100);
+                    $_POST['login_page_logo'] = basename($logo_path); // Save dynamic file name
+                    if (file_exists($_FILES['login_page_logo']['tmp_name']))
+                        unlink($_FILES['login_page_logo']['tmp_name']);
+                } else {
+                    r2(getUrl('settings/app'), 'e', 'Logo must be a JPG, JPEG, or PNG image.');
+                }
+            }
             foreach ($_POST as $key => $value) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
@@ -264,105 +333,6 @@ switch ($action) {
 
             r2(getUrl('settings/app'), 's', Lang::T('Settings Saved Successfully'));
         }
-        break;
-
-    case 'login-page-post':
-
-        if ($_app_stage == 'Demo') {
-            r2(getUrl('settings/app'), 'e', 'You cannot perform this action in Demo mode');
-        }
-        // Login page post
-        $login_page_title = _post('login_page_head');
-        $login_page_description = _post('login_page_description');
-        $login_Page_template = _post('login_Page_template');
-        $login_page_type = _post('login_page_type');
-        $csrf_token = _post('csrf_token');
-
-        if (!Csrf::check($csrf_token)) {
-            r2(getUrl('settings/app'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
-        }
-
-        if ($login_page_type == 'custom' && (empty($login_Page_template) || empty($login_page_title) || empty($login_page_description))) {
-            r2(getUrl('settings/app'), 'e', 'Please fill all required fields');
-            return;
-        }
-
-        if (strlen($login_page_title) > 25) {
-            r2(getUrl('settings/app'), 'e', 'Login page title must not exceed 25 characters');
-            return;
-        }
-        if (strlen($login_page_description) > 100) {
-            r2(getUrl('settings/app'), 'e', 'Login page description must not exceed 50 characters');
-            return;
-        }
-
-        $settings = [
-            'login_page_head' => $login_page_title,
-            'login_page_description' => $login_page_description,
-            'login_Page_template' => $login_Page_template,
-            'login_page_type' => $login_page_type,
-        ];
-
-        $image_paths = [];
-        $allowed_types = ['image/jpeg', 'image/png'];
-
-        if ($_FILES['login_page_favicon']['name'] != '') {
-            $favicon_type = $_FILES['login_page_favicon']['type'];
-            if (in_array($favicon_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_favicon']['name'])) {
-                $extension = pathinfo($_FILES['login_page_favicon']['name'], PATHINFO_EXTENSION);
-                $favicon_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('favicon_') . '.' . $extension;
-                File::resizeCropImage($_FILES['login_page_favicon']['tmp_name'], $favicon_path, 16, 16, 100);
-                $settings['login_page_favicon'] = basename($favicon_path); // Save dynamic file name
-                if (file_exists($_FILES['login_page_favicon']['tmp_name']))
-                    unlink($_FILES['login_page_favicon']['tmp_name']);
-            } else {
-                r2(getUrl('settings/app'), 'e', 'Favicon must be a JPG, JPEG, or PNG image.');
-            }
-        }
-
-        if ($_FILES['login_page_wallpaper']['name'] != '') {
-            $wallpaper_type = $_FILES['login_page_wallpaper']['type'];
-            if (in_array($wallpaper_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_wallpaper']['name'])) {
-                $extension = pathinfo($_FILES['login_page_wallpaper']['name'], PATHINFO_EXTENSION);
-                $wallpaper_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('wallpaper_') . '.' . $extension;
-                File::resizeCropImage($_FILES['login_page_wallpaper']['tmp_name'], $wallpaper_path, 1920, 1080, 100);
-                $settings['login_page_wallpaper'] = basename($wallpaper_path); // Save dynamic file name
-                if (file_exists($_FILES['login_page_wallpaper']['tmp_name']))
-                    unlink($_FILES['login_page_wallpaper']['tmp_name']);
-            } else {
-                r2(getUrl('settings/app'), 'e', 'Wallpaper must be a JPG, JPEG, or PNG image.');
-            }
-        }
-
-        if ($_FILES['login_page_logo']['name'] != '') {
-            $logo_type = $_FILES['login_page_logo']['type'];
-            if (in_array($logo_type, $allowed_types) && preg_match('/\.(jpg|jpeg|png)$/i', $_FILES['login_page_logo']['name'])) {
-                $extension = pathinfo($_FILES['login_page_logo']['name'], PATHINFO_EXTENSION);
-                $logo_path = $UPLOAD_PATH . DIRECTORY_SEPARATOR . uniqid('logo_') . '.' . $extension;
-                File::resizeCropImage($_FILES['login_page_logo']['tmp_name'], $logo_path, 300, 60, 100);
-                $settings['login_page_logo'] = basename($logo_path); // Save dynamic file name
-                if (file_exists($_FILES['login_page_logo']['tmp_name']))
-                    unlink($_FILES['login_page_logo']['tmp_name']);
-            } else {
-                r2(getUrl('settings/app'), 'e', 'Logo must be a JPG, JPEG, or PNG image.');
-            }
-        }
-
-        foreach ($settings as $key => $value) {
-            $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
-            if ($d) {
-                $d->value = $value;
-                $d->save();
-            } else {
-                $d = ORM::for_table('tbl_appconfig')->create();
-                $d->setting = $key;
-                $d->value = $value;
-                $d->save();
-            }
-        }
-
-        _log('[' . $admin['username'] . ']: ' . Lang::T('Login Page Settings Saved Successfully'), $admin['user_type'], $admin['id']);
-        r2(getUrl('settings/app'), 's', Lang::T('Login Page Settings Saved Successfully'));
         break;
 
     case 'localisation':
@@ -590,7 +560,7 @@ switch ($action) {
         }
         //allow see himself
         if ($admin['id'] == $id) {
-            $d = ORM::for_table('tbl_users')->where('id', $id)->find_array($id)[0];
+            $d = ORM::for_table('tbl_users')->where('id', $id)->find_array()[0];
         } else {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
                 // Super Admin can see anyone
