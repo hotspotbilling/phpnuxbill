@@ -1148,5 +1148,6 @@
     "Continue_the_process_of_sending_messages": "Continue the process of sending messages",
     "Yours_Balances": "Yours Balances",
     "Friend_username": "Friend username",
-    "This_will_sync_dan_send_Customer_active_package_to_Mikrotik": "This will sync dan send Customer active package to Mikrotik"
+    "This_will_sync_dan_send_Customer_active_package_to_Mikrotik": "This will sync dan send Customer active package to Mikrotik",
+    "Email_not_sent__Mailer_Error__": "Email not sent, Mailer Error: "
 }

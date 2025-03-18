@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Invoice No: INV-284</title>
+
+    <style>
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: #555;
+        }
+
+        .invoice-box table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+        }
+
+        .invoice-box table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .invoice-box table tr td:nth-child(2) {
+            text-align: right;
+        }
+
+        .invoice-box table tr.top table td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.top table td.title {
+            font-size: 45px;
+            line-height: 45px;
+            color: #333;
+        }
+
+        .invoice-box table tr.information table td {
+            padding-bottom: 40px;
+        }
+
+        .invoice-box table tr.heading td {
+            background: #eee;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        .invoice-box table tr.details td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+        }
+
+        .invoice-box table tr.item.last td {
+            border-bottom: none;
+        }
+
+        .invoice-box table tr.total td:nth-child(2) {
+            border-top: 2px solid #eee;
+            font-weight: bold;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .invoice-box table tr.top table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+
+            .invoice-box table tr.information table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+        }
+
+        /** RTL **/
+        .invoice-box.rtl {
+            direction: rtl;
+            font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+        }
+
+        .invoice-box.rtl table {
+            text-align: right;
+        }
+
+        .invoice-box.rtl table tr td:nth-child(2) {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-box">
+        <table cellpadding="0" cellspacing="0">
+            <tr class="top">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td class="title">
+                                <img src="system/uploads/logo.default.png" style="max-width: 100px" />
+                            </td>
+
+                            <td>
+                                Invoice #: INV-284<br />
+                                Created: March 16, 2025<br />
+                                Due: March 23, 2025
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr class="information">
+                <td colspan="2">
+                    <table>
+                        <tr>
+                            <td>
+                                PHPNuxBill<br />
+                                No 2, udo wogu street chevy view estate, Road c17 mercyland, losoro lakowe<br />
+                                +2347054020007<br />
+                            </td>
+
+                            <td>
+                                admin<br />
+                                admin <br />
+                                admin@gmail.com <br />
+                                9006721321 <br />
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr>
+                        <th style="background: #3498db; color: white; padding: 12px; text-align: left;">Service
+                            Description</th>
+                        <th style="background: #3498db; color: white; padding: 12px; text-align: left;">Plan Details
+                        </th>
+                        <th style="background: #3498db; color: white; padding: 12px; text-align: left;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style='padding: 12px; border-bottom: 1px solid #ddd;'>Test Plan</td>
+                        <td style='padding: 12px; border-bottom: 1px solid #ddd;'>Monthly Subscription</td>
+                        <td style='padding: 12px; border-bottom: 1px solid #ddd;'>₦200</td>
+                      </tr>
+                </tbody>                
+            </table>
+        </table>
+
+        <div style="text-align: right; margin-top: 20px;">
+            <p style="margin: 0;">Subtotal: ₦202.00<br>
+                TAX (1%): ₦2.00<br>
+                <strong>Total Due: ₦202.00</strong>
+            </p>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px;">
+            <h4 style="margin: 0;">Payment Options:</h4>
+            <p style="margin: 0;">Online Portal: <a href="pay.phpnuxbill.com">pay.phpnuxbill.com</a> <br>
+                Bank Transfer: Account # 1234-567890<br>
+                Auto Pay: Enabled (Next payment: 2023-11-12)</p>
+        </div>
+
+        <footer
+            style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 0.9em; color: #666; text-align: center;">
+            <p style="margin: 0;">Thank you for choosing PHPNuxBill!<br>
+                Late payments may result in service interruption<br>
+                Need help? Contact support@PHPNuxBill.com or call +2347054020007</p>
+        </footer>
+    </div>
+</body>
+
+</html>
