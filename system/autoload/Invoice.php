@@ -11,13 +11,7 @@ class Invoice
                 throw new Exception("Invoice ID is required");
             }
 
-            $templatePath = 'pages/Custom_Invoice.html';
-            if (!file_exists($templatePath)) {
-                $templatePath = 'pages/Default_Invoice.html';
-            }
-
-            $template = file_get_contents($templatePath);
-
+            $template = Lang::getNotifText('email_invoice');
             if (!$template) {
                 throw new Exception("Invoice template not found");
             }
@@ -94,7 +88,7 @@ class Invoice
         }, $template);
     }
 
-    public static function sendInvoice($userId, $status = "Unpaid")
+    public static function sendInvoice($userId,  $package, $status = "Unpaid")
     {
         global $config;
 
@@ -148,8 +142,21 @@ class Invoice
         $tax = $config['enable_tax'] ? Package::tax($subtotal) : 0;
         $total = ($tax > 0) ? $subtotal + $tax : $subtotal + $tax;
 
+        $token = User::generateToken($account['id'], 1);
+        if (!empty($token['token'])) {
+            $tur = ORM::for_table('tbl_user_recharges')
+                ->where('customer_id', $account['id'])
+                ->where('namebp', $package)
+                ->find_one();
+            if ($tur) {
+                $payLink = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
+            }
+        } else {
+            $payLink = '?_route=home';
+        }
+
         $invoiceData = [
-            'id' => "INV-" . Package::_raid(),
+            'invoice' => "INV-" . Package::_raid(),
             'fullname' => $account->fullname,
             'email' => $account->email,
             'address' => $account->address,
@@ -163,6 +170,8 @@ class Invoice
             'company_name' => $config['CompanyName'],
             'company_phone' => $config['phone'],
             'logo' => $config['logo'],
+            'company_url' => APP_URL,
+            'payment_link' => $payLink,
         ];
 
         if (!isset($invoiceData['bill_rows']) || empty($invoiceData['bill_rows'])) {

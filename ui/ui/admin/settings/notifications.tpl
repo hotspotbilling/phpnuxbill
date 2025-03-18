@@ -162,43 +162,80 @@
                     </div>
                 </div>
                 {if $_c['enable_balance'] == 'yes'}
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Send Balance')}</label>
-                            <div class="col-md-6">
-                                <textarea class="form-control" id="balance_send" name="balance_send"
-                                    rows="4">{if $_json['balance_send']}{Lang::htmlspecialchars($_json['balance_send'])}{else}{Lang::htmlspecialchars($_default['balance_send'])}{/if}</textarea>
-                            </div>
-                            <p class="col-md-4 help-block">
-                                <b>[[name]]</b> - {Lang::T('Receiver name')}.<br>
-                                <b>[[balance]]</b> - {Lang::T('how much balance have been send')}.<br>
-                                <b>[[current_balance]]</b> - {Lang::T('Current Balance')}.
-                            </p>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Send Balance')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="balance_send" name="balance_send"
+                                rows="4">{if $_json['balance_send']}{Lang::htmlspecialchars($_json['balance_send'])}{else}{Lang::htmlspecialchars($_default['balance_send'])}{/if}</textarea>
                         </div>
+                        <p class="col-md-4 help-block">
+                            <b>[[name]]</b> - {Lang::T('Receiver name')}.<br>
+                            <b>[[balance]]</b> - {Lang::T('how much balance have been send')}.<br>
+                            <b>[[current_balance]]</b> - {Lang::T('Current Balance')}.
+                        </p>
                     </div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label class="col-md-2 control-label">{Lang::T('Received Balance')}</label>
-                            <div class="col-md-6">
-                                <textarea class="form-control" id="balance_received" name="balance_received"
-                                    rows="4">{if $_json['balance_received']}{Lang::htmlspecialchars($_json['balance_received'])}{else}{Lang::htmlspecialchars($_default['balance_received'])}{/if}</textarea>
-                            </div>
-                            <p class="col-md-4 help-block">
-                                <b>[[name]]</b> - {Lang::T('Sender name')}.<br>
-                                <b>[[balance]]</b> - {Lang::T('how much balance have been received')}.<br>
-                                <b>[[current_balance]]</b> - {Lang::T('Current Balance')}.
-                            </p>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Received Balance')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="balance_received" name="balance_received"
+                                rows="4">{if $_json['balance_received']}{Lang::htmlspecialchars($_json['balance_received'])}{else}{Lang::htmlspecialchars($_default['balance_received'])}{/if}</textarea>
                         </div>
+                        <p class="col-md-4 help-block">
+                            <b>[[name]]</b> - {Lang::T('Sender name')}.<br>
+                            <b>[[balance]]</b> - {Lang::T('how much balance have been received')}.<br>
+                            <b>[[current_balance]]</b> - {Lang::T('Current Balance')}.
+                        </p>
                     </div>
+                </div>
                 {/if}
-            </div>
+               {* <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('PDF Invoice Template')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="email_invoice" name="email_invoice"
+                                placeholder="{Lang::T('Template for sending pdf invoice')}" rows="20">
+                            {if !empty($_json['email_invoice'])}
+                            {Lang::htmlspecialchars($_json['email_invoice'])}
+                            {else}
+                            {Lang::htmlspecialchars($_default['email_invoice'])}
+                            {/if}
+                        </textarea>
+                        </div>
+                        <p class="col-md-4 help-block">
+                            <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings')}.<br>
+                            <b>[[company_address]]</b> {Lang::T('Your Company Address at Settings')}.<br>
+                            <b>[[company_phone]]</b> - {Lang::T('Your Company Phone at Settings')}.<br>
+                            <b>[[company_url]]</b> - {Lang::T('Your APP_URL at Settings')}.<br>
+                            <b>[[invoice]]</b> - {Lang::T('Invoice number')}.<br>
+                            <b>[[created_at]]</b> - {Lang::T('Date invoice created')}.<br>
+                            <b>[[payment_gateway]]</b> - {Lang::T('Payment gateway user paid from')}.<br>
+                            <b>[[payment_channel]]</b> - {Lang::T('Payment channel user paid from')}.<br>
+                            <b>[[bill_rows]]</b> - {Lang::T('Bills table, where bills are listed')}.<br>
+                            <b>[[currency]]</b> - {Lang::T('Your currency code at localisation Settings')}.<br>
+                            <b>[[status]]</b> - {Lang::T('Invoice status')}.<br>
+                            <b>[[fullname]]</b> - {Lang::T('Receiver name')}.<br>
+                            <b>[[user_name]]</b> - {Lang::T('Username internet')}.<br>
+                            <b>[[email]]</b> - {Lang::T('Customer email')} .<br>
+                            <b>[[phone]]</b> - {Lang::T('Customer phone')}. <br>
+                            <b>[[address]]</b> - {Lang::T('Customer phone')}. <br>
+                            <b>[[expired_date]]</b> - {Lang::T('Expired datetime')}.<br>
+                            <b>[[logo]]</b> - {Lang::T('Your company logo at Settings')}.<br>
+                            <b>[[due_date]]</b> - {Lang::T('Invoice Due date, 7 Days after invoice created')}.<br>
+                            <b>[[payment_link]]</b> - <a href="{$app_url}/docs/#Reminder%20with%20payment%20link"
+                                target="_blank">{Lang::T("read documentation")}</a>.
+                        </p>
+                    </div>
+                </div>*}
 
-            <div class="panel-body">
-                <div class="form-group">
-                    <button class="btn btn-success btn-block" type="submit">{Lang::T('Save Changes')}</button>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <button class="btn btn-success btn-block" type="submit">{Lang::T('Save Changes')}</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 </form>
 {include file="sections/footer.tpl"}
