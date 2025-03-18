@@ -7,7 +7,7 @@
                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <div class="btn-group pull-right">
                         <a class="btn btn-primary btn-xs" title="save" href="{Text::url('logs/radius-csv')}"
-                            onclick="return ask(this, 'This will export to CSV?')"><span
+                            onclick="return ask(this, '{Lang::T('This will export to CSV')}?')"><span
                                 class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
                     </div>
                 {/if}

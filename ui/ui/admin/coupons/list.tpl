@@ -238,12 +238,12 @@
     function deleteCoupons(couponIds) {
         if (couponIds.length > 0) {
             Swal.fire({
-                title: 'Are you sure?',
-                text: 'You won\'t be able to revert this!',
+                title: '{Lang::T('Are you sure')}?',
+                text: '{Lang::T('You won\'t be able to revert this')}!',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: '{Lang::T('Yes, delete it')}!',
+                cancelButtonText: '{Lang::T('Cancel')}'
             }).then((result) => {
                 if (result.isConfirmed) {
                     var xhr = new XMLHttpRequest();
@@ -255,7 +255,7 @@
 
                             if (response.status === 'success') {
                                 Swal.fire({
-                                    title: 'Deleted!',
+                                    title: '{Lang::T('Deleted')}!',
                                     text: response.message,
                                     icon: 'success',
                                     confirmButtonText: 'OK'
@@ -273,7 +273,7 @@
                         } else {
                             Swal.fire({
                                 title: 'Error!',
-                                text: 'Failed to delete coupons. Please try again.',
+                                text: '{Lang::T('Failed to delete coupons. Please try again.')}',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
@@ -285,7 +285,7 @@
         } else {
             Swal.fire({
                 title: 'Error!',
-                text: 'No coupons selected to delete.',
+                text: '{Lang::T('No coupons selected to delete.')}',
                 icon: 'error',
                 confirmButtonText: 'OK'
             });
@@ -304,7 +304,7 @@
         } else {
             Swal.fire({
                 title: 'Error!',
-                text: 'Please select at least one coupon to delete.',
+                text: '{Lang::T('Please select at least one coupon to delete')}',
                 icon: 'error',
                 confirmButtonText: 'OK'
             });
