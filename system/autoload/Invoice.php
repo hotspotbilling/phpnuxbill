@@ -11,9 +11,9 @@ class Invoice
                 throw new Exception("Invoice ID is required");
             }
 
-            $templatePath = 'pages/custom_invoice.html';
+            $templatePath = 'pages/Custom_Invoice.html';
             if (!file_exists($templatePath)) {
-                $templatePath = 'pages/default_invoice.html';
+                $templatePath = 'pages/Default_Invoice.html';
             }
 
             $template = file_get_contents($templatePath);
