@@ -1149,5 +1149,9 @@
     "Yours_Balances": "Yours Balances",
     "Friend_username": "Friend username",
     "This_will_sync_dan_send_Customer_active_package_to_Mikrotik": "This will sync dan send Customer active package to Mikrotik",
+<<<<<<< HEAD
     "Email_not_sent__Mailer_Error__": "Email not sent, Mailer Error: "
+=======
+    "Payment_History": "Payment History"
+>>>>>>> 20916b44f0a88d7df2366b0d36d81f7ab249af1d
 }

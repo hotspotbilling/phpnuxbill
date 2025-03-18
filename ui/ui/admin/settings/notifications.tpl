@@ -113,6 +113,8 @@
                             <b>[[expired_date]]</b> - {Lang::T('Expired datetime')}.<br>
                             <b>[[footer]]</b> - {Lang::T('Invoice Footer')}.<br>
                             <b>[[note]]</b> - {Lang::T('For Notes by admin')}.<br>
+                            <b>[[invoice_link]]</b> - <a href="{$app_url}/docs/#Reminder%20with%20payment%20link"
+                            target="_blank">{Lang::T("read documentation")}</a>.
                         </p>
                     </div>
                 </div>

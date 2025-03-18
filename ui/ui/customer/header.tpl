@@ -164,7 +164,7 @@
                         <li {if $_system_menu eq 'history'}class="active" {/if}>
                             <a href="{Text::url('order/history')}">
                                 <i class="fa fa-file-text"></i>
-                                <span>{Lang::T('Order History')}</span>
+                                <span>{Lang::T('Payment History')}</span>
                             </a>
                         </li>
                     {/if}

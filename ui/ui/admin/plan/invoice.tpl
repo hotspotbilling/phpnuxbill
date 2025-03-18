@@ -38,7 +38,8 @@
                         class="btn btn-success text-black btn-sm hidden-xs hidden-sm" target="_blank">
                         <i class="glyphicon glyphicon-phone"></i>
                         NuxPrint
-                    </a>
+                    </a><br><br>
+                    <input type="text" class="form-control form-sm" style="border: 0px; padding: 1px; background-color: white;" readonly onclick="this.select()" value="{$public_url}">
                 </form>
             </div>
         </div>
@@ -58,7 +59,7 @@
     paid.src = '{$app_url}/system/uploads/paid.png';
     {if !empty($logo)}
         var img = new Image();
-        img.src = '{$app_url}/{$logo}';
+        img.src = '{$app_url}/{$logo}?{time()}';
         var new_width = (width / 4) * 2;
         var new_height = Math.ceil({$hlogo} * (new_width/{$wlogo}));
         height = height + new_height;

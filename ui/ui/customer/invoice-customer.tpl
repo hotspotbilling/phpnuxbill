@@ -1,4 +1,8 @@
-{include file="customer/header.tpl"}
+{if empty($_user)}
+    {include file="customer/header-public.tpl"}
+{else}
+    {include file="customer/header.tpl"}
+{/if}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
@@ -12,12 +16,16 @@
                     <pre id="content"
                         style="border: 0px; ;text-align: center; background-color: transparent; background-image: url('{$app_url}/system/uploads/paid.png');background-repeat:no-repeat;background-position: center">{$invoice}</pre>
                     <input type="hidden" name="id" value="{$in['id']}">
-                    <a href="{Text::url('voucher/list-activated')}" class="btn btn-default btn-sm"><i
+                    {if !empty($_user)}
+                        <a href="{Text::url('voucher/list-activated')}" class="btn btn-default btn-sm"><i
                             class="ion-reply-all"></i>{Lang::T('Finish')}</a>
+                    {/if}
                     <a href="javascript:download()" class="btn btn-success btn-sm text-black">
                         <i class="glyphicon glyphicon-share"></i> Download</a>
                     <a href="https://api.whatsapp.com/send/?text={$whatsapp}" class="btn btn-primary btn-sm">
                         <i class="glyphicon glyphicon-share"></i> WhatsApp</a>
+                        <br><br>
+                        <input type="text" class="form-control form-sm" style="border: 0px; padding: 1px; background-color: white;" readonly onclick="this.select()" value="{$public_url}">
                 </form>
             </div>
         </div>
@@ -37,7 +45,7 @@
     paid.src = '{$app_url}/system/uploads/paid.png';
     {if !empty($logo)}
         var img = new Image();
-        img.src = '{$app_url}/{$logo}';
+        img.src = '{$app_url}/{$logo}?{time()}';
         var new_width = (width / 4) * 2;
         var new_height = Math.ceil({$hlogo} * (new_width/{$wlogo}));
         height = height + new_height;
