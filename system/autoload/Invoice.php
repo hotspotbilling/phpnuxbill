@@ -7,7 +7,7 @@ class Invoice
     public static function generateInvoice($invoiceData)
     {
         try {
-            if (empty($invoiceData['id'])) {
+            if (empty($invoiceData['invoice'])) {
                 throw new Exception("Invoice ID is required");
             }
 
@@ -45,7 +45,7 @@ class Invoice
             $mpdf->WriteHTML($processedHtml);
 
             // Save PDF
-            $filename = "invoice_{$invoiceData['id']}.pdf";
+            $filename = "invoice_{$invoiceData['invoice']}.pdf";
             $outputPath = "system/uploads/invoices/{$filename}";
             $mpdf->Output($outputPath, 'F');
 
@@ -88,9 +88,9 @@ class Invoice
         }, $template);
     }
 
-    public static function sendInvoice($userId,  $package, $status = "Unpaid")
+    public static function sendInvoice($userId, $status = "Unpaid")
     {
-        global $config;
+        global $config, $root_path, $UPLOAD_PATH;
 
         if (empty($config['currency_code'])) {
             $config['currency_code'] = '$';
@@ -142,19 +142,28 @@ class Invoice
         $tax = $config['enable_tax'] ? Package::tax($subtotal) : 0;
         $total = ($tax > 0) ? $subtotal + $tax : $subtotal + $tax;
 
-        $token = User::generateToken($account['id'], 1);
+        $token = User::generateToken($account->id, 1);
         if (!empty($token['token'])) {
             $tur = ORM::for_table('tbl_user_recharges')
-                ->where('customer_id', $account['id'])
-                ->where('namebp', $package)
-                ->find_one();
-            if ($tur) {
-                $payLink = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
+                ->where('customer_id', $account->id)
+                ->where('namebp', $invoice->plan_name);
+
+            switch ($status) {
+                case 'Paid':
+                    $tur->where('status', 'on');
+                    break;
+                default:
+                    $tur->where('status', 'off');
+                    break;
             }
+            $turResult = $tur->find_one();
+            $payLink = $turResult ? '?_route=home&recharge=' . $turResult['id'] . '&uid=' . urlencode($token['token']) : '?_route=home';
         } else {
             $payLink = '?_route=home';
         }
 
+        $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
+        $logo = (file_exists($UPLOAD_PATH . DIRECTORY_SEPARATOR . 'logo.png')) ? $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.png?' . time() : $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . 'logo.default.png';
         $invoiceData = [
             'invoice' => "INV-" . Package::_raid(),
             'fullname' => $account->fullname,
@@ -169,9 +178,8 @@ class Invoice
             'company_address' => $config['address'],
             'company_name' => $config['CompanyName'],
             'company_phone' => $config['phone'],
-            'logo' => $config['logo'],
-            'company_url' => APP_URL,
-            'payment_link' => $payLink,
+            'logo' => $logo,
+            'payment_link' => $payLink
         ];
 
         if (!isset($invoiceData['bill_rows']) || empty($invoiceData['bill_rows'])) {

@@ -210,7 +210,6 @@
                             <b>[[company_name]]</b> {Lang::T('Your Company Name at Settings')}.<br>
                             <b>[[company_address]]</b> {Lang::T('Your Company Address at Settings')}.<br>
                             <b>[[company_phone]]</b> - {Lang::T('Your Company Phone at Settings')}.<br>
-                            <b>[[company_url]]</b> - {Lang::T('Your APP_URL at Settings')}.<br>
                             <b>[[invoice]]</b> - {Lang::T('Invoice number')}.<br>
                             <b>[[created_at]]</b> - {Lang::T('Date invoice created')}.<br>
                             <b>[[payment_gateway]]</b> - {Lang::T('Payment gateway user paid from')}.<br>
@@ -230,7 +229,7 @@
                                 target="_blank">{Lang::T("read documentation")}</a>.
                         </p>
                     </div>
-                </div>*}
+                </div> *}
 
                 <div class="panel-body">
                     <div class="form-group">
