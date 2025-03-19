@@ -6,7 +6,11 @@ class graph_monthly_registered_customers
     {
         global $CACHE_PATH,$ui;
 
-        $cacheMRfile = File::pathFixer('/monthlyRegistered.temp');
+        $cacheMRfile = $CACHE_PATH . File::pathFixer('/monthlyRegistered.temp');
+        //Compatibility for old path
+        if (file_exists($oldCacheMRfile = str_replace($CACHE_PATH, '', $cacheMRfile))) {
+            rename($oldCacheMRfile, $cacheMRfile);
+        }
         //Cache for 1 hour
         if (file_exists($cacheMRfile) && time() - filemtime($cacheMRfile) < 3600) {
             $monthlyRegistered = json_decode(file_get_contents($cacheMRfile), true);
