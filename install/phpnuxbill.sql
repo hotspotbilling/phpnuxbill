@@ -251,6 +251,16 @@ CREATE TABLE `tbl_customers_inbox` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `tbl_port_pool`;
+CREATE TABLE IF NOT EXISTS `tbl_port_pool` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `public_ip` varchar(40) NOT NULL,
+  `port_name` varchar(40) NOT NULL,
+  `range_port` varchar(40) NOT NULL,
+  `routers` varchar(40) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE IF NOT EXISTS `tbl_meta` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `tbl` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Table name',
