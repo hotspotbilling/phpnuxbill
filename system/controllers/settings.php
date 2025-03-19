@@ -146,7 +146,8 @@ switch ($action) {
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
         if (function_exists("shell_exec")) {
-            $php = trim(shell_exec('which php'));
+            $which = stripos(php_uname('s'), "Win") === 0 ? 'where' : 'which';
+            $php = trim(shell_exec("$which php"));
             if (empty($php)) {
                 $php = 'php';
             }
