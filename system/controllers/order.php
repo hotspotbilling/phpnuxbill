@@ -371,7 +371,7 @@ switch ($action) {
                 $d->trx_invoice = $result;
                 $d->status = 2;
                 $d->save();
-                r2(getUrl('order/view/$trx_id'), 's', Lang::T("Success to send package"));
+                r2(getUrl("order/view/$trx_id"), 's', Lang::T("Success to send package"));
             } else {
                 $errorMessage = "Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .
                     "\nRouter: " . $router_name .
