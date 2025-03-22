@@ -58,7 +58,7 @@ switch ($action) {
                             $w = [];
                             $v = [];
                             foreach ($mts as $mt) {
-                                $w[] ='method';
+                                $w[] = 'method';
                                 $v[] = "$mt - %";
                             }
                             $query->where_likes($w, $v);
@@ -91,7 +91,7 @@ switch ($action) {
                             $w = [];
                             $v = [];
                             foreach ($mts as $mt) {
-                                $w[] ='method';
+                                $w[] = 'method';
                                 $v[] = "$mt - %";
                             }
                             $query->where_likes($w, $v);
@@ -161,7 +161,7 @@ switch ($action) {
                         $w = [];
                         $v = [];
                         foreach ($mts as $mt) {
-                            $w[] ='method';
+                            $w[] = 'method';
                             $v[] = "$mt - %";
                         }
                         $query->where_likes($w, $v);
@@ -246,7 +246,7 @@ switch ($action) {
                         $total += $v;
                         $array['data'][] = $v;
                     }
-                    if($total>0){
+                    if ($total > 0) {
                         $result['datas'][] = $array;
                     }
                 }
@@ -258,18 +258,29 @@ switch ($action) {
         die();
     case 'by-date':
     case 'activation':
-        $q = (_post('q') ? _post('q') : _get('q'));
+        $q = trim(_post('q') ?: _get('q'));
         $keep = _post('keep');
+
         if (!empty($keep)) {
-            ORM::raw_execute("DELETE FROM tbl_transactions WHERE date < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))");
-            r2(getUrl('logs/list/'), 's', "Delete logs older than $keep days");
+            ORM::raw_execute("DELETE FROM tbl_transactions WHERE date < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))", [$keep]);
+            r2(getUrl('reports/activation/'), 's', "Deleted logs older than $keep days");
         }
-        if ($q != '') {
-            $query = ORM::for_table('tbl_transactions')->where_like('invoice', '%' . $q . '%')->order_by_desc('id');
+
+        $query = ORM::for_table('tbl_transactions')
+            ->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
+
+        if ($q !== '') {
+            $query->where_like('invoice', "%$q%");
+        }
+
+        try {
             $d = Paginator::findMany($query, ['q' => $q]);
-        } else {
-            $query = ORM::for_table('tbl_transactions')->order_by_desc('id');
-            $d = Paginator::findMany($query);
+        } catch (Exception $e) {
+             r2(getUrl('reports/activation/'), 'e','Database query failed: ' . $e->getMessage());
+            $d = [];
         }
 
         $ui->assign('activation', $d);
@@ -298,7 +309,7 @@ switch ($action) {
         $d->where_gte('recharged_on', $fdate);
         $d->where_lte('recharged_on', $tdate);
         $d->order_by_desc('id');
-        $x =  $d->find_many();
+        $x = $d->find_many();
 
         $dr = ORM::for_table('tbl_transactions');
         if ($stype != '') {
@@ -356,7 +367,7 @@ switch ($action) {
             $w = [];
             $v = [];
             foreach ($mts as $mt) {
-                $w[] ='method';
+                $w[] = 'method';
                 $v[] = "$mt - %";
             }
             $query->where_likes($w, $v);
