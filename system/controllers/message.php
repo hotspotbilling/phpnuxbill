@@ -200,6 +200,7 @@ EOT;
                 ['tbl_customers.phonenumber', 'phonenumber'],
                 ['tbl_user_recharges.customer_id', 'customer_id'],
                 ['tbl_customers.fullname', 'fullname'],
+                ['tbl_customers.username','username'],
             ]);
             $customers = $query->find_array();
         } else {
