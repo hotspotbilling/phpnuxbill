@@ -359,7 +359,10 @@ switch ($action) {
         $query = ORM::for_table('tbl_transactions')
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-            ->order_by_desc('id');
+            ->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
         if (count($tps) > 0) {
             $query->where_in('type', $tps);
         }

@@ -114,7 +114,10 @@ switch ($action) {
         $query = ORM::for_table('tbl_transactions')
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-            ->order_by_desc('id');
+            ->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
         if (count($tps) > 0) {
             $query->where_in('type', $tps);
         }
@@ -158,6 +161,7 @@ switch ($action) {
 			<table id="customers">
 				<tr>
 				<th>' . Lang::T('Username') . '</th>
+                <th>' . Lang::T('Fullname') . '</th>
 				<th>' . Lang::T('Plan Name') . '</th>
 				<th>' . Lang::T('Type') . '</th>
 				<th>' . Lang::T('Plan Price') . '</th>
@@ -170,6 +174,7 @@ switch ($action) {
             foreach ($x as $value) {
 
                 $username = $value['username'];
+                $fullname = $value['fullname'];
                 $plan_name = $value['plan_name'];
                 $type = $value['type'];
                 $price = $config['currency_code'] . ' ' . number_format($value['price'], 0, $config['dec_point'], $config['thousands_sep']);
@@ -181,6 +186,7 @@ switch ($action) {
 
                 $html .= "<tr" . (($c = !$c) ? ' class="alt"' : ' class=""') . ">" . "
 				<td>$username</td>
+                <td>$fullname</td>
 				<td>$plan_name</td>
 				<td>$type</td>
 				<td align='right'>$price</td>
