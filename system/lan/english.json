@@ -381,5 +381,9 @@
     "_Clear_old_logs_": " Clear old logs?",
     "Clean_up_Logs": "Clean up Logs",
     "ID": "ID",
-    "Date_Sent": "Date Sent"
+    "Date_Sent": "Date Sent",
+    "Notification_Message": "Notification Message",
+    "Share": "Share",
+    "Previous": "Previous",
+    "Email_not_sent__Mailer_Error__": "Email not sent, Mailer Error: "
 }

@@ -200,7 +200,9 @@ EOT;
                 ['tbl_customers.phonenumber', 'phonenumber'],
                 ['tbl_user_recharges.customer_id', 'customer_id'],
                 ['tbl_customers.fullname', 'fullname'],
-                ['tbl_customers.username','username'],
+                ['tbl_customers.username', 'username'],
+                ['tbl_customers.email', 'email'],
+                ['tbl_customers.service_type','service_type'],
             ]);
             $customers = $query->find_array();
         } else {
@@ -288,7 +290,13 @@ EOT;
         $totalSMSFailed = 0;
         $totalWhatsappSent = 0;
         $totalWhatsappFailed = 0;
+        $totalEmailSent = 0;
+        $totalEmailFailed = 0;
+        $totalInboxSent = 0;
+        $totalInboxFailed = 0;
         $batchStatus = [];
+        $subject = Lang::T('Notification Message');
+        $form = 'Admin';
 
         foreach ($customers as $customer) {
             $currentMessage = str_replace(
@@ -311,14 +319,14 @@ EOT;
             if ($test) {
                 $batchStatus[] = [
                     'name' => $customer['fullname'],
-                    'phone' => $customer['phonenumber'],
+                    'channel' => 'Test Channel',
                     'status' => 'Test Mode',
                     'message' => $currentMessage,
                     'service' => $service,
                     'router' => $routerName,
                 ];
             } else {
-                if ($via == 'sms' || $via == 'both') {
+                if ($via === 'sms' || $via === 'both' || $via === 'all') {
                     if (Message::sendSMS($customer['phonenumber'], $currentMessage)) {
                         $totalSMSSent++;
                         $batchStatus[] = ['name' => $customer['fullname'], 'phone' => $customer['phonenumber'], 'status' => 'SMS Sent', 'message' => $currentMessage];
@@ -328,13 +336,33 @@ EOT;
                     }
                 }
 
-                if ($via == 'wa' || $via == 'both') {
+                if ($via === 'wa' || $via == 'both' || $via === 'all') {
                     if (Message::sendWhatsapp($customer['phonenumber'], $currentMessage)) {
                         $totalWhatsappSent++;
-                        $batchStatus[] = ['name' => $customer['fullname'], 'phone' => $customer['phonenumber'], 'status' => 'WhatsApp Sent', 'message' => $currentMessage];
+                        $batchStatus[] = ['name' => $customer['fullname'], 'channel' => $customer['phonenumber'], 'status' => 'WhatsApp Sent', 'message' => $currentMessage];
                     } else {
                         $totalWhatsappFailed++;
-                        $batchStatus[] = ['name' => $customer['fullname'], 'phone' => $customer['phonenumber'], 'status' => 'WhatsApp Failed', 'message' => $currentMessage];
+                        $batchStatus[] = ['name' => $customer['fullname'], 'channel' => $customer['phonenumber'], 'status' => 'WhatsApp Failed', 'message' => $currentMessage];
+                    }
+                }
+
+                if ($via === 'email' || $via === 'all') {
+                    if (Message::sendEmail($customer['email'], $subject, $currentMessage)) {
+                        $totalEmailSent++;
+                        $batchStatus[] = ['name' => $customer['fullname'], 'channel' => $customer['email'], 'status' => 'Email Sent', 'message' => $currentMessage];
+                    } else {
+                        $totalEmailFailed++;
+                        $batchStatus[] = ['name' => $customer['fullname'], 'channel' => $customer['email'], 'status' => 'Email Failed', 'message' => $currentMessage];
+                    }
+                }
+
+                if ($via === 'inbox' || $via === 'all') {
+                    if (Message::addToInbox($customer['customer_id'], $subject, $currentMessage, $form)) {
+                        $totalInboxSent++;
+                        $batchStatus[] = ['name' => $customer['fullname'], 'channel' => 'Inbox', 'status' => 'Inbox Message Sent', 'message' => $currentMessage];
+                    } else {
+                        $totalInboxFailed++;
+                        $batchStatus[] = ['name' => $customer['fullname'], 'channel' => 'Inbox', 'status' => 'Inbox Message Failed', 'message' => $currentMessage];
                     }
                 }
             }
@@ -349,8 +377,8 @@ EOT;
             'page' => $page + 1,
             'batchStatus' => $batchStatus,
             'message' => $currentMessage,
-            'totalSent' => $totalSMSSent + $totalWhatsappSent,
-            'totalFailed' => $totalSMSFailed + $totalWhatsappFailed,
+            'totalSent' => $totalSMSSent + $totalWhatsappSent + $totalEmailSent + $totalInboxSent,
+            'totalFailed' => $totalSMSFailed + $totalWhatsappFailed + $totalEmailFailed + $totalInboxFailed,
             'hasMore' => $hasMore,
             'service' => $service,
             'router' => $routerName,

@@ -50,6 +50,9 @@
                         <label class="col-md-2 control-label">{Lang::T('Send Via')}</label>
                         <div class="col-md-6">
                             <select class="form-control" name="via" id="via">
+                                <option value="all" {if $via=='all' }selected{/if}>{Lang::T('All Channels')}</option>
+                                <option value="inbox" {if $via=='inbox' }selected{/if}>{Lang::T('Inbox')}</option>
+                                <option value="email" {if $via=='email' }selected{/if}>{Lang::T('Email')}</option>
                                 <option value="sms" {if $via=='sms' }selected{/if}>{Lang::T('SMS')}</option>
                                 <option value="wa" {if $via=='wa' }selected{/if}>{Lang::T('WhatsApp')}</option>
                                 <option value="both" {if $via=='both' }selected{/if}>{Lang::T('SMS and WhatsApp')}</option>
@@ -112,7 +115,7 @@
             <thead>
                 <tr>
                     <th>{Lang::T('Customer')}</th>
-                    <th>{Lang::T('Phone')}</th>
+                    <th>{Lang::T('Channel')}</th>
                     <th>{Lang::T('Status')}</th>
                     <th>{Lang::T('Message')}</th>
                     <th>{Lang::T('Router')}</th>
@@ -186,7 +189,7 @@
                         let statusClass = msg.status.includes('Failed') ? 'danger' : 'success';
                         historyTable.row.add([
                             msg.name,
-                            msg.phone,
+                            msg.channel,
                             `<span class="text-${statusClass}">${msg.status}</span>`,
                             msg.message || 'No message',
                             msg.router ? msg.router : 'All Router', 

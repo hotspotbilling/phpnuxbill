@@ -46,7 +46,7 @@ class Message
                     $txts = str_split($txt, 160);
                     try {
                         foreach ($txts as $txt) {
-                            self::sendSMS($config['sms_url'], $phone, $txt);
+                            self::sendSMS( $phone, $txt);
                             self::logMessage('SMS', $phone, $txt, 'Success');
                         }
                     } catch (Throwable $e) {
@@ -396,9 +396,11 @@ class Message
             $v->body = nl2br($body);
             $v->save();
             self::logMessage("Inbox", $user->username, $body, "Success");
+            return true;
         } catch (Throwable $e) {
             $errorMessage = Lang::T("Error adding message to inbox: " . $e->getMessage());
             self::logMessage('Inbox', $user->username, $body, 'Error', $errorMessage);
+            return false;
         }
     }
 
