@@ -49,7 +49,7 @@ foreach ($d as $ds) {
         } else {
             $price = $p['price'];
         }
-        if ($ds['expiration'] == $day7 && $config['notification_reminder_7day'] !== 'no') {
+        if ($ds['expiration'] == $day7 && $config['notification_reminder_7days'] !== 'no') {
             try {
                 echo Message::sendPackageNotification(
                     $c,
@@ -61,7 +61,7 @@ foreach ($d as $ds) {
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 7-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
-        } else if ($ds['expiration'] == $day3 && $config['notification_reminder_3day'] !== 'no') {
+        } else if ($ds['expiration'] == $day3 && $config['notification_reminder_3days'] !== 'no') {
             try {
                 echo Message::sendPackageNotification(
                     $c,
