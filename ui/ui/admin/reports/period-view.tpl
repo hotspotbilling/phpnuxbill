@@ -37,6 +37,7 @@
                     <thead>
                         <tr>
                             <th>{Lang::T('Username')}</th>
+                            <th>{Lang::T('Fullname')}</th>
                             <th>{Lang::T('Type')}</th>
                             <th>{Lang::T('Plan Name')}</th>
                             <th>{Lang::T('Plan Price')}</th>
@@ -50,6 +51,7 @@
                         {foreach $d as $ds}
                             <tr>
                                 <td>{$ds['username']}</td>
+                                <td>{$ds['fullname']}</td>
                                 <td>{$ds['type']}</td>
                                 <td>{$ds['plan_name']}</td>
                                 <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>

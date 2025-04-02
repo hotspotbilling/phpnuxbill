@@ -279,7 +279,7 @@ switch ($action) {
         try {
             $d = Paginator::findMany($query, ['q' => $q]);
         } catch (Exception $e) {
-             r2(getUrl('reports/activation/'), 'e','Database query failed: ' . $e->getMessage());
+            r2(getUrl('reports/activation/'), 'e', 'Database query failed: ' . $e->getMessage());
             $d = [];
         }
 
@@ -302,6 +302,10 @@ switch ($action) {
         $stype = _post('stype');
 
         $d = ORM::for_table('tbl_transactions');
+        $d->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
         if ($stype != '') {
             $d->where('type', $stype);
         }
