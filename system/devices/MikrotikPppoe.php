@@ -244,7 +244,7 @@ class MikrotikPppoe
 
     function add_pool($pool){
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $mikrotik = $this->info($pool['routers']);
@@ -259,7 +259,7 @@ class MikrotikPppoe
 
     function update_pool($old_pool, $new_pool){
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $mikrotik = $this->info($new_pool['routers']);
@@ -284,7 +284,7 @@ class MikrotikPppoe
 
     function remove_pool($pool){
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $mikrotik = $this->info($pool['routers']);
@@ -329,7 +329,7 @@ class MikrotikPppoe
     function getClient($ip, $user, $pass)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $iport = explode(":", $ip);
@@ -339,7 +339,7 @@ class MikrotikPppoe
     function removePpoeUser($client, $username)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $printRequest = new RouterOS\Request('/ppp/secret/print');
@@ -376,7 +376,7 @@ class MikrotikPppoe
     function removePpoeActive($client, $username)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $onlineRequest = new RouterOS\Request('/ppp/active/print');
@@ -392,7 +392,7 @@ class MikrotikPppoe
     function getIpHotspotUser($client, $username)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $printRequest = new RouterOS\Request(
@@ -405,7 +405,7 @@ class MikrotikPppoe
     function addIpToAddressList($client, $ip, $listName, $comment = '')
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $addRequest = new RouterOS\Request('/ip/firewall/address-list/add');
@@ -420,7 +420,7 @@ class MikrotikPppoe
     function removeIpFromAddressList($client, $ip)
     {
         global $_app_stage;
-        if ($_app_stage == 'demo') {
+        if ($_app_stage == 'Demo') {
             return null;
         }
         $printRequest = new RouterOS\Request(
