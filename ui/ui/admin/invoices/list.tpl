@@ -35,7 +35,7 @@
                             <span class="label label-warning">{Lang::T('Pending')}</span>
                         {/if}
                     </td>
-                    <td>{$invoice->created_date}</td>
+                    <td>{$invoice->created_at}</td>
                     <td>{$invoice->due_date}</td>
                     <td>
                         <a href="{$app_url}/system/uploads/invoices/{$invoice->filename}" class="btn btn-primary btn-xs">{Lang::T('View')}</a>
