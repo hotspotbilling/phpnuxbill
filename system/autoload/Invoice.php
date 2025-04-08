@@ -92,7 +92,7 @@ class Invoice
      * Send invoice to user
      *
      * @param int $userId
-     * @param array $invoice
+     * @param array $invoice // $invoice['plan_name'] = 'Plan Name', $invoice['price'] = 100
      * @param array $bills
      * @param string $status
      * @param string $invoiceNo
