@@ -8,12 +8,12 @@ class Invoice
     {
         try {
             if (empty($invoiceData['invoice'])) {
-                throw new Exception("Invoice ID is required");
+                throw new Exception(Lang::T("Invoice No is required"));
             }
 
             $template = Lang::getNotifText('email_invoice');
             if (!$template) {
-                throw new Exception("Invoice template not found");
+                throw new Exception(Lang::T("Invoice template not found"));
             }
 
             if (strpos($template, '<body') === false) {
@@ -47,10 +47,14 @@ class Invoice
             // Save PDF
             $filename = "invoice_{$invoiceData['invoice']}.pdf";
             $outputPath = "system/uploads/invoices/{$filename}";
+            $dir = dirname($outputPath);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
             $mpdf->Output($outputPath, 'F');
 
             if (!file_exists($outputPath)) {
-                throw new Exception("Failed to save PDF file");
+                throw new Exception(Lang::T("Failed to save PDF file"));
             }
 
             return $filename;
@@ -67,7 +71,7 @@ class Invoice
         return preg_replace_callback('/\[\[(\w+)\]\]/', function ($matches) use ($invoiceData) {
             $key = $matches[1];
             if (!isset($invoiceData[$key])) {
-                _log("Missing invoice key: $key");
+                _log(Lang::T("Missing invoice key: ") . $key);
                 return '';
             }
 
@@ -80,9 +84,8 @@ class Invoice
             }
 
             if ($key === 'bill_rows') {
-                return html_entity_decode($invoiceData[$key]);
+                return $invoiceData[$key];
             }
-
 
             return htmlspecialchars($invoiceData[$key] ?? '');
         }, $template);
@@ -92,14 +95,14 @@ class Invoice
      * Send invoice to user
      *
      * @param int $userId
-     * @param array $invoice // $invoice['plan_name'] = 'Plan Name', $invoice['price'] = 100
+     * @param array $invoice
      * @param array $bills
      * @param string $status
      * @param string $invoiceNo
      * @return bool
      */
 
-    public static function sendInvoice($userId, $invoice = [], $bills = [], $status = "Unpaid", $invoiceNo = "INV-" . Package::_raid())
+    public static function sendInvoice($userId, $invoice = null, $bills = [], $status = "Unpaid", $invoiceNo = null)
     {
         global $config, $root_path, $UPLOAD_PATH;
 
@@ -108,11 +111,39 @@ class Invoice
 
         $account = ORM::for_table('tbl_customers')->find_one($userId);
         self::validateAccount($account);
-
+        if (!$invoiceNo) {
+            $invoiceNo = "INV-" . Package::_raid();
+        }
         // Fetch invoice if not provided
-        $invoice = $invoice ?: ORM::for_table("tbl_transactions")->where("username", $account->username)->find_one();
+        if ($status === "Unpaid" && !$invoice) {
+            $data = ORM::for_table('tbl_user_recharges')->where('customer_id', $userId)
+                ->where('status', 'off')
+                ->left_outer_join('tbl_plans', 'tbl_user_recharges.namebp = tbl_plans.name_plan')
+                ->select('tbl_plans.price', 'price')
+                ->select('tbl_plans.name_plan', 'namebp')
+                ->find_one();
+            if (!$data) {
+                $data = ORM::for_table('tbl_user_recharges')->where('username', $account->username)
+                    ->left_outer_join('tbl_plans', 'tbl_user_recharges.namebp = tbl_plans.name_plan')
+                    ->select('tbl_plans.price', 'price')
+                    ->select('tbl_plans.name_plan', 'namebp')
+                    ->where('status', 'off')
+                    ->find_one();
+            }
+            if (!$data) {
+                throw new Exception(Lang::T("No unpaid invoice found for username:") . $account->username);
+            }
+            $invoice = [
+                'price' => $data->price,
+                'plan_name' => $data->namebp,
+                'routers' => $data->routers,
+            ];
+
+        } else if ($status === "Paid" && !$invoice) {
+            $invoice = ORM::for_table("tbl_transactions")->where("username", $account->username)->find_one();
+        }
         if (!$invoice) {
-            throw new Exception("Transaction not found for user: {$userId}");
+            throw new Exception(Lang::T("Transaction not found for username: ") . $account->username);
         }
 
         // Get additional bills if not provided
@@ -148,12 +179,12 @@ class Invoice
         ];
 
         if (empty($invoiceData['bill_rows'])) {
-            throw new Exception("Bill rows data is empty.");
+            throw new Exception(Lang::T("Bill rows data is empty."));
         }
 
         $filename = self::generateInvoice($invoiceData);
         if (!$filename) {
-            throw new Exception("Failed to generate invoice PDF");
+            throw new Exception(Lang::T("Failed to generate invoice PDF"));
         }
 
         $pdfPath = "system/uploads/invoices/{$filename}";
@@ -162,23 +193,23 @@ class Invoice
         try {
             Message::sendEmail(
                 $account->email,
-                "Invoice for Account {$account->fullname}",
-                "Please find your invoice attached",
+                Lang::T("Invoice for Account {$account->fullname}"),
+                Lang::T("Please find your invoice attached"),
                 $pdfPath
             );
             return true;
         } catch (\Exception $e) {
-            throw new Exception("Failed to send invoice email: " . $e->getMessage());
+            throw new Exception(Lang::T("Failed to send email invoice to ") . $account->email . ". " . Lang::T("Reason: ") . $e->getMessage());
         }
     }
 
     private static function validateAccount($account)
     {
         if (!$account) {
-            throw new Exception("User not found");
+            throw new Exception(Lang::T("User not found"));
         }
         if (!$account->email || !filter_var($account->email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Invalid user email");
+            throw new Exception(Lang::T("Invalid user email"));
         }
     }
 
@@ -186,22 +217,22 @@ class Invoice
     {
         $items = [
             [
-                'description' => $invoice->plan_name,
-                'details' => 'Monthly Subscription',
-                'amount' => (float) $invoice->price
+                'description' => $invoice['plan_name'],
+                'details' => Lang::T('Subscription'),
+                'amount' => (float) $invoice['price']
             ]
         ];
 
-        if ($add_cost > 0 && $invoice->routers != 'balance') {
+        if ($invoice->routers != 'balance') {
             foreach ($bills as $description => $amount) {
                 if (is_numeric($amount)) {
                     $items[] = [
                         'description' => $description,
-                        'details' => 'Additional Bill',
+                        'details' => Lang::T('Additional Bill'),
                         'amount' => (float) $amount
                     ];
                 } else {
-                   _log("Invalid bill amount for {$description}: {$amount}");
+                    _log(Lang::T("Invalid bill amount for {$description}: {$amount}"));
                 }
             }
         }
@@ -246,9 +277,11 @@ class Invoice
                 <tbody>";
 
         foreach ($items as $item) {
+            $desc = htmlspecialchars($item['description'], ENT_QUOTES);
+            $details = htmlspecialchars($item['details'], ENT_QUOTES);
             $html .= "<tr>
-                    <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{$item['description']}</td>
-                    <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{$item['details']}</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{$desc}</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{$details}</td>
                     <td style='padding: 10px; border-bottom: 1px solid #ddd;'>{$currency}" . number_format((float) $item['amount'], 2) . "</td>
                   </tr>";
         }
@@ -287,6 +320,28 @@ class Invoice
         $invoice->created_at = date('Y-m-d H:i:s');
         $invoice->save();
         return $invoice->id;
+    }
+
+    public static function getAll()
+    {
+        return ORM::for_table('tbl_invoices')->order_by_desc('id')->find_many();
+    }
+    public static function getById($id)
+    {
+        return ORM::for_table('tbl_invoices')->find_one($id);
+    }
+    public static function getByNumber($number)
+    {
+        return ORM::for_table('tbl_invoices')->where('number', $number)->find_one();
+    }
+    public static function delete($id)
+    {
+        $invoice = ORM::for_table('tbl_invoices')->find_one($id);
+        if ($invoice) {
+            $invoice->delete();
+            return true;
+        }
+        return false;
     }
 
 }

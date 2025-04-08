@@ -1,210 +1,211 @@
 {
-    "2023.8.9": [
-        "ALTER TABLE `tbl_customers` ADD `balance` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'For Money Deposit' AFTER `email`;",
-        "CREATE TABLE `tbl_customers_meta` (`id` int(11) NOT NULL, `customer_id` int(11) NOT NULL,`meta_key` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `meta_value` longtext COLLATE utf8mb4_general_ci) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
-        "ALTER TABLE `tbl_customers_meta` ADD PRIMARY KEY (`id`);",
-        "ALTER TABLE `tbl_customers_meta` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;"
-    ],
-    "2023.8.14": [
-        "ALTER TABLE `tbl_customers` ADD `pppoe_password` varchar(45) NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `password`;",
-        "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "ALTER TABLE `tbl_customers` ADD `auto_renewal` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Auto renewall using balance' AFTER `balance`;"
-    ],
-    "2023.8.23": [
-        "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login';"
-    ],
-    "2023.8.28": [
-        "ALTER TABLE `tbl_user_recharges` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;",
-        "ALTER TABLE `tbl_transactions` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;"
-    ],
-    "2023.9.5": [
-        "DROP TABLE `tbl_language`;",
-        "ALTER TABLE `tbl_plans` ADD `pool_expired`  varchar(40) NOT NULL DEFAULT '' AFTER `pool`;"
-    ],
-    "2023.9.27": [
-        "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
-    ],
-    "2023.9.28": [
-        "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
-    ],
-    "2023.10.1": [
-        "ALTER TABLE `tbl_plans` ADD `is_radius` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '1 is radius' AFTER `routers`; "
-    ],
-    "2023.10.24": [
-        "ALTER TABLE `nas` ADD `routers` VARCHAR(32) NOT NULL DEFAULT '' AFTER `description`;"
-    ],
-    "2023.12.15": [
-        "ALTER TABLE `tbl_customers` ADD `service_type` ENUM('Hotspot','PPPoE','Others') DEFAULT 'Others' COMMENT 'For selecting user type' AFTER `balance`;"
-    ],
-    "2024.1.11": [
-        "ALTER TABLE `tbl_plans` ADD `allow_purchase` ENUM('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page' AFTER `enabled`;"
-    ],
-    "2024.2.7": [
-        "ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;",
-        "ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;"
-    ],
-    "2024.2.12": [
-        "ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
-    ],
-    "2024.2.15": [
-        "ALTER TABLE `tbl_users` CHANGE `password` `password` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "ALTER TABLE `tbl_users` ADD `phone` VARCHAR(32) NOT NULL DEFAULT '' AFTER `password`, ADD `email` VARCHAR(128) NOT NULL DEFAULT '' AFTER `phone`, ADD `city` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kota' AFTER `email`, ADD `subdistrict` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kecamatan' AFTER `city`, ADD `ward` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kelurahan' AFTER `subdistrict`;"
-    ],
-    "2024.2.16": [
-        "ALTER TABLE `tbl_customers` ADD `created_by` INT NOT NULL DEFAULT '0' AFTER `auto_renewal`;"
-    ],
-    "2024.2.19": [
-        "CREATE TABLE `tbl_customers_fields` (`id` INT PRIMARY KEY AUTO_INCREMENT, `customer_id` INT NOT NULL, `field_name` VARCHAR(255) NOT NULL, `field_value` VARCHAR(255) NOT NULL, FOREIGN KEY (customer_id) REFERENCES tbl_customers(id));"
-    ],
-    "2024.2.20": [
-        "ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'address list' AFTER `pool_expired`;",
-        "ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;"
-    ],
-    "2024.2.20.1": [
-        "DROP TABLE IF EXISTS `tbl_customers_meta`;"
-    ],
-    "2024.2.23": [
-        "ALTER TABLE `tbl_transactions` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;",
-        "ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;"
-    ],
-    "2024.3.3": [
-        "ALTER TABLE `tbl_plans` CHANGE `validity_unit` `validity_unit` ENUM('Mins','Hrs','Days','Months','Period') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
-    ],
-    "2024.3.12": [
-        "ALTER TABLE `tbl_plans` CHANGE `allow_purchase` `prepaid` ENUM('yes','no') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'yes' COMMENT 'is prepaid';"
-    ],
-    "2024.3.14": [
-        "ALTER TABLE `tbl_transactions` ADD `note` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'for note' AFTER `type`;"
-    ],
-    "2024.3.19": [
-        "ALTER TABLE `tbl_customers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates' AFTER `email`;"
-    ],
-    "2024.3.19.1": [
-        "ALTER TABLE `tbl_customers` ADD `account_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' AFTER `coordinates`;"
-    ],
-    "2024.3.19.2": [
-        "ALTER TABLE `tbl_plans` ADD `plan_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' ;"
-    ],
-    "2023.3.20": [
-        "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login';"
-    ],
-    "2024.4.5": [
-        "ALTER TABLE `tbl_payment_gateway` ADD `trx_invoice` VARCHAR(25) NOT NULL DEFAULT '' COMMENT 'from tbl_transactions' AFTER `paid_date`;"
-    ],
-    "2024.5.17": [
-        "ALTER TABLE `tbl_customers` ADD `status` ENUM('Active','Banned','Disabled') NOT NULL DEFAULT 'Active' AFTER `auto_renewal`;"
-    ],
-    "2024.5.18": [
-        "ALTER TABLE `tbl_customers` CHANGE `status` `status` ENUM('Active','Banned','Disabled','Inactive','Limited','Suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Active';"
-    ],
-    "2024.5.20": [
-        "ALTER TABLE `tbl_customers` ADD `city` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `address`, ADD `district` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `city`, ADD `state` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `district`, ADD `zip` VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `state`;"
-    ],
-    "2024.6.5": [
-        "ALTER TABLE `tbl_plans` ADD `price_old` VARCHAR(40) NOT NULL DEFAULT '' AFTER `price`;",
-        "ALTER TABLE `tbl_plans` ADD `device` VARCHAR(32) NOT NULL DEFAULT '' AFTER `plan_type`;"
-    ],
-    "2024.6.10": [
-        "ALTER TABLE `tbl_pool` ADD `local_ip` VARCHAR(40) NOT NULL DEFAULT '' AFTER `pool_name`;"
-    ],
-    "2024.6.11": [
-        "ALTER TABLE `tbl_plans` ADD `plan_expired` INT NOT NULL DEFAULT '0' AFTER `pool`;",
-        "ALTER TABLE `tbl_plans` DROP `pool_expired`, DROP `list_expired`;"
-    ],
-    "2024.6.19": [
-        "ALTER TABLE `tbl_plans` ADD `expired_date` TINYINT(1) NOT NULL DEFAULT '20' AFTER `plan_expired`;"
-    ],
-    "2024.6.21": [
-        "ALTER TABLE `tbl_plans` ADD `on_login` TEXT NULL DEFAULT NULL AFTER `device`;",
-        "ALTER TABLE `tbl_plans` ADD `on_logout` TEXT NULL DEFAULT NULL AFTER `on_login`;"
-    ],
-    "2024.7.6": [
-        "CREATE TABLE IF NOT EXISTS `rad_acct` ( `id` bigint NOT NULL, `acctsessionid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `realm` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `nasid` varchar(32) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `nasipaddress` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `nasportid` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL, `nasporttype` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL, `framedipaddress` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',`acctstatustype` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL, `macaddr` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, `dateAdded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
-        "ALTER TABLE `rad_acct` ADD PRIMARY KEY (`id`), ADD KEY `username` (`username`), ADD KEY `framedipaddress` (`framedipaddress`), ADD KEY `acctsessionid` (`acctsessionid`), ADD KEY `nasipaddress` (`nasipaddress`);",
-        "ALTER TABLE `rad_acct` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"
-    ],
-    "2024.7.24": [
-        "ALTER TABLE `tbl_voucher` ADD `used_date` DATETIME NULL DEFAULT NULL AFTER `status`;",
-        "UPDATE `tbl_voucher` SET `used_date`=now() WHERE `status`=1;"
-    ],
-    "2024.8.1": [
-        "ALTER TABLE `tbl_payment_gateway` CHANGE `gateway_trx_id` `gateway_trx_id` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';",
-        "ALTER TABLE `tbl_payment_gateway` CHANGE `pg_url_payment` `pg_url_payment` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';"
-    ],
-    "2024.8.2": [
-        "CREATE TABLE IF NOT EXISTS `tbl_customers_inbox` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `customer_id` int NOT NULL, `date_created` datetime NOT NULL, `date_read` datetime DEFAULT NULL, `subject` varchar(64) COLLATE utf8mb4_general_ci NOT NULL, `body` TEXT NULL DEFAULT NULL, `from` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'System' COMMENT 'System or Admin or Else',`admin_id` int NOT NULL DEFAULT '0' COMMENT 'other than admin is 0', PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
-    ],
-    "2024.8.5": [
-        "ALTER TABLE `tbl_customers` ADD `pppoe_username` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `password`;",
-        "ALTER TABLE `tbl_customers` ADD `pppoe_ip` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `pppoe_password`;"
-    ],
-    "2024.8.5.1": [
-        "ALTER TABLE `tbl_routers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '' AFTER `description`;",
-        "ALTER TABLE `tbl_routers` ADD `coverage` VARCHAR(8) NOT NULL DEFAULT '0' AFTER `coordinates`;"
-    ],
-    "2024.8.6": [
-        "ALTER TABLE `rad_acct` ADD `acctinputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `framedipaddress`;",
-        "ALTER TABLE `rad_acct` ADD `acctoutputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `acctinputoctets`;"
-    ],
-    "2024.8.7": [
-        "ALTER TABLE `tbl_customers` CHANGE `coordinates` `coordinates` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates';"
-    ],
-    "2024.8.28": [
-        "ALTER TABLE `tbl_routers` ADD `status` ENUM('Online', 'Offline') DEFAULT 'Online' AFTER `coordinates`;",
-        "ALTER TABLE `tbl_routers` ADD `last_seen` DATETIME AFTER `status`;"
-    ],
-    "2024.9.13": [
-        "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "ALTER TABLE `tbl_customers` CHANGE `service_type` `service_type` ENUM('Hotspot','PPPoE','VPN','Others') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'Others' COMMENT 'For selecting user type';",
-        "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
-        "CREATE TABLE IF NOT EXISTS `tbl_port_pool` ( `id` int(10) NOT NULL AUTO_INCREMENT , `public_ip` varchar(40) NOT NULL, `port_name` varchar(40) NOT NULL, `range_port` varchar(40) NOT NULL, `routers` varchar(40) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
-    ],
-    "2024.10.10": [
-        "ALTER TABLE `tbl_users` ADD `login_token` VARCHAR(40) AFTER `last_login`;"
-    ],
-    "2024.10.17": [
-        "CREATE TABLE IF NOT EXISTS `tbl_meta` ( `id` int UNSIGNED NOT NULL AUTO_INCREMENT, `tbl` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Table name', `tbl_id` int NOT NULL COMMENT 'table value id', `name` varchar(32) COLLATE utf8mb4_general_ci NOT NULL, `value` mediumtext COLLATE utf8mb4_general_ci, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='This Table to add additional data for any table';"
-    ],
-    "2024.10.30": [
-        "ALTER TABLE `tbl_users` ADD `photo` VARCHAR(128) NOT NULL DEFAULT '/admin.default.png' AFTER `root`;",
-        "ALTER TABLE `tbl_users` ADD `data` TEXT NULL DEFAULT NULL COMMENT 'to put additional data' AFTER `status`;"
-    ],
-    "2024.10.31": [
-        "ALTER TABLE `tbl_customers` ADD `photo` VARCHAR(128) NOT NULL DEFAULT '/user.default.jpg' AFTER `password`;"
-    ],
-    "2024.12.5.1": [
-        "ALTER TABLE `tbl_transactions` ADD `user_id` INT(11) NOT NULL DEFAULT 0 AFTER `username`;",
-        "ALTER TABLE `tbl_payment_gateway` ADD `user_id` INT(11) NOT NULL DEFAULT 0 AFTER `username`;"
-    ],
-    "2024.12.16": [
-        "CREATE TABLE `tbl_coupons` ( `id` INT AUTO_INCREMENT PRIMARY KEY, `code` VARCHAR(50) NOT NULL UNIQUE, `type` ENUM('fixed', 'percent') NOT NULL, `value` DECIMAL(10,2) NOT NULL, `description` TEXT NOT NULL, `max_usage` INT NOT NULL DEFAULT 1,`usage_count` INT NOT NULL DEFAULT 0,`status` ENUM('active', 'inactive') NOT NULL, `min_order_amount` DECIMAL(10,2) NOT NULL, `max_discount_amount` DECIMAL(10,2) NOT NULL, `start_date` DATE NOT NULL,`end_date` DATE NOT NULL, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);"
-    ],
-    "2024.12.20": [
-        "ALTER TABLE `tbl_voucher` ADD `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `status`;"
-    ],
-    "2025.1.23": [
-        "ALTER TABLE `rad_acct` ADD `acctsessiontime` BIGINT(12) NOT NULL DEFAULT '0' AFTER `framedipaddress`;"
-    ],
-    "2025.2.14": [
-        "CREATE TABLE IF NOT EXISTS `tbl_widgets` ( `id` int NOT NULL AUTO_INCREMENT, `orders` int NOT NULL DEFAULT '99', `position` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1. top 2. left 3. right 4. bottom',`enabled` tinyint(1) NOT NULL DEFAULT '1', `title` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, `widget` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `content` text COLLATE utf8mb4_general_ci NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
-    ],
-    "2025.2.17" : [
-        "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `enabled`, `title`, `widget`, `content`) VALUES (1, 1, 1, 1, 'Top Widget', 'top_widget', ''),(2, 2, 1, 1, 'Default Info', 'default_info_row', ''),(3, 1, 2, 1, 'Graph Monthly Registered Customers', 'graph_monthly_registered_customers', ''),(4, 2, 2, 1, 'Graph Monthly Sales', 'graph_monthly_sales', ''),(5, 3, 2, 1, 'Voucher Stocks', 'voucher_stocks', ''),(6, 4, 2, 1, 'Customer Expired', 'customer_expired', ''),(7, 1, 3, 1, 'Cron Monitor', 'cron_monitor', ''),(8, 2, 3, 1, 'Mikrotik Cron Monitor', 'mikrotik_cron_monitor', ''),(9, 3, 3, 1, 'Info Payment Gateway', 'info_payment_gateway', ''),(10, 4, 3, 1, 'Graph Customers Insight', 'graph_customers_insight', ''),(11, 5, 3, 1, 'Activity Log', 'activity_log', '');"
-    ],
-    "2025.2.19" : [
-        "ALTER TABLE `tbl_widgets` ADD `user` ENUM('Admin','Agent','Sales','Customer') NOT NULL DEFAULT 'Admin' AFTER `position`;"
-    ],
-    "2025.2.21" : [
-        "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (60, 1, 2, 'Customer', 1, 'Account Info', 'account_info', ''),(61, 3, 1, 'Customer', 1, 'Active Internet Plan', 'active_internet_plan', ''),(62, 4, 1, 'Customer', 1, 'Balance Transfer', 'balance_transfer', ''),(63, 1, 1, 'Customer', 1, 'Unpaid Order', 'unpaid_order', ''),(64, 2, 1, 'Customer', 1, 'Announcement', 'announcement', ''),(65, 5, 1, 'Customer', 1, 'Recharge A Friend', 'recharge_a_friend', ''),(66, 2, 2, 'Customer', 1, 'Voucher Activation', 'voucher_activation', '');"
-    ],
-    "2025.2.25" : [
-        "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (30, 1, 1, 'Agent', 1, 'Top Widget', 'top_widget', ''), (31, 2, 1, 'Agent', 1, 'Default Info', 'default_info_row', ''), (32, 1, 2, 'Agent', 1, 'Graph Monthly Registered Customers', 'graph_monthly_registered_customers', ''), (33, 2, 2, 'Agent', 1, 'Graph Monthly Sales', 'graph_monthly_sales', ''), (34, 3, 2, 'Agent', 1, 'Voucher Stocks', 'voucher_stocks', ''), (35, 4, 2, 'Agent', 1, 'Customer Expired', 'customer_expired', ''), (36, 1, 3, 'Agent', 1, 'Cron Monitor', 'cron_monitor', ''), (37, 2, 3, 'Agent', 1, 'Mikrotik Cron Monitor', 'mikrotik_cron_monitor', ''), (38, 3, 3, 'Agent', 1, 'Info Payment Gateway', 'info_payment_gateway', ''), (39, 4, 3, 'Agent', 1, 'Graph Customers Insight', 'graph_customers_insight', ''),(40, 5, 3, 'Agent', 1, 'Activity Log', 'activity_log', '');",
-        "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (41, 1, 1, 'Sales', 1, 'Top Widget', 'top_widget', ''), (42, 2, 1, 'Sales', 1, 'Default Info', 'default_info_row', ''), (43, 1, 2, 'Sales', 1, 'Graph Monthly Registered Customers', 'graph_monthly_registered_customers', ''), (44, 2, 2, 'Sales', 1, 'Graph Monthly Sales', 'graph_monthly_sales', ''), (45, 3, 2, 'Sales', 1, 'Voucher Stocks', 'voucher_stocks', ''), (46, 4, 2, 'Sales', 1, 'Customer Expired', 'customer_expired', ''), (47, 1, 3, 'Sales', 1, 'Cron Monitor', 'cron_monitor', ''), (48, 2, 3, 'Sales', 1, 'Mikrotik Cron Monitor', 'mikrotik_cron_monitor', ''), (49, 3, 3, 'Sales', 1, 'Info Payment Gateway', 'info_payment_gateway', ''), (50, 4, 3, 'Sales', 1, 'Graph Customers Insight', 'graph_customers_insight', ''), (51, 5, 3, 'Sales', 1, 'Activity Log', 'activity_log', '');"
-    ],
-    "2025.3.5" : [
-        "CREATE TABLE IF NOT EXISTS `tbl_message_logs` ( `id` SERIAL PRIMARY KEY, `message_type` VARCHAR(50), `recipient` VARCHAR(255), `message_content` TEXT, `status` VARCHAR(50), `error_message` TEXT, `sent_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
-    ]
+  "2023.8.9": [
+    "ALTER TABLE `tbl_customers` ADD `balance` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'For Money Deposit' AFTER `email`;",
+    "CREATE TABLE `tbl_customers_meta` (`id` int(11) NOT NULL, `customer_id` int(11) NOT NULL,`meta_key` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `meta_value` longtext COLLATE utf8mb4_general_ci) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+    "ALTER TABLE `tbl_customers_meta` ADD PRIMARY KEY (`id`);",
+    "ALTER TABLE `tbl_customers_meta` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;"
+  ],
+  "2023.8.14": [
+    "ALTER TABLE `tbl_customers` ADD `pppoe_password` varchar(45) NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `password`;",
+    "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "ALTER TABLE `tbl_customers` ADD `auto_renewal` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Auto renewall using balance' AFTER `balance`;"
+  ],
+  "2023.8.23": [
+    "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login';"
+  ],
+  "2023.8.28": [
+    "ALTER TABLE `tbl_user_recharges` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;",
+    "ALTER TABLE `tbl_transactions` ADD `recharged_time` time NOT NULL DEFAULT '00:00:00' AFTER `recharged_on`;"
+  ],
+  "2023.9.5": [
+    "DROP TABLE `tbl_language`;",
+    "ALTER TABLE `tbl_plans` ADD `pool_expired`  varchar(40) NOT NULL DEFAULT '' AFTER `pool`;"
+  ],
+  "2023.9.27": [
+    "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance','Radius') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+  ],
+  "2023.9.28": [
+    "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+  ],
+  "2023.10.1": [
+    "ALTER TABLE `tbl_plans` ADD `is_radius` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '1 is radius' AFTER `routers`; "
+  ],
+  "2023.10.24": [
+    "ALTER TABLE `nas` ADD `routers` VARCHAR(32) NOT NULL DEFAULT '' AFTER `description`;"
+  ],
+  "2023.12.15": [
+    "ALTER TABLE `tbl_customers` ADD `service_type` ENUM('Hotspot','PPPoE','Others') DEFAULT 'Others' COMMENT 'For selecting user type' AFTER `balance`;"
+  ],
+  "2024.1.11": [
+    "ALTER TABLE `tbl_plans` ADD `allow_purchase` ENUM('yes','no') DEFAULT 'yes' COMMENT 'allow to show package in buy package page' AFTER `enabled`;"
+  ],
+  "2024.2.7": [
+    "ALTER TABLE `tbl_voucher` ADD `generated_by` INT NOT NULL DEFAULT '0' COMMENT 'id admin' AFTER `status`;",
+    "ALTER TABLE `tbl_users` ADD `root` INT NOT NULL DEFAULT '0' COMMENT 'for sub account' AFTER `id`;"
+  ],
+  "2024.2.12": [
+    "ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+  ],
+  "2024.2.15": [
+    "ALTER TABLE `tbl_users` CHANGE `password` `password` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "ALTER TABLE `tbl_users` ADD `phone` VARCHAR(32) NOT NULL DEFAULT '' AFTER `password`, ADD `email` VARCHAR(128) NOT NULL DEFAULT '' AFTER `phone`, ADD `city` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kota' AFTER `email`, ADD `subdistrict` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kecamatan' AFTER `city`, ADD `ward` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'kelurahan' AFTER `subdistrict`;"
+  ],
+  "2024.2.16": [
+    "ALTER TABLE `tbl_customers` ADD `created_by` INT NOT NULL DEFAULT '0' AFTER `auto_renewal`;"
+  ],
+  "2024.2.19": [
+    "CREATE TABLE `tbl_customers_fields` (`id` INT PRIMARY KEY AUTO_INCREMENT, `customer_id` INT NOT NULL, `field_name` VARCHAR(255) NOT NULL, `field_value` VARCHAR(255) NOT NULL, FOREIGN KEY (customer_id) REFERENCES tbl_customers(id));"
+  ],
+  "2024.2.20": [
+    "ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'address list' AFTER `pool_expired`;",
+    "ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;"
+  ],
+  "2024.2.20.1": ["DROP TABLE IF EXISTS `tbl_customers_meta`;"],
+  "2024.2.23": [
+    "ALTER TABLE `tbl_transactions` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;",
+    "ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;"
+  ],
+  "2024.3.3": [
+    "ALTER TABLE `tbl_plans` CHANGE `validity_unit` `validity_unit` ENUM('Mins','Hrs','Days','Months','Period') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+  ],
+  "2024.3.12": [
+    "ALTER TABLE `tbl_plans` CHANGE `allow_purchase` `prepaid` ENUM('yes','no') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'yes' COMMENT 'is prepaid';"
+  ],
+  "2024.3.14": [
+    "ALTER TABLE `tbl_transactions` ADD `note` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'for note' AFTER `type`;"
+  ],
+  "2024.3.19": [
+    "ALTER TABLE `tbl_customers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates' AFTER `email`;"
+  ],
+  "2024.3.19.1": [
+    "ALTER TABLE `tbl_customers` ADD `account_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' AFTER `coordinates`;"
+  ],
+  "2024.3.19.2": [
+    "ALTER TABLE `tbl_plans` ADD `plan_type` ENUM('Business', 'Personal') DEFAULT 'Personal' COMMENT 'For selecting account type' ;"
+  ],
+  "2023.3.20": [
+    "ALTER TABLE `tbl_customers` CHANGE `pppoe_password` `pppoe_password` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login';"
+  ],
+  "2024.4.5": [
+    "ALTER TABLE `tbl_payment_gateway` ADD `trx_invoice` VARCHAR(25) NOT NULL DEFAULT '' COMMENT 'from tbl_transactions' AFTER `paid_date`;"
+  ],
+  "2024.5.17": [
+    "ALTER TABLE `tbl_customers` ADD `status` ENUM('Active','Banned','Disabled') NOT NULL DEFAULT 'Active' AFTER `auto_renewal`;"
+  ],
+  "2024.5.18": [
+    "ALTER TABLE `tbl_customers` CHANGE `status` `status` ENUM('Active','Banned','Disabled','Inactive','Limited','Suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Active';"
+  ],
+  "2024.5.20": [
+    "ALTER TABLE `tbl_customers` ADD `city` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `address`, ADD `district` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `city`, ADD `state` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `district`, ADD `zip` VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci AFTER `state`;"
+  ],
+  "2024.6.5": [
+    "ALTER TABLE `tbl_plans` ADD `price_old` VARCHAR(40) NOT NULL DEFAULT '' AFTER `price`;",
+    "ALTER TABLE `tbl_plans` ADD `device` VARCHAR(32) NOT NULL DEFAULT '' AFTER `plan_type`;"
+  ],
+  "2024.6.10": [
+    "ALTER TABLE `tbl_pool` ADD `local_ip` VARCHAR(40) NOT NULL DEFAULT '' AFTER `pool_name`;"
+  ],
+  "2024.6.11": [
+    "ALTER TABLE `tbl_plans` ADD `plan_expired` INT NOT NULL DEFAULT '0' AFTER `pool`;",
+    "ALTER TABLE `tbl_plans` DROP `pool_expired`, DROP `list_expired`;"
+  ],
+  "2024.6.19": [
+    "ALTER TABLE `tbl_plans` ADD `expired_date` TINYINT(1) NOT NULL DEFAULT '20' AFTER `plan_expired`;"
+  ],
+  "2024.6.21": [
+    "ALTER TABLE `tbl_plans` ADD `on_login` TEXT NULL DEFAULT NULL AFTER `device`;",
+    "ALTER TABLE `tbl_plans` ADD `on_logout` TEXT NULL DEFAULT NULL AFTER `on_login`;"
+  ],
+  "2024.7.6": [
+    "CREATE TABLE IF NOT EXISTS `rad_acct` ( `id` bigint NOT NULL, `acctsessionid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `username` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `realm` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `nasid` varchar(32) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `nasipaddress` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `nasportid` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL, `nasporttype` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL, `framedipaddress` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',`acctstatustype` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL, `macaddr` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, `dateAdded` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+    "ALTER TABLE `rad_acct` ADD PRIMARY KEY (`id`), ADD KEY `username` (`username`), ADD KEY `framedipaddress` (`framedipaddress`), ADD KEY `acctsessionid` (`acctsessionid`), ADD KEY `nasipaddress` (`nasipaddress`);",
+    "ALTER TABLE `rad_acct` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"
+  ],
+  "2024.7.24": [
+    "ALTER TABLE `tbl_voucher` ADD `used_date` DATETIME NULL DEFAULT NULL AFTER `status`;",
+    "UPDATE `tbl_voucher` SET `used_date`=now() WHERE `status`=1;"
+  ],
+  "2024.8.1": [
+    "ALTER TABLE `tbl_payment_gateway` CHANGE `gateway_trx_id` `gateway_trx_id` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';",
+    "ALTER TABLE `tbl_payment_gateway` CHANGE `pg_url_payment` `pg_url_payment` VARCHAR(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '';"
+  ],
+  "2024.8.2": [
+    "CREATE TABLE IF NOT EXISTS `tbl_customers_inbox` (`id` int UNSIGNED NOT NULL AUTO_INCREMENT, `customer_id` int NOT NULL, `date_created` datetime NOT NULL, `date_read` datetime DEFAULT NULL, `subject` varchar(64) COLLATE utf8mb4_general_ci NOT NULL, `body` TEXT NULL DEFAULT NULL, `from` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'System' COMMENT 'System or Admin or Else',`admin_id` int NOT NULL DEFAULT '0' COMMENT 'other than admin is 0', PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+  ],
+  "2024.8.5": [
+    "ALTER TABLE `tbl_customers` ADD `pppoe_username` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `password`;",
+    "ALTER TABLE `tbl_customers` ADD `pppoe_ip` VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'For PPPOE Login' AFTER `pppoe_password`;"
+  ],
+  "2024.8.5.1": [
+    "ALTER TABLE `tbl_routers` ADD `coordinates` VARCHAR(50) NOT NULL DEFAULT '' AFTER `description`;",
+    "ALTER TABLE `tbl_routers` ADD `coverage` VARCHAR(8) NOT NULL DEFAULT '0' AFTER `coordinates`;"
+  ],
+  "2024.8.6": [
+    "ALTER TABLE `rad_acct` ADD `acctinputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `framedipaddress`;",
+    "ALTER TABLE `rad_acct` ADD `acctoutputoctets` BIGINT NOT NULL DEFAULT '0' AFTER `acctinputoctets`;"
+  ],
+  "2024.8.7": [
+    "ALTER TABLE `tbl_customers` CHANGE `coordinates` `coordinates` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates';"
+  ],
+  "2024.8.28": [
+    "ALTER TABLE `tbl_routers` ADD `status` ENUM('Online', 'Offline') DEFAULT 'Online' AFTER `coordinates`;",
+    "ALTER TABLE `tbl_routers` ADD `last_seen` DATETIME AFTER `status`;"
+  ],
+  "2024.9.13": [
+    "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "ALTER TABLE `tbl_customers` CHANGE `service_type` `service_type` ENUM('Hotspot','PPPoE','VPN','Others') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'Others' COMMENT 'For selecting user type';",
+    "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "CREATE TABLE IF NOT EXISTS `tbl_port_pool` ( `id` int(10) NOT NULL AUTO_INCREMENT , `public_ip` varchar(40) NOT NULL, `port_name` varchar(40) NOT NULL, `range_port` varchar(40) NOT NULL, `routers` varchar(40) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+  ],
+  "2024.10.10": [
+    "ALTER TABLE `tbl_users` ADD `login_token` VARCHAR(40) AFTER `last_login`;"
+  ],
+  "2024.10.17": [
+    "CREATE TABLE IF NOT EXISTS `tbl_meta` ( `id` int UNSIGNED NOT NULL AUTO_INCREMENT, `tbl` varchar(32) COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Table name', `tbl_id` int NOT NULL COMMENT 'table value id', `name` varchar(32) COLLATE utf8mb4_general_ci NOT NULL, `value` mediumtext COLLATE utf8mb4_general_ci, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='This Table to add additional data for any table';"
+  ],
+  "2024.10.30": [
+    "ALTER TABLE `tbl_users` ADD `photo` VARCHAR(128) NOT NULL DEFAULT '/admin.default.png' AFTER `root`;",
+    "ALTER TABLE `tbl_users` ADD `data` TEXT NULL DEFAULT NULL COMMENT 'to put additional data' AFTER `status`;"
+  ],
+  "2024.10.31": [
+    "ALTER TABLE `tbl_customers` ADD `photo` VARCHAR(128) NOT NULL DEFAULT '/user.default.jpg' AFTER `password`;"
+  ],
+  "2024.12.5.1": [
+    "ALTER TABLE `tbl_transactions` ADD `user_id` INT(11) NOT NULL DEFAULT 0 AFTER `username`;",
+    "ALTER TABLE `tbl_payment_gateway` ADD `user_id` INT(11) NOT NULL DEFAULT 0 AFTER `username`;"
+  ],
+  "2024.12.16": [
+    "CREATE TABLE `tbl_coupons` ( `id` INT AUTO_INCREMENT PRIMARY KEY, `code` VARCHAR(50) NOT NULL UNIQUE, `type` ENUM('fixed', 'percent') NOT NULL, `value` DECIMAL(10,2) NOT NULL, `description` TEXT NOT NULL, `max_usage` INT NOT NULL DEFAULT 1,`usage_count` INT NOT NULL DEFAULT 0,`status` ENUM('active', 'inactive') NOT NULL, `min_order_amount` DECIMAL(10,2) NOT NULL, `max_discount_amount` DECIMAL(10,2) NOT NULL, `start_date` DATE NOT NULL,`end_date` DATE NOT NULL, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);"
+  ],
+  "2024.12.20": [
+    "ALTER TABLE `tbl_voucher` ADD `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `status`;"
+  ],
+  "2025.1.23": [
+    "ALTER TABLE `rad_acct` ADD `acctsessiontime` BIGINT(12) NOT NULL DEFAULT '0' AFTER `framedipaddress`;"
+  ],
+  "2025.2.14": [
+    "CREATE TABLE IF NOT EXISTS `tbl_widgets` ( `id` int NOT NULL AUTO_INCREMENT, `orders` int NOT NULL DEFAULT '99', `position` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1. top 2. left 3. right 4. bottom',`enabled` tinyint(1) NOT NULL DEFAULT '1', `title` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, `widget` varchar(64) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '', `content` text COLLATE utf8mb4_general_ci NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+  ],
+  "2025.2.17": [
+    "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `enabled`, `title`, `widget`, `content`) VALUES (1, 1, 1, 1, 'Top Widget', 'top_widget', ''),(2, 2, 1, 1, 'Default Info', 'default_info_row', ''),(3, 1, 2, 1, 'Graph Monthly Registered Customers', 'graph_monthly_registered_customers', ''),(4, 2, 2, 1, 'Graph Monthly Sales', 'graph_monthly_sales', ''),(5, 3, 2, 1, 'Voucher Stocks', 'voucher_stocks', ''),(6, 4, 2, 1, 'Customer Expired', 'customer_expired', ''),(7, 1, 3, 1, 'Cron Monitor', 'cron_monitor', ''),(8, 2, 3, 1, 'Mikrotik Cron Monitor', 'mikrotik_cron_monitor', ''),(9, 3, 3, 1, 'Info Payment Gateway', 'info_payment_gateway', ''),(10, 4, 3, 1, 'Graph Customers Insight', 'graph_customers_insight', ''),(11, 5, 3, 1, 'Activity Log', 'activity_log', '');"
+  ],
+  "2025.2.19": [
+    "ALTER TABLE `tbl_widgets` ADD `user` ENUM('Admin','Agent','Sales','Customer') NOT NULL DEFAULT 'Admin' AFTER `position`;"
+  ],
+  "2025.2.21": [
+    "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (60, 1, 2, 'Customer', 1, 'Account Info', 'account_info', ''),(61, 3, 1, 'Customer', 1, 'Active Internet Plan', 'active_internet_plan', ''),(62, 4, 1, 'Customer', 1, 'Balance Transfer', 'balance_transfer', ''),(63, 1, 1, 'Customer', 1, 'Unpaid Order', 'unpaid_order', ''),(64, 2, 1, 'Customer', 1, 'Announcement', 'announcement', ''),(65, 5, 1, 'Customer', 1, 'Recharge A Friend', 'recharge_a_friend', ''),(66, 2, 2, 'Customer', 1, 'Voucher Activation', 'voucher_activation', '');"
+  ],
+  "2025.2.25": [
+    "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (30, 1, 1, 'Agent', 1, 'Top Widget', 'top_widget', ''), (31, 2, 1, 'Agent', 1, 'Default Info', 'default_info_row', ''), (32, 1, 2, 'Agent', 1, 'Graph Monthly Registered Customers', 'graph_monthly_registered_customers', ''), (33, 2, 2, 'Agent', 1, 'Graph Monthly Sales', 'graph_monthly_sales', ''), (34, 3, 2, 'Agent', 1, 'Voucher Stocks', 'voucher_stocks', ''), (35, 4, 2, 'Agent', 1, 'Customer Expired', 'customer_expired', ''), (36, 1, 3, 'Agent', 1, 'Cron Monitor', 'cron_monitor', ''), (37, 2, 3, 'Agent', 1, 'Mikrotik Cron Monitor', 'mikrotik_cron_monitor', ''), (38, 3, 3, 'Agent', 1, 'Info Payment Gateway', 'info_payment_gateway', ''), (39, 4, 3, 'Agent', 1, 'Graph Customers Insight', 'graph_customers_insight', ''),(40, 5, 3, 'Agent', 1, 'Activity Log', 'activity_log', '');",
+    "INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (41, 1, 1, 'Sales', 1, 'Top Widget', 'top_widget', ''), (42, 2, 1, 'Sales', 1, 'Default Info', 'default_info_row', ''), (43, 1, 2, 'Sales', 1, 'Graph Monthly Registered Customers', 'graph_monthly_registered_customers', ''), (44, 2, 2, 'Sales', 1, 'Graph Monthly Sales', 'graph_monthly_sales', ''), (45, 3, 2, 'Sales', 1, 'Voucher Stocks', 'voucher_stocks', ''), (46, 4, 2, 'Sales', 1, 'Customer Expired', 'customer_expired', ''), (47, 1, 3, 'Sales', 1, 'Cron Monitor', 'cron_monitor', ''), (48, 2, 3, 'Sales', 1, 'Mikrotik Cron Monitor', 'mikrotik_cron_monitor', ''), (49, 3, 3, 'Sales', 1, 'Info Payment Gateway', 'info_payment_gateway', ''), (50, 4, 3, 'Sales', 1, 'Graph Customers Insight', 'graph_customers_insight', ''), (51, 5, 3, 'Sales', 1, 'Activity Log', 'activity_log', '');"
+  ],
+  "2025.3.5": [
+    "CREATE TABLE IF NOT EXISTS `tbl_message_logs` ( `id` SERIAL PRIMARY KEY, `message_type` VARCHAR(50), `recipient` VARCHAR(255), `message_content` TEXT, `status` VARCHAR(50), `error_message` TEXT, `sent_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+  ],
+  "2025.3.10": [
+    "CREATE TABLE IF NOT EXISTS `tbl_invoices` ( `id` INT AUTO_INCREMENT PRIMARY KEY, `number` VARCHAR(50) NOT NULL, `customer_id` INT NOT NULL, `fullname` VARCHAR(100) NOT NULL, `email` VARCHAR(100) NOT NULL, `address` TEXT, `status` ENUM('Unpaid', 'Paid', 'Cancelled') NOT NULL DEFAULT 'Unpaid', `due_date` DATETIME NOT NULL, `filename` VARCHAR(255), `amount` DECIMAL(10, 2) NOT NULL, `data` JSON NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
+  ]
 }
