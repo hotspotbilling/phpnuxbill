@@ -46,7 +46,7 @@ class Message
                     $txts = str_split($txt, 160);
                     try {
                         foreach ($txts as $txt) {
-                            self::sendSMS( $phone, $txt);
+                            self::sendSMS($phone, $txt);
                             self::logMessage('SMS', $phone, $txt, 'Success');
                         }
                     } catch (Throwable $e) {
@@ -140,6 +140,7 @@ class Message
             }
             mail($to, $subject, $body, $attr);
             self::logMessage('Email', $to, $body, 'Success');
+            return true;
         } else {
             $mail = new PHPMailer();
             $mail->isSMTP();
@@ -188,8 +189,10 @@ class Message
             if (!$mail->send()) {
                 $errorMessage = Lang::T("Email not sent, Mailer Error: ") . $mail->ErrorInfo;
                 self::logMessage('Email', $to, $body, 'Error', $errorMessage);
+                return false;
             } else {
                 self::logMessage('Email', $to, $body, 'Success');
+                return true;
             }
 
             //<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">

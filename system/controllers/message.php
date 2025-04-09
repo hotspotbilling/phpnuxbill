@@ -202,7 +202,7 @@ EOT;
                 ['tbl_customers.fullname', 'fullname'],
                 ['tbl_customers.username', 'username'],
                 ['tbl_customers.email', 'email'],
-                ['tbl_customers.service_type','service_type'],
+                ['tbl_customers.service_type', 'service_type'],
             ]);
             $customers = $query->find_array();
         } else {
@@ -295,7 +295,7 @@ EOT;
         $totalInboxSent = 0;
         $totalInboxFailed = 0;
         $batchStatus = [];
-        $subject = Lang::T('Notification Message');
+        $subject = $config['CompanyName'] . ' ' . Lang::T('Notification Message');
         $form = 'Admin';
 
         foreach ($customers as $customer) {
