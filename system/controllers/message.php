@@ -135,9 +135,14 @@ EOT;
         $router = $_REQUEST['router'] ?? null;
         $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on' ? true : false;
         $service = $_REQUEST['service'] ?? '';
+        $subject = $_REQUEST['subject'] ?? '';
 
         if (empty($group) || empty($message) || empty($via) || empty($service)) {
-            die(json_encode(['status' => 'error', 'message' => 'All fields are required']));
+            die(json_encode(['status' => 'error', 'message' =>  LANG::T('All fields are required')]));
+        }
+
+        if ($via === 'all' || $via === 'email' || $via === 'inbox' && empty($subject)) {
+            die(json_encode(['status' => 'error', 'message' => LANG::T('Subject is required to send message using') . ' ' . $via . '.']));
         }
 
         // Get batch of customers based on group
@@ -153,7 +158,7 @@ EOT;
                 default:
                     $router = ORM::for_table('tbl_routers')->find_one($router);
                     if (!$router) {
-                        die(json_encode(['status' => 'error', 'message' => 'Invalid router']));
+                        die(json_encode(['status' => 'error', 'message' =>  LANG::T('Invalid router')]));
                     }
                     $routerName = $router->name;
                     break;
@@ -295,7 +300,7 @@ EOT;
         $totalInboxSent = 0;
         $totalInboxFailed = 0;
         $batchStatus = [];
-        $subject = $config['CompanyName'] . ' ' . Lang::T('Notification Message');
+        //$subject = $config['CompanyName'] . ' ' . Lang::T('Notification Message');
         $form = 'Admin';
 
         foreach ($customers as $customer) {
@@ -303,6 +308,12 @@ EOT;
                 ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
                 [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
                 $message
+            );
+
+            $currentSubject = str_replace(
+                ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
+                [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
+                $subject
             );
 
             $phoneNumber = preg_replace('/\D/', '', $customer['phonenumber']);
@@ -347,7 +358,7 @@ EOT;
                 }
 
                 if ($via === 'email' || $via === 'all') {
-                    if (Message::sendEmail($customer['email'], $subject, $currentMessage)) {
+                    if (Message::sendEmail($customer['email'], $currentSubject, $currentMessage)) {
                         $totalEmailSent++;
                         $batchStatus[] = ['name' => $customer['fullname'], 'channel' => $customer['email'], 'status' => 'Email Sent', 'message' => $currentMessage];
                     } else {
@@ -357,7 +368,7 @@ EOT;
                 }
 
                 if ($via === 'inbox' || $via === 'all') {
-                    if (Message::addToInbox($customer['customer_id'], $subject, $currentMessage, $form)) {
+                    if (Message::addToInbox($customer['customer_id'], $currentSubject, $currentMessage, $form)) {
                         $totalInboxSent++;
                         $batchStatus[] = ['name' => $customer['fullname'], 'channel' => 'Inbox', 'status' => 'Inbox Message Sent', 'message' => $currentMessage];
                     } else {
