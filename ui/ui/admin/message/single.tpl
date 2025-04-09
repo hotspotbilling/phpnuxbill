@@ -23,12 +23,26 @@
 						<label class="col-md-2 control-label">{Lang::T('Send Via')}</label>
 						<div class="col-md-6">
 							<select class="form-control" name="via" id="via">
-								<option value="sms" selected> {Lang::T('via SMS')}</option>
-								<option value="wa"> {Lang::T('Via WhatsApp')}</option>
-								<option value="both"> {Lang::T('Via WhatsApp and SMS')}</option>
-							</select>
+                                <option value="all" {if $via=='all' }selected{/if}>{Lang::T('All Channels')}</option>
+                                <option value="inbox" {if $via=='inbox' }selected{/if}>{Lang::T('Inbox')}</option>
+                                <option value="email" {if $via=='email' }selected{/if}>{Lang::T('Email')}</option>
+                                <option value="sms" {if $via=='sms' }selected{/if}>{Lang::T('SMS')}</option>
+                                <option value="wa" {if $via=='wa' }selected{/if}>{Lang::T('WhatsApp')}</option>
+                                <option value="both" {if $via=='both' }selected{/if}>{Lang::T('SMS and WhatsApp')}
+                                </option>
+                            </select>
 						</div>
 					</div>
+					<div class="form-group" id="subject">
+                        <label class="col-md-2 control-label">{Lang::T('Subject')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="subject" id="subject-content" value=""
+                                placeholder="{Lang::T('Enter message subject here')}">
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('You can also use the below placeholders here too')}.
+                        </p>
+                    </div>
 					<div class="form-group">
 						<label class="col-md-2 control-label">{Lang::T('Message')}</label>
 						<div class="col-md-6">
@@ -64,6 +78,33 @@
 		</div>
 	</div>
 </div>
+<script>
+    document.getElementById('via').addEventListener('change', function () {
+        const via = this.value;
+        const subject = document.getElementById('subject');
+        const subjectField = document.getElementById('subject-content');
 
+        subject.style.display = (via === 'all' || via === 'email' || via === 'inbox') ? 'block' : 'none';
+
+        switch (via) {
+            case 'all':
+                subjectField.placeholder = 'Enter a subject for all channels';
+                subjectField.required = true; 
+                break;
+            case 'email':
+                subjectField.placeholder = 'Enter a subject for email';
+                subjectField.required = true; 
+                break;
+            case 'inbox':
+                subjectField.placeholder = 'Enter a subject for inbox';
+                subjectField.required = true; 
+                break;
+            default:
+                subjectField.placeholder = 'Enter message subject here';
+                subjectField.required = false;
+                break;
+        }
+    });
+</script>
 
 {include file="sections/footer.tpl"}

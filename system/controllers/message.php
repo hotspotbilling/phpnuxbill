@@ -57,56 +57,79 @@ EOT;
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
-        // Get form data
-        $id_customer = $_POST['id_customer'];
-        $message = $_POST['message'];
-        $via = $_POST['via'];
+        $id_customer = $_POST['id_customer'] ?? '';
+        $message = $_POST['message']?? '';
+        $via = $_POST['via'] ?? '';
+        $subject = $_POST['subject'] ?? '';
 
-        // Check if fields are empty
-        if ($id_customer == '' or $message == '' or $via == '') {
-            r2(getUrl('message/send'), 'e', Lang::T('All field is required'));
-        } else {
-            // Get customer details from the database
-            $c = ORM::for_table('tbl_customers')->find_one($id_customer);
+        // Validate subject based on the selected channel
+        if (($via === 'all' || $via === 'email' || $via === 'inbox') && empty($subject)) {
+            r2(getUrl('message/send'), 'e', LANG::T('Subject is required to send message using') . ' ' . $via . '.');
+        }
 
-            // Replace placeholders in the message with actual values
-            $message = str_replace('[[name]]', $c['fullname'], $message);
-            $message = str_replace('[[user_name]]', $c['username'], $message);
-            $message = str_replace('[[phone]]', $c['phonenumber'], $message);
-            $message = str_replace('[[company_name]]', $config['CompanyName'], $message);
-            if (strpos($message, '[[payment_link]]') !== false) {
-                // token only valid for 1 day, for security reason
-                $token = User::generateToken($c['id'], 1);
-                if (!empty($token['token'])) {
-                    $tur = ORM::for_table('tbl_user_recharges')
-                        ->where('customer_id', $c['id'])
-                        //->where('namebp', $package)
-                        ->find_one();
-                    if ($tur) {
-                        $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
-                        $message = str_replace('[[payment_link]]', $url, $message);
-                    }
-                } else {
-                    $message = str_replace('[[payment_link]]', '', $message);
+        if (empty($id_customer) || empty($message) || empty($via)) {
+            r2(getUrl('message/send'), 'e', Lang::T('Customer, Message, and Channel are required'));
+        }
+
+        $customer = ORM::for_table('tbl_customers')->find_one($id_customer);
+        if (!$customer) {
+            r2(getUrl('message/send'), 'e', Lang::T('Customer not found'));
+        }
+
+        // Replace placeholders in message and subject
+        $currentMessage = str_replace(
+            ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
+            [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
+            $message
+        );
+
+        $currentSubject = str_replace(
+            ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
+            [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
+            $subject
+        );
+
+        if (strpos($message, '[[payment_link]]') !== false) {
+            $token = User::generateToken($customer['id'], 1);
+            if (!empty($token['token'])) {
+                $tur = ORM::for_table('tbl_user_recharges')
+                    ->where('customer_id', $customer['id'])
+                    ->find_one();
+                if ($tur) {
+                    $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
+                    $currentMessage = str_replace('[[payment_link]]', $url, $currentMessage);
                 }
-            }
-
-
-            //Send the message
-            if ($via == 'sms' || $via == 'both') {
-                $smsSent = Message::sendSMS($c['phonenumber'], $message);
-            }
-
-            if ($via == 'wa' || $via == 'both') {
-                $waSent = Message::sendWhatsapp($c['phonenumber'], $message);
-            }
-
-            if (isset($smsSent) || isset($waSent)) {
-                r2(getUrl('message/send'), 's', Lang::T('Message Sent Successfully'));
             } else {
-                r2(getUrl('message/send'), 'e', Lang::T('Failed to send message'));
+                $currentMessage = str_replace('[[payment_link]]', '', $currentMessage);
             }
         }
+
+        // Send the message through the selected channels
+        $smsSent = $waSent = $emailSent = $inboxSent = false;
+
+        if ($via === 'sms' || $via === 'both' || $via === 'all') {
+            $smsSent = Message::sendSMS($customer['phonenumber'], $currentSubject);
+        }
+
+        if ($via === 'wa' || $via === 'both' || $via === 'all') {
+            $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentSubject);
+        }
+
+        if ($via === 'email' || $via === 'all') {
+            $emailSent = Message::sendEmail($customer['email'], $currentSubject, $currentMessage);
+        }
+
+        if ($via === 'inbox' || $via === 'all') {
+            $inboxSent = Message::addToInbox($customer['id'], $currentSubject, $currentMessage, 'Admin');
+        }
+
+        // Check if any message was sent successfully
+        if ($smsSent || $waSent || $emailSent || $inboxSent) {
+            r2(getUrl('message/send'), 's', Lang::T('Message Sent Successfully'));
+        } else {
+            r2(getUrl('message/send'), 'e', Lang::T('Failed to send message'));
+        }
+
         break;
 
     case 'send_bulk':
@@ -138,7 +161,7 @@ EOT;
         $subject = $_REQUEST['subject'] ?? '';
 
         if (empty($group) || empty($message) || empty($via) || empty($service)) {
-            die(json_encode(['status' => 'error', 'message' =>  LANG::T('All fields are required')]));
+            die(json_encode(['status' => 'error', 'message' => LANG::T('All fields are required')]));
         }
 
         if ($via === 'all' || $via === 'email' || $via === 'inbox' && empty($subject)) {
@@ -158,7 +181,7 @@ EOT;
                 default:
                     $router = ORM::for_table('tbl_routers')->find_one($router);
                     if (!$router) {
-                        die(json_encode(['status' => 'error', 'message' =>  LANG::T('Invalid router')]));
+                        die(json_encode(['status' => 'error', 'message' => LANG::T('Invalid router')]));
                     }
                     $routerName = $router->name;
                     break;
@@ -405,16 +428,20 @@ EOT;
             // Get the posted data
             $customerIds = $_POST['customer_ids'] ?? [];
             $via = $_POST['message_type'] ?? '';
+            $subject = $_POST['subject'] ?? '';
             $message = isset($_POST['message']) ? trim($_POST['message']) : '';
             if (empty($customerIds) || empty($message) || empty($via)) {
                 echo json_encode(['status' => 'error', 'message' => Lang::T('Invalid customer IDs, Message, or Message Type.')]);
                 exit;
             }
 
+            if ($via === 'all' || $via === 'email' || $via === 'inbox' && empty($subject)) {
+                die(json_encode(['status' => 'error', 'message' => LANG::T('Subject is required to send message using') . ' ' . $via . '.']));
+            }
+            
             // Prepare to send messages
             $sentCount = 0;
             $failedCount = 0;
-            $subject = Lang::T('Notification Message');
             $form = 'Admin';
 
             foreach ($customerIds as $customerId) {
