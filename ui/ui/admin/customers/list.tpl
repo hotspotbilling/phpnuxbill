@@ -274,6 +274,16 @@
                 return;
             }
 
+            if (messageType == 'all' || messageType == 'inbox' || messageType == 'email' && !subject) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: "{Lang::T('Please enter a subject for the message.')}",
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
             // Disable the button and show loading text
             $(this).prop('disabled', true).text('{Lang::T('Sending...')}');
 
@@ -345,15 +355,15 @@
         switch (messageType) {
             case 'all':
                 subjectField.placeholder = 'Enter a subject for all channels';
-                subjectField.required = true; 
+                subjectField.required = true;
                 break;
             case 'email':
                 subjectField.placeholder = 'Enter a subject for email';
-                subjectField.required = true; 
+                subjectField.required = true;
                 break;
             case 'inbox':
                 subjectField.placeholder = 'Enter a subject for inbox';
-                subjectField.required = true; 
+                subjectField.required = true;
                 break;
             default:
                 subjectField.placeholder = 'Enter message subject here';
