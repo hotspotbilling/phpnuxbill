@@ -58,7 +58,7 @@ EOT;
         }
 
         $id_customer = $_POST['id_customer'] ?? '';
-        $message = $_POST['message']?? '';
+        $message = $_POST['message'] ?? '';
         $via = $_POST['via'] ?? '';
         $subject = $_POST['subject'] ?? '';
 
@@ -156,7 +156,7 @@ EOT;
         $batch = $_REQUEST['batch'] ?? 100;
         $page = $_REQUEST['page'] ?? 0;
         $router = $_REQUEST['router'] ?? null;
-        $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on' ? true : false;
+        $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on';
         $service = $_REQUEST['service'] ?? '';
         $subject = $_REQUEST['subject'] ?? '';
 
@@ -164,7 +164,7 @@ EOT;
             die(json_encode(['status' => 'error', 'message' => LANG::T('All fields are required')]));
         }
 
-        if ($via === 'all' || $via === 'email' || $via === 'inbox' && empty($subject)) {
+        if (in_array($via, ['all', 'email', 'inbox']) && empty($subject)) {
             die(json_encode(['status' => 'error', 'message' => LANG::T('Subject is required to send message using') . ' ' . $via . '.']));
         }
 
@@ -438,7 +438,7 @@ EOT;
             if ($via === 'all' || $via === 'email' || $via === 'inbox' && empty($subject)) {
                 die(json_encode(['status' => 'error', 'message' => LANG::T('Subject is required to send message using') . ' ' . $via . '.']));
             }
-            
+
             // Prepare to send messages
             $sentCount = 0;
             $failedCount = 0;

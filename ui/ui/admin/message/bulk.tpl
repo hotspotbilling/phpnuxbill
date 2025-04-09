@@ -79,10 +79,10 @@
                             {Lang::T('Use 20 and above if you are sending to all customers to avoid server time out')}
                         </div>
                     </div>
-                    <div class="form-group" id="subject">
+                    <div class="form-group" id="subject-content">
                         <label class="col-md-2 control-label">{Lang::T('Subject')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="subject" id="subject-content" value=""
+                            <input type="text" class="form-control" name="subject" id="subject" value=""
                                 placeholder="{Lang::T('Enter message subject here')}">
                         </div>
                         <p class="help-block col-md-4">
@@ -148,8 +148,8 @@
 <script>
     document.getElementById('via').addEventListener('change', function () {
         const via = this.value;
-        const subject = document.getElementById('subject');
-        const subjectField = document.getElementById('subject-content');
+        const subject = document.getElementById('subject-content');
+        const subjectField = document.getElementById('subject');
 
         subject.style.display = (via === 'all' || via === 'email' || via === 'inbox') ? 'block' : 'none';
 
@@ -198,7 +198,6 @@
             method: 'POST',
             data: {
                 group: $('#group').val(),
-                subject: $('#subject').val() || '',
                 message: $('#message').val(),
                 via: $('#via').val(),
                 batch: $('#batch').val(),
@@ -206,6 +205,7 @@
                 page: page,
                 test: $('#test').is(':checked') ? 'on' : 'off',
                 service: $('#service').val(),
+                subject: $('#subject').val(),
             },
             dataType: 'json',
             beforeSend: function () {
