@@ -155,7 +155,7 @@
             <h3 class="panel-title">
                 <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseLoginPage"
                     aria-expanded="true" aria-controls="collapseLoginPage">
-                    {Lang::T('Customer Login Page Settings')}
+                    {Lang::T('Customer Login Page')}
                 </a>
             </h3>
         </div>
@@ -248,6 +248,37 @@
                 </div>
 
                 <button class="btn btn-success btn-block" name="general" type="submit">
+                    {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-heading" role="tab" id="Coupon">
+            <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseCoupon" aria-expanded="false" aria-controls="collapseCoupon">
+                    {Lang::T('Coupons')}
+                </a>
+            </h4>
+        </div>
+        <div id="collapseCoupon" class="panel-collapse collapse" role="tabpanel">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Enable Coupon')}</label>
+                    <div class="col-md-5">
+                        <select name="enable_coupons" id="enable_coupons" class="form-control text-muted">
+                            <option value="no">{Lang::T('No')}</option>
+                            <option value="yes" {if $_c['enable_coupons'] == 'yes'}selected="selected" {/if}>{Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        <small>{Lang::T('Enable or disable coupons')}</small>
+                    </p>
+                </div>
+                <button class="btn btn-success btn-block" type="submit">
                     {Lang::T('Save Changes')}
                 </button>
             </div>
