@@ -1,25 +1,25 @@
 </section>
 </div>
 {if isset($_c['CompanyFooter'])}
-    <footer class="main-footer">
-        {$_c['CompanyFooter']}
-        <div class="pull-right">
-            <a href="javascript:showPrivacy()">Privacy</a>
-            &bull;
-            <a href="javascript:showTaC()">T &amp; C</a>
-        </div>
-    </footer>
+<footer class="main-footer">
+    {$_c['CompanyFooter']}
+    <div class="pull-right">
+        <a href="javascript:showPrivacy()">Privacy</a>
+        &bull;
+        <a href="javascript:showTaC()">T &amp; C</a>
+    </div>
+</footer>
 {else}
-    <footer class="main-footer">
-        PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener"
-            target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener"
-            target="_blank">AdminLTE</a>
-        <div class="pull-right">
-            <a href="javascript:showPrivacy()">Privacy</a>
-            &bull;
-            <a href="javascript:showTaC()">T &amp; C</a>
-        </div>
-    </footer>
+<footer class="main-footer">
+    PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener"
+        target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener"
+        target="_blank">AdminLTE</a>
+    <div class="pull-right">
+        <a href="javascript:showPrivacy()">Privacy</a>
+        &bull;
+        <a href="javascript:showTaC()">T &amp; C</a>
+    </div>
+</footer>
 {/if}
 </div>
 
@@ -50,156 +50,175 @@
 <script src="{$app_url}/ui/ui/scripts/custom.js?2025.2.5"></script>
 
 {if isset($xfooter)}
-    {$xfooter}
+{$xfooter}
 {/if}
 
 {if $_c['tawkto'] != ''}
-    <!--Start of Tawk.to Script-->
-    <script type="text/javascript">
-        var isLoggedIn = false;
-        var Tawk_API = {
-            onLoad: function() {
-                Tawk_API.setAttributes({
-                    'username'    : '{$_user['username']}',
-                    'service'    : '{$_user['service_type']}',
-                    'balance'    : '{$_user['balance']}',
-                    'account'    : '{$_user['account_type']}',
-                    'phone'    : '{$_user['phonenumber']}'
-                }, function(error) {
-                    console.log(error)
-                });
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+    var isLoggedIn = false;
+    var Tawk_API = {
+        onLoad: function () {
+            Tawk_API.setAttributes({
+                'username': '{$_user['username']}',
+                'service': '{$_user['service_type']}',
+                'balance': '{$_user['balance']}',
+                'account': '{$_user['account_type']}',
+                'phone': '{$_user['phonenumber']}'
+                }, function (error) {
+                console.log(error)
+            });
 
-                }
+        }
+    };
+    var Tawk_LoadStart = new Date();
+    Tawk_API.visitor = {
+        name: '{$_user['fullname']}',
+        email: '{$_user['email']}',
+        phone: '{$_user['phonenumber']}'
             };
-            var Tawk_LoadStart = new Date();
-            Tawk_API.visitor = {
-                name: '{$_user['fullname']}',
-                email: '{$_user['email']}',
-                phone: '{$_user['phonenumber']}'
-            };
-            (function() {
-                var s1 = document.createElement("script"),
-                    s0 = document.getElementsByTagName("script")[0];
-                s1.async = true;
-                s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
-                s1.charset = 'UTF-8';
-                s1.setAttribute('crossorigin', '*');
-                s0.parentNode.insertBefore(s1, s0);
-            })();
-        </script>
-        <!--End of Tawk.to Script-->
-    {/if}
+    (function () {
+        var s1 = document.createElement("script"),
+            s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+</script>
+<!--End of Tawk.to Script-->
+{/if}
 
-    <script>
-        const toggleIcon = document.getElementById('toggleIcon');
-        const body = document.body;
-        const savedMode = localStorage.getItem('mode');
-        if (savedMode === 'dark') {
+<script>
+    const toggleIcon = document.getElementById('toggleIcon');
+    const body = document.body;
+    const savedMode = localStorage.getItem('mode');
+    if (savedMode === 'dark') {
+        body.classList.add('dark-mode');
+        toggleIcon.textContent = '🌞';
+    }
+
+    function setMode(mode) {
+        if (mode === 'dark') {
             body.classList.add('dark-mode');
             toggleIcon.textContent = '🌞';
+        } else {
+            body.classList.remove('dark-mode');
+            toggleIcon.textContent = '🌜';
         }
-    
-        function setMode(mode) {
-            if (mode === 'dark') {
-                body.classList.add('dark-mode');
-                toggleIcon.textContent = '🌞';
-            } else {
-                body.classList.remove('dark-mode');
-                toggleIcon.textContent = '🌜';
-            }
+    }
+
+    toggleIcon.addEventListener('click', () => {
+        if (body.classList.contains('dark-mode')) {
+            setMode('light');
+            localStorage.setItem('mode', 'light');
+        } else {
+            setMode('dark');
+            localStorage.setItem('mode', 'dark');
         }
-    
-        toggleIcon.addEventListener('click', () => {
-            if (body.classList.contains('dark-mode')) {
-                setMode('light');
-                localStorage.setItem('mode', 'light');
-            } else {
-                setMode('dark');
-                localStorage.setItem('mode', 'dark');
-            }
-        });
-    </script>
+    });
+</script>
 
 
 {literal}
-    <script>
-        var listAtts = document.querySelectorAll(`[api-get-text]`);
-        listAtts.forEach(function(el) {
-            $.get(el.getAttribute('api-get-text'), function(data) {
-                el.innerHTML = data;
-            });
+<script>
+    var listAtts = document.querySelectorAll(`[api-get-text]`);
+    listAtts.forEach(function (el) {
+        $.get(el.getAttribute('api-get-text'), function (data) {
+            el.innerHTML = data;
         });
-        $(document).ready(function() {
-            var listAtts = document.querySelectorAll(`button[type="submit"]`);
-            listAtts.forEach(function(el) {
-                if (el.addEventListener) { // all browsers except IE before version 9
-                    el.addEventListener("click", function() {
+    });
+    $(document).ready(function () {
+        var listAtts = document.querySelectorAll(`button[type="submit"]`);
+        listAtts.forEach(function (el) {
+            if (el.addEventListener) { // all browsers except IE before version 9
+                el.addEventListener("click", function () {
+                    $(this).html(
+                        `<span class="loading"></span>`
+                    );
+                    setTimeout(() => {
+                        $(this).prop("disabled", true);
+                    }, 100);
+                }, false);
+            } else {
+                if (el.attachEvent) { // IE before version 9
+                    el.attachEvent("click", function () {
                         $(this).html(
                             `<span class="loading"></span>`
                         );
                         setTimeout(() => {
                             $(this).prop("disabled", true);
                         }, 100);
-                    }, false);
-                } else {
-                    if (el.attachEvent) { // IE before version 9
-                        el.attachEvent("click", function() {
-                            $(this).html(
-                                `<span class="loading"></span>`
-                            );
-                            setTimeout(() => {
-                                $(this).prop("disabled", true);
-                            }, 100);
-                        });
+                    });
+                }
+            }
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+        });
+    });
+
+    function ask(field, text) {
+        const txt = field.innerHTML;
+
+        field.innerHTML = `<span class="loading"></span>`;
+        field.setAttribute("disabled", true);
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, proceed',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            let delay = result.isConfirmed ? 400 : 500;
+
+            setTimeout(() => {
+                field.innerHTML = txt;
+                field.removeAttribute("disabled");
+
+                if (result.isConfirmed) {
+                    const form = field.closest('form');
+                    if (form) {
+                        form.submit(); // manually submit the form
+                    } else {
+                        //fallback if not in a form
+                        const href = field.getAttribute("href") || field.dataset.href;
+                        if (href) window.location.href = href;
                     }
                 }
-                $(function() {
-                    $('[data-toggle="tooltip"]').tooltip()
-                })
-            });
+            }, delay);
         });
 
-        function ask(field, text){
-            var txt = field.innerHTML;
-            if (confirm(text)) {
-                setTimeout(() => {
-                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, txt);
-                    field.removeAttribute("disabled");
-                }, 5000);
-                return true;
-            } else {
-                setTimeout(() => {
-                    field.innerHTML = field.innerHTML.replace(`<span class="loading"></span>`, txt);
-                    field.removeAttribute("disabled");
-                }, 500);
-                return false;
-            }
-        }
+        return false;
+    }
 
-        function setCookie(name, value, days) {
-            var expires = "";
-            if (days) {
-                var date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
         }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
 
-        function getCookie(name) {
-            var nameEQ = name + "=";
-            var ca = document.cookie.split(';');
-            for (var i = 0; i < ca.length; i++) {
-                var c = ca[i];
-                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
         }
-    </script>
+        return null;
+    }
+</script>
 {/literal}
 <script>
-setCookie('user_language', '{$user_language}', 365);
+    setCookie('user_language', '{$user_language}', 365);
 </script>
 </body>
 
