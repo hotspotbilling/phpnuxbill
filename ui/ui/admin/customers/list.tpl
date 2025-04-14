@@ -99,7 +99,7 @@
                             <tr>
                                 <th><input type="checkbox" id="select-all"></th>
                                 <th>{Lang::T('Username')}</th>
-                                <th>Photo</th>
+                                <th>{Lang::T('Photo')}</th>
                                 <th>{Lang::T('Account Type')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Balance')}</th>
