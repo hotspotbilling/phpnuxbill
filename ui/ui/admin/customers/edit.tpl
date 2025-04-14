@@ -152,7 +152,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">Remote IP <span class="label label-danger"
+                        <label class="col-md-3 control-label">{Lang::T('Remote')} IP <span class="label label-danger"
                                 id="warning_ip"></span></label>
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
@@ -328,8 +328,8 @@
 
 <script>
     function deletePhoto(id) {
-        if (confirm('Delete photo?')) {
-            if (confirm('Are you sure to delete photo?')) {
+        if (confirm('{Lang::T('Delete photo')}?')) {
+            if (confirm('{Lang::T('Are you sure to delete photo')}?')) {
                 window.location.href = '{Text::url('')}customers/edit/'+id+'/deletePhoto'
             }
         }

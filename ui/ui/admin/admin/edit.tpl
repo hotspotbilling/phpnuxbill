@@ -21,8 +21,8 @@
                         <div class="col-md-6 col-xs-8">
                             <input type="file" class="form-control" name="photo" accept="image/*">
                         </div>
-                        <div class="form-group col-md-3 col-xs-4" title="Not always Working">
-                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> Facedetect</label>
+                        <div class="form-group col-md-3 col-xs-4" title={Lang::T("Not always Working")}>
+                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> {Lang::T('Facedetect')}</label>
                         </div>
                     </div>
                     <div class="form-group">
@@ -83,22 +83,22 @@
                             <div class="col-md-9">
                                 <select name="user_type" id="user_type" class="form-control" onchange="checkUserType(this)">
                                     {if $_admin['user_type'] eq 'Agent'}
-                                        <option value="Sales" {if $d['user_type'] eq 'Sales'}selected="selected" {/if}>Sales
+                                        <option value="Sales" {if $d['user_type'] eq 'Sales'}selected="selected" {/if}>{Lang::T('Sales')}
                                         </option>
                                     {/if}
                                     {if $_admin['user_type'] eq 'Admin' || $_admin['user_type'] eq 'SuperAdmin'}
-                                        <option value="Report" {if $d['user_type'] eq 'Report'}selected="selected" {/if}>Report
-                                            Viewer</option>
-                                        <option value="Agent" {if $d['user_type'] eq 'Agent'}selected="selected" {/if}>Agent
+                                        <option value="Report" {if $d['user_type'] eq 'Report'}selected="selected" {/if}>{Lang::T('Report Viewer')}
                                         </option>
-                                        <option value="Sales" {if $d['user_type'] eq 'Sales'}selected="selected" {/if}>Sales
+                                        <option value="Agent" {if $d['user_type'] eq 'Agent'}selected="selected" {/if}>{Lang::T('Agent')}
+                                        </option>
+                                        <option value="Sales" {if $d['user_type'] eq 'Sales'}selected="selected" {/if}>{Lang::T('Sales')}
                                         </option>
                                     {/if}
                                     {if $_admin['user_type'] eq 'SuperAdmin'}
                                         <option value="Admin" {if $d['user_type'] eq 'Admin'}selected="selected" {/if}>
-                                            Administrator</option>
+                                            {Lang::T('Administrator')}</option>
                                         <option value="SuperAdmin" {if $d['user_type'] eq 'SuperAdmin'}selected="selected"
-                                            {/if}>Super Administrator</option>
+                                            {/if}>{Lang::T('Super Administrator')}</option>
                                     {/if}
                                 </select>
                             </div>
@@ -142,7 +142,7 @@
         </div>
     </div>
     <div class="form-group text-center">
-        <button class="btn btn-primary" onclick="return ask(this, 'Continue the Admin change process?')"
+        <button class="btn btn-primary" onclick="return ask(this, '{Lang::T('Continue the Admin change process')}?')"
             type="submit">{Lang::T('Save Changes')}</button>
         Or <a href="{Text::url('settings/users')}">{Lang::T('Cancel')}</a>
     </div>
@@ -159,7 +159,7 @@
 
     function deletePhoto(id) {
         if (confirm('Delete photo?')) {
-            if (confirm('Are you sure to delete photo?')) {
+            if (confirm('{Lang::T('Are you sure to delete photo')}?')) {
                 window.location.href = '{Text::url('settings/users-edit/')}'+id+'/deletePhoto'
             }
         }

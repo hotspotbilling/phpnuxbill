@@ -24,7 +24,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Secret</label>
+                        <label class="col-md-2 control-label">{Lang::T('Secret')}</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" id="secret" name="secret" required
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'" maxlength="60">
@@ -42,7 +42,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Server</label>
+                        <label class="col-md-2 control-label">{Lang::T('Server')}</label>
                         <div class="col-md-2">
                             <input type="text" class="form-control" id="server" name="server" placeholder="null">
                         </div>

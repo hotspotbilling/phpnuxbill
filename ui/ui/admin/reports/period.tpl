@@ -26,7 +26,7 @@
                                 <option value="" selected="">{Lang::T('All Transactions')}</option>
                                 <option value="Hotspot">Hotspot</option>
                                 <option value="PPPOE">PPPOE</option>
-                                <option value="Balance">Balance</option>
+                                <option value="Balance">{Lang::T('Balance')}</option>
                             </select>
                         </div>
                     </div>

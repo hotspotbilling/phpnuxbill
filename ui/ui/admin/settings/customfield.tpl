@@ -15,13 +15,13 @@
                     <div class="form-group">
                         <label class="col-md-4 control-label">{Lang::T("Name")}</label>
                         <div class="col-md-8">
-                            <input type="text" class="form-control" name="name[]" style="width: 100%" placeholder="Your Salary">
+                            <input type="text" class="form-control" name="name[]" style="width: 100%" placeholder="{Lang::T("Your Salary")}">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-4 control-label">Placeholder</label>
+                        <label class="col-md-4 control-label">{Lang::T("Placeholder")}</label>
                         <div class="col-md-8">
-                            <input type="text" class="form-control" name="placeholder[]" style="width: 100%" placeholder="this is placeholder">
+                            <input type="text" class="form-control" name="placeholder[]" style="width: 100%" placeholder="{Lang::T("this is placeholder")}">
                         </div>
                     </div>
                     <div class="form-group">
@@ -48,8 +48,8 @@
                         <label class="col-md-4 control-label">{Lang::T("Registration page")}</label>
                         <div class="col-md-8">
                             <select class="form-control" name="register[]" style="width: 100%">
-                                <option value="1">show</option>
-                                <option value="0">hide</option>
+                                <option value="1">{Lang::T("Show")}</option>
+                                <option value="0">{Lang::T("Hide")}</option>
                             </select>
                         </div>
                     </div>
@@ -84,13 +84,13 @@
                         <div class="form-group">
                             <label class="col-md-4 control-label">{Lang::T("Name")}</label>
                             <div class="col-md-8">
-                                <input type="text" class="form-control" name="name[]" style="width: 100%" placeholder="Your Salary" value="{$field['name']}">
+                                <input type="text" class="form-control" name="name[]" style="width: 100%" placeholder="{Lang::T("Your Salary")}" value="{$field['name']}">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-4 control-label">Placeholder</label>
+                            <label class="col-md-4 control-label">{Lang::T("Placeholder")}</label>
                             <div class="col-md-8">
-                                <input type="text" class="form-control" name="placeholder[]" style="width: 100%" placeholder="this is placeholder" value="{$field['placeholder']}">
+                                <input type="text" class="form-control" name="placeholder[]" style="width: 100%" placeholder="{Lang::T("this is placeholder")}" value="{$field['placeholder']}">
                             </div>
                         </div>
                         <div class="form-group">
@@ -117,8 +117,8 @@
                             <label class="col-md-4 control-label">{Lang::T("Registration page")}</label>
                             <div class="col-md-8">
                                 <select class="form-control" name="register[]" style="width: 100%">
-                                    <option value="1" {if $field['register'] == 1}selected{/if}>show</option>
-                                    <option value="0" {if $field['register'] != 1}selected{/if}>hide</option>
+                                    <option value="1" {if $field['register'] == 1}selected{/if}>{Lang::T("Show")}</option>
+                                    <option value="0" {if $field['register'] != 1}selected{/if}>{Lang::T("Hide")}</option>
                                 </select>
                             </div>
                         </div>

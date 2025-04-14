@@ -388,7 +388,7 @@
     "Internet_Plan": "Plan de Internet",
     "Send_Message": "Enviar mensaje",
     "Single_Customer": "Cliente \u00fanico",
-    "Bulk_Customers": "Clientes al por mayor",
+    "Bulk_Customers": "Grupos de Clientes",
     "Routers_Maps": "Mapas de enrutadores",
     "Theme_Voucher": "Cup\u00f3n tem\u00e1tico",
     "Customer_Announcement": "Anuncio para el cliente",
@@ -836,7 +836,7 @@
     "Make_sure_your_Mikrotik_accessible_from_PHPNuxBill": "Aseg\u00farese de que su Mikrotik sea accesible desde PHPNuxBill",
     "If_you_just_update_PHPNuxBill_from_upload_files__try_click_Update": "Si simplemente actualiza PHPNuxBill desde la carga de archivos, intente hacer clic en Actualizar",
     "Update": "Actualizar",
-    "Update_PHPNuxBill": "Actualizar PHPNuxBill",
+    "Update_PHPNuxBill": "Actualizar Sistema",
     "Ask_Github_Community": "Pregunta a la comunidad de Github",
     "Ask_Telegram_Community": "Pregunta a la comunidad de Telegram"
 }

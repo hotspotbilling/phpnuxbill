@@ -25,7 +25,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Secret</label>
+                        <label class="col-md-2 control-label">{Lang::T('Secret')}</label>
                         <div class="col-md-6">
                             <input type="password" class="form-control" id="secret" name="secret" required
                                 value="{$d['secret']}" onmouseleave="this.type = 'password'"
@@ -45,12 +45,12 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">Server</label>
+                        <label class="col-md-2 control-label">{Lang::T('Server')}</label>
                         <div class="col-md-2">
                             <input type="text" class="form-control" id="server" name="server" value="{$d['server']}"
                                 placeholder="null">
                         </div>
-                        <label class="col-md-2 control-label">Community</label>
+                        <label class="col-md-2 control-label">{Lang::T('Community')}</label>
                         <div class="col-md-2">
                             <input type="text" class="form-control" id="community" name="community"
                                 value="{$d['community']}" placeholder="null">

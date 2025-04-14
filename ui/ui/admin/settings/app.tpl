@@ -137,7 +137,7 @@
                             </option>
                         </select>
                         <p class="help-block">
-                            <b>?_route=settings/app&foo=bar</b> will be <b>/settings/app?foo=bar</b>
+                            <b>?_route=settings/app&foo=bar</b>{Lang::T(' will be ')}<b>/settings/app?foo=bar</b>
                         </p>
                     </div>
                     <span class="help-block col-md-4">{Lang::T('rename .htaccess_firewall to .htaccess')}</span>
@@ -845,8 +845,7 @@
                     href="#collapseEmailNotification" aria-expanded="false" aria-controls="collapseEmailNotification">
                     {Lang::T('Email Notification')}
                     <div class="btn-group pull-right">
-                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">Test
-                            Email</a>
+                        <a class="btn btn-success btn-xs" style="color: black;" href="javascript:testEmail()">{Lang::T('Test Email')}</a>
                     </div>
                 </a>
             </h4>
@@ -892,10 +891,10 @@
                             </option>
                         </select>
                     </div>
-                    <p class="help-block col-md-4">UPPERCASE lowercase RaNdoM</p>
+                    <p class="help-block col-md-4">{Lang::T('UPPERCASE lowercase RaNdoM')}</p>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">Mail {Lang::T('From')}</label>
+                    <label class="col-md-3 control-label">{Lang::T(' Mail From')}</label>
                     <div class="col-md-5">
                         <input type="text" class="form-control" id="mail_from" name="mail_from"
                             value="{$_c['mail_from']}" placeholder="noreply@host.tld">
