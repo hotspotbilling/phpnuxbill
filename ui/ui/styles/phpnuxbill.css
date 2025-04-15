@@ -595,7 +595,7 @@ input:checked+.slider:before {
 .dark-mode .main-sidebar,
 .dark-mode .main-sidebar .sidebar,
 .dark-mode .sidebar-menu li>a {
-    background-color: #1a202c;
+    background-color: #151521;
     color: #cbd5e0;
 }
 
@@ -612,11 +612,11 @@ input:checked+.slider:before {
 .dark-mode .content-header,
 .dark-mode .content-wrapper,
 .dark-mode .right-side {
-    background-color: #2d3748;
+    background-color: #151521;
 }
 
 .dark-mode .main-footer {
-    background-color: #1a202c;
+    background-color: #161414;
     color: #cbd5e0;
 }
 
@@ -907,7 +907,7 @@ select:not(#filterNavigateMenu),
 
 .dark-mode .table th,
 .dark-mode .table td {
-    background-color: #333;
+    background-color: #1e1e2d;
     border-color: #444;
     color: #ddd;
 }
@@ -1120,6 +1120,8 @@ select:not(#filterNavigateMenu),
     background-color: #353638;
 
 }
+
+
 
 /* Dark Mode - Select2 Dropdown ends here */
 
