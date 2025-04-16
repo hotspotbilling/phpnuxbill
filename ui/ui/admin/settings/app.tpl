@@ -73,8 +73,8 @@
                     <label class="col-md-3 control-label"><i class="glyphicon glyphicon-print"></i>
                         {Lang::T('Print Max Char')}</label>
                     <div class="col-md-5">
-                        <input type="number" required class="form-control" id="printer_cols" placeholder="37"
-                            name="printer_cols" value="{$_c['printer_cols']}">
+                        <input type="number" class="form-control" id="printer_cols" placeholder="37"
+                            name="printer_cols" value="{if empty($_c['printer_cols'])}37{else}{$_c['printer_cols']}{/if}">
                     </div>
                     <span class="help-block col-md-4">{Lang::T('For invoice print using Thermal
                         Printer')}</span>
@@ -109,7 +109,7 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Income reset date')}</label>
                     <div class="col-md-5">
-                        <input type="number" required class="form-control" id="reset_day" placeholder="20" min="1"
+                        <input type="number" class="form-control" id="reset_day" placeholder="20" min="1"
                             max="28" step="1" name="reset_day" value="{$_c['reset_day']}">
                     </div>
                     <span class="help-block col-md-4">{Lang::T('Income will reset every this day')}</span>
