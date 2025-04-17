@@ -246,14 +246,13 @@ class Response extends Message
      *
      * @see getType()
      */
-    protected function setType($type)
-    {
-        switch ($type) {
+        protected function setType($type){
+    switch ($type) {
         case self::TYPE_FINAL:
-        case self::TYPE_EMPTY:
         case self::TYPE_DATA:
         case self::TYPE_ERROR:
         case self::TYPE_FATAL:
+        case '!empty': // Added this line to handle RouterOS 7.18+ responses and support older versions
             $this->_type = $type;
             return $this;
         default:
@@ -263,8 +262,8 @@ class Response extends Message
                 null,
                 $type
             );
-        }
     }
+}
 
     /**
      * Gets the response type.
