@@ -280,7 +280,7 @@ switch ($action) {
             $ui->assign('hlogo', $height);
         }
 
-        $ui->assign('public_url', getUrl("voucher/invoice/$id/".md5($id. $db_pass)));
+        $ui->assign('public_url', getUrl("voucher/invoice/$id/" . md5($id . $db_pass)));
         $ui->assign('logo', $logo);
         $ui->assign('_title', 'View Invoice');
         $ui->display('admin/plan/invoice.tpl');
@@ -501,7 +501,7 @@ switch ($action) {
                 $query->where_in('generated_by', $sales);
             }
         }
-        $d = Paginator::findMany($query, ["search" => $search], 10, $append_url);
+        $d = $query->find_many();
         // extract admin
         $admins = [];
         foreach ($d as $k) {
@@ -525,6 +525,7 @@ switch ($action) {
             }
         }
 
+        $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
         $ui->assign('admins', $admins);
         $ui->assign('d', $d);
         $ui->assign('search', $search);
@@ -572,119 +573,77 @@ switch ($action) {
         $pagebreak = _post('pagebreak');
         $limit = _post('limit');
         $vpl = _post('vpl');
+        $batch = _post('batch');
+        $group = _post('group');
         $selected_datetime = _post('selected_datetime');
-        if (empty($vpl)) {
+
+        if (empty($vpl))
             $vpl = 3;
-        }
         if ($pagebreak < 1)
             $pagebreak = 12;
-
         if ($limit < 1)
             $limit = $pagebreak * 2;
-        if (empty($from_id)) {
+        if (empty($from_id))
             $from_id = 0;
+
+        $v = ORM::for_table('tbl_plans')
+            ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+            ->where('tbl_voucher.status', '0');
+
+        $vc = ORM::for_table('tbl_plans')
+            ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
+            ->where('tbl_voucher.status', '0');
+
+        if ($planid > 0) {
+            $v = $v->where('tbl_plans.id', $planid);
+            $vc = $vc->where('tbl_plans.id', $planid);
         }
 
-        if ($from_id > 0 && $planid > 0) {
-            $v = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where('tbl_plans.id', $planid)
-                ->where_gt('tbl_voucher.id', $from_id)
-                ->limit($limit);
-            $vc = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where('tbl_plans.id', $planid)
-                ->where_gt('tbl_voucher.id', $from_id);
-        } else if ($from_id == 0 && $planid > 0) {
-            $v = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where('tbl_plans.id', $planid)
-                ->limit($limit);
-            $vc = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where('tbl_plans.id', $planid);
-        } else if ($from_id > 0 && $planid == 0) {
-            $v = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where_gt('tbl_voucher.id', $from_id)
-                ->limit($limit);
-            $vc = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where_gt('tbl_voucher.id', $from_id);
-        } else if ($from_id > 0 && $planid == 0 && $selected_datetime != '') {
-            $v = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where_raw("DATE(created_at) = ?", [$selected_datetime])
-                ->where_gt('tbl_voucher.id', $from_id)
-                ->limit($limit);
-            $vc = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where_gt('tbl_voucher.id', $from_id);
-        } else {
-            $v = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->limit($limit);
-            $vc = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0');
+        if ($from_id > 0) {
+            $v = $v->where_gt('tbl_voucher.id', $from_id);
+            $vc = $vc->where_gt('tbl_voucher.id', $from_id);
         }
-        if (!empty($selected_datetime)) {
-            $v = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0')
-                ->where('tbl_voucher.created_at', $selected_datetime)
-                ->limit($limit);
-            $vc = ORM::for_table('tbl_plans')
-                ->left_outer_join('tbl_voucher', array('tbl_plans.id', '=', 'tbl_voucher.id_plan'))
-                ->where('tbl_voucher.status', '0');
+
+        // Group filters (date or batch)
+        if (!empty($group)) {
+            if ($group == 'datetime' && !empty($selected_datetime)) {
+                $dateFilter = date('Y-m-d', strtotime($selected_datetime));
+                $v = $v->where_raw("DATE(tbl_voucher.created_at) = ?", [$dateFilter]);
+                $vc = $vc->where_raw("DATE(tbl_voucher.created_at) = ?", [$dateFilter]);
+            } elseif ($group == 'batch' && !empty($batch)) {
+                switch ($batch) {
+                    case 'all':
+                        $v = $v->where_not_equal('tbl_voucher.batch_name', '');
+                        $vc = $vc->where_not_equal('tbl_voucher.batch_name', '');
+                        break;
+                    default:
+                        $v = $v->where('tbl_voucher.batch_name', $batch);
+                        $vc = $vc->where('tbl_voucher.batch_name', $batch);
+                        break;
+                }
+            }
         }
+
+        // Limit only to main query
+        $v = $v->limit($limit);
+
+        // Admin vs non-admin check
         if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             $v = $v->find_many();
             $vc = $vc->count();
         } else {
-            $sales = [];
+            $sales = [$admin['id']];
             $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
             foreach ($sls as $s) {
                 $sales[] = $s['id'];
             }
-            $sales[] = $admin['id'];
             $v = $v->where_in('generated_by', $sales)->find_many();
             $vc = $vc->where_in('generated_by', $sales)->count();
         }
+
+        // Voucher template and data
         $template = file_get_contents("pages/Voucher.html");
         $template = str_replace('[[company_name]]', $config['CompanyName'], $template);
-
-        $ui->assign('_title', Lang::T('Hotspot Voucher'));
-        $ui->assign('from_id', $from_id);
-        $ui->assign('vpl', $vpl);
-        $ui->assign('pagebreak', $pagebreak);
-
-        $plans = ORM::for_table('tbl_plans')->find_many();
-        $ui->assign('plans', $plans);
-        $ui->assign('limit', $limit);
-        $ui->assign('planid', $planid);
-
-        $createdate = ORM::for_table('tbl_voucher')
-            ->select_expr(
-                "CASE WHEN DATE(created_at) = CURDATE() THEN 'Today' ELSE DATE(created_at) END",
-                'created_datetime'
-            )
-            ->where_not_equal('created_at', '0')
-            ->select_expr('COUNT(*)', 'voucher_count')
-            ->group_by('created_datetime')
-            ->order_by_desc('created_datetime')
-            ->find_array();
-
-        $ui->assign('createdate', $createdate);
 
         $voucher = [];
         $n = 1;
@@ -699,12 +658,43 @@ switch ($action) {
             $n++;
         }
 
+        // Additional data for the view
+        $plans = ORM::for_table('tbl_plans')->find_many();
+
+        $createdate = ORM::for_table('tbl_voucher')
+            ->select_expr(
+                "CASE WHEN DATE(created_at) = CURDATE() THEN 'Today' ELSE DATE(created_at) END",
+                'created_datetime'
+            )
+            ->where_not_equal('created_at', '0')
+            ->select_expr('COUNT(*)', 'voucher_count')
+            ->group_by('created_datetime')
+            ->order_by_desc('created_datetime')
+            ->find_array();
+
+        $batches = ORM::for_table('tbl_voucher')
+            ->select('batch_name')
+            ->distinct()
+            ->where_not_equal('batch_name', '')
+            ->order_by_desc('created_at')
+            ->find_many();
+
+        $ui->assign('_title', Lang::T('Hotspot Voucher'));
+        $ui->assign('from_id', $from_id);
+        $ui->assign('vpl', $vpl);
+        $ui->assign('pagebreak', $pagebreak);
+        $ui->assign('plans', $plans);
+        $ui->assign('limit', $limit);
+        $ui->assign('planid', $planid);
+        $ui->assign('createdate', $createdate);
         $ui->assign('voucher', $voucher);
         $ui->assign('vc', $vc);
         $ui->assign('selected_datetime', $selected_datetime);
-
-        //for counting pagebreak
+        $ui->assign('batches', $batches);
+        $ui->assign('selected_batch', $batch);
+        $ui->assign('group', $group);
         $ui->assign('jml', 0);
+
         run_hook('view_print_voucher'); #HOOK
         $ui->display('admin/print/voucher.tpl');
         break;
@@ -725,6 +715,7 @@ switch ($action) {
         $lengthcode = _post('lengthcode');
         $printNow = _post('print_now', 'no');
         $voucherPerPage = _post('voucher_per_page', '36');
+        $batch_name = _post('batch_name', '');
 
         $msg = '';
         if (empty($type) || empty($plan) || empty($server) || empty($numbervoucher) || empty($lengthcode)) {
@@ -734,7 +725,7 @@ switch ($action) {
             $msg .= 'The Number of Vouchers must be a number' . '<br>';
         }
         if (!Validator::UnsignedNumber($lengthcode)) {
-            $msg .= 'The Length Code must be a number' . '<br>';
+            $msg .= "The Length Code must be a number<br>";
         }
 
         if ($msg == '') {
@@ -758,7 +749,7 @@ switch ($action) {
 
             if ($voucher_format == 'numbers') {
                 if ($lengthcode < 6) {
-                    $msg .= 'The Length Code must be more than 6 for numbers' . '<br>';
+                    $msg .= "The Length Code must be more than 6 for numbers<br>";
                 }
                 $vouchers = generateUniqueNumericVouchers($numbervoucher, $lengthcode);
             } else {
@@ -782,6 +773,7 @@ switch ($action) {
                 $d->user = '0';
                 $d->status = '0';
                 $d->generated_by = $admin['id'];
+                $d->batch_name = $batch_name;
                 $d->save();
                 $newVoucherIds[] = $d->id();
             }

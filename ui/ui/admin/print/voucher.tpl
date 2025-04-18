@@ -66,69 +66,105 @@
                     <td>From ID &gt; <input type="text" name="from_id" style="width:40px" value="{$from_id}"> limit
                         <input type="text" name="limit" style="width:40px" value="{$limit}">
                     </td>
-                    <td>Voucher PerLine <input type="text" style="width:40px" name="vpl" value="{$vpl}"> vouchers
+                    <td>Voucher PerLine <input type="text" style="width:40px" name="vpl" value="{$vpl}">
                     </td>
                     <td>PageBreak after <input type="text" style="width:40px" name="pagebreak" value="{$pagebreak}">
-                        vouchers
                     </td>
                     <td>Plans <select id="plan_id" name="planid" style="width:50px">
                             <option value="0">--all--</option>
                             {foreach $plans as $plan}
-                                <option value="{$plan['id']}" {if $plan['id']==$planid}selected{/if}>{$plan['name_plan']}
-                                </option>
+                            <option value="{$plan['id']}" {if $plan['id']==$planid}selected{/if}>{$plan['name_plan']}
+                            </option>
                             {/foreach}
                         </select></td>
-                    <td>Date <select id="selected_datetime" name="selected_datetime" style="width:50px">
+                    <td>Group
+                        <select id="group" name="group" style="width:50px" onchange="toggleOptions()">
+                            <option value="datetime" {if $group eq 'datetime' }selected{/if}> Date
+                            </option>
+                            <option value="batch" {if $group eq 'batch' }selected{/if}> Batch
+                            </option>
+                        </select>
+                    </td>
+                    <td style="display: none;" id="td-batch">Batch
+                        <select id="batch" name="batch" style="width:50px;">
+                            <option value="all">--all--</option>
+                            {foreach $batches as $batch}
+                            <option value="{$batch.batch_name}" {if $batch.batch_name eq $selected_batch}selected{/if}>
+                                {$batch.batch_name}
+                            </option>
+                            {/foreach}
+                        </select>
+                    </td>
+                    <td style="display: none;" id="td-datetime">Date
+                        <select id="selected_datetime" name="selected_datetime" style="width:50px;">
                             <option value="">--all--</option>
                             {foreach $createdate as $date}
-                                <option value="{$date.created_datetime}"
-                                    {if $date.created_datetime eq $selected_datetime}selected{/if}>
-                                    {$date.created_datetime} ({$date.voucher_count})
-                                </option>
+                            <option value="{$date.created_datetime}" {if $date.created_datetime eq
+                                $selected_datetime}selected{/if}>
+                                {$date.created_datetime} ({$date.voucher_count})
+                            </option>
                             {/foreach}
-                        </select></td>
+                        </select>
+                    </td>
                     <td><button type="submit">submit</button></td>
                 </tr>
             </table>
             <hr>
             <center><button type="button" onclick="window.print()"
-                    class="btn btn-default btn-sm no-print">{Lang::T('Click Here to Print')}</button><br>
+                    class="btn btn-default btn-sm no-print">{Lang::T('Click
+                    Here to Print')}</button><br>
                 {Lang::T('Print side by side, it will easy to cut')}<br> show {$v|@count} vouchers from {$vc}
                 vouchers<br> from ID {$v[0]['id']} limit {$limit} vouchers
             </center>
         </form>
         <div id="printable" align="center">
             <hr> {$n = 1} {foreach $voucher as $vs} {$jml = $jml + 1}
-                {if $n == 1}
-                    <table>
-                        <tr>
-                        {/if}
-                        <td>{$vs}</td>
-                        {if $n == $vpl}
-                    </table>
-                    {$n = 1} {else} {$n = $n + 1} {/if} {if $jml == $pagebreak} {$jml = 0}
-                    <!-- pageBreak -->
-                    <div class="page-break">
-                        <div class="no-print" style="background-color: #E91E63; color:#FFF;" align="center">-- pageBreak --
-                            <hr>
-                        </div>
-                    </div>
-                {/if}
+            {if $n == 1}
+            <table>
+                <tr>
+                    {/if}
+                    <td>{$vs}</td>
+                    {if $n == $vpl}
+            </table>
+            {$n = 1} {else} {$n = $n + 1} {/if} {if $jml == $pagebreak} {$jml = 0}
+            <!-- pageBreak -->
+            <div class="page-break">
+                <div class="no-print" style="background-color: #E91E63; color:#FFF;" align="center">-- pageBreak --
+                    <hr>
+                </div>
+            </div>
+            {/if}
             {/foreach}
         </div>
     </page>
     <script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
     {if isset($xfooter)} {$xfooter} {/if}
     <script>
-        jQuery(document).ready(function() {
+        jQuery(document).ready(function () {
             // initiate layout and plugins
-            $("#actprint").click(function() {
+            $("#actprint").click(function () {
                 window.print();
                 return false;
             });
         });
     </script>
+    <script>
+        function toggleOptions() {
+            const group = document.getElementById('group').value;
+            const tdBatch = document.getElementById('td-batch');
+            const tdDatetime = document.getElementById('td-datetime');
 
+            if (group === 'batch') {
+                tdBatch.style.display = 'block';
+                tdDatetime.style.display = 'none';
+            } else if (group === 'datetime') {
+                tdDatetime.style.display = 'block';
+                tdBatch.style.display = 'none';
+            }
+        }
+
+        toggleOptions();
+    </script>
 </body>
 
 </html>
