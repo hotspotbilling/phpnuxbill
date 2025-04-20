@@ -14,6 +14,7 @@
         </div>
     </div>
 </div>
+
 <div class="panel panel-hovered mb20 panel-primary">
     <div class="panel-heading">
         {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
@@ -26,7 +27,84 @@
         {/if}
         &nbsp;
     </div>
-
+    <div class="panel-body" style="margin-left: 10px;">
+        <form id="voucher-search-form" method="post" action="{Text::url('')}plan/voucher/" class="form-horizontal">
+            <div class="row">
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="{Lang::T('Code Voucher')}" 
+                               value="{$search}" autocomplete="off" data-toggle="tooltip" title="{Lang::T('Search by voucher code')}">
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <div class="input-group">
+                        <select class="form-control select2" id="router" name="router" data-placeholder="{Lang::T('Location')}">
+                            <option value=""></option>
+                            {foreach $routers as $r}
+                            <option value="{$r}" {if $router eq $r}selected{/if}>{$r}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <div class="input-group">
+                        <select class="form-control select2" id="batch_name" name="batch_name" data-placeholder="{Lang::T('Batch')}">
+                            <option value=""></option>
+                            {foreach $batches as $batch}
+                            <option value="{$batch.batch_name}" {if $batch_name eq $batch.batch_name}selected{/if}>
+                                {$batch.batch_name}
+                            </option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <div class="input-group">
+                        <select class="form-control select2" id="plan" name="plan" data-placeholder="{Lang::T('Plan Name')}">
+                            <option value=""></option>
+                            {foreach $plans as $p}
+                            <option value="{$p['id']}" {if $plan eq $p['id']}selected{/if}>{$p['name_plan']}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <div class="input-group">
+                        <select class="form-control" id="status" name="status">
+                            <option value="">{Lang::T('Status')}</option>
+                            <option value="1" {if $status eq 1}selected{/if}>{Lang::T('Used')}</option>
+                            <option value="0" {if $status eq 0}selected{/if}>{Lang::T('Not Used')}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <div class="input-group">
+                        <select class="form-control select2" id="customer" name="customer" data-placeholder="{Lang::T('Customer')}">
+                            <option value=""></option>
+                            {foreach $customers as $c}
+                            <option value="{$c['user']}" {if $customer eq $c['user']}selected{/if}>{$c['user']}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <div class="btn-group btn-group-justified" role="group">
+                        <div class="btn-group" role="group">
+                            <button type="submit" class="btn btn-success btn-block" data-toggle="tooltip" title="{Lang::T('Search')}">
+                                <i class="fa fa-search"></i> <span class="hidden-xs">{Lang::T('Search')}</span>
+                            </button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{Text::url('')}plan/voucher/" class="btn btn-warning btn-block" 
+                               data-toggle="tooltip" title="{Lang::T('Reset Search')}">
+                                <i class="fa fa-undo"></i> <span class="hidden-xs">{Lang::T('Reset')}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
     <div class="table-responsive">
         <div style="margin-left: 5px; margin-right: 5px;">&nbsp;
             <table id="datatable" class="table table-bordered table-striped table-condensed">
@@ -94,7 +172,6 @@
                     {/foreach}
                 </tbody>
             </table>
-            <br>
             <div class="row" style="padding: 5px">
                 <div class="col-lg-3 col-lg-offset-9">
                     <div class="btn-group btn-group-justified" role="group">
@@ -107,14 +184,11 @@
                     </div>
                 </div>
             </div>
+            {include file="pagination.tpl"}
             <br>
         </div>
     </div>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script type="text/javascript" charset="utf8"
-    src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
     function deleteVouchers(voucherIds) {
         if (voucherIds.length > 0) {
@@ -208,9 +282,4 @@
         }
     });
 </script>
-<script>
-    new DataTable('#datatable');
-</script>
-
-
 {include file="sections/footer.tpl"}

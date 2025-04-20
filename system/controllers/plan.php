@@ -438,6 +438,9 @@ switch ($action) {
         $customer = _req('customer');
         $plan = _req('plan');
         $status = _req('status');
+        $batch_name = _req('batch_name');
+        
+        $ui->assign('batch_name', $batch_name);
         $ui->assign('router', $router);
         $ui->assign('customer', $customer);
         $ui->assign('status', $status);
@@ -463,6 +466,10 @@ switch ($action) {
             $query->where('tbl_voucher.user', $customer);
         }
 
+        if (!empty($batch_name)) {
+            $query->where('tbl_voucher.batch_name', $batch_name);
+        }
+
         $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status);
 
         // option customers
@@ -478,7 +485,7 @@ switch ($action) {
 
         if ($search != '') {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
-                $query->where_like('tbl_voucher.code', '%' . $search . '%');
+                $query->where_like('tbl_voucher.code', "%$search%");
             } else if ($admin['user_type'] == 'Agent') {
                 $sales = [];
                 $sls = ORM::for_table('tbl_users')->select('id')->where('root', $admin['id'])->findArray();
@@ -487,7 +494,7 @@ switch ($action) {
                 }
                 $sales[] = $admin['id'];
                 $query->where_in('generated_by', $sales)
-                    ->where_like('tbl_voucher.code', '%' . $search . '%');
+                    ->where_like('tbl_voucher.code', "%$search%");
             }
         } else {
             if (in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
@@ -501,7 +508,7 @@ switch ($action) {
                 $query->where_in('generated_by', $sales);
             }
         }
-        $d = $query->find_many();
+        $d = Paginator::findMany($query, ["search" => $search], 10, $append_url);
         // extract admin
         $admins = [];
         foreach ($d as $k) {
@@ -525,7 +532,13 @@ switch ($action) {
             }
         }
 
-        $ui->assign('xheader', '<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">');
+        $batches = ORM::for_table('tbl_voucher')
+            ->select('batch_name')
+            ->distinct()
+            ->where_not_equal('batch_name', '')
+            ->order_by_desc('created_at')
+            ->find_many();
+        $ui->assign('batches', $batches);
         $ui->assign('admins', $admins);
         $ui->assign('d', $d);
         $ui->assign('search', $search);
