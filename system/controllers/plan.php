@@ -489,8 +489,8 @@ switch ($action) {
 
         $ui->assign('cookie', $_COOKIE['per-page']);
 
-        $per_page = (!empty($_COOKIE['per-page']) && $_COOKIE['per-page'] != $config['voucher_per_page']) ? $_COOKIE['per-page'] : '10';
-
+        $per_page = !empty($_COOKIE['per-page']) ? $_COOKIE['per-page'] : (!empty($config['voucher_per_page']) ? $config['voucher_per_page'] : '10');
+        
         $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status);
 
         // option customers
