@@ -329,7 +329,7 @@
     });
 
     function changePerPage(select) {
-        setCookie('per-page', select.value, 365);
+        setCookie('voucher_per_page', select.value, 365);
         setTimeout(() => {
             location.reload();
         }, 1000);

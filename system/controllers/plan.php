@@ -470,27 +470,27 @@ switch ($action) {
             $query->where('tbl_voucher.batch_name', $batch_name);
         }
 
-        if (!empty($_COOKIE['per-page']) && $_COOKIE['per-page'] != $config['voucher_per_page']) {
+        if (!empty($_COOKIE['voucher_per_page']) && $_COOKIE['voucher_per_page'] != $config['voucher_per_page']) {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_per_page')->find_one();
             if ($d) {
-                $d->value = $_COOKIE['per-page'];
+                $d->value = $_COOKIE['voucher_per_page'];
                 $d->save();
             } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'voucher_per_page';
-                $d->value = $_COOKIE['per-page'];
+                $d->value = $_COOKIE['voucher_per_page'];
                 $d->save();
             }
         }
-        if (!empty($config['voucher_per_page']) && empty($_COOKIE['per-page'])) {
-            $_COOKIE['per-page'] = $config['voucher_per_page'];
-            setcookie('per-page', $config['voucher_per_page'], time() + (86400 * 30), "/");
+        if (!empty($config['voucher_per_page']) && empty($_COOKIE['voucher_per_page'])) {
+            $_COOKIE['voucher_per_page'] = $config['voucher_per_page'];
+            setcookie('voucher_per_page', $config['voucher_per_page'], time() + (86400 * 30), "/");
         }
 
-        $ui->assign('cookie', $_COOKIE['per-page']);
+        $ui->assign('cookie', $_COOKIE['voucher_per_page']);
 
-        $per_page = !empty($_COOKIE['per-page']) ? $_COOKIE['per-page'] : (!empty($config['voucher_per_page']) ? $config['voucher_per_page'] : '10');
-        
+        $per_page = !empty($_COOKIE['voucher_per_page']) ? $_COOKIE['voucher_per_page'] : (!empty($config['voucher_per_page']) ? $config['voucher_per_page'] : '10');
+
         $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status);
 
         // option customers
