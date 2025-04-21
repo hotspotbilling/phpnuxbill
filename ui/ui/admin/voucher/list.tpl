@@ -1,4 +1,31 @@
 {include file="sections/header.tpl"}
+<style>
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-group select {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .page-item {
+        width: 100px;
+        display: block;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+
+    }
+</style>
 <!-- voucher -->
 <div class="row" style="padding: 5px">
     <div class="col-lg-3 col-lg-offset-9">
@@ -32,13 +59,15 @@
             <div class="row">
                 <div class="col-md-2 col-sm-6 col-xs-12 form-group">
                     <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="{Lang::T('Code Voucher')}" 
-                               value="{$search}" autocomplete="off" data-toggle="tooltip" title="{Lang::T('Search by voucher code')}">
+                        <input type="text" name="search" class="form-control" placeholder="{Lang::T('Code Voucher')}"
+                            value="{$search}" autocomplete="off" data-toggle="tooltip"
+                            title="{Lang::T('Search by voucher code')}">
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-6 col-xs-12 form-group">
                     <div class="input-group">
-                        <select class="form-control select2" id="router" name="router" data-placeholder="{Lang::T('Location')}">
+                        <select class="form-control select2" id="router" name="router"
+                            data-placeholder="{Lang::T('Location')}">
                             <option value=""></option>
                             {foreach $routers as $r}
                             <option value="{$r}" {if $router eq $r}selected{/if}>{$r}</option>
@@ -48,7 +77,8 @@
                 </div>
                 <div class="col-md-2 col-sm-6 col-xs-12 form-group">
                     <div class="input-group">
-                        <select class="form-control select2" id="batch_name" name="batch_name" data-placeholder="{Lang::T('Batch')}">
+                        <select class="form-control select2" id="batch_name" name="batch_name"
+                            data-placeholder="{Lang::T('Batch')}">
                             <option value=""></option>
                             {foreach $batches as $batch}
                             <option value="{$batch.batch_name}" {if $batch_name eq $batch.batch_name}selected{/if}>
@@ -60,7 +90,8 @@
                 </div>
                 <div class="col-md-2 col-sm-6 col-xs-12 form-group">
                     <div class="input-group">
-                        <select class="form-control select2" id="plan" name="plan" data-placeholder="{Lang::T('Plan Name')}">
+                        <select class="form-control select2" id="plan" name="plan"
+                            data-placeholder="{Lang::T('Plan Name')}">
                             <option value=""></option>
                             {foreach $plans as $p}
                             <option value="{$p['id']}" {if $plan eq $p['id']}selected{/if}>{$p['name_plan']}</option>
@@ -79,7 +110,8 @@
                 </div>
                 <div class="col-md-2 col-sm-6 col-xs-12 form-group">
                     <div class="input-group">
-                        <select class="form-control select2" id="customer" name="customer" data-placeholder="{Lang::T('Customer')}">
+                        <select class="form-control select2" id="customer" name="customer"
+                            data-placeholder="{Lang::T('Customer')}">
                             <option value=""></option>
                             {foreach $customers as $c}
                             <option value="{$c['user']}" {if $customer eq $c['user']}selected{/if}>{$c['user']}</option>
@@ -90,13 +122,14 @@
                 <div class="col-md-2 col-sm-6 col-xs-12 form-group">
                     <div class="btn-group btn-group-justified" role="group">
                         <div class="btn-group" role="group">
-                            <button type="submit" class="btn btn-success btn-block" data-toggle="tooltip" title="{Lang::T('Search')}">
+                            <button type="submit" class="btn btn-success btn-block" data-toggle="tooltip"
+                                title="{Lang::T('Search')}">
                                 <i class="fa fa-search"></i> <span class="hidden-xs">{Lang::T('Search')}</span>
                             </button>
                         </div>
                         <div class="btn-group" role="group">
-                            <a href="{Text::url('')}plan/voucher/" class="btn btn-warning btn-block" 
-                               data-toggle="tooltip" title="{Lang::T('Reset Search')}">
+                            <a href="{Text::url('')}plan/voucher/" class="btn btn-warning btn-block"
+                                data-toggle="tooltip" title="{Lang::T('Reset Search')}">
                                 <i class="fa fa-undo"></i> <span class="hidden-xs">{Lang::T('Reset')}</span>
                             </a>
                         </div>
@@ -107,6 +140,19 @@
     </div>
     <div class="table-responsive">
         <div style="margin-left: 5px; margin-right: 5px;">&nbsp;
+            <div class="form-group">
+                <span>Show</span>
+                <select class="page-item" id="per_page" name="per_page" onchange="changePerPage(this)">
+                    <option value="10" {if $cookie eq 10}selected{/if}>10</option>
+                    <option value="25" {if $cookie eq 25}selected{/if}>25</option>
+                    <option value="50" {if $cookie eq 50}selected{/if}>50</option>
+                    <option value="100" {if $cookie eq 100}selected{/if}>100</option>
+                    <option value="200" {if $cookie eq 200}selected{/if}>200</option>
+                    <option value="500" {if $cookie eq 500}selected{/if}>500</option>
+                    <option value="1000" {if $cookie eq 1000}selected{/if}>1000</option>
+                </select>
+                <span>entries</span>
+            </div>
             <table id="datatable" class="table table-bordered table-striped table-condensed">
                 <thead>
                     <tr>
@@ -281,5 +327,13 @@
             checkbox.checked = this.checked;
         }
     });
+
+    function changePerPage(select) {
+        setCookie('per-page', select.value, 365);
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+        console.log('Entries per page changed to: ' + select.value);
+    }
 </script>
 {include file="sections/footer.tpl"}

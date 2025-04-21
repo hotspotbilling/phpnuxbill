@@ -439,7 +439,7 @@ switch ($action) {
         $plan = _req('plan');
         $status = _req('status');
         $batch_name = _req('batch_name');
-        
+
         $ui->assign('batch_name', $batch_name);
         $ui->assign('router', $router);
         $ui->assign('customer', $customer);
@@ -469,6 +469,27 @@ switch ($action) {
         if (!empty($batch_name)) {
             $query->where('tbl_voucher.batch_name', $batch_name);
         }
+
+        if (!empty($_COOKIE['per-page']) && $_COOKIE['per-page'] != $config['voucher_per_page']) {
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_per_page')->find_one();
+            if ($d) {
+                $d->value = $_COOKIE['per-page'];
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'voucher_per_page';
+                $d->value = $_COOKIE['per-page'];
+                $d->save();
+            }
+        }
+        if (!empty($config['voucher_per_page']) && empty($_COOKIE['per-page'])) {
+            $_COOKIE['per-page'] = $config['voucher_per_page'];
+            setcookie('per-page', $config['voucher_per_page'], time() + (86400 * 30), "/");
+        }
+
+        $ui->assign('cookie', $_COOKIE['per-page']);
+
+        $per_page = (!empty($_COOKIE['per-page']) && $_COOKIE['per-page'] != $config['voucher_per_page']) ? $_COOKIE['per-page'] : '10';
 
         $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status);
 
@@ -508,7 +529,7 @@ switch ($action) {
                 $query->where_in('generated_by', $sales);
             }
         }
-        $d = Paginator::findMany($query, ["search" => $search], 10, $append_url);
+        $d = Paginator::findMany($query, ["search" => $search], $per_page, $append_url);
         // extract admin
         $admins = [];
         foreach ($d as $k) {
