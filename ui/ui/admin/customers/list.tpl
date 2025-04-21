@@ -9,6 +9,32 @@
         color: #333;
         cursor: pointer;
     }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-group select {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .page-item {
+        width: 100px;
+        display: block;
+        height: 34px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+
+    }
 </style>
 
 <div class="row">
@@ -94,6 +120,19 @@
                 </form>
                 <br>&nbsp;
                 <div class="table-responsive table_mobile">
+                    <div class="form-group">
+                        <span>Show</span>
+                        <select class="page-item" id="per_page" name="per_page" onchange="changePerPage(this)">
+                            <option value="10" {if $cookie eq 10}selected{/if}>10</option>
+                            <option value="25" {if $cookie eq 25}selected{/if}>25</option>
+                            <option value="50" {if $cookie eq 50}selected{/if}>50</option>
+                            <option value="100" {if $cookie eq 100}selected{/if}>100</option>
+                            <option value="200" {if $cookie eq 200}selected{/if}>200</option>
+                            <option value="500" {if $cookie eq 500}selected{/if}>500</option>
+                            <option value="1000" {if $cookie eq 1000}selected{/if}>1000</option>
+                        </select>
+                        <span>entries</span>
+                    </div>
                     <table id="customerTable" class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
@@ -371,5 +410,12 @@
                 break;
         }
     });
+
+    function changePerPage(select) {
+        setCookie('customer_per_page', select.value, 365);
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
 </script>
 {include file = "sections/footer.tpl" }

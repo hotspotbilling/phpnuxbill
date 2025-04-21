@@ -207,5 +207,8 @@
   ],
   "2025.3.10": [
     "CREATE TABLE IF NOT EXISTS `tbl_invoices` ( `id` INT AUTO_INCREMENT PRIMARY KEY, `number` VARCHAR(50) NOT NULL, `customer_id` INT NOT NULL, `fullname` VARCHAR(100) NOT NULL, `email` VARCHAR(100) NOT NULL, `address` TEXT, `status` ENUM('Unpaid', 'Paid', 'Cancelled') NOT NULL DEFAULT 'Unpaid', `due_date` DATETIME NOT NULL, `filename` VARCHAR(255), `amount` DECIMAL(10, 2) NOT NULL, `data` JSON NOT NULL, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
+  ],
+  "2025.4.18": [
+    "ALTER TABLE `tbl_voucher` ADD `batch_name` VARCHAR(40) AFTER `id_plan`;"
   ]
 }

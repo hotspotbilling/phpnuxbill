@@ -904,7 +904,29 @@ switch ($action) {
             fclose($fp);
             die();
         }
-        $d = Paginator::findMany($query, ['search' => $search], 30, $append_url);
+
+        if (!empty($_COOKIE['customer_per_page']) && $_COOKIE['customer_per_page'] != $config['customer_per_page']) {
+            $d = ORM::for_table('tbl_appconfig')->where('setting', 'customer_per_page')->find_one();
+            if ($d) {
+                $d->value = $_COOKIE['customer_per_page'];
+                $d->save();
+            } else {
+                $d = ORM::for_table('tbl_appconfig')->create();
+                $d->setting = 'customer_per_page';
+                $d->value = $_COOKIE['customer_per_page'];
+                $d->save();
+            }
+        } 
+        if (!empty($config['customer_per_page']) && empty($_COOKIE['customer_per_page'])) {
+            $_COOKIE['customer_per_page'] = $config['customer_per_page'];
+            setcookie('customer_per_page', $config['customer_per_page'], time() + (86400 * 30), "/");
+        }
+
+        $ui->assign('cookie', $_COOKIE['customer_per_page']);
+
+        $per_page = !empty($_COOKIE['customer_per_page']) ? $_COOKIE['customer_per_page'] : (!empty($config['customer_per_page']) ? $config['customer_per_page'] : '30');
+
+        $d = Paginator::findMany($query, ['search' => $search], $per_page, $append_url);
         $ui->assign('d', $d);
         $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
         $ui->assign('filter', $filter);
