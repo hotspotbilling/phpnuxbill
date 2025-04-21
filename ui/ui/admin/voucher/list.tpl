@@ -333,7 +333,6 @@
         setTimeout(() => {
             location.reload();
         }, 1000);
-        console.log('Entries per page changed to: ' + select.value);
     }
 </script>
 {include file="sections/footer.tpl"}
