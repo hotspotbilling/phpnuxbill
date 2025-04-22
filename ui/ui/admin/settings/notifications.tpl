@@ -190,7 +190,7 @@
                         <div class="col-md-6">
                             <textarea class="form-control" id="edit_expiry_message" name="edit_expiry_message"
                                 placeholder="{Lang::T('Dear')} [[name]], {Lang::T('your')} [[plan]] {Lang::T('expiry date has been extended! You can now enjoy seamless internet access until')} [[expiry]]. {Lang::T('Thank you for choosing')}  [[company]]  {Lang::T('for your internet needs')}!"
-                                rows="4"> {if $_json['edit_expiry_message']!=''}{Lang::htmlspecialchars($_json['edit_expiry_message'])}{else}{Lang::T('Dear')} [[name]], {Lang::T('your')} [[plan]] {Lang::T('expiry date has been extended! You can now enjoy
+                                rows="4">{if $_json['edit_expiry_message']!=''}{Lang::htmlspecialchars($_json['edit_expiry_message'])}{else}{Lang::T('Dear')} [[name]], {Lang::T('your')} [[plan]] {Lang::T('expiry date has been extended! You can now enjoy
                                 seamless internet access until')} [[expiry]]. {Lang::T('Thank you for choosing')} [[company]] {Lang::T('for your
                                 internet needs')}! {/if}</textarea>
                         </div>
