@@ -114,7 +114,7 @@
                             <b>[[footer]]</b> - {Lang::T('Invoice Footer')}.<br>
                             <b>[[note]]</b> - {Lang::T('For Notes by admin')}.<br>
                             <b>[[invoice_link]]</b> - <a href="{$app_url}/docs/#Reminder%20with%20payment%20link"
-                            target="_blank">{Lang::T("read documentation")}</a>.
+                                target="_blank">{Lang::T("read documentation")}</a>.
                         </p>
                     </div>
                 </div>
@@ -163,6 +163,46 @@
                         </p>
                     </div>
                 </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Plan Change Notification')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="plan_change_message" name="plan_change_message"
+                                placeholder="{Lang::T('Great news')}, [[name]]! {Lang::T('Your plan has been successfully upgraded from ')} [[old_plan]] {Lang::T('to')} [[new_plan]]. {Lang::T('You can now enjoy seamless internet access until')} [[expiry]]. {Lang::T('Thank you for choosing')}  [[company]]  {Lang::T('for your internet needs')}, {Lang::T('Enjoy enhanced features and benefits starting today')}!"
+                                rows="4">{if $_json['plan_change_message']!=''}{Lang::htmlspecialchars($_json['plan_change_message'])}{else}{Lang::T('Great news')}, [[name]]! {Lang::T('Your plan has been successfully upgraded from ')} [[old_plan]] {Lang::T('to')} [[new_plan]]. {Lang::T('You can now enjoy seamless internet access until')} [[expiry]]. {Lang::T('Thank
+                                you for choosing')} [[company]] {Lang::T('for your internet needs')}, {Lang::T('Enjoy enhanced features and benefits starting today')}!{/if}</textarea>
+                        </div>
+                        <p class="help-block col-md-4">
+                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name')}.<br>
+                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
+                            <b>[[old_plan]]</b> - {Lang::T('will be replaced with old plan name')}.<br>
+                            <b>[[new_plan]]</b> - {Lang::T('will be replaced with new plan name')}.<br>
+                            <b>[[expiry]]</b> - {Lang::T('will be replaced with the expiry date of the plan')}.<br>
+                            <b>[[company]]</b> - {Lang::T('will be replaced with Company Name')}.<br>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Expiry Edit Notification')}</label>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="edit_expiry_message" name="edit_expiry_message"
+                                placeholder="{Lang::T('Dear')} [[name]], {Lang::T('your')} [[plan]] {Lang::T('expiry date has been extended! You can now enjoy seamless internet access until')} [[expiry]]. {Lang::T('Thank you for choosing')}  [[company]]  {Lang::T('for your internet needs')}!"
+                                rows="4"> {if $_json['edit_expiry_message']!=''}{Lang::htmlspecialchars($_json['edit_expiry_message'])}{else}{Lang::T('Dear')} [[name]], {Lang::T('your')} [[plan]] {Lang::T('expiry date has been extended! You can now enjoy
+                                seamless internet access until')} [[expiry]]. {Lang::T('Thank you for choosing')} [[company]] {Lang::T('for your
+                                internet needs')}! {/if}</textarea>
+                        </div>
+                        <p class="help-block col-md-4">
+                            <b>[[name]]</b> - {Lang::T('will be replaced with Customer Name')}.<br>
+                            <b>[[username]]</b> - {Lang::T('will be replaced with Customer username')}.<br>
+                            <b>[[plan]]</b> - {Lang::T('will be replaced with plan name')}.<br>
+                            <b>[[expiry]]</b> - {Lang::T('will be replaced with the expiry date of the plan')}.<br>
+                            <b>[[company]]</b> - {Lang::T('will be replaced with Company Name')}.<br>
+                        </p>
+                    </div>
+                </div>
                 {if $_c['enable_balance'] == 'yes'}
                 <div class="panel-body">
                     <div class="form-group">
@@ -193,7 +233,7 @@
                     </div>
                 </div>
                 {/if}
-               {* <div class="panel-body">
+                {* <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('PDF Invoice Template')}</label>
                         <div class="col-md-6">

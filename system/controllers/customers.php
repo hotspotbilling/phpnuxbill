@@ -549,7 +549,7 @@ switch ($action) {
                 $welcomeMessage = str_replace('[[password]]', $d['password'], $welcomeMessage);
                 $welcomeMessage = str_replace('[[url]]', APP_URL . '/?_route=login', $welcomeMessage);
 
-                $emailSubject = "Welcome to " . $config['CompanyName'];
+                $subject = "Welcome to " . $config['CompanyName'];
 
                 $channels = [
                     'sms' => [
@@ -565,8 +565,13 @@ switch ($action) {
                     'email' => [
                         'enabled' => isset($_POST['mail']),
                         'method' => 'Message::sendEmail',
-                        'args' => [$d['email'], $emailSubject, $welcomeMessage, $d['email']]
-                    ]
+                        'args' => [$d['email'], $subject, $welcomeMessage, $d['email']]
+                    ],
+                    'inbox' => [
+                        'enabled' => isset($_POST['inbox']),
+                        'method' => 'Message::addToInbox',
+                        'args' => $d['id'], $subject, $welcomeMessage, $from = 'Admin'
+                    ],
                 ];
 
                 foreach ($channels as $channel => $message) {

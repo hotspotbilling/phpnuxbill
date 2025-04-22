@@ -48,7 +48,7 @@ switch ($action) {
                 $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
                 if ($c) {
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'demo') {
+                    if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             if (method_exists($dvc, 'sync_customer')) {
@@ -349,7 +349,7 @@ switch ($action) {
             $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
             $c = User::_info($d['customer_id']);
             $dvc = Package::getDevice($p);
-            if ($_app_stage != 'demo') {
+            if ($_app_stage != 'Demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
                     (new $p['device'])->remove_customer($c, $p);
@@ -367,64 +367,146 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+
+        $msg = '';
         $id_plan = _post('id_plan');
         $recharged_on = _post('recharged_on');
         $expiration = _post('expiration');
         $time = _post('time');
-
         $id = _post('id');
+
         $d = ORM::for_table('tbl_user_recharges')->find_one($id);
-        if ($d) {
-        } else {
+        if (!$d) {
             $msg .= Lang::T('Data Not Found') . '<br>';
         }
+
+        $customer = User::_info($d['customer_id']);
         $oldPlanID = $d['plan_id'];
         $newPlan = ORM::for_table('tbl_plans')->where('id', $id_plan)->find_one();
-        if ($newPlan) {
-        } else {
+
+        if (!$newPlan) {
             $msg .= ' Plan Not Found<br>';
         }
+
         if ($msg == '') {
-            run_hook('edit_customer_plan'); #HOOK
+            run_hook('edit_customer_plan'); // Hook 
+
             $d->expiration = $expiration;
             $d->time = $time;
-            if ($d['status'] == 'off') {
-                if (strtotime($expiration . ' ' . $time) > time()) {
-                    $d->status = 'on';
-                }
+
+            if ($d['status'] == 'off' && strtotime($expiration . ' ' . $time) > time()) {
+                $d->status = 'on';
             }
-            // plan different then do something
+
+            $p = null;
             if ($oldPlanID != $id_plan) {
                 $d->plan_id = $newPlan['id'];
                 $d->namebp = $newPlan['name_plan'];
-                $customer = User::_info($d['customer_id']);
-                //remove from old plan
+
                 if ($d['status'] == 'on') {
                     $p = ORM::for_table('tbl_plans')->find_one($oldPlanID);
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'demo') {
+                    if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             $p['plan_expired'] = 0;
                             (new $p['device'])->remove_customer($customer, $p);
                         } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                            throw new Exception(Lang::T("Devices Not Found"));
                         }
                     }
-                    //add new plan
+
                     $dvc = Package::getDevice($newPlan);
-                    if ($_app_stage != 'demo') {
+                    if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             (new $newPlan['device'])->add_customer($customer, $newPlan);
                         } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                            throw new Exception(Lang::T("Devices Not Found"));
                         }
                     }
                 }
             }
+
+            $planName = $d['namebp'];
             $d->save();
-            _log('[' . $admin['username'] . ']: ' . 'Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . '][' . Lang::moneyFormat($p['price']) . ']', $admin['user_type'], $admin['id']);
+
+            // Send  Notifications
+            if (isset($_POST['notify']) && $_POST['notify'] == true) {
+                if ($oldPlanID != $id_plan) {
+                    $oldPlan = ORM::for_table('tbl_plans')->find_one($oldPlanID);
+                    $oldPlanName = $oldPlan ? $oldPlan['name_plan'] : 'Old Plan';
+                    $notifyMessage = Lang::getNotifText('plan_change_message');
+                    if (empty($notifyMessage)) {
+                        $notifyMessage = Lang::T('Great news') . ', [[name]]! ' .
+                            Lang::T('Your plan has been successfully upgraded from ') . ' [[old_plan]] ' .
+                            Lang::T('to') . ' [[new_plan]]. ' .
+                            Lang::T('You can now enjoy seamless internet access until') . ' [[expiry]]. ' .
+                            Lang::T('Thank you for choosing') . ' [[company]] ' .
+                            Lang::T('for your internet needs') . ', ' .
+                            Lang::T('Enjoy enhanced features and benefits starting today') . '!';
+                    } else {
+                        $notifyMessage = Lang::getNotifText('plan_change_message');
+                    }
+                    $notifyMessage = str_replace('[[old_plan]]', $oldPlanName, $notifyMessage);
+                    $notifyMessage = str_replace('[[new_plan]]', $planName, $notifyMessage);
+                } else {
+                    if (empty($notifyMessage)) {
+                        $notifyMessage = Lang::T('Dear') . ' [[name]], ' .
+                            Lang::T('your') . ' [[plan]] ' .
+                            Lang::T('has been extended! You can now enjoy seamless internet access until') . ' [[expiry]]. ' .
+                            Lang::T('Thank you for choosing') . ' [[company]] ' .
+                            Lang::T('for your internet needs') . '!';
+                    } else {
+                        $notifyMessage = Lang::getNotifText('plan_change_message');
+                    }
+                    $notifyMessage = str_replace('[[plan]]', $planName, $notifyMessage);
+                }
+
+                $notifyMessage = str_replace('[[company]]', $config['CompanyName'], $notifyMessage);
+                $notifyMessage = str_replace('[[name]]', $customer['fullname'], $notifyMessage);
+                $notifyMessage = str_replace('[[username]]', $customer['username'], $notifyMessage);
+                $notifyMessage = str_replace('[[expiry]]', date('M d, Y h:i A', strtotime($expiration . ' ' . $time)), $notifyMessage);
+
+                $subject = $planName . ' ' . Lang::T('Expiry Extension Notification');
+
+                $channels = [
+                    'sms' => [
+                        'enabled' => isset($_POST['sms']),
+                        'method' => 'sendSMS',
+                        'args' => [$customer['phonenumber'], $notifyMessage]
+                    ],
+                    'whatsapp' => [
+                        'enabled' => isset($_POST['wa']),
+                        'method' => 'sendWhatsapp',
+                        'args' => [$customer['phonenumber'], $notifyMessage]
+                    ],
+                    'email' => [
+                        'enabled' => isset($_POST['mail']),
+                        'method' => 'Message::sendEmail',
+                        'args' => [$customer['email'], $subject, $notifyMessage, $d['email']]
+                    ],
+                    'inbox' => [
+                        'enabled' => isset($_POST['inbox']),
+                        'method' => 'Message::addToInbox',
+                        'args' => [$customer['id'], $subject, $notifyMessage, 'Admin']
+                    ],
+                ];
+
+                foreach ($channels as $channel => $message) {
+                    if ($message['enabled']) {
+                        try {
+                            call_user_func_array($message['method'], $message['args']);
+                            _log("Notification sent to {$customer['username']} via: " . implode(', ', array_keys(array_filter($channels, fn($c) => $c['enabled']))));
+                        } catch (Exception $e) {
+                            _log("Failed to send notify message via $channel: " . $e->getMessage());
+                        }
+                    }
+                }
+            }
+
+            $price = isset($p['price']) ? Lang::moneyFormat($p['price']) : '';
+            _log('[' . $admin['username'] . ']: Edit Plan for Customer ' . $d['username'] . ' to [' . $d['namebp'] . "][$price]", $admin['user_type'], $admin['id']);
             r2(getUrl('plan/list'), 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(getUrl('plan/edit/') . $id, 'e', $msg);
@@ -737,7 +819,7 @@ switch ($action) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
         if ($_app_stage == 'Demo') {
-            r2(getUrl('plan/add-voucher/'), 'e', 'You cannot perform this action in Demo mode');
+            r2(getUrl('plan/add-voucher/'), 'e', 'You cannot perform this action in demo mode');
         }
 
         $type = _post('type');
@@ -1082,7 +1164,7 @@ switch ($action) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 if ($p) {
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'demo') {
+                    if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
                             global $isChangePlan;
