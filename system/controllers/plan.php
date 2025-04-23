@@ -451,6 +451,7 @@ switch ($action) {
                     $notifyMessage = str_replace('[[old_plan]]', $oldPlanName, $notifyMessage);
                     $notifyMessage = str_replace('[[new_plan]]', $planName, $notifyMessage);
                 } else {
+                    $notifyMessage = Lang::getNotifText('edit_expiry_message');
                     if (empty($notifyMessage)) {
                         $notifyMessage = Lang::T('Dear') . ' [[name]], ' .
                             Lang::T('your') . ' [[plan]] ' .
