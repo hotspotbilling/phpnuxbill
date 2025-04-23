@@ -458,7 +458,7 @@ switch ($action) {
                             Lang::T('Thank you for choosing') . ' [[company]] ' .
                             Lang::T('for your internet needs') . '!';
                     } else {
-                        $notifyMessage = Lang::getNotifText('plan_change_message');
+                        $notifyMessage = Lang::getNotifText('edit_expiry_message');
                     }
                     $notifyMessage = str_replace('[[plan]]', $planName, $notifyMessage);
                 }
