@@ -467,7 +467,7 @@ switch ($action) {
                 $notifyMessage = str_replace('[[company]]', $config['CompanyName'], $notifyMessage);
                 $notifyMessage = str_replace('[[name]]', $customer['fullname'], $notifyMessage);
                 $notifyMessage = str_replace('[[username]]', $customer['username'], $notifyMessage);
-                $notifyMessage = str_replace('[[expiry]]', date('M d, Y h:i A', strtotime($expiration . ' ' . $time)), $notifyMessage);
+                $notifyMessage = str_replace('[[expiry]]', date('M d, Y h:i:s', strtotime($expiration . ' ' . $time)), $notifyMessage);
 
                 $subject = $planName . ' ' . Lang::T('Expiry Extension Notification');
 
