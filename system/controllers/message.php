@@ -108,11 +108,11 @@ EOT;
         $smsSent = $waSent = $emailSent = $inboxSent = false;
 
         if ($via === 'sms' || $via === 'both' || $via === 'all') {
-            $smsSent = Message::sendSMS($customer['phonenumber'], $currentSubject);
+            $smsSent = Message::sendSMS($customer['phonenumber'], $currentMessage);
         }
 
         if ($via === 'wa' || $via === 'both' || $via === 'all') {
-            $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentSubject);
+            $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentMessage);
         }
 
         if ($via === 'email' || $via === 'all') {
