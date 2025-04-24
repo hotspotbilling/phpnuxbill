@@ -13,36 +13,35 @@
 								name="id_customer" style="width: 100%"
 								data-placeholder="{Lang::T('Select a customer')}...">
 								{if $cust}
-									<option value="{$cust['id']}">{$cust['username']} &bull; {$cust['fullname']} &bull;
-										{$cust['email']}</option>
+								<option value="{$cust['id']}">{$cust['username']} &bull; {$cust['fullname']} &bull;
+									{$cust['email']}</option>
 								{/if}
 							</select>
 						</div>
 					</div>
-					<div class="form-group">
-						<label class="col-md-2 control-label">{Lang::T('Send Via')}</label>
-						<div class="col-md-6">
-							<select class="form-control" name="via" id="via">
-                                <option value="all" {if $via=='all' }selected{/if}>{Lang::T('All Channels')}</option>
-                                <option value="inbox" {if $via=='inbox' }selected{/if}>{Lang::T('Inbox')}</option>
-                                <option value="email" {if $via=='email' }selected{/if}>{Lang::T('Email')}</option>
-                                <option value="sms" {if $via=='sms' }selected{/if}>{Lang::T('SMS')}</option>
-                                <option value="wa" {if $via=='wa' }selected{/if}>{Lang::T('WhatsApp')}</option>
-                                <option value="both" {if $via=='both' }selected{/if}>{Lang::T('SMS and WhatsApp')}
-                                </option>
-                            </select>
-						</div>
+					<div class="form-group" id="via">
+						<label class="col-md-2 control-label">{Lang::T('Channel')}</label>
+						<label class="col-md-1 control-label"><input type="checkbox" id="sms" name="sms" value="1">
+							{Lang::T('SMS')}</label>
+						<label class="col-md-1 control-label"><input type="checkbox" id="wa" name="wa" value="1">
+							{Lang::T('WA')}</label>
+						<label class="col-md-1 control-label"><input type="checkbox" id="email" name="email" value="1">
+							{Lang::T('Email')}</label>
+						<label class="col-md-1 control-label"><input type="checkbox" id="inbox" name="inbox" value="1">
+							{Lang::T('Inbox')}</label>
 					</div>
-					<div class="form-group" id="subject">
-                        <label class="col-md-2 control-label">{Lang::T('Subject')}</label>
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" name="subject" id="subject-content" value=""
-                                placeholder="{Lang::T('Enter message subject here')}">
-                        </div>
-                        <p class="help-block col-md-4">
-                            {Lang::T('You can also use the below placeholders here too')}.
-                        </p>
-                    </div>
+					<div class="form-group" id="subject" style="display: none;">
+						<label class="col-md-2 control-label">{Lang::T('Subject')}</label>
+						<div class="col-md-6">
+							<input type="text" class="form-control" name="subject" id="subject-content" value=""
+								placeholder="{Lang::T('Enter message subject here')}">
+						</div>
+						<p class="help-block col-md-4">
+							<small>
+								{Lang::T('You can also use the below placeholders here too')}.
+							</small>
+						</p>
+					</div>
 					<div class="form-group">
 						<label class="col-md-2 control-label">{Lang::T('Message')}</label>
 						<div class="col-md-6">
@@ -50,18 +49,21 @@
 								placeholder="{Lang::T('Compose your message...')}" rows="5"></textarea>
 						</div>
 						<p class="help-block col-md-4">
-							{Lang::T('Use placeholders:')}
-							<br>
-							<b>[[name]]</b> - {Lang::T('Customer Name')}
-							<br>
-							<b>[[user_name]]</b> - {Lang::T('Customer Username')}
-							<br>
-							<b>[[phone]]</b> - {Lang::T('Customer Phone')}
-							<br>
-							<b>[[company_name]]</b> - {Lang::T('Your Company Name')}
-							<br>
-							<b>[[payment_link]]</b> - <a href="{Text::url('docs')}/#Reminder%20with%20payment%20link"
-								target="_blank">{Lang::T('Read documentation')}</a>.
+							<small>
+								{Lang::T('Use placeholders:')}
+								<br>
+								<b>[[name]]</b> - {Lang::T('Customer Name')}
+								<br>
+								<b>[[user_name]]</b> - {Lang::T('Customer Username')}
+								<br>
+								<b>[[phone]]</b> - {Lang::T('Customer Phone')}
+								<br>
+								<b>[[company_name]]</b> - {Lang::T('Your Company Name')}
+								<br>
+								<b>[[payment_link]]</b> - <a
+									href="{Text::url('docs')}/#Reminder%20with%20payment%20link"
+									target="_blank">{Lang::T('Read documentation')}</a>.
+							</small>
 						</p>
 					</div>
 
@@ -79,32 +81,26 @@
 	</div>
 </div>
 <script>
-    document.getElementById('via').addEventListener('change', function () {
-        const via = this.value;
-        const subject = document.getElementById('subject');
-        const subjectField = document.getElementById('subject-content');
+	document.addEventListener('DOMContentLoaded', function () {
+		const emailCheckbox = document.getElementById('email');
+		const inboxCheckbox = document.getElementById('inbox');
+		const subjectDiv = document.getElementById('subject');
+		const subjectInput = document.getElementById('subject-content');
 
-        subject.style.display = (via === 'all' || via === 'email' || via === 'inbox') ? 'block' : 'none';
+		function toggleSubjectField() {
+			if (emailCheckbox.checked || inboxCheckbox.checked) {
+				subjectDiv.style.display = 'block';
+				subjectInput.required = true;
+			} else {
+				subjectDiv.style.display = 'none';
+				subjectInput.required = false;
+				subjectInput.value = '';
+			}
+		}
 
-        switch (via) {
-            case 'all':
-                subjectField.placeholder = 'Enter a subject for all channels';
-                subjectField.required = true; 
-                break;
-            case 'email':
-                subjectField.placeholder = 'Enter a subject for email';
-                subjectField.required = true; 
-                break;
-            case 'inbox':
-                subjectField.placeholder = 'Enter a subject for inbox';
-                subjectField.required = true; 
-                break;
-            default:
-                subjectField.placeholder = 'Enter message subject here';
-                subjectField.required = false;
-                break;
-        }
-    });
+		emailCheckbox.addEventListener('change', toggleSubjectField);
+		inboxCheckbox.addEventListener('change', toggleSubjectField);
+	});
 </script>
 
 {include file="sections/footer.tpl"}
