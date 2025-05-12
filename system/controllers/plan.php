@@ -722,10 +722,13 @@ switch ($action) {
             $vc = $vc->where_gt('tbl_voucher.id', $from_id);
         }
 
-        // Group filters (date or batch)
         if (!empty($group)) {
             if ($group == 'datetime' && !empty($selected_datetime)) {
-                $dateFilter = date('Y-m-d', strtotime($selected_datetime));
+                $timestamp = strtotime($selected_datetime);
+                if ($timestamp === false) {
+                    throw new Exception("Invalid date format provided.");
+                }
+                $dateFilter = date('Y-m-d', $timestamp);
                 $v = $v->where_raw("DATE(tbl_voucher.created_at) = ?", [$dateFilter]);
                 $vc = $vc->where_raw("DATE(tbl_voucher.created_at) = ?", [$dateFilter]);
             } elseif ($group == 'batch' && !empty($batch)) {
@@ -784,7 +787,7 @@ switch ($action) {
                 "CASE WHEN DATE(created_at) = CURDATE() THEN 'Today' ELSE DATE(created_at) END",
                 'created_datetime'
             )
-            ->where_not_equal('created_at', '0')
+            ->where_not_equal('created_at', '0000-00-00 00:00:00')
             ->select_expr('COUNT(*)', 'voucher_count')
             ->group_by('created_datetime')
             ->order_by_desc('created_datetime')
@@ -792,6 +795,7 @@ switch ($action) {
 
         $batches = ORM::for_table('tbl_voucher')
             ->select('batch_name')
+            ->select('created_at')
             ->distinct()
             ->where_not_equal('batch_name', '')
             ->order_by_desc('created_at')
