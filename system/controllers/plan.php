@@ -638,6 +638,7 @@ switch ($action) {
 
         $batches = ORM::for_table('tbl_voucher')
             ->select('batch_name')
+            ->select('created_at')
             ->distinct()
             ->where_not_equal('batch_name', '')
             ->order_by_desc('created_at')
