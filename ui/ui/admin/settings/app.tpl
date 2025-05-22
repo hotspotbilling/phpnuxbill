@@ -318,17 +318,17 @@
                     </p>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Registration Username')}</label>
+                    <label class="col-md-3 control-label">{Lang::T('Registration Method')}</label>
                     <div class="col-md-5">
                         <select name="registration_username" id="voucher_format" class="form-control">
                             <option value="username" {if $_c['registration_username']=='username' }selected="selected"
-                                {/if}>Username
+                                {/if}>{Lang::T('Usernames')}
                             </option>
                             <option value="email" {if $_c['registration_username']=='email' }selected="selected" {/if}>
                                 Email
                             </option>
                             <option value="phone" {if $_c['registration_username']=='phone' }selected="selected" {/if}>
-                                Phone Number
+                                {Lang::T('Phone Number')}
                             </option>
                         </select>
                     </div>
