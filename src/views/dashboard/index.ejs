@@ -1,0 +1,173 @@
+<% layout('layouts/admin') -%>
+
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+        <p class="text-muted">Welcome back, <%= user.fullname %>!</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3><%= stats.totalCustomers || 0 %></h3>
+                    <p>Total Customers</p>
+                </div>
+                <div>
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3><%= stats.activeCustomers || 0 %></h3>
+                    <p>Active Customers</p>
+                </div>
+                <div>
+                    <i class="fas fa-user-check fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3><%= stats.totalPlans || 0 %></h3>
+                    <p>Total Plans</p>
+                </div>
+                <div>
+                    <i class="fas fa-list fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>$<%= stats.monthlyRevenue || 0 %></h3>
+                    <p>Monthly Revenue</p>
+                </div>
+                <div>
+                    <i class="fas fa-dollar-sign fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <% if (recentLogs && recentLogs.length > 0) { %>
+                    <div class="list-group list-group-flush">
+                        <% recentLogs.forEach(log => { %>
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span><%= log.description %></span>
+                                    <small class="text-muted"><%= new Date(log.date).toLocaleString() %></small>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <p class="text-muted">No recent activity</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 85%"></div>
+                            </div>
+                            <small>CPU Usage: 15%</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 60%"></div>
+                            </div>
+                            <small>Memory: 40%</small>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between">
+                            <span>Database Status:</span>
+                            <span class="badge bg-success">Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <a href="/customers/create" class="btn btn-primary btn-sm d-block">
+                            <i class="fas fa-user-plus"></i> Add Customer
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/plans/create" class="btn btn-success btn-sm d-block">
+                            <i class="fas fa-plus"></i> Add Plan
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/routers/create" class="btn btn-info btn-sm d-block">
+                            <i class="fas fa-router"></i> Add Router
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/orders" class="btn btn-warning btn-sm d-block">
+                            <i class="fas fa-shopping-cart"></i> View Orders
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/settings" class="btn btn-secondary btn-sm d-block">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/dashboard?refresh=1" class="btn btn-outline-primary btn-sm d-block">
+                            <i class="fas fa-sync"></i> Refresh
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
