@@ -1,7 +1,7 @@
 {
-  "name": "phpnuxbill-js",
+  "name": "robdius",
   "version": "1.0.0",
-  "description": "JavaScript port of PHPNuxBill - A Hotspot Billing Software",
+  "description": "Robdius - Modern JavaScript Hotspot Billing System",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -9,21 +9,27 @@
     "dev": "nodemon server.js",
     "test": "jest",
     "build": "webpack --mode production",
-    "migrate": "node migrations/migrate.js"
+    "migrate": "node migrations/migrate.js",
+    "vercel-build": "npm run build"
   },
   "keywords": [
     "hotspot",
     "billing",
     "mikrotik",
     "javascript",
-    "nodejs"
+    "nodejs",
+    "robdius"
   ],
-  "author": "Converted from PHPNuxBill",
+  "author": "Robdius Team",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
     "sequelize": "^6.32.1",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
     "mysql2": "^3.5.2",
+    "redis": "^4.6.8",
+    "connect-redis": "^7.1.0",
     "bcrypt": "^5.1.0",
     "jsonwebtoken": "^9.0.1",
     "cors": "^2.8.5",
@@ -40,7 +46,18 @@
     "crypto": "^1.0.1",
     "uuid": "^9.0.0",
     "ejs": "^3.1.9",
-    "cookie-parser": "^1.4.6"
+    "cookie-parser": "^1.4.6",
+    "node-cron": "^3.0.2",
+    "mikrotik-client": "^1.0.0",
+    "radius": "^1.1.4",
+    "csv-parser": "^3.0.0",
+    "express-fileupload": "^1.4.0",
+    "validator": "^13.9.0",
+    "winston": "^3.10.0",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "whatsapp-web.js": "^1.22.0",
+    "puppeteer": "^20.7.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",

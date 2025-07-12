@@ -3,12 +3,16 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import session from 'express-session';
+import RedisStore from 'connect-redis';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
+import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
 import { connectDB } from './src/config/database.js';
+import { connectRedis } from './src/config/redis.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
 import { authMiddleware } from './src/middleware/auth.js';
 import { maintenanceMiddleware } from './src/middleware/maintenance.js';
@@ -20,8 +24,11 @@ import customerRoutes from './src/routes/customers.js';
 import adminRoutes from './src/routes/admin.js';
 import routerRoutes from './src/routes/routers.js';
 import planRoutes from './src/routes/plans.js';
+import networkRoutes from './src/routes/network.js';
 import orderRoutes from './src/routes/orders.js';
 import settingsRoutes from './src/routes/settings.js';
+import reportsRoutes from './src/routes/reports.js';
+import whatsappRoutes from './src/routes/whatsapp.js';
 import apiRoutes from './src/routes/api.js';
 
 // Load environment variables
@@ -33,11 +40,36 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for Vercel
+app.set('trust proxy', 1);
+
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
+      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "https://unpkg.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'"]
+    }
+  }
+}));
+
+// Compression
+app.use(compression());
+
+// Logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
+}
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' ? 
-    process.env.ALLOWED_ORIGINS?.split(',') : 
+    process.env.ALLOWED_ORIGINS?.split(',') || ['https://robdius.vercel.app'] : 
     ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true
 }));
@@ -46,8 +78,22 @@ app.use(cors({
 const limiter = rateLimit({
   windowMs: (process.env.RATE_LIMIT_WINDOW || 15) * 60 * 1000, // 15 minutes
   max: process.env.RATE_LIMIT_MAX || 100,
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
+
+// More restrictive rate limiting for authentication routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: 'Too many authentication attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/auth', authLimiter);
+app.use('/auth', authLimiter);
 app.use('/api/', limiter);
 
 // Body parsing middleware
@@ -55,15 +101,28 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
+// Initialize Redis and session
+let redisClient;
+(async () => {
+  try {
+    redisClient = await connectRedis();
+    console.log('Redis connected successfully');
+  } catch (error) {
+    console.error('Redis connection failed:', error);
+  }
+})();
+
 // Session configuration
 app.use(session({
+  store: redisClient ? new RedisStore({ client: redisClient }) : undefined,
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
@@ -85,8 +144,11 @@ app.use('/customers', authMiddleware, customerRoutes);
 app.use('/admin', authMiddleware, adminRoutes);
 app.use('/routers', authMiddleware, routerRoutes);
 app.use('/plans', authMiddleware, planRoutes);
+app.use('/network', authMiddleware, networkRoutes);
 app.use('/orders', authMiddleware, orderRoutes);
 app.use('/settings', authMiddleware, settingsRoutes);
+app.use('/reports', authMiddleware, reportsRoutes);
+app.use('/whatsapp', authMiddleware, whatsappRoutes);
 app.use('/api', apiRoutes);
 
 // Default route
