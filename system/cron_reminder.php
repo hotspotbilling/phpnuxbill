@@ -58,6 +58,7 @@ foreach ($d as $ds) {
                     Message::getMessageType($p['type'], Lang::getNotifText('reminder_7_day')),
                     $config['user_notification_reminder']
                 ) . "\n";
+				sleep(1); // Add 1 second delay after sending notification
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 7-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
@@ -70,6 +71,7 @@ foreach ($d as $ds) {
                     Message::getMessageType($p['type'], Lang::getNotifText('reminder_3_day')),
                     $config['user_notification_reminder']
                 ) . "\n";
+				sleep(1); // Add 1 second delay after sending notification
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 3-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
@@ -82,6 +84,7 @@ foreach ($d as $ds) {
                     Message::getMessageType($p['type'], Lang::getNotifText('reminder_1_day')),
                     $config['user_notification_reminder']
                 ) . "\n";
+				sleep(1); // Add 1 second delay after sending notification
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 1-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
