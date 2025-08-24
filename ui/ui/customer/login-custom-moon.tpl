@@ -593,6 +593,12 @@
                                 <div>
                                     <input type="password" name="password" placeholder="{Lang::T('Password')}" required>
                                 </div>
+                                {if $_c['turnstile_client_enabled']=='1' && $_c['turnstile_site_key'] ne ''}
+                                    <div class="form-group">
+                                        <div class="cf-turnstile" data-sitekey="{$_c['turnstile_site_key']}" data-theme="auto" data-action="client_login"></div>
+                                    </div>
+                                    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                                {/if}
                                 <div class="checkbox clearfix">
                                     <!-- <div class="form-check checkbox-fg">
                                         <input class="form-check-input" type="checkbox" value="" id="remember">
