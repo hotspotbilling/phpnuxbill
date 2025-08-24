@@ -422,7 +422,6 @@
         </div>
     </div>
 
-
     <div class="panel">
         <div class="panel-heading" role="tab" id="Security">
             <h4 class="panel-title">
@@ -434,66 +433,126 @@
         </div>
         <div id="collapseSecurity" class="panel-collapse collapse" role="tabpanel">
             <div class="panel-body">
+                <hr class="clearfix">
+                <h4 class="col-md-12" style="margin-top:0">{Lang::T('Session & Timeout')}</h4>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
-                    <div class="col-md-5">
-                        <label class="switch">
-                            <input type="checkbox" id="enable_session_timeout" value="1" name="enable_session_timeout"
-                                {if $_c['enable_session_timeout']==1}checked{/if}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
+                <div class="col-md-5">
+                    <label class="switch">
+                    <input type="checkbox" id="enable_session_timeout" value="1" name="enable_session_timeout"
+                            {if $_c['enable_session_timeout']==1}checked{/if}>
+                    <span class="slider"></span>
+                    </label>
                 </div>
+                <p class="help-block col-md-4">{Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                </div>
+    
                 <div class="form-group" id="timeout_duration_input" style="display: none;">
-                    <label class="col-md-3 control-label">{Lang::T('Timeout Duration')}</label>
-                    <div class="col-md-5">
-                        <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
-                            name="session_timeout_duration" id="session_timeout_duration"
-                            placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
-                    </div>
-                    <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx
-                            minutes')}
-                    </p>
+                <label class="col-md-3 control-label">{Lang::T('Timeout Duration')}</label>
+                <div class="col-md-5">
+                    <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
+                        name="session_timeout_duration" id="session_timeout_duration"
+                        placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
                 </div>
+                <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx minutes')}</p>
+                </div>
+    
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Single Admin Session')}</label>
-                    <div class="col-md-5">
-                        <select name="single_session" id="single_session" class="form-control">
-                            <option value="no">
-                                {Lang::T('No')}</option>
-                            <option value="yes" {if $_c['single_session']=='yes' }selected="selected" {/if}>
-                                {Lang::T('Yes')}
-                            </option>
-                        </select>
-                    </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Admin can only have single session login, it will logout another session')}
-                    </p>
+                <label class="col-md-3 control-label">{Lang::T('Single Admin Session')}</label>
+                <div class="col-md-5">
+                    <select name="single_session" id="single_session" class="form-control">
+                    <option value="no">{Lang::T('No')}</option>
+                    <option value="yes" {if $_c['single_session']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}</option>
+                    </select>
                 </div>
-
+                <p class="help-block col-md-4">{Lang::T('Admin can only have single session login, it will logout another session')}</p>
+                </div>
+    
+                <hr class="clearfix">
+                <h4 class="col-md-12" style="margin-top:0">{Lang::T('Cross Site Request Forgery')}</h4>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Enable CSRF Validation')}</label>
-                    <div class="col-md-5">
-                        <select name="csrf_enabled" id="csrf_enabled" class="form-control">
-                            <option value="no">
-                                {Lang::T('No')}</option>
-                            <option value="yes" {if $_c['csrf_enabled']=='yes' }selected="selected" {/if}>
-                                {Lang::T('Yes')}
-                            </option>
-                        </select>
-                    </div>
-                    <p class="help-block col-md-4">
-                        <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery"
-                            target="_blank">{Lang::T('Cross-site request forgery')}</a>
-                    </p>
+                <label class="col-md-3 control-label">{Lang::T('Enable CSRF Validation')}</label>
+                <div class="col-md-5">
+                    <select name="csrf_enabled" id="csrf_enabled" class="form-control">
+                    <option value="no">{Lang::T('No')}</option>
+                    <option value="yes" {if $_c['csrf_enabled']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}</option>
+                    </select>
                 </div>
+                <p class="help-block col-md-4">
+                    <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank">{Lang::T('Cross-site request forgery')}</a>
+                </p>
+                </div>
+    
+                <hr class="clearfix">
+                <h4 class="col-md-12" style="margin-top:0">{Lang::T('Cloudflare Turnstile')}</h4>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">Turnstile Site Key</label>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="turnstile_site_key"
+                        value="{$_c['turnstile_site_key']|escape}" placeholder="1x0000..." autocomplete="off">
+                </div>
+                <p class="help-block col-md-4">{Lang::T('Public key used for verification on the client side.')}</p>
+                </div>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">Turnstile Secret Key</label>
+                <div class="col-md-5">
+                    <input type="password" class="form-control" name="turnstile_secret_key"
+                        onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                        value="{$_c['turnstile_secret_key']|escape}" placeholder="{Lang::T('Leave blank to keep unchanged')}" autocomplete="off">
+                </div>
+                <p class="help-block col-md-4"><a href="https://developers.cloudflare.com/turnstile/" target="_blank">{Lang::T('Learn more about Turnstile')}</a></p>
+                </div>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">{Lang::T('Enable on Admin Login')}</label>
+                <div class="col-md-5">
+                    <select name="turnstile_admin_enabled" id="turnstile_admin_enabled" class="form-control">
+                    <option value="0">{Lang::T('No')}</option>
+                    <option value="1" {if $_c['turnstile_admin_enabled']=='1'}selected="selected"{/if}>{Lang::T('Yes')}</option>
+                    </select>
+                </div>
+                <p class="help-block col-md-4">{Lang::T('Enable Turnstile for admin login page.')}</p>
+                </div>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">{Lang::T('Enable on Customer Login')}</label>
+                <div class="col-md-5">
+                    <select name="turnstile_client_enabled" id="turnstile_client_enabled" class="form-control">
+                    <option value="0">{Lang::T('No')}</option>
+                    <option value="1" {if $_c['turnstile_client_enabled']=='1'}selected="selected"{/if}>{Lang::T('Yes')}</option>
+                    </select>
+                </div>
+                <p class="help-block col-md-4">{Lang::T('Enable Turnstile for customer login page.')}</p>
+                </div>
+    
                 <button class="btn btn-success btn-block" type="submit">
-                    {Lang::T('Save Changes')}
+                {Lang::T('Save Changes')}
                 </button>
             </div>
         </div>
+
+        <script>
+            (function ($) {
+                function toggleTimeoutInput() {
+                var isChecked = $('#enable_session_timeout').is(':checked');
+                $('#timeout_duration_input').toggle(isChecked);
+                $('#session_timeout_duration').prop('required', isChecked);
+                }
+                function requireTurnstileSiteKey() {
+                var anyEnabled = $('#turnstile_admin_enabled').val() === '1' ||
+                                $('#turnstile_client_enabled').val() === '1';
+                $('input[name="turnstile_site_key"]').prop('required', anyEnabled);
+                }
+                $(function(){
+                toggleTimeoutInput();
+                requireTurnstileSiteKey();
+                $('#enable_session_timeout').on('change', toggleTimeoutInput);
+                $('#turnstile_admin_enabled, #turnstile_client_enabled').on('change', requireTurnstileSiteKey);
+                });
+            })(jQuery);
+        </script>
     </div>
 
     <div class="panel">
