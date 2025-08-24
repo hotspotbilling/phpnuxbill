@@ -318,6 +318,27 @@ switch ($action) {
                     r2(getUrl('settings/app'), 'e', 'Logo must be a JPG, JPEG, or PNG image.');
                 }
             }
+
+            $t_admin  = (_post('turnstile_admin_enabled') === '1') ? '1' : '0';
+            $t_client = (_post('turnstile_client_enabled') === '1') ? '1' : '0';
+            $_POST['turnstile_admin_enabled']  = $t_admin;
+            $_POST['turnstile_client_enabled'] = $t_client;
+            $site_in = trim((string) (_post('turnstile_site_key')));
+            $sec_in  = trim((string) (_post('turnstile_secret_key')));
+            $currSite   = $config['turnstile_site_key']   ?? '';
+            $currSecret = $config['turnstile_secret_key'] ?? '';
+            $finalSiteForCheck   = ($site_in !== '') ? $site_in : $currSite;
+            $finalSecretForCheck = ($sec_in  !== '') ? $sec_in  : $currSecret;
+            if (($t_admin === '1' || $t_client === '1') && ($finalSiteForCheck === '' || $finalSecretForCheck === '')) {
+                r2(getUrl('settings/app'), 'e', 'Cloudflare Turnstile requires Site Key and Secret Key when enabled.');
+            }
+            $_POST['turnstile_site_key'] = $site_in;
+            if ($sec_in !== '') {
+                $_POST['turnstile_secret_key'] = $sec_in;
+            } else {
+                unset($_POST['turnstile_secret_key']);
+            }
+            
             foreach ($_POST as $key => $value) {
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
@@ -1177,3 +1198,4 @@ switch ($action) {
     default:
         $ui->display('admin/404.tpl');
 }
+
