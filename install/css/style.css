@@ -1,0 +1,73 @@
+body {
+    background-color: #FBFBFB;
+
+}
+
+img {
+    border-width: 0;
+}
+
+#main-container {
+    width: 90%;
+    max-width: 940px;
+    margin: 20px auto;
+
+    background-color: #fff;
+    border: 1px solid #E5E5E5;
+    padding: 20px;
+
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 0px 5px 15px #bbb;
+    -webkit-box-shadow: 0px 5px 15px #bbb;
+    box-shadow: 0px 5px 15px #ddd;
+    overflow: hidden;
+}
+
+.wrapper {
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+}
+
+.header {
+    height: 50px;
+    position: relative;
+
+}
+
+.header-box {
+    height: 50px;
+    position: relative;
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+.hd-logo {
+    float: left;
+    margin: 0px 0px 0 0;
+    font-size: 13px;
+    line-height: 16px;
+    text-decoration: none;
+}
+
+.footer {
+    text-align: center;
+    font-size: 12px;
+
+}
+
+.box {
+    width: 500px;
+    height: 400px;
+    padding: 10px;
+    border: 1px solid black;
+    float: left;
+    margin: 0 20px 0 0;
+}
+
+.box-two {
+    overflow: auto;
+}
+
