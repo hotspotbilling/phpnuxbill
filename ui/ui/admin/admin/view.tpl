@@ -11,7 +11,7 @@
                         <center>
                             <a href="{$app_url}/{$UPLOAD_PATH}{$d['photo']}" target="foto">
                                 <img src="{$app_url}/{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
-                                    onerror="this.src='{$app_url}/{$UPLOAD_PATH}/admin.default.png'" class="img-circle img-responsive" alt="Foto">
+                                    onerror="this.src='https://www.gravatar.com/avatar/{$d['email']|default:'user@example.com'|md5}?d=mp'" class="img-circle img-responsive" alt="Foto">
                             </a>
                         </center><br>
                         <ul class="list-group list-group-unbordered">

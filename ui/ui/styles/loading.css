@@ -1,0 +1,100 @@
+/* Generic loading styles */
+:root {
+    --loading-bg: #f6f7f8;
+    --loading-shimmer-start: #f6f7f8;
+    --loading-shimmer-middle: #edeef1;
+    --loading-shimmer-end: #f6f7f8;
+    --loading-row-bg: #fff;
+}
+
+.dark-mode {
+    --loading-bg: #2a2a2a;
+    --loading-shimmer-start: #2a2a2a;
+    --loading-shimmer-middle: #3a3a3a;
+    --loading-shimmer-end: #2a2a2a;
+    --loading-row-bg: #1e1e2d;
+}
+
+/* Placeholder loading animation */
+.placeholder-loading {
+    position: relative;
+    background: var(--loading-bg);
+    background: linear-gradient(
+        to right,
+        var(--loading-shimmer-start) 8%,
+        var(--loading-shimmer-middle) 18%,
+        var(--loading-shimmer-end) 33%
+    );
+    background-size: 800px 104px;
+    animation: placeholderShimmer 1.5s linear infinite forwards;
+}
+
+@keyframes placeholderShimmer {
+    0% {
+        background-position: -468px 0;
+    }
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.loading-row td {
+    height: 50px;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+    background-color: var(--loading-row-bg);
+}
+
+.loading-row td > div {
+    width: 80%;
+    height: 20px;
+    border-radius: 4px;
+    margin: 0 auto;
+}
+
+/* Generic loading state for all tables */
+.table-with-loader.loading tbody:not(.loading-placeholder) tr {
+    display: none;
+}
+
+.loading-placeholder {
+    display: none;
+}
+
+.table-with-loader.loading + .loading-placeholder,
+.table-with-loader.loading > .loading-placeholder {
+    display: table-row-group;
+}
+
+.loading-row:first-child td {
+    padding-top: 20px;
+}
+
+.loading-row:last-child td {
+    padding-bottom: 20px;
+}
+
+/* Optional loading overlay */
+.table-responsive.loading-state {
+    position: relative;
+}
+
+.table-responsive.loading-state::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.dark-mode .table-responsive.loading-state::after {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .loading-row td {
+    border-color: #444;
+}

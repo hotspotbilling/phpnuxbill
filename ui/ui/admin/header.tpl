@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2-bootstrap.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2025.2.4" />
@@ -100,14 +101,13 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="{$app_url}/{$UPLOAD_PATH}{$_admin['photo']}.thumb.jpg"
-                                    onerror="this.src='{$app_url}/{$UPLOAD_PATH}/admin.default.png'" class="user-image"
-                                    alt="Avatar">
+                                    onerror="this.src='https://www.gravatar.com/avatar/{$_admin['email']|default:'user@example.com'|md5}?d=mp'" alt="" class="user-image">
                                 <span class="hidden-xs">{$_admin['fullname']}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="{$app_url}/{$UPLOAD_PATH}{$_admin['photo']}.thumb.jpg"
-                                        onerror="this.src='{$app_url}/{$UPLOAD_PATH}/admin.default.png'"
+                                        onerror="this.src='https://www.gravatar.com/avatar/{$_admin['email']|default:'user@example.com'|md5}?d=mp'"
                                         class="img-circle" alt="Avatar">
                                     <p>
                                         {$_admin['fullname']}
@@ -700,33 +700,8 @@
                     {$_title}
                 </h1>
             </section>
-            <div class="dashboard-skeleton" style="display: none;">
-                {if $_system_menu neq 'dashboard' }
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                {/if}
-            </div>
-            <section class="content" {if $_system_menu neq 'dashboard' } id="dashboard-content" style="display: none;"
+           
+            <section class="content" {if $_system_menu neq 'dashboard' } id="dashboard-content" 
                 {/if}>
                 {if isset($notify)}
                 <script>

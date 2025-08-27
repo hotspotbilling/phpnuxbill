@@ -1,6 +1,6 @@
 /* Default Light Mode Variables */
 :root {
-  --sidebar-bg:  rgb(28 36 52);
+  --sidebar-bg: rgb(28 36 52);
   --sidebar-active-bg: #e9ecef;
   --sidebar-hover-bg: #e2e6ea;
   --skeleton-bg: #f0f0f0;
@@ -52,7 +52,7 @@
 
 /* Dark Mode Variables */
 .dark-mode {
-  --sidebar-bg:  rgb(28 36 52);
+  --sidebar-bg: rgb(28 36 52);
   --sidebar-text: #f8f9fa;
   --sidebar-active-bg: #495057;
   --sidebar-hover-bg: #545b62;

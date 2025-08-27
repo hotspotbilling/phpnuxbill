@@ -1115,5 +1115,8 @@
     "Get_Directions": "Get Directions",
     "Error_saving_subscription__": "Error saving subscription: ",
     "Failed_to_save_subscription__Please_try_again_later_": "Failed to save subscription, Please try again later.",
-    "Subscription_saved_for_customer_id__1": "Subscription saved for customer_id: 1"
+    "Subscription_saved_for_customer_id__1": "Subscription saved for customer_id: 1",
+    "No_logs_found_": "No logs found.",
+    "Add_New_Administrator": "Add New Administrator",
+    "Agent": "Agent"
 }

@@ -1,41 +1,4 @@
 {include file="sections/header.tpl"}
-<style>
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        display: inline-block;
-        padding: 5px 10px;
-        margin-right: 5px;
-        border: 1px solid #ccc;
-        background-color: #fff;
-        color: #333;
-        cursor: pointer;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-    }
-
-    .form-group select {
-        margin-left: 10px;
-        margin-right: 10px;
-    }
-
-    .page-item {
-        width: 100px;
-        display: block;
-        height: 34px;
-        padding: 6px 12px;
-        font-size: 14px;
-        line-height: 1.42857143;
-        color: #555;
-        background-color: #fff;
-        background-image: none;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-
-    }
-</style>
 
 <div class="row">
     <div class="col-sm-12">
@@ -133,7 +96,7 @@
                         </select>
                         <span>entries</span>
                     </div>
-                    <table id="customerTable" class="table table-bordered table-striped table-condensed">
+                    <table id="customerTable" class="table table-bordered table-striped table-condensed table-with-loader">
                         <thead>
                             <tr>
                                 <th><input type="checkbox" id="select-all"></th>
@@ -208,6 +171,25 @@
                                 </td>
                             </tr>
                             {/foreach}
+                        </tbody>
+                        <tbody id="loading-placeholder">
+                            {for $i=1 to 10}
+                            <tr class="loading-row">
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                                <td><div class="placeholder-loading"></div></td>
+                            </tr>
+                            {/for}
                         </tbody>
                     </table>
                     <div class="row" style="padding: 5px">
@@ -304,6 +286,7 @@
     });
 
     $(document).ready(function () {
+        // Initialize variables
         let selectedCustomerIds = [];
 
         // Collect selected customer IDs when the button is clicked

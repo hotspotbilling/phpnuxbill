@@ -73,7 +73,7 @@
             </form>
             <div class="table-responsive">
                 <div style="margin-left: 5px; margin-right: 5px;">&nbsp;
-                    <table id="datatable" class="table table-bordered table-striped table-condensed">
+                    <table id="datatable" class="table table-bordered table-striped table-condensed table-with-loader">
                         <thead>
                             <tr>
                                 <th>{Lang::T("Username")}</th>
@@ -141,6 +141,39 @@
                                 </td>
                             </tr>
                             {/foreach}
+                        </tbody>
+                        <tbody id="loading-placeholder">
+                            {for $i=1 to 10}
+                            <tr class="loading-row">
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                                <td>
+                                    <div class="placeholder-loading"></div>
+                                </td>
+                            </tr>
+                            {/for}
                         </tbody>
                     </table>
                 </div>

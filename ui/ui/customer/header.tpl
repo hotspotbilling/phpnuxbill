@@ -210,13 +210,13 @@
                                 <span>{$_user['fullname']}</span>
                                 {/if}
                                 <img src="{$app_url}/{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
-                                    onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'" class="user-image"
+                                    onerror="this.src='https://www.gravatar.com/avatar/{$_user['email']|default:'user@example.com'|md5}?d=mp'" class="user-image"
                                     alt="User Image">
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-header">
                                     <img src="{$app_url}/{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
-                                        onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'"
+                                        onerror="this.src='https://www.gravatar.com/avatar/{$_user['email']|default:'user@example.com'|md5}?d=mp'"
                                         class="img-circle" alt="User Image">
 
                                     <p>
