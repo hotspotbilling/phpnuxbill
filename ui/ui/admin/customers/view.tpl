@@ -241,12 +241,12 @@
                             </li>
                         </ul>
                         <div class="row">
-                            <div class="col-xs-4">
+                            <div class="col-xs-6">
                                 <a href="{Text::url('customers/deactivate/', $d['id'],'/',$package['plan_id'], '&token=', $csrf_token)}"
                                     id="{$d['id']}" class="btn btn-danger btn-block btn-sm"
                                     onclick="return ask(this, '{Lang::T('This will deactivate Customer Plan, and make it expired')}')">{Lang::T('Deactivate')}</a>
                             </div>
-                            <div class="col-xs-8">
+                            <div class="col-xs-6">
                                 <a href="{Text::url('customers/recharge/', $d['id'], '/', $package['plan_id'], '&token=', $csrf_token)}"
                                     class="btn btn-success btn-sm btn-block">{Lang::T('Recharge')}</a>
                             </div>
