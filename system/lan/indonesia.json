@@ -415,7 +415,6 @@
     "Coordinates": "Koordinat",
     "Confirm": "Konfirmasi",
     "Name": "Nama",
-    "Plan": "Paket",
     "Using": "Menggunakan",
     "Total": "Total",
     "Additional_Cost": "Biaya tambahan",
@@ -525,7 +524,6 @@
     "Descending": "Menurun",
     "Query": "Query",
     "Add": "Tambah",
-    "Search": "Cari",
     "Logout_Successful": "Berhasil Keluar",
     "warning": "peringatan",
     "Created___Expired": "Dibuat \/ Kedaluwarsa",
@@ -914,5 +912,13 @@
     "Mikrotik_SMS_Command": "Perintah SMS Mikrotik",
     "Expired_Cronjob_Every_5_Minutes__Recommended_": "Cronjob Kedaluwarsa Setiap 5 Menit [Direkomendasikan]",
     "Visit": "Kunjungi",
-    "sync": "Sinkron"
+    "sync": "Sinkron",
+    "Stay_Updated": "Stay Updated",
+    "Get_real_time_notifications_about_events_and_activity_": "Get real-time notifications about events and activity.",
+    "Would_you_like_to_enable_push_notifications_": "Would you like to enable push notifications?",
+    "Yes__Subscribe_": "Ya, berlangganan!",
+    "No__Thanks": "Tidak, terima kasih",
+    "Payment_History": "Payment History",
+    "Subject": "Subject",
+    "No_email_found_": "No email found."
 }
