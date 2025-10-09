@@ -1118,5 +1118,7 @@
     "Subscription_saved_for_customer_id__1": "Subscription saved for customer_id: 1",
     "No_logs_found_": "No logs found.",
     "Add_New_Administrator": "Add New Administrator",
-    "Agent": "Agent"
+    "Agent": "Agent",
+    "To_download_from_private_paid_repository": "To download from private\/paid repository",
+    "Set_your_Github_Authentication_first": "Set your Github Authentication first"
 }
