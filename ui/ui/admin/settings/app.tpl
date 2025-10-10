@@ -1269,10 +1269,16 @@
         0 7 * * * cd {$dir} && {$php} cron_reminder.php
     </p>
     <br>
-    <h4><b>{Lang::T('Cron Settings to clear expired vouchers')}</b></h4>
+    <h4><b>{Lang::T('Cron Settings to clear expired vouchers older than 30 days')}</b></h4>
     <p>
         # {Lang::T('Clear expired vouchers cronjob to run every 12AM 0r 00:00HR')}<br>
-        0 0 * * * cd {$dir}cron && {$php} clean_expired_vouchers.php
+        0 0 * * * cd {$dir}cron && {$php} clean_expired_vouchers.php<br><br>
+
+        # {Lang::T('To check the expired voucher or clear expired voucher manually')}<br>
+        Check: <a href="{$app_url}/system/cron/clean_expired_vouchers.php?dry-run=1"
+            target="_blank">{$app_url}/system/cron/clean_expired_vouchers.php?dry-run=1</a><br>
+        Clear: <a href="{$app_url}/system/cron/clean_expired_vouchers.php"
+            target="_blank">{$app_url}/system/cron/clean_expired_vouchers.php</a>
     </p>
 </div>
 
