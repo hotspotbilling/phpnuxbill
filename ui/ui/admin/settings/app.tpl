@@ -1268,6 +1268,12 @@
         # {Lang::T('Reminder Cronjob Every 7 AM')}<br>
         0 7 * * * cd {$dir} && {$php} cron_reminder.php
     </p>
+    <br>
+    <h4><b>{Lang::T('Cron Settings to clear expired vouchers')}</b></h4>
+    <p>
+        # {Lang::T('Clear expired vouchers cronjob to run every 12AM 0r 00:00HR')}<br>
+        0 0 * * * cd {$dir}cron && {$php} clean_expired_vouchers.php
+    </p>
 </div>
 
 <script>
