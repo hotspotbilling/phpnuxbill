@@ -1,6 +1,6 @@
 <?php
 
-include "../init.php";
+include "../../init.php";
 
 $isCli = (php_sapi_name() === 'cli');
 if (!$isCli) echo "<pre>";
