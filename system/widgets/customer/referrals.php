@@ -21,6 +21,7 @@ class referrals
         // Get referral rewards
         $rewards = ORM::for_table('tbl_referral_rewards')
             ->where('referrer_id', $user['id'])
+            ->where('reward_for', 'referrer')
             ->find_many();
 
         $referral_link = Text::url('register') . '?ref=' . $referral_code;
