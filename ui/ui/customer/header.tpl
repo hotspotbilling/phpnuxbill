@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2025.2.4" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
 
     <style>
 
@@ -155,7 +157,7 @@
                                             d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
                                     </svg></i>
                             </a>
-                        </li>
+                        {if $_c.referral_enabled != 'no'}
                         <li class="dropdown tasks-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
                                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -377,7 +379,7 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
-                    {if $_c.referral_enabled !== 'no'}
+                    {if $_c.referral_enabled != 'no'}
                     <li {if $_system_menu eq 'referrals' }class="active" {/if}>
                         <a href="{Text::url('referrals')}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"

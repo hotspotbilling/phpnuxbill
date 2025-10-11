@@ -27,16 +27,19 @@
     </div>
     <div class="box-body">
         <!-- Referral intro -->
-        <p class="text-muted intro-text">{Lang::T('Share your referral link with friends and earn rewards when they sign up!')}</p>
-        
+        <p class="text-muted intro-text">{Lang::T('Share your referral link with friends and earn rewards when they sign
+            up!')}</p>
+
         <!-- Referral code and link -->
         <div class="referral-box">
             <div class="form-group">
                 <div class="input-group">
                     <span class="input-group-addon"><i class="fa fa-key"></i></span>
-                    <input type="text" class="form-control" value="{$referral_code}" readonly placeholder="{Lang::T('Your Referral Code')}">
+                    <input type="text" class="form-control" value="{$referral_code|escape:'html'}" readonly
+                        placeholder="{Lang::T('Your Referral Code')}">
                     <span class="input-group-btn">
-                        <button class="btn btn-default copy-button" type="button" data-clipboard-text="{$referral_code}">
+                        <button class="btn btn-default copy-button" type="button"
+                            data-clipboard-text="{$referral_code|escape:'html'}">
                             <i class="fa fa-copy"></i> {Lang::T('Copy')}
                         </button>
                     </span>
@@ -44,7 +47,7 @@
                 <small class="text-muted">{Lang::T('Your unique referral code')}</small>
             </div>
         </div>
-        
+
         <!-- Quick stats -->
         <div class="row">
             <div class="col-xs-6">
@@ -58,16 +61,10 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-xs-6">
                 <div class="small-box bg-blue">
                     <div class="inner">
-                        {assign var="total_rewards" value=0}
-                        {foreach $referral_rewards as $rw}
-                            {if $rw->status == 'processed'}
-                                {assign var="total_rewards" value=$total_rewards+$rw->reward_amount}
-                            {/if}
-                        {/foreach}
                         <h3><sup>{$_c['currency_code']}</sup> {number_format($total_rewards,2)}</h3>
                         <p>{Lang::T('Earned')}</p>
                     </div>
@@ -77,44 +74,45 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Share options -->
         <div class="share-section">
             <p><strong>{Lang::T('Share your link')}:</strong></p>
             <div class="btn-group btn-group-justified">
-                <a href="https://wa.me/?text={urlencode($referral_link)}" target="_blank" class="btn btn-success">
+                <a href="https://wa.me/?text={urlencode($referral_link)|escape:'html'}" target="_blank"
+                    class="btn btn-success">
                     <i class="fa fa-whatsapp"></i> WhatsApp
                 </a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={urlencode($referral_link)}" target="_blank" class="btn btn-primary">
+                <a href="https://www.facebook.com/sharer/sharer.php?u={urlencode($referral_link)|escape:'html'}"
+                    target="_blank" class="btn btn-primary">
                     <i class="fa fa-facebook"></i> Facebook
                 </a>
-                <a href="https://x.com/intent/tweet?url={urlencode($referral_link)}&text={urlencode(Lang::T('Check out this website!'))}" target="_blank" class="btn btn-info">
+                <a href="https://x.com/intent/tweet?url={urlencode($referral_link)|escape:'html'}&text={urlencode(Lang::T('Check out this website!'))|escape:'html'}"
+                    target="_blank" class="btn btn-info">
                     <i class="fa fa-twitter"></i> Twitter
                 </a>
             </div>
-        </div>
-        
-        {if $referrer}
-        <!-- Referrer information -->
-        <div class="referrer-info">
             <hr>
-            <p>{Lang::T('You were referred by')}: <strong>{$referrer->referrer_name}</strong></p>
+            <p>{Lang::T('You were referred by')}: <strong>{$referrer->referrer_name|default:'Unknown'}</strong></p>
         </div>
-        {/if}
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
 <script>
+    // Variables for JS to avoid XSS issues
+    var copiedTitle = "{Lang::T('Copied!')|escape:'javascript'}";
+    var copiedText = "{Lang::T('The text has been copied to your clipboard.')|escape:'javascript'}";
+    var errorTitle = "{Lang::T('Oops...')|escape:'javascript'}";
+    var errorText = "{Lang::T('Failed to copy. Please try manually.')|escape:'javascript'}";
+
     $(document).ready(function () {
         var clipboard = new ClipboardJS('.copy-button');
 
         clipboard.on('success', function (e) {
             Swal.fire({
                 icon: 'success',
-                title: '{Lang::T("Copied!")}',
-                text: '{Lang::T("The text has been copied to your clipboard.")}',
+                title: copiedTitle,
+                text: copiedText,
                 showConfirmButton: false,
                 timer: 1800
             });
@@ -124,8 +122,8 @@
         clipboard.on('error', function (e) {
             Swal.fire({
                 icon: 'error',
-                title: '{Lang::T("Oops...")}',
-                text: '{Lang::T("Failed to copy. Please try manually.")}'
+                title: errorTitle,
+                text: errorText
             });
         });
     });

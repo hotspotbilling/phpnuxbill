@@ -20,13 +20,13 @@
                                     </select>
                                 </div>
                                 <small>
-                                    <p class="help-block">{Lang::T('Enable or Disabled Referral system')}</p>
+                                    <p class="help-block">{Lang::T('Enable or Disable Referral system')}</p>
                                 </small>
                             </div>
                             <div class="form-group">
                                 <label class="col-md-3 control-label">{Lang::T('Referral Code Length')}</label>
                                 <div class="col-md-6">
-                                    <input type="text" class="form-control" name="referral_code_length" value="{$_c.referral_code_length|default:'8'}" placeholder="8">
+                                    <input type="number" class="form-control" name="referral_code_length" value="{$_c['referral_code_length']|default:'8'}" placeholder="8">
                                 </div>
                                 <small>
                                     <p class="help-block">{Lang::T('Length of referral code')}</p>
@@ -86,8 +86,8 @@
                                 <label class="col-md-3 control-label">{Lang::T('Referrer Fixed Reward Amount')}</label>
                                 <div class="col-md-6">
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="referrer_reward_amount"
-                                            value="{$_c.referrer_reward_amount}" placeholder="0.00">
+                                        <input type="number" class="form-control" name="referrer_reward_amount"
+                                            value="{$_c['referrer_reward_amount']}" placeholder="0.00">
                                         <span class="input-group-addon">{$_c['currency_code']}</span>
                                     </div>
                                 </div>
@@ -148,9 +148,9 @@
                                 <label class="col-md-3 control-label">{Lang::T('Referred Fixed Reward Amount')}</label>
                                 <div class="col-md-6">
                                     <div class="input-group">
-                                        <input type="text" class="form-control" name="referred_reward_amount"
+                                        <input type="number" class="form-control" name="referred_reward_amount"
                                             value="{$_c.referred_reward_amount}" placeholder="0.00">
-                                        <span class="input-group-addon">{$_c.currency_code}</span>
+                                        <span class="input-group-addon">{$_c['currency_code']}</span>
                                     </div>
                                 </div>
                                 <small>
