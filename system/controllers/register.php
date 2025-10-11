@@ -9,13 +9,41 @@ if ($_c['disable_registration'] == 'noreg') {
     _alert(Lang::T('Registration Disabled'), 'danger', "login");
 }
 
+$referral_code = null;
+
 if (isset($_SESSION['nux-ref']) && !empty($_SESSION['nux-ref'])) {
    $referral_code = $_SESSION['nux-ref'];
 } elseif (isset($_GET['ref']) && !empty($_GET['ref'])) {
-    $_SESSION['nux-ref'] = $_GET['ref'];
-    $referral_code = $_GET['ref'];
+    // Import the validate function from index.php if not already available
+    if (!function_exists('validateInput')) {
+        /**
+         * Validate and sanitize input
+         * @param string $input The input to validate and sanitize
+         * @param string $type The type of input
+         * @return string|false Sanitized input or false if invalid
+         */
+        function validateInput($input, $type) {
+            if (empty($input)) return false;
+            
+            $input = trim($input);
+            
+            if ($type === 'referral') {
+                // Referral codes are alphanumeric between 4-25 characters
+                if (preg_match('/^[a-zA-Z0-9]{4,25}$/', $input)) {
+                    return $input;
+                }
+                return false;
+            }
+            return false;
+        }
+    }
+    
+    $sanitized = validateInput($_GET['ref'], 'referral');
+    if ($sanitized !== false) {
+        $_SESSION['nux-ref'] = $sanitized;
+        $referral_code = $sanitized;
+    }
 }
-
 if (isset($routes['1'])) {
     $do = $routes['1'];
 } else {
@@ -32,8 +60,7 @@ switch ($do) {
         $fullname = _post('fullname');
         $password = _post('password');
         $cpassword = _post('cpassword');
-        $address = _post('address');
-        $referral_code = _post('referral_code');
+        $referral_code = _post('referral_code') ?: ($referral_code ?? null);
 
         // Separate phone number input if OTP is required
         $phone_number = ($config['sms_otp_registration'] == 'yes') ? alphanumeric(_post('phone_number'), "+_.@-") : $username;
@@ -128,9 +155,25 @@ switch ($do) {
 
                 // Process referral code if provided
                 if (!empty($referral_code) && Referral::getSetting('referral_enabled', 'yes') === 'yes') {
-                    $referrer = Referral::getReferrerByCode($referral_code);
-                    if ($referrer) {
-                        Referral::recordReferral($referrer->id, $user, $referral_code);
+                    // Sanitize and validate referral code
+                    $referral_code = trim($referral_code);
+                    
+                    // Get the expected code length from settings
+                    $code_length = intval(Referral::getSetting('referral_code_length', 8));
+                    
+                    // Validate the referral code format (alphanumeric and within expected length range)
+                    if (preg_match('/^[A-Z0-9]{' . max(4, min(20, $code_length)) . '}$/', $referral_code)) {
+                        // Code passes validation, proceed with lookup
+                        $referrer = Referral::getReferrerByCode($referral_code);
+                        if ($referrer) {
+                            Referral::recordReferral($referrer->id, $user, $referral_code);
+                        } else {
+                            // Invalid referral code - log the attempt
+                            _log('Invalid referral code used in registration: ' . $referral_code, 'Warning');
+                        }
+                    } else {
+                        // Log invalid format
+                        _log('Invalid referral code format used in registration: ' . $referral_code, 'Warning');
                     }
                 }
 
@@ -158,7 +201,7 @@ switch ($do) {
             $ui->assign('address', $address);
             $ui->assign('email', $email);
             $ui->assign('phone_number', $phone_number);
-            $ui->assign('referral_code', $referral_code);
+            $ui->assign('referral_code', isset($referral_code) ? $referral_code : null);
             $ui->assign('notify', $msg);
             $ui->assign('notify_t', 'd');
             $ui->assign('_title', Lang::T('Register'));
