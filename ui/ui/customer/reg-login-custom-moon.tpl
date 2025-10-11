@@ -313,7 +313,6 @@
                 font-size: 12px;
             }
         }
-        
     </style>
 </head>
 
@@ -363,17 +362,16 @@
                                     </div>
                                     {if $_c['photo_register'] == 'yes'}
                                     <div class="form-group">
-                                        <input type="file" required id="photo" name="photo"
-                                            accept="image/*">
+                                        <input type="file" required id="photo" name="photo" accept="image/*">
                                     </div>
                                     {/if}
                                     <div class="form-group">
-                                        <input type="text" name="fullname" placeholder="{Lang::T('Full Name')}"
-                                        {if $_c['man_fields_fname'] neq 'no'}required{/if} >
+                                        <input type="text" name="fullname" placeholder="{Lang::T('Full Name')}" {if
+                                            $_c['man_fields_fname'] neq 'no' }required{/if}>
                                     </div>
                                     <div class="form-group">
-                                        <input type="email" name="email" placeholder="{Lang::T('Email Address')}"
-                                        {if $_c['man_fields_email'] neq 'no'}required{/if}>
+                                        <input type="email" name="email" placeholder="{Lang::T('Email Address')}" {if
+                                            $_c['man_fields_email'] neq 'no' }required{/if}>
                                     </div>
                                     <div class="form-group">
                                         <button type="button" onclick="toggleFields()" class="submit-btn">
@@ -385,9 +383,19 @@
                                 <!-- Password Fields (Initially Hidden) -->
                                 <div id="passwordFields" style="display: none;">
                                     <div class="form-group">
-                                        <input type="text" name="address" placeholder="{Lang::T('Home Address')}"
-                                        {if $_c['man_fields_address'] neq 'no'}required{/if}>
+                                        <input type="text" name="address" placeholder="{Lang::T('Home Address')}" {if
+                                            $_c['man_fields_address'] neq 'no' }required{/if}>
                                     </div>
+                                    {if $_c.referral_enabled neq 'no'}
+                                    <div class="form-group">
+                                        {if isset($referral_code) && !empty($referral_code)}
+                                        <input readonly type="text" name="referral_code" value="{$referral_code}">
+                                        {else}
+                                        <input type="text" name="referral_code"
+                                            placeholder="{Lang::T('Referral Code')} ({Lang::T('Optional')})">
+                                        {/if}
+                                    </div>
+                                    {/if}
                                     <div class="form-group">
                                         <input type="password" name="password" placeholder="{Lang::T('Password')}"
                                             required>

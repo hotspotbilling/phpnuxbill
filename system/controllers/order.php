@@ -224,24 +224,24 @@ switch ($action) {
 
         list($bills, $add_cost) = User::getBills($id_customer);
 
-        // Tax calculation start
-        $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
-        $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
-        $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
+                    // Tax calculation start
+            $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
+            $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
+            $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
 
-        if ($tax_rate_setting === 'custom') {
-            $tax_rate = $custom_tax_rate;
-        } else {
-            $tax_rate = $tax_rate_setting;
-        }
+            if ($tax_rate_setting === 'custom') {
+                $tax_rate = $custom_tax_rate;
+            } else {
+                $tax_rate = $tax_rate_setting;
+            }
 
-        if ($tax_enable === 'yes') {
-            $tax = Package::tax($plan['price'], $tax_rate);
-        } else {
-            $tax = 0;
-        }
-        // Tax calculation stop
-        $total_cost = $plan['price'] + $add_cost + $tax;
+            if ($tax_enable === 'yes') {
+                $tax = Package::tax($plan['price'], $tax_rate);
+            } else {
+                $tax = 0;
+            }
+            // Tax calculation stop
+            $total_cost = $plan['price'] + $add_cost + $tax;
         if ($plan && $plan['enabled'] && $user['balance'] >= $total_cost) {
             if (Package::rechargeUser($user['id'], $router_name, $plan['id'], 'Customer', 'Balance')) {
                 // if success, then get the balance
@@ -328,6 +328,7 @@ switch ($action) {
             if ($active && $active['plan_id'] != $plan['id']) {
                 r2(getUrl('order/package'), 'e', Lang::T("Target has active plan, different with current plant.") . " [ <b>$active[namebp]</b> ]");
             }
+            
             $result = Package::rechargeUser($target['id'], $router_name, $plan['id'], $user['username'], 'Balance');
             if (!empty($result)) {
                 // if success, then get the balance

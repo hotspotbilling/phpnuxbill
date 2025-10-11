@@ -62,6 +62,16 @@
                             <input type="text" {if $_c['man_fields_address'] neq 'no'}required{/if} name="address"
                                 id="address" value="{$address}" class="form-control">
                         </div>
+                        {if $_c.referral_enabled neq 'no'}
+                        <div class="form-group">
+                            <label>{Lang::T('Referral Code')} ({Lang::T('Optional')})</label>
+                            {if isset($referral_code) && !empty($referral_code)}
+                            <input readonly type="text" name="referral_code" value="{$referral_code}" class="form-control">
+                            {else}
+                            <input type="text" id="referral_code" name="referral_code" value="{$referral_code}" placeholder="{Lang::T('Referral Code')} ({Lang::T('Optional')})" class="form-control">
+                            {/if}
+                        </div>
+                        {/if}
                         {$customFields}
                     </div>
                 </div>

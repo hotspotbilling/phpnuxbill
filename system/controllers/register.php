@@ -8,6 +8,14 @@
 if ($_c['disable_registration'] == 'noreg') {
     _alert(Lang::T('Registration Disabled'), 'danger', "login");
 }
+
+if (isset($_SESSION['nux-ref']) && !empty($_SESSION['nux-ref'])) {
+   $referral_code = $_SESSION['nux-ref'];
+} elseif (isset($_GET['ref']) && !empty($_GET['ref'])) {
+    $_SESSION['nux-ref'] = $_GET['ref'];
+    $referral_code = $_GET['ref'];
+}
+
 if (isset($routes['1'])) {
     $do = $routes['1'];
 } else {
@@ -25,6 +33,7 @@ switch ($do) {
         $password = _post('password');
         $cpassword = _post('cpassword');
         $address = _post('address');
+        $referral_code = _post('referral_code');
 
         // Separate phone number input if OTP is required
         $phone_number = ($config['sms_otp_registration'] == 'yes') ? alphanumeric(_post('phone_number'), "+_.@-") : $username;
@@ -116,6 +125,15 @@ switch ($do) {
                 if (file_exists($_FILES['photo']['tmp_name']))
                     unlink($_FILES['photo']['tmp_name']);
                 User::setFormCustomField($user);
+
+                // Process referral code if provided
+                if (!empty($referral_code) && Referral::getSetting('referral_enabled', 'yes') === 'yes') {
+                    $referrer = Referral::getReferrerByCode($referral_code);
+                    if ($referrer) {
+                        Referral::recordReferral($referrer->id, $user, $referral_code);
+                    }
+                }
+
                 run_hook('register_user'); #HOOK
                 $msg .= Lang::T('Registration successful') . '<br>';
                 if ($config['reg_nofify_admin'] == 'yes') {
@@ -140,6 +158,7 @@ switch ($do) {
             $ui->assign('address', $address);
             $ui->assign('email', $email);
             $ui->assign('phone_number', $phone_number);
+            $ui->assign('referral_code', $referral_code);
             $ui->assign('notify', $msg);
             $ui->assign('notify_t', 'd');
             $ui->assign('_title', Lang::T('Register'));
@@ -226,10 +245,12 @@ switch ($do) {
                     $ui->assign('notify_t', 's');
                     $ui->assign('_title', Lang::T('Register'));
                     $ui->assign('customFields', User::getFormCustomField($ui, true));
+                    $ui->assign('referral_code', isset($referral_code) ? $referral_code : null);
                     $ui->display('customer/register-otp.tpl');
                 }
             } else {
                 $ui->assign('_title', Lang::T('Register'));
+                $ui->assign('referral_code', isset($referral_code) ? $referral_code : null);
                 run_hook('view_otp_register'); #HOOK
                 $ui->display('customer/register-rotp.tpl');
             }
@@ -270,6 +291,7 @@ switch ($do) {
             $ui->assign('address', "");
             $ui->assign('email', "");
             $ui->assign('otp', false);
+            $ui->assign('referral_code', isset($referral_code) ? $referral_code : null);
             $ui->assign('_title', Lang::T('Register'));
             run_hook('view_register'); #HOOK
             switch ($config['login_page_type']) {
@@ -280,7 +302,6 @@ switch ($do) {
                     $ui->display('customer/register.tpl');
                     break;
             }
-
         }
         break;
 }

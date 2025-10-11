@@ -377,6 +377,20 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
+                    {if $_c.referral_enabled !== 'no'}
+                    <li {if $_system_menu eq 'referrals' }class="active" {/if}>
+                        <a href="{Text::url('referrals')}">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M7 12l5 5l-1.5 1.5a3.5 3.5 0 1 1 -7 0v-10a3.5 3.5 0 1 1 7 0l-1.5 1.5l-5 5"/>
+                                <path d="M17 12l-5 -5l1.5 -1.5a3.5 3.5 0 1 1 7 0v10a3.5 3.5 0 1 1 -7 0l1.5 -1.5l5 -5"/>
+                            </svg>
+                            <span>{Lang::T('Referrals')}</span>
+                        </a>
+                    </li>
+                    {/if}
                     <li {if $_system_menu eq 'inbox' }class="active" {/if}>
                         <a href="{Text::url('mail')}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -489,6 +503,12 @@
                 </h1>
             </section>
             <div class="dashboard-skeleton" style="display: none;">
+                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
+                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
+                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
+                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
+                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
+                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
                 <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
                 <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
                 <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
