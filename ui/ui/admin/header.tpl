@@ -318,7 +318,6 @@
                     {/if}
                     {$_MENU_AFTER_SERVICES}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                    {if $_c.referral_enabled !== 'no'}
                     <li {if $_system_menu eq 'referrals' }class="active" {/if}>
                         <a href="{Text::url('referrals/list')}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -331,7 +330,6 @@
                             <span>{Lang::T('Referrals')}</span>
                         </a>
                     </li>
-                    {/if}
                     {/if}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <li class="{if $_system_menu eq 'services'}active{/if} treeview">
