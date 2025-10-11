@@ -2,6 +2,15 @@
 
 # CHANGELOG
 
+## 2025.11.1
+
+- Added complete customer referral system
+  - Customers can refer friends using unique referral codes
+  - Track referrals and referred customers
+  - Reward system for successful referrals
+  - Admin dashboard to manage referral settings
+  - Widget for customers to view and share referrals
+
 ## 2024.10.23
 
 - Custom Balance admin refill Requested by Javi Tech
