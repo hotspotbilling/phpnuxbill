@@ -224,7 +224,7 @@ switch ($action) {
 
         list($bills, $add_cost) = User::getBills($id_customer);
 
-                    // Tax calculation start
+            // Tax calculation start
             $tax_enable = isset($config['enable_tax']) ? $config['enable_tax'] : 'no';
             $tax_rate_setting = isset($config['tax_rate']) ? $config['tax_rate'] : null;
             $custom_tax_rate = isset($config['custom_tax_rate']) ? (float)$config['custom_tax_rate'] : null;
