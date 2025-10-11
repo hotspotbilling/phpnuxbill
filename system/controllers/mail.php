@@ -28,7 +28,6 @@ switch ($action) {
             ->select('id')
             ->where('customer_id', $user['id'])
             ->where_gt('id', $routes['2'])
-            ->order_by_desc('date_read')
             ->order_by_asc('id')
             ->find_one();
 
@@ -36,7 +35,6 @@ switch ($action) {
             ->select('id')
             ->where('customer_id', $user['id'])
             ->where_lt('id', $routes['2'])
-            ->order_by_desc('date_read')
             ->order_by_desc('id')
             ->find_one();
 
