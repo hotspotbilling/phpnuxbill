@@ -26,6 +26,13 @@ if(isset($_GET['nux-key']) && !empty($_GET['nux-key'])){
 if(isset($_GET['nux-hostname']) && !empty($_GET['nux-hostname'])){
     $_SESSION['nux-hostname'] = $_GET['nux-hostname'];
 }
+
+// check if user use referral code
+if (isset($_GET['ref']) && !empty($_GET['ref'])) {
+    $_SESSION['nux-ref'] = $_GET['ref'];
+}
+
+
 require_once 'system/vendor/autoload.php';
 require_once 'system/boot.php';
 App::_run();
