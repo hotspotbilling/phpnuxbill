@@ -5,7 +5,8 @@
         <div class="panel panel-hovered mb20 panel-primary">
             <div class="panel-heading">
                 {Lang::T('Referral Relationships')}
-                <a href="{getUrl('referrals/settings')}" class="btn btn-primary btn-xs pull-right"><i class="ion ion-gear-a"></i> {Lang::T('Settings')}</a>
+                <a href="{getUrl('referrals/settings')}" class="btn btn-primary btn-xs pull-right"><i
+                        class="ion ion-gear-a"></i> {Lang::T('Settings')}</a>
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
@@ -19,20 +20,28 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {if $referrals && count($referrals) > 0}
                             {foreach $referrals as $r}
                             <tr>
-                                <td>{$r['created_at']}</td>
+                                <td>{$r['created_at']|escape}</td>
                                 <td>
-                                    <strong>{$r['referrer_name']}</strong><br>
-                                    <small>{$r['referrer_username']}</small>
+                                    <strong>{$r['referrer_name']|escape}</strong><br>
+                                    <small>{$r['referrer_username']|escape}</small>
                                 </td>
                                 <td>
-                                    <strong>{$r['referred_name']}</strong><br>
-                                    <small>{$r['referred_username']}</small>
+                                    <strong>{$r['referred_name']|escape}</strong><br>
+                                    <small>{$r['referred_username']|escape}</small>
                                 </td>
-                                <td>{$r['referral_code']}</td>
+                                <td>{$r['referral_code']|escape}</td>
                             </tr>
                             {/foreach}
+                            {else}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    {Lang::T('No referral relationships found')}
+                                </td>
+                            </tr>
+                            {/if}
                         </tbody>
                     </table>
                 </div>
