@@ -39,6 +39,7 @@ CREATE TABLE `tbl_customers` (
   `zip` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `phonenumber` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0',
   `email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '1',
+  `referral_code` varchar(25) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `coordinates` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'Latitude and Longitude coordinates',
   `account_type` enum('Business','Personal') COLLATE utf8mb4_general_ci DEFAULT 'Personal' COMMENT 'For selecting account type',
   `balance` decimal(15,2) NOT NULL DEFAULT '0.00' COMMENT 'For Money Deposit',
@@ -251,6 +252,52 @@ CREATE TABLE `tbl_customers_inbox` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `tbl_referrals`;
+CREATE TABLE `tbl_referrals` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
+  `code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`),
+  UNIQUE KEY `customer_id` (`customer_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DROP TABLE IF EXISTS `tbl_referral_relationships`;
+CREATE TABLE `tbl_referral_relationships` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `referrer_id` int NOT NULL COMMENT 'Customer who referred',
+  `referred_id` int NOT NULL COMMENT 'Customer who was referred',
+  `referral_code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `referred_id` (`referred_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DROP TABLE IF EXISTS `tbl_referral_rewards`;
+CREATE TABLE `tbl_referral_rewards` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `relationship_id` int NOT NULL,
+  `referrer_id` int NOT NULL,
+  `referred_id` int NOT NULL,
+  `reward_type` enum('balance','discount','plan_extension') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'balance',
+  `reward_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `status` enum('pending','processed','claimed') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `processed_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DROP TABLE IF EXISTS `tbl_referral_settings`;
+CREATE TABLE `tbl_referral_settings` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `setting_value` text COLLATE utf8mb4_general_ci,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `setting_key` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 DROP TABLE IF EXISTS `tbl_port_pool`;
 CREATE TABLE IF NOT EXISTS `tbl_port_pool` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
@@ -318,6 +365,32 @@ CREATE TABLE `tbl_push_subscriptions` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `tbl_referral_relationships` (
+  `id` int(11) NOT NULL,
+  `referrer_id` int(11) NOT NULL COMMENT 'Customer who referred',
+  `referred_id` int(11) NOT NULL COMMENT 'Customer who was referred',
+  `referral_code` varchar(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `tbl_referral_rewards` (
+  `id` int(11) NOT NULL,
+  `relationship_id` int(11) NOT NULL,
+  `referrer_id` int(11) NOT NULL,
+  `referred_id` int(11) NOT NULL,
+  `reward_type` enum('balance','discount','plan_extension') NOT NULL DEFAULT 'balance',
+  `reward_for` varchar(20) DEFAULT 'referrer' COMMENT 'referrer or referred',
+  `reward_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `status` enum('pending','processed','claimed') NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `processed_at` timestamp NULL DEFAULT NULL,
+  `calculation_type` enum('fixed','percentage') DEFAULT 'fixed',
+  `percentage_value` decimal(10,2) DEFAULT NULL,
+  `purchase_amount` decimal(10,2) DEFAULT NULL,
+  `actual_discount_amount` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 ALTER TABLE `rad_acct`
   ADD PRIMARY KEY (`id`),
@@ -417,6 +490,16 @@ INSERT INTO
     `tbl_appconfig` (`id`, `setting`, `value`)
 VALUES (1, 'CompanyName', 'PHPNuxBill'), (2, 'currency_code', 'Rp.'), (3, 'language', 'english'), (4, 'show-logo', '1'), (5, 'nstyle', 'blue'), (6, 'timezone', 'Asia/Jakarta'), (7, 'dec_point', ','), (8, 'thousands_sep', '.'), (9, 'rtl', '0'), (10, 'address', ''), (11, 'phone', ''), (12, 'date_format', 'd M Y'), (13, 'note', 'Thank you...');
 
+INSERT INTO `tbl_appconfig` (`setting`, `value`) VALUES
+('referral_enabled', 'yes'),
+('referrer_reward_type', 'balance'),
+('referrer_reward_amount', '10.00'),
+('referred_reward_type', 'discount'),
+('referred_reward_amount', '5.00'),
+('min_purchase_amount', '0.00'),
+('referral_code_length', '8'),
+('require_purchase', 'yes');
+
 
 INSERT INTO
     `tbl_users` (
@@ -483,4 +566,5 @@ INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title
 (63, 1, 1, 'Customer', 1, 'Unpaid Order', 'unpaid_order', ''),
 (64, 2, 1, 'Customer', 1, 'Announcement', 'announcement', ''),
 (65, 5, 1, 'Customer', 1, 'Recharge A Friend', 'recharge_a_friend', ''),
-(66, 2, 2, 'Customer', 1, 'Voucher Activation', 'voucher_activation', '');
+(66, 2, 2, 'Customer', 1, 'Voucher Activation', 'voucher_activation', ''),
+(67, 6, 2, 'Customer', 1, 'Referral Program', 'referral_program', '');
