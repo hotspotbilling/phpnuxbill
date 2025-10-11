@@ -32,9 +32,9 @@
                             class="ion ion-chatboxes"></i> {Lang::T('Github Discussions')}</a>
                     <a style="margin: 5px;" href="https://t.me/phpnuxbill" target="_blank" class="btn btn-primary">
                         <i class="ion ion-chatboxes"></i> {Lang::T('Telegram Group')}</a>
-                    <a style="margin: 5px;" href="http://forum.phpnuxbill.org" target="_blank" class="btn btn-primary"><i class="ion ion-chatboxes"></i>
+                    <a style="margin: 5px;" href="https://forum.phpnuxbill.org" target="_blank" class="btn btn-primary"><i class="ion ion-chatboxes"></i>
                         {Lang::T('Forum Discussions')}</a>
-                    <a style="margin: 5px;" href="http://phpnuxbill.org" target="_blank" class="btn btn-primary">
+                    <a style="margin: 5px;" href="https://phpnuxbill.org" target="_blank" class="btn btn-primary">
                         <i class="fa fa-link"></i> {Lang::T('Website')}</a>
                 </div>
                 <div class="btn-group hidden-xs" role="group" aria-label="...">
@@ -42,9 +42,9 @@
                         class="btn btn-primary btn-sm"><i class="ion ion-chatboxes"></i> {Lang::T('Github Discussions')}</a>
                     <a href="https://t.me/phpnuxbill" target="_blank" class="btn btn-primary btn-sm">
                         <i class="ion ion-chatboxes"></i> {Lang::T('Telegram Group')}</a>
-                    <a href="http://forum.phpnuxbill.org" target="_blank" class="btn btn-primary btn-sm"><i
+                    <a href="https://forum.phpnuxbill.org" target="_blank" class="btn btn-primary btn-sm"><i
                             class="ion ion-chatboxes"></i> {Lang::T('Forum Discussions')}</a>
-                    <a href="http://phpnuxbill.org" target="_blank" class="btn btn-primary btn-sm">
+                    <a href="https://phpnuxbill.org" target="_blank" class="btn btn-primary btn-sm">
                         <i class="fa fa-link"></i> {Lang::T('Website')}</a>
                 </div>
             </div>
@@ -208,7 +208,7 @@
                         <table class="table table-bordered table-striped table-hover">
                             <thead>
                                 <tr>
-                                    <th>{Lang::T('Souce')}</th>
+                                    <th>{Lang::T('Source')}</th>
                                     <th>{Lang::T('Details')}</th>
                                 </tr>
                             </thead>
@@ -256,7 +256,7 @@
                                 <tr>
                                     <td>PHP QRCode</td>
                                     <td>
-                                        <a href="http://phpqrcode.sourceforge.net/" target="_blank">
+                                        <a href="https://phpqrcode.sourceforge.net/" target="_blank">
                                             <i class="glyphicon glyphicon-globe"></i> {Lang::T('Visit')}
                                         </a>
                                     </td>
