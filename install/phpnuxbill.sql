@@ -48,7 +48,8 @@ CREATE TABLE `tbl_customers` (
   `status` enum('Active','Banned','Disabled','Inactive','Limited','Suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Active',
   `created_by` int NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_login` datetime DEFAULT NULL
+  `last_login` datetime DEFAULT NULL,
+  UNIQUE KEY `idx_unique_referral_code` (`referral_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `tbl_customers_fields`;
@@ -252,51 +253,6 @@ CREATE TABLE `tbl_customers_inbox` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `tbl_referrals`;
-CREATE TABLE `tbl_referrals` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `customer_id` int NOT NULL,
-  `code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `code` (`code`),
-  UNIQUE KEY `customer_id` (`customer_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-DROP TABLE IF EXISTS `tbl_referral_relationships`;
-CREATE TABLE `tbl_referral_relationships` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `referrer_id` int NOT NULL COMMENT 'Customer who referred',
-  `referred_id` int NOT NULL COMMENT 'Customer who was referred',
-  `referral_code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `referred_id` (`referred_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-DROP TABLE IF EXISTS `tbl_referral_rewards`;
-CREATE TABLE `tbl_referral_rewards` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `relationship_id` int NOT NULL,
-  `referrer_id` int NOT NULL,
-  `referred_id` int NOT NULL,
-  `reward_type` enum('balance','discount','plan_extension') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'balance',
-  `reward_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `status` enum('pending','processed','claimed') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `processed_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-DROP TABLE IF EXISTS `tbl_referral_settings`;
-CREATE TABLE `tbl_referral_settings` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `setting_key` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
-  `setting_value` text COLLATE utf8mb4_general_ci,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `setting_key` (`setting_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `tbl_port_pool`;
 CREATE TABLE IF NOT EXISTS `tbl_port_pool` (
