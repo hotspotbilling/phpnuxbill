@@ -12,20 +12,36 @@ $ui->assign('_user', $user);
 
 switch ($action) {
     case 'view':
+
         $mail = ORM::for_table('tbl_customers_inbox')->where('customer_id', $user['id'])->find_one($routes['2']);
+
         if (!$mail) {
             r2(getUrl('mail'), 'e', Lang::T('Message Not Found'));
         }
-        if ($mail['date_read'] == null) {
+
+        if ($mail->date_read === null) {
             $mail->date_read = date('Y-m-d H:i:s');
             $mail->save();
         }
-        $next = ORM::for_table('tbl_customers_inbox')->select("id")->where('customer_id', $user['id'])->where_gt("id", $routes['2'])->order_by_asc("id")->find_one();
-        $prev = ORM::for_table('tbl_customers_inbox')->select("id")->where('customer_id', $user['id'])->where_lt("id", $routes['2'])->order_by_desc("id")->find_one();
-        usort($mail, fn($a, $b) => ($a['date_read'] === null) ? -1 : (($b['date_read'] === null) ? 1 : 0));
 
-        $ui->assign('next', $next['id']);
-        $ui->assign('prev', $prev['id']);
+        $next = ORM::for_table('tbl_customers_inbox')
+            ->select('id')
+            ->where('customer_id', $user['id'])
+            ->where_gt('id', $routes['2'])
+            ->order_by_desc('date_read')
+            ->order_by_asc('id')
+            ->find_one();
+
+        $prev = ORM::for_table('tbl_customers_inbox')
+            ->select('id')
+            ->where('customer_id', $user['id'])
+            ->where_lt('id', $routes['2'])
+            ->order_by_desc('date_read')
+            ->order_by_desc('id')
+            ->find_one();
+
+        $ui->assign('next', $next ? $next->id : null);
+        $ui->assign('prev', $prev ? $prev->id : null);
         $ui->assign('mail', $mail);
         $ui->assign('tipe', 'view');
         $ui->assign('_system_menu', 'inbox');
