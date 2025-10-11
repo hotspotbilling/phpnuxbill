@@ -468,6 +468,52 @@ class Package
             User::billsPaid($bills, $id_customer);
         }
         run_hook("recharge_user_finish");
+        
+        // Process referral rewards if the class exists and it's not a balance recharge
+        if (class_exists('Referral') && Referral::getSetting('enable_referral', 'no') === 'yes' && $router_name != 'balance') {
+            // Get the price of the plan for purchase reward calculation
+            $price = isset($p['price']) ? $p['price'] : 0;
+            
+            // Check if purchase meets minimum requirement
+            if (Referral::purchaseQualifiesForReward($price)) {
+                // Check if the user was referred
+                $referrer = Referral::getReferrer($id_customer);
+                if ($referrer) {
+                    // If require_purchase is yes, create the rewards now
+                    if (Referral::getSetting('require_purchase', 'yes') === 'yes') {
+                        // Create rewards for both referrer and referred user with purchase amount
+                        Referral::createReward($referrer->id, $referrer->referrer_id, $id_customer, $price, 'referrer');
+                        Referral::createReward($referrer->id, $referrer->referrer_id, $id_customer, $price, 'referred');
+                    }
+
+                    // Find and process pending referrer rewards
+                    $referrerReward = ORM::for_table('tbl_referral_rewards')
+                        ->where('referred_id', $id_customer)
+                        ->where('referrer_id', $referrer->referrer_id)
+                        ->where('status', 'pending')
+                        ->where('reward_type', 'balance')
+                        ->where('reward_for', 'referrer')
+                        ->find_one();
+
+                    if ($referrerReward) {
+                        Referral::processReferrerReward($referrerReward->id);
+                    }
+                    
+                    // Find and process pending referred user rewards
+                    $referredReward = ORM::for_table('tbl_referral_rewards')
+                        ->where('referred_id', $id_customer)
+                        ->where('status', 'pending')
+                        ->where('reward_type', 'balance')
+                        ->where('reward_for', 'referred')
+                        ->find_one();
+                        
+                    if ($referredReward) {
+                        Referral::processReferredReward($referredReward->id);
+                    }
+                }
+            }
+        }
+        
         Message::sendInvoice($c, $t);
         if ($trx) {
             $trx->trx_invoice = $inv;
