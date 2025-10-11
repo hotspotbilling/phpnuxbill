@@ -233,9 +233,23 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     }
 }
 
+/**
+ * Safely assign session variable to UI with HTML encoding
+ * 
+ * @param object $ui The UI object
+ * @param string $var_name Variable name for template
+ * @param string $session_key Session key to retrieve
+ * @return void
+ */
+function safeAssignSessionVar($ui, $var_name, $session_key) {
+    if (isset($_SESSION[$session_key])) {
+        $ui->assign($var_name, htmlspecialchars($_SESSION[$session_key], ENT_QUOTES, 'UTF-8'));
+    }
+}
+
 if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && $_c['hs_auth_method'] != 'hchap')) {
-    $ui->assign('nux_mac', $_SESSION['nux-mac']);
-    $ui->assign('nux_ip', $_SESSION['nux-ip']);
+    safeAssignSessionVar($ui, 'nux_mac', 'nux-mac');
+    safeAssignSessionVar($ui, 'nux_ip', 'nux-ip');
     $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
     $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
     $dvc = Package::getDevice($p);
