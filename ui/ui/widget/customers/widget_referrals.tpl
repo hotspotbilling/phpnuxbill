@@ -104,22 +104,29 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
 <script>
     $(document).ready(function () {
         var clipboard = new ClipboardJS('.copy-button');
-        
+
         clipboard.on('success', function (e) {
-            var $button = $(e.trigger);
-            var originalText = $button.html();
-            
-            $button.html('<i class="fa fa-check"></i> {Lang::T("Copied!")}');
-            
-            setTimeout(function () {
-                $button.html(originalText);
-            }, 2000);
-            
+            Swal.fire({
+                icon: 'success',
+                title: '{Lang::T("Copied!")}',
+                text: '{Lang::T("The text has been copied to your clipboard.")}',
+                showConfirmButton: false,
+                timer: 1800
+            });
             e.clearSelection();
+        });
+
+        clipboard.on('error', function (e) {
+            Swal.fire({
+                icon: 'error',
+                title: '{Lang::T("Oops...")}',
+                text: '{Lang::T("Failed to copy. Please try manually.")}'
+            });
         });
     });
 </script>

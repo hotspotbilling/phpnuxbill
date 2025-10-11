@@ -1221,5 +1221,8 @@
     "Referral_Code_Length": "Referral Code Length",
     "Length_of_referral_code": "Length of referral code",
     "You_have_received_a_referral_reward_of__s_to_your_balance_for_referring_a_new_customer_who_signed_up_": "You have received a referral reward of %s to your balance for referring a new customer who signed up.",
-    "You_have_received_a_signup_bonus_of__s_to_your_balance_for_joining_through_a_referral_": "You have received a signup bonus of %s to your balance for joining through a referral."
+    "You_have_received_a_signup_bonus_of__s_to_your_balance_for_joining_through_a_referral_": "You have received a signup bonus of %s to your balance for joining through a referral.",
+    "The_text_has_been_copied_to_your_clipboard_": "The text has been copied to your clipboard.",
+    "Oops___": "Oops...",
+    "Failed_to_copy__Please_try_manually_": "Failed to copy. Please try manually."
 }

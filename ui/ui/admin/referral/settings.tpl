@@ -302,5 +302,4 @@
     })();
 </script>
 
-
 {include file="sections/footer.tpl"}

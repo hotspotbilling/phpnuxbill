@@ -122,6 +122,7 @@ switch ($action) {
         $ui->assign('referred_customers', $referred_customers);
         $ui->assign('referral_rewards', $rewards);
         $ui->assign('referrer', $referrer);
+        $ui->assign('xfooter', '');
         run_hook('view_customer_referrals'); #HOOK
         $ui->display('customer/referrals.tpl');
         break;
