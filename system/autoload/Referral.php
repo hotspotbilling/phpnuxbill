@@ -65,17 +65,35 @@ class Referral
         
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $code = '';
-
+        $maxAttempts = 50; // Maximum number of retry attempts
+        $attempts = 0;
+        
         do {
+            if ($attempts >= $maxAttempts) {
+                // Log the error
+                _log('Failed to generate a unique referral code after ' . $maxAttempts . ' attempts', 'Warning');
+                throw new Exception('Could not generate a unique referral code after ' . $maxAttempts . ' attempts. Please try again later.');
+            }
+            
             $code = '';
+            $charLen = strlen($characters) - 1;
             for ($i = 0; $i < $length; $i++) {
-                $code .= $characters[rand(0, strlen($characters) - 1)];
+                try {
+                    // Use cryptographically secure random_int instead of rand
+                    $code .= $characters[random_int(0, $charLen)];
+                } catch (Exception $e) {
+                    // Fallback to rand() if random_int fails (should be rare)
+                    _log('random_int failed, falling back to rand(): ' . $e->getMessage(), 'Warning');
+                    $code .= $characters[rand(0, $charLen)];
+                }
             }
 
             // Check if code already exists
             $exists = ORM::for_table('tbl_customers')
                 ->where('referral_code', $code)
                 ->count();
+                
+            $attempts++;
         } while ($exists > 0);
 
         return $code;
@@ -111,6 +129,7 @@ class Referral
      * 
      * @param int $customer_id Customer ID
      * @return string Generated referral code
+     * @throws Exception If unable to generate a unique code within retry limit
      */
     public static function createCustomerReferralCode($customer_id)
     {
@@ -128,11 +147,57 @@ class Referral
             return $customer->referral_code;
         }
         
-        $code = self::generateReferralCode();
+        $maxAttempts = 10;
+        $attempts = 0;
+        $success = false;
         
-        // Update customer record with new referral code
-        $customer->referral_code = $code;
-        $customer->save();    
+        // Get PDO instance to handle constraint violations properly
+        $db = ORM::get_db();
+        
+        while (!$success && $attempts < $maxAttempts) {
+            try {
+                $code = self::generateReferralCode();
+                
+                // Try to update with a transaction to handle potential race conditions
+                $db->beginTransaction();
+                
+                // First verify the code is still unique right before inserting
+                $exists = ORM::for_table('tbl_customers')
+                    ->where('referral_code', $code)
+                    ->count();
+                
+                if ($exists == 0) {
+                    $customer->referral_code = $code;
+                    $customer->save();
+                    $success = true;
+                }
+                
+                $db->commit();
+                
+            } catch (PDOException $e) {
+                $db->rollBack();
+                
+                // Check if this was a duplicate key error
+                if (strpos($e->getMessage(), 'UNIQUE constraint failed') !== false || 
+                    strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                    // Log the collision
+                    _log('Referral code collision detected: ' . $code, 'Warning');
+                } else {
+                    // For other errors, log and re-throw
+                    _log('Error creating referral code: ' . $e->getMessage(), 'Error');
+                    throw $e;
+                }
+            }
+            
+            $attempts++;
+        }
+        
+        if (!$success) {
+            $errorMsg = 'Failed to generate a unique referral code after ' . $maxAttempts . ' attempts';
+            _log($errorMsg, 'Error');
+            throw new Exception($errorMsg);
+        }
+        
         return $code;
     }
 
@@ -144,7 +209,15 @@ class Referral
      */
     public static function getReferrerByCode($code)
     {
+        // Validate and sanitize input
+        if (empty($code) || !is_string($code)) {
+            return null;
+        }
+        
+        $code = trim($code);
+        
         // Look for the customer with this referral code directly in tbl_customers
+        // ORM automatically uses parameterized queries for where conditions
         return ORM::for_table('tbl_customers')
             ->where('referral_code', $code)
             ->find_one();
@@ -220,68 +293,86 @@ class Referral
             return false;
         }
         
-        // Record the relationship
-        $relationship = ORM::for_table('tbl_referral_relationships')->create();
-        $relationship->referrer_id = $referrer_id;
-        $relationship->referred_id = $referred_id;
-        $relationship->referral_code = $referral_code;
+        // Get database connection for transaction
+        $db = ORM::get_db();
         
-        if($relationship->save()) {
+        try {
+            // Begin transaction to ensure atomicity
+            $db->beginTransaction();
+            
+            // Record the relationship
+            $relationship = ORM::for_table('tbl_referral_relationships')->create();
+            $relationship->referrer_id = $referrer_id;
+            $relationship->referred_id = $referred_id;
+            $relationship->referral_code = $referral_code;
+            
+            if(!$relationship->save()) {
+                throw new Exception("Failed to save referral relationship");
+            }
+            
+            $relationshipId = $relationship->id();
+            
             // Create and process rewards immediately if no purchase required
             if(self::getSetting('require_purchase', 'yes') === 'no') {
                 // Create referrer reward
-                $referrerReward = self::createReward($relationship->id(), $referrer_id, $referred_id, 0, 'referrer');
-                if ($referrerReward) {
-                    // Get the reward ID
-                    $referrerRewardRecord = ORM::for_table('tbl_referral_rewards')
-                        ->where('relationship_id', $relationship->id())
-                        ->where('referrer_id', $referrer_id)
-                        ->where('referred_id', $referred_id)
-                        ->where('reward_for', 'referrer')
-                        ->where('status', 'pending')
-                        ->find_one();
-                    
-                    if ($referrerRewardRecord) {
-                        // Process referrer reward immediately
-                        self::processReferrerReward($referrerRewardRecord->id);
+                $referrerRewardObj = self::createRewardAndReturn($relationshipId, $referrer_id, $referred_id, 0, 'referrer');
+                if ($referrerRewardObj) {
+                    // Process referrer reward immediately
+                    $referrerProcessed = self::processReferrerReward($referrerRewardObj->id);
+                    if (!$referrerProcessed) {
+                        throw new Exception("Failed to process referrer reward");
                     }
                 }
                 
                 // Create referred reward
-                $referredReward = self::createReward($relationship->id(), $referrer_id, $referred_id, 0, 'referred');
-                if ($referredReward) {
-                    // Get the reward ID
-                    $referredRewardRecord = ORM::for_table('tbl_referral_rewards')
-                        ->where('relationship_id', $relationship->id())
-                        ->where('referrer_id', $referrer_id)
-                        ->where('referred_id', $referred_id)
-                        ->where('reward_for', 'referred')
-                        ->where('status', 'pending')
-                        ->find_one();
-                    
-                    if ($referredRewardRecord) {
-                        // Process referred reward immediately
-                        self::processReferredReward($referredRewardRecord->id);
+                $referredRewardObj = self::createRewardAndReturn($relationshipId, $referrer_id, $referred_id, 0, 'referred');
+                if ($referredRewardObj) {
+                    // Process referred reward immediately
+                    $referredProcessed = self::processReferredReward($referredRewardObj->id);
+                    if (!$referredProcessed) {
+                        throw new Exception("Failed to process referred reward");
                     }
                 }
             }
+            
+            // Commit the transaction if everything succeeded
+            $db->commit();
             return true;
+            
+        } catch (Exception $e) {
+            // Rollback transaction on any error
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            
+            // Log the error
+            _log("Error recording referral: " . $e->getMessage(), 'Error');
+            
+            return false;
         }
-        
-        return false;
     }
-
+    
     /**
-     * Create a reward for a successful referral
+     * Create a reward and return the ORM object (for transaction support)
      * 
      * @param int $relationship_id Relationship ID
      * @param int $referrer_id Referrer customer ID
      * @param int $referred_id Referred customer ID
      * @param float $purchase_amount Purchase amount (optional, for purchase-based rewards)
      * @param string $reward_for Who the reward is for ('referrer' or 'referred')
-     * @return bool Success status
+     * @return object|false The created reward object or false on failure
      */
-    public static function createReward($relationship_id, $referrer_id, $referred_id, $purchase_amount = 0, $reward_for = 'referrer')
+    /**
+     * Create a reward for a successful referral and return the reward object
+     * 
+     * @param int $relationship_id Relationship ID
+     * @param int $referrer_id Referrer customer ID
+     * @param int $referred_id Referred customer ID
+     * @param float $purchase_amount Purchase amount (optional, for purchase-based rewards)
+     * @param string $reward_for Who the reward is for ('referrer' or 'referred')
+     * @return mixed Reward object on success, false on failure
+     */
+    public static function createRewardAndReturn($relationship_id, $referrer_id, $referred_id, $purchase_amount = 0, $reward_for = 'referrer')
     {
         $require_purchase = self::getSetting('require_purchase', 'yes');
         
@@ -343,7 +434,29 @@ class Referral
             }
         }
         
-        return $reward->save();
+        // Save the reward and return the object (with ID) on success
+        if ($reward->save()) {
+            return $reward;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Create a reward for a successful referral
+     * 
+     * @param int $relationship_id Relationship ID
+     * @param int $referrer_id Referrer customer ID
+     * @param int $referred_id Referred customer ID
+     * @param float $purchase_amount Purchase amount (optional, for purchase-based rewards)
+     * @param string $reward_for Who the reward is for ('referrer' or 'referred')
+     * @return bool Success status
+     */
+    public static function createReward($relationship_id, $referrer_id, $referred_id, $purchase_amount = 0, $reward_for = 'referrer')
+    {
+        // Call createRewardAndReturn and return bool success status for backward compatibility
+        $reward = self::createRewardAndReturn($relationship_id, $referrer_id, $referred_id, $purchase_amount, $reward_for);
+        return ($reward !== false);
     }
 
     /**
@@ -430,7 +543,7 @@ class Referral
                 // Generate coupon code and send it to customer inbox, email and whatsApp message or SMS
                 $coupon = ORM::for_table('tbl_coupons')->create();
                 $coupon->customer_id = $customer->id;
-                $coupon->code = substr(md5(time()), 0, 8);
+                $coupon->code = substr(bin2hex(random_bytes(8)), 0, 8);
                 
                 // Set coupon type based on calculation type
                 if (isset($reward->calculation_type) && $reward->calculation_type == 'percentage') {
