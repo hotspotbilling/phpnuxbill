@@ -1224,5 +1224,6 @@
     "You_have_received_a_signup_bonus_of__s_to_your_balance_for_joining_through_a_referral_": "You have received a signup bonus of %s to your balance for joining through a referral.",
     "The_text_has_been_copied_to_your_clipboard_": "The text has been copied to your clipboard.",
     "Oops___": "Oops...",
-    "Failed_to_copy__Please_try_manually_": "Failed to copy. Please try manually."
+    "Failed_to_copy__Please_try_manually_": "Failed to copy. Please try manually.",
+    "Enable_or_Disable_Referral_system": "Enable or Disable Referral system"
 }

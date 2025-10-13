@@ -147,8 +147,8 @@
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
                         <li>
-                            <a class="toggle-container" href="#">
-                                <i class="toggle-icon" id="toggleIcon"><svg xmlns="http://www.w3.org/2000/svg"
+                            <a id="toggleIcon" class="toggle-container" href="#">
+                                <i class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg"
                                         width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                         class="icon icon-tabler icons-tabler-outline icon-tabler-moon">
@@ -157,7 +157,7 @@
                                             d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
                                     </svg></i>
                             </a>
-                        {if $_c.referral_enabled != 'no'}
+                        </li>
                         <li class="dropdown tasks-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
                                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"

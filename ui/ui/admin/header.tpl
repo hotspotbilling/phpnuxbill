@@ -70,8 +70,8 @@
                             </div>
                         </div>
                         <li>
-                            <a class="toggle-container" href="#">
-                                <i class="toggle-icon" id="toggleIcon"><svg xmlns="http://www.w3.org/2000/svg"
+                            <a id="toggleIcon" class="toggle-container" href="#">
+                                <i class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg"
                                         width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                         class="icon icon-tabler icons-tabler-outline icon-tabler-moon">
