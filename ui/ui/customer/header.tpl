@@ -379,7 +379,7 @@
                         </a>
                     </li>
                     {$_MENU_AFTER_DASHBOARD}
-                    {if $_c.referral_enabled != 'no'}
+                    {if $_c['enable_balance'] == 'yes' and $_c['referral_enabled'] != 'no'}
                     <li {if $_system_menu eq 'referrals' }class="active" {/if}>
                         <a href="{Text::url('referrals')}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
