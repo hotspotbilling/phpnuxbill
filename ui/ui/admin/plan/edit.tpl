@@ -73,6 +73,8 @@
                             {Lang::T('Email')}</label>
                         <label class="col-md-1 control-label"><input type="checkbox" name="inbox" value="1">
                             {Lang::T('Inbox')}</label>
+                        <label class="col-md-1 control-label"><input type="checkbox" name="push" value="1">
+                            {Lang::T('Push')}</label>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-offset-2 col-lg-10">
