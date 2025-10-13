@@ -492,6 +492,11 @@ switch ($action) {
                         'method' => 'Message::addToInbox',
                         'args' => [$customer['id'], $subject, $notifyMessage, 'Admin']
                     ],
+                    'push' => [
+                        'enabled' => isset($_POST['push']),
+                        'method' => 'Message::sendPush',
+                        'args' => [$customer['id'], $subject, $notifyMessage]
+                    ],
                 ];
 
                 foreach ($channels as $channel => $message) {
