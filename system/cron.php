@@ -1,6 +1,28 @@
 <?php
 
+
+session_start();
+
 include "../init.php";
+
+// Determine if running from CLI or web
+$isCli = (php_sapi_name() === 'cli');
+// Set up HTML formatting for web interface
+if (!$isCli) {
+    echo "<pre>";
+}
+
+// Check if the user is authenticated and authorized
+if (!$isCli && (!isset($_SESSION['aid']) || empty($_SESSION['aid']))) {
+    // Log unauthorized access
+    _log("Unauthorized access attempt to cron.php from " . $_SERVER['REMOTE_ADDR'], 'Warning');
+
+    // Return HTTP 403 Forbidden
+    header('HTTP/1.1 403 Forbidden');
+    echo "Access denied. You must be logged in with admin privileges to view this page.</pre>";
+    exit(1);
+}
+
 $lockFile = "$CACHE_PATH/router_monitor.lock";
 
 if (!is_dir($CACHE_PATH)) {
@@ -21,12 +43,6 @@ if (!flock($lock, LOCK_EX | LOCK_NB)) {
     exit;
 }
 
-
-$isCli = true;
-if (php_sapi_name() !== 'cli') {
-    $isCli = false;
-    echo "<pre>";
-}
 echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
 $res = ORM::raw_execute('SELECT NOW() AS WAKTU;');
 $statement = ORM::get_last_statement();
@@ -77,7 +93,7 @@ foreach ($d as $ds) {
                     require_once $dvc;
                     (new $p['device'])->remove_customer($c, $p);
                 } else {
-                    throw new Exception("Cron error: Devices " . $p['device'] . "not found, cannot disconnect ".$c['username']."\n");
+                    throw new Exception("Cron error: Devices " . $p['device'] . "not found, cannot disconnect " . $c['username'] . "\n");
                 }
             }
 
