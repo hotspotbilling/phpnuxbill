@@ -93,7 +93,11 @@
                 </a>
             </div>
             <hr>
-            <p>{Lang::T('You were referred by')}: <strong>{$referrer->referrer_name|default:'Unknown'}</strong></p>
+            {if $referrer}
+            <p>Referred by: <strong>{$referrer->referrer_name|escape:'html'}</strong></p>
+            {else}
+            <p>Not referred by anyone</p>
+            {/if}
         </div>
     </div>
 </div>
