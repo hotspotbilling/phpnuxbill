@@ -1251,5 +1251,6 @@
     "Connection_problem__Please_check_your_internet_and_try_again_": "Connection problem. Please check your internet and try again.",
     "An_unknown_error_occurred__Please_try_again_later_": "An unknown error occurred. Please try again later.",
     "Show_password": "Show password",
-    "Hide_password": "Hide password"
+    "Hide_password": "Hide password",
+    "You_are_not_logged_in": "You are not logged in"
 }

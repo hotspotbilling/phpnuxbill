@@ -5,9 +5,15 @@
  *  by https://t.me/ibnux
  **/
 
+
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
 header("Pragma: no-cache");
+
+// Check if the user is logged in
+if ((empty($_SESSION['uid']) || !isset($_SESSION['uid'])) && (empty($_SESSION['aid']) || !isset($_SESSION['aid']))) {
+    _alert(Lang::T('You are not logged in'), 'warning', "login");
+}
 
 run_hook('customer_logout'); #HOOK
 if (session_status() == PHP_SESSION_NONE) session_start();
