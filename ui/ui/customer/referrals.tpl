@@ -57,8 +57,7 @@
                                 <h5>{Lang::T('You were referred by')}</h5>
                             </div>
                             <div class="panel-body">
-                                <p><strong>{$referrer->referrer_name|escape:'html'}</strong>
-                                    ({$referrer->referrer_username|escape:'html'})</p>
+                                <p><strong>{$referrer->referrer_name|escape:'html'}</strong></p>
                             </div>
                         </div>
                     </div>
@@ -127,7 +126,7 @@
                                         <tbody>
                                             {foreach $referral_rewards as $reward}
                                             <tr>
-                                                <td>{$reward->date|escape:'html'}</td>
+                                                <td>{$reward->created_at|escape:'html'}</td>
                                                 <td>{$_c['currency_code']} {number_format($reward->reward_amount,2)}
                                                 </td>
                                                 <td>{$reward->reward_type|escape:'html'}</td>
