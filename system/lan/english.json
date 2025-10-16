@@ -1225,7 +1225,6 @@
     "The_text_has_been_copied_to_your_clipboard_": "The text has been copied to your clipboard.",
     "Oops___": "Oops...",
     "Failed_to_copy__Please_try_manually_": "Failed to copy. Please try manually.",
-    "Enable_or_Disable_Referral_system": "Enable or Disable Referral system",
     "View_All_Announcements": "View All Announcements",
     "All_rights_reserved_": "All rights reserved.",
     "Privacy": "Privacy",
@@ -1250,5 +1249,7 @@
     "Failed_to_refresh_security_token__Please_refresh_the_page_and_try_again_": "Failed to refresh security token. Please refresh the page and try again.",
     "Your_account_has_been_suspended__Please_contact_support_": "Your account has been suspended. Please contact support.",
     "Connection_problem__Please_check_your_internet_and_try_again_": "Connection problem. Please check your internet and try again.",
-    "An_unknown_error_occurred__Please_try_again_later_": "An unknown error occurred. Please try again later."
+    "An_unknown_error_occurred__Please_try_again_later_": "An unknown error occurred. Please try again later.",
+    "Show_password": "Show password",
+    "Hide_password": "Hide password"
 }

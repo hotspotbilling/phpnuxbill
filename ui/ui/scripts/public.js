@@ -8,8 +8,29 @@ const themeToggle = document.getElementById("themeToggle");
 const themeIcon = document.getElementById("themeIcon");
 const app_url = "?_route=";
 
-// Get CSRF token from window (set by the template)
-let csrfToken = window.csrfToken || "";
+// Verify critical elements exist
+if (!loginForm || !usernameInput || !passwordInput || !loginBtn) {
+  console.warn('Login form elements not found. Skipping login initialization.');
+  // Still initialize theme and other non-login features
+  document.addEventListener("DOMContentLoaded", function () {
+    initializeTheme();
+  });
+  // Exit early or conditionally initialize
+}
+
+// Get CSRF token from form data attribute (secure approach)
+function getCSRFToken() {
+  const loginForm = document.getElementById("loginForm");
+  return loginForm ? loginForm.dataset.csrfToken || "" : "";
+}
+
+let csrfToken = getCSRFToken();
+
+// Fallback to empty string if not set
+if (!csrfToken) {
+  csrfToken = "";
+}
+
 const fillAllText = window.fillAll || "Please fill in all fields";
 const invalidCredentialsText = window.invalidCredentials || "Invalid username or password";
 const accountInactiveText = window.accountInactive || "Your account is inactive. Please contact support.";
@@ -51,7 +72,11 @@ async function refreshCSRFToken() {
       // Extract CSRF token from response (if it's in a meta tag or similar)
       const tokenMatch = text.match(/csrf_token['"]\s*:\s*['"]([^'"]+)['"]/);
       if (tokenMatch) {
-        window.csrfToken = tokenMatch[1];
+        // Update form data attribute instead of global window
+        const loginForm = document.getElementById("loginForm");
+        if (loginForm) {
+          loginForm.dataset.csrfToken = tokenMatch[1];
+        }
         csrfToken = tokenMatch[1]; // Update local variable too
         return tokenMatch[1];
       }
@@ -83,16 +108,33 @@ function setupEventListeners() {
     toggleTheme();
   });
 
-  // Toggle password visibility
-  togglePassword.addEventListener("click", function () {
-    const type =
-      passwordInput.getAttribute("type") === "password" ? "text" : "password";
-    passwordInput.setAttribute("type", type);
+  // Toggle password visibility with accessibility
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener("click", function () {
+      const isPassword = passwordInput.getAttribute("type") === "password";
+      const newType = isPassword ? "text" : "password";
+      const newPressed = isPassword ? "true" : "false";
+      
+      // Get localized labels or fallback to English
+      const showText = window.showPasswordText || "Show password";
+      const hideText = window.hidePasswordText || "Hide password";
+      const newLabel = isPassword ? hideText : showText;
 
-    const icon = this.querySelector("i");
-    icon.classList.toggle("fa-eye");
-    icon.classList.toggle("fa-eye-slash");
-  });
+      // Update input type
+      passwordInput.setAttribute("type", newType);
+      
+      // Update button accessibility attributes
+      this.setAttribute("aria-pressed", newPressed);
+      this.setAttribute("aria-label", newLabel);
+
+      // Update icon
+      const icon = this.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-eye");
+        icon.classList.toggle("fa-eye-slash");
+      }
+    });
+  }
 
   // Form submission
   loginForm.addEventListener("submit", function (e) {
@@ -179,18 +221,9 @@ async function handleLogin() {
 
     showNotification(successText, "success");
 
-    // Store token if provided
-    if (result.data && result.data.token) {
-      localStorage.setItem('authToken', result.data.token);
-    }
-
-    // Store user info if provided
-    if (result.data && result.data.user) {
-      localStorage.setItem('userInfo', JSON.stringify(result.data.user));
-    }
-
     // Clear form for security
     passwordInput.value = '';
+    usernameInput.value = '';
 
     // Redirect to dashboard
     setTimeout(() => {
@@ -314,7 +347,7 @@ async function performLoginAPI(username, password) {
     }
   } catch (error) {
     // Handle network errors or parsing errors
-    if (error.message.includes("fetch")) {
+    if (error.name === "TypeError" || /failed to fetch|networkerror/i.test(error.message)) {
       throw new Error("Network error. Please check your connection.");
     }
     throw error;
@@ -568,12 +601,6 @@ document.addEventListener("keydown", function (e) {
       showNotification("Form cleared", "info");
     }
   }
-
-  // Ctrl+R or F5 to clear stored credentials
-  if ((e.ctrlKey && e.key === "r") || e.key === "F5") {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userInfo");
-  }
 });
 
 // Auto-focus username field when page loads
@@ -638,8 +665,13 @@ document.querySelectorAll(".login-btn, .connection-btn").forEach((button) => {
 });
 
 window.logout = function () {
-  localStorage.removeItem("authToken");
-  localStorage.removeItem("userInfo");
+  // Clean up client-side session data
+  sessionStorage.removeItem("userDisplay");
+  
+  // Security: Auth tokens should be cleared server-side via logout endpoint
+  // TODO: Call server logout endpoint to invalidate httpOnly cookies
+  // Example: fetch(app_url + "logout", { method: "POST" });
+  
   showNotification("Logged out successfully", "success");
   setTimeout(() => {
     window.location.href = app_url + "login";

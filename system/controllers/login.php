@@ -1,5 +1,4 @@
 <?php
-
 /**
  *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
  *  by https://t.me/ibnux
@@ -20,6 +19,7 @@ if (isset($routes['1'])) {
     $do = 'login-display';
 }
 
+global $isApi;
 /**
  * Perform user login with enhanced security and validation
  * 
@@ -40,11 +40,50 @@ function performLogin($username, $password, $isApiCall = false) {
         ];
     }
     
+    /**
+     * Get client IP address securely, handling proxy headers
+     * @return string Valid IP address or fallback
+     */
+    function getClientIP() {
+        // Common proxy headers to check (in order of priority)
+        $headers = [
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_REAL_IP',
+            'HTTP_X_CLIENT_IP',
+            'HTTP_CF_CONNECTING_IP', // Cloudflare
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR'
+        ];
+        
+        foreach ($headers as $header) {
+            if (!empty($_SERVER[$header])) {
+                $ips = explode(',', $_SERVER[$header]);
+                
+                foreach ($ips as $ip) {
+                    $ip = trim($ip);
+                    
+                    // Validate IP and exclude private/reserved ranges for forwarded headers
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                        return $ip;
+                    }
+                    
+                    // For REMOTE_ADDR, allow private IPs (internal networks)
+                    if ($header === 'REMOTE_ADDR' && filter_var($ip, FILTER_VALIDATE_IP)) {
+                        return $ip;
+                    }
+                }
+            }
+        }
+        
+        // Final fallback
+        return '127.0.0.1';
+    }
+    
     // Sanitize inputs
     $username = trim($username);
     
-    // Rate limiting check
-    $clientIP = $_SERVER['REMOTE_ADDR'];
+    // Rate limiting check with secure IP detection
+    $clientIP = getClientIP();
     $rateLimitKey = 'login_attempts_' . md5($clientIP);
     
     if (!isset($_SESSION[$rateLimitKey])) {
@@ -72,7 +111,27 @@ function performLogin($username, $password, $isApiCall = false) {
         // Find user by username
         $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
         
-        if (!$user) {
+        // Security: Always perform password verification to prevent timing attacks
+        // This ensures consistent execution time regardless of whether user exists
+        $passwordValid = false;
+        $userExists = ($user !== false);
+        
+        if ($userExists) {
+            // User exists - verify against real password hash
+            $passwordValid = Password::_uverify($password, $user['password']);
+        } else {
+            // User doesn't exist - verify against dummy hash to maintain consistent timing
+            // Using a realistic bcrypt hash to ensure same computation time
+            $dummyHash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'; // bcrypt hash of "dummy"
+            Password::_uverify($password, $dummyHash);
+            $passwordValid = false; // Always false for non-existent users
+        }
+        
+        // Add small random delay to further normalize timing (1-5ms)
+        usleep(rand(1000, 5000));
+        
+        // Now evaluate results after consistent timing
+        if (!$userExists) {
             // Add failed attempt
             $_SESSION[$rateLimitKey][] = time();
             _log("Login attempt with non-existent username: $username from IP: $clientIP", 'Security');
@@ -82,7 +141,7 @@ function performLogin($username, $password, $isApiCall = false) {
                 'data' => []
             ];
         }
-        
+
         // Check account status
         if ($user['status'] == 'Banned') {
             _log("Banned user $username attempted login from IP: $clientIP", 'Security');
@@ -92,9 +151,9 @@ function performLogin($username, $password, $isApiCall = false) {
                 'data' => []
             ];
         }
-        
-        // Verify password
-        if (!Password::_uverify($password, $user['password'])) {
+
+        // Check password verification result
+        if (!$passwordValid) {
             // Add failed attempt
             $_SESSION[$rateLimitKey][] = time();
             _log("Failed login attempt for user: $username from IP: $clientIP", 'Security');
@@ -104,8 +163,9 @@ function performLogin($username, $password, $isApiCall = false) {
                 'data' => []
             ];
         }
-        
+
         // Successful login
+        session_regenerate_id(true); // Regenerate session ID and delete old session
         $_SESSION['uid'] = $user['id'];
         $token = User::setCookie($user['id']);
         

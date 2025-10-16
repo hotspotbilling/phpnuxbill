@@ -910,6 +910,6 @@ input[type="password"]:focus ~ .input-icon {
 }
 
 a {
-  color: #4facfe;
+  color: var(--text-primary);
   text-decoration: none;
 }

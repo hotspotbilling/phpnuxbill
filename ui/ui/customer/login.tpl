@@ -21,15 +21,18 @@
     </div>
     <div class="login-card">
         <div class="logo-section">
-            <div class="theme-toggle" id="themeToggle">
+            <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme" aria-pressed="false">
                 <i class="fas fa-sun" id="themeIcon"></i>
-            </div>
+            </button>
             <h1 class="brand-name">{$_c['CompanyName']}</h1>
             <p class="subtitle">{Lang::T('Log in to Member Panel')}</p>
         </div>
 
-        <form class="login-form" id="loginForm">
+        <form class="login-form" id="loginForm" data-csrf-token="{$csrf_token}">
             <div class="form-group">
+                <label for="username" class="visually-hidden">
+                    {if $_c['registration_username'] == 'phone'}{Lang::T('Phone Number')}{elseif $_c['registration_username'] == 'email'}{Lang::T('Email')}{else}{Lang::T('Username')}{/if}
+                </label>
                 <div class="input-wrapper">
                     {if $_c['registration_username'] == 'phone'}
                     <i class="fas fa-phone-alt input-icon"></i>
@@ -39,15 +42,23 @@
                     <i class="fas fa-user input-icon"></i>
                     {/if}
                     <input type="text" id="username" name="username"
-                        placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{elseif $_c['registration_username'] == 'email'}{Lang::T('Email')}{else}{Lang::T('Username')}{/if}">
+                           placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{elseif $_c['registration_username'] == 'email'}{Lang::T('Email')}{else}{Lang::T('Username')}{/if}"
+                           required
+                           aria-label="{if $_c['registration_username'] == 'phone'}{Lang::T('Phone Number')}{elseif $_c['registration_username'] == 'email'}{Lang::T('Email')}{else}{Lang::T('Username')}{/if}">
                 </div>
             </div>
 
             <div class="form-group">
+                <label for="password" class="visually-hidden">{Lang::T('Password')}</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock input-icon"></i>
-                    <input type="password" id="password" name="password" placeholder="{Lang::T('Password')}">
-                    <button type="button" class="toggle-password" id="togglePassword">
+                    <input type="password" id="password" name="password" 
+                           placeholder="{Lang::T('Password')}" 
+                           required
+                           aria-label="{Lang::T('Password')}">
+                    <button type="button" class="toggle-password" id="togglePassword"
+                            aria-label="{Lang::T('Show password')}"
+                            aria-pressed="false">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
@@ -83,8 +94,22 @@
         </form>
     </div>
 </div>
+<style>
+    /* Accessibility: Visually hidden labels for screen readers */
+    .visually-hidden {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
+</style>
 <script>
-    window.csrfToken = '{$csrf_token}';
+    // Security: CSRF token moved to form data attribute instead of global window
     window.successText = '{Lang::T("Login successful")}! {Lang::T("Redirecting...")}';
     window.fillAll = '{Lang::T("Please fill in all fields")}';
     window.invalidCredentials = '{Lang::T("Invalid username or password")}';
@@ -97,6 +122,10 @@
     window.tokenExpired = '{Lang::T("Security token expired. Please refresh the page and try again.")}';
     window.tokenRefreshed = '{Lang::T("Security token refreshed. Please try again.")}';
     window.tokenRefreshError = '{Lang::T("Failed to refresh security token. Please refresh the page and try again.")}';
+    
+    // Accessibility: Password toggle labels
+    window.showPasswordText = '{Lang::T("Show password")}';
+    window.hidePasswordText = '{Lang::T("Hide password")}';
     window.accountSuspended = '{Lang::T("Your account has been suspended. Please contact support.")}';
     window.connectionError = '{Lang::T("Connection problem. Please check your internet and try again.")}';
     window.unknownError = '{Lang::T("An unknown error occurred. Please try again later.")}';
