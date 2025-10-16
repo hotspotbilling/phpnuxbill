@@ -20,7 +20,161 @@ if (isset($routes['1'])) {
     $do = 'login-display';
 }
 
+/**
+ * Perform user login with enhanced security and validation
+ * 
+ * @param string $username User's username
+ * @param string $password User's password
+ * @param bool $isApiCall Whether this is an API call (affects response format)
+ * @return array Result array with success status, message, and data
+ */
+function performLogin($username, $password, $isApiCall = false) {
+    global $config;
+    
+    // Input validation
+    if (empty($username) || empty($password)) {
+        return [
+            'success' => false,
+            'message' => Lang::T('Please fill in all fields'),
+            'data' => []
+        ];
+    }
+    
+    // Sanitize inputs
+    $username = trim($username);
+    
+    // Rate limiting check
+    $clientIP = $_SERVER['REMOTE_ADDR'];
+    $rateLimitKey = 'login_attempts_' . md5($clientIP);
+    
+    if (!isset($_SESSION[$rateLimitKey])) {
+        $_SESSION[$rateLimitKey] = [];
+    }
+    
+    // Remove attempts older than 15 minutes
+    $_SESSION[$rateLimitKey] = array_filter($_SESSION[$rateLimitKey], function($time) {
+        return (time() - $time) < 900; // 15 minutes
+    });
+    
+    // Check if too many attempts (max 5 per 15 minutes)
+    if (count($_SESSION[$rateLimitKey]) >= 5) {
+        _log("Too many login attempts from IP: $clientIP", 'Security');
+        return [
+            'success' => false,
+            'message' => Lang::T('Too many login attempts. Please try again later.'),
+            'data' => []
+        ];
+    }
+    
+    try {
+        run_hook('customer_login'); #HOOK
+        
+        // Find user by username
+        $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+        
+        if (!$user) {
+            // Add failed attempt
+            $_SESSION[$rateLimitKey][] = time();
+            _log("Login attempt with non-existent username: $username from IP: $clientIP", 'Security');
+            return [
+                'success' => false,
+                'message' => Lang::T('Invalid username or password'),
+                'data' => []
+            ];
+        }
+        
+        // Check account status
+        if ($user['status'] == 'Banned') {
+            _log("Banned user $username attempted login from IP: $clientIP", 'Security');
+            return [
+                'success' => false,
+                'message' => Lang::T('This account status') . ' : ' . Lang::T($user['status']),
+                'data' => []
+            ];
+        }
+        
+        // Verify password
+        if (!Password::_uverify($password, $user['password'])) {
+            // Add failed attempt
+            $_SESSION[$rateLimitKey][] = time();
+            _log("Failed login attempt for user: $username from IP: $clientIP", 'Security');
+            return [
+                'success' => false,
+                'message' => Lang::T('Invalid username or password'),
+                'data' => []
+            ];
+        }
+        
+        // Successful login
+        $_SESSION['uid'] = $user['id'];
+        $token = User::setCookie($user['id']);
+        
+        // Update last login time
+        $user->last_login = date('Y-m-d H:i:s');
+        $user->save();
+        
+        // Clear failed attempts on successful login
+        unset($_SESSION[$rateLimitKey]);
+        
+        // Log successful login
+        _log($username . ' ' . Lang::T('Login Successful'), 'User', $user['id']);
+        
+        $responseData = [];
+        if ($token) {
+            $responseData['token'] = "u." . $token;
+        }
+        
+        // Add user info for API responses
+        if ($isApiCall) {
+            $responseData['user'] = [
+                'id' => $user['id'],
+                'username' => $user['username'],
+                'fullname' => $user['fullname'],
+                'status' => $user['status'],
+                'last_login' => $user['last_login']
+            ];
+        }
+        
+        return [
+            'success' => true,
+            'message' => Lang::T('Login Successful'),
+            'data' => $responseData
+        ];
+        
+    } catch (Exception $e) {
+        _log("Login error: " . $e->getMessage(), 'Error');
+        return [
+            'success' => false,
+            'message' => Lang::T('An error occurred during login. Please try again.'),
+            'data' => []
+        ];
+    }
+}
+
 switch ($do) {
+    case 'api':
+        // Handle AJAX/API login requests
+        header('Content-Type: application/json');
+        
+        $username = _post('username');
+        $password = _post('password');
+        $csrf_token = _post('csrf_token');
+        
+        // Verify CSRF token for API requests
+        if (!Csrf::check($csrf_token)) {
+            echo json_encode([
+                'success' => false,
+                'message' => Lang::T('Invalid or Expired CSRF Token'),
+                'data' => []
+            ]);
+            exit;
+        }
+        
+        $result = performLogin($username, $password, true);
+        
+        echo json_encode($result);
+        exit;
+        
     case 'post':
         $username = _post('username');
         $password = _post('password');
@@ -29,42 +183,23 @@ switch ($do) {
             _msglog('e', Lang::T('Invalid or Expired CSRF Token'));
             r2(getUrl('login'));
         }
-        run_hook('customer_login'); #HOOK
-        if ($username != '' and $password != '') {
-            $d = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
-            if ($d) {
-                $d_pass = $d['password'];
-                if ($d['status'] == 'Banned') {
-                    _alert(Lang::T('This account status') . ' : ' . Lang::T($d['status']), 'danger', "");
-                }
-                if (Password::_uverify($password, $d_pass) == true) {
-                    $_SESSION['uid'] = $d['id'];
-                    $token = User::setCookie($d['id']);
-                    $d->last_login = date('Y-m-d H:i:s');
-                    $d->save();
-                    _log($username . ' ' . Lang::T('Login Successful'), 'User', $d['id']);
-                    if ($isApi) {
-                        if ($token) {
-                            showResult(true, Lang::T('Login Successful'), ['token' => "u." . $token]);
-                        } else {
-                            showResult(false, Lang::T('Invalid Username or Password'));
-                        }
-                    }
-                    _alert(Lang::T('Login Successful'), 'success', "home");
-                } else {
-                    _msglog('e', Lang::T('Invalid Username or Password'));
-                    _log($username . ' ' . Lang::T('Failed Login'), 'User');
-                    r2(getUrl('login'));
-                }
+        
+        $result = performLogin($username, $password, false);
+        
+        if ($result['success']) {
+            if ($isApi) {
+                showResult(true, $result['message'], $result['data']);
             } else {
-                _msglog('e', Lang::T('Invalid Username or Password'));
-                r2(getUrl('login'));
+                _alert($result['message'], 'success', "home");
             }
         } else {
-            _msglog('e', Lang::T('Invalid Username or Password'));
-            r2(getUrl('login'));
+            if ($isApi) {
+                showResult(false, $result['message']);
+            } else {
+                _msglog('e', $result['message']);
+                r2(getUrl('login'));
+            }
         }
-
         break;
 
     case 'activation':
