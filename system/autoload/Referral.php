@@ -268,11 +268,11 @@ class Referral
         return ORM::for_table('tbl_referral_relationships')
             ->table_alias('r')
             ->select('r.*')
-            ->join('tbl_customers', array('c.id', '=', 'r.referred_id'), 'c')
             ->select('c.username', 'referred_username')
             ->select('c.fullname', 'referred_fullname')
             ->select('c.email', 'referred_email')
             ->select('c.created_at', 'signup_date')
+            ->join('tbl_customers', array('c.id', '=', 'r.referred_id'), 'c')
             ->where('r.referrer_id', $customer_id)
             ->order_by_desc('r.created_at')
             ->find_many();
