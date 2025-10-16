@@ -52,7 +52,6 @@ class referrals
 
         // Get the customer who referred this customer
         $referrer = Referral::getReferrer($user['id']);
-
         $ui->assign('referral_code', $referral_code);
         $ui->assign('referral_link', $referral_link);
         $ui->assign('referred_customers', $referred_customers);
