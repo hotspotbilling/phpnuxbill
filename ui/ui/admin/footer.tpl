@@ -35,39 +35,96 @@
 <script>
     const toggleIcon = document.getElementById('toggleIcon');
     const body = document.body;
-    const savedMode = localStorage.getItem('mode');
+    let currentMode = localStorage.getItem('mode') || 'system';
 
-    // Function to set the mode and update the icon
-    function setMode(mode) {
-        if (mode === 'dark') {
+    // Function to get system preference
+    function getSystemPreference() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    // Function to apply the theme
+    function applyTheme(theme) {
+        body.classList.remove('dark-mode');
+        if (theme === 'dark') {
             body.classList.add('dark-mode');
-            toggleIcon.innerHTML = `
-               <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-sun"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" /></svg>`;
-        } else {
-            body.classList.remove('dark-mode');
-            toggleIcon.innerHTML = `
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-moon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg>`;
         }
     }
 
-    // Initialize mode based on saved preference
-    if (savedMode === 'dark') {
-        setMode('dark');
-    } else {
-        setMode('light');
+    // Function to update the icon based on current mode
+    function updateIcon() {
+        const effectiveTheme = currentMode === 'system' ? getSystemPreference() : currentMode;
+
+        if (currentMode === 'system') {
+            toggleIcon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon icon-tabler icons-tabler-filled icon-tabler-brightness"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 3.34a10 10 0 1 1 -15 8.66l.005 -.324a10 10 0 0 1 14.995 -8.336m-9 1.732a8 8 0 0 0 4.001 14.928l-.001 -16a8 8 0 0 0 -4 1.072" /></svg>`;
+        } else if (effectiveTheme === 'dark') {
+            toggleIcon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                     stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-sun">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
+                    <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/>
+                </svg>`;
+        } else {
+            toggleIcon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                     stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-moon">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"/>
+                </svg>`;
+        }
     }
 
-    // Toggle mode on click
+    // Function to set mode and apply changes
+    function setMode(mode) {
+        currentMode = mode;
+        localStorage.setItem('mode', mode);
+
+        const effectiveTheme = mode === 'system' ? getSystemPreference() : mode;
+        applyTheme(effectiveTheme);
+        updateIcon();
+    }
+
+    // Initialize theme on page load
+    function initializeTheme() {
+        const effectiveTheme = currentMode === 'system' ? getSystemPreference() : currentMode;
+        applyTheme(effectiveTheme);
+        updateIcon();
+    }
+
+    // Listen for system theme changes
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+            if (currentMode === 'system') {
+                const newTheme = getSystemPreference();
+                applyTheme(newTheme);
+            }
+        });
+    }
+
+    // Toggle mode on click (cycle through: system -> light -> dark -> system)
     toggleIcon.addEventListener('click', () => {
-        if (body.classList.contains('dark-mode')) {
-            setMode('light');
-            localStorage.setItem('mode', 'light');
-        } else {
-            setMode('dark');
-            localStorage.setItem('mode', 'dark');
+        switch (currentMode) {
+            case 'system':
+                setMode('light');
+                break;
+            case 'light':
+                setMode('dark');
+                break;
+            case 'dark':
+                setMode('system');
+                break;
+            default:
+                setMode('system');
         }
     });
+
+    // Initialize theme when page loads
+    initializeTheme();
 </script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const skeleton = document.querySelector('.dashboard-skeleton');
