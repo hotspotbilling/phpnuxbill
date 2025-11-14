@@ -30,11 +30,11 @@ if ($isCli) {
     // Check if the user is authenticated and authorized or valid API key
     if (!$isCli && (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) && (!isset($_GET['secret']) || $_GET['secret'] !== $config['api_key'])) {
         // Log unauthorized access
-        _log("Unauthorized access attempt to clean_expired_vouchers.php from " . $_SERVER['REMOTE_ADDR'] . " User-Agent: " . $_SERVER['HTTP_USER_AGENT'], 'Warning');
+        _log("Unauthorized access attempt to clean_expired_vouchers.php from " . $_SERVER['REMOTE_ADDR'] . " User-Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'), 'Warning');
 
         // Return HTTP 403 Forbidden
         header('HTTP/1.1 403 Forbidden');
-        echo "Access denied. Please ensure you are logged in with the appropriate privileges or provide a valid API key.";
+        echo "Access denied. You do not have permission to access this resource.";
         exit(1);
     }
 }

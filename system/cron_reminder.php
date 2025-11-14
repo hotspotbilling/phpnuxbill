@@ -19,7 +19,8 @@ if (php_sapi_name() !== 'cli') {
 if (!$isCli) {
     if (!isset($_GET['secret']) || $_GET['secret'] !== $config['api_key']) {
         header('HTTP/1.1 403 Forbidden');
-        echo "Access denied. Invalid API key.</pre>";
+        _log("Unauthorized access attempt to cron.php from " . $_SERVER['REMOTE_ADDR'] . " User-Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'), 'Warning');
+        echo "Access denied. You do not have permission to access this resource.";
         exit(1);
     }
 }
@@ -71,17 +72,9 @@ function sendReminderNotifications($config, $customer, $planName, $price, $messa
                     $method
                 ) . "\n";
                 // After successful notification
-                file_put_contents(
-                    'logs/reminder_success.log',
-                    date('Y-m-d H:i:s') . " [SUCCESS] $method notification sent to {$customer['username']}.\n",
-                    FILE_APPEND
-                );
+                _log(date('Y-m-d H:i:s') . " [SUCCESS] $method notification sent to {$customer['username']}.", 'Info'); 
             } catch (Exception $e) {
-                file_put_contents(
-                    'logs/reminder.log',
-                    date('Y-m-d H:i:s') . " [ERROR] $method notification for {$customer['username']}: {$e->getMessage()}\n",
-                    FILE_APPEND
-                );
+                _log(date('Y-m-d H:i:s') . " [ERROR] $method notification for {$customer['username']}: {$e->getMessage()}", 'Error');
                 sendTelegram("Failed to send $days-day $method reminder to {$customer['username']}: {$e->getMessage()}");
             }
         }
