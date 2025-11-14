@@ -1,64 +1,58 @@
 <?php
+
 /**
- * Pro version
- * Cron job for reminding users about expiration
- * Example: 0 7 * * * /usr/bin/php /var/www/system/cron_reminder.php
- */
+ * PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ * This file for reminding user about expiration
+ * Example to run every at 7:00 in the morning
+ * 0 7 * * * /usr/bin/php /var/www/system/cron_reminder.php
+ **/
 
 include "../init.php";
 
+$isCli = true;
 if (php_sapi_name() !== 'cli') {
-    die("This script must be run from the command line.\n");
+    $isCli = false;
+    echo "<pre>";
 }
 
-date_default_timezone_set('UTC'); // Set appropriate time zone
+$d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->whereNotEqual('customer_id', '0')->find_many();
 
-// Validate configuration
-$requiredConfigs = [
-    'notification_reminder_1day', 'notification_reminder_3days', 'notification_reminder_7days',
-    'user_notification_reminder_sms', 'user_notification_reminder_wa',
-    'user_notification_reminder_email', 'user_notification_reminder_inbox',
-    'user_notification_reminder_push'
-];
-foreach ($requiredConfigs as $key) {
-    if (!isset($config[$key])) {
-        die("Error: Configuration key '$key' is missing.\n");
-    }
-}
+run_hook('cronjob_reminder'); #HOOK
 
-const REMINDER_DAYS = [1, 3, 7];
-
-// Fetch active recharges with plan and customer data
-$d = ORM::for_table('tbl_user_recharges')
-    ->select('tbl_user_recharges.*')
-    ->select('tbl_plans.name_plan')
-    ->select('tbl_plans.price')
-    ->select('tbl_plans.type')
-    ->select('tbl_plans.validity_unit')
-    ->select('tbl_customers.*')
-    ->join('tbl_plans', ['tbl_user_recharges.plan_id', '=', 'tbl_plans.id'])
-    ->join('tbl_customers', ['tbl_user_recharges.customer_id', '=', 'tbl_customers.id'])
-    ->where('tbl_user_recharges.status', 'on')
-    ->whereNotEqual('tbl_user_recharges.customer_id', '0')
-    ->find_many();
-
-run_hook('cronjob_reminder'); // HOOK
 
 echo "PHP Time\t" . date('Y-m-d H:i:s') . "\n";
-echo "MYSQL Time\t" . ORM::for_table('tbl_user_recharges')->raw_query('SELECT NOW() AS WAKTU')->find_one()['WAKTU'] . "\n";
-
-// Calculate reminder dates
-$reminderDates = [];
-foreach (REMINDER_DAYS as $days) {
-    $reminderDates[$days] = date('Y-m-d', strtotime("+$days day"));
+$res = ORM::raw_execute('SELECT NOW() AS WAKTU;');
+$statement = ORM::get_last_statement();
+$rows = [];
+while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+    echo "MYSQL Time\t" . $row['WAKTU'] . "\n";
 }
-print_r($reminderDates);
 
-function sendNotifications($config, $customer, $planName, $price, $messageType, $days) {
+
+$day7 = date('Y-m-d', strtotime("+7 day"));
+$day3 = date('Y-m-d', strtotime("+3 day"));
+$day1 = date('Y-m-d', strtotime("+1 day"));
+print_r([$day1, $day3, $day7]);
+
+
+/**
+ * Send package notifications to users who have less than $days days left for expiration
+ *
+ * @param array $config Configuration array
+ * @param array $customer Customer array
+ * @param string $planName Package name
+ * @param float $price Package price
+ * @param string $messageType Notification message type
+ * @param int $days Days left for expiration
+ * @return array Array of outputs from each notification method
+ */
+
+function sendReminderNotifications($config, $customer, $planName, $price, $messageType, $days)
+{
     $methods = ['sms', 'wa', 'email', 'inbox', 'push'];
     $outputs = [];
     foreach ($methods as $method) {
-        if ($config["user_notification_reminder_$method"]) {
+        if (isset($config["user_notification_reminder_$method"]) && $config["user_notification_reminder_$method"]) {
             try {
                 $outputs[] = Message::sendPackageNotification(
                     $customer,
@@ -67,6 +61,12 @@ function sendNotifications($config, $customer, $planName, $price, $messageType, 
                     $messageType,
                     $method
                 ) . "\n";
+                // After successful notification
+                file_put_contents(
+                    'logs/reminder_success.log',
+                    date('Y-m-d H:i:s') . " [SUCCESS] $method notification sent to {$customer['username']}.\n",
+                    FILE_APPEND
+                );
             } catch (Exception $e) {
                 file_put_contents(
                     'logs/reminder.log',
@@ -80,30 +80,65 @@ function sendNotifications($config, $customer, $planName, $price, $messageType, 
     return $outputs;
 }
 
-foreach ($d as $index => $ds) {
-    $expirationDate = date('Y-m-d', strtotime($ds['expiration']));
-    foreach (REMINDER_DAYS as $days) {
-        if ($expirationDate === $reminderDates[$days] && $config["notification_reminder_{$days}days"] !== 'no') {
-            // Determine price for postpaid plans
-            $price = $ds['price'];
-            if ($ds['validity_unit'] === 'Period') {
-                $add_inv = User::getAttribute("Invoice", $ds['customer_id']);
-                if (!empty($add_inv) && $add_inv != 0) {
-                    $price = $add_inv;
-                }
+foreach ($d as $ds) {
+    if (in_array($ds['expiration'], [$day1, $day3, $day7])) {
+        $u = ORM::for_table('tbl_user_recharges')->where('id', $ds['id'])->find_one();
+        $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
+        $c = ORM::for_table('tbl_customers')->where('id', $ds['customer_id'])->find_one();
+        if ($p['validity_unit'] == 'Period') {
+            // Postpaid price from field
+            $add_inv = User::getAttribute("Invoice", $ds['customer_id']);
+            if (empty($add_inv) or $add_inv == 0) {
+                $price = $p['price'];
+            } else {
+                $price = $add_inv;
             }
+        } else {
+            $price = $p['price'];
+        }
 
-            // Send notifications
-            $messageType = Message::getMessageType($ds['type'], Lang::getNotifText("reminder_{$days}_days"));
-            $outputs = sendNotifications($config, $ds, $ds['name_plan'], $price, $messageType, $days);
-            foreach ($outputs as $output) {
-                echo $output;
+        if ($ds['expiration'] == $day7 && $config['notification_reminder_7days'] !== 'no') {
+            try {
+                print_r(sendReminderNotifications(
+                    $config,
+                    $c,
+                    $p['name_plan'],
+                    $price,
+                    Message::getMessageType($p['type'], Lang::getNotifText('reminder_7_day')),
+                    $config['user_notification_reminder']
+                )) . "\n";
+                sleep(1); // Add 1 second delay after sending notification
+            } catch (Exception $e) {
+                sendTelegram("Cron Reminder failed to send 7-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
+            }
+        } else if ($ds['expiration'] == $day3 && $config['notification_reminder_3days'] !== 'no') {
+            try {
+                print_r(sendReminderNotifications(
+                    $config,
+                    $c,
+                    $p['name_plan'],
+                    $price,
+                    Message::getMessageType($p['type'], Lang::getNotifText('reminder_3_day')),
+                    $config['user_notification_reminder']
+                )) . "\n";
+                sleep(1); // Add 1 second delay after sending notification
+            } catch (Exception $e) {
+                sendTelegram("Cron Reminder failed to send 3-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
+            }
+        } else if ($ds['expiration'] == $day1 && $config['notification_reminder_1day'] !== 'no') {
+            try {
+                print_r(sendReminderNotifications(
+                    $config,
+                    $c,
+                    $p['name_plan'],
+                    $price,
+                    Message::getMessageType($p['type'], Lang::getNotifText('reminder_1_day')),
+                    $config['user_notification_reminder']
+                )) . "\n";
+                sleep(1); // Add 1 second delay after sending notification
+            } catch (Exception $e) {
+                sendTelegram("Cron Reminder failed to send 1-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
         }
-    }
-
-    // Batch processing: Pause every 100 records
-    if ($index % 100 === 0 && $index > 0) {
-        sleep(1);
     }
 }

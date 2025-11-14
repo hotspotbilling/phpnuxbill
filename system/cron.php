@@ -1,6 +1,52 @@
 <?php
 
 
+/**
+ * Send package notifications to users who have less than $days days left for expiration
+ *
+ * @param array $config Configuration array
+ * @param array $customer Customer array
+ * @param string $planName Package name
+ * @param float $price Package price
+ * @param string $messageType Notification message type
+ * @param int $days Days left for expiration
+ * @return array Array of outputs from each notification method
+ */
+
+function sendReminderNotifications($config, $customer, $planName, $price, $messageType, $days)
+{
+    $methods = ['sms', 'wa', 'email', 'inbox', 'push'];
+    $outputs = [];
+    foreach ($methods as $method) {
+        if (isset($config["user_notification_expired_$method"]) && $config["user_notification_expired_$method"]) {
+            try {
+                $outputs[] = Message::sendPackageNotification(
+                    $customer,
+                    $planName,
+                    $price,
+                    $messageType,
+                    $method
+                ) . "\n";
+                // After successful notification
+                file_put_contents(
+                    'logs/expiration_success.log',
+                    date('Y-m-d H:i:s') . " [SUCCESS] $method notification sent to {$customer['username']}.\n",
+                    FILE_APPEND
+                );
+            } catch (Exception $e) {
+                file_put_contents(
+                    'logs/expiration_error.log',
+                    date('Y-m-d H:i:s') . " [ERROR] $method notification for {$customer['username']}: {$e->getMessage()}\n",
+                    FILE_APPEND
+                );
+                sendTelegram("Failed to send $days-day $method reminder to {$customer['username']}: {$e->getMessage()}");
+            }
+        }
+    }
+    return $outputs;
+}
+
+
 session_start();
 
 include "../init.php";
@@ -99,13 +145,14 @@ foreach ($d as $ds) {
 
             // Send notification and update user status
             try {
-                echo Message::sendPackageNotification(
+                print_r(sendReminderNotifications(
+                    $config,
                     $c,
                     $u['namebp'],
                     $p['price'],
                     Message::getMessageType($p['type'], $textExpired),
                     $config['user_notification_expired']
-                ) . "\n";
+                )) . "\n";
                 $u->status = 'off';
                 $u->save();
             } catch (Throwable $e) {
