@@ -15,6 +15,15 @@ if (php_sapi_name() !== 'cli') {
     echo "<pre>";
 }
 
+// Require API Key to run from web
+if (!$isCli) {
+    if (!isset($_GET['api_key']) || $_GET['api_key'] !== $config['api_key']) {
+        header('HTTP/1.1 403 Forbidden');
+        echo "Access denied. Invalid API key.</pre>";
+        exit(1);
+    }
+}
+
 $d = ORM::for_table('tbl_user_recharges')->where('status', 'on')->whereNotEqual('customer_id', '0')->find_many();
 
 run_hook('cronjob_reminder'); #HOOK

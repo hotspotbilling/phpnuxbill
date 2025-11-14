@@ -1269,6 +1269,12 @@
         0 7 * * * cd {$dir} && {$php} cron_reminder.php
     </p>
     <br>
+    <h4><b>{Lang::T('Run Cron From Web')}</b></h4>
+    <p>
+        <a href="{$app_url}/system/cron.php?api_key={$_c['api_key']}" target="_blank">{$app_url}/system/cron.php?api_key={$_c['api_key']}</a><br>
+        <a href="{$app_url}/system/cron_reminder.php?api_key={$_c['api_key']}" target="_blank">{$app_url}/system/cron_reminder.php?api_key={$_c['api_key']}</a>
+    </p>    
+    <br>
     <h4><b>{Lang::T('Cron Settings to clear expired vouchers older than 30 days')}</b></h4>
     <p>
         # {Lang::T('Clear expired vouchers cronjob to run every 12AM 0r 00:00HR')}<br>

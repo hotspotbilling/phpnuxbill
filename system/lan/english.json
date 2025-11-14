@@ -1274,5 +1274,8 @@
     "Enter_percentage": "Enter percentage",
     "Value_of_the_discount__percentage__max_100_": "Value of the discount (percentage, max 100)",
     "Enter_amount": "Enter amount",
-    "Value_of_the_discount__amount_": "Value of the discount (amount)"
+    "Value_of_the_discount__amount_": "Value of the discount (amount)",
+    "Use_the_below_to_run_the_cron_from_web": "Use the below to run the cron from web",
+    "Cron_Job_last_ran_on": "Cron Job last ran on",
+    "Run_Cron_From_Web": "Run Cron From Web"
 }
