@@ -60,7 +60,7 @@ if (!$isCli) {
 
 
 // Check if the user is authenticated and authorized or valid API key
-if (!$isCli && (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) && (!isset($_GET['api_key']) || $_GET['api_key'] !== $config['api_key'])) {
+if (!$isCli && (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) && (!isset($_GET['secret']) || $_GET['secret'] !== $config['api_key'])) {
     // Log unauthorized access
     _log("Unauthorized access attempt to cron.php from " . $_SERVER['REMOTE_ADDR'] . " User-Agent: " . $_SERVER['HTTP_USER_AGENT'], 'Warning');
 

@@ -17,7 +17,7 @@ if (php_sapi_name() !== 'cli') {
 
 // Require API Key to run from web
 if (!$isCli) {
-    if (!isset($_GET['api_key']) || $_GET['api_key'] !== $config['api_key']) {
+    if (!isset($_GET['secret']) || $_GET['secret'] !== $config['api_key']) {
         header('HTTP/1.1 403 Forbidden');
         echo "Access denied. Invalid API key.</pre>";
         exit(1);
