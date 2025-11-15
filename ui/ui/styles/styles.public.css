@@ -393,7 +393,16 @@ body {
 }
 
 input[type="text"],
-input[type="password"] {
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="file"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="tel"],
+input[type="textarea"]
+ {
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
   border: 2px solid var(--input-border);
