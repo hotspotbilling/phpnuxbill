@@ -8,14 +8,10 @@ const themeToggle = document.getElementById("themeToggle");
 const themeIcon = document.getElementById("themeIcon");
 const app_url = "?_route=";
 
-// Verify critical elements exist
-if (!loginForm || !usernameInput || !passwordInput || !loginBtn) {
-  console.warn('Login form elements not found. Skipping login initialization.');
-  // Still initialize theme and other non-login features
-  document.addEventListener("DOMContentLoaded", function () {
-    initializeTheme();
-  });
-  // Exit early or conditionally initialize
+// Verify critical elements exist (but don't exit - allow registration page features)
+const isLoginPage = !!(loginForm && usernameInput && passwordInput && loginBtn);
+if (!isLoginPage) {
+  console.warn('Login form elements not found. This may be a registration or other page.');
 }
 
 // Get CSRF token from form data attribute (secure approach)
@@ -102,15 +98,18 @@ function validateCSRFToken() {
 // Setup event listeners
 function setupEventListeners() {
   // Theme toggle
-  themeToggle.addEventListener("click", function (e) {
-    e.preventDefault();
-    //console.log("Theme toggle clicked, current theme:", currentTheme);
-    toggleTheme();
-  });
+  if (themeToggle) {
+    themeToggle.addEventListener("click", function (e) {
+      e.preventDefault();
+      //console.log("Theme toggle clicked, current theme:", currentTheme);
+      toggleTheme();
+    });
+  }
 
   // Toggle password visibility with accessibility
   if (togglePassword && passwordInput) {
-    togglePassword.addEventListener("click", function () {
+    togglePassword.addEventListener("click", function (e) {
+      e.preventDefault();
       const isPassword = passwordInput.getAttribute("type") === "password";
       const newType = isPassword ? "text" : "password";
       const newPressed = isPassword ? "true" : "false";
@@ -136,11 +135,45 @@ function setupEventListeners() {
     });
   }
 
-  // Form submission
-  loginForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    handleLogin();
-  });
+  // Toggle confirm password visibility (for registration page)
+  const togglePasswordConfirm = document.getElementById("togglePasswordConfirm");
+  const cpasswordInput = document.getElementById("cpassword");
+  
+  if (togglePasswordConfirm && cpasswordInput) {
+    togglePasswordConfirm.addEventListener("click", function (e) {
+      e.preventDefault();
+      const isPassword = cpasswordInput.getAttribute("type") === "password";
+      const newType = isPassword ? "text" : "password";
+      const newPressed = isPassword ? "true" : "false";
+      
+      // Get localized labels or fallback to English
+      const showText = window.showPasswordText || "Show password";
+      const hideText = window.hidePasswordText || "Hide password";
+      const newLabel = isPassword ? hideText : showText;
+
+      // Update input type
+      cpasswordInput.setAttribute("type", newType);
+      
+      // Update button accessibility attributes
+      this.setAttribute("aria-pressed", newPressed);
+      this.setAttribute("aria-label", newLabel);
+
+      // Update icon
+      const icon = this.querySelector("i");
+      if (icon) {
+        icon.classList.toggle("fa-eye");
+        icon.classList.toggle("fa-eye-slash");
+      }
+    });
+  }
+
+  // Form submission (only for login form)
+  if (loginForm) {
+    loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      handleLogin();
+    });
+  }
 
   // Input focus animations
   const inputs = document.querySelectorAll(
