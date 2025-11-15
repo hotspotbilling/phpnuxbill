@@ -1,141 +1,389 @@
 {include file="customer/header-public.tpl"}
-<div class="hidden-xs" style="height:100px"></div>
+<style>
+    /* Accessibility: Visually hidden labels for screen readers */
+    .visually-hidden {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+    }
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="panel panel-info">
-            <div class="panel-heading">{Lang::T('Registration Info')}</div>
-            <div class="panel-body">
-                {include file="$_path/../pages/Registration_Info.html"}
+    /* Register specific layout adjustments */
+    .register-form-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .card-header-section {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--card-border);
+        background: var(--card-bg);
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 1em;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .card-title i {
+        color: #667eea;
+        font-size: 1.1em;
+    }
+
+    .card-body-section {
+        padding: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.85em;
+    }
+
+    .optional {
+        font-size: 0.85em;
+        color: var(--text-tertiary);
+        font-weight: normal;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 12px;
+        color: var(--text-tertiary);
+        pointer-events: none;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.4rem 0.4rem 0.4rem 2rem;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.85em;
+        transition: all 0.2s;
+        font-family: inherit;
+        resize: vertical;
+    }
+
+    textarea.form-control {
+        min-height: 60px;
+        padding: 0.4rem;
+        border: 2px solid var(--input-border);
+        border-radius: 8px;
+    }
+
+    input[type="file"].form-control {
+        border: 2px solid var(--input-border);
+    }
+
+    input[type="email"].form-control {
+        border: 2px solid var(--input-border);
+    }
+
+    .form-control:focus {
+        background: var(--input-bg-focus);
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control:read-only {
+        background-color: var(--input-bg);
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.75em;
+        color: var(--text-tertiary);
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        color: var(--text-tertiary);
+        cursor: pointer;
+        padding: 8px;
+        font-size: 1.1em;
+        transition: color 0.2s;
+        z-index: 10;
+    }
+
+    .toggle-password:hover {
+        color: #667eea;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85em;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        flex: 1;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--input-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--input-border);
+    }
+
+    .btn-secondary:hover {
+        background: var(--input-bg-focus);
+        border-color: #667eea;
+    }
+
+    @media (max-width: 768px) {
+        .register-form-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="login-container">
+    <div class="announcement-panel">
+        <div class="announcement-header">
+            <div class="announcement-icon">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <h3>{Lang::T('Registration Info')}</h3>
+        </div>
+
+        <div class="announcements">
+            <div class="announcement-content">
+                <p>{$InfoPath = "{$PAGES_PATH}/Registration_Info.html"}
+                    {if file_exists($InfoPath)}
+                    {include file=$InfoPath}
+                    {/if}
+                </p>
             </div>
         </div>
     </div>
-    <form enctype="multipart/form-data" action="{Text::url('register/post')}" method="post">
-        <div class="col-md-4">
-            <div class="panel panel-primary">
-                <div class="panel-heading">1. {Lang::T('Register as Member')}</div>
-                <div class="panel-body">
-                    <div class="form-container">
-                        <!-- Phone Number Field -->
-                        <div class="form-group">
-                            <label>{Lang::T('Phone Number')}</label>
-                            <div class="input-group">
-                                <span class="input-group-addon" id="basic-addon1"><i
-                                        class="glyphicon glyphicon-phone-alt"></i></span>
-                                <input type="text" class="form-control" name="phone_number" value="{$phone_number}"
-                                    readonly
-                                    placeholder="{if $_c['country_code_phone']!= '' || $_c['registration_username'] == 'phone'}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Phone Number')}{/if}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>{Lang::T('SMS Verification Code')}</label>
-                            <input type="text" required class="form-control" id="otp_code" value=""
-                                placeholder="{Lang::T('Verification Code')}" name="otp_code">
-                        </div>
-                        {if $_c['photo_register'] == 'yes'}
-                        <div class="form-group">
-                            <label>{Lang::T('Photo')}</label>
-                            <input type="file" required class="form-control" id="photo" name="photo" accept="image/*">
-                        </div>
-                        {/if}
-                        <div class="form-group">
-                            <label>{Lang::T('Full Name')}</label>
-                            <input type="text" {if $_c['man_fields_fname'] neq 'no' }required{/if} class="form-control"
-                                id="fullname" value="{$fullname}" name="fullname">
-                        </div>
-                        <div class="form-group">
-                            <label>{Lang::T('Email')}</label>
-                            <input type="text" class="form-control" {if $_c['man_fields_email'] neq 'no' }required{/if}
-                                placeholder="xxxxxx@xxx.xx" id="email" value="{$email}" name="email">
-                        </div>
-                        <div class="form-group">
-                            <label>{Lang::T('Home Address')}</label>
-                            <input type="text" name="address" {if $_c['man_fields_address'] neq 'no' }required{/if}
-                                id="address" value="{$address}" class="form-control">
-                        </div>
-                        {if $_c.referral_enabled neq 'no'}
-                        <div class="form-group">
-                            <label>{Lang::T('Referral Code')} ({Lang::T('Optional')})</label>
-                            {if isset($referral_code) && !empty($referral_code)}
-                            <input readonly type="text" name="referral_code" value="{$referral_code}"
-                                class="form-control">
-                            {else}
-                            <input type="text" id="referral_code" name="referral_code" value="{$referral_code}"
-                                placeholder="{Lang::T('Referral Code')} ({Lang::T('Optional')})" class="form-control">
-                            {/if}
-                        </div>
-                        {/if}
-                        {$customFields}
+
+    <form enctype="multipart/form-data" action="{Text::url('register/post')}" method="post"
+        class="register-form-wrapper">
+        <div class="login-card">
+            <div class="logo-section">
+                <div class="brand-name">{$_c['CompanyName']}</div>
+                <div class="subtitle">{Lang::T('Register as Member')}</div>
+                <br>
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i class="fas fa-circle-half-stroke" id="themeIcon"></i>
+                </button>
+            </div>
+
+            <div class="card-header-section">
+                <h3 class="card-title">
+                    <i class="fas fa-user-circle"></i>
+                    {Lang::T('Personal Information')}
+                </h3>
+            </div>
+
+            <div class="card-body-section">
+                <!-- Phone Number Field (Read-only) -->
+                <div class="form-group">
+                    <label for="phone_number">{Lang::T('Phone Number')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone-alt input-icon"></i>
+                        <input type="text" id="phone_number" class="form-control" name="phone_number"
+                            value="{$phone_number}" readonly
+                            placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {/if}{Lang::T('Phone Number')}"
+                            aria-label="{Lang::T('Phone Number')}">
                     </div>
                 </div>
+
+                <!-- OTP Verification Code -->
+                <div class="form-group">
+                    <label for="otp_code">{Lang::T('SMS Verification Code')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key input-icon"></i>
+                        <input type="text" id="otp_code" class="form-control" name="otp_code" value=""
+                            placeholder="{Lang::T('Enter verification code')}" required
+                            aria-label="{Lang::T('SMS Verification Code')}">
+                    </div>
+                    <small class="form-text text-muted">{Lang::T('Check your SMS for the verification code')}</small>
+                </div>
+
+                {if $_c['photo_register'] == 'yes'}
+                <div class="form-group">
+                    <label for="photo">{Lang::T('Photo')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-image input-icon"></i>
+                        <input type="file" id="photo" class="form-control" name="photo" accept="image/*" required
+                            aria-label="{Lang::T('Photo')}">
+                    </div>
+                </div>
+                {/if}
+
+                <div class="form-group">
+                    <label for="fullname">{Lang::T('Full Name')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user-tag input-icon"></i>
+                        <input type="text" id="fullname" class="form-control" value="{$fullname}" name="fullname" {if
+                            $_c['man_fields_fname'] neq 'no' }required{/if} aria-label="{Lang::T('Full Name')}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">{Lang::T('Email')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input type="email" id="email" class="form-control" placeholder="example@email.com"
+                            value="{$email}" name="email" {if $_c['man_fields_email'] neq 'no' }required{/if}
+                            aria-label="{Lang::T('Email')}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">{Lang::T('Home Address')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-map-marker-alt input-icon"></i>
+                        <input type="text" id="address" class="form-control" name="address" value="{$address}" {if
+                            $_c['man_fields_address'] neq 'no' }required{/if} aria-label="{Lang::T('Home Address')}">
+                    </div>
+                </div>
+
+                {if $_c.referral_enabled neq 'no'}
+                <div class="form-group">
+                    <label for="referral_code">{Lang::T('Referral Code')} <span
+                            class="optional">({Lang::T('Optional')})</span></label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-link input-icon"></i>
+                        {if isset($referral_code) && !empty($referral_code)}
+                        <input type="text" id="referral_code" class="form-control" name="referral_code"
+                            value="{$referral_code}" readonly aria-label="{Lang::T('Referral Code')}">
+                        {else}
+                        <input type="text" id="referral_code" class="form-control" name="referral_code"
+                            value="{$referral_code}" placeholder="{Lang::T('Referral Code')} ({Lang::T('Optional')})"
+                            aria-label="{Lang::T('Referral Code')}">
+                        {/if}
+                    </div>
+                </div>
+                {/if}
+
+                {$customFields}
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="panel panel-primary">
-                <div class="panel-heading">2. {Lang::T('Usernames & Password')}</div>
-                <div class="panel-body">
-                    <div class="form-container">
-                        <!-- Username Field -->
-                        <div class="form-group">
-                            <label>{Lang::T('Usernames')}</label>
-                            <input type="text" required class="form-control" id="username" name="username"
-                                placeholder="{Lang::T('Choose a Usernames')}">
-                        </div>
-                        <!-- Password Fields -->
-                        <div class="form-group">
-                            <label>{Lang::T('Password')}</label>
-                            <input type="password" required class="form-control" id="password" name="password">
-                        </div>
-                        <div class="form-group">
-                            <label>{Lang::T('Confirm Password')}</label>
-                            <input type="password" required class="form-control" id="cpassword" name="cpassword">
-                        </div>
-                        <div class="btn-group btn-group-justified mb15">
-                            <div class="btn-group">
-                                <a href="{Text::url('register')}" class="btn btn-success">{Lang::T('Cancel')}</a>
-                            </div>
-                            <div class="btn-group">
-                                <button class="btn btn-primary" type="submit">{Lang::T('Register')}</button>
-                            </div>
-                        </div>
-                        <br>
-                        <center>
-                            <a href="javascript:showPrivacy()">Privacy</a>
-                            &bull;
-                            <a href="javascript:showTaC()">T &amp; C</a>
-                        </center>
+
+        <div class="login-card">
+            <div class="card-header-section">
+                <h3 class="card-title">
+                    <i class="fas fa-lock"></i>
+                    {Lang::T('Username & Password')}
+                </h3>
+            </div>
+
+            <div class="card-body-section">
+                <!-- Username Field -->
+                <div class="form-group">
+                    <label for="username">{Lang::T('Username')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" id="username" class="form-control" name="username"
+                            placeholder="{Lang::T('Choose a username')}" required aria-label="{Lang::T('Username')}">
                     </div>
+                </div>
+
+                <!-- Password Fields -->
+                <div class="form-group">
+                    <label for="password">{Lang::T('Password')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="password" class="form-control" name="password"
+                            placeholder="{Lang::T('Enter password')}" required aria-label="{Lang::T('Password')}">
+                        <button type="button" class="toggle-password" id="togglePassword"
+                            aria-label="{Lang::T('Show password')}" aria-pressed="false">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cpassword">{Lang::T('Confirm Password')}</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" id="cpassword" class="form-control" name="cpassword"
+                            placeholder="{Lang::T('Confirm password')}" required
+                            aria-label="{Lang::T('Confirm Password')}">
+                        <button type="button" class="toggle-password" id="togglePasswordConfirm"
+                            aria-label="{Lang::T('Show password')}" aria-pressed="false">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{Text::url('register')}" class="btn btn-secondary">{Lang::T('Cancel')}</a>
+                    <button type="submit" class="btn btn-primary">{Lang::T('Register')}</button>
                 </div>
             </div>
         </div>
     </form>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="HTMLModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-            </div>
-            <div class="modal-body" id="HTMLModal_konten"></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">&times;</button>
-            </div>
-        </div>
-    </div>
-</div>
+
+
 {if $_c['tawkto'] != ''}
 <!--Start of Tawk.to Script-->
 <script type="text/javascript">
     var Tawk_API = Tawk_API || {},
-        Tawk_LoadStart = new Date();
+        Tawk_LoadStart = new Date(),
+        tawktoId = "{$_c['tawkto']}";
     (function () {
         var s1 = document.createElement("script"),
             s0 = document.getElementsByTagName("script")[0];
         s1.async = true;
-        s1.src = 'https://embed.tawk.to/{$_c['tawkto']}';
+        s1.src = 'https://embed.tawk.to/' + tawktoId;
         s1.charset = 'UTF-8';
         s1.setAttribute('crossorigin', '*');
         s0.parentNode.insertBefore(s1, s0);
