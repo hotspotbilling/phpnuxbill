@@ -374,6 +374,8 @@ class Referral
      */
     public static function createRewardAndReturn($relationship_id, $referrer_id, $referred_id, $purchase_amount = 0, $reward_for = 'referrer')
     {
+        _log("DEBUG: createRewardAndReturn called - reward_for: '$reward_for', referrer_id: $referrer_id, referred_id: $referred_id");
+        
         $require_purchase = self::getSetting('require_purchase', 'yes');
         
         // Create a new reward record
@@ -435,10 +437,14 @@ class Referral
         }
         
         // Save the reward and return the object (with ID) on success
+        _log("DEBUG: About to save reward - reward_for: '{$reward->reward_for}', amount: {$reward->reward_amount}");
+        
         if ($reward->save()) {
+            _log("DEBUG: Reward SAVED successfully - reward_for: '{$reward->reward_for}', ID: {$reward->id()}");
             return $reward;
         }
         
+        _log("DEBUG: Reward SAVE FAILED - reward_for: '$reward_for'");
         return false;
     }
 
