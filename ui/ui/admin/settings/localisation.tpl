@@ -18,7 +18,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Timezone')}</label>
                         <div class="col-md-6">
-                            <select name="tzone" id="tzone" class="form-control">
+                            <select name="tzone" id="tzone" class="form-control select2">
                                 {foreach $tlist as $value => $label}
                                     <option value="{$value}" {if $_c['timezone'] eq $value}selected="selected" {/if}>
                                         {$label}</option>
@@ -29,7 +29,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Date Format')}</label>
                         <div class="col-md-6">
-                            <select class="form-control" name="date_format" id="date_format">
+                            <select class="form-control select2" name="date_format" id="date_format">
                                 <option value="d/m/Y" {if $_c['date_format'] eq 'd/m/Y'} selected="selected" {/if}>
                                     {date('d/m/Y')}</option>
                                 <option value="d.m.Y" {if $_c['date_format'] eq 'd.m.Y'} selected="selected" {/if}>
@@ -54,7 +54,7 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Default Language')}</label>
                         <div class="col-md-6">
-                            <select class="form-control" name="lan" id="lan">
+                            <select class="form-control select2" name="lan" id="lan">
                                 {foreach $lani as $lanis}
                                     <option value="{$lanis@key}" {if $_c['language'] eq $lanis@key} selected="selected"
                                         {/if}>

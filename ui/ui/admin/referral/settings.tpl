@@ -8,6 +8,7 @@
                 <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
                     <div class="col-md-8">
                         <form id="site-settings" class="form-horizontal" method="post">
+                            <input type="hidden" name="csrf_token" value="{$csrf_token}">
                             <div class="form-group">
                                 <label class="col-md-3 control-label">{Lang::T('Enable Referral System')}</label>
                                 <div class="col-md-6">
