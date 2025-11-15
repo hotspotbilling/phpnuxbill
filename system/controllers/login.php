@@ -45,6 +45,9 @@ function performLogin($username, $password, $isApiCall = false) {
      * @return string Valid IP address or fallback
      */
     function getClientIP() {
+        // Use $GLOBALS to reliably access server superglobals and avoid undefined variable issues
+        $server = isset($GLOBALS['_SERVER']) && is_array($GLOBALS['_SERVER']) ? $GLOBALS['_SERVER'] : [];
+
         // Common proxy headers to check (in order of priority)
         $headers = [
             'HTTP_X_FORWARDED_FOR',
@@ -56,8 +59,8 @@ function performLogin($username, $password, $isApiCall = false) {
         ];
         
         foreach ($headers as $header) {
-            if (!empty($_SERVER[$header])) {
-                $ips = explode(',', $_SERVER[$header]);
+            if (!empty($server[$header])) {
+                $ips = explode(',', $server[$header]);
                 
                 foreach ($ips as $ip) {
                     $ip = trim($ip);
