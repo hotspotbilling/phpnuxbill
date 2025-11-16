@@ -1337,5 +1337,14 @@
     "Your_Verification_Code": "Your Verification Code",
     "If_your_Username_is_found__Verification_Code_has_been_Sent_to_Your_Phone_Email_Whatsapp": "If your Username is found, Verification Code has been Sent to Your Phone\/Email\/Whatsapp",
     "Verification_Code": "Verification Code",
-    "Verification_Code_already_Sent_to_Your_Phone_Email_Whatsapp__please_wait": "Verification Code already Sent to Your Phone\/Email\/Whatsapp, please wait"
+    "Verification_Code_already_Sent_to_Your_Phone_Email_Whatsapp__please_wait": "Verification Code already Sent to Your Phone\/Email\/Whatsapp, please wait",
+    "Login_Page": "Login Page",
+    "Advanced": "Advanced",
+    "Customer_Settings": "Customer Settings",
+    "System_Settings": "System Settings",
+    "Note_": "Note:",
+    "If_you_want_to_test_the_cron_job__please_make_sure_the_cron_job_is_running_": "If you want to test the cron job, please make sure the cron job is running.",
+    "Data_Deleted_Successfully": "Data Deleted Successfully",
+    "Send_Test_SMS": "Send Test SMS",
+    "Test_SMS_Settings": "Test SMS Settings"
 }
