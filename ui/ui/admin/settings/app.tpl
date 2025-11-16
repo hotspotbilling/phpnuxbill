@@ -850,7 +850,7 @@
                 <div role="tabpanel" class="tab-pane" id="email">
                     <div class="form-group">
                         <label class="col-md-3 control-label">SMTP Host : Port</label>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <input type="text" class="form-control" id="smtp_host" name="smtp_host"
                                 value="{$_c['smtp_host']}" placeholder="smtp.host.tld">
                         </div>
@@ -903,9 +903,17 @@
                                 value="{$_c['mail_reply_to']}" placeholder="support@host.tld">
                         </div>
                         <p class="help-block col-md-4">
-                            {Lang::T('Customer will reply email to this address, empty if you want to use From
-                            Address')}
+                            {Lang::T('Empty if you want to use From Address')}
                         </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Test Email')}</label>
+                        <div class="col-md-2">
+                            <button class="btn btn-info" type="button" onclick="javascript:testEmail();">
+                                {Lang::T('Test Email Notification')}
+                            </button>
+                        </div>
                     </div>
 
                     <button class="btn btn-success btn-block" type="submit">
@@ -1261,14 +1269,14 @@
     function testWa() {
         var target = prompt("Phone number\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{Text::url('settings / app & testWa=')}' + target;
+            window.location.href = '{Text::url('settings/app&testWa=')}' + target;
         }
     }
 
     function testSms() {
         var target = prompt("Phone number\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{Text::url('settings / app & testSms=')}' + target;
+            window.location.href = '{Text::url('settings/app&testSms=')}' + target;
         }
     }
 
@@ -1276,12 +1284,12 @@
     function testEmail() {
         var target = prompt("Email\nSave First before Test", "");
         if (target != null) {
-            window.location.href = '{Text::url('settings / app & testEmail=')}' + target;
+            window.location.href = '{Text::url('settings/app&testEmail=')}' + target;
         }
     }
 
     function testTg() {
-        window.location.href = '{Text::url('settings / app & testTg=test')}';
+        window.location.href = '{Text::url('settings/app&testTg=test')}';
     }
 </script>
 

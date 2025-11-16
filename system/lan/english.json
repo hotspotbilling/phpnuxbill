@@ -1350,5 +1350,9 @@
     "Test": "Test",
     "Test_Telegram_Notification": "Test Telegram Notification",
     "Test_WhatsApp": "Test WhatsApp",
-    "Test_WhatsApp_Notification": "Test WhatsApp Notification"
+    "Test_WhatsApp_Notification": "Test WhatsApp Notification",
+    "Test_Email": "Test Email",
+    "Test_Email_Notification": "Test Email Notification",
+    "empty_if_you_want_to_use_From_Address": "empty if you want to use From Address",
+    "Empty_if_you_want_to_use_From_Address": "Empty if you want to use From Address"
 }
