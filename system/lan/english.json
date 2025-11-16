@@ -1346,5 +1346,9 @@
     "If_you_want_to_test_the_cron_job__please_make_sure_the_cron_job_is_running_": "If you want to test the cron job, please make sure the cron job is running.",
     "Data_Deleted_Successfully": "Data Deleted Successfully",
     "Send_Test_SMS": "Send Test SMS",
-    "Test_SMS_Settings": "Test SMS Settings"
+    "Test_SMS_Settings": "Test SMS Settings",
+    "Test": "Test",
+    "Test_Telegram_Notification": "Test Telegram Notification",
+    "Test_WhatsApp": "Test WhatsApp",
+    "Test_WhatsApp_Notification": "Test WhatsApp Notification"
 }

@@ -753,6 +753,14 @@
                                 value="{$_c['telegram_target_id']}" placeholder="12345678">
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Test')}</label>
+                        <div class="col-md-2">
+                            <button class="btn btn-info" type="button" onclick="javascript:testTg();">
+                                {Lang::T('Test Telegram Notification')}
+                            </button>
+                        </div>
+                    </div>
                     <small id="emailHelp" class="form-text text-muted">
                         {Lang::T('You will get Payment and Error notification')}
                     </small>
@@ -799,7 +807,7 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Test SMS')}</label>
                         <div class="col-md-2">
-                            <button class="btn btn-info" type="button" onclick="sendTestSms()">
+                            <button class="btn btn-info" type="button" onclick="javascript:testSms();">
                                 {Lang::T('Send Test SMS')}
                             </button>
                         </div>
@@ -822,6 +830,14 @@
                         </div>
                         <p class="help-block col-md-4">{Lang::T('Must include')} <b>[text]</b> &amp; <b>[number]</b>,
                             {Lang::T('it will be replaced.')}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Test WhatsApp')}</label>
+                        <div class="col-md-2">
+                            <button class="btn btn-info" type="button" onclick="javascript:testWa();">
+                                {Lang::T('Test WhatsApp Notification')}
+                            </button>
+                        </div>
                     </div>
                     <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
                         {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">{Lang::T('Free
