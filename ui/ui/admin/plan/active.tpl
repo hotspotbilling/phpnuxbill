@@ -143,7 +143,7 @@
                             {/foreach}
                         </tbody>
                         <tbody id="loading-placeholder">
-                            {for $i=1 to 10}
+                            {for $i=1 to 1}
                             <tr class="loading-row">
                                 <td>
                                     <div class="placeholder-loading"></div>
