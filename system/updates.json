@@ -206,5 +206,8 @@
     ],
     "2025.3.5" : [
         "CREATE TABLE IF NOT EXISTS `tbl_message_logs` ( `id` SERIAL PRIMARY KEY, `message_type` VARCHAR(50), `recipient` VARCHAR(255), `message_content` TEXT, `status` VARCHAR(50), `error_message` TEXT, `sent_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+    ],
+    "2025.11.17" : [
+        "CREATE TABLE IF NOT EXISTS `tbl_odps` (`id` INT NOT NULL AUTO_INCREMENT, `name` VARCHAR(32) NOT NULL COLLATE 'latin1_swedish_ci',`port_amount` INT NOT NULL,`attenuation` DECIMAL(15,2) NOT NULL DEFAULT '0.00',`address` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',`coordinates` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci', `coverage` INT NOT NULL DEFAULT '0', PRIMARY KEY (`id`) USING BTREE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
     ]
 }
