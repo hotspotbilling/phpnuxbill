@@ -61,6 +61,21 @@ switch ($action) {
             $ui->assign('_title', Lang::T('Routers Geo Location Information'));
             $ui->display('admin/maps/routers.tpl');
             break;
+    /*   ODPs Geo Location  */
+    /*  Added by ItsLiLxyzx  */
+    case 'odp':
+            $name = _post('name');
+            $query = ORM::for_table('tbl_odps')->where_not_equal('coordinates', '')->order_by_desc('id');
+            $query->selects(['id', 'name', 'port_amount', 'coordinates', 'address', 'attenuation', 'coverage']);
+            if ($name != '') {
+                $query->where_like('name', '%' . $name . '%');
+            }
+            $d = Paginator::findMany($query, ['name' => $name], '20', '', true);
+            $ui->assign('name', $name);
+            $ui->assign('d', $d);
+            $ui->assign('_title', Lang::T('ODP Geo Location Information'));
+            $ui->display('admin/maps/odps.tpl');
+            break;
     default:
         r2(getUrl('map/customer'), 'e', 'action not defined');
         break;

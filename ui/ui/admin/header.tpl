@@ -198,6 +198,8 @@
                                     href="{Text::url('maps/customer')}">{Lang::T('Customer')}</a></li>
                             <li {if $_routes[1] eq 'routers' }class="active" {/if}><a
                                     href="{Text::url('maps/routers')}">{Lang::T('Routers')}</a></li>
+                            <li {if $_routes[1] eq 'odp' }class="active" {/if}><a
+                                    href="{Text::url('maps/odp')}">{Lang::T('ODPs')}</a></li>
                             {$_MENU_MAPS}
                         </ul>
                     </li>
@@ -250,6 +252,8 @@
                                         href="{Text::url('pool/list')}">IP Pool</a></li>
                                 <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
                                         href="{Text::url('pool/port')}">Port Pool</a></li>
+                                <li {if $_routes[0] eq 'odp' and $_routes[1] eq '' }class="active" {/if}><a
+                                        href="{Text::url('odp')}">ODP List</a></li>
                                 {$_MENU_NETWORK}
                             </ul>
                         </li>

@@ -270,6 +270,20 @@ CREATE TABLE IF NOT EXISTS `tbl_meta` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='This Table to add additional data for any table';
 
+CREATE TABLE `tbl_odps` (
+	`id` INT NOT NULL AUTO_INCREMENT,
+	`name` VARCHAR(32) NOT NULL COLLATE 'latin1_swedish_ci',
+	`port_amount` INT NOT NULL,
+	`attenuation` DECIMAL(15,2) NOT NULL DEFAULT '0.00',
+	`address` MEDIUMTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`coordinates` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`coverage` INT NOT NULL DEFAULT '0',
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;
+
 CREATE TABLE IF NOT EXISTS  `tbl_coupons` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `code` VARCHAR(50) NOT NULL UNIQUE,
