@@ -209,7 +209,7 @@
                     {/foreach}
                 {else}
                     <tr>
-                        <td colspan="11" style="text-align: center;">
+                        <td colspan="15" style="text-align: center;">
                             {Lang::T('No coupons found.')}
                         </td>
                     </tr>
