@@ -199,6 +199,8 @@
                                     href="{Text::url('maps/customer')}">{Lang::T('Customer')}</a></li>
                             <li {if $_routes[1] eq 'routers' }class="active" {/if}><a
                                     href="{Text::url('maps/routers')}">{Lang::T('Routers')}</a></li>
+                            <li {if $_routes[1] eq 'odp' }class="active" {/if}><a
+                                    href="{Text::url('maps/odp')}">{Lang::T('ODPs')}</a></li>
                             {$_MENU_MAPS}
                         </ul>
                     </li>
@@ -239,6 +241,9 @@
                     </li>
                     {$_MENU_AFTER_MESSAGE}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+<<<<<<< HEAD
+                    {$_MENU_AFTER_MESSAGE}
+                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     <li class="{if $_system_menu eq 'network'}active{/if} treeview">
                         <a href="#">
                             <i class="ion ion-network"></i> <span>{Lang::T('Network')}</span>
@@ -253,6 +258,8 @@
                                     href="{Text::url('pool/list')}">IP Pool</a></li>
                             <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
                                     href="{Text::url('pool/port')}">Port Pool</a></li>
+                            <li {if $_routes[0] eq 'odp' and $_routes[1] eq '' }class="active" {/if}><a
+                                    href="{Text::url('odp')}">ODP List</a></li>
                             {$_MENU_NETWORK}
                         </ul>
                     </li>
@@ -290,6 +297,41 @@
                             <li {if $_routes[1] eq 'Announcement_Customer' }class="active" {/if}><a
                                     href="{Text::url('pages/Announcement_Customer')}">{Lang::T('Customer
                                     Announcement')}</a>
+=======
+                        <li class="{if $_system_menu eq 'network'}active{/if} treeview">
+                            <a href="#">
+                                <i class="ion ion-network"></i> <span>{Lang::T('Network')}</span>
+                                <span class="pull-right-container">
+                                    <i class="fa fa-angle-left pull-right"></i>
+                                </span>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li {if $_routes[0] eq 'routers' and $_routes[1] eq '' }class="active" {/if}><a
+                                        href="{Text::url('routers')}">Routers</a></li>
+                                <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
+                                        href="{Text::url('pool/list')}">IP Pool</a></li>
+                                <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
+                                        href="{Text::url('pool/port')}">Port Pool</a></li>
+                                <li {if $_routes[0] eq 'odp' and $_routes[1] eq '' }class="active" {/if}><a
+                                        href="{Text::url('odp')}">ODP List</a></li>
+                                {$_MENU_NETWORK}
+                            </ul>
+                        </li>
+                        {$_MENU_AFTER_NETWORKS}
+                        {if $_c['radius_enable']}
+                            <li class="{if $_system_menu eq 'radius'}active{/if} treeview">
+                                <a href="#">
+                                    <i class="fa fa-database"></i> <span>{Lang::T('Radius')}</span>
+                                    <span class="pull-right-container">
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </span>
+                                </a>
+                                <ul class="treeview-menu">
+                                    <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list' }class="active" {/if}><a
+                                            href="{Text::url('radius/nas-list')}">{Lang::T('Radius NAS')}</a></li>
+                                    {$_MENU_RADIUS}
+                                </ul>
+>>>>>>> master
                             </li>
                             <li {if $_routes[1] eq 'Registration_Info' }class="active" {/if}><a
                                     href="{Text::url('pages/Registration_Info')}">{Lang::T('Registration Info')}</a>
