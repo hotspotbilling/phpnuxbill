@@ -1,4 +1,4 @@
-<div class="panel panel-warning mb20 panel-hovered project-stats table-responsive">
+<div class="panel panel-primary mb20 panel-hovered project-stats table-responsive">
     <div class="panel-heading">{Lang::T('Customers Expired, Today')}</div>
     <div class="table-responsive">
         <table class="table table-condensed">

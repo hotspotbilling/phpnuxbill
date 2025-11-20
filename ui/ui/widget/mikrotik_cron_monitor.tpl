@@ -1,5 +1,5 @@
 {if $_c['router_check'] && count($routeroffs)> 0}
-    <div class="panel panel-danger">
+    <div class="panel panel-primary">
         <div class="panel-heading text-bold">{Lang::T('Routers Offline')}</div>
         <div class="table-responsive">
             <table class="table table-condensed">

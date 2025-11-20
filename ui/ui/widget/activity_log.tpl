@@ -1,4 +1,4 @@
-<div class="panel panel-info panel-hovered mb20 activities" style="overflow: hidden;">
+<div class="panel panel-primary panel-hovered mb20 activities" style="overflow: hidden;">
     <div class="panel-heading"><a href="{Text::url('logs')}">{Lang::T('Activity Log')}</a></div>
     <div class="panel-body" style="overflow: auto;">
         <ul class="list-unstyled">

@@ -1,4 +1,4 @@
-<div class="panel panel-info panel-hovered mb20 activities">
+<div class="panel panel-primary panel-hovered mb20 activities">
     <div class="panel-heading">{Lang::T('All Users Insights')}</div>
     <div class="panel-body">
         <canvas id="userRechargesChart"></canvas>
