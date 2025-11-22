@@ -2,7 +2,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
-            <div class="panel-heading">
+            <div class="box-header">
                 <h3 class="box-title">{Lang::T('Referral Program')}</h3>
             </div>
             <div class="panel-body">
@@ -15,11 +15,11 @@
                     </div>
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-12">
+                <div class="row mb-3 col-md-12">
+                    <div class="col-md-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5>{Lang::T('Your Referral Code')}</h5>
+                            <div class="box-header">
+                                <h5 class="box-title">{Lang::T('Your Referral Code')}</h5>
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
@@ -47,28 +47,26 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {if $referrer}
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5>{Lang::T('You were referred by')}</h5>
-                            </div>
-                            <div class="panel-body">
-                                <p><strong>{$referrer->referrer_name|escape:'html'}</strong></p>
+                    {if $referrer}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="box-header">
+                                    <h3 class="box-title">{Lang::T('You were referred by')}</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <p><strong>{$referrer->referrer_name|escape:'html'}</strong></p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                {/if}
+                    {/if}
 
-                <div class="row mb-3">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5>{Lang::T('People You\'ve Referred')}</h5>
+                            <div class="box-header">
+                                <h5 class="box-title">{Lang::T('People You\'ve Referred')}</h5>
                             </div>
                             <div class="panel-body">
                                 {if count($referred_customers) > 0}
@@ -103,13 +101,11 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5>{Lang::T('Your Referral Rewards')}</h5>
+                            <div class="box-header">
+                                <h5 class="box-title">{Lang::T('Your Referral Rewards')}</h5>
                             </div>
                             <div class="panel-body">
                                 {if $referral_rewards|@count > 0}
