@@ -117,10 +117,10 @@
                                 <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
                                 <td>
                                     {if $ds['status']=='off' }
-                                    <span class="label label-danger"><i class="fa fa-circle" aria-hidden="true"></i>
+                                    <span class="label label-danger"><i class="fa fa-cancel" aria-hidden="true"></i> {Lang::T("Expired")}
                                     </span>
                                     {else}
-                                    <span class="label label-success"><i class="fa fa-circle" aria-hidden="true"></i>
+                                    <span class="label label-success"><i class="fa fa-check-circle" aria-hidden="true"></i> {Lang::T("Active")}
                                     </span>
                                     {/if}
                                 </td>
