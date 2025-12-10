@@ -323,15 +323,16 @@ CREATE TABLE `tbl_push_subscriptions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `tbl_referral_relationships` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `referrer_id` int(11) NOT NULL COMMENT 'Customer who referred',
   `referred_id` int(11) NOT NULL COMMENT 'Customer who was referred',
   `referral_code` varchar(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `tbl_referral_rewards` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `relationship_id` int(11) NOT NULL,
   `referrer_id` int(11) NOT NULL,
   `referred_id` int(11) NOT NULL,
@@ -344,7 +345,8 @@ CREATE TABLE `tbl_referral_rewards` (
   `calculation_type` enum('fixed','percentage') DEFAULT 'fixed',
   `percentage_value` decimal(10,2) DEFAULT NULL,
   `purchase_amount` decimal(10,2) DEFAULT NULL,
-  `actual_discount_amount` decimal(10,2) DEFAULT NULL
+  `actual_discount_amount` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
