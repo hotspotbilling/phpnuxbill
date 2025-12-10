@@ -1,5 +1,26 @@
 <?php
 
+/// Allow requests from same origin only (more secure)
+$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+$allowed_origins = [
+    'https://' . $_SERVER['HTTP_HOST'],
+    'http://' . $_SERVER['HTTP_HOST']  // for localhost development
+];
+
+if (in_array($origin, $allowed_origins)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+} else {
+    header('Access-Control-Allow-Origin: https://' . $_SERVER['HTTP_HOST']);
+}
+
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit;
+}
+
 header('Content-Type: application/json');
 
 // Decode the incoming JSON payload
@@ -19,7 +40,7 @@ foreach ($requiredFields as $field) {
         echo json_encode(['success' => false, 'title' => Lang::T('An error occurred'), 'message' => Lang::T("Missing required field: $field")]);
         exit;
     }
-}
+} 
 
 foreach ($requiredKeys as $key) {
     if (!isset($subscription['keys'][$key])) {
