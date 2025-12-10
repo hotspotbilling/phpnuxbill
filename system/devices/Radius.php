@@ -104,10 +104,10 @@ class Radius
             $this->customerAddPlan($customer, $plan, $date_exp . ' ' . $time);
         }
     }
-	
-	function sync_customer($customer, $plan)
-    {	
-		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->findOne();
+
+    function sync_customer($customer, $plan)
+    {
+        $t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->findOne();
         $date_exp = $t['expiration'];
         $time = $t['time'];
         $this->customerAddPlan($customer, $plan, $date_exp . ' ' . $time);
@@ -121,8 +121,8 @@ class Radius
                 $this->customerAddPlan($customer, $p);
             }
         } else {
-        $this->customerDeactivate($customer['username'], true);
-		}
+            $this->customerDeactivate($customer['username'], true);
+        }
     }
 
     public function change_username($plan, $from, $to)
@@ -195,13 +195,9 @@ class Radius
         }
     }
 
-    function online_customer($customer, $router_name)
-    {
-    }
+    function online_customer($customer, $router_name) {}
 
-    function connect_customer($customer, $ip, $mac_address, $router_name)
-    {
-    }
+    function connect_customer($customer, $ip, $mac_address, $router_name) {}
 
     function disconnect_customer($customer, $router_name)
     {
@@ -309,10 +305,6 @@ class Radius
                 $this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'Mikrotik-Rate-Limit', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'WISPr-Session-Terminate-Time', 'username', $customer['username']);
-                //$this->delAtribute($this->getTableCustomer(), 'Ascend-Data-Rate', 'username', $customer['username']);
-                //we are removing the below in the next two updates, some users may have that attribute, it will remove them before we remove it
-                $this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
-                $this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
                 $p->groupname = "plan_" . $plan['id'];
                 $p->save();
             } else {
@@ -363,9 +355,6 @@ class Radius
                 $this->delAtribute($this->getTableCustomer(), 'Max-Data', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'Mikrotik-Rate-Limit', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'WISPr-Session-Terminate-Time', 'username', $customer['username']);
-                //we are removing the below in the next two updates, some users may have that attribute, it will remove them before we remove it
-                $this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
-                $this->delAtribute($this->getTableCustomer(), 'Max-Volume', 'username', $customer['username']);
             }
 
             $this->disconnectCustomer($customer['username']);
@@ -389,23 +378,17 @@ class Radius
                 $this->delAtribute($this->getTableCustomer(), 'Expiration', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'Mikrotik-Rate-Limit', 'username', $customer['username']);
                 $this->delAtribute($this->getTableCustomer(), 'WISPr-Session-Terminate-Time', 'username', $customer['username']);
-                //we are removing the below in the next two updates, some users may have that attribute, it will remove them before we remove it
-                $this->delAtribute($this->getTableCustomer(), 'access-period', 'username', $customer['username']);
             }
 
             if ($plan['type'] == 'PPPOE') {
-				if (!empty($customer['pppoe_ip']) && $expired != '') {
-				$this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
-				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Address', $customer['pppoe_ip'], ':=');
-				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Netmask', '255.255.255.0', ':=');
-					}else{
-                $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
-				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Address', '0.0.0.0', ':=');
-				$this->upsertCustomerAttr($customer['username'], 'Framed-IP-Netmask', '255.255.255.0', ':=');
-				}
+                if (!empty($customer['pppoe_ip']) && $expired != '') {
+                    $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
+                    $this->upsertCustomerAttr($customer['username'], 'Framed-IP-Address', $customer['pppoe_ip'], ':=');
+                    $this->upsertCustomerAttr($customer['username'], 'Framed-IP-Netmask', '255.255.255.0', ':=');
+                } else {
+                    $this->upsertCustomerAttr($customer['username'], 'Framed-Pool', $plan['pool'], ':=');
+                }
             }
-
-
             return true;
         }
         return false;
