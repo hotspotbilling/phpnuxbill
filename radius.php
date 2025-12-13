@@ -303,7 +303,7 @@ try {
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
             // pastikan data akunting yang disimpan memang customer aktif phpnuxbill
-            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND `routers` = 'radius'")->find_one();
+            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND (`routers` = 'radius' OR `routers` = 'Radius')")->find_one();
             if (!$tur) {
                 // check if pppoe_username
                 $c = ORM::for_table('tbl_customers')->select('username')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
@@ -321,7 +321,7 @@ try {
                         $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
                         if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
                             $attrs['reply:Mikrotik-Total-Limit'] = 0;
-                            show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+                            show_radius_result(["control:Auth-Type" => "Reject", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
                         }
                     }
                 }
@@ -336,14 +336,14 @@ try {
     die();
 } catch (Throwable $e) {
     Message::sendTelegram(
-        "Sistem Error.\n" .
+        "System Error.\n" .
             $e->getMessage() . "\n" .
             $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 } catch (Exception $e) {
     Message::sendTelegram(
-        "Sistem Error.\n" .
+        "System Error.\n" .
             $e->getMessage() . "\n" .
             $e->getTraceAsString()
     );
@@ -356,16 +356,27 @@ function process_radiust_rest($tur, $code)
     global $config;
     $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
     $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
-    // Count User Onlines
-    $USRon = ORM::for_table('rad_acct')
-        ->whereRaw("BINARY username = '" . $tur['username'] . "' AND acctStatusType = 'Start'")
-        ->find_array();
-    // get all the IP
-    $ips = array_column($USRon, 'framedipaddress');
-    // check if user reach shared_users limit but IP is not in the list active
-    if (count($USRon) >= $plan['shared_users'] && $plan['type'] == 'Hotspot' && !in_array(_post('framedIPAddress'), $ips)) {
-        show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You are already logged in - access denied (' . $USRon . ')'], 401);
+    // Count User Onlines across both tables
+    $USRonAll = get_online_sessions_bi($tur['username']);
+    $ips = array_column($USRonAll, 'ip');
+
+    // Check if user reached shared_users limit, Hotspot only, and current IP is not already active
+    if ($plan['type'] == 'Hotspot' && count($USRonAll) >= (int)$plan['shared_users'] && !in_array(_post('framedIPAddress'), $ips, true)) {
+        if ((int)$plan['shared_users'] == 1) {
+            // We'll stop the newest existing session to favor current login
+            usort($USRonAll, fn($a, $b) => $b['date'] <=> $a['date']);
+            $toStop = $USRonAll[0];
+            stop_session_bi($toStop, intval(_post('acctSessionTime')));
+            _log("Terminated previous session for {$tur['username']} on {$toStop['source']} IP {$toStop['ip']}", 'RADIUS');
+        } else {
+            // Multiple shared users: if exhausted, stop the oldest session and allow current
+            usort($USRonAll, fn($a, $b) => $a['date'] <=> $b['date']); // oldest first
+            $toStop = $USRonAll[0];
+            stop_session_bi($toStop, intval(_post('acctSessionTime')));
+            _log("Terminated oldest session for {$tur['username']} on {$toStop['source']} IP {$toStop['ip']}", 'RADIUS');
+        }
     }
+
     if ($bw['rate_down_unit'] == 'Kbps') {
         $unitdown = 'K';
     } else {
@@ -405,14 +416,34 @@ function process_radiust_rest($tur, $code)
 
     if ($plan['typebp'] == "Limited") {
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
-            $raddact = ORM::for_table('rad_acct')->whereRaw("BINARY username = '$tur[username]'")->where('acctstatustype', 'Start')->find_one();
-            $totalUsage = intval($raddact['acctOutputOctets']) + intval($raddact['acctInputOctets']);
+            // Usage fallback: prefer REST active usage; if empty, use MySQL active usage
+            $totalUsage = 0;
+
+            $restActive = ORM::for_table('rad_acct')
+                ->whereRaw("BINARY username = '" . addslashes($tur['username']) . "'")
+                ->where('acctstatustype', 'Start')
+                ->find_array();
+
+            if (!empty($restActive)) {
+                foreach ($restActive as $r) {
+                    $totalUsage += intval($r['acctOutputOctets']) + intval($r['acctInputOctets']);
+                }
+            } else {
+                $mysqlActive = ORM::for_table('radacct')
+                    ->whereRaw("BINARY username = '" . addslashes($tur['username']) . "' AND acctstoptime IS NULL")
+                    ->find_array();
+                foreach ($mysqlActive as $m) {
+                    $totalUsage += intval($m['acctoutputoctets']) + intval($m['acctinputoctets']);
+                }
+            }
+
             $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
             if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
                 $attrs['reply:Mikrotik-Total-Limit'] = 0;
-                show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+                show_radius_result(["control:Auth-Type" => "Reject", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
             }
         }
+
         if ($plan['limit_type'] == "Time_Limit") {
             if ($plan['time_unit'] == 'Hrs')
                 $timelimit = $plan['time_limit'] * 60 * 60;
@@ -443,6 +474,7 @@ function process_radiust_rest($tur, $code)
             $attrs['reply:Mikrotik-Xmit-Limit-Gigawords'] = $datalimit;
         }
     }
+
     $result = array_merge([
         "control:Auth-Type" => "Accept",
         "reply" =>  ["Reply-Message" => ['value' => 'success']]
@@ -461,4 +493,88 @@ function show_radius_result($array, $code = 200)
         die();
     }
     die(json_encode($array));
+}
+
+
+/**
+ * Collect active sessions from both REST (rad_acct) and MySQL RADIUS (radacct)
+ * Returns unified array: [ ['source'=>'rest'|'mysql', 'ip'=>'x.x.x.x', 'date'=>timestamp, 'username'=>'...', 'id'=>int|null] ]
+ */
+function get_online_sessions_bi($username)
+{
+    $sessions = [];
+
+    // REST sessions (rad_acct): active if acctStatusType = 'Start'
+    $rest = ORM::for_table('rad_acct')
+        ->whereRaw("BINARY username = '$username' AND acctStatusType = 'Start'")
+        ->find_array();
+    foreach ($rest as $r) {
+        $sessions[] = [
+            'source'   => 'rest',
+            'ip'       => $r['framedipaddress'] ?? '',
+            'date'     => strtotime($r['dateAdded'] ?? 'now'),
+            'username' => $username,
+            'id'       => isset($r['id']) ? (int)$r['id'] : null
+        ];
+    }
+
+    // MySQL RADIUS sessions (radacct): active if acctstoptime IS NULL
+    $sql = ORM::for_table('radacct')
+        ->whereRaw("BINARY username = '$username' AND acctstoptime IS NULL")
+        ->find_array();
+    foreach ($sql as $s) {
+        // prefer acctupdatetime, fallback to acctstarttime
+        $ts = !empty($s['acctupdatetime']) ? strtotime($s['acctupdatetime']) : (!empty($s['acctstarttime']) ? strtotime($s['acctstarttime']) : time());
+        $sessions[] = [
+            'source'   => 'mysql',
+            'ip'       => $s['framedipaddress'] ?? '',
+            'date'     => $ts,
+            'username' => $username,
+            'id'       => isset($s['radacctid']) ? (int)$s['radacctid'] : null // standard PK in radacct
+        ];
+    }
+
+    // Remove empty-IP entries just for IP-based comparison
+    return array_values(array_filter($sessions, fn($x) => !empty($x['ip'])));
+}
+
+/**
+ * Stop an active session in its source table
+ */
+
+function stop_session_bi(array $sess, ?int $acctSessionTime = null)
+{
+    if ($sess['source'] === 'rest') {
+        $q = ORM::for_table('rad_acct')
+            ->whereRaw("BINARY username = '" . addslashes($sess['username']) . "' AND framedipaddress = '" . addslashes($sess['ip']) . "' AND acctstatustype = 'Start'")
+            ->order_by_desc('dateAdded')
+            ->find_one();
+        if ($q) {
+            $q->acctstatustype = 'Stop';
+            if ($acctSessionTime !== null) $q->acctsessiontime = $acctSessionTime;
+            $q->save();
+        }
+    } else {
+        // mysql radacct
+        // Prefer updating by primary key if present
+        if (!empty($sess['id'])) {
+            $q = ORM::for_table('radacct')->find_one($sess['id']);
+        } else {
+            $q = ORM::for_table('radacct')
+                ->whereRaw("BINARY username = '" . addslashes($sess['username']) . "' AND framedipaddress = '" . addslashes($sess['ip']) . "' AND acctstoptime IS NULL")
+                ->order_by_desc('acctupdatetime')
+                ->find_one();
+        }
+        if ($q) {
+            $q->acctstoptime = date('Y-m-d H:i:s');
+            // Optional: mark terminate cause
+            if (isset($q->acctterminatecause)) {
+                $q->acctterminatecause = 'Admin-Reset';
+            }
+            if ($acctSessionTime !== null && isset($q->acctsessiontime)) {
+                $q->acctsessiontime = $acctSessionTime;
+            }
+            $q->save();
+        }
+    }
 }
