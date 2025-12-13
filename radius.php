@@ -364,16 +364,18 @@ function process_radiust_rest($tur, $code)
     if ($plan['type'] == 'Hotspot' && count($USRonAll) >= (int)$plan['shared_users'] && !in_array(_post('framedIPAddress'), $ips, true)) {
         if ((int)$plan['shared_users'] == 1) {
             // We'll stop the newest existing session to favor current login
-            usort($USRonAll, fn($a, $b) => $b['date'] <=> $a['date']);
-            $toStop = $USRonAll[0];
-            stop_session_bi($toStop, intval(_post('acctSessionTime')));
-            _log("Terminated previous session for {$tur['username']} on {$toStop['source']} IP {$toStop['ip']}", 'RADIUS');
+            show_radius_result(["control:Auth-Type" => "Reject", 'Reply-Message' => 'You are already logged in from another location, Please wait for 5 minutes.'], 401);
+            // usort($USRonAll, fn($a, $b) => $b['date'] <=> $a['date']);
+            // $toStop = $USRonAll[0];
+            // stop_session_bi($toStop, intval(_post('acctSessionTime')));
+            // _log("Terminated previous session for {$tur['username']} on {$toStop['source']} IP {$toStop['ip']}", 'RADIUS');
         } else {
             // Multiple shared users: if exhausted, stop the oldest session and allow current
-            usort($USRonAll, fn($a, $b) => $a['date'] <=> $b['date']); // oldest first
-            $toStop = $USRonAll[0];
-            stop_session_bi($toStop, intval(_post('acctSessionTime')));
-            _log("Terminated oldest session for {$tur['username']} on {$toStop['source']} IP {$toStop['ip']}", 'RADIUS');
+            show_radius_result(["control:Auth-Type" => "Reject", 'Reply-Message' => 'You have reached your shared device limit, Please disconnect other devices and try again.'], 401);
+            // usort($USRonAll, fn($a, $b) => $a['date'] <=> $b['date']); // oldest first
+            // $toStop = $USRonAll[0];
+            // stop_session_bi($toStop, intval(_post('acctSessionTime')));
+            // _log("Terminated oldest session for {$tur['username']} on {$toStop['source']} IP {$toStop['ip']}", 'RADIUS');
         }
     }
 
@@ -495,10 +497,9 @@ function show_radius_result($array, $code = 200)
     die(json_encode($array));
 }
 
-
 /**
  * Collect active sessions from both REST (rad_acct) and MySQL RADIUS (radacct)
- * Returns unified array: [ ['source'=>'rest'|'mysql', 'ip'=>'x.x.x.x', 'date'=>timestamp, 'username'=>'...', 'id'=>int|null] ]
+ * Returns unified array with only essential fields (no ID needed)
  */
 function get_online_sessions_bi($username)
 {
@@ -506,21 +507,20 @@ function get_online_sessions_bi($username)
 
     // REST sessions (rad_acct): active if acctStatusType = 'Start'
     $rest = ORM::for_table('rad_acct')
-        ->whereRaw("BINARY username = '$username' AND acctStatusType = 'Start'")
+        ->whereRaw("BINARY username = '" . addslashes($username) . "' AND acctStatusType = 'Start'")
         ->find_array();
     foreach ($rest as $r) {
         $sessions[] = [
             'source'   => 'rest',
             'ip'       => $r['framedipaddress'] ?? '',
             'date'     => strtotime($r['dateAdded'] ?? 'now'),
-            'username' => $username,
-            'id'       => isset($r['id']) ? (int)$r['id'] : null
+            'username' => $username
         ];
     }
 
     // MySQL RADIUS sessions (radacct): active if acctstoptime IS NULL
     $sql = ORM::for_table('radacct')
-        ->whereRaw("BINARY username = '$username' AND acctstoptime IS NULL")
+        ->whereRaw("BINARY username = '" . addslashes($username) . "' AND acctstoptime IS NULL")
         ->find_array();
     foreach ($sql as $s) {
         // prefer acctupdatetime, fallback to acctstarttime
@@ -529,8 +529,7 @@ function get_online_sessions_bi($username)
             'source'   => 'mysql',
             'ip'       => $s['framedipaddress'] ?? '',
             'date'     => $ts,
-            'username' => $username,
-            'id'       => isset($s['radacctid']) ? (int)$s['radacctid'] : null // standard PK in radacct
+            'username' => $username
         ];
     }
 
@@ -545,36 +544,23 @@ function get_online_sessions_bi($username)
 function stop_session_bi(array $sess, ?int $acctSessionTime = null)
 {
     if ($sess['source'] === 'rest') {
-        $q = ORM::for_table('rad_acct')
-            ->whereRaw("BINARY username = '" . addslashes($sess['username']) . "' AND framedipaddress = '" . addslashes($sess['ip']) . "' AND acctstatustype = 'Start'")
-            ->order_by_desc('dateAdded')
-            ->find_one();
-        if ($q) {
-            $q->acctstatustype = 'Stop';
-            if ($acctSessionTime !== null) $q->acctsessiontime = $acctSessionTime;
-            $q->save();
-        }
+        $username = addslashes($sess['username']);
+        $ip = addslashes($sess['ip']);
+
+        ORM::raw_execute(
+            "UPDATE rad_acct SET acctstatustype = 'Stop'" .
+                ($acctSessionTime !== null ? ", acctsessiontime = " . intval($acctSessionTime) : "") .
+                " WHERE BINARY username = '$username' AND framedipaddress = '$ip' AND acctstatustype = 'Start' ORDER BY dateAdded DESC LIMIT 1"
+        );
+        _log("Stopped REST session for {$sess['username']} IP {$sess['ip']}", 'RADIUS');
     } else {
-        // mysql radacct
-        // Prefer updating by primary key if present
-        if (!empty($sess['id'])) {
-            $q = ORM::for_table('radacct')->find_one($sess['id']);
-        } else {
-            $q = ORM::for_table('radacct')
-                ->whereRaw("BINARY username = '" . addslashes($sess['username']) . "' AND framedipaddress = '" . addslashes($sess['ip']) . "' AND acctstoptime IS NULL")
-                ->order_by_desc('acctupdatetime')
-                ->find_one();
-        }
-        if ($q) {
-            $q->acctstoptime = date('Y-m-d H:i:s');
-            // Optional: mark terminate cause
-            if (isset($q->acctterminatecause)) {
-                $q->acctterminatecause = 'Admin-Reset';
-            }
-            if ($acctSessionTime !== null && isset($q->acctsessiontime)) {
-                $q->acctsessiontime = $acctSessionTime;
-            }
-            $q->save();
-        }
+        $username = addslashes($sess['username']);
+        $ip = addslashes($sess['ip']);
+
+        ORM::raw_execute(
+            "UPDATE radacct SET acctstoptime = '" . date('Y-m-d H:i:s') . "', acctterminatecause = 'Admin-Reset' " .
+                "WHERE BINARY username = '$username' AND framedipaddress = '$ip' AND acctstoptime IS NULL ORDER BY acctupdatetime DESC LIMIT 1"
+        );
+        _log("Stopped MySQL session for {$sess['username']} IP {$sess['ip']}", 'RADIUS');
     }
 }
