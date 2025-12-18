@@ -654,6 +654,28 @@
                                 </option>
                             </select>
                         </div>
+                    </div>
+                    <div class="form-group" id="clear_stale_sessions_group">
+                        <label class="col-md-3 control-label">{Lang::T('Clear Stale Sessions')}</label>
+                        <div class="col-md-5">
+                            <select name="clear_stale_sessions" id="clear_stale_sessions" class="form-control text-muted">
+                                <option value="0">{Lang::T('No')}</option>
+                                <option value="1" {if $_c['clear_stale_sessions']}selected="selected" {/if}>{Lang::T('Yes')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Clear prolong/unattended active sessions in every xx minutes')}</p>
+                    </div>
+                    <div class="form-group" id="stale_session_timeout_group">
+                        <label class="col-md-3 control-label">{Lang::T('Stale Session Timeout (minutes)')}</label>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" id="stale_session_timeout" name="stale_session_timeout"
+                                placeholder="10" value="{$_c['stale_session_timeout']}">
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('Time in minutes of inactivity before considering session stale')}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label"></label>
                         <p class="help-block col-md-4"><a
                                 href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius"
                                 target="_blank">{Lang::T('Radius Instructions')}</a></p>
@@ -1250,6 +1272,12 @@
                             Clear: <a href="{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}"
                                 target="_blank">{$app_url}/system/cron/clean_expired_vouchers.php?secret={$_c['api_key']}</a>
                         </p>
+                        <br>
+                        <h4><b>{Lang::T('Cron Settings to clear freeradius stale sessions')}</b></h4>
+                        <p>
+                            # {Lang::T('Clear stale sessions cronjob to run every 5 minutes, this is important only if freeradius module is enabled')}<br>
+                           */5 * * * * cd {$dir}cron && {$php} cleanup_stale_sessions.php<br><br>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -1401,5 +1429,30 @@
         }
     });
     document.getElementById('login_page_type').dispatchEvent(new Event('change'));
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var radiusEnable = document.getElementById('radius_enable');
+        var clearGroup = document.getElementById('clear_stale_sessions_group');
+        var clearSelect = document.getElementById('clear_stale_sessions');
+        var timeoutGroup = document.getElementById('stale_session_timeout_group');
+
+        function toggleRadiusFields() {
+            var radiusOn = radiusEnable && radiusEnable.value === '1';
+            if (!radiusOn) {
+                if (clearGroup) clearGroup.style.display = 'none';
+                if (timeoutGroup) timeoutGroup.style.display = 'none';
+                return;
+            }
+
+            if (clearGroup) clearGroup.style.display = '';
+            var clearOn = clearSelect && clearSelect.value === '1';
+            if (timeoutGroup) timeoutGroup.style.display = clearOn ? '' : 'none';
+        }
+
+        if (radiusEnable) radiusEnable.addEventListener('change', toggleRadiusFields);
+        if (clearSelect) clearSelect.addEventListener('change', toggleRadiusFields);
+        toggleRadiusFields();
+    });
 </script>
 {include file="sections/footer.tpl"}

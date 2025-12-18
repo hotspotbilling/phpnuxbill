@@ -1355,5 +1355,15 @@
     "Test_Email_Notification": "Test Email Notification",
     "empty_if_you_want_to_use_From_Address": "empty if you want to use From Address",
     "Empty_if_you_want_to_use_From_Address": "Empty if you want to use From Address",
-    "All_field_is_required": "All field is required"
+    "All_field_is_required": "All field is required",
+    "Source": "Source",
+    "Login_Status": "Login Status",
+    "Clear_Stale_Sessions": "Clear Stale Sessions",
+    "Stale_Session_Timeout__minutes_": "Stale Session Timeout (minutes)",
+    "Time_in_minutes_of_inactivity_before_considering_session_stale": "Time in minutes of inactivity before considering session stale",
+    "Clear_prolong_active_sessions_and_stale_sessions_in_every_xx_minutes": "Clear prolong active sessions and stale sessions in every xx minutes",
+    "Clear_prolong_unattended_active_sessions_sessions_in_every_xx_minutes": "Clear prolong\/unattended active sessions sessions in every xx minutes",
+    "Clear_prolong_unattended_active_sessions_in_every_xx_minutes": "Clear prolong\/unattended active sessions in every xx minutes",
+    "Cron_Settings_to_clear_expired_freeradius_stale_sessions": "Cron Settings to clear expired freeradius stale sessions",
+    "Clear_stale_sessions_cronjob_to_run_every_5_minutes__this_is_important_only_if_freeradius_module_is_enabled": "Clear stale sessions cronjob to run every 5 minutes, this is important only if freeradius module is enabled"
 }
