@@ -190,7 +190,7 @@ foreach ($d as $ds) {
     }
 }
 
-//Cek interim-update radiusrest
+// Check for stale radius-rest sessions
 if ($config['frrest_interim_update'] != 0) {
 
     $r_a = ORM::for_table('rad_acct')

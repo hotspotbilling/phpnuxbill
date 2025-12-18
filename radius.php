@@ -405,12 +405,8 @@ function process_radiust_rest($tur, $code)
 
     $attrs = [];
     $timeexp = strtotime($tur['expiration'] . ' ' . $tur['time']);
-    $attrs['reply:Reply-Message'] = 'success';
     $attrs['Simultaneous-Use'] = $plan['shared_users'];
     $attrs['reply:Mikrotik-Wireless-Comment'] = $plan['name_plan'] . ' | ' . $tur['expiration'] . ' ' . $tur['time'];
-
-    $attrs['reply:Ascend-Data-Rate'] = str_replace('M', '000000', str_replace('K', '000', $rates[1]));
-    $attrs['reply:Ascend-Xmit-Rate'] = str_replace('M', '000000', str_replace('K', '000', $rates[0]));
     $attrs['reply:Mikrotik-Rate-Limit'] = $ratos;
     $attrs['reply:WISPr-Bandwidth-Max-Up'] = str_replace('M', '000000', str_replace('K', '000', $rates[0]));
     $attrs['reply:WISPr-Bandwidth-Max-Down'] = str_replace('M', '000000', str_replace('K', '000', $rates[1]));
@@ -486,7 +482,6 @@ function process_radiust_rest($tur, $code)
         "reply" => ["Reply-Message" => ['value' => 'success']]
     ], $attrs);
     show_radius_result($result, 200);
-    
 }
 
 function show_radius_result($array, $code = 200)
