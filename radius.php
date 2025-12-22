@@ -101,10 +101,7 @@ try {
                     $isVoucher = true;
                     $password = $username;
                 } else if (empty($username) || empty($password)) {
-                    show_radius_result([
-                        "control:Auth-Type" => "Reject",
-                        "reply:Reply-Message" => 'Login invalid......'
-                    ], 401);
+                    show_radius_result(['Reply-Message' => 'Login invalid......'], 401);
                 }
             }
             if ($username == $password) {
@@ -122,10 +119,7 @@ try {
                 header("HTTP/1.1 204 No Content");
                 die();
             } else {
-                show_radius_result([
-                    "control:Auth-Type" => "Reject",
-                    "reply:Reply-Message" => 'Login invalid......'
-                ], 401);
+                show_radius_result(['Reply-Message' => 'Login invalid......'], 401);
             }
             break;
         case 'authorize':
@@ -197,10 +191,7 @@ try {
                     $isVoucher = true;
                     $password = $username;
                 } else if (empty($username) || empty($password)) {
-                    show_radius_result([
-                        "control:Auth-Type" => "Reject",
-                        "reply:Reply-Message" => 'Login invalid......'
-                    ], 401);
+                    show_radius_result(['Reply-Message' => 'Login invalid......'], 401);
                 }
             }
             $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
@@ -228,6 +219,59 @@ try {
                                 if ($d['pppoe_password'] != $password) {
                                     show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
                                 }
+                            }
+                        }
+                    }
+                }
+
+                $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+
+                if (!$plan) {
+                    _log("User {$tur['username']} has no valid internet plan.", 'RADIUS');
+                    sendTelegram("User {$tur['username']} has no valid internet plan. Please check immediately.\nPlan ID: {$tur['plan_id']}, Plan Name: {$plan['name_plan']}, Expiration: {$tur['expiration']} {$tur['time']}, \nError at Radius-Rest authorize.");
+                    show_radius_result(['Reply-Message' => 'Invalid Internet Plan, Please contact customer support.'], 401);
+                } else {
+                    if ($plan['typebp'] == "Limited") {
+                        // --- DATA LIMIT: use remaining bytes based on rad_acct ---
+                        if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
+                            $raddacts = ORM::for_table('rad_acct')
+                                ->where('username', $tur['username'])
+                                ->find_many();
+
+                            $totalUsage = 0;
+                            foreach ($raddacts as $acct) {
+                                $totalUsage += intval($acct['acctinputoctets']) + intval($acct['acctoutputoctets']);
+                            }
+
+                            $limitBytes = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']);
+                            $remainingBytes = $limitBytes - $totalUsage;
+
+                            if ($remainingBytes <= 0) {
+                                show_radius_result(['Reply-Message' => 'You have exhausted your data limit.'], 401);
+                            }
+                        }
+
+                        // --- TIME LIMIT: use remaining seconds based on rad_acct ---
+                        if ($plan['limit_type'] == "Time_Limit" || $plan['limit_type'] == "Both_Limit") {
+                            $timeActs = ORM::for_table('rad_acct')
+                                ->where('username', $tur['username'])
+                                ->find_many();
+
+                            $usedSeconds = 0;
+                            foreach ($timeActs as $acct) {
+                                $usedSeconds += intval($acct['acctsessiontime']);
+                            }
+
+                            if ($plan['time_unit'] == 'Hrs') {
+                                $limitSeconds = $plan['time_limit'] * 60 * 60;
+                            } else {
+                                $limitSeconds = $plan['time_limit'] * 60;
+                            }
+
+                            $remainingSeconds = $limitSeconds - $usedSeconds;
+
+                            if ($remainingSeconds <= 0) {
+                                show_radius_result(['Reply-Message' => 'You have exceeded your time limit.'], 401);
                             }
                         }
                     }
@@ -266,15 +310,12 @@ try {
         case 'accounting':
             $username = _req('username');
             if (empty($username)) {
-                show_radius_result([
-                    "control:Auth-Type" => "Reject",
-                    "reply:Reply-Message" => 'Username empty'
-                ], 200);
+                show_radius_result(['Reply-Message' => 'Username empty'], 401);
                 die();
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY username = '$username' AND macaddr = '" . _post('macAddr') . "' AND acctsessionid = '" . _post('acctSessionId') . "' AND (acctstatustype = 'Start' OR acctstatustype IS NULL) AND nasid = '" . _post('nasid') . "'")
+                ->whereRaw("BINARY username = '$username' AND macaddr = '" . _post('macAddr') . "' AND acctsessionid = '" . _post('acctSessionId') . "' AND (acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL) AND nasid = '" . _post('nasid') . "'")
                 ->findOne();
 
             if ($d) {
@@ -295,55 +336,34 @@ try {
             $d->nasportid = _post('nasPortId');
             $d->nasporttype = _post('nasPortType');
             $d->framedipaddress = _post('framedIPAddress');
-            if (in_array(_post('acctStatusType'), ['Start', 'Stop'])) {
+            if (in_array(_post('acctStatusType'), ['Start', 'Stop', 'Interim-Update'])) {
                 $d->acctstatustype = _post('acctStatusType');
             }
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
-            // pastikan data akunting yang disimpan memang customer aktif phpnuxbill
-            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND (`routers` = 'radius' OR `routers` = 'Radius')")->find_one();
-            if (!$tur) {
-                // check if pppoe_username
-                $c = ORM::for_table('tbl_customers')->select('username')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
-                if ($c) {
-                    $username = $c['username'];
-                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
-                }
-            }
-            if ($tur) {
-                // Save accounting record only; do not enforce quota or terminate here.
-                $d->save();
-                process_radiust_rest($tur, 200);
-                show_radius_result([
-                    "control:Auth-Type" => "Accept",
-                    "reply" => ["Reply-Message" => ['value' => 'Saved']]
-                ], 200);
-            } else {
-                show_radius_result([
-                    "control:Auth-Type" => "Reject",
-                    'Reply-Message' => 'Your internet plan is has been expired. Please contact administrator.'
-                ], 401);
-            }
+            // Save accounting record only; do not enforce quota or terminate.
+            $d->save();
+            show_radius_result(['Reply-Message' => 'Saved'], 200);
+            break;
+        default:
+            show_radius_result(['Reply-Message' => 'Invalid Command : ' . $action], 401);
             break;
     }
-    die();
 } catch (Throwable $e) {
     Message::sendTelegram(
         "System Error.\n" .
-            $e->getMessage() . "\n" .
-            $e->getTraceAsString()
+        $e->getMessage() . "\n" .
+        $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 } catch (Exception $e) {
     Message::sendTelegram(
         "System Error.\n" .
-            $e->getMessage() . "\n" .
-            $e->getTraceAsString()
+        $e->getMessage() . "\n" .
+        $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 }
-
-show_radius_result(['Reply-Message' => 'Invalid Command : ' . $action], 401);
 
 function process_radiust_rest($tur, $code)
 {
@@ -352,7 +372,10 @@ function process_radiust_rest($tur, $code)
     $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
     // Count User Onlines
     $USRon = ORM::for_table('rad_acct')
-        ->whereRaw("BINARY username = '" . $tur['username'] . "' AND acctStatusType = 'Start'")
+        ->where_raw(
+            "BINARY username = ? AND (acctStatusType = 'Start' OR acctStatusType = 'Interim-Update' OR acctStatusType IS NULL)",
+            [$tur['username']]
+        )
         ->find_array();
 
     // get all the IP
@@ -363,22 +386,13 @@ function process_radiust_rest($tur, $code)
         if ($tur['status'] == 'on') {
             if (count($USRon) >= (int) $plan['shared_users'] && !in_array(_post('framedIPAddress'), $ips, true)) {
                 if ((int) $plan['shared_users'] == 1) {
-                    show_radius_result([
-                        "control:Auth-Type" => "Reject",
-                        'Reply-Message' => 'Your previous session is still active, Kindly disconnect it first then try again, or wait for 5 minutes. (If you are not the one who logged in, please contact customer support.)'
-                    ], 401);
+                    show_radius_result(['Reply-Message' => 'Your previous session is still active, Kindly disconnect it first then try again, or wait for 5 minutes. (If you are not the one who logged in, please contact customer support.)'], 401);
                 } else {
-                    show_radius_result([
-                        "control:Auth-Type" => "Reject",
-                        'Reply-Message' => 'You have reached your shared device limit, Kindly disconnect other devices and try again.'
-                    ], 401);
+                    show_radius_result(['Reply-Message' => 'You have reached your shared device limit, Kindly disconnect other devices and try again.'], 401);
                 }
             }
         } else {
-            show_radius_result([
-                "control:Auth-Type" => "Reject",
-                'Reply-Message' => 'Your internet Voucher/Plan has been expired. For more info please contact customer support.'
-            ], 401);
+            show_radius_result(['Reply-Message' => 'Your internet Voucher/Plan has been expired. For more info please contact customer support.'], 401);
         }
     }
 
@@ -421,23 +435,19 @@ function process_radiust_rest($tur, $code)
         // --- DATA LIMIT: use remaining bytes based on rad_acct ---
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
             $raddacts = ORM::for_table('rad_acct')
-                ->where_raw("BINARY username = ?", [$tur['username']])
-                ->where_raw("(acctstatustype = 'Start' OR acctstatustype IS NULL)")
+                ->where('username', $tur['username'])
                 ->find_many();
 
             $totalUsage = 0;
             foreach ($raddacts as $acct) {
-                $totalUsage += intval($acct['acctOutputOctets']) + intval($acct['acctInputOctets']);
+                $totalUsage += intval($acct['acctoutputoctets']) + intval($acct['acctinputoctets']);
             }
 
             $limitBytes = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']);
             $remainingBytes = $limitBytes - $totalUsage;
 
             if ($remainingBytes <= 0) {
-                show_radius_result([
-                    "control:Auth-Type" => "Reject",
-                    'Reply-Message' => 'You have exceeded your data limit.'
-                ], 401);
+                show_radius_result(['Reply-Message' => 'You have exhausted your data limit..'], 401);
             }
 
             // Tell Mikrotik remaining bytes so it can auto‑cut session.
@@ -448,7 +458,7 @@ function process_radiust_rest($tur, $code)
         // --- TIME LIMIT: use remaining seconds based on rad_acct ---
         if ($plan['limit_type'] == "Time_Limit" || $plan['limit_type'] == "Both_Limit") {
             $timeActs = ORM::for_table('rad_acct')
-                ->where_raw("BINARY username = ?", [$tur['username']])
+                ->where('username', $tur['username'])
                 ->find_many();
 
             $usedSeconds = 0;
@@ -465,10 +475,7 @@ function process_radiust_rest($tur, $code)
             $remainingSeconds = $limitSeconds - $usedSeconds;
 
             if ($remainingSeconds <= 0) {
-                show_radius_result([
-                    "control:Auth-Type" => "Reject",
-                    'Reply-Message' => 'You have exceeded your time limit.'
-                ], 401);
+                show_radius_result(['Reply-Message' => 'You have exceeded your time limit.'], 401);
             }
 
             // Tell Mikrotik remaining seconds so it can auto‑cut session
@@ -477,9 +484,9 @@ function process_radiust_rest($tur, $code)
         }
     }
 
+    $attrs['Reply-Message'] = 'success';
     $result = array_merge([
-        "control:Auth-Type" => "Accept",
-        "reply" => ["Reply-Message" => ['value' => 'success']]
+        "control:Auth-Type" => "Accept"
     ], $attrs);
     show_radius_result($result, 200);
 }
