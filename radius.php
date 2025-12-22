@@ -227,8 +227,12 @@ try {
                 $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
 
                 if (!$plan) {
-                    _log("User {$tur['username']} has no valid internet plan.", 'RADIUS');
-                    sendTelegram("User {$tur['username']} has no valid internet plan. Please check immediately.\nPlan ID: {$tur['plan_id']}, Plan Name: {$plan['name_plan']}, Expiration: {$tur['expiration']} {$tur['time']}, \nError at Radius-Rest authorize.");
+                    _log("User {$tur['username']} has no valid internet plan. Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}", 'RADIUS');
+                    sendTelegram(
+                        "User {$tur['username']} has no valid internet plan. Please check immediately.\n" .
+                        "Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}, \n" .
+                        "Error at Radius-Rest authorize."
+                    );
                     show_radius_result(['Reply-Message' => 'Invalid Internet Plan, Please contact customer support.'], 401);
                 } else {
                     if ($plan['typebp'] == "Limited") {
