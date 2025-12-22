@@ -28,14 +28,14 @@ $now = time();
 
 // Find stale REST sessions (rad_acct table)
 $staleSessionsRest = ORM::for_table('rad_acct')
-    ->whereRaw("BINARY acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL")
-    ->whereRaw("UNIX_TIMESTAMP(dateAdded) < " . ($now - $sessionTimeout))
+    ->where_raw("(BINARY acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL)", ['Start', 'Interim-Update'])
+    ->where_raw("UNIX_TIMESTAMP(dateAdded) < ?", [$now - $sessionTimeout])
     ->find_many();
 
 // Find stale MySQL RADIUS sessions (radacct table)
 $staleSessionsMysql = ORM::for_table('radacct')
-    ->whereNull('acctstoptime')
-    ->whereRaw("UNIX_TIMESTAMP(acctupdatetime) < " . ($now - $sessionTimeout))
+    ->where_null('acctstoptime')
+    ->where_raw("UNIX_TIMESTAMP(acctupdatetime) < ?", [$now - $sessionTimeout])
     ->find_many();
 
 $count = 0;
