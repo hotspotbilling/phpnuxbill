@@ -236,44 +236,50 @@ try {
                     show_radius_result(['Reply-Message' => 'Invalid Internet Plan, Please contact customer support.'], 401);
                 } else {
                     if ($plan['typebp'] == "Limited") {
-                        // --- DATA LIMIT: use remaining bytes based on rad_acct ---
+                        // window for this recharge only
+                        $startAt = $tur['recharged_on'] . ' ' . $tur['recharged_time'];
+                        $endAt   = $tur['expiration'] . ' ' . $tur['time'];
+                
+                        // --- DATA LIMIT: use remaining bytes for THIS recharge only ---
                         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
                             $raddacts = ORM::for_table('rad_acct')
                                 ->where('username', $tur['username'])
+                                ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                                 ->find_many();
-
+                
                             $totalUsage = 0;
                             foreach ($raddacts as $acct) {
                                 $totalUsage += intval($acct['acctinputoctets']) + intval($acct['acctoutputoctets']);
                             }
-
+                
                             $limitBytes = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']);
                             $remainingBytes = $limitBytes - $totalUsage;
-
+                
                             if ($remainingBytes <= 0) {
                                 show_radius_result(['Reply-Message' => 'You have exhausted your data limit.'], 401);
                             }
                         }
-
-                        // --- TIME LIMIT: use remaining seconds based on rad_acct ---
+                
+                        // --- TIME LIMIT: use remaining seconds for THIS recharge only ---
                         if ($plan['limit_type'] == "Time_Limit" || $plan['limit_type'] == "Both_Limit") {
                             $timeActs = ORM::for_table('rad_acct')
                                 ->where('username', $tur['username'])
+                                ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                                 ->find_many();
-
+                
                             $usedSeconds = 0;
                             foreach ($timeActs as $acct) {
                                 $usedSeconds += intval($acct['acctsessiontime']);
                             }
-
+                
                             if ($plan['time_unit'] == 'Hrs') {
                                 $limitSeconds = $plan['time_limit'] * 60 * 60;
                             } else {
                                 $limitSeconds = $plan['time_limit'] * 60;
                             }
-
+                
                             $remainingSeconds = $limitSeconds - $usedSeconds;
-
+                
                             if ($remainingSeconds <= 0) {
                                 show_radius_result(['Reply-Message' => 'You have exceeded your time limit.'], 401);
                             }
@@ -436,54 +442,58 @@ function process_radiust_rest($tur, $code)
     }
 
     if ($plan['typebp'] == "Limited") {
-        // --- DATA LIMIT: use remaining bytes based on rad_acct ---
+        // window for this recharge only
+        $startAt = $tur['recharged_on'] . ' ' . $tur['recharged_time'];
+        $endAt   = $tur['expiration'] . ' ' . $tur['time'];
+    
+        // --- DATA LIMIT: use remaining bytes based on rad_acct for THIS recharge ---
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
             $raddacts = ORM::for_table('rad_acct')
                 ->where('username', $tur['username'])
+                ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                 ->find_many();
-
+    
             $totalUsage = 0;
             foreach ($raddacts as $acct) {
                 $totalUsage += intval($acct['acctoutputoctets']) + intval($acct['acctinputoctets']);
             }
-
+    
             $limitBytes = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']);
             $remainingBytes = $limitBytes - $totalUsage;
-
+    
             if ($remainingBytes <= 0) {
                 show_radius_result(['Reply-Message' => 'You have exhausted your data limit..'], 401);
             }
-
+    
             // Tell Mikrotik remaining bytes so it can auto‑cut session.
-            // We use at least 1, because 0 means "unlimited" on Mikrotik.
             $attrs['reply:Mikrotik-Total-Limit'] = max(1, $remainingBytes);
         }
-
-        // --- TIME LIMIT: use remaining seconds based on rad_acct ---
+    
+        // --- TIME LIMIT: use remaining seconds based on rad_acct for THIS recharge ---
         if ($plan['limit_type'] == "Time_Limit" || $plan['limit_type'] == "Both_Limit") {
             $timeActs = ORM::for_table('rad_acct')
                 ->where('username', $tur['username'])
+                ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                 ->find_many();
-
+    
             $usedSeconds = 0;
             foreach ($timeActs as $acct) {
                 $usedSeconds += intval($acct['acctsessiontime']);
             }
-
+    
             if ($plan['time_unit'] == 'Hrs') {
                 $limitSeconds = $plan['time_limit'] * 60 * 60;
             } else {
                 $limitSeconds = $plan['time_limit'] * 60;
             }
-
+    
             $remainingSeconds = $limitSeconds - $usedSeconds;
-
+    
             if ($remainingSeconds <= 0) {
                 show_radius_result(['Reply-Message' => 'You have exceeded your time limit.'], 401);
             }
-
+    
             // Tell Mikrotik remaining seconds so it can auto‑cut session
-            // We use at least 1, because 0 means "unlimited" on Mikrotik.
             $attrs['reply:Max-All-Session'] = max(1, $remainingSeconds);
         }
     }
