@@ -105,7 +105,7 @@ if ($dryRun) {
         $db->rollBack();
         
         // Log the error
-        error_log("Error in clean_expired_vouchers.php: " . $e->getMessage());
+        _log("Error in clean_expired_vouchers.php: " . $e->getMessage(), 'CRON');
         echo "ERROR: Transaction failed and was rolled back: " . $e->getMessage() . "\n";
     }
 }
