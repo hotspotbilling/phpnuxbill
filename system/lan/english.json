@@ -1365,5 +1365,6 @@
     "Clear_prolong_unattended_active_sessions_sessions_in_every_xx_minutes": "Clear prolong\/unattended active sessions sessions in every xx minutes",
     "Clear_prolong_unattended_active_sessions_in_every_xx_minutes": "Clear prolong\/unattended active sessions in every xx minutes",
     "Cron_Settings_to_clear_expired_freeradius_stale_sessions": "Cron Settings to clear expired freeradius stale sessions",
-    "Clear_stale_sessions_cronjob_to_run_every_5_minutes__this_is_important_only_if_freeradius_module_is_enabled": "Clear stale sessions cronjob to run every 5 minutes, this is important only if freeradius module is enabled"
+    "Clear_stale_sessions_cronjob_to_run_every_5_minutes__this_is_important_only_if_freeradius_module_is_enabled": "Clear stale sessions cronjob to run every 5 minutes, this is important only if freeradius module is enabled",
+    "Cron_Settings_to_clear_freeradius_stale_sessions": "Cron Settings to clear freeradius stale sessions"
 }
