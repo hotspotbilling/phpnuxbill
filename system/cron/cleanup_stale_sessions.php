@@ -26,10 +26,11 @@ $timeout = isset($config['stale_session_timeout']) ? (int)$config['stale_session
 $sessionTimeout = $timeout * 60; // Minutes of inactivity
 $now = time();
 
-/// Find stale REST sessions (rad_acct table)
-$cutoffTime = date('Y-m-d H:i:s', $now - $sessionTimeout);
+// Find stale REST sessions (rad_acct table)
+// A session is stale if it hasn't been updated in more than $sessionTimeout seconds
+// Using strict < to match original behavior: only sessions exceeding the threshold are cleaned
 $staleSessionsRest = ORM::for_table('rad_acct')
-    ->where_raw("(BINARY acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL) AND dateAdded <= ?", ['Start', 'Interim-Update', $cutoffTime])
+    ->where_raw("(BINARY acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL) AND UNIX_TIMESTAMP(dateAdded) < ?", ['Start', 'Interim-Update', $now - $sessionTimeout])
     ->find_many();
 
 // Find stale MySQL RADIUS sessions (radacct table)
