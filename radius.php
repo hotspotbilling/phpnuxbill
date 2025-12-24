@@ -325,7 +325,7 @@ try {
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY username = '$username' AND macaddr = '" . _post('macAddr') . "' AND acctsessionid = '" . _post('acctSessionId') . "' AND (acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL) AND nasid = '" . _post('nasid') . "'")
+                ->whereRaw("BINARY username = '$username' AND macaddr = '" . _post('macAddr') . "' AND acctsessionid = '" . _post('acctSessionId') . "' AND nasid = '" . _post('nasid') . "'")
                 ->findOne();
 
             if ($d) {
