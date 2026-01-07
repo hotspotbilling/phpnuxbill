@@ -42,7 +42,7 @@ try {
             $CHAPchallenge = _req('CHAPchallenge');
             $isCHAP = false;
             if (!empty($CHAPassword)) {
-                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
                 if ($c) {
                     if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                         $password = $c['password'];
@@ -68,7 +68,7 @@ try {
                         }
                     }
                 } else {
-                    $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
+                    $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY pppoe_username = ?", [$username])->where('status', 'Active')->find_one();
                     if ($c) {
                         if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                             $password = $c['password'];
@@ -106,9 +106,9 @@ try {
             }
             if ($username == $password) {
                 $username = Text::alphanumeric($username, "-_.,");
-                $d = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$username'")->find_one();
+                $d = ORM::for_table('tbl_voucher')->where_raw("BINARY code = ?", [$username])->find_one();
             } else {
-                $d = ORM::for_table('tbl_customers')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                $d = ORM::for_table('tbl_customers')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
                 if ($d['password'] != $password) {
                     if ($d['pppoe_password'] != $password) {
                         unset($d);
@@ -130,7 +130,7 @@ try {
             $CHAPchallenge = _req('CHAPchallenge');
             $isCHAP = false;
             if (!empty($CHAPassword)) {
-                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
                 if ($c) {
                     if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                         $password = $c['password'];
@@ -156,7 +156,7 @@ try {
                         }
                     }
                 } else {
-                    $c = ORM::for_table('tbl_customers')->select('password')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
+                    $c = ORM::for_table('tbl_customers')->select('password')->select('username')->select('pppoe_password')->where_raw("BINARY pppoe_username = ?", [$username])->where('status', 'Active')->find_one();
                     if ($c) {
                         if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                             $password = $c['password'];
@@ -195,23 +195,23 @@ try {
                 }
             }
             $tur = ORM::for_table('tbl_user_recharges')
-                ->whereRaw("BINARY username = '$username'")
-                ->whereRaw("LOWER(routers) = LOWER('radius')")
+                ->where_raw("BINARY username = ?", [$username])
+                ->where('routers', 'radius')
                 ->find_one();
             if (!$tur) {
                 // if check if pppoe_username
-                $c = ORM::for_table('tbl_customers')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
+                $c = ORM::for_table('tbl_customers')->select('username')->select('pppoe_password')->where_raw("BINARY pppoe_username = ?", [$username])->find_one();
                 if ($c) {
                     $username = $c['username'];
                     $tur = ORM::for_table('tbl_user_recharges')
-                        ->whereRaw("BINARY username = '$username'")
-                        ->whereRaw("LOWER(routers) = LOWER('radius')")
+                        ->whereRaw("BINARY username = ?", [$username])
+                        ->where('routers', 'radius')
                         ->find_one();
                 }
             }
             if ($tur) {
                 if (!$isVoucher && !$isCHAP) {
-                    $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                    $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
                     if ($d) {
                         if ($d['password'] != $password) {
                             if ($d['pppoe_password'] != $password) {
@@ -219,7 +219,7 @@ try {
                             }
                         }
                     } else {
-                        $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
+                        $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY pppoe_username = ?", [$username])->where('status', 'Active')->find_one();
                         if ($d) {
                             if ($d['password'] != $password) {
                                 if ($d['pppoe_password'] != $password) {
@@ -296,7 +296,7 @@ try {
             } else {
                 if ($isVoucher) {
                     $username = Text::alphanumeric($username, "-_.,");
-                    $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$username' AND routers = 'radius'")->find_one();
+                    $v = ORM::for_table('tbl_voucher')->where_raw("BINARY code = ?", [$username])->where('routers', 'radius')->find_one();
                     if ($v) {
                         if ($v['status'] == 0) {
                             if (Package::rechargeUser(0, $v['routers'], $v['id_plan'], "Voucher", $username)) {
@@ -304,8 +304,8 @@ try {
                                 $v->used_date = date('Y-m-d H:i:s');
                                 $v->save();
                                 $tur = ORM::for_table('tbl_user_recharges')
-                                    ->whereRaw("BINARY username = '$username'")
-                                    ->whereRaw("LOWER(routers) = LOWER('radius')")
+                                    ->whereRaw("BINARY username = ?", [$username])
+                                    ->where('routers', 'radius')
                                     ->find_one();
                                 if ($tur) {
                                     process_radiust_rest($tur, $code);
@@ -334,7 +334,10 @@ try {
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY username = '$username' AND macaddr = '" . _post('macAddr') . "' AND acctsessionid = '" . _post('acctSessionId') . "' AND (acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL) AND nasid = '" . _post('nasid') . "'")
+                ->where_raw(
+                    "BINARY username = ? AND macaddr = ? AND acctsessionid = ? AND (acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL) AND nasid = ?",
+                    [$username, _post('macAddr'), _post('acctSessionId'), _post('nasid')]
+                )
                 ->findOne();
 
             if ($d) {
