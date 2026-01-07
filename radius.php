@@ -194,13 +194,18 @@ try {
                     show_radius_result(['Reply-Message' => 'Login invalid......'], 401);
                 }
             }
-            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+            $tur = ORM::for_table('tbl_user_recharges')
+                ->whereRaw("BINARY username = '$username'")
+                ->where('routers', 'LIKE', '%radius%')
+                ->find_one();
             if (!$tur) {
                 // if check if pppoe_username
                 $c = ORM::for_table('tbl_customers')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
                 if ($c) {
                     $username = $c['username'];
-                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")
+                        ->where('routers', 'LIKE', '%radius%')
+                        ->find_one();
                 }
             }
             if ($tur) {
@@ -230,8 +235,8 @@ try {
                     _log("User {$tur['username']} has no valid internet plan. Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}", 'RADIUS');
                     sendTelegram(
                         "User {$tur['username']} has no valid internet plan. Please check immediately.\n" .
-                        "Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}, \n" .
-                        "Error at Radius-Rest authorize."
+                            "Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}, \n" .
+                            "Error at Radius-Rest authorize."
                     );
                     show_radius_result(['Reply-Message' => 'Invalid Internet Plan, Please contact customer support.'], 401);
                 } else {
@@ -239,47 +244,47 @@ try {
                         // window for this recharge only
                         $startAt = $tur['recharged_on'] . ' ' . $tur['recharged_time'];
                         $endAt   = $tur['expiration'] . ' ' . $tur['time'];
-                
+
                         // --- DATA LIMIT: use remaining bytes for THIS recharge only ---
                         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
                             $raddacts = ORM::for_table('rad_acct')
                                 ->where('username', $tur['username'])
                                 ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                                 ->find_many();
-                
+
                             $totalUsage = 0;
                             foreach ($raddacts as $acct) {
                                 $totalUsage += intval($acct['acctinputoctets']) + intval($acct['acctoutputoctets']);
                             }
-                
+
                             $limitBytes = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']);
                             $remainingBytes = $limitBytes - $totalUsage;
-                
+
                             if ($remainingBytes <= 0) {
                                 show_radius_result(['Reply-Message' => 'You have exhausted your data limit.'], 401);
                             }
                         }
-                
+
                         // --- TIME LIMIT: use remaining seconds for THIS recharge only ---
                         if ($plan['limit_type'] == "Time_Limit" || $plan['limit_type'] == "Both_Limit") {
                             $timeActs = ORM::for_table('rad_acct')
                                 ->where('username', $tur['username'])
                                 ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                                 ->find_many();
-                
+
                             $usedSeconds = 0;
                             foreach ($timeActs as $acct) {
                                 $usedSeconds += intval($acct['acctsessiontime']);
                             }
-                
+
                             if ($plan['time_unit'] == 'Hrs') {
                                 $limitSeconds = $plan['time_limit'] * 60 * 60;
                             } else {
                                 $limitSeconds = $plan['time_limit'] * 60;
                             }
-                
+
                             $remainingSeconds = $limitSeconds - $usedSeconds;
-                
+
                             if ($remainingSeconds <= 0) {
                                 show_radius_result(['Reply-Message' => 'You have exceeded your time limit.'], 401);
                             }
@@ -297,7 +302,9 @@ try {
                                 $v->status = "1";
                                 $v->used_date = date('Y-m-d H:i:s');
                                 $v->save();
-                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")
+                                    ->where('routers', 'LIKE', '%radius%')
+                                    ->find_one();
                                 if ($tur) {
                                     process_radiust_rest($tur, $code);
                                 } else {
@@ -362,15 +369,15 @@ try {
 } catch (Throwable $e) {
     Message::sendTelegram(
         "System Error.\n" .
-        $e->getMessage() . "\n" .
-        $e->getTraceAsString()
+            $e->getMessage() . "\n" .
+            $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 } catch (Exception $e) {
     Message::sendTelegram(
         "System Error.\n" .
-        $e->getMessage() . "\n" .
-        $e->getTraceAsString()
+            $e->getMessage() . "\n" .
+            $e->getTraceAsString()
     );
     show_radius_result(['Reply-Message' => 'Command Failed : ' . $action], 401);
 }
@@ -445,54 +452,54 @@ function process_radiust_rest($tur, $code)
         // window for this recharge only
         $startAt = $tur['recharged_on'] . ' ' . $tur['recharged_time'];
         $endAt   = $tur['expiration'] . ' ' . $tur['time'];
-    
+
         // --- DATA LIMIT: use remaining bytes based on rad_acct for THIS recharge ---
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
             $raddacts = ORM::for_table('rad_acct')
                 ->where('username', $tur['username'])
                 ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                 ->find_many();
-    
+
             $totalUsage = 0;
             foreach ($raddacts as $acct) {
                 $totalUsage += intval($acct['acctoutputoctets']) + intval($acct['acctinputoctets']);
             }
-    
+
             $limitBytes = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']);
             $remainingBytes = $limitBytes - $totalUsage;
-    
+
             if ($remainingBytes <= 0) {
                 show_radius_result(['Reply-Message' => 'You have exhausted your data limit..'], 401);
             }
-    
+
             // Tell Mikrotik remaining bytes so it can auto‑cut session.
             $attrs['reply:Mikrotik-Total-Limit'] = max(1, $remainingBytes);
         }
-    
+
         // --- TIME LIMIT: use remaining seconds based on rad_acct for THIS recharge ---
         if ($plan['limit_type'] == "Time_Limit" || $plan['limit_type'] == "Both_Limit") {
             $timeActs = ORM::for_table('rad_acct')
                 ->where('username', $tur['username'])
                 ->where_raw('dateAdded >= ? AND dateAdded <= ?', [$startAt, $endAt])
                 ->find_many();
-    
+
             $usedSeconds = 0;
             foreach ($timeActs as $acct) {
                 $usedSeconds += intval($acct['acctsessiontime']);
             }
-    
+
             if ($plan['time_unit'] == 'Hrs') {
                 $limitSeconds = $plan['time_limit'] * 60 * 60;
             } else {
                 $limitSeconds = $plan['time_limit'] * 60;
             }
-    
+
             $remainingSeconds = $limitSeconds - $usedSeconds;
-    
+
             if ($remainingSeconds <= 0) {
                 show_radius_result(['Reply-Message' => 'You have exceeded your time limit.'], 401);
             }
-    
+
             // Tell Mikrotik remaining seconds so it can auto‑cut session
             $attrs['reply:Max-All-Session'] = max(1, $remainingSeconds);
         }
