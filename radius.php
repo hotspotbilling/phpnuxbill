@@ -204,7 +204,7 @@ try {
                 if ($c) {
                     $username = $c['username'];
                     $tur = ORM::for_table('tbl_user_recharges')
-                        ->whereRaw("BINARY username = ?", [$username])
+                        ->where_raw("BINARY username = ?", [$username])
                         ->where('routers', 'radius')
                         ->find_one();
                 }
