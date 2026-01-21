@@ -304,7 +304,7 @@ try {
                                 $v->used_date = date('Y-m-d H:i:s');
                                 $v->save();
                                 $tur = ORM::for_table('tbl_user_recharges')
-                                    ->whereRaw("BINARY username = ?", [$username])
+                                    ->where_raw("BINARY username = ?", [$username])
                                     ->where('routers', 'radius')
                                     ->find_one();
                                 if ($tur) {
@@ -343,10 +343,12 @@ try {
             if ($d) {
                 $d->acctOutputOctets = intval(_post('acctOutputOctets', 0));
                 $d->acctInputOctets = intval(_post('acctInputOctets', 0));
+                $d->dateUpdated = date('Y-m-d H:i:s');
             } else {
                 $d = ORM::for_table('rad_acct')->create();
                 $d->acctOutputOctets = intval(_post('acctOutputOctets', 0));
                 $d->acctInputOctets = intval(_post('acctInputOctets', 0));
+                $d->dateAdded = date('Y-m-d H:i:s');
             }
 
             $d->acctsessionid = _post('acctSessionId');
@@ -362,7 +364,6 @@ try {
                 $d->acctstatustype = _post('acctStatusType');
             }
             $d->macaddr = _post('macAddr');
-            $d->dateAdded = date('Y-m-d H:i:s');
             // Save accounting record only; do not enforce quota or terminate.
             $d->save();
             show_radius_result(['Reply-Message' => 'Saved'], 200);
