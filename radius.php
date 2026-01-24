@@ -333,38 +333,45 @@ try {
                 die();
             }
             header("HTTP/1.1 200 ok");
+
+            $acctSessionId = _post('acctSessionId');
+            $acctStatusType = _post('acctStatusType');
+
+            // Find existing record by session ID (unique per session)
+            // NAS is source of truth - if NAS sends update for same session ID, update the record
+            // even if cron marked it as 'Stop' (user was idle but session still active on NAS)
             $d = ORM::for_table('rad_acct')
-                ->where_raw(
-                    "BINARY username = ? AND macaddr = ? AND acctsessionid = ? AND (acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL) AND nasid = ?",
-                    [$username, _post('macAddr'), _post('acctSessionId'), _post('nasid')]
-                )
-                ->findOne();
+                ->where('username', $username)
+                ->where('acctsessionid', $acctSessionId)
+                ->find_one();
 
             if ($d) {
-                $d->acctOutputOctets = intval(_post('acctOutputOctets', 0));
-                $d->acctInputOctets = intval(_post('acctInputOctets', 0));
+                // Update existing record - NAS continues the session
+                $d->acctoutputoctets = intval(_post('acctOutputOctets', 0));
+                $d->acctinputoctets = intval(_post('acctInputOctets', 0));
+                $d->acctsessiontime = intval(_post('acctSessionTime', 0));
                 $d->dateUpdated = date('Y-m-d H:i:s');
             } else {
+                // Create new record only if no existing record found for this session ID
                 $d = ORM::for_table('rad_acct')->create();
-                $d->acctOutputOctets = intval(_post('acctOutputOctets', 0));
-                $d->acctInputOctets = intval(_post('acctInputOctets', 0));
+                $d->acctoutputoctets = intval(_post('acctOutputOctets', 0));
+                $d->acctinputoctets = intval(_post('acctInputOctets', 0));
+                $d->acctsessiontime = intval(_post('acctSessionTime', 0));
                 $d->dateAdded = date('Y-m-d H:i:s');
+                $d->acctsessionid = $acctSessionId;
+                $d->username = $username;
+                $d->realm = _post('realm');
+                $d->nasipaddress = _post('nasIpAddress');
+                $d->nasid = _post('nasid');
+                $d->nasportid = _post('nasPortId');
+                $d->nasporttype = _post('nasPortType');
+                $d->macaddr = _post('macAddr');
             }
 
-            $d->acctsessionid = _post('acctSessionId');
-            $d->username = $username;
-            $d->realm = _post('realm');
-            $d->nasipaddress = _post('nasIpAddress');
-            $d->acctsessiontime = intval(_post('acctSessionTime'));
-            $d->nasid = _post('nasid');
-            $d->nasportid = _post('nasPortId');
-            $d->nasporttype = _post('nasPortType');
             $d->framedipaddress = _post('framedIPAddress');
-            if (in_array(_post('acctStatusType'), ['Start', 'Stop', 'Interim-Update'])) {
-                $d->acctstatustype = _post('acctStatusType');
+            if (in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'])) {
+                $d->acctstatustype = $acctStatusType;
             }
-            $d->macaddr = _post('macAddr');
-            // Save accounting record only; do not enforce quota or terminate.
             $d->save();
             show_radius_result(['Reply-Message' => 'Saved'], 200);
             break;

@@ -28,9 +28,9 @@ $now = time();
 
 // Find stale REST sessions (rad_acct table)
 // A session is stale if it hasn't been updated in more than $sessionTimeout seconds
-// Using strict < to match original behavior: only sessions exceeding the threshold are cleaned
+// Use dateUpdated if available (for sessions with interim updates), otherwise fall back to dateAdded
 $staleSessionsRest = ORM::for_table('rad_acct')
-    ->where_raw("(BINARY acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL) AND UNIX_TIMESTAMP(dateAdded) < ?", ['Start', 'Interim-Update', $now - $sessionTimeout])
+    ->where_raw("(acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL) AND UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) < ?", ['Start', 'Interim-Update', $now - $sessionTimeout])
     ->find_many();
 
 // Find stale MySQL RADIUS sessions (radacct table)
