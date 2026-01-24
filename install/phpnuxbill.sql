@@ -356,7 +356,8 @@ ALTER TABLE `rad_acct`
   ADD KEY `username` (`username`),
   ADD KEY `framedipaddress` (`framedipaddress`),
   ADD KEY `acctsessionid` (`acctsessionid`),
-  ADD KEY `nasipaddress` (`nasipaddress`);
+  ADD KEY `nasipaddress` (`nasipaddress`),
+  ADD UNIQUE KEY `unique_session` (`username`, `acctsessionid`);
 
 
 ALTER TABLE `rad_acct`

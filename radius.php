@@ -337,6 +337,11 @@ try {
             $acctSessionId = _post('acctSessionId');
             $acctStatusType = _post('acctStatusType');
 
+            if (empty($acctSessionId)) {
+                show_radius_result(['Reply-Message' => 'Session ID empty'], 401);
+                die();
+            }
+
             // Find existing record by session ID (unique per session)
             // NAS is source of truth - if NAS sends update for same session ID, update the record
             // even if cron marked it as 'Stop' (user was idle but session still active on NAS)

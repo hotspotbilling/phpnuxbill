@@ -221,5 +221,9 @@
     "INSERT INTO `tbl_appconfig` (`setting`, `value`) VALUES ('referral_enabled', 'yes'), ('referrer_reward_type', 'balance'), ('referrer_reward_amount', '0.00'), ('referred_reward_type', 'balance'), ('referred_reward_amount', '0.00'), ('min_purchase_amount', '0.00'), ('referral_code_length', '8'), ('require_purchase', 'yes');",
     "INSERT INTO `tbl_widgets` (`orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (6, 1, 'Customer', 1, 'Referrals', 'referrals', '');",
     "ALTER TABLE `rad_acct` ADD COLUMN `dateUpdated` timestamp NULL DEFAULT NULL;"
+  ],
+  "2026.1.24": [
+    "DELETE r1 FROM rad_acct r1 INNER JOIN rad_acct r2 ON r1.username = r2.username AND r1.acctsessionid = r2.acctsessionid AND r1.id < r2.id;",
+    "ALTER TABLE `rad_acct` ADD UNIQUE KEY `unique_session` (`username`, `acctsessionid`);"
   ]
 }
