@@ -1,3 +1,5 @@
+
+{if in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
 <div class="box box-solid ">
     <div class="box-header">
         <i class="fa fa-inbox"></i>
@@ -151,3 +153,5 @@
         {/literal}
     {/if}
 </script>
+
+{/if}
