@@ -30,7 +30,9 @@ $now = time();
 // A session is stale if it hasn't been updated in more than $sessionTimeout seconds
 // Use dateUpdated if available (for sessions with interim updates), otherwise fall back to dateAdded
 $staleSessionsRest = ORM::for_table('rad_acct')
-    ->where_raw("(acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL) AND UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) < ?", ['Start', 'Interim-Update', $now - $sessionTimeout])
+    ->where_raw("(acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL)", ['Start', 'Interim-Update'])
+    ->where_not_null('dateAdded')
+    ->where_raw("UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) > 0 AND UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) < ?", [$now - $sessionTimeout])
     ->find_many();
 
 // Find stale MySQL RADIUS sessions (radacct table)
@@ -57,15 +59,20 @@ if (!empty($staleSessionsRest)) {
     }
     
     if (!empty($sessionIds)) {
-        // Use raw SQL UPDATE for better performance
-        $ids = implode(',', array_map('intval', $sessionIds));
-        $db = ORM::get_db();
-        $db->exec("UPDATE rad_acct SET acctstatustype = 'Stop' WHERE id IN ($ids)");
-        
-        // Log each session
-        foreach ($sessionDetails as $detail) {
-            _log("Cleaned up stale REST session: {$detail['username']} from IP {$detail['framedipaddress']}", 'CRON');
-            $count++;
+        try {
+            // Use prepared statement for consistency and security
+            $ids = implode(',', array_map('intval', $sessionIds));
+            $db = ORM::get_db();
+            $stmt = $db->prepare("UPDATE rad_acct SET acctstatustype = ? WHERE id IN ($ids)");
+            $stmt->execute(['Stop']);
+            
+            // Log each session
+            foreach ($sessionDetails as $detail) {
+                _log("Cleaned up stale REST session: {$detail['username']} from IP {$detail['framedipaddress']}", 'CRON');
+                $count++;
+            }
+        } catch (Exception $e) {
+            _log("Error cleaning up stale REST sessions: " . $e->getMessage(), 'CRON', 'ERROR');
         }
     }
 }
@@ -85,17 +92,21 @@ if (!empty($staleSessionsMysql)) {
     }
     
     if (!empty($sessionIds)) {
-        // Use raw SQL UPDATE for better performance
-        $ids = implode(',', array_map('intval', $sessionIds));
-        $stopTime = date('Y-m-d H:i:s');
-        $db = ORM::get_db();
-        $stmt = $db->prepare("UPDATE radacct SET acctstoptime = ? WHERE radacctid IN ($ids)");
-        $stmt->execute([$stopTime]);
-        
-        // Log each session
-        foreach ($sessionDetails as $detail) {
-            _log("Cleaned up stale MySQL session: {$detail['username']} from IP {$detail['framedipaddress']}", 'CRON');
-            $count++;
+        try {
+            // Use prepared statement for consistency and security
+            $ids = implode(',', array_map('intval', $sessionIds));
+            $stopTime = date('Y-m-d H:i:s');
+            $db = ORM::get_db();
+            $stmt = $db->prepare("UPDATE radacct SET acctstoptime = ? WHERE radacctid IN ($ids)");
+            $stmt->execute([$stopTime]);
+            
+            // Log each session
+            foreach ($sessionDetails as $detail) {
+                _log("Cleaned up stale MySQL session: {$detail['username']} from IP {$detail['framedipaddress']}", 'CRON');
+                $count++;
+            }
+        } catch (Exception $e) {
+            _log("Error cleaning up stale MySQL sessions: " . $e->getMessage(), 'CRON', 'ERROR');
         }
     }
 }

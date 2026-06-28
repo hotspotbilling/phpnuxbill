@@ -225,5 +225,8 @@
   "2026.1.24": [
     "DELETE r1 FROM rad_acct r1 INNER JOIN rad_acct r2 ON r1.username = r2.username AND r1.acctsessionid = r2.acctsessionid AND r1.id < r2.id;",
     "ALTER TABLE `rad_acct` ADD UNIQUE KEY `unique_session` (`username`, `acctsessionid`);"
+  ],
+  "2026.6.28": [
+    "ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales','Asset','Support') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
   ]
 }

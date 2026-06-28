@@ -69,6 +69,8 @@
                                 <option value="Report">{Lang::T('Report Viewer')}</option>
                                 <option value="Agent">{Lang::T('Agent')}</option>
                                 <option value="Sales">{Lang::T('Sales')}</option>
+                                <option value="Asset">{Lang::T('Asset Manager')}</option>
+                                <option value="Support">{Lang::T('Support')}</option>
                                 {/if} {if $_admin['user_type'] eq 'SuperAdmin'}
                                 <option value="Admin">{Lang::T('Administrator')}</option>
                                 <option value="SuperAdmin">{Lang::T('Super Administrator')}</option>

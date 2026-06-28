@@ -25,7 +25,12 @@ if ($isCli) {
     $dryRun = in_array('--dry-run', $argv);
 } else {
     // Web access is forced to dry-run mode for safety
-    $dryRun = true;
+    if (isset($_GET['dry-run']) && $_GET['dry-run'] === '1') {
+        $dryRun = true;
+    } else {
+        // If accessed via web without dry-run parameter, force dry-run mode
+        $dryRun = false;
+    }
 
     // Check if the user is authenticated and authorized or valid API key
     if (!$isCli && (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) && (!isset($_GET['secret']) || $_GET['secret'] !== $config['api_key'])) {
@@ -60,7 +65,7 @@ $expiredUsers = ORM::for_table('tbl_user_recharges')
 $usernames = array_column($expiredUsers, 'username');
 $countCandidates = count($usernames);
 
-echo "Found $countCandidates expired voucher(s) older than 30 days\n";
+echo "Found $countCandidates expired voucher(s) older than $cutoffDate \n";
 
 if ($countCandidates === 0) {
     echo "Nothing to delete.\n";
@@ -75,11 +80,11 @@ if ($dryRun) {
 } else {
     // Get database connection for transaction
     $db = ORM::get_db();
-    
+
     try {
         // Begin transaction to ensure atomicity
         $db->beginTransaction();
-        
+
         // Step 2: Delete expired recharges
         $deletedRecharges = ORM::for_table('tbl_user_recharges')
             ->where_in('username', $usernames)
@@ -96,14 +101,13 @@ if ($dryRun) {
             ->delete_many();
 
         echo "Deleted $deletedVouchers vouchers from tbl_voucher\n";
-        
+
         // Commit the transaction if both deletes were successful
         $db->commit();
-        
     } catch (Exception $e) {
         // Rollback the transaction on any error
         $db->rollBack();
-        
+
         // Log the error
         _log("Error in clean_expired_vouchers.php: " . $e->getMessage(), 'CRON');
         echo "ERROR: Transaction failed and was rolled back: " . $e->getMessage() . "\n";
@@ -118,7 +122,7 @@ echo "Mode: " . ($dryRun ? "DRY RUN" : "LIVE DELETE") . "\n";
 // Add HTML formatting for web interface
 if (!$isCli) {
     echo "</pre>";
-    
+
     if ($dryRun) {
         echo "<div style='margin-top: 20px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;'>";
         echo "<p><strong>Note:</strong> This is a preview mode only. Actual deletions can only be performed via CLI.</p>";

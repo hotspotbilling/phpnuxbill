@@ -332,53 +332,73 @@ try {
                 show_radius_result(['Reply-Message' => 'Username empty'], 401);
                 die();
             }
-            header("HTTP/1.1 200 ok");
+            header("HTTP/1.1 200 OK");
 
-            $acctSessionId = _post('acctSessionId');
-            $acctStatusType = _post('acctStatusType');
+            $acctSessionId = _req('acctSessionId', _req('acctsessionid'));
+            $acctStatusType = _req('acctStatusType', _req('acctstatustype'));
+            $acctInputOctets = intval(_req('acctInputOctets', _req('acctinputoctets', 0)));
+            $acctOutputOctets = intval(_req('acctOutputOctets', _req('acctoutputoctets', 0)));
+            $acctSessionTime = intval(_req('acctSessionTime', _req('acctsessiontime', 0)));
+            $framedIPAddress = _req('framedIPAddress', _req('framedipaddress'));
+            $nasIpAddress = _req('nasIpAddress', _req('nasipaddress'));
+            $nasPortId = _req('nasPortId', _req('nasportid'));
+            $nasPortType = _req('nasPortType', _req('nasporttype'));
+            $macAddr = _req('macAddr', _req('macaddr'));
+            $realm = _req('realm');
 
             if (empty($acctSessionId)) {
                 show_radius_result(['Reply-Message' => 'Session ID empty'], 401);
                 die();
             }
 
-            // Find existing record by session ID (unique per session)
-            // NAS is source of truth - if NAS sends update for same session ID, update the record
-            // even if cron marked it as 'Stop' (user was idle but session still active on NAS)
+            // Find existing record by session ID and username (unique session)
             $d = ORM::for_table('rad_acct')
-                ->where('username', $username)
                 ->where('acctsessionid', $acctSessionId)
+                ->where('username', $username)
                 ->find_one();
 
             if ($d) {
                 // Update existing record - NAS continues the session
-                $d->acctoutputoctets = intval(_post('acctOutputOctets', 0));
-                $d->acctinputoctets = intval(_post('acctInputOctets', 0));
-                $d->acctsessiontime = intval(_post('acctSessionTime', 0));
+                $d->acctoutputoctets = $acctOutputOctets;
+                $d->acctinputoctets = $acctInputOctets;
+                $d->acctsessiontime = $acctSessionTime;
                 $d->dateUpdated = date('Y-m-d H:i:s');
             } else {
                 // Create new record only if no existing record found for this session ID
                 $d = ORM::for_table('rad_acct')->create();
-                $d->acctoutputoctets = intval(_post('acctOutputOctets', 0));
-                $d->acctinputoctets = intval(_post('acctInputOctets', 0));
-                $d->acctsessiontime = intval(_post('acctSessionTime', 0));
+                $d->acctoutputoctets = $acctOutputOctets;
+                $d->acctinputoctets = $acctInputOctets;
+                $d->acctsessiontime = $acctSessionTime;
                 $d->dateAdded = date('Y-m-d H:i:s');
+                $d->dateUpdated = date('Y-m-d H:i:s');
                 $d->acctsessionid = $acctSessionId;
                 $d->username = $username;
-                $d->realm = _post('realm');
-                $d->nasipaddress = _post('nasIpAddress');
-                $d->nasid = _post('nasid');
-                $d->nasportid = _post('nasPortId');
-                $d->nasporttype = _post('nasPortType');
-                $d->macaddr = _post('macAddr');
+                $d->realm = $realm;
+                $d->nasipaddress = $nasIpAddress;
+                $d->nasid = _req('nasid');
+                $d->nasportid = $nasPortId;
+                $d->nasporttype = $nasPortType;
+                $d->macaddr = $macAddr;
             }
 
-            $d->framedipaddress = _post('framedIPAddress');
-            if (in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'])) {
+            $d->framedipaddress = $framedIPAddress;
+            if (in_array($acctStatusType, ['Start', 'Stop', 'Interim-Update'], true)) {
                 $d->acctstatustype = $acctStatusType;
             }
-            $d->save();
-            show_radius_result(['Reply-Message' => 'Saved'], 200);
+
+            try {
+                $d->save();
+                show_radius_result(['Reply-Message' => 'Saved'], 200);
+            } catch (Exception $e) {
+                // Avoid Mikrotik no-response due server error (500)
+                sendTelegram(
+                    "Database Save Error on RADIUS Accounting.\n" .
+                    "Username: {$username}\n" .
+                    "Session ID: {$acctSessionId}\n" .
+                    "Error: " . $e->getMessage()
+                );
+                show_radius_result(['Reply-Message' => 'Database save failed: ' . $e->getMessage()], 401);
+            }
             break;
         default:
             show_radius_result(['Reply-Message' => 'Invalid Command : ' . $action], 401);

@@ -93,6 +93,10 @@
                                         </option>
                                         <option value="Sales" {if $d['user_type'] eq 'Sales'}selected="selected" {/if}>Sales
                                         </option>
+                                        <option value="Asset" {if $d['user_type'] eq 'Asset'}selected="selected" {/if}>Asset
+                                            Manager</option>
+                                        <option value="Support" {if $d['user_type'] eq 'Support'}selected="selected"
+                                            {/if}>Support</option>
                                     {/if}
                                     {if $_admin['user_type'] eq 'SuperAdmin'}
                                         <option value="Admin" {if $d['user_type'] eq 'Admin'}selected="selected" {/if}>
@@ -108,8 +112,9 @@
                             <div class="col-md-9">
                                 <select name="root" id="root" class="form-control">
                                     {foreach $agents as $agent}
-                                        <option value="{$agent['id']}">{$agent['username']} | {$agent['fullname']} |
-                                            {$agent['phone']}</option>
+                                        <option value="{$agent['id']}" {if $d['root'] eq $agent['id']}selected="selected"{/if}>
+                                            {$agent['username']} | {$agent['fullname']} | {$agent['phone']}
+                                        </option>
                                     {/foreach}
                                 </select>
                             </div>

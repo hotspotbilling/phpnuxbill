@@ -253,7 +253,7 @@ switch ($action) {
             $_POST['user_notification_payment_email'] = isset($_POST['user_notification_payment_email']) ? '1' : '0';
             $_POST['user_notification_payment_inbox'] = isset($_POST['user_notification_payment_inbox']) ? '1' : '0';
             $_POST['user_notification_payment_push'] = isset($_POST['user_notification_payment_push']) ? '1' : '0';
-             //reminder notification
+            //reminder notification
             $_POST['user_notification_reminder_sms'] = isset($_POST['user_notification_reminder_sms']) ? '1' : '0';
             $_POST['user_notification_reminder_wa'] = isset($_POST['user_notification_reminder_wa']) ? '1' : '0';
             $_POST['user_notification_reminder_email'] = isset($_POST['user_notification_reminder_email']) ? '1' : '0';
@@ -497,11 +497,13 @@ switch ($action) {
             } else if ($admin['user_type'] == 'Admin') {
                 $query = ORM::for_table('tbl_users')
                     ->where_like('username', '%' . $search . '%')->where_any_is([
-                            ['user_type' => 'Report'],
-                            ['user_type' => 'Agent'],
-                            ['user_type' => 'Sales'],
-                            ['id' => $admin['id']]
-                        ])->order_by_asc('id');
+                        ['user_type' => 'Report'],
+                        ['user_type' => 'Agent'],
+                        ['user_type' => 'Sales'],
+                        ['user_type' => 'Asset'],
+                        ['user_type' => 'Support'],
+                        ['id' => $admin['id']]
+                    ])->order_by_asc('id');
                 $d = Paginator::findMany($query, ['search' => $search]);
             } else {
                 $query = ORM::for_table('tbl_users')
@@ -521,6 +523,8 @@ switch ($action) {
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
                     ['user_type' => 'Sales'],
+                    ['user_type' => 'Asset'],
+                    ['user_type' => 'Support'],
                     ['id' => $admin['id']]
                 ])->order_by_asc('id');
                 $d = Paginator::findMany($query);
@@ -616,7 +620,9 @@ switch ($action) {
                 $d = ORM::for_table('tbl_users')->where_any_is([
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
-                    ['user_type' => 'Sales']
+                    ['user_type' => 'Sales'],
+                    ['user_type' => 'Asset'],
+                    ['user_type' => 'Support'],
                 ])->find_one($id);
                 $ui->assign('agents', ORM::for_table('tbl_users')->where('user_type', 'Agent')->find_many());
             } else {
@@ -796,7 +802,9 @@ switch ($action) {
                 $d = ORM::for_table('tbl_users')->where_any_is([
                     ['user_type' => 'Report'],
                     ['user_type' => 'Agent'],
-                    ['user_type' => 'Sales']
+                    ['user_type' => 'Sales'],
+                    ['user_type' => 'Asset'],
+                    ['user_type' => 'Support'],
                 ])->find_one($id);
             } else {
                 $d = ORM::for_table('tbl_users')->where('root', $admin['id'])->find_one($id);

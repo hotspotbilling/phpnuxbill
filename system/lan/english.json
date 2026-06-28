@@ -1532,5 +1532,12 @@
     "Code_Login": "Code Login",
     "Create_New_Device": "Create New Device",
     "Set_as_Active": "Set as Active",
-    "Set_Active": "Set Active"
+    "Set_Active": "Set Active",
+    "Add_User": "Add User",
+    "Report_Viewer": "Report Viewer",
+    "Asset_Manager": "Asset Manager",
+    "Support": "Support",
+    "Administrator": "Administrator",
+    "Super_Administrator": "Super Administrator",
+    "Password_should_be_minimum_6_characters": "Password should be minimum 6 characters"
 }
