@@ -15,7 +15,7 @@
                                     <span class="fa fa-search"></span>
                                 </div>
                                 <input type="text" name="name" class="form-control"
-                                    placeholder="{Lang::T('Search by Name')}...">
+                                    placeholder="{Lang::T('Search by Name')}..." value="{$name}>
                                 <div class="input-group-btn">
                                     <button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
                                 </div>

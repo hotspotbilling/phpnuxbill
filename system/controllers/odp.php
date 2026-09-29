@@ -128,17 +128,17 @@ switch ($action) {
 
     default:
         run_hook('view_list_odp'); #HOOK
-		$name = _post('name');
+		$name = _req('name');
 		if ($name != ''){
-            $paginator = Paginator::build(ORM::for_table('tbl_odps'), ['name' => '%' . $name . '%'], $name);
-			$d = ORM::for_table('tbl_odps')->where_like('name','%'.$name.'%')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
+            $query = ORM::for_table('tbl_odps')->where_like('name','%'.$name.'%');
+            $d = Paginator::findMany($query, ['name' => $name], 10);
 		}else{
-            $paginator = Paginator::build(ORM::for_table('tbl_odps'));
-			$d = ORM::for_table('tbl_odps')->offset($paginator['startpoint'])->limit($paginator['limit'])->order_by_desc('id')->find_many();
-		}
+            $query = ORM::for_table('tbl_odps')->order_by_asc('id');
+            $d = Paginator::findMany($query);
+        }    
 
         $ui->assign('d',$d);
-		$ui->assign('paginator',$paginator);
+		$ui->assign('name',$name);
         $ui->display('admin/odp/list.tpl');
         break;
 }
