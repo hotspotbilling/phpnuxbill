@@ -5,15 +5,18 @@
 
 const CACHE_NAME = 'merchant-portal-v2.0';
 const ASSETS_TO_CACHE = [
-    './ui/ui/images/logo.png',
+    './ui/ui/images/logo.png'
+];
+const OPTIONAL_ASSETS = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
     'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS_TO_CACHE);
+        caches.open(CACHE_NAME).then(async (cache) => {
+            await cache.addAll(ASSETS_TO_CACHE);
+            await Promise.allSettled(OPTIONAL_ASSETS.map((url) => cache.add(url).catch(() => {})));
         }).then(() => self.skipWaiting())
     );
 });
@@ -22,7 +25,7 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
-                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+                keys.filter((key) => key.startsWith('merchant-portal-') && key !== CACHE_NAME).map((key) => caches.delete(key))
             );
         }).then(() => self.clients.claim())
     );
@@ -34,7 +37,7 @@ self.addEventListener('fetch', (event) => {
 
     // Static assets cache-first strategy, dynamic network-first strategy
     const url = new URL(event.request.url);
-    if (url.pathname.includes('/ui/') || url.pathname.includes('cdnjs') || url.pathname.includes('fonts.')) {
+    if (url.pathname.includes('/ui/') || url.hostname.includes('cdnjs') || url.hostname.includes('fonts.')) {
         event.respondWith(
             caches.match(event.request).then((cachedResponse) => {
                 if (cachedResponse) return cachedResponse;

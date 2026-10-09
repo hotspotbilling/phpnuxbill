@@ -498,7 +498,7 @@
 <script>
     window.addEventListener('load', function() {
         {if $d['coordinates']}
-            var rawCoords = "{$d['coordinates']}".split(',');
+            var rawCoords = '{$d['coordinates']|escape:'javascript'}'.split(',');
             if (rawCoords.length === 2) {
                 setupMap(rawCoords[0].trim(), rawCoords[1].trim());
             } else {

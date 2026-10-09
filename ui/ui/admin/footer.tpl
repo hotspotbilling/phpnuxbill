@@ -28,8 +28,20 @@
         let debounceTimer = null;
         let selectedIndex = -1;
         let currentXhr = null;
+        let isOpen = false;
+
+        function closeSearch() {
+            isOpen = false;
+            if (currentXhr) {
+                currentXhr.abort();
+                currentXhr = null;
+            }
+            if (spinner) spinner.style.display = 'none';
+            resultsEl.style.display = 'none';
+        }
 
         function fetchResults(query) {
+            isOpen = true;
             if (currentXhr) {
                 currentXhr.abort();
             }
@@ -43,6 +55,7 @@
                 data: { query: query },
                 success: function (data) {
                     if (spinner) spinner.style.display = 'none';
+                    if (!isOpen) return;
                     selectedIndex = -1;
                     if (data && data.trim() !== '') {
                         resultsEl.innerHTML = data;
@@ -77,6 +90,7 @@
         if (clearBtn) {
             clearBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
+                clearTimeout(debounceTimer);
                 searchEl.value = '';
                 searchEl.focus();
                 fetchResults('');
@@ -85,6 +99,12 @@
 
         // Keyboard navigation (ArrowDown, ArrowUp, Enter, Escape)
         searchEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeSearch();
+                searchEl.blur();
+                return;
+            }
+
             const items = resultsEl.querySelectorAll('.search-item');
             if (!items || items.length === 0) return;
 
@@ -103,9 +123,6 @@
                     e.preventDefault();
                     items[selectedIndex].click();
                 }
-            } else if (e.key === 'Escape') {
-                resultsEl.style.display = 'none';
-                searchEl.blur();
             }
         });
 
@@ -123,7 +140,7 @@
         // Close on click outside
         document.addEventListener('click', function (e) {
             if (!searchWrap || !searchWrap.contains(e.target)) {
-                resultsEl.style.display = 'none';
+                closeSearch();
                 if (clearBtn && searchEl.value.trim() === '') {
                     clearBtn.style.display = 'none';
                 }

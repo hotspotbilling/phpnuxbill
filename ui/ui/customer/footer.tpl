@@ -300,9 +300,37 @@
 
     async function subscribeUser() {
         try {
+            // 1. Check secure context and browser capability
+            if (!window.isSecureContext) {
+                throw new Error('Push notifications require a secure connection (HTTPS). Please ensure SSL is enabled on your cloud server.');
+            }
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+                throw new Error('Push notifications are not supported on this browser.');
+            }
+            if (!publicVapidKey || publicVapidKey.trim() === '') {
+                throw new Error('Push notification service is not configured (missing VAPID key).');
+            }
+
             console.log('Starting subscription process...');
-            const registration = await navigator.serviceWorker.register('{$app_url}/ui/ui/scripts/sw.js');
-            console.log('Service worker registered');
+
+            // 2. Request Notification Permission explicitly (required by modern browsers)
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                if (permission === 'denied') {
+                    throw new Error('Notification permission was blocked in your browser settings.');
+                } else {
+                    throw new Error('Notification permission was dismissed or not granted.');
+                }
+            }
+
+            // 3. Register Service Worker with safe protocol
+            const rawSwUrl = '{$app_url}/ui/ui/scripts/sw.js';
+            const swUrl = rawSwUrl.replace(/^http:\/\//i, window.location.protocol + '//');
+            const registration = await navigator.serviceWorker.register(swUrl);
+            console.log('Service worker registered:', registration);
+
+            // Wait until service worker is active
+            await navigator.serviceWorker.ready;
 
             const existingSubscription = await registration.pushManager.getSubscription();
             if (existingSubscription) {
@@ -343,21 +371,20 @@
                     $('#subscribeModal').modal('hide');
                 });
             } else {
-                const result = await response.json();
-                throw new Error(result.message || 'Failed to subscribe');
+                const result = await response.json().catch(() => ({}));
+                throw new Error(result.message || 'Failed to save subscription on server');
             }
         } catch (error) {
             console.error('Subscription error:', error);
+            localStorage.setItem('push_subscribed', 'no');
+            localStorage.setItem('push_subscribed_timestamp', Date.now().toString());
+
             Swal.fire({
                 icon: 'error',
                 title: error.title || 'Oops!',
                 text: error.message,
-                confirmButtonText: 'Try Again',
+                confirmButtonText: 'OK',
                 confirmButtonColor: '#f44336'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#subscribeModal').modal('show'); // Re-show modal to retry
-                }
             });
         }
     }
@@ -374,24 +401,40 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Do not prompt if environment does not support Web Push or is not HTTPS
+        if (!window.isSecureContext || !('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+            console.info('Push notifications not supported or not running on HTTPS.');
+            return;
+        }
+
+        // Do not prompt if VAPID key is missing
+        if (!publicVapidKey || publicVapidKey.trim() === '') {
+            console.info('Push notifications disabled: VAPID public key is not configured.');
+            return;
+        }
+
+        // Do not prompt if user has already permanently blocked notifications
+        if (Notification.permission === 'denied') {
+            console.info('Push notifications permission is denied.');
+            return;
+        }
+
         const status = localStorage.getItem('push_subscribed');
         const declineTimestamp = localStorage.getItem('push_subscribed_timestamp');
         const oneMonthInMs = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
-        // Helper function to show the modal
         function showModal() {
             $('#subscribeModal').modal({
                 backdrop: 'static',
                 keyboard: false
             });
 
-            $('#confirmSubscribe').on('click', () => {
-                console.log('User confirmed subscription');
-                subscribeUser();
+            $('#confirmSubscribe').off('click').on('click', () => {
                 $('#subscribeModal').modal('hide');
+                subscribeUser();
             });
 
-            $('#subscribeModal').on('hidden.bs.modal', () => {
+            $('#subscribeModal').off('hidden.bs.modal').on('hidden.bs.modal', () => {
                 if (localStorage.getItem('push_subscribed') !== 'yes') {
                     localStorage.setItem('push_subscribed', 'no');
                     localStorage.setItem('push_subscribed_timestamp', Date.now().toString());
@@ -400,18 +443,15 @@
         }
 
         if (status === null || status === undefined) {
-            // First time: show the modal
             showModal();
         } else if (status === 'yes') {
             console.log('Push subscription already handled:', status);
         } else if (status === 'no') {
-            // Check if one month has passed since decline
             const currentTime = Date.now();
             const declineTime = declineTimestamp ? parseInt(declineTimestamp, 10) : 0;
             const timeSinceDecline = currentTime - declineTime;
 
             if (timeSinceDecline >= oneMonthInMs) {
-                // One month has passed, reset status and show modal
                 localStorage.removeItem('push_subscribed');
                 localStorage.removeItem('push_subscribed_timestamp');
                 showModal();

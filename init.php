@@ -293,6 +293,12 @@ function getUrl($url)
 
 function generateUniqueNumericVouchers($totalVouchers, $length = 8)
 {
+    $totalVouchers = (int) $totalVouchers;
+    $length = (int) $length;
+    if ($totalVouchers <= 0 || $length <= 0 || $totalVouchers > pow(10, $length)) {
+        throw new InvalidArgumentException("Requested vouchers exceed available unique code space");
+    }
+
     $vouchers = [];
     $attempts = 0;
     $maxAttempts = $totalVouchers * 50;
@@ -304,6 +310,10 @@ function generateUniqueNumericVouchers($totalVouchers, $length = 8)
             $voucherCode .= mt_rand(0, 9);
         }
         $vouchers[$voucherCode] = $voucherCode;
+    }
+
+    if (count($vouchers) < $totalVouchers) {
+        throw new RuntimeException("Failed to generate the required number of unique vouchers");
     }
 
     return array_values($vouchers);
@@ -398,23 +408,36 @@ function isTableExist($table)
 }
 
 if (empty($config['push_public_key']) || empty($config['push_private_key'])) {
-    $keys = Message::pushKeys();
-    $publicKey = $keys['publicKey'];
-    $privateKey = $keys['privateKey'];
+    try {
+        $keys = Message::pushKeys();
+        if (!empty($keys['publicKey']) && !empty($keys['privateKey'])) {
+            $publicKey = $keys['publicKey'];
+            $privateKey = $keys['privateKey'];
 
-    // Save public key
-    if (!ORM::for_table('tbl_appconfig')->where('setting', 'push_public_key')->find_one()) {
-        $d = ORM::for_table('tbl_appconfig')->create();
-        $d->setting = 'push_public_key';
-        $d->value = $publicKey;
-        $d->save();
-    }
+            // Save public key
+            $pub = ORM::for_table('tbl_appconfig')->where('setting', 'push_public_key')->find_one();
+            if (!$pub) {
+                $pub = ORM::for_table('tbl_appconfig')->create();
+                $pub->setting = 'push_public_key';
+            }
+            $pub->value = $publicKey;
+            $pub->save();
 
-    // Save private key
-    if (!ORM::for_table('tbl_appconfig')->where('setting', 'push_private_key')->find_one()) {
-        $d = ORM::for_table('tbl_appconfig')->create();
-        $d->setting = 'push_private_key';
-        $d->value = $privateKey;
-        $d->save();
+            // Save private key
+            $priv = ORM::for_table('tbl_appconfig')->where('setting', 'push_private_key')->find_one();
+            if (!$priv) {
+                $priv = ORM::for_table('tbl_appconfig')->create();
+                $priv->setting = 'push_private_key';
+            }
+            $priv->value = $privateKey;
+            $priv->save();
+
+            $config['push_public_key'] = $publicKey;
+            $config['push_private_key'] = $privateKey;
+            $_c['push_public_key'] = $publicKey;
+            $_c['push_private_key'] = $privateKey;
+        }
+    } catch (Throwable $e) {
+        _log('Failed to generate push VAPID keys: ' . $e->getMessage());
     }
 }

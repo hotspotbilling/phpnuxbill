@@ -23,7 +23,7 @@
                 <a href="{Text::url('customers/list')}" class="btn btn-default">
                     <i class="fa fa-times"></i> <span class="hidden-xs">{Lang::T('Cancel')}</span>
                 </a>
-                <button type="button" class="btn btn-primary" onclick="$('#customerAddForm').submit();">
+                <button type="submit" form="customerAddForm" class="btn btn-primary">
                     <i class="fa fa-check"></i> <span>{Lang::T('Save Customer')}</span>
                 </button>
             </div>

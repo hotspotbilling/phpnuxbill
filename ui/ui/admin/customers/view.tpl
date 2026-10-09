@@ -85,7 +85,7 @@
                     <h4 class="profile-hero-name">{$d['fullname']}</h4>
                     <span class="profile-username-tag">
                         <span>@{$d['username']}</span>
-                        <button type="button" class="btn-tag-copy" onclick="copyText(this, '{$d['username']}')" title="{Lang::T('Copy Username')}">
+                        <button type="button" class="btn-tag-copy" onclick="copyText(this, '{$d['username']|escape:'javascript'}')" title="{Lang::T('Copy Username')}">
                             <i class="fa fa-clone"></i>
                         </button>
                     </span>
@@ -131,7 +131,7 @@
                         <span class="cv-list-val">
                             <span class="cred-box">
                                 <span style="font-family: monospace; font-size: 12px; font-weight: 600;">{$d['username']}</span>
-                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['username']}')" title="{Lang::T('Copy')}">
+                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['username']|escape:'javascript'}')" title="{Lang::T('Copy')}">
                                     <i class="fa fa-clone"></i>
                                 </button>
                             </span>
@@ -146,7 +146,7 @@
                                     <button type="button" class="btn-cred-action" onclick="toggleSecret('cust_pass', this)" title="{Lang::T('Show/Hide')}">
                                         <i class="fa fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['password']}')" title="{Lang::T('Copy')}">
+                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['password']|escape:'javascript'}')" title="{Lang::T('Copy')}">
                                         <i class="fa fa-clone"></i>
                                     </button>
                                 </span>
@@ -159,7 +159,7 @@
                             <span class="cv-list-val">
                                 <span class="cred-box">
                                     <span style="font-family: monospace; font-size: 12px; font-weight: 600;">{$d['pppoe_username']}</span>
-                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_username']}')" title="{Lang::T('Copy')}">
+                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_username']|escape:'javascript'}')" title="{Lang::T('Copy')}">
                                         <i class="fa fa-clone"></i>
                                     </button>
                                 </span>
@@ -175,7 +175,7 @@
                                     <button type="button" class="btn-cred-action" onclick="toggleSecret('pppoe_pass', this)" title="{Lang::T('Show/Hide')}">
                                         <i class="fa fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_password']}')" title="{Lang::T('Copy')}">
+                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_password']|escape:'javascript'}')" title="{Lang::T('Copy')}">
                                         <i class="fa fa-clone"></i>
                                     </button>
                                 </span>
@@ -206,7 +206,7 @@
                         <span class="cv-list-val">
                             {if $d['phonenumber']}
                                 <a href="tel:{$d['phonenumber']}" style="color: inherit; text-decoration: none; font-weight: 600;">{$d['phonenumber']}</a>
-                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['phonenumber']}')" title="{Lang::T('Copy')}">
+                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['phonenumber']|escape:'javascript'}')" title="{Lang::T('Copy')}">
                                     <i class="fa fa-clone"></i>
                                 </button>
                             {else}
@@ -219,7 +219,7 @@
                         <span class="cv-list-val">
                             {if $d['email']}
                                 <a href="mailto:{$d['email']}" style="color: inherit; text-decoration: none; font-weight: 600;">{$d['email']}</a>
-                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['email']}')" title="{Lang::T('Copy')}">
+                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['email']|escape:'javascript'}')" title="{Lang::T('Copy')}">
                                     <i class="fa fa-clone"></i>
                                 </button>
                             {else}
@@ -274,7 +274,7 @@
                                 <div style="display: flex; gap: 4px; align-items: center;">
                                     <span class="cred-box">
                                         <span style="font-family: monospace; font-size: 11px; font-weight: 600;">{$d['coordinates']}</span>
-                                        <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['coordinates']}')" title="{Lang::T('Copy')}">
+                                        <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['coordinates']|escape:'javascript'}')" title="{Lang::T('Copy')}">
                                             <i class="fa fa-clone"></i>
                                         </button>
                                     </span>
@@ -594,16 +594,23 @@ function toggleSecret(inputId, btn) {
                 var mapEl = document.getElementById('map');
                 if (!mapEl || typeof L === 'undefined') return;
                 try {
-                    var coords = [{/literal}{$d['coordinates']}{literal}];
-                    var map = L.map('map', { scrollWheelZoom: false }).setView(coords, 16);
-                    L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga', {
-                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-                        maxZoom: 20
-                    }).addTo(map);
-                    L.marker(coords).addTo(map);
-                    setTimeout(function() {
-                        map.invalidateSize();
-                    }, 400);
+                    var rawCoords = '{/literal}{$d['coordinates']|escape:'javascript'}{literal}'.split(',');
+                    if (rawCoords.length >= 2) {
+                        var lat = parseFloat(rawCoords[0].trim());
+                        var lng = parseFloat(rawCoords[1].trim());
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            var coords = [lat, lng];
+                            var map = L.map('map', { scrollWheelZoom: false }).setView(coords, 16);
+                            L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga', {
+                                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                                maxZoom: 20
+                            }).addTo(map);
+                            L.marker(coords).addTo(map);
+                            setTimeout(function() {
+                                map.invalidateSize();
+                            }, 400);
+                        }
+                    }
                 } catch (e) {
                     console.error('Customer map initialization error:', e);
                 }

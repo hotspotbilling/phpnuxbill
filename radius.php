@@ -397,7 +397,7 @@ try {
                     "Session ID: {$acctSessionId}\n" .
                     "Error: " . $e->getMessage()
                 );
-                show_radius_result(['Reply-Message' => 'Database save failed: ' . $e->getMessage()], 401);
+                show_radius_result(['Reply-Message' => 'Database save failed'], 401);
             }
             break;
         default:

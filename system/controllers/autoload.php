@@ -132,6 +132,7 @@ switch ($action) {
             $c = ORM::for_table('tbl_customers')->find_one($routes['2']);
             foreach ($ds as $d) {
                 if ($d['status'] == 'on') {
+                    $status = '';
                     if ($config['check_customer_online'] == 'yes') {
                         $p = ORM::for_table('tbl_plans')->find_one($d['plan_id']);
                         $dvc = Package::getDevice($p);

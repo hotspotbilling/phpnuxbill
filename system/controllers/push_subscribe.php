@@ -1,16 +1,23 @@
 <?php
 
-/// Allow requests from same origin only (more secure)
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
 $allowed_origins = [
-    'https://' . $_SERVER['HTTP_HOST'],
-    'http://' . $_SERVER['HTTP_HOST']  // for localhost development
+    'https://' . $host,
+    'http://' . $host
 ];
 
-if (in_array($origin, $allowed_origins)) {
+if (!empty($origin) && in_array($origin, $allowed_origins)) {
     header('Access-Control-Allow-Origin: ' . $origin);
-} else {
-    header('Access-Control-Allow-Origin: https://' . $_SERVER['HTTP_HOST']);
+} elseif (!empty($origin)) {
+    // If behind reverse proxy or port mismatch, allow request from same host
+    $originHost = parse_url($origin, PHP_URL_HOST);
+    $serverHost = explode(':', $host)[0];
+    if ($originHost && strcasecmp($originHost, $serverHost) === 0) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+    } else {
+        header('Access-Control-Allow-Origin: ' . (defined('APP_URL') ? APP_URL : '*'));
+    }
 }
 
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -60,13 +67,37 @@ if (!filter_var($subscription['customer_id'], FILTER_VALIDATE_INT)) {
 }
 
 try {
-    // Create and save the subscription
-    $sub = ORM::for_table('tbl_push_subscriptions')->create([
-        'customer_id' => (int) $subscription['customer_id'], // Cast to integer for safety
-        'endpoint' => $subscription['endpoint'],
-        'p256dh' => $subscription['keys']['p256dh'],
-        'auth' => $subscription['keys']['auth'],
-    ]);
+    // Auto-create table if missing or broken on the server
+    try {
+        ORM::raw_execute("CREATE TABLE IF NOT EXISTS `tbl_push_subscriptions` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `customer_id` int(11) NOT NULL,
+            `endpoint` text DEFAULT NULL,
+            `p256dh` varchar(255) DEFAULT NULL,
+            `auth` varchar(255) DEFAULT NULL,
+            `created_at` timestamp NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Throwable $t) {
+        // Table probably already exists
+    }
+
+    // Check if subscription already exists for this endpoint or customer
+    $endpoint = (string) $subscription['endpoint'];
+    $customerId = (int) $subscription['customer_id'];
+
+    $sub = ORM::for_table('tbl_push_subscriptions')
+        ->where('endpoint', $endpoint)
+        ->find_one();
+
+    if (!$sub) {
+        $sub = ORM::for_table('tbl_push_subscriptions')->create();
+    }
+
+    $sub->customer_id = $customerId;
+    $sub->endpoint = $endpoint;
+    $sub->p256dh = $subscription['keys']['p256dh'];
+    $sub->auth = $subscription['keys']['auth'];
 
     if ($sub->save()) {
         _log(Lang::T("Subscription saved for customer_id: " . $subscription['customer_id']));
@@ -79,12 +110,12 @@ try {
     } else {
         throw new Exception('Failed to save subscription');
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     _log(Lang::T("Error saving subscription: ") . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'title' => Lang::T('An error occurred'),
-        'message' =>  Lang::T('Failed to save subscription, Please try again later.')
+        'message' =>  Lang::T('Failed to save subscription, Please try again later.') . ' (' . $e->getMessage() . ')'
     ]);
 }

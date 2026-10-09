@@ -81,7 +81,7 @@
                     <span class="sr-only">Toggle navigation</span>
                 </a>
 
-                <div id="searchOverlay" class="topbar-search-wrap" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; width: 360px; max-width: calc(100vw - 320px); z-index: 1000;">
+                <div id="searchOverlay" class="topbar-search-wrap" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; width: 360px; max-width: calc(100vw - 120px); z-index: 1000;">
                     <span class="search-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 3; color: #94a3b8;"><i class="fa fa-search"></i></span>
                     <input type="text" id="searchTerm" class="searchTerm"
                         style="width: 100% !important; height: 36px !important; padding: 0 62px 0 34px !important; border-radius: 8px !important; text-align: left !important; font-size: 13px !important; box-sizing: border-box !important;"

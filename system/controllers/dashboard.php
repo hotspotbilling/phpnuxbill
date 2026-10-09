@@ -46,8 +46,8 @@ $ui->assign('current_date', $current_date);
 if ($config['dashboard_type'] === 'dynamic') {
     $today = date('Y-m-d');
     $thisMonthStart = date('Y-m-01');
-    $lastMonthStart = date('Y-m-01', strtotime('-1 month'));
-    $lastMonthEnd = date('Y-m-t', strtotime('-1 month'));
+    $lastMonthStart = date('Y-m-01', strtotime('-1 month', strtotime($thisMonthStart)));
+    $lastMonthEnd = date('Y-m-t', strtotime('-1 month', strtotime($thisMonthStart)));
 
     // 1. Total Customers
     $c_all = (int) ORM::for_table('tbl_customers')->count();
@@ -117,7 +117,7 @@ if ($config['dashboard_type'] === 'dynamic') {
     $weeksMap = [];
     for ($i = 11; $i >= 0; $i--) {
         $wTime = strtotime("-$i weeks");
-        $wKey = date('Y-W', $wTime);
+        $wKey = date('o-W', $wTime);
         $weeksMap[$wKey] = ['label' => 'Wk ' . date('W', $wTime), 'value' => 0.0, 'count' => 0];
     }
     $weekTrx = ORM::for_table('tbl_transactions')
@@ -138,14 +138,14 @@ if ($config['dashboard_type'] === 'dynamic') {
 
     $monthsMap = [];
     for ($i = 11; $i >= 0; $i--) {
-        $mKey = date('Y-m', strtotime("-$i months"));
+        $mKey = date('Y-m', strtotime("-$i months", strtotime($thisMonthStart)));
         $monthsMap[$mKey] = ['label' => date('M Y', strtotime($mKey . '-01')), 'value' => 0.0, 'count' => 0, 'new_customers' => 0, 'churned' => 0];
     }
     $monthTrx = ORM::for_table('tbl_transactions')
         ->select_expr("DATE_FORMAT(recharged_on, '%Y-%m')", 'month_key')
         ->select_expr('SUM(price)', 'total')
         ->select_expr('COUNT(*)', 'count')
-        ->where_gte('recharged_on', date('Y-m-01', strtotime('-11 months')))
+        ->where_gte('recharged_on', date('Y-m-01', strtotime('-11 months', strtotime($thisMonthStart))))
         ->where_not_equal('method', 'Customer - Balance')
         ->where_not_equal('method', 'Recharge Balance - Administrator')
         ->group_by_expr("DATE_FORMAT(recharged_on, '%Y-%m')")

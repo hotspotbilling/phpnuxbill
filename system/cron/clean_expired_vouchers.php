@@ -29,7 +29,7 @@ if ($isCli) {
         $dryRun = true;
     } else {
         // If accessed via web without dry-run parameter, force dry-run mode
-        $dryRun = false;
+        $dryRun = true;
     }
 
     // Check if the user is authenticated and authorized or valid API key

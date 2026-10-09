@@ -101,7 +101,12 @@ try {
         foreach ($menu_registered as $menu) {
             if ($menu['admin'] && _admin(false)) {
                 if (count($menu['auth']) == 0 || in_array($admin['user_type'], $menu['auth'])) {
-                    $isActive = ($routes[1] == $menu['function'] || (stripos($menu['function'], 'hotspot_merchant') !== false && stripos($routes[1], 'hotspot_merchant') === 0) || (stripos($menu['function'], 'hotspot_reseller') !== false && stripos($routes[1], 'hotspot_reseller') === 0));
+                    $isActive = ($routes[1] == $menu['function']) || (
+                        in_array($menu['function'], ['hotspot_merchantAdmin', 'hotspot_resellerAdmin']) &&
+                        (in_array($routes[1], ['hotspot_merchantAdmin', 'hotspot_resellerAdmin']) ||
+                         stripos($routes[1], 'hotspot_merchantAdmin') === 0 ||
+                         stripos($routes[1], 'hotspot_resellerAdmin') === 0)
+                    );
                     $menus[$menu['position']] .= '<li' . ($isActive ? ' class="active"' : '') . '><a href="' . getUrl('plugin/' . $menu['function']) . '">';
                     if (!empty($menu['icon'])) {
                         $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';
@@ -113,7 +118,12 @@ try {
                     $menus[$menu['position']] .= '<span class="text">' . $menu['name'] . '</span></a></li>';
                 }
             } else if (!$menu['admin'] && _auth(false)) {
-                $isActive = ($routes[1] == $menu['function'] || (stripos($menu['function'], 'hotspot_merchant') !== false && stripos($routes[1], 'hotspot_merchant') === 0) || (stripos($menu['function'], 'hotspot_reseller') !== false && stripos($routes[1], 'hotspot_reseller') === 0));
+                $isActive = ($routes[1] == $menu['function']) || (
+                    in_array($menu['function'], ['hotspot_merchantAdmin', 'hotspot_resellerAdmin']) &&
+                    (in_array($routes[1], ['hotspot_merchantAdmin', 'hotspot_resellerAdmin']) ||
+                     stripos($routes[1], 'hotspot_merchantAdmin') === 0 ||
+                     stripos($routes[1], 'hotspot_resellerAdmin') === 0)
+                );
                 $menus[$menu['position']] .= '<li' . ($isActive ? ' class="active"' : '') . '><a href="' . getUrl('plugin/' . $menu['function']) . '">';
                 if (!empty($menu['icon'])) {
                     $menus[$menu['position']] .= '<i class="' . $menu['icon'] . '"></i>';

@@ -213,17 +213,17 @@ $(document).ready(function () {
     var $targets = $(".table-responsive");
     var $tables = $(".table-with-loader, table.table");
 
-    if ($targets.length === 0 && $tables.length > 0) {
-      $tables.each(function () {
-        var $t = $(this);
+    $tables.each(function () {
+      var $t = $(this);
+      if (!$t.closest(".table-responsive").length) {
         var $p = $t.closest(".panel-body, .card-body, .box-body, .panel, .card");
         if ($p.length) {
           $targets = $targets.add($p);
         } else {
           $targets = $targets.add($t.parent());
         }
-      });
-    }
+      }
+    });
 
     $targets.each(function () {
       var $wrap = $(this);
@@ -231,7 +231,12 @@ $(document).ready(function () {
       if ($wrap.css("position") === "static") {
         $wrap.addClass("table-loading-relative");
       }
-      if ($wrap.find(".table-loading-overlay").length === 0) {
+      var $existing = $wrap.find(".table-loading-overlay");
+      if ($existing.length > 0 && $existing.hasClass("is-fading-out")) {
+        $existing.stop(true, false).removeClass("is-fading-out").remove();
+        $existing = $();
+      }
+      if ($existing.length === 0) {
         $wrap.append(
           '<div class="table-loading-overlay">' +
             '<div class="table-loading-bar"></div>' +
@@ -251,10 +256,12 @@ $(document).ready(function () {
   function hideTableLoading() {
     $(".table-responsive, .panel-body, .card-body, .box-body, .panel, .card").removeClass("loading-state table-loading-relative");
     $(".table-with-loader, table.table").removeClass("table-loading-dimmed loading");
-    var $overlays = $(".table-loading-overlay");
+    var $overlays = $(".table-loading-overlay").not(".is-fading-out");
     if ($overlays.length > 0) {
-      $overlays.fadeOut(150, function () {
-        $(this).remove();
+      $overlays.addClass("is-fading-out").fadeOut(150, function () {
+        if ($(this).hasClass("is-fading-out")) {
+          $(this).remove();
+        }
       });
     }
   }

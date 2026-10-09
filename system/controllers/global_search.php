@@ -18,7 +18,7 @@ $defaultAvatarUrl = $baseUrl . '/' . $uploadPath . '/user.default.jpg';
 
 $query = isset($_GET['query']) ? trim($_GET['query']) : '';
 
-if (empty($query)) {
+if ($query === '') {
     // Show Quick Navigation & Shortcuts when query is empty or focused
     $quickLinks = [
         ['title' => Lang::T('Add Customer'), 'sub' => Lang::T('Create a new customer profile'), 'url' => getUrl('customers/add'), 'icon' => 'fa-user-plus', 'category' => Lang::T('Actions')],
@@ -132,9 +132,13 @@ if ($customers && count($customers) > 0) {
         $emailHash = !empty($c->email) ? md5(strtolower(trim($c->email))) : md5($c->username);
         $gravatarUrl = 'https://www.gravatar.com/avatar/' . $emailHash . '?d=mp';
 
+        $safeDefault = htmlspecialchars($defaultAvatarUrl, ENT_QUOTES, 'UTF-8');
+        $safeGravatar = htmlspecialchars($gravatarUrl, ENT_QUOTES, 'UTF-8');
+        $avatarOnerror = "if(!this.dataset.step){this.dataset.step=(this.src.indexOf('user.default.jpg')!==-1)?'gravatar':'default';}if(this.dataset.step==='default'){this.dataset.step='gravatar';this.src='" . $safeDefault . "';}else if(this.dataset.step==='gravatar'){this.dataset.step='done';this.src='" . $safeGravatar . "';}else{this.onerror=null;}";
+
         echo '<a href="' . $url . '" class="search-item" tabindex="-1">';
         echo '  <div class="search-item-avatar">';
-        echo '    <img src="' . htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8') . '" onerror="if(this.src!=\'' . htmlspecialchars($defaultAvatarUrl, ENT_QUOTES, 'UTF-8') . '\'){this.src=\'' . htmlspecialchars($defaultAvatarUrl, ENT_QUOTES, 'UTF-8') . '\';}else{this.src=\'' . htmlspecialchars($gravatarUrl, ENT_QUOTES, 'UTF-8') . '\';}" alt="avatar">';
+        echo '    <img src="' . htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8') . '" onerror="' . $avatarOnerror . '" alt="avatar">';
         echo '  </div>';
         echo '  <div class="search-item-info">';
         echo '    <div class="search-item-title">' . htmlspecialchars($c->fullname ?: $c->username, ENT_QUOTES, 'UTF-8') . '</div>';

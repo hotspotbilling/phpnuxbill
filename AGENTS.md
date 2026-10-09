@@ -56,7 +56,7 @@ HTTP Request → index.php → system/boot.php → Router (?_route=controller/ac
 
 - **No framework** — DIY procedural + class-based hybrid. No namespaces.
 - **Autoloading**: Class `Admin` → `system/autoload/Admin.php`. Supports `PEAR2\Net\RouterOS` → `system/autoload/PEAR2/Net/RouterOS.php`
-- **Database**: [Idiorm](https://idiorm.readthedocs.io/) ORM — fluent query builder. See `system/orm.php`. No migrations — schema via `install/phpnuxbill.sql`
+- **Database**: [Idiorm](https://idiorm.readthedocs.io/) ORM — fluent query builder. See `system/orm.php`. Schema setup for new installations uses `install/phpnuxbill.sql`, while upgrade migrations are defined in `system/updates.json` (executed via `update.php`).
 - **Global state**: `$ui` (Smarty), `$config` (app config), `$admin` (user obj), `$routes` (URL segments), `$_L` (language), `$root_path` are globals — use `global $ui, $config;` in functions
 - **Auth**: `_admin()` for admin pages, `_auth()` for customer pages — both set globals and enforce login
 - **Routing**: URL pattern `?_route=controller/action/id`. Plugin routes: `?_route=plugin/functionName`
@@ -155,7 +155,7 @@ ORM using Idiorm : `system/orm.php`
 
 ## Pitfalls
 
-- **No migrations** — schema changes directly in `.sql` files or ad-hoc in plugin code. Check `update.php` for version migrations.
+- **Schema updates**: Schema changes for new installations belong in `install/phpnuxbill.sql`, and upgrade migrations must be added to `system/updates.json` (executed via `update.php`).
 - **Global state is pervasive** — always declare `global $ui, $config, $admin, $routes, $_L;` inside functions that use them.
 - **`.htaccess` blocks direct PHP access** except `index.php`, `update.php`, `radius.php`. Never create publicly accessible PHP files without `.htaccess` whitelisting.
 - **Payment gateways NOT auto-loaded** — they must be `include`d explicitly. Plugins ARE auto-loaded.

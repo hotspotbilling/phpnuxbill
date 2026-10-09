@@ -30,7 +30,8 @@
 }
 
 .table-responsive.loading-state,
-.table-with-loader.loading {
+.table-with-loader.loading,
+.table-loading-relative {
     position: relative;
 }
 

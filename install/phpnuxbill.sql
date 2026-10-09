@@ -316,7 +316,7 @@ CREATE TABLE tbl_message_logs (
 CREATE TABLE `tbl_push_subscriptions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL,
-  `endpoint` varchar(255) DEFAULT NULL,
+  `endpoint` text DEFAULT NULL,
   `p256dh` varchar(255) DEFAULT NULL,
   `auth` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
