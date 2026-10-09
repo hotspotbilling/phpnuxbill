@@ -370,7 +370,9 @@ ALTER TABLE `tbl_bandwidth`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `tbl_customers`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_customers_created_at` (`created_at`),
+  ADD KEY `idx_customers_status` (`status`);
 
 ALTER TABLE `tbl_customers_fields`
   ADD PRIMARY KEY (`id`),
@@ -392,16 +394,26 @@ ALTER TABLE `tbl_routers`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `tbl_transactions`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_trx_date_method` (`recharged_on`, `method`),
+  ADD KEY `idx_trx_type` (`type`),
+  ADD KEY `idx_trx_plan` (`plan_name`),
+  ADD KEY `idx_trx_routers` (`routers`);
 
 ALTER TABLE `tbl_users`
   ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `tbl_user_recharges`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_recharges_status_exp` (`status`, `expiration`),
+  ADD KEY `idx_recharges_customer` (`customer_id`),
+  ADD KEY `idx_recharges_date` (`recharged_on`);
 
 ALTER TABLE `tbl_voucher`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_voucher_code` (`code`),
+  ADD KEY `idx_voucher_status_plan` (`status`, `id_plan`),
+  ADD KEY `idx_voucher_routers` (`routers`);
 
 
 ALTER TABLE `tbl_appconfig`

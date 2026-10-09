@@ -228,5 +228,19 @@
   ],
   "2026.6.28": [
     "ALTER TABLE `tbl_users` CHANGE `user_type` `user_type` ENUM('SuperAdmin','Admin','Report','Agent','Sales','Asset','Support') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;"
+  ],
+  "2026.10.9": [
+    "ALTER TABLE `tbl_user_recharges` ADD INDEX IF NOT EXISTS `idx_recharges_status_exp` (`status`, `expiration`);",
+    "ALTER TABLE `tbl_user_recharges` ADD INDEX IF NOT EXISTS `idx_recharges_customer` (`customer_id`);",
+    "ALTER TABLE `tbl_user_recharges` ADD INDEX IF NOT EXISTS `idx_recharges_date` (`recharged_on`);",
+    "ALTER TABLE `tbl_customers` ADD INDEX IF NOT EXISTS `idx_customers_created_at` (`created_at`);",
+    "ALTER TABLE `tbl_customers` ADD INDEX IF NOT EXISTS `idx_customers_status` (`status`);",
+    "ALTER TABLE `tbl_transactions` ADD INDEX IF NOT EXISTS `idx_trx_date_method` (`recharged_on`, `method`);",
+    "ALTER TABLE `tbl_transactions` ADD INDEX IF NOT EXISTS `idx_trx_type` (`type`);",
+    "ALTER TABLE `tbl_transactions` ADD INDEX IF NOT EXISTS `idx_trx_plan` (`plan_name`);",
+    "ALTER TABLE `tbl_transactions` ADD INDEX IF NOT EXISTS `idx_trx_routers` (`routers`);",
+    "ALTER TABLE `tbl_voucher` ADD INDEX IF NOT EXISTS `idx_voucher_code` (`code`);",
+    "ALTER TABLE `tbl_voucher` ADD INDEX IF NOT EXISTS `idx_voucher_status_plan` (`status`, `id_plan`);",
+    "ALTER TABLE `tbl_voucher` ADD INDEX IF NOT EXISTS `idx_voucher_routers` (`routers`);"
   ]
 }

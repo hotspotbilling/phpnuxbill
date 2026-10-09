@@ -1,100 +1,172 @@
-/* Generic loading styles */
+/**
+ * Modern Table Loading Styles
+ * Replaces disruptive skeleton loading with a smooth non-shifting loading overlay
+ */
+
 :root {
-    --loading-bg: #f6f7f8;
-    --loading-shimmer-start: #f6f7f8;
-    --loading-shimmer-middle: #edeef1;
-    --loading-shimmer-end: #f6f7f8;
-    --loading-row-bg: #fff;
+    --table-loader-accent: #4299e1;
+    --table-loader-accent-end: #667eea;
+    --table-loader-bg: rgba(255, 255, 255, 0.94);
+    --table-loader-border: rgba(226, 232, 240, 0.9);
+    --table-loader-text: #2d3748;
+    --table-loader-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+    --table-dim-opacity: 0.55;
 }
 
-.dark-mode {
-    --loading-bg: #2a2a2a;
-    --loading-shimmer-start: #2a2a2a;
-    --loading-shimmer-middle: #3a3a3a;
-    --loading-shimmer-end: #2a2a2a;
-    --loading-row-bg: #1e1e2d;
+.dark-mode, .dark {
+    --table-loader-accent: #4299e1;
+    --table-loader-accent-end: #667eea;
+    --table-loader-bg: rgba(24, 24, 27, 0.94);
+    --table-loader-border: rgba(63, 63, 70, 0.85);
+    --table-loader-text: #f4f4f5;
+    --table-loader-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    --table-dim-opacity: 0.45;
 }
 
-/* Placeholder loading animation */
-.placeholder-loading {
+/* Container state */
+.table-responsive {
     position: relative;
-    background: var(--loading-bg);
-    background: linear-gradient(
-        to right,
-        var(--loading-shimmer-start) 8%,
-        var(--loading-shimmer-middle) 18%,
-        var(--loading-shimmer-end) 33%
-    );
-    background-size: 800px 104px;
-    animation: placeholderShimmer 1.5s linear infinite forwards;
+    transition: min-height 0.2s ease;
 }
 
-@keyframes placeholderShimmer {
-    0% {
-        background-position: -468px 0;
-    }
-    100% {
-        background-position: 468px 0;
-    }
-}
-
-.loading-row td {
-    height: 50px;
-    padding: 8px;
-    text-align: center;
-    vertical-align: middle;
-    background-color: var(--loading-row-bg);
-}
-
-.loading-row td > div {
-    width: 80%;
-    height: 20px;
-    border-radius: 4px;
-    margin: 0 auto;
-}
-
-/* Generic loading state for all tables */
-.table-with-loader.loading tbody:not(.loading-placeholder) tr {
-    display: none;
-}
-
-.loading-placeholder {
-    display: none;
-}
-
-.table-with-loader.loading + .loading-placeholder,
-.table-with-loader.loading > .loading-placeholder {
-    display: table-row-group;
-}
-
-.loading-row:first-child td {
-    padding-top: 20px;
-}
-
-.loading-row:last-child td {
-    padding-bottom: 20px;
-}
-
-/* Optional loading overlay */
-.table-responsive.loading-state {
+.table-responsive.loading-state,
+.table-with-loader.loading {
     position: relative;
 }
 
-.table-responsive.loading-state::after {
-    content: '';
+/* Never hide table rows; dim gracefully without layout shift */
+.table-responsive.loading-state > table,
+.table-with-loader.table-loading-dimmed,
+table.table.table-loading-dimmed,
+.table-with-loader.loading,
+table.table.loading {
+    opacity: var(--table-dim-opacity);
+    filter: blur(0.4px);
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.25s ease, filter 0.25s ease;
+}
+
+/* Hide any legacy skeleton placeholders or secondary pseudo-element spinners */
+.loading-placeholder,
+.placeholder-loading,
+.loading-row,
+table::after,
+table.loading::after,
+table.table-loading-dimmed::after,
+.table::after,
+.table.loading::after,
+.table.table-loading-dimmed::after,
+.table-responsive::after,
+.table-responsive.loading-state::after,
+.table-responsive.loading-state::before,
+.table-with-loader::after,
+.table-with-loader.loading::after,
+.table-with-loader.table-loading-dimmed::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Centered modern table loading overlay */
+.table-loading-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.1);
-    z-index: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+    pointer-events: none;
+    animation: tableFadeIn 0.2s ease forwards;
 }
 
-.dark-mode .table-responsive.loading-state::after {
-    background: rgba(0, 0, 0, 0.3);
+/* Top animated indeterminate progress accent bar */
+.table-loading-overlay .table-loading-bar,
+.table-responsive.loading-state::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(66, 153, 225, 0.15);
+    overflow: hidden;
+    z-index: 30;
 }
 
-.dark-mode .loading-row td {
-    border-color: #444;
+.table-loading-overlay .table-loading-bar::after,
+.table-responsive.loading-state::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 35%;
+    background: linear-gradient(90deg, transparent, var(--table-loader-accent), var(--table-loader-accent-end), transparent);
+    animation: tableProgressSlide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Elegant floating pill badge with spinner and label */
+.table-loading-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    background: var(--table-loader-bg);
+    border: 1px solid var(--table-loader-border);
+    color: var(--table-loader-text);
+    box-shadow: var(--table-loader-shadow);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    z-index: 31;
+    pointer-events: auto;
+    animation: tableBadgePop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Sleek dual-ring spinner */
+.table-loading-spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(66, 153, 225, 0.25);
+    border-top-color: var(--table-loader-accent);
+    border-right-color: var(--table-loader-accent);
+    animation: tableSpinnerRotate 0.65s linear infinite;
+    flex-shrink: 0;
+}
+
+/* Animations */
+@keyframes tableSpinnerRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes tableProgressSlide {
+    0% { left: -35%; }
+    100% { left: 100%; }
+}
+
+@keyframes tableFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes tableBadgePop {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

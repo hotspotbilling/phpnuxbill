@@ -1,339 +1,513 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" enctype="multipart/form-data" method="post" role="form" action="{Text::url('customers/edit-post')}">
+<!-- TOP COMMAND BAR -->
+<div class="row">
+    <div class="col-xs-12">
+        <div class="customer-view-header">
+            <div class="customer-heading-meta">
+                <a href="{Text::url('customers/view/', $d['id'])}" class="btn-back-round" title="{Lang::T('Back')}">
+                    <i class="fa fa-arrow-left"></i>
+                </a>
+                <div class="customer-title-block">
+                    <h3 class="customer-name-heading">
+                        <span>{Lang::T('Edit Customer')}: {$d['fullname']}</span>
+                        {if $d['status'] == 'Active'}
+                            <span class="c-badge c-badge-success"><span class="c-dot c-dot-success"></span> {Lang::T('Active')}</span>
+                        {else}
+                            <span class="c-badge c-badge-danger"><span class="c-dot c-dot-danger"></span> {Lang::T($d['status'])}</span>
+                        {/if}
+                    </h3>
+                    <div class="customer-subtitle">
+                        <span class="customer-sub-item"><i class="fa fa-user-circle-o"></i> @{$d['username']}</span>
+                        {if $d['phonenumber']}
+                            <span class="customer-sub-divider">•</span>
+                            <span class="customer-sub-item"><i class="fa fa-phone"></i> {$d['phonenumber']}</span>
+                        {/if}
+                        {if $d['email']}
+                            <span class="customer-sub-divider">•</span>
+                            <span class="customer-sub-item"><i class="fa fa-envelope-o"></i> {$d['email']}</span>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+
+            <div class="customer-action-toolbar">
+                <a href="{Text::url('customers/view/', $d['id'])}" class="btn btn-default" title="{Lang::T('View Profile')}">
+                    <i class="fa fa-user"></i> <span class="hidden-xs">{Lang::T('View Profile')}</span>
+                </a>
+                <a href="{Text::url('customers/delete/', $d['id'], '&token=', $csrf_token)}" id="{$d['id']}"
+                    class="btn btn-danger"
+                    onclick="return ask(this, '{Lang::T('Delete')}?')" title="{Lang::T('Delete')}">
+                    <i class="fa fa-trash"></i> <span class="hidden-xs">{Lang::T('Delete')}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" role="form" action="{Text::url('customers/edit-post')}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
+    <input type="hidden" name="id" value="{$d['id']}">
+
     <div class="row">
-        <div class="col-md-6">
-            <div
-                class="panel panel-{if $d['status']=='Active'}primary{else}danger{/if} panel-hovered panel-stacked mb30">
-                <div class="panel-heading">{Lang::T('Edit Contact')}</div>
-                <div class="panel-body">
-                    <center>
-                        <img src="{$app_url}/{$UPLOAD_PATH}{$d['photo']}.thumb.jpg" width="200"
-                            onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'" class="img-circle img-responsive"
-                            alt="Photo" onclick="return deletePhoto({$d['id']})">
-                    </center><br>
-                    <input type="hidden" name="id" value="{$d['id']}">
-                    <div class="form-group">
-                        <label class="col-md-3 col-xs-12 control-label">{Lang::T('Photo')}</label>
-                        <div class="col-md-6 col-xs-8">
+        <!-- LEFT COLUMN: ACCOUNT DETAILS & SECURITY -->
+        <div class="col-md-7">
+            <!-- Profile & Personal Details -->
+            <div class="edit-form-card">
+                <div class="edit-card-header">
+                    <h4 class="edit-card-title"><i class="fa fa-user text-primary"></i> {Lang::T('Basic Information')}</h4>
+                </div>
+                <div class="edit-card-body">
+                    <!-- Avatar & Upload -->
+                    <div class="edit-avatar-section">
+                        {if empty($d['photo']) || strpos($d['photo'], 'default') !== false}
+                            <img src="{$app_url}/{$UPLOAD_PATH}/user.default.jpg"
+                                class="edit-avatar-img"
+                                alt="Photo">
+                        {else}
+                            <img src="{$app_url}/{$UPLOAD_PATH}{$d['photo']}.thumb.jpg"
+                                onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'"
+                                class="edit-avatar-img"
+                                alt="Photo">
+                        {/if}
+                        <div class="edit-avatar-controls">
+                            <label class="control-label" style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">{Lang::T('Profile Photo')}</label>
                             <input type="file" class="form-control" name="photo" accept="image/*">
-                        </div>
-                        <div class="form-group col-md-3 col-xs-4" title="Not always Working">
-                            <label class=""><input type="checkbox" checked name="faceDetect" value="yes"> {Lang::T("Face Detection")}</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Usernames')}</label>
-                        <div class="col-md-9">
-                            <div class="input-group">
-                                {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-phone-alt"></i></span>
-                                {else}
-                                    <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-user"></i></span>
+                            <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                                <label class="checkbox-inline" style="margin: 0; font-size: 12px;">
+                                    <input type="checkbox" checked name="faceDetect" value="yes"> {Lang::T("Face Detection")}
+                                </label>
+                                {if $d['photo'] != '' && strpos($d['photo'], 'default') === false}
+                                    <a href="{Text::url('customers/edit/', $d['id'], '/deletePhoto')}"
+                                        class="btn btn-danger btn-xs"
+                                        onclick="return ask(this, '{Lang::T('Delete photo')}?')"
+                                        title="{Lang::T('Delete Photo')}">
+                                        <i class="fa fa-trash"></i> {Lang::T('Delete Photo')}
+                                    </a>
                                 {/if}
-                                <input type="text" class="form-control" name="username" value="{$d['username']}"
-                                    required
-                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Usernames')}{/if}">
                             </div>
                         </div>
                     </div>
+
+                    <!-- Username -->
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Full Name')}</label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="fullname" name="fullname"
-                                value="{$d['fullname']}">
+                        <label class="control-label">{Lang::T('Username')} <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            {if $_c['country_code_phone']!= ''}
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-phone-alt"></i></span>
+                            {else}
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            {/if}
+                            <input type="text" class="form-control" name="username" value="{$d['username']}" required
+                                placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
                         </div>
                     </div>
+
+                    <!-- Full Name -->
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Email')}</label>
-                        <div class="col-md-9">
-                            <input type="email" class="form-control" id="email" name="email" value="{$d['email']}">
-                        </div>
+                        <label class="control-label">{Lang::T('Full Name')} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="fullname" name="fullname" value="{$d['fullname']}" required>
                     </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Phone Number')}</label>
-                        <div class="col-md-9">
-                            <div class="input-group">
-                                {if $_c['country_code_phone']!= ''}
-                                    <span class="input-group-addon" id="basic-addon1">+</span>
-                                {else}
-                                    <span class="input-group-addon" id="basic-addon1"><i
-                                            class="glyphicon glyphicon-phone-alt"></i></span>
-                                {/if}
-                                <input type="text" class="form-control" name="phonenumber" value="{$d['phonenumber']}"
-                                    placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
+
+                    <!-- Email & Phone Number -->
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('Email')}</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{$d['email']}">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('Phone Number')}</label>
+                                <div class="input-group">
+                                    {if $_c['country_code_phone']!= ''}
+                                        <span class="input-group-addon">+</span>
+                                    {else}
+                                        <span class="input-group-addon"><i class="glyphicon glyphicon-phone-alt"></i></span>
+                                    {/if}
+                                    <input type="text" class="form-control" name="phonenumber" value="{$d['phonenumber']}"
+                                        placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']}{/if} {Lang::T('Phone Number')}">
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Password -->
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Password')}</label>
-                        <div class="col-md-9">
+                        <label class="control-label">{Lang::T('Password')}</label>
+                        <div class="input-group">
                             <input type="password" autocomplete="off" class="form-control" id="password" name="password"
-                                onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
                                 value="{$d['password']}">
-                            <span class="help-block">{Lang::T('Keep Blank to do not change Password')}</span>
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" onclick="togglePasswordVisibility()" title="{Lang::T('Toggle Visibility')}">
+                                    <i class="fa fa-eye" id="passwordEyeIcon"></i>
+                                </button>
+                                <button type="button" class="btn btn-default" onclick="generateRandomPassword()" title="{Lang::T('Generate Password')}">
+                                    <i class="fa fa-refresh"></i> <span class="hidden-xs">{Lang::T('Generate')}</span>
+                                </button>
+                            </span>
+                        </div>
+                        <span class="help-block text-muted">{Lang::T('Keep Blank to do not change Password')}</span>
+                    </div>
+
+                    <!-- Service Type & Account Type -->
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('Service Type')}</label>
+                                <select class="form-control" id="service_type" name="service_type">
+                                    <option value="Hotspot" {if $d['service_type'] eq 'Hotspot'}selected{/if}>Hotspot</option>
+                                    <option value="PPPoE" {if $d['service_type'] eq 'PPPoE'}selected{/if}>PPPoE</option>
+                                    <option value="VPN" {if $d['service_type'] eq 'VPN'}selected{/if}>VPN</option>
+                                    <option value="Others" {if $d['service_type'] eq 'Others'}selected{/if}>{Lang::T("Other")}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('Account Type')}</label>
+                                <select class="form-control" id="account_type" name="account_type">
+                                    <option value="Personal" {if $d['account_type'] eq 'Personal'}selected{/if}>{Lang::T("Personal")}</option>
+                                    <option value="Business" {if $d['account_type'] eq 'Business'}selected{/if}>{Lang::T("Business")}</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Status -->
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Home Address')}</label>
-                        <div class="col-md-9">
-                            <textarea name="address" id="address" class="form-control">{$d['address']}</textarea>
-                        </div>
+                        <label class="control-label">{Lang::T('Status')}</label>
+                        <select class="form-control" id="status" name="status">
+                            {foreach $statuses as $status}
+                                <option value="{$status}" {if $d['status'] eq $status}selected{/if}>{Lang::T($status)}</option>
+                            {/foreach}
+                        </select>
+                        <span class="help-block text-muted">
+                            <i class="fa fa-info-circle"></i> <strong>{Lang::T('Banned')}:</strong> {Lang::T('Customer cannot login again')}.<br>
+                            <strong>{Lang::T('Disabled')}:</strong> {Lang::T('Customer can login but cannot buy internet package, Admin cannot recharge customer')}.
+                        </span>
                     </div>
+                </div>
+            </div>
+
+            <!-- PPPoE Settings -->
+            <div class="edit-form-card">
+                <div class="edit-card-header">
+                    <h4 class="edit-card-title"><i class="fa fa-plug text-primary"></i> {Lang::T('PPPoE Credentials')}</h4>
+                </div>
+                <div class="edit-card-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Service Type')}</label>
-                        <div class="col-md-9">
-                            <select class="form-control" id="service_type" name="service_type">
-                                <option value="Hotspot" {if $d['service_type'] eq 'Hotspot' }selected{/if}>Hotspot
-                                </option>
-                                <option value="PPPoE" {if $d['service_type'] eq 'PPPoE' }selected{/if}>PPPoE</option>
-                                <option value="VPN" {if $d['service_type'] eq 'VPN' }selected{/if}>VPN</option>
-                                <option value="Others" {if $d['service_type'] eq 'Others' }selected{/if}>{Lang::T("Other")}</option>
-                            </select>
-                        </div>
+                        <label class="control-label">
+                            {Lang::T('Usernames')} <span class="label label-danger" id="warning_username"></span>
+                        </label>
+                        <input type="text" class="form-control" id="pppoe_username" name="pppoe_username"
+                            onkeyup="checkUsername(this, {$d['id']})" value="{$d['pppoe_username']}">
+                        <span class="help-block text-muted">{Lang::T('Not Working with Freeradius Mysql')}</span>
                     </div>
+
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Account Type')}</label>
-                        <div class="col-md-9">
-                            <select class="form-control" id="account_type" name="account_type">
-                                <option value="Personal" {if $d['account_type'] eq 'Personal' }selected{/if}>{Lang::T("Personal")}
-                                </option>
-                                <option value="Business" {if $d['account_type'] eq 'Business' }selected{/if}>{Lang::T("Business")}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Coordinates')}</label>
-                        <div class="col-md-9">
-                            <input name="coordinates" id="coordinates" class="form-control" value="{$d['coordinates']}"
-                                placeholder="6.465422, 3.406448">
-                            <div id="map" style="width: '100%'; height: 200px; min-height: 150px;"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Status')}</label>
-                        <div class="col-md-9">
-                            <select class="form-control" id="status" name="status">
-                                {foreach $statuses as $status}
-                                    <option value="{$status}" {if $d['status'] eq $status }selected{/if}>{Lang::T($status)}
-                                    </option>
-                                {/foreach}
-                            </select>
-                            <span class="help-block">
-                                {Lang::T('Banned')}: {Lang::T('Customer cannot login again')}.<br>
-                                {Lang::T('Disabled')}:
-                                {Lang::T('Customer can login but cannot buy internet package, Admin cannot recharge customer')}.<br>
-                                {Lang::T("Don't forget to deactivate all active package too")}.
+                        <label class="control-label">{Lang::T('Password')}</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="pppoe_password" name="pppoe_password"
+                                value="{$d['pppoe_password']}">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" onclick="togglePppoePasswordVisibility()">
+                                    <i class="fa fa-eye" id="pppoeEyeIcon"></i>
+                                </button>
                             </span>
                         </div>
                     </div>
-                </div>
-                <div class="panel-heading">PPPoE</div>
-                <div class="panel-body">
+
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Usernames')} <span class="label label-danger"
-                                id="warning_username"></span></label>
-                        <div class="col-md-9">
-                            <input type="username" class="form-control" id="pppoe_username" name="pppoe_username"
-                                onkeyup="checkUsername(this, {$d['id']})" value="{$d['pppoe_username']}">
-                            <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
-                        </div>
+                        <label class="control-label">
+                            Remote IP <span class="label label-danger" id="warning_ip"></span>
+                        </label>
+                        <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
+                            onkeyup="checkIP(this, {$d['id']})" value="{$d['pppoe_ip']}">
+                        <span class="help-block text-muted">{Lang::T('Not Working with Freeradius Mysql')}</span>
                     </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Password')}</label>
-                        <div class="col-md-9">
-                            <input type="password" class="form-control" id="pppoe_password" name="pppoe_password"
-                                value="{$d['pppoe_password']}" onmouseleave="this.type = 'password'"
-                                onmouseenter="this.type = 'text'">
-                        </div>
+
+                    <div class="alert alert-info" style="margin-bottom: 0; padding: 10px 14px; font-size: 12px;">
+                        <i class="fa fa-info-circle"></i> {Lang::T('User Cannot change this, only admin. if it Empty it will use Customer Credentials')}
                     </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">Remote IP <span class="label label-danger"
-                                id="warning_ip"></span></label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
-                                onkeyup="checkIP(this, {$d['id']})" value="{$d['pppoe_ip']}">
-                            <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
-                        </div>
-                    </div>
-                    <span class="help-block">
-                        {Lang::T('User Cannot change this, only admin. if it Empty it will use Customer Credentials')}
-                    </span>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="panel panel-primary panel-hovered panel-stacked mb30">
-                <div class="panel-heading">{Lang::T('Attributes')}</div>
-                <div class="panel-body">
-                    <!--Customers Attributes edit start -->
+
+        <!-- RIGHT COLUMN: ADDRESS, LOCATION & ATTRIBUTES -->
+        <div class="col-md-5">
+            <!-- Address & Geographic Location (Prominent & Clear!) -->
+            <div class="edit-form-card">
+                <div class="edit-card-header">
+                    <h4 class="edit-card-title"><i class="fa fa-map-marker text-danger"></i> {Lang::T('Address & Geographic Location')}</h4>
+                </div>
+                <div class="edit-card-body">
+                    <div class="form-group">
+                        <label class="control-label">{Lang::T('Home / Street Address')}</label>
+                        <textarea name="address" id="address" class="form-control" rows="3" placeholder="{Lang::T('Home Address')}">{$d['address']}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('City')}</label>
+                                <input type="text" class="form-control" id="city" name="city" value="{$d['city']}" placeholder="{Lang::T('City')}">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('District')}</label>
+                                <input type="text" class="form-control" id="district" name="district" value="{$d['district']}" placeholder="{Lang::T('District')}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('State')}</label>
+                                <input type="text" class="form-control" id="state" name="state" value="{$d['state']}" placeholder="{Lang::T('State')}">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="control-label">{Lang::T('Zip Code')}</label>
+                                <input type="text" class="form-control" id="zip" name="zip" value="{$d['zip']}" placeholder="{Lang::T('Zip Code')}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">{Lang::T('Coordinates')}</label>
+                        <div class="input-group">
+                            <input name="coordinates" id="coordinates" class="form-control" value="{$d['coordinates']}" placeholder="Latitude, Longitude">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" onclick="getLocation()" title="{Lang::T('Use Current Location')}">
+                                    <i class="fa fa-crosshairs text-primary"></i> <span class="hidden-xs">{Lang::T('GPS')}</span>
+                                </button>
+                            </span>
+                        </div>
+                        <div id="map" class="edit-map-picker"></div>
+                        <span class="help-block text-muted" style="margin-top: 6px;">
+                            <i class="fa fa-hand-pointer-o"></i> {Lang::T('Click on the map or drag the pin to set customer coordinates.')}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Attributes -->
+            <div class="edit-form-card">
+                <div class="edit-card-header">
+                    <h4 class="edit-card-title"><i class="fa fa-tags text-primary"></i> {Lang::T('Attributes')}</h4>
+                    <button class="btn btn-success btn-xs" type="button" id="add-custom-field">
+                        <i class="fa fa-plus"></i> {Lang::T('Add Attribute')}
+                    </button>
+                </div>
+                <div class="edit-card-body">
                     {if $customFields}
                         {foreach $customFields as $customField}
-                            <div class="form-group">
-                                <label class="col-md-4 control-label"
-                                    for="{$customField.field_name}">{$customField.field_name}</label>
-                                <div class="col-md-6">
-                                    <input class="form-control" type="text" name="custom_fields[{$customField.field_name}]"
-                                        id="{$customField.field_name}" value="{$customField.field_value}">
+                            <div class="custom-field-row">
+                                <div class="cf-name">
+                                    <label class="control-label" for="cf_{$customField.field_name}">{$customField.field_name}</label>
                                 </div>
-                                <label class="col-md-2">
-                                    <input type="checkbox" name="delete_custom_fields[]" value="{$customField.field_name}">
-                                    {Lang::T('Delete')}
-                                </label>
+                                <div class="cf-val">
+                                    <input class="form-control" type="text" id="cf_{$customField.field_name}"
+                                        name="custom_fields[{$customField.field_name}]" value="{$customField.field_value}">
+                                </div>
+                                <div class="cf-del">
+                                    <label class="checkbox-inline text-danger" title="{Lang::T('Delete')}">
+                                        <input type="checkbox" name="delete_custom_fields[]" value="{$customField.field_name}">
+                                        <span class="hidden-xs">{Lang::T('Delete')}</span>
+                                    </label>
+                                </div>
                             </div>
                         {/foreach}
                     {/if}
-                    <!--Customers Attributes edit end -->
-                    <!-- Customers Attributes add start -->
-                    <div id="custom-fields-container">
-                    </div>
-                    <!-- Customers Attributes add end -->
-                </div>
-                <div class="panel-footer">
-                    <button class="btn btn-success btn-block" type="button"
-                        id="add-custom-field">{Lang::T('Add')}</button>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="box box-primary box-solid collapsed-box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">{Lang::T('Additional Information')}</h3>
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body" style="display: none;">
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('City')}</label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="city" name="city" value="{$d['city']}">
-                            <small class="form-text text-muted">{Lang::T('City of Resident')}</small>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('District')}</label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="district" name="district"
-                                value="{$d['district']}">
-                            <small class="form-text text-muted">{Lang::T('District')}</small>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('State')}</label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="state" name="state" value="{$d['state']}">
-                            <small class="form-text text-muted">{Lang::T('State of Resident')}</small>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Zip Code')}</label>
-                        <div class="col-md-9">
-                            <input type="text" class="form-control" id="zip" name="zip" value="{$d['zip']}">
-                            <small class="form-text text-muted">{Lang::T('Zip Code')}</small>
-                        </div>
-                    </div>
+                    <div id="custom-fields-container"></div>
                 </div>
             </div>
         </div>
     </div>
-    <center>
-        <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Customer Data change process?")}')"
-            type="submit">
-            {Lang::T('Save Changes')}
-        </button>
-        <br><a href="{Text::url('')}customers/list" class="btn btn-link">{Lang::T('Cancel')}</a>
-    </center>
+
+    <!-- BOTTOM ACTIONS -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="customer-edit-actions">
+                <a href="{Text::url('customers/view/', $d['id'])}" class="btn btn-default">
+                    {Lang::T('Cancel')}
+                </a>
+                <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Customer Data change process?")}')" type="submit">
+                    <i class="fa fa-floppy-o"></i> {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
 </form>
 
-{literal}
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            var customFieldsContainer = document.getElementById('custom-fields-container');
-            var addCustomFieldButton = document.getElementById('add-custom-field');
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 
+{literal}
+<script type="text/javascript">
+    // Custom Fields management
+    document.addEventListener("DOMContentLoaded", function() {
+        var customFieldsContainer = document.getElementById('custom-fields-container');
+        var addCustomFieldButton = document.getElementById('add-custom-field');
+
+        if (addCustomFieldButton && customFieldsContainer) {
             addCustomFieldButton.addEventListener('click', function() {
-                var fieldIndex = customFieldsContainer.children.length;
                 var newField = document.createElement('div');
-                newField.className = 'form-group';
+                newField.className = 'custom-field-row';
                 newField.innerHTML = `
-                <div class="col-md-4">
-                    <input type="text" class="form-control" name="custom_field_name[]" placeholder="Name">
-                </div>
-                <div class="col-md-6">
-                    <input type="text" class="form-control" name="custom_field_value[]" placeholder="Value">
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="remove-custom-field btn btn-danger btn-sm">-</button>
-                </div>
-            `;
+                    <div class="cf-name">
+                        <input type="text" class="form-control" name="custom_field_name[]" placeholder="Name">
+                    </div>
+                    <div class="cf-val">
+                        <input type="text" class="form-control" name="custom_field_value[]" placeholder="Value">
+                    </div>
+                    <div class="cf-del">
+                        <button type="button" class="btn btn-danger btn-sm remove-custom-field" title="Remove">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                `;
                 customFieldsContainer.appendChild(newField);
             });
 
             customFieldsContainer.addEventListener('click', function(event) {
-                if (event.target.classList.contains('remove-custom-field')) {
-                    var fieldContainer = event.target.parentNode.parentNode;
-                    fieldContainer.parentNode.removeChild(fieldContainer);
+                var removeBtn = event.target.closest('.remove-custom-field');
+                if (removeBtn) {
+                    var fieldRow = removeBtn.closest('.custom-field-row');
+                    if (fieldRow) {
+                        fieldRow.remove();
+                    }
                 }
             });
-        });
-    </script>
-
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script>
-        function getLocation() {
-            if (window.location.protocol == "https:" && navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
-            } else {
-                setupMap(51.505, -0.09);
-            }
         }
 
-        function showPosition(position) {
-            setupMap(position.coords.latitude, position.coords.longitude);
+        // Live manual coordinate input listener
+        var coordInput = document.getElementById('coordinates');
+        if (coordInput) {
+            coordInput.addEventListener('change', function() {
+                var parts = this.value.split(',');
+                if (parts.length === 2) {
+                    var lat = parseFloat(parts[0].trim());
+                    var lon = parseFloat(parts[1].trim());
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        setupMap(lat, lon);
+                    }
+                }
+            });
+        }
+    });
+
+    // Password helpers
+    function togglePasswordVisibility() {
+        var pwd = document.getElementById('password');
+        var icon = document.getElementById('passwordEyeIcon');
+        if (pwd.type === 'password') {
+            pwd.type = 'text';
+            icon.className = 'fa fa-eye-slash';
+        } else {
+            pwd.type = 'password';
+            icon.className = 'fa fa-eye';
+        }
+    }
+
+    function togglePppoePasswordVisibility() {
+        var pwd = document.getElementById('pppoe_password');
+        var icon = document.getElementById('pppoeEyeIcon');
+        if (pwd.type === 'password') {
+            pwd.type = 'text';
+            icon.className = 'fa fa-eye-slash';
+        } else {
+            pwd.type = 'password';
+            icon.className = 'fa fa-eye';
+        }
+    }
+
+    function generateRandomPassword() {
+        var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%';
+        var res = '';
+        for (var i = 0; i < 10; i++) {
+            res += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        var pwd = document.getElementById('password');
+        pwd.value = res;
+        pwd.type = 'text';
+        var icon = document.getElementById('passwordEyeIcon');
+        if (icon) icon.className = 'fa fa-eye-slash';
+    }
+
+    // Leaflet Map Logic
+    var editMap = null;
+    var editMarker = null;
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                setupMap(position.coords.latitude, position.coords.longitude);
+                $('#coordinates').val(position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6));
+            }, function(err) {
+                alert('Unable to fetch GPS position: ' + err.message);
+            });
+        } else {
+            alert('Geolocation is not supported by your browser');
+        }
+    }
+
+    function setupMap(lat, lon) {
+        if (typeof L === 'undefined') {
+            setTimeout(function() { setupMap(lat, lon); }, 200);
+            return;
+        }
+        lat = parseFloat(lat);
+        lon = parseFloat(lon);
+        if (isNaN(lat) || isNaN(lon)) {
+            lat = 51.505;
+            lon = -0.09;
         }
 
-        function setupMap(lat, lon) {
-            var map = L.map('map').setView([lat, lon], 13);
+        if (!editMap) {
+            editMap = L.map('map').setView([lat, lon], 14);
             L.tileLayer('https://{s}.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga', {
-            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                 maxZoom: 20
-        }).addTo(map);
-        var marker = L.marker([lat, lon]).addTo(map);
-        map.on('click', function(e) {
-            var coord = e.latlng;
-            var lat = coord.lat;
-            var lng = coord.lng;
-            var newLatLng = new L.LatLng(lat, lng);
-            marker.setLatLng(newLatLng);
-            $('#coordinates').val(lat + ',' + lng);
-        });
+            }).addTo(editMap);
+
+            editMarker = L.marker([lat, lon], { draggable: true }).addTo(editMap);
+
+            editMarker.on('dragend', function(e) {
+                var pos = editMarker.getLatLng();
+                $('#coordinates').val(pos.lat.toFixed(6) + ', ' + pos.lng.toFixed(6));
+            });
+
+            editMap.on('click', function(e) {
+                var coord = e.latlng;
+                editMarker.setLatLng(coord);
+                $('#coordinates').val(coord.lat.toFixed(6) + ', ' + coord.lng.toFixed(6));
+            });
+        } else {
+            editMap.setView([lat, lon], 14);
+            editMarker.setLatLng([lat, lon]);
         }
-        window.onload = function() {
-        {/literal}
-        {if $d['coordinates']}
-            setupMap({$d['coordinates']});
-        {else}
-            getLocation();
-        {/if}
-        {literal}
-        }
-    </script>
+    }
+</script>
 {/literal}
 
 <script>
-    function deletePhoto(id) {
-        if (confirm('Delete photo?')) {
-            if (confirm('Are you sure to delete photo?')) {
-                window.location.href = '{Text::url('')}customers/edit/'+id+'/deletePhoto'
+    window.addEventListener('load', function() {
+        {if $d['coordinates']}
+            var rawCoords = "{$d['coordinates']}".split(',');
+            if (rawCoords.length === 2) {
+                setupMap(rawCoords[0].trim(), rawCoords[1].trim());
+            } else {
+                setupMap(51.505, -0.09);
             }
-        }
-    }
+        {else}
+            setupMap(51.505, -0.09);
+        {/if}
+    });
 </script>
 
 {include file="sections/footer.tpl"}

@@ -176,54 +176,6 @@
                                 </tr>
                             {/foreach}
                         </tbody>
-                        <tbody id="loading-placeholder">
-                            {for $i=1 to 1}
-                            <tr class="loading-row">
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                                <td>
-                                    <div class="placeholder-loading"></div>
-                                </td>
-                            </tr>
-                            {/for}
-                        </tbody>
                     </table>
                 </div>
             </div>

@@ -242,14 +242,15 @@ class MikrotikHotspot
         return ORM::for_table('tbl_routers')->where('name', $name)->find_one();
     }
 
-    function getClient($ip, $user, $pass)
+    function getClient($ip, $user, $pass, $port = null, $timeout = 8)
     {
         global $_app_stage;
         if ($_app_stage == 'Demo') {
             return null;
         }
         $iport = explode(":", $ip);
-        return new RouterOS\Client($iport[0], $user, $pass, ($iport[1]) ? $iport[1] : null);
+        $p = ($port) ? $port : (($iport[1] ?? null) ? $iport[1] : null);
+        return new RouterOS\Client($iport[0], $user, $pass, $p, false, $timeout);
     }
 
     function removeHotspotUser($client, $username)

@@ -123,6 +123,7 @@ switch ($action) {
                 }
             }
         }
+        echo $status;
         break;
     case 'plan_is_active':
         $ds = ORM::for_table('tbl_user_recharges')->where('customer_id', $routes['2'])->find_array();

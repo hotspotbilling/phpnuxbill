@@ -208,31 +208,109 @@ document.addEventListener('click', function() {
 */
 
 $(document).ready(function () {
-  // Function to handle loading state for any table
-  function handleTableLoading() {
-    // Show loading state for all tables with loader
-    $(".table-with-loader").addClass("loading");
-    $(".table-responsive").addClass("loading-state");
+  // Show modern loading state for tables
+  function showTableLoading() {
+    var $targets = $(".table-responsive");
+    var $tables = $(".table-with-loader, table.table");
 
-    // Remove loading state after content is loaded
-    setTimeout(function () {
-      $(".table-with-loader").removeClass("loading");
-      $(".table-responsive").removeClass("loading-state");
-    }, 500);
+    if ($targets.length === 0 && $tables.length > 0) {
+      $tables.each(function () {
+        var $t = $(this);
+        var $p = $t.closest(".panel-body, .card-body, .box-body, .panel, .card");
+        if ($p.length) {
+          $targets = $targets.add($p);
+        } else {
+          $targets = $targets.add($t.parent());
+        }
+      });
+    }
+
+    $targets.each(function () {
+      var $wrap = $(this);
+      $wrap.addClass("loading-state");
+      if ($wrap.css("position") === "static") {
+        $wrap.addClass("table-loading-relative");
+      }
+      if ($wrap.find(".table-loading-overlay").length === 0) {
+        $wrap.append(
+          '<div class="table-loading-overlay">' +
+            '<div class="table-loading-bar"></div>' +
+            '<div class="table-loading-badge">' +
+              '<div class="table-loading-spinner"></div>' +
+              '<span>Loading...</span>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+    });
+
+    $(".table-with-loader, table.table").addClass("table-loading-dimmed");
   }
 
-  // Show loading state when the page loads
-  handleTableLoading();
+  // Hide modern loading state
+  function hideTableLoading() {
+    $(".table-responsive, .panel-body, .card-body, .box-body, .panel, .card").removeClass("loading-state table-loading-relative");
+    $(".table-with-loader, table.table").removeClass("table-loading-dimmed loading");
+    var $overlays = $(".table-loading-overlay");
+    if ($overlays.length > 0) {
+      $overlays.fadeOut(150, function () {
+        $(this).remove();
+      });
+    }
+  }
 
-  // Remove loading state after the page is fully loaded
-  $(window).on("load", handleTableLoading);
+  // Handle temporary loading state
+  function handleTableLoading(duration) {
+    showTableLoading();
+    setTimeout(hideTableLoading, duration || 450);
+  }
 
-  // Show loading state when applying filters or changing page
-  $("form#site-search").on("submit", handleTableLoading);
+  // Expose helpers globally
+  window.showTableLoading = showTableLoading;
+  window.hideTableLoading = hideTableLoading;
+  window.handleTableLoading = handleTableLoading;
+
+  // Global entries-per-page change handler
+  window.changePerPage = function (select) {
+    showTableLoading();
+    var val = select.value;
+    var search = window.location.search || "";
+    var cookieName = "customer_per_page";
+    if (search.indexOf("voucher") !== -1) {
+      cookieName = "voucher_per_page";
+    } else if (search.indexOf("hotspot") !== -1) {
+      cookieName = "hotspot_per_page";
+    } else if (search.indexOf("pppoe") !== -1) {
+      cookieName = "pppoe_per_page";
+    }
+    document.cookie = cookieName + "=" + val + "; path=/; max-age=" + (365 * 24 * 60 * 60);
+    setTimeout(function () {
+      location.reload();
+    }, 250);
+  };
+
+  // Trigger loading on page load if any table is present
+  if ($(".table-responsive, .table-with-loader, table.table").length > 0) {
+    handleTableLoading(450);
+  }
+
+  // Dismiss loading state when window load finishes (with slight buffer)
+  $(window).on("load", function () {
+    setTimeout(hideTableLoading, 200);
+  });
+
+  // Show loading state on search form submission
+  $(document).on("submit", "form#site-search, form[action*='customers'], form[action*='hotspot'], form[action*='pppoe'], form[action*='plan'], form[action*='routers'], form[action*='voucher'], form[action*='bandwidth'], form[action*='logs']", function () {
+    showTableLoading();
+  });
 
   // Show loading state when changing entries per page
-  $("#per_page").on("change", handleTableLoading);
+  $(document).on("change", "#per_page, select[name='per_page']", function () {
+    showTableLoading();
+  });
 
   // Add loading state on pagination clicks
-  $(document).on("click", ".pagination a", handleTableLoading);
+  $(document).on("click", ".pagination a, .pager a", function () {
+    showTableLoading();
+  });
 });

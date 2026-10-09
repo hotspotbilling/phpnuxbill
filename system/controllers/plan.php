@@ -890,18 +890,25 @@ switch ($action) {
                 }
             }
 
-            foreach ($vouchers as $code) {
-                $d = ORM::for_table('tbl_voucher')->create();
-                $d->type = $type;
-                $d->routers = $server;
-                $d->id_plan = $plan;
-                $d->code = "$prefix$code";
-                $d->user = '0';
-                $d->status = '0';
-                $d->generated_by = $admin['id'];
-                $d->batch_name = $batch_name;
-                $d->save();
-                $newVoucherIds[] = $d->id();
+            ORM::raw_execute('START TRANSACTION');
+            try {
+                foreach ($vouchers as $code) {
+                    $d = ORM::for_table('tbl_voucher')->create();
+                    $d->type = $type;
+                    $d->routers = $server;
+                    $d->id_plan = $plan;
+                    $d->code = "$prefix$code";
+                    $d->user = '0';
+                    $d->status = '0';
+                    $d->generated_by = $admin['id'];
+                    $d->batch_name = $batch_name;
+                    $d->save();
+                    $newVoucherIds[] = $d->id();
+                }
+                ORM::raw_execute('COMMIT');
+            } catch (Throwable $e) {
+                ORM::raw_execute('ROLLBACK');
+                throw $e;
             }
 
             if ($printNow == 'yes' && count($newVoucherIds) > 0) {

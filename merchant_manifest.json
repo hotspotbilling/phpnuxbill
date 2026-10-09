@@ -1,0 +1,25 @@
+{
+  "name": "Hotspot Merchant & Agent Portal",
+  "short_name": "Merchant POS",
+  "description": "Hotspot Voucher Management, POS Billing, Agents, and Multi-Channel Dispatch",
+  "start_url": "./index.php?_route=plugin/hotspot_merchantDashboard",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#4f46e5",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./ui/ui/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./ui/ui/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -12,24 +12,124 @@
 <script src="{$app_url}/ui/ui/scripts/plugins/select2.min.js"></script>
 <script src="{$app_url}/ui/ui/scripts/pace.min.js"></script>
 <script src="{$app_url}/ui/ui/summernote/summernote.min.js"></script>
-<script src="{$app_url}/ui/ui/scripts/custom.js?2025.2.5"></script> 
+<script src="{$app_url}/ui/ui/scripts/custom.js?2026.10.9.14"></script>
 
 <script>
-    document.getElementById('searchTerm').addEventListener('keyup', function () {
-        let query = this.value;
-        $.ajax({
-            url: '{Text::url('search_user')}',
-            type: 'GET',
-            data: { query: query },
-            success: function (data) {
-                if (data.trim() !== '') {
-                    $('#searchResults').html(data).show();
+    // Enhanced Live Command Palette Search Handler
+    (function () {
+        const searchEl = document.getElementById('searchTerm');
+        const searchWrap = document.getElementById('searchOverlay');
+        const resultsEl = document.getElementById('searchResults');
+        const clearBtn = document.getElementById('searchClearBtn');
+        const spinner = document.getElementById('searchSpinner');
+
+        if (!searchEl || !resultsEl) return;
+
+        let debounceTimer = null;
+        let selectedIndex = -1;
+        let currentXhr = null;
+
+        function fetchResults(query) {
+            if (currentXhr) {
+                currentXhr.abort();
+            }
+
+            if (spinner) spinner.style.display = 'block';
+            if (clearBtn) clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+
+            currentXhr = $.ajax({
+                url: '{Text::url('global_search')}',
+                type: 'GET',
+                data: { query: query },
+                success: function (data) {
+                    if (spinner) spinner.style.display = 'none';
+                    selectedIndex = -1;
+                    if (data && data.trim() !== '') {
+                        resultsEl.innerHTML = data;
+                        resultsEl.style.display = 'block';
+                    } else {
+                        resultsEl.style.display = 'none';
+                    }
+                },
+                error: function (xhr, status) {
+                    if (status !== 'abort' && spinner) {
+                        spinner.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Live input with debounce
+        searchEl.addEventListener('input', function () {
+            const query = this.value.trim();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                fetchResults(query);
+            }, 180);
+        });
+
+        // Focus: show quick actions if empty or refresh
+        searchEl.addEventListener('focus', function () {
+            fetchResults(this.value.trim());
+        });
+
+        // Clear button
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                searchEl.value = '';
+                searchEl.focus();
+                fetchResults('');
+            });
+        }
+
+        // Keyboard navigation (ArrowDown, ArrowUp, Enter, Escape)
+        searchEl.addEventListener('keydown', function (e) {
+            const items = resultsEl.querySelectorAll('.search-item');
+            if (!items || items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex++;
+                if (selectedIndex >= items.length) selectedIndex = 0;
+                updateSelection(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex--;
+                if (selectedIndex < 0) selectedIndex = items.length - 1;
+                updateSelection(items);
+            } else if (e.key === 'Enter') {
+                if (selectedIndex >= 0 && items[selectedIndex]) {
+                    e.preventDefault();
+                    items[selectedIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                resultsEl.style.display = 'none';
+                searchEl.blur();
+            }
+        });
+
+        function updateSelection(items) {
+            items.forEach(function (item, idx) {
+                if (idx === selectedIndex) {
+                    item.classList.add('is-selected');
+                    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                 } else {
-                    $('#searchResults').html('').hide();
+                    item.classList.remove('is-selected');
+                }
+            });
+        }
+
+        // Close on click outside
+        document.addEventListener('click', function (e) {
+            if (!searchWrap || !searchWrap.contains(e.target)) {
+                resultsEl.style.display = 'none';
+                if (clearBtn && searchEl.value.trim() === '') {
+                    clearBtn.style.display = 'none';
                 }
             }
         });
-    });
+    })();
 </script>
 
 <script>

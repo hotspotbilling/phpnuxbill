@@ -9,6 +9,14 @@
 
     <script>
         var appUrl = '{$app_url}';
+        window.paceOptions = {
+            ajax: {
+                trackMethods: ['GET', 'POST'],
+                ignoreURLs: [/autoload/, /autoload_user/, /search_user/, /global_search/]
+            },
+            restartOnRequestAfter: false,
+            restartOnPushState: false
+        };
     </script>
 
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/bootstrap.min.css">
@@ -18,10 +26,10 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2-bootstrap.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css?2026.10.9.14" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2025.2.4" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.9.20" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/js/all.js"></script>
@@ -34,6 +42,18 @@
 </head>
 
 <body class="hold-transition modern-skin-dark sidebar-mini {if $_kolaps}sidebar-collapse{/if}">
+    <script>
+        document.addEventListener('keydown', function (e) {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                const searchInput = document.getElementById('searchTerm');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const skeleton = document.querySelector('.sidebar-skeleton');
@@ -60,15 +80,22 @@
                 <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button" onclick="return setKolaps()">
                     <span class="sr-only">Toggle navigation</span>
                 </a>
+
+                <div id="searchOverlay" class="topbar-search-wrap" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; width: 360px; max-width: calc(100vw - 320px); z-index: 1000;">
+                    <span class="search-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 3; color: #94a3b8;"><i class="fa fa-search"></i></span>
+                    <input type="text" id="searchTerm" class="searchTerm"
+                        style="width: 100% !important; height: 36px !important; padding: 0 62px 0 34px !important; border-radius: 8px !important; text-align: left !important; font-size: 13px !important; box-sizing: border-box !important;"
+                        placeholder="{Lang::T('Search customers, routers, plans...')} (⌘K)" autocomplete="off">
+                    <span class="search-spinner" id="searchSpinner" style="display: none; position: absolute; right: 36px; top: 50%; transform: translateY(-50%); z-index: 3;"><i class="fa fa-spinner fa-spin"></i></span>
+                    <button type="button" class="search-clear-btn" id="searchClearBtn" style="display: none; position: absolute; right: 34px; top: 50%; transform: translateY(-50%); z-index: 3;" title="{Lang::T('Clear')}">&times;</button>
+                    <kbd class="search-kbd" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 2;">⌘K</kbd>
+                    <div id="searchResults" class="search-results" style="position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: 440px; max-width: 90vw; max-height: 440px; z-index: 1050;">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                </div>
+
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
-                        <div id="searchOverlay" class="wrap">
-                            <input type="text" id="searchTerm" class="searchTerm"
-                                placeholder="{Lang::T('Search Users')}" autocomplete="off">
-                            <div id="searchResults" class="search-results">
-                                <!-- Search results will be displayed here -->
-                            </div>
-                        </div>
                         <li>
                             <a id="toggleIcon" class="toggle-container" href="#">
                                 <i class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg"

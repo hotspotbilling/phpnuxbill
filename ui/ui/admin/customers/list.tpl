@@ -101,7 +101,7 @@
                             <tr>
                                 <th><input type="checkbox" id="select-all"></th>
                                 <th>{Lang::T('Username')}</th>
-                                <th>Photo</th>
+                                <th style="text-align: center;">{Lang::T('Photo')}</th>
                                 <th>{Lang::T('Account Type')}</th>
                                 <th>{Lang::T('Full Name')}</th>
                                 <th>{Lang::T('Balance')}</th>
@@ -120,10 +120,18 @@
                                 <td><input type="checkbox" name="customer_ids[]" value="{$ds['id']}"></td>
                                 <td onclick="window.location.href = '{Text::url('customers/view/', $ds['id'])}'"
                                     style="cursor:pointer;">{$ds['username']}</td>
-                                <td>
-                                    <a href="{$app_url}/{$UPLOAD_PATH}{$ds['photo']}" target="photo">
-                                        <img src="{$app_url}/{$UPLOAD_PATH}{$ds['photo']}.thumb.jpg" width="32" alt="">
-                                    </a>
+                                <td align="center" style="vertical-align: middle; text-align: center;">
+                                    {if empty($ds['photo']) || strpos($ds['photo'], 'default') !== false}
+                                        <span class="customer-avatar-wrap">
+                                            <img class="customer-avatar-circle img-circle" src="{$app_url}/{$UPLOAD_PATH}/user.default.jpg" width="34" height="34" alt="avatar">
+                                        </span>
+                                    {else}
+                                        <a href="{$app_url}/{$UPLOAD_PATH}{$ds['photo']}" target="photo" class="customer-avatar-wrap" title="{Lang::T('Click to view full image')}">
+                                            <img class="customer-avatar-circle img-circle" src="{$app_url}/{$UPLOAD_PATH}{$ds['photo']}.thumb.jpg"
+                                                onerror="this.src='{$app_url}/{$UPLOAD_PATH}/user.default.jpg'"
+                                                width="34" height="34" alt="avatar">
+                                        </a>
+                                    {/if}
                                 </td>
                                 <td>{$ds['account_type']}</td>
                                 <td onclick="window.location.href = '{Text::url('customers/view/', $ds['id'])}'"
@@ -171,25 +179,6 @@
                                 </td>
                             </tr>
                             {/foreach}
-                        </tbody>
-                        <tbody id="loading-placeholder">
-                            {for $i=1 to 1}
-                            <tr class="loading-row">
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                                <td><div class="placeholder-loading"></div></td>
-                            </tr>
-                            {/for}
                         </tbody>
                     </table>
                     <div class="row" style="padding: 5px">

@@ -14,14 +14,15 @@ class Mikrotik
         return ORM::for_table('tbl_routers')->where('name', $name)->find_one();
     }
 
-    public static function getClient($ip, $user, $pass)
+    public static function getClient($ip, $user, $pass, $port = null, $timeout = 8)
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return null;
         }
         $iport = explode(":", $ip);
-        return new RouterOS\Client($iport[0], $user, $pass, ($iport[1]) ? $iport[1] : null);
+        $p = ($port) ? $port : (($iport[1] ?? null) ? $iport[1] : null);
+        return new RouterOS\Client($iport[0], $user, $pass, $p, false, $timeout);
     }
 
     public static function isUserLogin($client, $username)

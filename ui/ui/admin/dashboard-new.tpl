@@ -1,107 +1,135 @@
 {include file="sections/header.tpl"}
-<!-- Stats Cards -->
+<style>
+    .isp-button {
+        padding: 5px 12px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        border-radius: 6px !important;
+        border: 1px solid transparent !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        outline: none !important;
+        line-height: 1.3 !important;
+    }
+    .isp-button-day,
+    .isp-button.active {
+        background-color: #4299e1 !important;
+        color: #ffffff !important;
+        border-color: #4299e1 !important;
+        font-weight: 600 !important;
+        box-shadow: 0 1px 2px rgba(66, 153, 225, 0.3) !important;
+    }
+    .dark-mode .isp-button-day,
+    .dark-mode .isp-button.active,
+    .dark .isp-button-day,
+    .dark .isp-button.active {
+        background-color: #4299e1 !important;
+        color: #ffffff !important;
+        border-color: #4299e1 !important;
+        box-shadow: 0 1px 2px rgba(66, 153, 225, 0.35) !important;
+    }
+    .isp-button-secondary {
+        background-color: #edf2f7 !important;
+        color: #4a5568 !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+    .isp-button-secondary:hover {
+        background-color: #e2e8f0 !important;
+        color: #2d3748 !important;
+    }
+    .dark-mode .isp-button-secondary,
+    .dark .isp-button-secondary {
+        background-color: #2d3748 !important;
+        color: #cbd5e0 !important;
+        border: 1px solid #4a5568 !important;
+    }
+    .dark-mode .isp-button-secondary:hover,
+    .dark .isp-button-secondary:hover {
+        background-color: #4a5568 !important;
+        color: #ffffff !important;
+    }
+    .isp-text-blue {
+        color: #4299e1 !important;
+        font-weight: 500 !important;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+        text-decoration: none !important;
+    }
+    .isp-text-blue:hover {
+        opacity: 0.8;
+    }
+    .dark-mode .isp-text-blue,
+    .dark .isp-text-blue {
+        color: #63b3ed !important;
+    }
+</style>
+
+<!-- Stats Cards (100% Real Database Values) -->
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-md-2 isp-grid-cols-lg-4 isp-gap-6 isp-margin-bottom-6">
+    <!-- Card 1: Total Customers -->
     <div class="isp-stat-card isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between">
-            <div>
-                <p class="isp-text-sm isp-font-medium isp-text-gray-dark isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p class="isp-text-2xl isp-font-bold isp-margin-top-1 isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p
-                    class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center isp-skeleton isp-skeleton-stat-small isp-hidden">
-                    <i class="fas fa-arrow-up isp-margin-right-1"></i> Loading...
+            <div id="total-customers-content">
+                <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Total Customers')}</p>
+                <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{$c_all}</p>
+                <p class="isp-text-sm {if $c_percentage_change >= 0}isp-text-green{else}isp-text-red{/if} isp-margin-top-1 isp-flex isp-align-center">
+                    <i class="fas {if $c_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
+                    {$c_percentage_change}% {Lang::T('from last month')}
                 </p>
-                <div id="total-customers-content">
-                    <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Total Customers')}</p>
-                    <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{$c_all}</p>
-                    <p class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center">
-                        <i class="fas fa-arrow-up isp-margin-right-1"></i> {$percentage_change}% {Lang::T('from last
-                        month')}
-                    </p>
-                </div>
             </div>
-            <div
-                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-blue-light isp-flex isp-align-center isp-justify-center">
+            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-blue-light isp-flex isp-align-center isp-justify-center">
                 <i class="fas fa-users isp-text-blue"></i>
             </div>
         </div>
     </div>
 
+    <!-- Card 2: Active Connections -->
     <div class="isp-stat-card isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between">
-            <div>
-                <p class="isp-text-sm isp-font-medium isp-text-gray-dark isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p class="isp-text-2xl isp-font-bold isp-margin-top-1 isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p
-                    class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center isp-skeleton isp-skeleton-stat-small isp-hidden">
-                    <i class="fas fa-arrow-up isp-margin-right-1"></i> Loading...
+            <div id="active-connections-content">
+                <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Active Connections')}</p>
+                <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{$u_act}</p>
+                <p class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center">
+                    <i class="fas fa-signal isp-margin-right-1"></i>
+                    {$u_act_pct}% {Lang::T('Active')} {if $u_expired > 0}• {$u_expired} {Lang::T('Expired')}{/if}
                 </p>
-                <div id="active-connections-content">
-                    <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Active Connections')}</p>
-                    <p class="isp-text-2xl isp-font-bold isp-margin-top-1">1,932</p>
-                    <p class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center">
-                        <i class="fas fa-arrow-up isp-margin-right-1"></i> 8.3% from yesterday
-                    </p>
-                </div>
             </div>
-            <div
-                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-green-light isp-flex isp-align-center isp-justify-center">
+            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-green-light isp-flex isp-align-center isp-justify-center">
                 <i class="fas fa-wifi isp-text-green"></i>
             </div>
         </div>
     </div>
 
+    <!-- Card 3: Monthly Revenue -->
     <div class="isp-stat-card isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between">
-            <div>
-                <p class="isp-text-sm isp-font-medium isp-text-gray-dark isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p class="isp-text-2xl isp-font-bold isp-margin-top-1 isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p
-                    class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center isp-skeleton isp-skeleton-stat-small isp-hidden">
-                    <i class="fas fa-arrow-up isp-margin-right-1"></i> Loading...
+            <div id="monthly-revenue-content">
+                <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Monthly Revenue')}</p>
+                <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{Lang::moneyFormat($imonth)}</p>
+                <p class="isp-text-sm {if $rev_percentage_change >= 0}isp-text-green{else}isp-text-red{/if} isp-margin-top-1 isp-flex isp-align-center">
+                    <i class="fas {if $rev_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
+                    {$rev_percentage_change}% {Lang::T('from last month')}
                 </p>
-                <div id="monthly-revenue-content">
-                    <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Monthly Revenue')}</p>
-                    <p class="isp-text-2xl isp-font-bold isp-margin-top-1">$48,759</p>
-                    <p class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center">
-                        <i class="fas fa-arrow-up isp-margin-right-1"></i> 5.7% from last month
-                    </p>
-                </div>
             </div>
-            <div
-                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-purple-light isp-flex isp-align-center isp-justify-center">
+            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-purple-light isp-flex isp-align-center isp-justify-center">
                 <i class="fas fa-dollar-sign isp-text-purple"></i>
             </div>
         </div>
     </div>
 
+    <!-- Card 4: Today Sales -->
     <div class="isp-stat-card isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between">
-            <div>
-                <p class="isp-text-sm isp-font-medium isp-text-gray-dark isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p class="isp-text-2xl isp-font-bold isp-margin-top-1 isp-skeleton isp-skeleton-stat isp-hidden">
-                    Loading...</p>
-                <p
-                    class="isp-text-sm isp-text-red isp-margin-top-1 isp-flex isp-align-center isp-skeleton isp-skeleton-stat-small isp-hidden">
-                    <i class="fas fa-arrow-up isp-margin-right-1"></i> Loading...
+            <div id="today-sales-content">
+                <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Today Sales')}</p>
+                <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{Lang::moneyFormat($iday)}</p>
+                <p class="isp-text-sm isp-text-blue isp-margin-top-1 isp-flex isp-align-center">
+                    <i class="fas fa-receipt isp-margin-right-1"></i>
+                    {$iday_count} {Lang::T('Transactions')}
                 </p>
-                <div id="open-tickets-content">
-                    <p class="isp-text-sm isp-font-medium isp-text-gray-dark">Open Tickets</p>
-                    <p class="isp-text-2xl isp-font-bold isp-margin-top-1">47</p>
-                    <p class="isp-text-sm isp-text-red isp-margin-top-1 isp-flex isp-align-center">
-                        <i class="fas fa-arrow-up isp-margin-right-1"></i> 3 new today
-                    </p>
-                </div>
             </div>
-            <div
-                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-yellow-light isp-flex isp-align-center isp-justify-center">
-                <i class="fas fa-ticket-alt isp-text-yellow"></i>
+            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-yellow-light isp-flex isp-align-center isp-justify-center">
+                <i class="fas fa-coins isp-text-yellow"></i>
             </div>
         </div>
     </div>
@@ -112,35 +140,31 @@
     <!-- Sales Report Chart -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="sales-report-title" class="isp-text-lg isp-font-semibold">Sales Report</h2>
-            <div class="isp-flex isp-space-x-2">
-                <button class="isp-button isp-button-day">Day</button>
-                <button class="isp-button isp-button-secondary">Week</button>
-                <button class="isp-button isp-button-secondary">Month</button>
-                <button class="isp-button isp-button-secondary">Year</button>
+            <h2 id="sales-report-title" class="isp-text-lg isp-font-semibold">{Lang::T('Sales Report')}</h2>
+            <div class="isp-flex isp-space-x-2" id="sales-timeframe-btns">
+                <button type="button" class="isp-button isp-button-day active" data-timeframe="day">{Lang::T('Day')}</button>
+                <button type="button" class="isp-button isp-button-secondary" data-timeframe="week">{Lang::T('Week')}</button>
+                <button type="button" class="isp-button isp-button-secondary" data-timeframe="month">{Lang::T('Month')}</button>
+                <button type="button" class="isp-button isp-button-secondary" data-timeframe="year">{Lang::T('Year')}</button>
             </div>
         </div>
         <div class="isp-chart-container">
-            <div id="sales-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="salesChart" class="isp-hidden"></canvas>
+            <canvas id="salesChart"></canvas>
         </div>
     </div>
 
     <!-- Customer Growth Chart -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden"> Loading...</h2>
-            <h2 id="customer-growth-title" class="isp-text-lg isp-font-semibold">Customer Growth</h2>
-            <div class="isp-flex isp-space-x-2">
-                <button class="isp-button isp-button-day">All</button>
-                <button class="isp-button isp-button-secondary">New</button>
-                <button class="isp-button isp-button-secondary">Churned</button>
-            </div>  
+            <h2 id="customer-growth-title" class="isp-text-lg isp-font-semibold">{Lang::T('Customer Growth')}</h2>
+            <div class="isp-flex isp-space-x-2" id="customer-filter-btns">
+                <button type="button" class="isp-button isp-button-day active" data-filter="all">{Lang::T('All')}</button>
+                <button type="button" class="isp-button isp-button-secondary" data-filter="new">{Lang::T('New')}</button>
+                <button type="button" class="isp-button isp-button-secondary" data-filter="churned">{Lang::T('Churned')}</button>
+            </div>
         </div>
         <div class="isp-chart-container">
-            <div id="customers-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="customersChart" class="isp-hidden"></canvas>
+            <canvas id="customersChart"></canvas>
         </div>
     </div>
 </div>
@@ -150,285 +174,267 @@
     <!-- Network Status Chart -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="network-status-title" class="isp-text-lg isp-font-semibold">Network Status</h2>
+            <h2 id="network-status-title" class="isp-text-lg isp-font-semibold">{Lang::T('Network Status')}</h2>
             <div class="isp-flex isp-align-center">
-                <span class="isp-status-indicator isp-status-online"></span>
-                <span class="isp-text-xs isp-skeleton isp-skeleton-stat-small isp-hidden">Loading...</span>
-                <span id="network-status-uptime" class="isp-text-xs">98.7% uptime</span>
+                <span class="isp-status-indicator {if $routers_offline == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                <span id="network-status-uptime" class="isp-text-xs">{$network_uptime}% {Lang::T('uptime')}</span>
             </div>
         </div>
         <div class="isp-chart-container">
-            <div id="network-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="networkChart" class="isp-hidden"></canvas>
+            <canvas id="networkChart"></canvas>
         </div>
     </div>
 
-    <!-- Support Tickets Chart -->
+    <!-- Transactions by Service (replaces dummy Support Tickets) -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="support-tickets-title" class="isp-text-lg isp-font-semibold">Support Tickets</h2>
-            <div class="isp-flex isp-space-x-2">
-                <button class="isp-button isp-button-day">Open</button>
-                <button class="isp-button isp-button-secondary">Closed</button>
-                <button class="isp-button isp-button-secondary">All</button>
+            <h2 id="services-trx-title" class="isp-text-lg isp-font-semibold">{Lang::T('Transactions by Service')}</h2>
+            <div class="isp-flex isp-space-x-2" id="trx-metric-btns">
+                <button type="button" class="isp-button isp-button-day active" data-metric="totals">{Lang::T('Revenue')}</button>
+                <button type="button" class="isp-button isp-button-secondary" data-metric="counts">{Lang::T('Count')}</button>
             </div>
         </div>
         <div class="isp-chart-container">
-            <div id="tickets-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="ticketsChart" class="isp-hidden"></canvas>
+            <canvas id="ticketsChart"></canvas>
         </div>
     </div>
 </div>
 
 <!-- Third Row with smaller charts -->
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-md-2 isp-grid-cols-lg-3 isp-gap-6 isp-margin-bottom-6">
-    <!-- Hotspot Usage -->
+    <!-- Router Activity / Usage -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="hotspot-usage-title" class="isp-text-lg isp-font-semibold">Hotspot Usage</h2>
-            <span class="isp-text-xs isp-text-blue">View All</span>
+            <h2 id="hotspot-usage-title" class="isp-text-lg isp-font-semibold">{Lang::T('Router Activity')}</h2>
+            <a href="{Text::url('routers')}" class="isp-text-xs isp-text-blue">{Lang::T('View All')}</a>
         </div>
         <div class="isp-chart-container isp-small-chart">
-            <div id="hotspot-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="hotspotChart" class="isp-hidden"></canvas>
+            <canvas id="hotspotChart"></canvas>
         </div>
     </div>
 
-    <!-- Captive Portal Logins -->
+    <!-- Day of Week Activity -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="portal-logins-title" class="isp-text-lg isp-font-semibold">Portal Logins</h2>
-            <span class="isp-text-xs isp-text-blue">View All</span>
+            <h2 id="portal-logins-title" class="isp-text-lg isp-font-semibold">{Lang::T('Day of Week Activity')}</h2>
+            <a href="{Text::url('reports')}" class="isp-text-xs isp-text-blue">{Lang::T('View All')}</a>
         </div>
         <div class="isp-chart-container isp-small-chart">
-            <div id="portal-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="portalChart" class="isp-hidden"></canvas>
+            <canvas id="portalChart"></canvas>
         </div>
     </div>
 
-    <!-- Bandwidth Usage -->
+    <!-- Plan Distribution by Type -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">
-                Loading...</h2>
-            <h2 id="bandwidth-usage-title" class="isp-text-lg isp-font-semibold">Bandwidth Usage</h2>
-            <span class="isp-text-xs isp-text-blue">View All</span>
+            <h2 id="bandwidth-usage-title" class="isp-text-lg isp-font-semibold">{Lang::T('Plan Distribution')}</h2>
+            <a href="{Text::url('plan/list')}" class="isp-text-xs isp-text-blue">{Lang::T('View All')}</a>
         </div>
         <div class="isp-chart-container isp-small-chart">
-            <div id="bandwidth-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="bandwidthChart" class="isp-hidden"></canvas>
+            <canvas id="bandwidthChart"></canvas>
         </div>
     </div>
 </div>
 
-<!-- Fourth Row with additional ISP-specific charts -->
+<!-- Fourth Row: Top Selling Plans & Hourly Activity -->
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6">
-    <!-- Data Consumption by Plan -->
+    <!-- Top Selling Plans -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="data-consumption-title" class="isp-text-lg isp-font-semibold">Data Consumption by
-                Plan</h2>
-            <div class="isp-flex isp-space-x-2">
-                <button class="isp-button isp-button-day">Day</button>
-                <button class="isp-button isp-button-secondary">Week</button>
-                <button class="isp-button isp-button-secondary">Month</button>
+            <h2 id="top-plans-title" class="isp-text-lg isp-font-semibold">{Lang::T('Top Selling Plans')}</h2>
+            <div class="isp-flex isp-space-x-2" id="topplans-metric-btns">
+                <button type="button" class="isp-button isp-button-day active" data-metric="counts">{Lang::T('Count')}</button>
+                <button type="button" class="isp-button isp-button-secondary" data-metric="totals">{Lang::T('Revenue')}</button>
             </div>
         </div>
         <div class="isp-chart-container">
-            <div id="consumption-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="consumptionChart" class="isp-hidden"></canvas>
+            <canvas id="consumptionChart"></canvas>
         </div>
     </div>
 
-    <!-- Network Latency -->
+    <!-- Hourly Activity (24 Hours) -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="network-latency-title" class="isp-text-lg isp-font-semibold">Network Latency</h2>
+            <h2 id="hourly-activity-title" class="isp-text-lg isp-font-semibold">{Lang::T('Hourly Activity (24h)')}</h2>
             <div class="isp-flex isp-align-center">
                 <span class="isp-status-indicator isp-status-online"></span>
-                <span class="isp-text-xs isp-skeleton isp-skeleton-stat-small isp-hidden">Loading...</span>
-                <span id="network-latency-uptime" class="isp-text-xs">Avg: 28ms</span>
+                <span id="hourly-peak-time" class="isp-text-xs"><i class="fas fa-clock isp-margin-right-1"></i>Peak: {$peak_hour_str}</span>
             </div>
         </div>
         <div class="isp-chart-container">
-            <div id="latency-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="latencyChart" class="isp-hidden"></canvas>
+            <canvas id="latencyChart"></canvas>
         </div>
     </div>
 </div>
 
-<!-- Fifth Row with additional charts -->
+<!-- Fifth Row: Peak Usage & System Inventory -->
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6 isp-margin-top-6">
-    <!-- Peak Usage Hours -->
+    <!-- Peak Usage Hours (3-Hour Blocks) -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">Loading...</h2>
-            <h2 id="peak-usage-title" class="isp-text-lg isp-font-semibold">Peak Usage Hours</h2>
-            <span class="isp-text-xs isp-text-blue">Last 7 days</span>
+            <h2 id="peak-usage-title" class="isp-text-lg isp-font-semibold">{Lang::T('Peak Usage Hours')}</h2>
+            <span class="isp-text-xs isp-text-blue">{Lang::T('Last 30 days')}</span>
         </div>
         <div class="isp-chart-container">
-            <div id="peak-usage-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="peakUsageChart" class="isp-hidden"></canvas>
+            <canvas id="peakUsageChart"></canvas>
         </div>
     </div>
 
-    <!-- Equipment Status -->
+    <!-- System Inventory -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 class="isp-text-lg isp-font-semibold isp-skeleton isp-skeleton-stat isp-hidden">
-                Loading...</h2>
-            <h2 id="equipment-status-title" class="isp-text-lg isp-font-semibold">Equipment Status</h2>
+            <h2 id="equipment-status-title" class="isp-text-lg isp-font-semibold">{Lang::T('System Inventory')}</h2>
             <div class="isp-flex isp-align-center isp-space-x-2">
-                <span class="isp-flex isp-align-center isp-text-xs"><span
-                        class="isp-status-indicator isp-status-online isp-margin-right-1"></span>92%</span>
-                <span class="isp-flex isp-align-center isp-text-xs"><span
-                        class="isp-status-indicator isp-status-warning isp-margin-right-1"></span>5%</span>
-                <span class="isp-flex isp-align-center isp-text-xs"><span
-                        class="isp-status-indicator isp-status-offline isp-margin-right-1"></span>3%</span>
+                <span class="isp-flex isp-align-center isp-text-xs">
+                    <span class="isp-status-indicator {if $routers_offline == 0}isp-status-online{else}isp-status-warning{/if} isp-margin-right-1"></span>
+                    {$network_uptime}% {Lang::T('Online')}
+                </span>
             </div>
         </div>
         <div class="isp-chart-container">
-            <div id="equipment-chart-skeleton" class="isp-skeleton isp-skeleton-chart"></div>
-            <canvas id="equipmentChart" class="isp-hidden"></canvas>
+            <canvas id="equipmentChart"></canvas>
         </div>
     </div>
 </div>
+
+<!-- Real Database Data Payload -->
+<script id="dashboard-raw-data" type="application/json">
+{$dashboard_data_json}
+</script>
+<script>
+    window.dashboardCurrencyCode = "{$_c['currency_code']}";
+</script>
+
 {literal}
 <script>
-
-    // Initialize charts
+    // Initialize chart variables
     let salesChart, customersChart, networkChart, ticketsChart, hotspotChart, portalChart, bandwidthChart;
     let consumptionChart, latencyChart, peakUsageChart, equipmentChart;
 
-    function updateCharts() {
-        const gridColor = getComputedStyle(document.body).getPropertyValue('--chart-grid');
-        const textColor = getComputedStyle(document.body).getPropertyValue('--text-primary');
-
-        // Update all charts with new colors
-        const charts = [salesChart, customersChart, networkChart, ticketsChart, hotspotChart,
-            portalChart, bandwidthChart, consumptionChart, latencyChart,
-            peakUsageChart, equipmentChart];
-
-        charts.forEach(chart => {
-            if (chart) {
-                chart.options.scales = chart.options.scales || {};
-
-                // Update grid colors for all axes
-                if (chart.options.scales.x) {
-                    chart.options.scales.x.grid = chart.options.scales.x.grid || {};
-                    chart.options.scales.x.grid.color = gridColor;
-                }
-
-                if (chart.options.scales.y) {
-                    chart.options.scales.y.grid = chart.options.scales.y.grid || {};
-                    chart.options.scales.y.grid.color = gridColor;
-                }
-
-                if (chart.options.scales.r) {
-                    chart.options.scales.r.grid = chart.options.scales.r.grid || {};
-                    chart.options.scales.r.grid.color = gridColor;
-                    chart.options.scales.r.angleLines = chart.options.scales.r.angleLines || {};
-                    chart.options.scales.r.angleLines.color = gridColor;
-                }
-
-                // Update legend colors
-                if (chart.options.plugins && chart.options.plugins.legend) {
-                    chart.options.plugins.legend.labels = chart.options.plugins.legend.labels || {};
-                    chart.options.plugins.legend.labels.color = textColor;
-                }
-
-                chart.update();
-            }
-        });
+    // Load real data from payload
+    let dData = {};
+    try {
+        const rawEl = document.getElementById('dashboard-raw-data');
+        if (rawEl && rawEl.textContent) {
+            dData = JSON.parse(rawEl.textContent);
+        }
+    } catch (e) {
+        console.error('Failed to parse dashboard data payload:', e);
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // Show skeleton loaders
-        document.querySelectorAll('.isp-skeleton').forEach(skel => {
-            skel.classList.remove('isp-hidden');
-        });
-        document.querySelectorAll('.isp-chart-container canvas').forEach(canvas => {
-            canvas.classList.add('isp-hidden');
-        });
-        document.querySelectorAll('#total-customers-content, #active-connections-content, #monthly-revenue-content, #open-tickets-content').forEach(content => {
-            content.classList.add('isp-hidden');
-        });
-        document.querySelectorAll('#sales-report-title, #customer-growth-title, #network-status-title, #support-tickets-title, #hotspot-usage-title, #portal-logins-title, #bandwidth-usage-title, #data-consumption-title, #network-latency-title, #peak-usage-title, #equipment-status-title').forEach(title => {
-            title.classList.add('isp-hidden');
-        });
-        document.querySelectorAll('#network-status-uptime, #network-latency-uptime').forEach(uptime => {
-            uptime.classList.add('isp-hidden');
-        });
+    const curCode = window.dashboardCurrencyCode || '';
 
-        // Simulate data loading
-        setTimeout(() => {
-            const gridColor = getComputedStyle(document.body).getPropertyValue('--chart-grid');
-            const textColor = getComputedStyle(document.body).getPropertyValue('--text-primary');
+    function formatMoney(val) {
+        const num = Number(val) || 0;
+        return (curCode ? curCode + ' ' : '') + num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
-            // Sales Chart
-            const salesCtx = document.getElementById('salesChart').getContext('2d');
+    function getThemeColors() {
+        const isDark = document.body.classList.contains('dark-mode') || document.body.classList.contains('dark');
+        return {
+            isDark: isDark,
+            blue: '#4299e1',
+            blueHover: '#3182ce',
+            green: '#48bb78',
+            red: '#f56565',
+            orange: '#ed8936',
+            purple: '#9f7aea',
+            indigo: '#667eea',
+            yellow: '#ecc94b',
+            teal: '#38b2ac',
+            gridColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+            textColor: isDark ? '#a0aec0' : '#718096'
+        };
+    }
+
+    function initAllDashboardCharts() {
+        const colors = getThemeColors();
+        const isDark = colors.isDark;
+        const gridColor = colors.gridColor;
+        const textColor = colors.textColor;
+
+        // 1. Sales Report Chart (Day, Week, Month, Year)
+        const salesCanvas = document.getElementById('salesChart');
+        if (salesCanvas && dData.sales && dData.sales.day) {
+            const salesCtx = salesCanvas.getContext('2d');
+            const salesGrad = salesCtx.createLinearGradient(0, 0, 0, 240);
+            salesGrad.addColorStop(0, 'rgba(66, 153, 225, 0.40)');
+            salesGrad.addColorStop(0.7, 'rgba(66, 153, 225, 0.08)');
+            salesGrad.addColorStop(1, 'rgba(66, 153, 225, 0.00)');
+
             salesChart = new Chart(salesCtx, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    labels: dData.sales.day.labels,
                     datasets: [{
-                        label: 'Revenue',
-                        data: [12000, 19000, 15000, 22000, 21000, 25000, 28000],
-                        borderColor: '#4299e1',
-                        backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                        label: 'Sales Revenue',
+                        data: dData.sales.day.values,
+                        borderColor: colors.blue,
+                        backgroundColor: salesGrad,
                         borderWidth: 2,
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: colors.blue,
+                        pointHoverBorderColor: isDark ? '#1a202c' : '#ffffff',
+                        pointHoverBorderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: {
-                            display: false
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    return 'Revenue: ' + formatMoney(ctx.parsed.y);
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: gridColor
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: {
+                                color: textColor,
+                                callback: function (val) {
+                                    return (curCode ? curCode + ' ' : '') + Number(val).toLocaleString();
+                                }
                             }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            }
+                            grid: { display: false },
+                            ticks: { color: textColor }
                         }
                     }
                 }
             });
+        }
 
-            // Customers Chart
-            const customersCtx = document.getElementById('customersChart').getContext('2d');
-            customersChart = new Chart(customersCtx, {
+        // 2. Customer Growth Chart (All, New, Churned)
+        const custCanvas = document.getElementById('customersChart');
+        if (custCanvas && dData.customerGrowth) {
+            const custCtx = custCanvas.getContext('2d');
+            customersChart = new Chart(custCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    labels: dData.customerGrowth.labels,
                     datasets: [
                         {
                             label: 'New Customers',
-                            data: [120, 190, 150, 220, 210, 250, 280],
-                            backgroundColor: '#48bb78',
-                            borderRadius: 4
+                            data: dData.customerGrowth.new,
+                            backgroundColor: colors.green,
+                            borderRadius: 6
                         },
                         {
-                            label: 'Churned Customers',
-                            data: [20, 30, 25, 40, 35, 45, 50],
-                            backgroundColor: '#f56565',
-                            borderRadius: 4
+                            label: 'Expired / Churned',
+                            data: dData.customerGrowth.churned,
+                            backgroundColor: colors.red,
+                            borderRadius: 6
                         }
                     ]
                 },
@@ -438,39 +444,38 @@
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: {
-                                color: textColor
-                            }
+                            align: 'end',
+                            labels: { color: textColor, usePointStyle: true, boxWidth: 8 }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: gridColor
-                            }
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: { color: textColor, precision: 0 }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            }
+                            grid: { display: false },
+                            ticks: { color: textColor }
                         }
                     }
                 }
             });
+        }
 
-            // Network Chart
-            const networkCtx = document.getElementById('networkChart').getContext('2d');
-            networkChart = new Chart(networkCtx, {
+        // 3. Network Status Chart (Online vs Offline Routers)
+        const netCanvas = document.getElementById('networkChart');
+        if (netCanvas && dData.network) {
+            const netCtx = netCanvas.getContext('2d');
+            networkChart = new Chart(netCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Online', 'Offline', 'Maintenance'],
+                    labels: dData.network.labels,
                     datasets: [{
-                        data: [92, 5, 3],
+                        data: dData.network.values,
                         backgroundColor: [
-                            '#48bb78',
-                            '#f56565',
-                            '#ed8936'
+                            colors.green,
+                            colors.red
                         ],
                         borderWidth: 0
                     }]
@@ -478,136 +483,160 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
+                    cutout: '72%',
                     plugins: {
                         legend: {
                             position: 'right',
-                            labels: {
-                                color: textColor
-                            }
+                            labels: { color: textColor, usePointStyle: true, boxWidth: 8 }
                         }
                     }
                 }
             });
+        }
 
-            // Tickets Chart
-            const ticketsCtx = document.getElementById('ticketsChart').getContext('2d');
-            ticketsChart = new Chart(ticketsCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [
-                        {
-                            label: 'Opened',
-                            data: [12, 19, 15, 22, 21, 25, 28],
-                            borderColor: '#4299e1',
-                            backgroundColor: 'rgba(66, 153, 225, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Closed',
-                            data: [8, 15, 12, 18, 17, 20, 22],
-                            borderColor: '#48bb78',
-                            backgroundColor: 'rgba(72, 187, 120, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: textColor
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: gridColor
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Hotspot Chart
-            const hotspotCtx = document.getElementById('hotspotChart').getContext('2d');
-            hotspotChart = new Chart(hotspotCtx, {
+        // 4. Transactions by Service (formerly Tickets Chart)
+        const trxCanvas = document.getElementById('ticketsChart');
+        if (trxCanvas && dData.transactions) {
+            const trxCtx = trxCanvas.getContext('2d');
+            ticketsChart = new Chart(trxCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Downtown', 'Airport', 'Mall', 'University', 'Park'],
+                    labels: dData.transactions.labels,
                     datasets: [{
-                        label: 'Connections',
-                        data: [350, 420, 280, 510, 390],
-                        backgroundColor: [
-                            'rgba(66, 153, 225, 0.7)',
-                            'rgba(102, 126, 234, 0.7)',
-                            'rgba(159, 122, 234, 0.7)',
-                            'rgba(237, 137, 54, 0.7)',
-                            'rgba(72, 187, 120, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(66, 153, 225, 1)',
-                            'rgba(102, 126, 234, 1)',
-                            'rgba(159, 122, 234, 1)',
-                            'rgba(237, 137, 54, 1)',
-                            'rgba(72, 187, 120, 1)'
-                        ],
-                        borderWidth: 1,
-                        borderRadius: 4
+                        label: 'Revenue',
+                        data: dData.transactions.totals,
+                        backgroundColor: colors.blue,
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    return formatMoney(ctx.parsed.y);
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: gridColor
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: {
+                                color: textColor,
+                                callback: function (val) {
+                                    return (curCode ? curCode + ' ' : '') + Number(val).toLocaleString();
+                                }
                             }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            }
+                            grid: { display: false },
+                            ticks: { color: textColor }
                         }
                     }
                 }
             });
+        }
 
-            // Portal Chart
-            const portalCtx = document.getElementById('portalChart').getContext('2d');
+        // 5. Router Activity Chart (formerly Hotspot Chart)
+        const hsCanvas = document.getElementById('hotspotChart');
+        if (hsCanvas && dData.routerUsage) {
+            const hsCtx = hsCanvas.getContext('2d');
+            const hsColors = [
+                'rgba(66, 153, 225, 0.85)',
+                'rgba(102, 126, 234, 0.85)',
+                'rgba(159, 122, 234, 0.85)',
+                'rgba(237, 137, 54, 0.85)',
+                'rgba(72, 187, 120, 0.85)',
+                'rgba(245, 101, 101, 0.85)'
+            ];
+            hotspotChart = new Chart(hsCtx, {
+                type: 'bar',
+                data: {
+                    labels: dData.routerUsage.labels,
+                    datasets: [{
+                        label: 'Transactions',
+                        data: dData.routerUsage.values,
+                        backgroundColor: hsColors.slice(0, dData.routerUsage.labels.length),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: { color: textColor, precision: 0 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 6. Day of Week Activity Radar Chart (formerly Portal Chart)
+        const portalCanvas = document.getElementById('portalChart');
+        if (portalCanvas && dData.portalLogins) {
+            const portalCtx = portalCanvas.getContext('2d');
             portalChart = new Chart(portalCtx, {
                 type: 'radar',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    labels: dData.portalLogins.labels,
                     datasets: [{
-                        label: 'Logins',
-                        data: [120, 190, 150, 220, 210, 180, 250],
-                        backgroundColor: 'rgba(159, 122, 234, 0.2)',
-                        borderColor: 'rgba(159, 122, 234, 1)',
+                        label: 'Activity',
+                        data: dData.portalLogins.values,
+                        backgroundColor: 'rgba(102, 126, 234, 0.25)',
+                        borderColor: colors.indigo,
                         borderWidth: 2,
-                        pointBackgroundColor: 'rgba(159, 122, 234, 1)'
+                        pointBackgroundColor: colors.indigo
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            angleLines: { color: gridColor },
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, backdropColor: 'transparent', precision: 0 },
+                            pointLabels: { color: textColor },
+                            suggestedMin: 0
+                        }
+                    }
+                }
+            });
+        }
+
+        // 7. Plan Distribution Polar Chart (formerly Bandwidth Chart)
+        const bwCanvas = document.getElementById('bandwidthChart');
+        if (bwCanvas && dData.planTypes) {
+            const bwCtx = bwCanvas.getContext('2d');
+            const ptColors = [
+                'rgba(66, 153, 225, 0.8)',
+                'rgba(72, 187, 120, 0.8)',
+                'rgba(159, 122, 234, 0.8)',
+                'rgba(237, 137, 54, 0.8)',
+                'rgba(245, 101, 101, 0.8)'
+            ];
+            bandwidthChart = new Chart(bwCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: dData.planTypes.labels,
+                    datasets: [{
+                        data: dData.planTypes.values,
+                        backgroundColor: ptColors.slice(0, dData.planTypes.labels.length),
+                        borderWidth: 0
                     }]
                 },
                 options: {
@@ -615,246 +644,296 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            display: false
+                            position: 'right',
+                            labels: { color: textColor, usePointStyle: true, boxWidth: 8 }
                         }
                     },
                     scales: {
                         r: {
-                            angleLines: {
-                                color: gridColor
-                            },
-                            grid: {
-                                color: gridColor
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 300
+                            grid: { color: gridColor },
+                            angleLines: { color: gridColor },
+                            ticks: { color: textColor, backdropColor: 'transparent', precision: 0 }
                         }
                     }
                 }
             });
+        }
 
-            // Bandwidth Chart
-            const bandwidthCtx = document.getElementById('bandwidthChart').getContext('2d');
-            bandwidthChart = new Chart(bandwidthCtx, {
-                type: 'polarArea',
+        // 8. Top Selling Plans (formerly Data Consumption Chart)
+        const consCanvas = document.getElementById('consumptionChart');
+        if (consCanvas && dData.topPlans) {
+            const consCtx = consCanvas.getContext('2d');
+            consumptionChart = new Chart(consCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['HTTP', 'HTTPS', 'FTP', 'Video', 'VoIP'],
+                    labels: dData.topPlans.labels,
                     datasets: [{
-                        data: [35, 25, 15, 20, 5],
-                        backgroundColor: [
-                            'rgba(66, 153, 225, 0.7)',
-                            'rgba(102, 126, 234, 0.7)',
-                            'rgba(159, 122, 234, 0.7)',
-                            'rgba(237, 137, 54, 0.7)',
-                            'rgba(72, 187, 120, 0.7)'
-                        ],
-                        borderWidth: 0
+                        label: 'Sold Count',
+                        data: dData.topPlans.counts,
+                        backgroundColor: colors.purple,
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                color: textColor
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Data Consumption Chart
-            const consumptionCtx = document.getElementById('consumptionChart').getContext('2d');
-            consumptionChart = new Chart(consumptionCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Basic (10Mbps)', 'Standard (50Mbps)', 'Premium (100Mbps)', 'Business (500Mbps)'],
-                    datasets: [
-                        {
-                            label: 'Download (TB)',
-                            data: [12, 45, 28, 62],
-                            backgroundColor: 'rgba(66, 153, 225, 0.7)',
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Upload (TB)',
-                            data: [4, 15, 9, 22],
-                            backgroundColor: 'rgba(102, 126, 234, 0.7)',
-                            borderRadius: 4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: textColor
-                            }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: gridColor
-                            }
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: { color: textColor, precision: 0 }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            }
+                            grid: { display: false },
+                            ticks: { color: textColor }
                         }
                     }
                 }
             });
+        }
 
-            // Latency Chart
-            const latencyCtx = document.getElementById('latencyChart').getContext('2d');
-            latencyChart = new Chart(latencyCtx, {
+        // 9. Hourly Activity 24h (formerly Network Latency Chart)
+        const latCanvas = document.getElementById('latencyChart');
+        if (latCanvas && dData.hourly) {
+            const latCtx = latCanvas.getContext('2d');
+            const ltGrad = latCtx.createLinearGradient(0, 0, 0, 220);
+            ltGrad.addColorStop(0, 'rgba(237, 137, 54, 0.35)');
+            ltGrad.addColorStop(1, 'rgba(237, 137, 54, 0.00)');
+
+            latencyChart = new Chart(latCtx, {
                 type: 'line',
                 data: {
-                    labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
+                    labels: dData.hourly.labels,
                     datasets: [{
-                        label: 'Latency (ms)',
-                        data: [32, 28, 25, 22, 20, 18, 16, 15, 18, 22, 28, 32,
-                            35, 38, 42, 45, 48, 50, 45, 40, 38, 35, 32, 30],
-                        borderColor: '#ed8936',
-                        backgroundColor: 'rgba(237, 137, 54, 0.1)',
+                        label: 'Transactions',
+                        data: dData.hourly.values,
+                        borderColor: colors.orange,
+                        backgroundColor: ltGrad,
                         borderWidth: 2,
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: colors.orange,
+                        pointHoverBorderColor: isDark ? '#1a202c' : '#ffffff',
+                        pointHoverBorderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: 10,
-                            grid: {
-                                color: gridColor
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Peak Usage Chart
-            const peakUsageCtx = document.getElementById('peakUsageChart').getContext('2d');
-            peakUsageChart = new Chart(peakUsageCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['12AM', '3AM', '6AM', '9AM', '12PM', '3PM', '6PM', '9PM'],
-                    datasets: [{
-                        label: 'Bandwidth Usage (%)',
-                        data: [15, 10, 20, 45, 65, 80, 75, 50],
-                        backgroundColor: [
-                            'rgba(66, 153, 225, 0.7)',
-                            'rgba(66, 153, 225, 0.7)',
-                            'rgba(66, 153, 225, 0.7)',
-                            'rgba(102, 126, 234, 0.7)',
-                            'rgba(159, 122, 234, 0.7)',
-                            'rgba(237, 137, 54, 0.7)',
-                            'rgba(237, 137, 54, 0.7)',
-                            'rgba(102, 126, 234, 0.7)'
-                        ],
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 100,
-                            grid: {
-                                color: gridColor
-                            }
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: { color: textColor, precision: 0 }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            }
+                            grid: { display: false },
+                            ticks: { color: textColor }
                         }
                     }
                 }
             });
+        }
 
-            // Equipment Chart
-            const equipmentCtx = document.getElementById('equipmentChart').getContext('2d');
-            equipmentChart = new Chart(equipmentCtx, {
-                type: 'pie',
+        // 10. Peak Usage Chart (3-Hour Blocks)
+        const pkCanvas = document.getElementById('peakUsageChart');
+        if (pkCanvas && dData.peakUsage) {
+            const pkCtx = pkCanvas.getContext('2d');
+            const pkColors = [
+                'rgba(66, 153, 225, 0.85)',
+                'rgba(66, 153, 225, 0.85)',
+                'rgba(66, 153, 225, 0.85)',
+                'rgba(102, 126, 234, 0.85)',
+                'rgba(159, 122, 234, 0.85)',
+                'rgba(237, 137, 54, 0.85)',
+                'rgba(237, 137, 54, 0.85)',
+                'rgba(102, 126, 234, 0.85)'
+            ];
+            peakUsageChart = new Chart(pkCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['Routers', 'Switches', 'OLTs', 'ONUs', 'Servers', 'Other'],
+                    labels: dData.peakUsage.labels,
                     datasets: [{
-                        data: [25, 20, 15, 30, 5, 5],
-                        backgroundColor: [
-                            'rgba(66, 153, 225, 0.7)',
-                            'rgba(102, 126, 234, 0.7)',
-                            'rgba(159, 122, 234, 0.7)',
-                            'rgba(237, 137, 54, 0.7)',
-                            'rgba(72, 187, 120, 0.7)',
-                            'rgba(245, 101, 101, 0.7)'
-                        ],
+                        label: 'Transactions',
+                        data: dData.peakUsage.values,
+                        backgroundColor: pkColors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: { color: textColor, precision: 0 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 11. System Inventory Chart (formerly Equipment Chart)
+        const eqCanvas = document.getElementById('equipmentChart');
+        if (eqCanvas && dData.equipment) {
+            const eqCtx = eqCanvas.getContext('2d');
+            const eqColors = [
+                '#4299e1',
+                '#667eea',
+                '#9f7aea',
+                '#ed8936',
+                '#48bb78',
+                '#f56565'
+            ];
+            equipmentChart = new Chart(eqCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: dData.equipment.labels,
+                    datasets: [{
+                        data: dData.equipment.values,
+                        backgroundColor: eqColors.slice(0, dData.equipment.labels.length),
                         borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '65%',
                     plugins: {
                         legend: {
                             position: 'right',
-                            labels: {
-                                color: textColor
-                            }
+                            labels: { color: textColor, usePointStyle: true, boxWidth: 8 }
                         }
                     }
                 }
             });
+        }
+    }
 
-            // Hide skeleton loaders and show content
-            document.querySelectorAll('.isp-skeleton').forEach(skel => {
-                skel.classList.add('isp-hidden');
+    function setupInteractiveButtons() {
+        // 1. Sales Report Timeframe Toggle
+        const salesBtns = document.getElementById('sales-timeframe-btns');
+        if (salesBtns && dData.sales) {
+            salesBtns.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    salesBtns.querySelectorAll('button').forEach(b => {
+                        b.classList.remove('isp-button-day', 'active');
+                        b.classList.add('isp-button-secondary');
+                    });
+                    this.classList.remove('isp-button-secondary');
+                    this.classList.add('isp-button-day', 'active');
+
+                    const tf = this.getAttribute('data-timeframe');
+                    if (salesChart && dData.sales[tf]) {
+                        salesChart.data.labels = dData.sales[tf].labels;
+                        salesChart.data.datasets[0].data = dData.sales[tf].values;
+                        salesChart.update();
+                    }
+                });
             });
-            document.querySelectorAll('.isp-chart-container canvas').forEach(canvas => {
-                canvas.classList.remove('isp-hidden');
+        }
+
+        // 2. Customer Growth Filter Toggle
+        const custBtns = document.getElementById('customer-filter-btns');
+        if (custBtns && dData.customerGrowth) {
+            custBtns.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    custBtns.querySelectorAll('button').forEach(b => {
+                        b.classList.remove('isp-button-day', 'active');
+                        b.classList.add('isp-button-secondary');
+                    });
+                    this.classList.remove('isp-button-secondary');
+                    this.classList.add('isp-button-day', 'active');
+
+                    const filter = this.getAttribute('data-filter');
+                    if (customersChart) {
+                        if (filter === 'all') {
+                            customersChart.data.datasets[0].hidden = false;
+                            customersChart.data.datasets[1].hidden = false;
+                        } else if (filter === 'new') {
+                            customersChart.data.datasets[0].hidden = false;
+                            customersChart.data.datasets[1].hidden = true;
+                        } else if (filter === 'churned') {
+                            customersChart.data.datasets[0].hidden = true;
+                            customersChart.data.datasets[1].hidden = false;
+                        }
+                        customersChart.update();
+                    }
+                });
             });
-            document.querySelectorAll('#total-customers-content, #active-connections-content, #monthly-revenue-content, #open-tickets-content').forEach(content => {
-                content.classList.remove('isp-hidden');
+        }
+
+        // 3. Transactions by Service Metric Toggle
+        const trxBtns = document.getElementById('trx-metric-btns');
+        if (trxBtns && dData.transactions) {
+            trxBtns.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    trxBtns.querySelectorAll('button').forEach(b => {
+                        b.classList.remove('isp-button-day', 'active');
+                        b.classList.add('isp-button-secondary');
+                    });
+                    this.classList.remove('isp-button-secondary');
+                    this.classList.add('isp-button-day', 'active');
+
+                    const metric = this.getAttribute('data-metric');
+                    if (ticketsChart) {
+                        ticketsChart.data.datasets[0].label = metric === 'totals' ? 'Revenue' : 'Count';
+                        ticketsChart.data.datasets[0].data = dData.transactions[metric];
+                        ticketsChart.options.plugins.tooltip.callbacks.label = function (ctx) {
+                            return metric === 'totals' ? formatMoney(ctx.parsed.y) : ctx.parsed.y + ' transactions';
+                        };
+                        ticketsChart.update();
+                    }
+                });
             });
-            document.querySelectorAll('#sales-report-title, #customer-growth-title, #network-status-title, #support-tickets-title, #hotspot-usage-title, #portal-logins-title, #bandwidth-usage-title, #data-consumption-title, #network-latency-title, #peak-usage-title, #equipment-status-title').forEach(title => {
-                title.classList.remove('isp-hidden');
+        }
+
+        // 4. Top Selling Plans Metric Toggle
+        const topPlansBtns = document.getElementById('topplans-metric-btns');
+        if (topPlansBtns && dData.topPlans) {
+            topPlansBtns.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    topPlansBtns.querySelectorAll('button').forEach(b => {
+                        b.classList.remove('isp-button-day', 'active');
+                        b.classList.add('isp-button-secondary');
+                    });
+                    this.classList.remove('isp-button-secondary');
+                    this.classList.add('isp-button-day', 'active');
+
+                    const metric = this.getAttribute('data-metric');
+                    if (consumptionChart) {
+                        consumptionChart.data.datasets[0].label = metric === 'totals' ? 'Revenue' : 'Sold Count';
+                        consumptionChart.data.datasets[0].data = dData.topPlans[metric];
+                        consumptionChart.options.plugins.tooltip.callbacks = {
+                            label: function (ctx) {
+                                return metric === 'totals' ? formatMoney(ctx.parsed.y) : ctx.parsed.y + ' plans';
+                            }
+                        };
+                        consumptionChart.update();
+                    }
+                });
             });
-            document.querySelectorAll('#network-status-uptime, #network-latency-uptime').forEach(uptime => {
-                uptime.classList.remove('isp-hidden');
-            });
-        }, 2000); // Simulate 2-second loading time
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initAllDashboardCharts();
+        setupInteractiveButtons();
     });
 </script>
 {/literal}
+
 {if $_c['new_version_notify'] != 'disable'}
 <script>
     window.addEventListener('DOMContentLoaded', function () {
@@ -862,9 +941,7 @@
             var localVersion = data.version;
             $('#version').html('Version: ' + localVersion);
             $.getJSON(
-                "https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?" +
-                Math
-                    .random(),
+                "https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?" + Math.random(),
                 function (data) {
                     var latestVersion = data.version;
                     if (localVersion !== latestVersion) {
@@ -881,9 +958,8 @@
                                 confirmButtonText: '<a href="{Text::url('community')}#latestVersion" style="color: white;">Update Now</a>',
                                 timerProgressBar: true,
                                 didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal
-                                        .resumeTimer)
+                                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer);
                                 }
                             });
                             setCookie(latestVersion, 'done', 7);
@@ -891,7 +967,6 @@
                     }
                 });
         });
-
     });
 </script>
 {/if}

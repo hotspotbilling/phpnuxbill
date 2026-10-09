@@ -177,8 +177,10 @@ if (file_exists($lan_file)) {
 
 function safedata($value)
 {
-    $value = trim($value);
-    return $value;
+    if (is_array($value)) {
+        return array_map('safedata', $value);
+    }
+    return trim((string)$value);
 }
 
 function _post($param, $defvalue = '')
@@ -291,27 +293,20 @@ function getUrl($url)
 
 function generateUniqueNumericVouchers($totalVouchers, $length = 8)
 {
-    // Define characters allowed in the voucher code
-    $characters = '0123456789';
-    $charactersLength = strlen($characters);
-    $vouchers = array();
+    $vouchers = [];
+    $attempts = 0;
+    $maxAttempts = $totalVouchers * 50;
 
-    // Attempt to generate unique voucher codes
-    for ($j = 0; $j < $totalVouchers; $j++) {
-        do {
-            $voucherCode = '';
-            // Generate the voucher code
-            for ($i = 0; $i < $length; $i++) {
-                $voucherCode .= $characters[rand(0, $charactersLength - 1)];
-            }
-            // Check if the generated voucher code already exists in the array
-            $isUnique = !in_array($voucherCode, $vouchers);
-        } while (!$isUnique);
-
-        $vouchers[] = $voucherCode;
+    while (count($vouchers) < $totalVouchers && $attempts < $maxAttempts) {
+        $attempts++;
+        $voucherCode = '';
+        for ($i = 0; $i < $length; $i++) {
+            $voucherCode .= mt_rand(0, 9);
+        }
+        $vouchers[$voucherCode] = $voucherCode;
     }
 
-    return $vouchers;
+    return array_values($vouchers);
 }
 
 function sendTelegram($txt)
