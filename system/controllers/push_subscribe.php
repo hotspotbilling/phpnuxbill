@@ -15,7 +15,7 @@ if (!empty($origin) && in_array($origin, $allowed_origins)) {
     $serverHost = explode(':', $host)[0];
     if ($originHost && strcasecmp($originHost, $serverHost) === 0) {
         header('Access-Control-Allow-Origin: ' . $origin);
-    } elseif (defined('APP_URL') && !empty(APP_URL)) {
+    } elseif (defined('APP_URL') && !empty(APP_URL) && rtrim($origin, '/') === rtrim(APP_URL, '/')) {
         header('Access-Control-Allow-Origin: ' . APP_URL);
     }
 }
@@ -103,7 +103,7 @@ try {
     $sub->auth = $subscription['keys']['auth'];
 
     if ($sub->save()) {
-        _log(Lang::T("Subscription saved for customer_id: " . $customerId));
+        _log("Subscription saved for customer_id: " . $customerId);
         echo json_encode([
             'success' => true,
             'title' => Lang::T('Subscribed!'),
