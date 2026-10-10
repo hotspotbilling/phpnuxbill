@@ -215,16 +215,16 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group" id="via">
-                    <label class="col-md-1 control-label"><input type="checkbox" id="sms" name="sms" value="1">
+                <div class="form-group" id="via" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 15px;">
+                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="sms" name="sms" value="1">
                         {Lang::T('SMS')}</label>
-                    <label class="col-md-1 control-label"><input type="checkbox" id="wa" name="wa" value="1">
+                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="wa" name="wa" value="1">
                         {Lang::T('WA')}</label>
-                    <label class="col-md-1 control-label"><input type="checkbox" id="email" name="email" value="1">
+                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="email" name="email" value="1">
                         {Lang::T('Email')}</label>
-                    <label class="col-md-1 control-label"><input type="checkbox" id="inbox" name="inbox" value="1">
+                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="inbox" name="inbox" value="1">
                         {Lang::T('Inbox')}</label>
-                    <label class="col-md-1 control-label"><input type="checkbox" id="push" name="push" value="1">
+                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="push" name="push" value="1">
                         {Lang::T('Push')}</label>
                 </div>
                 <input type="text" style="margin-bottom: 10px; display: none;" class="form-control" id="subject-content"
@@ -275,6 +275,9 @@
     });
 
     $(document).ready(function () {
+        // Move modal to body to prevent stacking context or transform trapping issues
+        $('#sendMessageModal').appendTo('body');
+
         // Initialize variables
         let selectedCustomerIds = [];
 
@@ -383,15 +386,8 @@
     });
 
     $(document).ready(function () {
-        $('#sendMessageModal').on('show.bs.modal', function () {
-            $(this).attr('inert', 'true');
-        });
         $('#sendMessageModal').on('shown.bs.modal', function () {
             $('#messageContent').focus();
-            $(this).removeAttr('inert');
-        });
-        $('#sendMessageModal').on('hidden.bs.modal', function () {
-            // $('#button').focus();
         });
     });
 </script>
