@@ -182,7 +182,7 @@ if ($config['dashboard_type'] === 'dynamic') {
     $custMonths = ORM::for_table('tbl_customers')
         ->select_expr("DATE_FORMAT(created_at, '%Y-%m')", 'month_key')
         ->select_expr('COUNT(*)', 'count')
-        ->where_gte('created_at', date('Y-m-01 00:00:00', strtotime('-11 months')))
+        ->where_gte('created_at', date('Y-m-01 00:00:00', strtotime('-11 months', strtotime($thisMonthStart))))
         ->group_by_expr("DATE_FORMAT(created_at, '%Y-%m')")
         ->find_array();
     foreach ($custMonths as $c) {
@@ -195,7 +195,7 @@ if ($config['dashboard_type'] === 'dynamic') {
         ->select_expr("DATE_FORMAT(expiration, '%Y-%m')", 'month_key')
         ->select_expr('COUNT(*)', 'count')
         ->where('status', 'off')
-        ->where_gte('expiration', date('Y-m-01', strtotime('-11 months')))
+        ->where_gte('expiration', date('Y-m-01', strtotime('-11 months', strtotime($thisMonthStart))))
         ->group_by_expr("DATE_FORMAT(expiration, '%Y-%m')")
         ->find_array();
     foreach ($expMonths as $e) {

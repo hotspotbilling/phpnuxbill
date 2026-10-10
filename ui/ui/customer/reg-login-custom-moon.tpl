@@ -8,8 +8,8 @@
     <link rel="shortcut icon" href="./{$favicon}" type="image/x-icon" />
     <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css' />
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css' />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
+    <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <style>
         .login-fg .form-container {
             color: #ccc;

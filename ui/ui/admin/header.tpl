@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/phpnuxbill.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/select2-bootstrap.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
@@ -31,8 +32,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.9.20" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/js/all.js"></script>
+    <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
      {if isset($xheader)}
     {$xheader}
     {/if}

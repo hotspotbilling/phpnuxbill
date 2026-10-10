@@ -15,8 +15,8 @@ if (empty($action)) {
     $action = 'customer';
 }
 
-$ui->assign('xheader', '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">');
-$ui->assign('xfooter', '<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>');
+$ui->assign('xheader', '<link rel="stylesheet" href="' . APP_URL . '/ui/ui/scripts/leaflet/leaflet.css">');
+$ui->assign('xfooter', '<script src="' . APP_URL . '/ui/ui/scripts/leaflet/leaflet.js"></script>');
 
 switch ($action) {
     case 'customer':

@@ -146,8 +146,8 @@
     <p>{Lang::T('Export and Print will show all data without pagination')}.</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-autocolors"></script>
+<script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/chartjs-plugin-autocolors.min.js"></script>
 
 {literal}
     <script>

@@ -20,14 +20,14 @@
                         {/if}
                     </h3>
                     <div class="customer-subtitle">
-                        <span class="customer-sub-item"><i class="fa fa-user-circle-o"></i> @{$d['username']}</span>
+                        <span class="customer-sub-item"><i class="fa fa-user"></i> @{$d['username']}</span>
                         {if $d['phonenumber']}
                             <span class="customer-sub-divider">•</span>
                             <span class="customer-sub-item"><i class="fa fa-phone"></i> {$d['phonenumber']}</span>
                         {/if}
                         {if $d['email']}
                             <span class="customer-sub-divider">•</span>
-                            <span class="customer-sub-item"><i class="fa fa-envelope-o"></i> {$d['email']}</span>
+                            <span class="customer-sub-item"><i class="fa fa-envelope"></i> {$d['email']}</span>
                         {/if}
                     </div>
                 </div>
@@ -40,7 +40,7 @@
                 </a>
                 <a href="{Text::url('message/send/', $d['id'], '&token=', $csrf_token)}"
                     class="btn btn-primary" title="{Lang::T('Send Message')}">
-                    <i class="fa fa-commenting-o"></i> <span class="hidden-xs">{Lang::T('Send Message')}</span>
+                    <i class="fa fa-comment"></i> <span class="hidden-xs">{Lang::T('Send Message')}</span>
                 </a>
                 <a href="{Text::url('customers/sync/', $d['id'], '&token=', $csrf_token)}"
                     onclick="return ask(this, '{Lang::T('This will sync Customer to Mikrotik')}?')"
@@ -85,7 +85,7 @@
                     <h4 class="profile-hero-name">{$d['fullname']}</h4>
                     <span class="profile-username-tag">
                         <span>@{$d['username']}</span>
-                        <button type="button" class="btn-tag-copy" onclick="copyText(this, '{$d['username']|escape:'javascript'}')" title="{Lang::T('Copy Username')}">
+                        <button type="button" class="btn-tag-copy" onclick="copyText(this, '{$d['username']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy Username')}">
                             <i class="fa fa-clone"></i>
                         </button>
                     </span>
@@ -131,7 +131,7 @@
                         <span class="cv-list-val">
                             <span class="cred-box">
                                 <span style="font-family: monospace; font-size: 12px; font-weight: 600;">{$d['username']}</span>
-                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['username']|escape:'javascript'}')" title="{Lang::T('Copy')}">
+                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['username']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy')}">
                                     <i class="fa fa-clone"></i>
                                 </button>
                             </span>
@@ -146,7 +146,7 @@
                                     <button type="button" class="btn-cred-action" onclick="toggleSecret('cust_pass', this)" title="{Lang::T('Show/Hide')}">
                                         <i class="fa fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['password']|escape:'javascript'}')" title="{Lang::T('Copy')}">
+                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['password']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy')}">
                                         <i class="fa fa-clone"></i>
                                     </button>
                                 </span>
@@ -159,7 +159,7 @@
                             <span class="cv-list-val">
                                 <span class="cred-box">
                                     <span style="font-family: monospace; font-size: 12px; font-weight: 600;">{$d['pppoe_username']}</span>
-                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_username']|escape:'javascript'}')" title="{Lang::T('Copy')}">
+                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_username']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy')}">
                                         <i class="fa fa-clone"></i>
                                     </button>
                                 </span>
@@ -175,7 +175,7 @@
                                     <button type="button" class="btn-cred-action" onclick="toggleSecret('pppoe_pass', this)" title="{Lang::T('Show/Hide')}">
                                         <i class="fa fa-eye"></i>
                                     </button>
-                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_password']|escape:'javascript'}')" title="{Lang::T('Copy')}">
+                                    <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['pppoe_password']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy')}">
                                         <i class="fa fa-clone"></i>
                                     </button>
                                 </span>
@@ -206,7 +206,7 @@
                         <span class="cv-list-val">
                             {if $d['phonenumber']}
                                 <a href="tel:{$d['phonenumber']}" style="color: inherit; text-decoration: none; font-weight: 600;">{$d['phonenumber']}</a>
-                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['phonenumber']|escape:'javascript'}')" title="{Lang::T('Copy')}">
+                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['phonenumber']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy')}">
                                     <i class="fa fa-clone"></i>
                                 </button>
                             {else}
@@ -215,11 +215,11 @@
                         </span>
                     </li>
                     <li class="cv-list-item">
-                        <span class="cv-list-label"><i class="fa fa-envelope-o"></i> {Lang::T('Email')}</span>
+                        <span class="cv-list-label"><i class="fa fa-envelope"></i> {Lang::T('Email')}</span>
                         <span class="cv-list-val">
                             {if $d['email']}
                                 <a href="mailto:{$d['email']}" style="color: inherit; text-decoration: none; font-weight: 600;">{$d['email']}</a>
-                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['email']|escape:'javascript'}')" title="{Lang::T('Copy')}">
+                                <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['email']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy')}">
                                     <i class="fa fa-clone"></i>
                                 </button>
                             {else}
@@ -274,7 +274,7 @@
                                 <div style="display: flex; gap: 4px; align-items: center;">
                                     <span class="cred-box">
                                         <span style="font-family: monospace; font-size: 11px; font-weight: 600;">{$d['coordinates']}</span>
-                                        <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['coordinates']|escape:'javascript'}')" title="{Lang::T('Copy')}">
+                                        <button type="button" class="btn-cred-action" onclick="copyText(this, '{$d['coordinates']|escape:'javascript'|escape:'html'}')" title="{Lang::T('Copy')}">
                                             <i class="fa fa-clone"></i>
                                         </button>
                                     </span>
@@ -587,8 +587,8 @@ function toggleSecret(inputId, btn) {
 </script>
 
 {if $d['coordinates']}
+    <script src="{$app_url}/ui/ui/scripts/leaflet/leaflet.js"></script>
     {literal}
-        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
         <script>
             function initCustomerMap() {
                 var mapEl = document.getElementById('map');

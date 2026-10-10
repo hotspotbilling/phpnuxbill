@@ -212,7 +212,7 @@
     "ALTER TABLE `tbl_voucher` ADD `batch_name` VARCHAR(40) AFTER `id_plan`;"
   ],
   "2025.8.15": [
-    "CREATE TABLE `tbl_push_subscriptions` (`id` int(11) NOT NULL AUTO_INCREMENT,`customer_id` int(11) NOT NULL,`endpoint` text DEFAULT NULL,`p256dh` varchar(255) DEFAULT NULL,`auth` varchar(255) DEFAULT NULL,`created_at` timestamp NULL DEFAULT current_timestamp(), PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
+    "CREATE TABLE `tbl_push_subscriptions` (`id` int(11) NOT NULL,`customer_id` int(11) NOT NULL,`endpoint` varchar(255) DEFAULT NULL,`p256dh` varchar(255) DEFAULT NULL,`auth` varchar(255) DEFAULT NULL,`created_at` timestamp NULL DEFAULT current_timestamp(), PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;"
   ],
   "2025.10.9": [
     "ALTER TABLE `tbl_customers` ADD `referral_code` VARCHAR(25) DEFAULT '' COMMENT 'Referral code' AFTER `email`;",
@@ -242,5 +242,9 @@
     "ALTER TABLE `tbl_voucher` ADD INDEX IF NOT EXISTS `idx_voucher_code` (`code`);",
     "ALTER TABLE `tbl_voucher` ADD INDEX IF NOT EXISTS `idx_voucher_status_plan` (`status`, `id_plan`);",
     "ALTER TABLE `tbl_voucher` ADD INDEX IF NOT EXISTS `idx_voucher_routers` (`routers`);"
+  ],
+  "2026.10.10": [
+    "ALTER TABLE `tbl_push_subscriptions` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;",
+    "ALTER TABLE `tbl_push_subscriptions` MODIFY `endpoint` TEXT DEFAULT NULL;"
   ]
 }

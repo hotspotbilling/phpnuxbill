@@ -208,6 +208,8 @@ document.addEventListener('click', function() {
 */
 
 $(document).ready(function () {
+  var $activeTargets = null;
+
   // Show modern loading state for tables
   function showTableLoading() {
     var $targets = $(".table-responsive");
@@ -224,6 +226,8 @@ $(document).ready(function () {
         }
       }
     });
+
+    $activeTargets = $targets;
 
     $targets.each(function () {
       var $wrap = $(this);
@@ -254,6 +258,10 @@ $(document).ready(function () {
 
   // Hide modern loading state
   function hideTableLoading() {
+    if ($activeTargets && $activeTargets.length) {
+      $activeTargets.removeClass("loading-state table-loading-relative");
+      $activeTargets = null;
+    }
     $(".table-responsive, .panel-body, .card-body, .box-body, .panel, .card").removeClass("loading-state table-loading-relative");
     $(".table-with-loader, table.table").removeClass("table-loading-dimmed loading");
     var $overlays = $(".table-loading-overlay").not(".is-fading-out");

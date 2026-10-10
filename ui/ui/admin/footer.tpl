@@ -32,11 +32,15 @@
 
         function closeSearch() {
             isOpen = false;
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
             if (currentXhr) {
                 currentXhr.abort();
                 currentXhr = null;
             }
             if (spinner) spinner.style.display = 'none';
+            selectedIndex = -1;
+            resultsEl.innerHTML = '';
             resultsEl.style.display = 'none';
         }
 

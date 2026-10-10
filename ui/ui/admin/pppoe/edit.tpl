@@ -247,15 +247,15 @@
 </script>
 
 <script language="javascript" type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    src="{$app_url}/ui/ui/scripts/codemirror/codemirror.min.js"></script>
 <script language="javascript" type="text/javascript"
-    src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/perl/perl.min.js"></script>
+    src="{$app_url}/ui/ui/scripts/codemirror/perl.min.js"></script>
 
 <link rel="stylesheet" type="text/css"
-    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    href="{$app_url}/ui/ui/scripts/codemirror/codemirror.min.css">
 </link>
 <link rel="stylesheet" type="text/css"
-    href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/abbott.min.css">
+    href="{$app_url}/ui/ui/scripts/codemirror/abbott.min.css">
 </link>
 
 <script>

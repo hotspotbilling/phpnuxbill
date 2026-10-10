@@ -89,8 +89,8 @@
 </div>
 </div>
 
+<script src="{$app_url}/ui/ui/scripts/leaflet/leaflet.js"></script>
 {literal}
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script>
         var circle;
         function getLocation() {

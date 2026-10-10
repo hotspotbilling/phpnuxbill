@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="{$app_url}/ui/ui/styles/jquery.dataTables.min.css">
+<link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
 
 <div class="row">
     <div class="col-sm-12 col-md-12">
@@ -151,8 +151,8 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
+<script src="{$app_url}/ui/ui/scripts/jquery.dataTables.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const emailCheckbox = document.getElementById('email');

@@ -14,12 +14,13 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/bootstrap.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/ionicons/css/ionicons.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/fonts/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/phpnuxbill.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2025.2.4" />
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+    <script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
+    <script src="{$app_url}/ui/ui/scripts/clipboard.min.js"></script>
 
     <style>
 

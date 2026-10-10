@@ -132,9 +132,10 @@ if ($customers && count($customers) > 0) {
         $emailHash = !empty($c->email) ? md5(strtolower(trim($c->email))) : md5($c->username);
         $gravatarUrl = 'https://www.gravatar.com/avatar/' . $emailHash . '?d=mp';
 
-        $safeDefault = htmlspecialchars($defaultAvatarUrl, ENT_QUOTES, 'UTF-8');
-        $safeGravatar = htmlspecialchars($gravatarUrl, ENT_QUOTES, 'UTF-8');
-        $avatarOnerror = "if(!this.dataset.step){this.dataset.step=(this.src.indexOf('user.default.jpg')!==-1)?'gravatar':'default';}if(this.dataset.step==='default'){this.dataset.step='gravatar';this.src='" . $safeDefault . "';}else if(this.dataset.step==='gravatar'){this.dataset.step='done';this.src='" . $safeGravatar . "';}else{this.onerror=null;}";
+        $jsDefault = json_encode($defaultAvatarUrl);
+        $jsGravatar = json_encode($gravatarUrl);
+        $avatarJs = "if(!this.dataset.step){this.dataset.step=(this.src.indexOf('user.default.jpg')!==-1)?'gravatar':'default';}if(this.dataset.step==='default'){this.dataset.step='gravatar';this.src=" . $jsDefault . ";}else if(this.dataset.step==='gravatar'){this.dataset.step='done';this.src=" . $jsGravatar . ";}else{this.onerror=null;}";
+        $avatarOnerror = htmlspecialchars($avatarJs, ENT_QUOTES, 'UTF-8');
 
         echo '<a href="' . $url . '" class="search-item" tabindex="-1">';
         echo '  <div class="search-item-avatar">';

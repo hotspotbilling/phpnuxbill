@@ -18,14 +18,14 @@
                         {/if}
                     </h3>
                     <div class="customer-subtitle">
-                        <span class="customer-sub-item"><i class="fa fa-user-circle-o"></i> @{$d['username']}</span>
+                        <span class="customer-sub-item"><i class="fa fa-user"></i> @{$d['username']}</span>
                         {if $d['phonenumber']}
                             <span class="customer-sub-divider">•</span>
                             <span class="customer-sub-item"><i class="fa fa-phone"></i> {$d['phonenumber']}</span>
                         {/if}
                         {if $d['email']}
                             <span class="customer-sub-divider">•</span>
-                            <span class="customer-sub-item"><i class="fa fa-envelope-o"></i> {$d['email']}</span>
+                            <span class="customer-sub-item"><i class="fa fa-envelope"></i> {$d['email']}</span>
                         {/if}
                     </div>
                 </div>
@@ -338,14 +338,14 @@
                     {Lang::T('Cancel')}
                 </a>
                 <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Customer Data change process?")}')" type="submit">
-                    <i class="fa fa-floppy-o"></i> {Lang::T('Save Changes')}
+                    <i class="fa fa-save"></i> {Lang::T('Save Changes')}
                 </button>
             </div>
         </div>
     </div>
 </form>
 
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="{$app_url}/ui/ui/scripts/leaflet/leaflet.js"></script>
 
 {literal}
 <script type="text/javascript">

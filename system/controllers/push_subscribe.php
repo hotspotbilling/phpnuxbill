@@ -15,8 +15,8 @@ if (!empty($origin) && in_array($origin, $allowed_origins)) {
     $serverHost = explode(':', $host)[0];
     if ($originHost && strcasecmp($originHost, $serverHost) === 0) {
         header('Access-Control-Allow-Origin: ' . $origin);
-    } else {
-        header('Access-Control-Allow-Origin: ' . (defined('APP_URL') ? APP_URL : '*'));
+    } elseif (defined('APP_URL') && !empty(APP_URL)) {
+        header('Access-Control-Allow-Origin: ' . APP_URL);
     }
 }
 
@@ -30,6 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 header('Content-Type: application/json');
 
+$customerId = (int) User::getID();
+if (!$customerId) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'title' => Lang::T('Unauthorized'),
+        'message' => Lang::T('Please log in to continue.')
+    ]);
+    exit;
+}
+
 // Decode the incoming JSON payload
 $subscription = json_decode(file_get_contents('php://input'), true);
 
@@ -37,7 +48,7 @@ $subscription = json_decode(file_get_contents('php://input'), true);
 _log("Received subscription: " . json_encode($subscription));
 
 // Validate required fields
-$requiredFields = ['customer_id', 'endpoint', 'keys'];
+$requiredFields = ['endpoint', 'keys'];
 $requiredKeys = ['p256dh', 'auth'];
 
 foreach ($requiredFields as $field) {
@@ -58,14 +69,6 @@ foreach ($requiredKeys as $key) {
     }
 }
 
-// Validate customer_id (ensure it's an integer)
-if (!filter_var($subscription['customer_id'], FILTER_VALIDATE_INT)) {
-    _log("Invalid customer_id: " . $subscription['customer_id']);
-    http_response_code(400);
-    echo json_encode(['success' => false, 'title' => Lang::T('An error occurred'), 'message' => Lang::T('Invalid customer id')]);
-    exit;
-}
-
 try {
     // Auto-create table if missing or broken on the server
     try {
@@ -82,12 +85,12 @@ try {
         // Table probably already exists
     }
 
-    // Check if subscription already exists for this endpoint or customer
+    // Check if subscription already exists for this endpoint and authenticated customer
     $endpoint = (string) $subscription['endpoint'];
-    $customerId = (int) $subscription['customer_id'];
 
     $sub = ORM::for_table('tbl_push_subscriptions')
         ->where('endpoint', $endpoint)
+        ->where('customer_id', $customerId)
         ->find_one();
 
     if (!$sub) {
@@ -100,12 +103,12 @@ try {
     $sub->auth = $subscription['keys']['auth'];
 
     if ($sub->save()) {
-        _log(Lang::T("Subscription saved for customer_id: " . $subscription['customer_id']));
+        _log(Lang::T("Subscription saved for customer_id: " . $customerId));
         echo json_encode([
             'success' => true,
             'title' => Lang::T('Subscribed!'),
             'message' => Lang::T('You will now receive updates.'),
-            'customer_id' => $subscription['customer_id']
+            'customer_id' => $customerId
         ]);
     } else {
         throw new Exception('Failed to save subscription');
@@ -116,6 +119,6 @@ try {
     echo json_encode([
         'success' => false,
         'title' => Lang::T('An error occurred'),
-        'message' =>  Lang::T('Failed to save subscription, Please try again later.') . ' (' . $e->getMessage() . ')'
+        'message' => Lang::T('Failed to save subscription, Please try again later.')
     ]);
 }

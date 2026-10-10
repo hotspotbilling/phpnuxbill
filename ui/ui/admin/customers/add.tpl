@@ -69,7 +69,7 @@
                             <div class="form-group">
                                 <label class="control-label">{Lang::T('Email')}</label>
                                 <div class="input-group">
-                                    <span class="input-group-addon"><i class="fa fa-envelope-o"></i></span>
+                                    <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
                                     <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
                                 </div>
                             </div>
@@ -241,7 +241,7 @@
                         </div>
                         <div id="map" class="edit-map-picker"></div>
                         <span class="help-block text-muted" style="margin-top: 6px;">
-                            <i class="fa fa-hand-pointer-o"></i> {Lang::T('Click on the map or drag the pin to set customer coordinates.')}
+                            <i class="fa fa-map-marker"></i> {Lang::T('Click on the map or drag the pin to set customer coordinates.')}
                         </span>
                     </div>
                 </div>
@@ -268,7 +268,7 @@
                         <label class="control-label" style="margin-bottom: 8px;">{Lang::T('Notification via')}:</label>
                         <div style="display: flex; flex-wrap: wrap; gap: 14px;">
                             <label class="checkbox-inline" style="margin: 0; font-weight: 500;">
-                                <input type="checkbox" name="sms" value="1"> <i class="fa fa-commenting-o"></i> {Lang::T('SMS')}
+                                <input type="checkbox" name="sms" value="1"> <i class="fa fa-comment"></i> {Lang::T('SMS')}
                             </label>
                             <label class="checkbox-inline" style="margin: 0; font-weight: 500;">
                                 <input type="checkbox" name="wa" value="1"> <i class="fa fa-whatsapp text-success"></i> {Lang::T('WA')}
@@ -316,7 +316,7 @@
     </div>
 </form>
 
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="{$app_url}/ui/ui/scripts/leaflet/leaflet.js"></script>
 
 {literal}
 <script type="text/javascript">
