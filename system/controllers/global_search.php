@@ -67,7 +67,7 @@ $quickActions = [
     'router' => ['title' => Lang::T('Add Router'), 'sub' => Lang::T('Connect new MikroTik router'), 'url' => getUrl('routers/add'), 'icon' => 'fa-server'],
     'voucher' => ['title' => Lang::T('Generate Vouchers'), 'sub' => Lang::T('Batch voucher generator'), 'url' => getUrl('plan/voucher'), 'icon' => 'fa-ticket'],
     'logs' => ['title' => Lang::T('Activity Logs'), 'sub' => Lang::T('System event logs'), 'url' => getUrl('logs'), 'icon' => 'fa-history'],
-    'settings' => ['title' => Lang::T('General Settings'), 'sub' => Lang::T('Configure application preferences'), 'url' => getUrl('settings/general'), 'icon' => 'fa-cog'],
+    'settings' => ['title' => Lang::T('General Settings'), 'sub' => Lang::T('Configure application preferences'), 'url' => getUrl('settings/app'), 'icon' => 'fa-cog'],
     'backup' => ['title' => Lang::T('Database Backup'), 'sub' => Lang::T('Database status and backup'), 'url' => getUrl('settings/dbstatus'), 'icon' => 'fa-database'],
 ];
 
