@@ -252,7 +252,7 @@ body {
     margin-top: 0px;
   }
   .navbar-custom-menu .navbar-nav > li > a {
-    margin-left: -14px;
+    margin-left: 0;
   }
 }
 

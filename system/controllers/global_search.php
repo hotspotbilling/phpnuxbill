@@ -25,8 +25,8 @@ if ($query === '') {
         ['title' => Lang::T('Recharge Account'), 'sub' => Lang::T('Refill customer package or voucher'), 'url' => getUrl('plan/recharge'), 'icon' => 'fa-bolt', 'category' => Lang::T('Actions')],
         ['title' => Lang::T('Hotspot Plans'), 'sub' => Lang::T('Manage internet packages'), 'url' => getUrl('services/hotspot'), 'icon' => 'fa-wifi', 'category' => Lang::T('Navigation')],
         ['title' => Lang::T('Routers & Network'), 'sub' => Lang::T('Manage MikroTik routers and interfaces'), 'url' => getUrl('routers/list'), 'icon' => 'fa-server', 'category' => Lang::T('Navigation')],
-        ['title' => Lang::T('Transactions & Reports'), 'sub' => Lang::T('View invoices and revenue reports'), 'url' => getUrl('reports/daily'), 'icon' => 'fa-file-text-o', 'category' => Lang::T('Navigation')],
-        ['title' => Lang::T('General Settings'), 'sub' => Lang::T('System configuration and company details'), 'url' => getUrl('settings/general'), 'icon' => 'fa-cog', 'category' => Lang::T('Navigation')],
+        ['title' => Lang::T('Transactions & Reports'), 'sub' => Lang::T('View invoices and revenue reports'), 'url' => getUrl('reports/daily'), 'icon' => 'fa-line-chart', 'category' => Lang::T('Navigation')],
+        ['title' => Lang::T('General Settings'), 'sub' => Lang::T('System configuration and company details'), 'url' => getUrl('settings/app'), 'icon' => 'fa-cog', 'category' => Lang::T('Navigation')],
     ];
 
     echo '<div class="search-results-container">';
