@@ -411,20 +411,24 @@ async function performLoginAPI(username, password) {
             retryFormData.append("g-recaptcha-response", recaptchaToken);
           }
 
-          const retryResponse = await fetch(app_url + "login/api", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "X-Requested-With": "XMLHttpRequest",
-            },
-            body: retryFormData,
-          });
+          try {
+            const retryResponse = await fetch(app_url + "login/api", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-Requested-With": "XMLHttpRequest",
+              },
+              body: retryFormData,
+            });
 
-          if (retryResponse.ok) {
-            const retryData = await retryResponse.json();
-            if (retryData.success) {
-              return retryData;
+            if (retryResponse.ok) {
+              const retryData = await retryResponse.json();
+              if (retryData.success) {
+                return retryData;
+              }
             }
+          } catch (retryError) {
+            // Network/parse failure on retry: fall through, reset widgets and report the original failure
           }
         }
       }

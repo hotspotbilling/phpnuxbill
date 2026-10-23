@@ -28,6 +28,7 @@ if ($step == 1) {
         if (!$captchaPassed || isset($_POST['cf-turnstile-response']) || isset($_POST['g-recaptcha-response'])) {
             $captchaResult = Captcha::verify('customer');
             if (!$captchaResult['success']) {
+                setcookie('forgot_username', '', time() - 3600, '/');
                 r2(getUrl('forgot'), 'e', $captchaResult['message']);
             }
             $_SESSION['forgot_captcha_user'] = $username;
