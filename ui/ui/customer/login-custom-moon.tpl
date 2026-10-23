@@ -602,6 +602,9 @@
                                     </div> -->
                                     <a href="{Text::url('forgot')}">{Lang::T('Forgot Password')}?</a>
                                 </div>
+                                {if !empty($captcha_widget)}
+                                    {$captcha_widget}
+                                {/if}
                                 <div class="form-group mt-2">
                                     <button id="login-btn" type="submit" class="submit-btn">
                                         <span id="login-text">{Lang::T('Login')}</span>

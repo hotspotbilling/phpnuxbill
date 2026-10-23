@@ -109,6 +109,10 @@
                             </div>
                         </div>
 
+                        {if !empty($captcha_widget)}
+                            {$captcha_widget}
+                        {/if}
+
                         <button type="submit" class="login-btn">
                             <span class="btn-text">{Lang::T('Validate')}</span>
                         </button>
@@ -145,6 +149,10 @@
                                     aria-label="{if $_c['country_code_phone']!= ''}{Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
                             </div>
                         </div>
+
+                        {if !empty($captcha_widget)}
+                            {$captcha_widget}
+                        {/if}
 
                         <button type="submit" class="login-btn">
                             <span class="btn-text">{Lang::T('Validate')}</span>

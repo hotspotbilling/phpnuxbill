@@ -6,34 +6,23 @@ class unpaid_order
     public function getWidget()
     {
         global $ui, $user;
-        $unpaid = ORM::for_table('tbl_payment_gateway')
+        $unpaids = ORM::for_table('tbl_payment_gateway')
             ->where('username', $user['username'])
             ->where('status', 1)
-            ->find_one();
+            ->find_many();
 
-        // check expired payments
-        if ($unpaid) {
-            try {
-                if (strtotime($unpaid['expired_date']) < time()) {
-                    $unpaid->status = 4;
-                    $unpaid->save();
-                    $unpaid = [];
-                }
-            } catch (Throwable $e) {
-            } catch (Exception $e) {
+        $active = [];
+        foreach ($unpaids as $unpaid) {
+            // expire payments past their expired_date, or older than 24 hours
+            if (strtotime($unpaid['expired_date']) < time() || strtotime($unpaid['created_date'] . ' +24 hours') < time()) {
+                $unpaid->status = 4;
+                $unpaid->save();
+                continue;
             }
-            try {
-                if (strtotime($unpaid['created_date'], "+24 HOUR") < time()) {
-                    $unpaid->status = 4;
-                    $unpaid->save();
-                    $unpaid = [];
-                }
-            } catch (Throwable $e) {
-            } catch (Exception $e) {
-            }
+            $active[] = $unpaid;
         }
 
-        $ui->assign('unpaid', $unpaid);
+        $ui->assign('unpaids', $active);
         return $ui->fetch('widget/customers/unpaid_order.tpl');
     }
 }

@@ -299,6 +299,14 @@ async function handleLogin() {
       );
     }
 
+    // Reset captcha on failure so user can re-verify without refreshing
+    if (typeof turnstile !== "undefined" && typeof turnstile.reset === "function") {
+      try { turnstile.reset(); } catch (e) {}
+    }
+    if (typeof grecaptcha !== "undefined" && typeof grecaptcha.reset === "function") {
+      try { grecaptcha.reset(); } catch (e) {}
+    }
+
     // Clear password field on error for security
     passwordInput.value = "";
     passwordInput.focus();
@@ -324,6 +332,35 @@ async function performLoginAPI(username, password) {
       formData.append("csrf_token", csrfToken);
     }
 
+    // Add Captcha tokens if available
+    let turnstileToken = "";
+    if (typeof turnstile !== "undefined" && typeof turnstile.getResponse === "function") {
+      try { turnstileToken = turnstile.getResponse() || ""; } catch (e) {}
+    }
+    if (!turnstileToken) {
+      const turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
+      if (turnstileInput && turnstileInput.value) {
+        turnstileToken = turnstileInput.value;
+      }
+    }
+    if (turnstileToken) {
+      formData.append("cf-turnstile-response", turnstileToken);
+    }
+
+    let recaptchaToken = "";
+    if (typeof grecaptcha !== "undefined" && typeof grecaptcha.getResponse === "function") {
+      try { recaptchaToken = grecaptcha.getResponse() || ""; } catch (e) {}
+    }
+    if (!recaptchaToken) {
+      const recaptchaInput = document.querySelector('[name="g-recaptcha-response"]');
+      if (recaptchaInput && recaptchaInput.value) {
+        recaptchaToken = recaptchaInput.value;
+      }
+    }
+    if (recaptchaToken) {
+      formData.append("g-recaptcha-response", recaptchaToken);
+    }
+
     const response = await fetch(app_url + "login/api", {
       method: "POST",
       headers: {
@@ -342,6 +379,14 @@ async function performLoginAPI(username, password) {
     if (data.success) {
       return data;
     } else {
+      // Reset captcha widgets if verification failed
+      if (typeof turnstile !== "undefined" && turnstile.reset) {
+        try { turnstile.reset(); } catch (e) {}
+      }
+      if (typeof grecaptcha !== "undefined" && grecaptcha.reset) {
+        try { grecaptcha.reset(); } catch (e) {}
+      }
+
       // If CSRF token error, try to refresh and retry once
       if (
         data.message &&
@@ -358,6 +403,12 @@ async function performLoginAPI(username, password) {
             password: password,
             csrf_token: newToken,
           });
+          if (turnstileInput && turnstileInput.value) {
+            retryFormData.append("cf-turnstile-response", turnstileInput.value);
+          }
+          if (recaptchaInput && recaptchaInput.value) {
+            retryFormData.append("g-recaptcha-response", recaptchaInput.value);
+          }
 
           const retryResponse = await fetch(app_url + "login/api", {
             method: "POST",
@@ -588,29 +639,6 @@ function initializeAnimations() {
   });
 }
 
-// 3D Card tilt effect
-document.addEventListener("mousemove", function (e) {
-  const cards = document.querySelectorAll(".login-card, .announcement-panel");
-
-  cards.forEach((card) => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateX = (y - centerY) / 20;
-    const rotateY = (centerX - x) / 20;
-
-    if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-    } else {
-      card.style.transform =
-        "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)";
-    }
-  });
-});
 
 // Add keyboard shortcuts
 document.addEventListener("keydown", function (e) {

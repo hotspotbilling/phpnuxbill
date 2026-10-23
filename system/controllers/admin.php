@@ -28,6 +28,11 @@ switch ($do) {
         if (!Csrf::check($csrf_token)) {
             _alert(Lang::T('Invalid or Expired CSRF Token') . ".", 'danger', "admin");
         }
+        // Captcha verification
+        $captchaResult = Captcha::verify('admin');
+        if (!$captchaResult['success']) {
+            _alert($captchaResult['message'], 'danger', "admin");
+        }
         run_hook('admin_login'); #HOOK
         if ($username != '' and $password != '') {
             $d = ORM::for_table('tbl_users')->where('username', $username)->find_one();
@@ -63,6 +68,7 @@ switch ($do) {
         run_hook('view_login'); #HOOK
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
+        $ui->assign('captcha_widget', Captcha::renderWidget('admin'));
         $ui->display('admin/admin/login.tpl');
         break;
 }

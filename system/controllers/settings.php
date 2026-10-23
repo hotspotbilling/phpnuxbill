@@ -238,6 +238,10 @@ switch ($action) {
             $_POST['man_fields_custom'] = isset($_POST['man_fields_custom']) ? 'yes' : 'no';
             $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
             $_POST['enable_session_timeout'] = $enable_session_timeout;
+            if (isset($_POST['turnstile_site_key'])) $_POST['turnstile_site_key'] = trim($_POST['turnstile_site_key']);
+            if (isset($_POST['turnstile_secret_key'])) $_POST['turnstile_secret_key'] = trim($_POST['turnstile_secret_key']);
+            if (isset($_POST['recaptcha_site_key'])) $_POST['recaptcha_site_key'] = trim($_POST['recaptcha_site_key']);
+            if (isset($_POST['recaptcha_secret_key'])) $_POST['recaptcha_secret_key'] = trim($_POST['recaptcha_secret_key']);
             $_POST['notification_reminder_1day'] = isset($_POST['notification_reminder_1day']) ? 'yes' : 'no';
             $_POST['notification_reminder_3days'] = isset($_POST['notification_reminder_3days']) ? 'yes' : 'no';
             $_POST['notification_reminder_7days'] = isset($_POST['notification_reminder_7days']) ? 'yes' : 'no';
@@ -1196,6 +1200,91 @@ switch ($action) {
         $ui->assign('_c', $config);
         $ui->assign('_title', Lang::T('Miscellaneous Settings'));
         $ui->display('admin/settings/miscellaneous.tpl');
+        break;
+
+    case 'redis':
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
+            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+            exit;
+        }
+
+        // Test Connection Action
+        if (_post('action') == 'test') {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/redis'), 'e', 'You cannot perform this action in Demo mode');
+            }
+            $csrf_token = _post('csrf_token');
+            if (!Csrf::check($csrf_token)) {
+                r2(getUrl('settings/redis'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
+            $host = _post('redis_host', '127.0.0.1');
+            $port = (int) _post('redis_port', 6379);
+            $pass = _post('redis_pass');
+            $res = RedisCache::testConnection($host, $port, $pass);
+            if ($res['success']) {
+                r2(getUrl('settings/redis'), 's', $res['message']);
+            } else {
+                r2(getUrl('settings/redis'), 'e', $res['message']);
+            }
+        }
+
+        // Flush Cache Action
+        if (_post('action') == 'flush') {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/redis'), 'e', 'You cannot perform this action in Demo mode');
+            }
+            $csrf_token = _post('csrf_token');
+            if (!Csrf::check($csrf_token)) {
+                r2(getUrl('settings/redis'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
+            $count = RedisCache::flushAll();
+            r2(getUrl('settings/redis'), 's', Lang::T('Redis Cache cleared successfully. Flushed keys: ') . $count);
+        }
+
+        // Save Settings Action
+        if (_post('save') == 'save') {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('settings/redis'), 'e', 'You cannot perform this action in Demo mode');
+            }
+            $csrf_token = _post('csrf_token');
+            if (!Csrf::check($csrf_token)) {
+                r2(getUrl('settings/redis'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
+
+            $settings = [
+                'redis_enabled' => isset($_POST['redis_enabled']) ? 1 : 0,
+                'redis_host' => trim(_post('redis_host', '127.0.0.1')),
+                'redis_port' => (int) _post('redis_port', 6379),
+                'redis_pass' => _post('redis_pass', ''),
+                'redis_cache_dashboard' => isset($_POST['redis_cache_dashboard']) ? 1 : 0,
+                'redis_dashboard_ttl' => max(5, (int) _post('redis_dashboard_ttl', 60)),
+                'redis_cache_radius' => isset($_POST['redis_cache_radius']) ? 1 : 0,
+                'redis_radius_ttl' => max(5, (int) _post('redis_radius_ttl', 60)),
+            ];
+
+            foreach ($settings as $key => $value) {
+                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+                if ($d) {
+                    $d->value = $value;
+                    $d->save();
+                } else {
+                    $d = ORM::for_table('tbl_appconfig')->create();
+                    $d->setting = $key;
+                    $d->value = $value;
+                    $d->save();
+                }
+            }
+
+            r2(getUrl('settings/redis'), 's', Lang::T('Redis Settings Saved Successfully'));
+        }
+
+        $stats = RedisCache::getStats();
+        $csrf_token = Csrf::generateAndStoreToken();
+        $ui->assign('csrf_token', $csrf_token);
+        $ui->assign('_c', $config);
+        $ui->assign('stats', $stats);
+        $ui->assign('_title', Lang::T('Redis Cache Settings'));
+        $ui->display('admin/settings/redis.tpl');
         break;
 
     default:

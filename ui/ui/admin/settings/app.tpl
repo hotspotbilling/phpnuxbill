@@ -583,7 +583,107 @@
                                 target="_blank">{Lang::T('Cross-site request forgery')}</a>
                         </p>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
+
+                    <div class="col-md-12" style="margin: 20px 0 15px; padding: 0;">
+                        <hr style="border-top: 1px solid #e5e7eb; margin: 15px 0;">
+                        <h4 style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                            <i class="glyphicon glyphicon-shield" style="color: #3b82f6;"></i>
+                            {Lang::T('Captcha & Bot Protection')}
+                        </h4>
+                        <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">
+                            {Lang::T('Protect Admin and Member login from automated brute-force attacks and credential stuffing with Cloudflare Turnstile or Google reCAPTCHA.')}
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Captcha Provider')}</label>
+                        <div class="col-md-5">
+                            <select name="captcha_provider" id="captcha_provider" class="form-control">
+                                <option value="none" {if empty($_c['captcha_provider']) || $_c['captcha_provider']=='none'}selected="selected"{/if}>
+                                    {Lang::T('Disabled')}
+                                </option>
+                                <option value="turnstile" {if $_c['captcha_provider']=='turnstile'}selected="selected"{/if}>
+                                    Cloudflare Turnstile ({Lang::T('Recommended - Privacy Focused')})
+                                </option>
+                                <option value="recaptcha" {if $_c['captcha_provider']=='recaptcha'}selected="selected"{/if}>
+                                    Google reCAPTCHA v2 ({Lang::T('Checkbox')})
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            <small>{Lang::T('Choose the bot protection service to safeguard your login pages.')}</small>
+                        </p>
+                    </div>
+
+                    <div class="form-group" id="captcha_target_group">
+                        <label class="col-md-3 control-label">{Lang::T('Protected Pages')}</label>
+                        <div class="col-md-5">
+                            <select name="captcha_target" id="captcha_target" class="form-control">
+                                <option value="both" {if empty($_c['captcha_target']) || $_c['captcha_target']=='both'}selected="selected"{/if}>
+                                    {Lang::T('Both Admin & Customer Login')}
+                                </option>
+                                <option value="admin" {if $_c['captcha_target']=='admin'}selected="selected"{/if}>
+                                    {Lang::T('Admin Login Only')}
+                                </option>
+                                <option value="customer" {if $_c['captcha_target']=='customer'}selected="selected"{/if}>
+                                    {Lang::T('Customer Login Only')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            <small>{Lang::T('Select which login pages require verification.')}</small>
+                        </p>
+                    </div>
+
+                    <!-- Cloudflare Turnstile Keys -->
+                    <div id="turnstile_keys_section" style="display: none;">
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{Lang::T('Turnstile Site Key')}</label>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="turnstile_site_key" id="turnstile_site_key"
+                                    value="{$_c['turnstile_site_key']}" placeholder="0x4AAAAAA...">
+                            </div>
+                            <p class="help-block col-md-4">
+                                <small>{Lang::T('Obtain from Cloudflare Dashboard')} &rarr; <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank" rel="noopener">Cloudflare Turnstile</a></small>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{Lang::T('Turnstile Secret Key')}</label>
+                            <div class="col-md-5">
+                                <input type="password" class="form-control" name="turnstile_secret_key" id="turnstile_secret_key"
+                                    value="{$_c['turnstile_secret_key']}" placeholder="0x4AAAAAA...">
+                            </div>
+                            <p class="help-block col-md-4">
+                                <small>{Lang::T('Keep your Turnstile secret key confidential.')}</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Google reCAPTCHA Keys -->
+                    <div id="recaptcha_keys_section" style="display: none;">
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{Lang::T('reCAPTCHA Site Key')}</label>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="recaptcha_site_key" id="recaptcha_site_key"
+                                    value="{$_c['recaptcha_site_key']}" placeholder="6LeIxacTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI">
+                            </div>
+                            <p class="help-block col-md-4">
+                                <small>{Lang::T('Obtain from Google reCAPTCHA Admin')} &rarr; <a href="https://www.google.com/recaptcha/admin" target="_blank" rel="noopener">Google Admin Console</a></small>
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-3 control-label">{Lang::T('reCAPTCHA Secret Key')}</label>
+                            <div class="col-md-5">
+                                <input type="password" class="form-control" name="recaptcha_secret_key" id="recaptcha_secret_key"
+                                    value="{$_c['recaptcha_secret_key']}" placeholder="6LeIxacTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe">
+                            </div>
+                            <p class="help-block col-md-4">
+                                <small>{Lang::T('Keep your reCAPTCHA secret key confidential.')}</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin: 25px auto 0;">
                         <button class="btn btn-success" name="general" type="submit">
                             {Lang::T('Save Changes')}
                         </button>
@@ -1453,6 +1553,34 @@
         if (radiusEnable) radiusEnable.addEventListener('change', toggleRadiusFields);
         if (clearSelect) clearSelect.addEventListener('change', toggleRadiusFields);
         toggleRadiusFields();
+
+        // Captcha provider fields toggle
+        var captchaProvider = document.getElementById('captcha_provider');
+        var captchaTargetGroup = document.getElementById('captcha_target_group');
+        var turnstileSection = document.getElementById('turnstile_keys_section');
+        var recaptchaSection = document.getElementById('recaptcha_keys_section');
+
+        function toggleCaptchaFields() {
+            var val = captchaProvider ? captchaProvider.value : 'none';
+            if (val === 'turnstile') {
+                if (captchaTargetGroup) captchaTargetGroup.style.display = '';
+                if (turnstileSection) turnstileSection.style.display = '';
+                if (recaptchaSection) recaptchaSection.style.display = 'none';
+            } else if (val === 'recaptcha') {
+                if (captchaTargetGroup) captchaTargetGroup.style.display = '';
+                if (turnstileSection) turnstileSection.style.display = 'none';
+                if (recaptchaSection) recaptchaSection.style.display = '';
+            } else {
+                if (captchaTargetGroup) captchaTargetGroup.style.display = 'none';
+                if (turnstileSection) turnstileSection.style.display = 'none';
+                if (recaptchaSection) recaptchaSection.style.display = 'none';
+            }
+        }
+
+        if (captchaProvider) {
+            captchaProvider.addEventListener('change', toggleCaptchaFields);
+            toggleCaptchaFields();
+        }
     });
 </script>
 {include file="sections/footer.tpl"}

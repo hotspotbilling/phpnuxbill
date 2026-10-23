@@ -470,7 +470,8 @@ INSERT INTO `tbl_appconfig` (`setting`, `value`) VALUES
 ('referred_reward_amount', '5.00'),
 ('min_purchase_amount', '0.00'),
 ('referral_code_length', '8'),
-('require_purchase', 'yes');
+('require_purchase', 'yes'),
+('dashboard_Customer', '4,4,4');
 
 
 INSERT INTO
@@ -534,9 +535,9 @@ INSERT INTO `tbl_widgets` (`id`, `orders`, `position`, `user`, `enabled`, `title
 
 (60, 1, 2, 'Customer', 1, 'Account Info', 'account_info', ''),
 (61, 3, 1, 'Customer', 1, 'Active Internet Plan', 'active_internet_plan', ''),
-(62, 4, 1, 'Customer', 1, 'Balance Transfer', 'balance_transfer', ''),
+(62, 1, 3, 'Customer', 1, 'Balance Transfer', 'balance_transfer', ''),
 (63, 1, 1, 'Customer', 1, 'Unpaid Order', 'unpaid_order', ''),
 (64, 2, 1, 'Customer', 1, 'Announcement', 'announcement', ''),
-(65, 5, 1, 'Customer', 1, 'Recharge A Friend', 'recharge_a_friend', ''),
+(65, 2, 3, 'Customer', 1, 'Recharge A Friend', 'recharge_a_friend', ''),
 (66, 2, 2, 'Customer', 1, 'Voucher Activation', 'voucher_activation', ''),
-(67, 6, 2, 'Customer', 1, 'Referral Program', 'referral_program', '');
+(67, 3, 3, 'Customer', 1, 'Referrals', 'referrals', '');

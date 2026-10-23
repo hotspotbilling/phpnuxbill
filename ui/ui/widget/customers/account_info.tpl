@@ -6,13 +6,38 @@
         <table class="table table-bordered table-striped table-bordered table-hover mb-0" style="margin-bottom: 0px;">
             <tr>
                 <td class="small text-success text-uppercase text-normal">{Lang::T('Usernames')}</td>
-                <td class="small mb15">{$_user['username']}</td>
+                <td class="small mb15">
+                    <div class="input-group">
+                        <input type="text" id="account_username" value="{$_user['username']|escape:'html'}"
+                            class="form-control input-sm" style="border: 0px; background: transparent;" readonly
+                            onclick="this.select()">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default btn-sm copy-account-btn"
+                                data-clipboard-text="{$_user['username']|escape:'html'}"
+                                title="{Lang::T('Copy')}">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                        </span>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td class="small text-success text-uppercase text-normal">{Lang::T('Password')}</td>
-                <td class="small mb15"><input type="password" value="{$_user['password']}"
-                        style="width:100%; border: 0px;" onmouseleave="this.type = 'password'"
-                        onmouseenter="this.type = 'text'" onclick="this.select()"></td>
+                <td class="small mb15">
+                    <div class="input-group">
+                        <input type="password" id="account_password" value="{$_user['password']|escape:'html'}"
+                            class="form-control input-sm" style="border: 0px; background: transparent;"
+                            onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                            onclick="this.select()">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default btn-sm copy-account-btn"
+                                data-clipboard-text="{$_user['password']|escape:'html'}"
+                                title="{Lang::T('Copy')}">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                        </span>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <td class="small text-success text-uppercase text-normal">{Lang::T('Service Type')}</td>
@@ -34,12 +59,16 @@
                     <td class="small text-warning text-uppercase text-normal">{Lang::T('Yours Balances')}</td>
                     <td class="small mb15 text-bold">
                         {Lang::moneyFormat($_user['balance'])}
+                        <a class="btn btn-success btn-xs pull-right"
+                            href="{Text::url('order/balance')}">{Lang::T('Top Up')}</a>
                         {if $_user['auto_renewal'] == 1}
-                            <a class="label label-success pull-right" href="{Text::url('home&renewal=0')}"
+                            <a class="label label-success pull-right"
+                                href="{Text::url('home&renewal=0&stoken=', App::getToken())}"
                                 onclick="return ask(this, '{Lang::T('Disable auto renewal?')}')">{Lang::T('Auto Renewal
                                 On')}</a>
                         {else}
-                            <a class="label label-danger pull-right" href="{Text::url('home&renewal=1')}"
+                            <a class="label label-danger pull-right"
+                                href="{Text::url('home&renewal=1&stoken=', App::getToken())}"
                                 onclick="return ask(this, '{Lang::T('Enable auto renewal?')}')">{Lang::T('Auto Renewal
                                 Off')}</a>
                         {/if}
@@ -48,6 +77,13 @@
             {/if}
         </table>&nbsp;&nbsp;
     </div>
+    <script>
+        (function() {
+            if (window.ClipboardJS) {
+                new ClipboardJS('.copy-account-btn');
+            }
+        })();
+    </script>
     {if $abills && count($abills)>0}
         <div class="box-header">
             <h3 class="box-title">{Lang::T('Additional Billing')}</h3>

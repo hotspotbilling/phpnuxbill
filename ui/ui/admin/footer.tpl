@@ -22,6 +22,8 @@
         const resultsEl = document.getElementById('searchResults');
         const clearBtn = document.getElementById('searchClearBtn');
         const spinner = document.getElementById('searchSpinner');
+        const searchMobileBtn = document.getElementById('searchMobileBtn');
+        const searchMobileBack = document.getElementById('searchMobileBack');
 
         if (!searchEl || !resultsEl) return;
 
@@ -32,6 +34,9 @@
 
         function closeSearch() {
             isOpen = false;
+            if (searchWrap && window.innerWidth <= 767) {
+                searchWrap.classList.remove('is-active-mobile');
+            }
             clearTimeout(debounceTimer);
             debounceTimer = null;
             if (currentXhr) {
@@ -141,9 +146,53 @@
             });
         }
 
+        function updateSearchPlaceholder() {
+            if (!searchEl) return;
+            if (window.innerWidth <= 767) {
+                searchEl.setAttribute('placeholder', '{Lang::T("Search customers, routers, plans...")}');
+            } else {
+                searchEl.setAttribute('placeholder', '{Lang::T("Search customers, routers, plans...")} (⌘K)');
+            }
+        }
+        updateSearchPlaceholder();
+        window.addEventListener('resize', updateSearchPlaceholder);
+
+        // Mobile Search Toggle buttons
+        if (searchMobileBtn) {
+            searchMobileBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (searchWrap) {
+                    searchWrap.classList.add('is-active-mobile');
+                }
+                updateSearchPlaceholder();
+                searchEl.focus();
+                searchEl.select();
+                fetchResults(searchEl.value.trim());
+            });
+        }
+
+        if (searchMobileBack) {
+            searchMobileBack.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (searchWrap) {
+                    searchWrap.classList.remove('is-active-mobile');
+                }
+                closeSearch();
+                searchEl.blur();
+            });
+        }
+
         // Close on click outside
         document.addEventListener('click', function (e) {
+            if (searchMobileBtn && searchMobileBtn.contains(e.target)) {
+                return;
+            }
             if (!searchWrap || !searchWrap.contains(e.target)) {
+                if (searchWrap && window.innerWidth <= 767) {
+                    searchWrap.classList.remove('is-active-mobile');
+                }
                 closeSearch();
                 if (clearBtn && searchEl.value.trim() === '') {
                     clearBtn.style.display = 'none';
@@ -165,10 +214,17 @@
 
     // Function to apply the theme
     function applyTheme(theme) {
-        body.classList.remove('dark-mode');
-        if (theme === 'dark') {
-            body.classList.add('dark-mode');
+        var isDark = (theme === 'dark');
+        body.classList.toggle('dark-mode', isDark);
+        document.documentElement.classList.toggle('dark-mode', isDark);
+        if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.body.setAttribute('data-theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            document.body.removeAttribute('data-theme');
         }
+        localStorage.setItem('phpnuxbill_admin_theme', theme);
     }
 
     // Function to update the icon based on current mode
@@ -244,21 +300,6 @@
 
     // Initialize theme when page loads
     initializeTheme();
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const skeleton = document.querySelector('.dashboard-skeleton');
-        const content = document.querySelector('#dashboard-content');
-
-        skeleton.style.display = 'block';
-        content.style.display = 'none';
-
-        setTimeout(() => {
-            skeleton.style.display = 'none';
-            content.style.display = 'block';
-        }, 2000);
-    });
 </script>
 
 {if isset($xfooter)}
@@ -351,25 +392,49 @@
     function apiGetText() {
         var el = listAttApi[posAttApi];
         if (el != undefined) {
+            el.classList.add('api-skeleton');
             $.get(el.getAttribute('api-get-text'), function (data) {
                 el.innerHTML = data;
                 posAttApi++;
                 if (posAttApi < listAttApi.length) {
                     apiGetText();
                 }
+            }).always(function () {
+                el.classList.remove('api-skeleton');
             });
         }
     }
 
     function setKolaps() {
-        var kolaps = getCookie('kolaps');
-        if (kolaps) {
-            setCookie('kolaps', false, 30);
-        } else {
-            setCookie('kolaps', true, 30);
+        if ($(window).width() > 767) {
+            setTimeout(function() {
+                var isCollapsed = $('body').hasClass('sidebar-collapse');
+                setCookie('kolaps', isCollapsed ? 'true' : 'false', 30);
+            }, 50);
         }
         return true;
     }
+
+    $(document).on('collapsed.pushMenu', function () {
+        if ($(window).width() > 767) {
+            setCookie('kolaps', 'true', 30);
+        }
+    });
+
+    $(document).on('expanded.pushMenu', function () {
+        if ($(window).width() > 767) {
+            setCookie('kolaps', 'false', 30);
+        }
+    });
+
+    // Auto-close mobile sidebar drawer when tapping outside
+    $(document).on('click touchstart', function (e) {
+        if ($(window).width() <= 767 && $('body').hasClass('sidebar-open')) {
+            if (!$(e.target).closest('.main-sidebar, .sidebar-toggle').length) {
+                $('body').removeClass('sidebar-open');
+            }
+        }
+    });
 
     function setCookie(name, value, days) {
         var expires = "";

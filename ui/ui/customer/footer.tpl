@@ -90,20 +90,6 @@
 <!--End of Tawk.to Script-->
 {/if}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const skeleton = document.querySelector('.dashboard-skeleton');
-        const content = document.querySelector('#dashboard-content');
-
-        skeleton.style.display = 'block';
-        content.style.display = 'none';
-
-        setTimeout(() => {
-            skeleton.style.display = 'none';
-            content.style.display = 'block';
-        }, 2000);
-    });
-</script>
-<script>
     const toggleIcon = document.getElementById('toggleIcon');
     const body = document.body;
     let currentMode = localStorage.getItem('mode') || 'system';
@@ -199,8 +185,11 @@
 <script>
     var listAtts = document.querySelectorAll(`[api-get-text]`);
     listAtts.forEach(function (el) {
+        el.classList.add('api-skeleton');
         $.get(el.getAttribute('api-get-text'), function (data) {
             el.innerHTML = data;
+        }).always(function () {
+            el.classList.remove('api-skeleton');
         });
     });
     $(document).ready(function () {

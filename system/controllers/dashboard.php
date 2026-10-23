@@ -10,6 +10,9 @@ $ui->assign('_title', Lang::T('Dashboard'));
 $ui->assign('_admin', $admin);
 
 if (isset($_GET['refresh'])) {
+    if (class_exists('RedisCache')) {
+        RedisCache::flushPattern('dash:*');
+    }
     $files = scandir($CACHE_PATH);
     foreach ($files as $file) {
         $ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -44,10 +47,11 @@ $ui->assign('current_date', $current_date);
 
 
 if ($config['dashboard_type'] === 'dynamic') {
-    $today = date('Y-m-d');
-    $thisMonthStart = date('Y-m-01');
-    $lastMonthStart = date('Y-m-01', strtotime('-1 month', strtotime($thisMonthStart)));
-    $lastMonthEnd = date('Y-m-t', strtotime('-1 month', strtotime($thisMonthStart)));
+    $computeDynamicData = function () use ($config) {
+        $today = date('Y-m-d');
+        $thisMonthStart = date('Y-m-01');
+        $lastMonthStart = date('Y-m-01', strtotime('-1 month', strtotime($thisMonthStart)));
+        $lastMonthEnd = date('Y-m-t', strtotime('-1 month', strtotime($thisMonthStart)));
 
     // 1. Total Customers
     $c_all = (int) ORM::for_table('tbl_customers')->count();
@@ -87,10 +91,73 @@ if ($config['dashboard_type'] === 'dynamic') {
         ->count();
 
     // 5. Routers Status
-    $routers_total = (int) ORM::for_table('tbl_routers')->count();
-    $routers_online = (int) ORM::for_table('tbl_routers')->where('status', 'Online')->count();
+    $routers_list = ORM::for_table('tbl_routers')
+        ->select_many('id', 'name', 'ip_address', 'status', 'last_seen', 'enabled')
+        ->order_by_desc('status')
+        ->order_by_asc('name')
+        ->find_array();
+    $routers_total = count($routers_list);
+    $routers_online = 0;
+    $routers_map = [];
+    foreach ($routers_list as $r) {
+        $routers_map[$r['name']] = $r;
+        if (!empty($r['ip_address'])) {
+            $routers_map[$r['ip_address']] = $r;
+        }
+        if (strcasecmp($r['status'] ?? '', 'online') === 0) {
+            $routers_online++;
+        }
+    }
     $routers_offline = max(0, $routers_total - $routers_online);
-    $network_uptime = $routers_total > 0 ? round(($routers_online / $routers_total) * 100, 1) : 100;
+
+    // 6. Radius Status & NAS Clients
+    global $radius_host;
+    $radius_enabled = !empty($config['radius_enable']);
+    $radius_online = false;
+    $radius_nas_list = [];
+    $radius_nas_count = 0;
+    $radius_nas_online = 0;
+    $radius_active_sessions = 0;
+
+    if ($radius_enabled) {
+        try {
+            $nas_records = ORM::for_table('nas', 'radius')
+                ->order_by_asc('shortname')
+                ->find_array();
+            $radius_online = true;
+            $radius_nas_count = count($nas_records);
+
+            foreach ($nas_records as $nas) {
+                $nas_status = 'Online';
+                if (!empty($nas['routers']) && isset($routers_map[$nas['routers']])) {
+                    $nas_status = $routers_map[$nas['routers']]['status'] ?? 'Online';
+                } elseif (!empty($nas['nasname']) && isset($routers_map[$nas['nasname']])) {
+                    $nas_status = $routers_map[$nas['nasname']]['status'] ?? 'Online';
+                }
+                $nas['status'] = $nas_status;
+                if (strcasecmp($nas_status, 'online') === 0) {
+                    $radius_nas_online++;
+                }
+                $radius_nas_list[] = $nas;
+            }
+
+            try {
+                $radius_active_sessions = (int) ORM::for_table('radacct', 'radius')
+                    ->where_null('acctstoptime')
+                    ->count();
+            } catch (Throwable $e) {
+                $radius_active_sessions = 0;
+            }
+        } catch (Throwable $e) {
+            $radius_online = false;
+        }
+    }
+
+    // Combined Network calculations (Routers + Radius AAA Server + NAS Clients)
+    $total_network_nodes = $routers_total + ($radius_enabled ? 1 : 0) + $radius_nas_count;
+    $online_network_nodes = $routers_online + ($radius_enabled && $radius_online ? 1 : 0) + $radius_nas_online;
+    $offline_network_nodes = max(0, $total_network_nodes - $online_network_nodes);
+    $network_uptime = $total_network_nodes > 0 ? round(($online_network_nodes / $total_network_nodes) * 100, 1) : 100;
 
     // Charts: Sales Report Data (Day, Week, Month, Year)
     $daysMap = [];
@@ -351,6 +418,10 @@ if ($config['dashboard_type'] === 'dynamic') {
             (int)ORM::for_table('tbl_customers')->count()
         ]
     ];
+    if ($radius_enabled) {
+        $equipmentData['labels'][] = 'Radius NAS';
+        $equipmentData['values'][] = $radius_nas_count;
+    }
 
     $allDashboardData = [
         'sales' => [
@@ -382,8 +453,22 @@ if ($config['dashboard_type'] === 'dynamic') {
         ],
         'network' => [
             'labels' => ['Online', 'Offline'],
-            'values' => [$routers_online, $routers_offline],
-            'uptime' => $network_uptime
+            'values' => [$online_network_nodes, $offline_network_nodes],
+            'uptime' => $network_uptime,
+            'total' => $total_network_nodes,
+            'online' => $online_network_nodes,
+            'offline' => $offline_network_nodes,
+            'routers' => $routers_list,
+            'routers_total' => $routers_total,
+            'routers_online' => $routers_online,
+            'routers_offline' => $routers_offline,
+            'radius_enabled' => $radius_enabled,
+            'radius_online' => $radius_online,
+            'radius_host' => $radius_host ?? 'localhost',
+            'radius_nas' => $radius_nas_list,
+            'radius_nas_count' => $radius_nas_count,
+            'radius_nas_online' => $radius_nas_online,
+            'radius_active_sessions' => $radius_active_sessions
         ],
         'transactions' => [
             'labels' => $trxLabels,
@@ -419,24 +504,48 @@ if ($config['dashboard_type'] === 'dynamic') {
         'equipment' => $equipmentData
     ];
 
-    $ui->assign('c_all', $c_all);
-    $ui->assign('c_percentage_change', $c_percentage_change);
-    $ui->assign('u_act', $u_act);
-    $ui->assign('u_all', $u_all);
-    $ui->assign('u_act_pct', $u_act_pct);
-    $ui->assign('u_expired', $u_expired);
-    $ui->assign('imonth', $imonth);
-    $ui->assign('imonth_formatted', number_format($imonth, 2));
-    $ui->assign('rev_percentage_change', $rev_percentage_change);
-    $ui->assign('iday', $iday);
-    $ui->assign('iday_formatted', number_format($iday, 2));
-    $ui->assign('iday_count', $iday_count);
-    $ui->assign('routers_total', $routers_total);
-    $ui->assign('routers_online', $routers_online);
-    $ui->assign('routers_offline', $routers_offline);
-    $ui->assign('network_uptime', $network_uptime);
-    $ui->assign('peak_hour_str', $peak_hour_str);
-    $ui->assign('dashboard_data_json', json_encode($allDashboardData));
+        return [
+            'c_all' => $c_all,
+            'c_percentage_change' => $c_percentage_change,
+            'u_act' => $u_act,
+            'u_all' => $u_all,
+            'u_act_pct' => $u_act_pct,
+            'u_expired' => $u_expired,
+            'imonth' => $imonth,
+            'imonth_formatted' => number_format($imonth, 2),
+            'rev_percentage_change' => $rev_percentage_change,
+            'iday' => $iday,
+            'iday_formatted' => number_format($iday, 2),
+            'iday_count' => $iday_count,
+            'routers_total' => $routers_total,
+            'routers_online' => $routers_online,
+            'routers_offline' => $routers_offline,
+            'routers_list' => $routers_list,
+            'radius_enabled' => $radius_enabled,
+            'radius_online' => $radius_online,
+            'radius_host' => $radius_host ?? 'localhost',
+            'radius_nas_list' => $radius_nas_list,
+            'radius_nas_count' => $radius_nas_count,
+            'radius_nas_online' => $radius_nas_online,
+            'radius_active_sessions' => $radius_active_sessions,
+            'total_network_nodes' => $total_network_nodes,
+            'online_network_nodes' => $online_network_nodes,
+            'offline_network_nodes' => $offline_network_nodes,
+            'network_uptime' => $network_uptime,
+            'peak_hour_str' => $peak_hour_str,
+            'dashboard_data_json' => json_encode($allDashboardData)
+        ];
+    };
+
+    if (class_exists('RedisCache') && RedisCache::isDashboardCacheEnabled()) {
+        $data = RedisCache::remember('dash:metrics_dynamic', RedisCache::getDashboardTTL(), $computeDynamicData);
+    } else {
+        $data = $computeDynamicData();
+    }
+
+    foreach ($data as $key => $val) {
+        $ui->assign($key, $val);
+    }
 
     $ui->display('admin/dashboard-new.tpl');
 } else {
@@ -445,19 +554,28 @@ if ($config['dashboard_type'] === 'dynamic') {
         $tipeUser = 'Admin';
     }
 
-    $widgets = ORM::for_table('tbl_widgets')->where("enabled", 1)->where('user', $tipeUser)->order_by_asc("orders")->findArray();
-    $count = count($widgets);
-    for ($i = 0; $i < $count; $i++) {
-        try {
-            if (file_exists($WIDGET_PATH . DIRECTORY_SEPARATOR . $widgets[$i]['widget'] . ".php")) {
-                require_once $WIDGET_PATH . DIRECTORY_SEPARATOR . $widgets[$i]['widget'] . ".php";
-                $widgets[$i]['content'] = (new $widgets[$i]['widget'])->getWidget($widgets[$i]);
-            } else {
-                $widgets[$i]['content'] = "Widget not found";
+    $computeWidgets = function () use ($WIDGET_PATH, $tipeUser) {
+        $widgets = ORM::for_table('tbl_widgets')->where("enabled", 1)->where('user', $tipeUser)->order_by_asc("orders")->findArray();
+        $count = count($widgets);
+        for ($i = 0; $i < $count; $i++) {
+            try {
+                if (file_exists($WIDGET_PATH . DIRECTORY_SEPARATOR . $widgets[$i]['widget'] . ".php")) {
+                    require_once $WIDGET_PATH . DIRECTORY_SEPARATOR . $widgets[$i]['widget'] . ".php";
+                    $widgets[$i]['content'] = (new $widgets[$i]['widget'])->getWidget($widgets[$i]);
+                } else {
+                    $widgets[$i]['content'] = "Widget not found";
+                }
+            } catch (Throwable $e) {
+                $widgets[$i]['content'] = $e->getMessage();
             }
-        } catch (Throwable $e) {
-            $widgets[$i]['content'] = $e->getMessage();
         }
+        return $widgets;
+    };
+
+    if (class_exists('RedisCache') && RedisCache::isDashboardCacheEnabled()) {
+        $widgets = RedisCache::remember('dash:widgets_' . $tipeUser, RedisCache::getDashboardTTL(), $computeWidgets);
+    } else {
+        $widgets = $computeWidgets();
     }
 
     $ui->assign('widgets', $widgets);

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{$_title} - {$_c['CompanyName']}</title>
 
     <script>
@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/phpnuxbill.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2025.2.4" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2026.10.22.13" />
     <script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/clipboard.min.js"></script>
 
@@ -32,7 +32,7 @@
 
 </head>
 
-<body class="hold-transition modern-skin-dark sidebar-mini">
+<body class="hold-transition modern-skin-dark sidebar-mini fixed">
     <!-- Modal -->
     <div class="modal fade" id="subscribeModal" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel">
         <div class="modal-dialog" role="document">
@@ -70,7 +70,7 @@
     </div>
     <div class="bottom-nav">
         <a href="{$_url}home" class="nav-item {if $_system_menu eq 'home' }active {/if}">
-            <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-home">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -78,27 +78,31 @@
                     <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
                     <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
                 </svg></span>
+            <span class="nav-label">{Lang::T('Home')}</span>
         </a>
-        <a href="{$_url}order/history" class="nav-item history {if $_system_menu eq 'history' }active {/if}">
-            <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        <a href="{$_url}order/history" class="nav-item {if $_system_menu eq 'history' }active {/if}">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-history">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M12 8l0 4l2 2" />
                     <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" />
                 </svg></span>
+            <span class="nav-label">{Lang::T('History')}</span>
         </a>
-        <div class="floating-button">
-            <a href="{$_url}order/package"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        <div class="nav-item nav-item-fab{if $_system_menu eq 'package' } active {/if}">
+            <a href="{$_url}order/package" class="floating-button" title="{Lang::T('Buy Package')}"
+                aria-label="{Lang::T('Buy Package')}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     viewBox="0 0 24 24" fill="currentColor"
                     class="icon icon-tabler icons-tabler-filled icon-tabler-shopping-cart">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path
                         d="M6 2a1 1 0 0 1 .993 .883l.007 .117v1.068l13.071 .935a1 1 0 0 1 .929 1.024l-.01 .114l-1 7a1 1 0 0 1 -.877 .853l-.113 .006h-12v2h10a3 3 0 1 1 -2.995 3.176l-.005 -.176l.005 -.176c.017 -.288 .074 -.564 .166 -.824h-5.342a3 3 0 1 1 -5.824 1.176l-.005 -.176l.005 -.176a3.002 3.002 0 0 1 1.995 -2.654v-12.17h-1a1 1 0 0 1 -.993 -.883l-.007 -.117a1 1 0 0 1 .883 -.993l.117 -.007h2zm0 16a1 1 0 1 0 0 2a1 1 0 0 0 0 -2zm11 0a1 1 0 1 0 0 2a1 1 0 0 0 0 -2z" />
                 </svg></a>
+            <span class="nav-label">{Lang::T('Buy')}</span>
         </div>
-        <a href="{$_url}mail" class="nav-item message {if $_system_menu eq 'inbox' }active {/if}">
-            <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        <a href="{$_url}mail" class="nav-item {if $_system_menu eq 'inbox' }active {/if}">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-headset">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -107,9 +111,10 @@
                     <path d="M4 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3z" />
                     <path d="M15 14a2 2 0 0 1 2 -2h1a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-1a2 2 0 0 1 -2 -2v-3z" />
                 </svg></span>
+            <span class="nav-label">{Lang::T('Support')}</span>
         </a>
-        <a href="#" class="nav-item" data-toggle="push-menu" role="button">
-            <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        <a href="#" class="nav-item" data-toggle="push-menu" role="button" aria-label="{Lang::T('Menu')}">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-1">
                     <path d="M4 4m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v1a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"></path>
@@ -117,23 +122,9 @@
                     <path d="M14 4m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v3a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"></path>
                     <path d="M14 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v1a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"></path>
                 </svg></span>
+            <span class="nav-label">{Lang::T('Menu')}</span>
         </a>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const skeleton = document.querySelector('.sidebar-skeleton');
-            const sidebarMenu = document.querySelector('.sidebar-menu');
-
-            skeleton.style.display = 'block';
-            sidebarMenu.style.display = 'none';
-
-            setTimeout(() => {
-                // Hide skeleton and show actual content
-                skeleton.style.display = 'none';
-                sidebarMenu.style.display = 'block';
-            }, 1000);
-        });
-    </script>
 
     <div class="wrapper">
         <header class="main-header" style="position:fixed; width: 100%">
@@ -256,115 +247,7 @@
 
         <aside class="main-sidebar" style="position:fixed;">
             <section class="sidebar">
-                <!-- Skeleton Loading Placeholder -->
-                <div class="sidebar-skeleton" style="display: none;">
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                </div>
-                <ul class="sidebar-menu" data-widget="tree" style="display: none;">
+                <ul class="sidebar-menu fade-in" data-widget="tree">
                     <li {if $_system_menu eq 'home' }class="active" {/if}>
                         <a href="{Text::url('home')}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -505,39 +388,13 @@
                     {$_title}
                 </h1>
             </section>
-            <div class="dashboard-skeleton" style="display: none;">
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-                <div class="date-balance-skeleton" style="width: 100%; height: 30px;  margin: 10px 0;"></div>
-            </div>
-            <section class="content" id="dashboard-content" style="display: none;">
+            <section class="content fade-in" id="dashboard-content">
                 {if isset($notify)}
                 <script>
                     // Display SweetAlert toast notification
                     Swal.fire({
                         icon: '{if $notify_t == "s"}success{else}warning{/if}',
-                        title: '{$notify}',
+                        title: {$notify|json_encode},
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 5000,
@@ -549,18 +406,3 @@
                     });
                 </script>
                 {/if}
-
-                <script>
-                    document.querySelectorAll('.nav-item').forEach(item => {
-                        item.addEventListener('click', function (e) {
-
-                            // Remove active class from all items
-                            document.querySelectorAll('.nav-item').forEach(navItem => {
-                                navItem.classList.remove('active');
-                            });
-
-                            // Add active class to clicked item
-                            this.classList.add('active');
-                        });
-                    });
-                </script>

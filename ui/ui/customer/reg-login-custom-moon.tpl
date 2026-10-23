@@ -404,6 +404,9 @@
                                         <input type="password" name="cpassword"
                                             placeholder="{Lang::T('Confirm Password')}" required>
                                     </div>
+                                    {if !empty($captcha_widget)}
+                                        {$captcha_widget}
+                                    {/if}
                                     <div class="form-group">
                                         <button id="register-btn" type="submit" class="submit-btn">
                                             <span id="register-text">{Lang::T('Register')}</span>

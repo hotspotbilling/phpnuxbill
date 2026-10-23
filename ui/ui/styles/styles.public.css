@@ -5,127 +5,99 @@
 }
 
 :root {
-  /* Light mode colors */
-  --bg-gradient-start: #667eea;
-  --bg-gradient-end: #764ba2;
-  --bg-gradient-complex: linear-gradient(
-    135deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #f5576c 75%,
-    #4facfe 100%
-  );
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --card-border: rgba(255, 255, 255, 0.2);
-  --text-primary: #2d3748;
-  --text-secondary: #4a5568;
-  --text-tertiary: #718096;
-  --text-quaternary: #a0aec0;
-  --input-bg: rgba(255, 255, 255, 0.8);
-  --input-bg-focus: rgba(255, 255, 255, 1);
-  --input-border: #e2e8f0;
-  --divider-bg: rgba(255, 255, 255, 0.95);
-  --footer-bg: rgba(255, 255, 255, 0.9);
-  --stat-item-bg: rgba(102, 126, 234, 0.1);
-  --stat-item-bg-hover: rgba(102, 126, 234, 0.15);
-  --floating-shape-bg: rgba(255, 255, 255, 0.1);
+  /* Light mode colors - clean neutral solid background */
+  --bg-gradient-start: #f8fafc;
+  --bg-gradient-end: #f1f5f9;
+  --bg-gradient-complex: #f8fafc;
+  --card-bg: rgba(255, 255, 255, 0.98);
+  --card-border: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-quaternary: #94a3b8;
+  --input-bg: #ffffff;
+  --input-bg-focus: #ffffff;
+  --input-border: #cbd5e1;
+  --divider-bg: #e2e8f0;
+  --footer-bg: #f8fafc;
+  --stat-item-bg: rgba(99, 102, 241, 0.08);
+  --stat-item-bg-hover: rgba(99, 102, 241, 0.12);
+  --floating-shape-bg: transparent;
 }
 
 /* Dark mode for system preference */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-gradient-start: #1a202c;
-    --bg-gradient-end: #2d3748;
-    --bg-gradient-complex: linear-gradient(
-      135deg,
-      #1a202c 0%,
-      #2d3748 25%,
-      #4a5568 50%,
-      #667eea 75%,
-      #764ba2 100%
-    );
-    --card-bg: rgba(26, 32, 44, 0.95);
-    --card-border: rgba(255, 255, 255, 0.1);
-    --text-primary: #f7fafc;
-    --text-secondary: #e2e8f0;
-    --text-tertiary: #cbd5e0;
-    --text-quaternary: #a0aec0;
-    --input-bg: rgba(45, 55, 72, 0.8);
-    --input-bg-focus: rgba(45, 55, 72, 1);
-    --input-border: #4a5568;
-    --divider-bg: rgba(26, 32, 44, 0.95);
-    --footer-bg: rgba(26, 32, 44, 0.9);
-    --stat-item-bg: rgba(102, 126, 234, 0.2);
-    --stat-item-bg-hover: rgba(102, 126, 234, 0.3);
-    --floating-shape-bg: rgba(255, 255, 255, 0.05);
+    --bg-gradient-start: #0b0f17;
+    --bg-gradient-end: #0f172a;
+    --bg-gradient-complex: #0b0f17;
+    --card-bg: #111827;
+    --card-border: #1f2937;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --text-quaternary: #64748b;
+    --input-bg: #1f2937;
+    --input-bg-focus: #1f2937;
+    --input-border: #374151;
+    --divider-bg: #1f2937;
+    --footer-bg: #0b0f17;
+    --stat-item-bg: rgba(99, 102, 241, 0.15);
+    --stat-item-bg-hover: rgba(99, 102, 241, 0.22);
+    --floating-shape-bg: transparent;
   }
 }
 
-/* Manual dark theme override - higher specificity to override media queries */
+/* Manual dark theme override */
 html.theme-dark,
 html.theme-dark * {
   color-scheme: dark;
 }
 
 html.theme-dark:root {
-  --bg-gradient-start: #1a202c !important;
-  --bg-gradient-end: #2d3748 !important;
-  --bg-gradient-complex: linear-gradient(
-    135deg,
-    #1a202c 0%,
-    #2d3748 25%,
-    #4a5568 50%,
-    #667eea 75%,
-    #764ba2 100%
-  ) !important;
-  --card-bg: rgba(26, 32, 44, 0.95) !important;
-  --card-border: rgba(255, 255, 255, 0.1) !important;
-  --text-primary: #f7fafc !important;
-  --text-secondary: #e2e8f0 !important;
-  --text-tertiary: #cbd5e0 !important;
-  --text-quaternary: #a0aec0 !important;
-  --input-bg: rgba(45, 55, 72, 0.8) !important;
-  --input-bg-focus: rgba(45, 55, 72, 1) !important;
-  --input-border: #4a5568 !important;
-  --divider-bg: rgba(26, 32, 44, 0.95) !important;
-  --footer-bg: rgba(26, 32, 44, 0.9) !important;
-  --stat-item-bg: rgba(102, 126, 234, 0.2) !important;
-  --stat-item-bg-hover: rgba(102, 126, 234, 0.3) !important;
-  --floating-shape-bg: rgba(255, 255, 255, 0.05) !important;
+  --bg-gradient-start: #0b0f17 !important;
+  --bg-gradient-end: #0f172a !important;
+  --bg-gradient-complex: #0b0f17 !important;
+  --card-bg: #111827 !important;
+  --card-border: #1f2937 !important;
+  --text-primary: #f8fafc !important;
+  --text-secondary: #cbd5e1 !important;
+  --text-tertiary: #94a3b8 !important;
+  --text-quaternary: #64748b !important;
+  --input-bg: #1f2937 !important;
+  --input-bg-focus: #1f2937 !important;
+  --input-border: #374151 !important;
+  --divider-bg: #1f2937 !important;
+  --footer-bg: #0b0f17 !important;
+  --stat-item-bg: rgba(99, 102, 241, 0.15) !important;
+  --stat-item-bg-hover: rgba(99, 102, 241, 0.22) !important;
+  --floating-shape-bg: transparent !important;
 }
 
-/* Manual light theme override - higher specificity to override media queries */
+/* Manual light theme override */
 html.theme-light,
 html.theme-light * {
   color-scheme: light;
 }
 
 html.theme-light:root {
-  --bg-gradient-start: #667eea !important;
-  --bg-gradient-end: #764ba2 !important;
-  --bg-gradient-complex: linear-gradient(
-    135deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #f5576c 75%,
-    #4facfe 100%
-  ) !important;
-  --card-bg: rgba(255, 255, 255, 0.95) !important;
-  --card-border: rgba(255, 255, 255, 0.2) !important;
-  --text-primary: #2d3748 !important;
-  --text-secondary: #4a5568 !important;
-  --text-tertiary: #718096 !important;
-  --text-quaternary: #a0aec0 !important;
-  --input-bg: rgba(255, 255, 255, 0.8) !important;
-  --input-bg-focus: rgba(255, 255, 255, 1) !important;
-  --input-border: #e2e8f0 !important;
-  --divider-bg: rgba(255, 255, 255, 0.95) !important;
-  --footer-bg: rgba(255, 255, 255, 0.9) !important;
-  --stat-item-bg: rgba(102, 126, 234, 0.1) !important;
-  --stat-item-bg-hover: rgba(102, 126, 234, 0.15) !important;
-  --floating-shape-bg: rgba(255, 255, 255, 0.1) !important;
+  --bg-gradient-start: #f8fafc !important;
+  --bg-gradient-end: #f1f5f9 !important;
+  --bg-gradient-complex: #f8fafc !important;
+  --card-bg: rgba(255, 255, 255, 0.98) !important;
+  --card-border: #e2e8f0 !important;
+  --text-primary: #1e293b !important;
+  --text-secondary: #475569 !important;
+  --text-tertiary: #64748b !important;
+  --text-quaternary: #94a3b8 !important;
+  --input-bg: #ffffff !important;
+  --input-bg-focus: #ffffff !important;
+  --input-border: #cbd5e1 !important;
+  --divider-bg: #e2e8f0 !important;
+  --footer-bg: #f8fafc !important;
+  --stat-item-bg: rgba(99, 102, 241, 0.08) !important;
+  --stat-item-bg-hover: rgba(99, 102, 241, 0.12) !important;
+  --floating-shape-bg: transparent !important;
 }
 
 body {
@@ -133,16 +105,27 @@ body {
     sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
-  background: linear-gradient(
-    135deg,
-    var(--bg-gradient-start) 0%,
-    var(--bg-gradient-end) 100%
-  );
+  background: var(--bg-gradient-start);
   position: relative;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Animated Background */
+/* Accessibility: Visually hidden labels for screen readers */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Neutral Clean Background */
 .background {
   position: fixed;
   top: 0;
@@ -151,37 +134,15 @@ body {
   height: 100%;
   z-index: -2;
   background: var(--bg-gradient-complex);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-  transition: all 0.3s ease;
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  transition: background-color 0.3s ease;
 }
 
 .animated-bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+  display: none;
 }
 
 .floating-shape {
-  position: absolute;
-  border-radius: 50%;
-  background: var(--floating-shape-bg);
-  backdrop-filter: blur(10px);
-  animation: float 20s infinite linear;
-  transition: background 0.3s ease;
+  display: none;
 }
 
 .shape1 {
@@ -243,12 +204,14 @@ body {
 
 /* Main Container */
 .login-container {
+  flex: 1 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 2rem;
-  gap: 3rem;
+  padding: 2.5rem 1.5rem;
+  gap: 2.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* Login Card */
@@ -268,7 +231,6 @@ body {
 }
 
 .login-card:hover {
-  transform: translateY(-5px);
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
 }
 
@@ -350,7 +312,7 @@ body {
 }
 
 .logo:hover {
-  transform: rotateY(180deg);
+  opacity: 0.95;
 }
 
 .brand-name {
@@ -824,13 +786,12 @@ input[type="password"]:focus ~ .input-icon {
 
 /* Footer */
 .footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: static;
+  width: 100%;
+  flex-shrink: 0;
   background: var(--footer-bg);
   backdrop-filter: blur(10px);
-  padding: 1rem 2rem;
+  padding: 1.25rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -838,6 +799,7 @@ input[type="password"]:focus ~ .input-icon {
   color: var(--text-tertiary);
   border-top: 1px solid var(--card-border);
   transition: all 0.3s ease;
+  z-index: 2;
 }
 
 .footer-links {
@@ -860,20 +822,29 @@ input[type="password"]:focus ~ .input-icon {
 @media (max-width: 768px) {
   .login-container {
     flex-direction: column;
-    padding: 1rem;
+    padding: 1.25rem 1rem;
     gap: 1.5rem;
+    align-items: center;
   }
 
-  .login-card,
+  .login-card {
+    order: 1;
+    width: 100%;
+    max-width: 440px;
+  }
+
   .announcement-panel {
-    max-width: 100%;
+    order: -1;
+    width: 100%;
+    max-width: 440px;
   }
 
   .footer {
     position: static;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
     text-align: center;
+    padding: 1.5rem 1rem;
   }
 
   .footer-links {
@@ -881,8 +852,14 @@ input[type="password"]:focus ~ .input-icon {
   }
 
   .theme-toggle {
-    position: relative;
-    margin: 0 auto 1rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+  }
+
+  .input-wrapper input {
+    font-size: 16px !important;
   }
 
   .announcements {
@@ -897,11 +874,12 @@ input[type="password"]:focus ~ .input-icon {
 @media (max-width: 480px) {
   .login-card,
   .announcement-panel {
-    padding: 2rem 1.5rem;
+    padding: 1.75rem 1.25rem;
+    border-radius: 14px;
   }
 
   .brand-name {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
   }
 
   .connection-options {

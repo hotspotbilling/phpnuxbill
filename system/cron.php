@@ -304,5 +304,16 @@ unlink($lockFile);
 $timestampFile = "$UPLOAD_PATH/cron_last_run.txt";
 file_put_contents($timestampFile, time());
 
+// Pre-warm Redis dashboard cache in the background
+if (class_exists('RedisCache') && RedisCache::isDashboardCacheEnabled()) {
+    try {
+        echo "Updating Redis dashboard cache in background...\n";
+        RedisCache::warmDashboard();
+        echo "Redis dashboard cache successfully updated.\n";
+    } catch (Throwable $e) {
+        echo "Redis cache warm note: " . $e->getMessage() . "\n";
+    }
+}
+
 run_hook('cronjob_end'); #HOOK
 echo "Cron job finished and completed successfully.\n";

@@ -30,44 +30,41 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css?2026.10.9.14" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.9.20" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.22.16" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
      {if isset($xheader)}
     {$xheader}
     {/if}
-    <style>
-
-    </style>
+    <script>
+        (function() {
+            var mode = localStorage.getItem('mode') || 'system';
+            var isDark = mode === 'dark' || (mode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+            }
+        })();
+    </script>
 </head>
 
 <body class="hold-transition modern-skin-dark sidebar-mini {if $_kolaps}sidebar-collapse{/if}">
     <script>
+        if (document.documentElement.classList.contains('dark-mode')) {
+            document.body.classList.add('dark-mode');
+        }
         document.addEventListener('keydown', function (e) {
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault();
+                const searchWrap = document.getElementById('searchOverlay');
+                if (searchWrap && window.innerWidth <= 767) {
+                    searchWrap.classList.add('is-active-mobile');
+                }
                 const searchInput = document.getElementById('searchTerm');
                 if (searchInput) {
                     searchInput.focus();
                     searchInput.select();
                 }
             }
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const skeleton = document.querySelector('.sidebar-skeleton');
-            const sidebarMenu = document.querySelector('.sidebar-menu');
-
-            // Show skeleton initially
-            skeleton.style.display = 'block';
-            sidebarMenu.style.display = 'none';
-
-            setTimeout(() => {
-                // Hide skeleton and show actual content
-                skeleton.style.display = 'none';
-                sidebarMenu.style.display = 'block';
-            }, 1000);
         });
     </script>
     <div class="wrapper">
@@ -81,25 +78,41 @@
                     <span class="sr-only">Toggle navigation</span>
                 </a>
 
-                <div id="searchOverlay" class="topbar-search-wrap" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; width: 360px; max-width: calc(100vw - 120px); z-index: 1000;">
-                    <span class="search-icon" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 3; color: #94a3b8;"><i class="fa fa-search"></i></span>
+                <div id="searchOverlay" class="topbar-search-wrap">
+                    <button type="button" class="search-mobile-back" id="searchMobileBack" title="{Lang::T('Close')}" aria-label="{Lang::T('Close')}">
+                        <i class="fa fa-arrow-left"></i>
+                    </button>
+                    <span class="search-icon"><i class="fa fa-search"></i></span>
                     <input type="text" id="searchTerm" class="searchTerm"
-                        style="width: 100% !important; height: 36px !important; padding: 0 62px 0 34px !important; border-radius: 8px !important; text-align: left !important; font-size: 13px !important; box-sizing: border-box !important;"
                         placeholder="{Lang::T('Search customers, routers, plans...')} (⌘K)" autocomplete="off">
-                    <span class="search-spinner" id="searchSpinner" style="display: none; position: absolute; right: 36px; top: 50%; transform: translateY(-50%); z-index: 3;"><i class="fa fa-spinner fa-spin"></i></span>
-                    <button type="button" class="search-clear-btn" id="searchClearBtn" style="display: none; position: absolute; right: 34px; top: 50%; transform: translateY(-50%); z-index: 3;" title="{Lang::T('Clear')}">&times;</button>
-                    <kbd class="search-kbd" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); z-index: 2;">⌘K</kbd>
-                    <div id="searchResults" class="search-results" style="position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); width: 440px; max-width: 90vw; max-height: 440px; z-index: 1050;">
+                    <span class="search-spinner" id="searchSpinner" style="display: none;"><i class="fa fa-spinner fa-spin"></i></span>
+                    <button type="button" class="search-clear-btn" id="searchClearBtn" style="display: none;" title="{Lang::T('Clear')}">&times;</button>
+                    <kbd class="search-kbd">⌘K</kbd>
+                    <div id="searchResults" class="search-results">
                         <!-- Search results will be displayed here -->
                     </div>
                 </div>
 
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
+                        <li class="mobile-search-item">
+                            <a id="searchMobileBtn" class="toggle-container" href="#" title="{Lang::T('Search')}" aria-label="{Lang::T('Search')}">
+                                <i class="toggle-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="icon icon-tabler icons-tabler-outline icon-tabler-search">
+                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                                        <path d="M21 21l-6 -6" />
+                                    </svg>
+                                </i>
+                            </a>
+                        </li>
                         <li>
-                            <a id="toggleIcon" class="toggle-container" href="#">
+                            <a id="toggleIcon" class="toggle-container" href="#" title="{Lang::T('Toggle Theme')}">
                                 <i class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg"
-                                        width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                         class="icon icon-tabler icons-tabler-outline icon-tabler-moon">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -109,9 +122,9 @@
                             </a>
                         </li>
                         <li>
-                            <a class="toggle-container" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="toggle-container" href="{Text::url('settings/notifications')}" title="{Lang::T('Notifications')}">
                                 <i class="toggle-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round"
                                         class="icon icon-tabler icons-tabler-outline icon-tabler-bell-ringing">
@@ -168,105 +181,7 @@
         </header>
         <aside class="main-sidebar">
             <section class="sidebar">
-                <div class="sidebar-skeleton" style="display: none;">
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text"
-                            style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text" style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                    <div class="skeleton-item" style="margin: 10px 0; padding: 15px; border-radius: 4px;">
-                        <div class="skeleton-icon"
-                            style="width: 20px; height: 20px; display: inline-block; margin-right: 10px; vertical-align: middle;">
-                        </div>
-                        <div class="skeleton-text" style="width: 70%; height: 20px; display: inline-block; vertical-align: middle;"></div>
-                    </div>
-                </div>
-                <ul class="sidebar-menu" data-widget="tree" style="display: none;">
+                <ul class="sidebar-menu" data-widget="tree">
                     <li {if $_system_menu eq 'dashboard' }class="active" {/if}>
                         <a href="{Text::url('dashboard')}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -302,7 +217,7 @@
                     </li>
                     {$_MENU_AFTER_CUSTOMERS}
                     {if !in_array($_admin['user_type'],['Report'])}
-                    <li class="{if $_routes[0] eq 'plan' || $_routes[0] eq 'coupons'}active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['plan', 'coupons']) || $_system_menu eq 'services_refill' || $_system_menu eq 'voucher'}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -319,24 +234,24 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[1] eq 'list' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'plan' && ($_routes[1] eq 'list' || empty($_routes[1]))}class="active" {/if}><a
                                     href="{Text::url('plan/list')}">{Lang::T('Active Customers')}</a></li>
                             {if $_c['disable_voucher'] != 'yes'}
-                            <li {if $_routes[1] eq 'refill' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'plan' && $_routes[1] eq 'refill'}class="active" {/if}><a
                                     href="{Text::url('plan/refill')}">{Lang::T('Refill Customer')}</a></li>
                             {/if}
                             {if $_c['disable_voucher'] != 'yes'}
-                            <li {if $_routes[1] eq 'voucher' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'plan' && $_routes[1] eq 'voucher'}class="active" {/if}><a
                                     href="{Text::url('plan/voucher')}">{Lang::T('Vouchers')}</a></li>
                             {/if}
                             {if $_c['enable_coupons'] == 'yes'}
-                            <li {if $_routes[0] eq 'coupons' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'coupons'}class="active" {/if}><a
                                     href="{Text::url('coupons')}">{Lang::T('Coupons')}</a></li>
                             {/if}
-                            <li {if $_routes[1] eq 'recharge' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'plan' && $_routes[1] eq 'recharge'}class="active" {/if}><a
                                     href="{Text::url('plan/recharge')}">{Lang::T('Recharge Customer')}</a></li>
                             {if $_c['enable_balance'] == 'yes'}
-                            <li {if $_routes[1] eq 'deposit' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'plan' && $_routes[1] eq 'deposit'}class="active" {/if}><a
                                     href="{Text::url('plan/deposit')}">{Lang::T('Refill Balance')}</a></li>
                             {/if}
                             {$_MENU_SERVICES}
@@ -346,7 +261,7 @@
                     {$_MENU_AFTER_SERVICES}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                     {if $_c['enable_balance'] == 'yes'}
-                    <li {if $_system_menu eq 'referrals' }class="active" {/if}>
+                    <li {if $_system_menu eq 'referrals' || $_routes[0] eq 'referrals'}class="active" {/if}>
                         <a href="{Text::url('referrals/list')}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -361,7 +276,7 @@
                     {/if}
                     {/if}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                    <li class="{if $_system_menu eq 'services'}active{/if} treeview">
+                    <li class="{if $_system_menu eq 'services' || in_array($_routes[0], ['services', 'bandwidth'])}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -380,17 +295,17 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[1] eq 'hotspot' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'services' && $_routes[1] eq 'hotspot'}class="active" {/if}><a
                                     href="{Text::url('services/hotspot')}">Hotspot</a></li>
-                            <li {if $_routes[1] eq 'pppoe' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'services' && $_routes[1] eq 'pppoe'}class="active" {/if}><a
                                     href="{Text::url('services/pppoe')}">PPPOE</a></li>
-                            <li {if $_routes[1] eq 'vpn' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'services' && $_routes[1] eq 'vpn'}class="active" {/if}><a
                                     href="{Text::url('services/vpn')}">VPN</a>
                             </li>
-                            <li {if $_routes[1] eq 'list' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'bandwidth'}class="active" {/if}><a
                                     href="{Text::url('bandwidth/list')}">Bandwidth</a></li>
                             {if $_c['enable_balance'] == 'yes'}
-                            <li {if $_routes[1] eq 'balance' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'services' && $_routes[1] eq 'balance'}class="active" {/if}><a
                                     href="{Text::url('services/balance')}">{Lang::T('Customer Balance')}</a></li>
                             {/if}
                             {$_MENU_PLANS}
@@ -398,7 +313,7 @@
                     </li>
                     {/if}
                     {$_MENU_AFTER_PLANS}
-                    <li class="{if in_array($_routes[0], ['maps'])}active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['maps']) || $_system_menu eq 'maps'}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -417,14 +332,14 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[1] eq 'customer' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'maps' && ($_routes[1] eq 'customer' || empty($_routes[1]))}class="active" {/if}><a
                                     href="{Text::url('maps/customer')}">{Lang::T('Customer')}</a></li>
-                            <li {if $_routes[1] eq 'routers' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'maps' && $_routes[1] eq 'routers'}class="active" {/if}><a
                                     href="{Text::url('maps/routers')}">{Lang::T('Routers')}</a></li>
                             {$_MENU_MAPS}
                         </ul>
                     </li>
-                    <li class="{if $_system_menu eq 'reports'}active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['reports']) || $_system_menu eq 'reports'}active menu-open{/if} treeview">
                         {if in_array($_admin['user_type'],['SuperAdmin','Admin', 'Report'])}
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -445,9 +360,9 @@
                         </a>
                         {/if}
                         <ul class="treeview-menu">
-                            <li {if $_routes[1] eq 'reports' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'reports' && (empty($_routes[1]) || $_routes[1] eq 'reports' || $_routes[1] eq 'daily')}class="active" {/if}><a
                                     href="{Text::url('reports')}">{Lang::T('Daily Reports')}</a></li>
-                            <li {if $_routes[1] eq 'activation' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'reports' && $_routes[1] eq 'activation'}class="active" {/if}><a
                                     href="{Text::url('reports/activation')}">{Lang::T('Activation History')}</a></li>
                             {* <li {if $_routes[0] eq 'invoices' }class="active" {/if}><a
                                     href="{Text::url('invoices')}">{Lang::T('Invoices')}</a></li> *}
@@ -455,7 +370,7 @@
                         </ul>
                     </li>
                     {$_MENU_AFTER_REPORTS}
-                    <li class="{if $_system_menu eq 'message'}active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['message']) || $_system_menu eq 'message'}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -471,16 +386,16 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[1] eq 'send' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'message' && ($_routes[1] eq 'send' || empty($_routes[1]))}class="active" {/if}><a
                                     href="{Text::url('message/send')}">{Lang::T('Single Customer')}</a></li>
-                            <li {if $_routes[1] eq 'send_bulk' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'message' && $_routes[1] eq 'send_bulk'}class="active" {/if}><a
                                     href="{Text::url('message/send_bulk')}">{Lang::T('Bulk Customers')}</a></li>
                             {$_MENU_MESSAGE}
                         </ul>
                     </li>
                     {$_MENU_AFTER_MESSAGE}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                    <li class="{if $_system_menu eq 'network'}active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['routers', 'pool']) || $_system_menu eq 'network'}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -501,18 +416,18 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[0] eq 'routers' and $_routes[1] eq '' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'routers'}class="active" {/if}><a
                                     href="{Text::url('routers')}">Routers</a></li>
-                            <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'list' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pool' and $_routes[1] neq 'port'}class="active" {/if}><a
                                     href="{Text::url('pool/list')}">IP Pool</a></li>
-                            <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pool' and $_routes[1] eq 'port'}class="active" {/if}><a
                                     href="{Text::url('pool/port')}">Port Pool</a></li>
                             {$_MENU_NETWORK}
                         </ul>
                     </li>
                     {$_MENU_AFTER_NETWORKS}
                     {if $_c['radius_enable']}
-                    <li class="{if $_system_menu eq 'radius'}active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['radius']) || $_system_menu eq 'radius'}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -536,14 +451,14 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[0] eq 'radius' and $_routes[1] eq 'nas-list' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'radius'}class="active" {/if}><a
                                     href="{Text::url('radius/nas-list')}">{Lang::T('Radius NAS')}</a></li>
                             {$_MENU_RADIUS}
                         </ul>
                     </li>
                     {/if}
                     {$_MENU_AFTER_RADIUS}
-                    <li class="{if $_system_menu eq 'pages'}active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['pages']) || $_system_menu eq 'pages'}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -563,24 +478,24 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[1] eq 'Order_Voucher' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Order_Voucher'}class="active" {/if}><a
                                     href="{Text::url('pages/Order_Voucher')}">{Lang::T('Order Voucher')}</a></li>
-                            <li {if $_routes[1] eq 'Voucher' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Voucher'}class="active" {/if}><a
                                     href="{Text::url('pages/Voucher')}">{Lang::T('Theme Voucher')}</a></li>
-                            <li {if $_routes[1] eq 'Announcement' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Announcement'}class="active" {/if}><a
                                     href="{Text::url('pages/Announcement')}">{Lang::T('Announcement')}</a></li>
-                            <li {if $_routes[1] eq 'Announcement_Customer' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Announcement_Customer'}class="active" {/if}><a
                                     href="{Text::url('pages/Announcement_Customer')}">{Lang::T('Customer
                                     Announcement')}</a>
                             </li>
-                            <li {if $_routes[1] eq 'Registration_Info' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Registration_Info'}class="active" {/if}><a
                                     href="{Text::url('pages/Registration_Info')}">{Lang::T('Registration Info')}</a>
                             </li>
-                            <li {if $_routes[1] eq 'Payment_Info' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Payment_Info'}class="active" {/if}><a
                                     href="{Text::url('pages/Payment_Info')}">{Lang::T('Payment Info')}</a></li>
-                            <li {if $_routes[1] eq 'Privacy_Policy' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Privacy_Policy'}class="active" {/if}><a
                                     href="{Text::url('pages/Privacy_Policy')}">{Lang::T('Privacy Policy')}</a></li>
-                            <li {if $_routes[1] eq 'Terms_and_Conditions' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'pages' && $_routes[1] eq 'Terms_and_Conditions'}class="active" {/if}><a
                                     href="{Text::url('pages/Terms_and_Conditions')}">{Lang::T('Terms and
                                     Conditions')}</a></li>
                             {$_MENU_PAGES}
@@ -589,7 +504,7 @@
                     {/if}
                     {$_MENU_AFTER_PAGES}
                     <li
-                        class="{if $_system_menu eq 'settings' || $_system_menu eq 'paymentgateway' }active{/if} treeview">
+                        class="{if in_array($_system_menu, ['settings', 'paymentgateway']) || in_array($_routes[0], ['settings', 'paymentgateway', 'customfield', 'widgets', 'pluginmanager'])}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -619,37 +534,39 @@
                         </a>
                         <ul class="treeview-menu">
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                            <li {if $_routes[1] eq 'app' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and ($_routes[1] eq 'app' || empty($_routes[1]))}class="active" {/if}><a
                                     href="{Text::url('settings/app')}">{Lang::T('General Settings')}</a></li>
-                            <li {if $_routes[1] eq 'localisation' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'localisation'}class="active" {/if}><a
                                     href="{Text::url('settings/localisation')}">{Lang::T('Localisation')}</a></li>
-                            <li {if $_routes[0] eq 'customfield' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'customfield'}class="active" {/if}><a
                                     href="{Text::url('customfield')}">{Lang::T('Custom Fields')}</a></li>
-                            <li {if $_routes[1] eq 'miscellaneous' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'miscellaneous'}class="active" {/if}><a
                                     href="{Text::url('settings/miscellaneous')}">{Lang::T('Miscellaneous')}</a></li>
-                            <li {if $_routes[1] eq 'maintenance' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'maintenance'}class="active" {/if}><a
                                     href="{Text::url('settings/maintenance')}">{Lang::T('Maintenance Mode')}</a></li>
-                            <li {if $_routes[0] eq 'widgets' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'redis'}class="active" {/if}><a
+                                    href="{Text::url('settings/redis')}">{Lang::T('Redis Cache')}</a></li>
+                            <li {if $_routes[0] eq 'widgets'}class="active" {/if}><a
                                     href="{Text::url('widgets')}">{Lang::T('Widgets')}</a></li>
-                            <li {if $_routes[1] eq 'notifications' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'notifications'}class="active" {/if}><a
                                     href="{Text::url('settings/notifications')}">{Lang::T('Notifications')}</a></li>
-                            <li {if $_routes[1] eq 'devices' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'devices'}class="active" {/if}><a
                                     href="{Text::url('settings/devices')}">{Lang::T('Devices')}</a></li>
                             {/if}
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin','Agent'])}
-                            <li {if $_routes[1] eq 'users' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'users'}class="active" {/if}><a
                                     href="{Text::url('settings/users')}">{Lang::T('Administrator Users')}</a></li>
                             {/if}
                             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                            <li {if $_routes[1] eq 'dbstatus' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'settings' and $_routes[1] eq 'dbstatus'}class="active" {/if}><a
                                     href="{Text::url('settings/dbstatus')}">{Lang::T('Backup/Restore')}</a></li>
-                            <li {if $_system_menu eq 'paymentgateway' }class="active" {/if}>
+                            <li {if $_routes[0] eq 'paymentgateway' || $_system_menu eq 'paymentgateway'}class="active" {/if}>
                                 <a href="{Text::url('paymentgateway')}">
                                     <span class="text">{Lang::T('Payment Gateway')}</span>
                                 </a>
                             </li>
                             {$_MENU_SETTINGS}
-                            <li {if $_routes[0] eq 'pluginmanager' }class="active" {/if}>
+                            <li {if $_routes[0] eq 'pluginmanager'}class="active" {/if}>
                                 <a href="{Text::url('pluginmanager')}">
                                     {Lang::T('Plugin Manager')}</a>
                             </li>
@@ -658,7 +575,7 @@
                     </li>
                     {$_MENU_AFTER_SETTINGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                    <li class="{if $_system_menu eq 'logs' }active{/if} treeview">
+                    <li class="{if in_array($_routes[0], ['logs']) || $_system_menu eq 'logs'}active menu-open{/if} treeview">
                         <a href="#">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -674,14 +591,14 @@
                             </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li {if $_routes[1] eq 'list' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'logs' and ($_routes[1] eq 'phpnuxbill' || empty($_routes[1]) || $_routes[1] eq 'list')}class="active" {/if}><a
                                     href="{Text::url('logs/phpnuxbill')}">System</a></li>
                             {if $_c['radius_enable']}
-                            <li {if $_routes[1] eq 'radius' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'radius'}class="active" {/if}><a
                                     href="{Text::url('logs/radius')}">Radius</a>
                             </li>
                             {/if}
-                            <li {if $_routes[1] eq 'message' }class="active" {/if}><a
+                            <li {if $_routes[0] eq 'logs' and $_routes[1] eq 'message'}class="active" {/if}><a
                                     href="{Text::url('logs/message')}">Message</a></li>
                             {$_MENU_LOGS}
                         </ul>
@@ -689,7 +606,7 @@
                     {/if}
                     {$_MENU_AFTER_LOGS}
                     {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                    <li {if $_routes[1] eq 'docs' }class="active" {/if}>
+                    <li {if $_routes[0] eq 'settings' && $_routes[1] eq 'docs'}class="active" {/if}>
                         <a
                             href="{if $_c['docs_clicked'] != 'yes'}{Text::url('settings/docs')}{else}{$app_url}/docs{/if}">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -707,11 +624,11 @@
                             <span class="text">{Lang::T('Documentation')}</span>
                             {if $_c['docs_clicked'] != 'yes'}
                             <span class="pull-right-container"><small
-                                    class="label pull-right bg-green">New</small></span>
+                                     class="label pull-right bg-green">New</small></span>
                             {/if}
                         </a>
                     </li>
-                    <li {if $_system_menu eq 'community' }class="active" {/if}>
+                    <li {if $_system_menu eq 'community' || $_routes[0] eq 'community'}class="active" {/if}>
                         <a href="{Text::url('community')}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -744,14 +661,14 @@
                 </h1>
             </section>
            
-            <section class="content" {if $_system_menu neq 'dashboard' } id="dashboard-content" 
+            <section class="content fade-in" {if $_system_menu neq 'dashboard' } id="dashboard-content" 
                 {/if}>
                 {if isset($notify)}
                 <script>
                     // Display SweetAlert toast notification
                     Swal.fire({
                         icon: '{if $notify_t == "s"}success{else}error{/if}',
-                        title: '{$notify}',
+                        title: {$notify|json_encode},
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 5000,

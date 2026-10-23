@@ -21,6 +21,13 @@ if (!empty($_COOKIE['forgot_username']) && in_array($step, [0, 1])) {
 if ($step == 1) {
     $username = _post('username');
     if (!empty($username)) {
+        // Verify Captcha on fresh submission
+        if (empty($_COOKIE['forgot_username']) || isset($_POST['cf-turnstile-response']) || isset($_POST['g-recaptcha-response'])) {
+            $captchaResult = Captcha::verify('customer');
+            if (!$captchaResult['success']) {
+                r2(getUrl('forgot'), 'e', $captchaResult['message']);
+            }
+        }
         $ui->assign('username', $username);
         if (!file_exists($otpPath)) {
             mkdir($otpPath);
@@ -97,6 +104,10 @@ if ($step == 1) {
     $find = _post('find');
     $step = 6;
     if (!empty($find)) {
+        $captchaResult = Captcha::verify('customer');
+        if (!$captchaResult['success']) {
+            r2(getUrl('forgot&step=6'), 'e', $captchaResult['message']);
+        }
         $via = $config['user_notification_reminder'];
         if ($via == 'email') {
             $via = 'sms';
@@ -164,6 +175,7 @@ foreach ($fs as $file) {
     }
 }
 
+$ui->assign('captcha_widget', Captcha::renderWidget('customer'));
 $ui->assign('step', $step);
 $ui->assign('_title', Lang::T('Forgot Password'));
 $ui->display('customer/forgot.tpl');

@@ -12,12 +12,20 @@ $user = User::_info();
 $ui->assign('_user', $user);
 
 if (isset($_GET['renewal'])) {
-    $user->auto_renewal = $_GET['renewal'];
+    if (!App::checkToken(_get('stoken'))) {
+        r2(getUrl('home'), 'e', Lang::T('Invalid or expired token'));
+    }
+    App::setToken(_get('stoken'), 1); // consume token, prevent replay
+    $user->auto_renewal = _get('renewal') == '1' ? 1 : 0;
     $user->save();
+    r2(getUrl('home'), 's', $user->auto_renewal ? Lang::T('Auto Renewal Enabled') : Lang::T('Auto Renewal Disabled'));
 }
 
 if (_post('send') == 'balance') {
     if ($config['enable_balance'] == 'yes' && $config['allow_balance_transfer'] == 'yes') {
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('home'), 'e', Lang::T('Invalid or expired token'));
+        }
         if ($user['status'] != 'Active') {
             _alert(Lang::T('This account status') . ' : ' . Lang::T($user['status']), 'danger', "");
         }
@@ -26,11 +34,14 @@ if (_post('send') == 'balance') {
             r2(getUrl('home'), 'd', Lang::T('Username not found'));
         }
         $username = _post('username');
-        $balance = _post('balance');
-        if ($user['balance'] < $balance) {
+        $balance = round(floatval(_post('balance')), 2);
+        if ($balance <= 0) {
+            r2(getUrl('home'), 'd', Lang::T('Invalid amount'));
+        }
+        if (floatval($user['balance']) < $balance) {
             r2(getUrl('home'), 'd', Lang::T('insufficient balance'));
         }
-        if (!empty($config['minimum_transfer']) && intval($balance) < intval($config['minimum_transfer'])) {
+        if (!empty($config['minimum_transfer']) && $balance < floatval($config['minimum_transfer'])) {
             r2(getUrl('home'), 'd', Lang::T('Minimum Transfer') . ' ' . Lang::moneyFormat($config['minimum_transfer']));
         }
         if ($user['username'] == $target['username']) {
@@ -99,6 +110,11 @@ if (_post('send') == 'balance') {
 
 // Sync plan to router
 if (isset($_GET['sync']) && !empty($_GET['sync'])) {
+    if (!App::checkToken(_get('stoken'))) {
+        r2(getUrl('home'), 'e', Lang::T('Invalid or expired token'));
+    }
+    App::setToken(_get('stoken'), 1); // consume token, prevent replay
+    $_bill = User::_billing();
     foreach ($_bill as $tur) {
         if ($tur['status'] == 'on') {
             $p = ORM::for_table('tbl_plans')->findOne($tur['plan_id']);
@@ -109,16 +125,17 @@ if (isset($_GET['sync']) && !empty($_GET['sync'])) {
                     if ($_app_stage != 'demo') {
                         if (file_exists($dvc)) {
                             require_once $dvc;
-                            if (method_exists($dvc, 'sync_customer')) {
+                            if (method_exists($p['device'], 'sync_customer')) {
                                 (new $p['device'])->sync_customer($c, $p);
                             }else{
                                 (new $p['device'])->add_customer($c, $p);
                             }
                         } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                            $log .= "DEVICES NOT FOUND : $tur[namebp], $tur[type], $tur[routers]<br>";
+                            continue;
                         }
                     }
-                    $log .= "DONE : $ptur[namebp], $tur[type], $tur[routers]<br>";
+                    $log .= "DONE : $tur[namebp], $tur[type], $tur[routers]<br>";
                 } else {
                     $log .= "Customer NOT FOUND : $tur[namebp], $tur[type], $tur[routers]<br>";
                 }
@@ -155,8 +172,8 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
     if (!$config['extend_expired']) {
         r2(getUrl('home'), 'e', "cannot extend");
     }
-    if (!empty(App::getTokenValue(_get('stoken')))) {
-        r2(getUrl('home'), 'e', "You already extend");
+    if (!App::checkToken(_get('stoken'))) {
+        r2(getUrl('home'), 'e', Lang::T('Invalid or expired token'));
     }
     $id = _get('extend');
     $tur = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->where('id', $id)->find_one();
@@ -184,7 +201,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                     $isChangePlan = true;
                     (new $p['device'])->add_customer($user, $p);
                 } else {
-                    new Exception(Lang::T("Devices Not Found"));
+                    r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));
                 }
             }
 
@@ -194,7 +211,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
             $tur->expiration = $expiration;
             $tur->status = "on";
             $tur->save();
-            App::setToken(_get('stoken'), $id);
+            App::setToken(_get('stoken'), 1); // consume token, prevent replay
             file_put_contents($path, $m);
             _log("Customer $tur[customer_id] $user[fullname] ($tur[username]) extend for $days days", "Customer", $user['id']);
             Message::sendTelegram("#u$user[username] ($user[fullname]) #id$tur[customer_id] #extend #" . $p['type'] . " \n" . $p['name_plan'] .
@@ -209,7 +226,10 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
         r2(getUrl('home'), 'e', "Plan Not Found or Not Active");
     }
 } else if (isset($_GET['deactivate']) && !empty($_GET['deactivate'])) {
-    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['deactivate'])->where('username', $user['username'])->findOne();
+    if (!App::checkToken(_get('stoken'))) {
+        r2(getUrl('home'), 'e', Lang::T('Invalid or expired token'));
+    }
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', _get('deactivate'))->where('username', $user['username'])->findOne();
     if ($bill) {
         $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
         $dvc = Package::getDevice($p);
@@ -218,13 +238,14 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 require_once $dvc;
                 (new $p['device'])->remove_customer($user, $p);
             } else {
-                new Exception(Lang::T("Devices Not Found"));
+                r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));
             }
         }
         $bill->status = 'off';
         $bill->expiration = date('Y-m-d');
         $bill->time = date('H:i:s');
         $bill->save();
+        App::setToken(_get('stoken'), 1); // consume token, prevent replay
         _log('User ' . $bill['username'] . ' Deactivate ' . $bill['namebp'], 'Customer', $bill['customer_id']);
         Message::sendTelegram('User u' . $bill['username'] . ' Deactivate ' . $bill['namebp']);
         r2(getUrl('home'), 's', 'Success deactivate ' . $bill['namebp']);
@@ -247,77 +268,52 @@ function safeAssignSessionVar($ui, $var_name, $session_key) {
     }
 }
 
-if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && $_c['hs_auth_method'] != 'hchap')) {
+if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip']) && $_c['hs_auth_method'] != 'hchap') {
     safeAssignSessionVar($ui, 'nux_mac', 'nux-mac');
     safeAssignSessionVar($ui, 'nux_ip', 'nux-ip');
-    $bill = ORM::for_table('tbl_user_recharges')->where('id', $_GET['id'])->where('username', $user['username'])->findOne();
-    $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
-    $dvc = Package::getDevice($p);
-    if ($_app_stage != 'demo') {
-        if (file_exists($dvc)) {
-            require_once $dvc;
-            if ($_GET['mikrotik'] == 'login') {
-                (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
-                r2(getUrl('home'), 's', Lang::T('Login Request successfully'));
-            } else if ($_GET['mikrotik'] == 'logout') {
-                (new $p['device'])->disconnect_customer($user, $bill['routers']);
-                r2(getUrl('home'), 's', Lang::T('Logout Request successfully'));
+    $bill = ORM::for_table('tbl_user_recharges')->where('id', _get('id'))->where('username', $user['username'])->findOne();
+    if ($bill) {
+        $p = ORM::for_table('tbl_plans')->where('id', $bill['plan_id'])->find_one();
+        $dvc = Package::getDevice($p);
+        if ($_app_stage != 'demo') {
+            if (file_exists($dvc)) {
+                require_once $dvc;
+                if (_get('mikrotik') == 'login') {
+                    (new $p['device'])->connect_customer($user, $_SESSION['nux-ip'], $_SESSION['nux-mac'], $bill['routers']);
+                    r2(getUrl('home'), 's', Lang::T('Login Request successfully'));
+                } else if (_get('mikrotik') == 'logout') {
+                    (new $p['device'])->disconnect_customer($user, $bill['routers']);
+                    r2(getUrl('home'), 's', Lang::T('Logout Request successfully'));
+                }
+            } else {
+                r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));
             }
-        } else {
-            new Exception(Lang::T("Devices Not Found"));
         }
     }
 }
 
-if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSION['nux-hostname']) && $_c['hs_auth_method'] == 'hchap')) {
+if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip']) && !empty($_SESSION['nux-hostname']) && $_c['hs_auth_method'] == 'hchap') {
     $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff') || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $ui->assign('nux_mac', $_SESSION['nux-mac']);
-    $ui->assign('nux_ip', $_SESSION['nux-ip']);
-    $keys = explode('-', $_SESSION['nux-key']);
+    safeAssignSessionVar($ui, 'nux_mac', 'nux-mac');
+    safeAssignSessionVar($ui, 'nux_ip', 'nux-ip');
+    $keys = explode('-', isset($_SESSION['nux-key']) ? $_SESSION['nux-key'] : '');
     $ui->assign('hostname', $_SESSION['nux-hostname']);
     $ui->assign('apkurl', $apkurl);
-    $ui->assign('key1', $keys[0]);
-    $ui->assign('key2', $keys[1]);
-    $ui->assign('hchap', $_GET['hchap']);
-    $ui->assign('logged', $_GET['logged']);
+    $ui->assign('key1', isset($keys[0]) ? $keys[0] : '');
+    $ui->assign('key2', isset($keys[1]) ? $keys[1] : '');
+    $ui->assign('hchap', _get('hchap'));
+    $ui->assign('logged', _get('logged'));
     if ($_app_stage != 'demo') {
-        if ($_GET['mikrotik'] == 'login') {
+        if (_get('mikrotik') == 'login') {
             r2(getUrl('home&hchap=true'), 's', Lang::T('Login Request successfully'));
         }
-        $getmsg = $_GET['msg'];
+        $getmsg = strip_tags(_get('msg'));
         ///get auth notification from mikrotik
         if ($getmsg == 'Connected') {
-            $msg .= Lang::T($getmsg);
+            $msg = Lang::T($getmsg);
             r2(getUrl('home&logged=1'), 's', $msg);
         } else if ($getmsg) {
-            $msg .= Lang::T($getmsg);
-            r2(getUrl('home'), 's', $msg);
-        }
-    }
-}
-
-if (!empty($_SESSION['nux-mac']) && !empty($_SESSION['nux-ip'] && !empty($_SESSION['nux-hostname']) && $_c['hs_auth_method'] == 'hchap')) {
-    $apkurl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'onoff') || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $ui->assign('nux_mac', $_SESSION['nux-mac']);
-    $ui->assign('nux_ip', $_SESSION['nux-ip']);
-    $keys = explode('-', $_SESSION['nux-key']);
-    $ui->assign('hostname', $_SESSION['nux-hostname']);
-    $ui->assign('apkurl', $apkurl);
-    $ui->assign('key1', $keys[0]);
-    $ui->assign('key2', $keys[1]);
-    $ui->assign('hchap', $_GET['hchap']);
-    $ui->assign('logged', $_GET['logged']);
-    if ($_app_stage != 'demo') {
-        if ($_GET['mikrotik'] == 'login') {
-            r2(getUrl('home&hchap=true'), 's', Lang::T('Login Request successfully'));
-        }
-        $getmsg = $_GET['msg'];
-        ///get auth notification from mikrotik
-        if ($getmsg == 'Connected') {
-            $msg .= Lang::T($getmsg);
-            r2(getUrl('home&logged=1'), 's', $msg);
-        } else if ($getmsg) {
-            $msg .= Lang::T($getmsg);
+            $msg = Lang::T($getmsg);
             r2(getUrl('home'), 's', $msg);
         }
     }
@@ -328,14 +324,15 @@ $widgets = ORM::for_table('tbl_widgets')->where("enabled", 1)->where('user', 'Cu
 $count = count($widgets);
 for ($i = 0; $i < $count; $i++) {
     try{
-        if(file_exists($WIDGET_PATH . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR . $widgets[$i]['widget'].".php")){
-            require_once $WIDGET_PATH . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR . $widgets[$i]['widget'].".php";
-            $widgets[$i]['content'] = (new $widgets[$i]['widget'])->getWidget($widgets[$i]);
+        $widgetFile = preg_replace('/[^a-zA-Z0-9_]/', '', $widgets[$i]['widget']);
+        if(file_exists($WIDGET_PATH . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR . $widgetFile.".php")){
+            require_once $WIDGET_PATH . DIRECTORY_SEPARATOR . 'customer' . DIRECTORY_SEPARATOR . $widgetFile.".php";
+            $widgets[$i]['content'] = (new $widgetFile())->getWidget($widgets[$i]);
         }else{
             $widgets[$i]['content'] = "Widget not found";
         }
     } catch (Throwable $e) {
-        $widgets[$i]['content'] = $e->getMessage();
+        $widgets[$i]['content'] = Lang::T('Failed to load widget');
     }
 }
 

@@ -110,20 +110,20 @@ body {
 
 .content-header {
   list-style-type: none;
-  padding: 15px;
+  padding: 25px 25px 0 25px;
+  background-color: #f6f9fc;
+}
+
+.content {
+  padding: 15px 25px 25px !important;
   background-color: #f6f9fc;
 }
 
 @media (max-width: 767px) {
   .content {
-    padding: 0 15px !important;
+    padding: 15px 15px 15px !important;
     background-color: #f6f9fc;
   }
-}
-
-.content {
-  padding: 25px !important;
-  background-color: #f6f9fc;
 }
 
 .content-wrapper,
@@ -289,13 +289,17 @@ body {
   background: yellow;
 }
 
+/* No extra offset here — navbar clearance is handled by the
+   "Fixed Navbar & Docked Sidebar" section below (padding-top).
+   The previous margin-top stacked on top of that padding and
+   doubled the gap between the navbar and the page body. */
 .content-wrapper {
-  margin-top: 50px;
+  margin-top: 0;
 }
 
 @media (max-width: 767px) {
   .content-wrapper {
-    margin-top: 100px;
+    margin-top: 0;
   }
 }
 
@@ -835,91 +839,154 @@ select:not(#filterNavigateMenu),
   color: #f5f5f5;
 }
 
+/* ===== Mobile bottom navigation ===== */
 .bottom-nav {
+  --nav-bg: #1c2431;
+  --nav-text: #9aa4b2;
+  --nav-text-active: #ffffff;
+  --nav-accent: #ffcc00;
+  --nav-ring: #f6f9fc;
+
   display: none;
   justify-content: space-around;
-  align-items: center;
+  align-items: stretch;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: #1a1a1a;
+  min-height: 60px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--nav-bg);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.25);
   z-index: 1000;
 }
 
+.dark-mode .bottom-nav {
+  --nav-bg: #0e1219;
+  --nav-text: #8b93a7;
+  --nav-ring: #0e1219;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
+}
+
 .nav-item {
-  text-decoration: none;
-  color: #bbb;
-  text-align: center;
-  font-family: Arial, sans-serif;
-  font-size: 16px;
+  position: relative;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 2px 6px;
+  text-decoration: none;
+  text-align: center;
+  font-family: inherit;
+  color: var(--nav-text);
+  transition: color 0.2s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.nav-item:hover {
-  color: #fff;
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
 }
 
-.bottom-nav::before {
+.nav-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-label {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.2px;
+}
+
+.nav-item:hover,
+.nav-item:focus {
+  color: var(--nav-text-active);
+  text-decoration: none;
+}
+
+.nav-item:active {
+  transform: scale(0.94);
+}
+
+/* Active tab: bright icon + accent pill on top */
+.nav-item.active {
+  color: var(--nav-text-active);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--nav-accent);
+}
+
+.nav-item.active::after {
   content: "";
   position: absolute;
-  top: -27px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 75px;
-  height: 75px;
-  background: #f6f9fc;
-  border-radius: 50%;
-  border-spacing: 20px;
-  z-index: 1001;
+  width: 28px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: var(--nav-accent);
 }
 
-.nav-item::after {
-  content: "";
-  display: block;
-  width: 50%;
-  height: 4px;
-  background: #ffcc00;
-  /* Yellow underline */
-  margin: 0 auto;
-  opacity: 0;
-  /* Hidden by default */
-  transition: opacity 0.3s;
-}
-
-.nav-item:hover::after {
-  opacity: 1;
-  /* Show underline on hover */
+/* Center action button (Buy) */
+.nav-item-fab {
+  justify-content: flex-end;
+  padding-bottom: 6px;
 }
 
 .floating-button {
   position: absolute;
-  bottom: 20px;
+  top: -22px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #ffcc00;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: var(--nav-accent);
+  color: #1a1a1a;
+  border-radius: 50%;
+  /* page-colored ring = notch illusion around the raised button (both themes) */
+  border: 4px solid var(--nav-ring);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
   z-index: 1001;
 }
 
-.floating-button a {
+.floating-button:hover,
+.floating-button:focus {
+  transform: translateX(-50%) scale(1.06);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  color: #1a1a1a;
   text-decoration: none;
-  color: black;
-  font-size: 28px;
 }
 
-.history {
-  margin-right: 40px;
+.floating-button:active {
+  transform: translateX(-50%) scale(0.95);
 }
 
-.message {
-  margin-left: 40px;
+.floating-button svg {
+  width: 26px;
+  height: 26px;
+}
+
+.nav-item-fab .nav-label {
+  color: var(--nav-text);
+}
+
+.nav-item-fab.active .nav-label {
+  color: var(--nav-text-active);
+}
+
+.nav-item-fab.active .floating-button {
+  box-shadow: 0 0 0 3px var(--nav-bg), 0 0 0 5px var(--nav-accent), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 @media (max-width: 768px) {
@@ -927,21 +994,74 @@ select:not(#filterNavigateMenu),
     display: flex;
   }
 
-  .nav-item {
-    font-size: 14px;
+  /* keep the top bar on a single row: flexible logo + compact icons */
+  .main-header {
+    display: flex;
+    align-items: center;
+    height: 50px;
+  }
+
+  .main-header .logo {
+    float: none;
+    width: auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 45%;
+    padding: 0 10px;
+  }
+
+  .main-header .logo .logo-lg {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .main-header .navbar {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .navbar-custom-menu {
+    float: none;
+  }
+
+  .navbar-custom-menu > .navbar-nav {
+    float: none;
+    margin: 0;
+    display: flex;
+  }
+
+  .navbar-custom-menu .navbar-nav > li > a {
+    padding: 12px 9px;
+  }
+
+  /* balance chip: truncate instead of pushing icons out */
+  .navbar-custom-menu .user-menu > a > span {
+    display: inline-block;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    font-size: 13px;
+  }
+
+  .navbar-custom-menu .dropdown-menu {
+    right: 0;
+    left: auto;
   }
 
   .toggle {
     display: none;
   }
-}
 
-.nav-item.active {
-  color: #fff;
-}
-
-.nav-item.active::after {
-  opacity: 1;
+  /* clear the bottom bar (60px) + raised FAB overhang */
+  .content-wrapper {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Apply Theme Variables */
@@ -982,9 +1102,9 @@ select:not(#filterNavigateMenu),
   }
 }
 
-.skeleton-icon,
-.skeleton-text {
-  animation: shimmer 1.5s infinite;
+/* Loading state for async [api-get-text] regions */
+.api-skeleton {
+  animation: shimmer 1.5s infinite linear;
   background: linear-gradient(
     to right,
     var(--skeleton-highlight) 8%,
@@ -992,25 +1112,37 @@ select:not(#filterNavigateMenu),
     var(--skeleton-highlight) 33%
   );
   background-size: 500px 90px;
-  height: 15px;
-  width: 80%;
   border-radius: 4px;
+  min-height: 1.2em;
+  min-width: 3em;
+  display: inline-block;
+  vertical-align: middle;
+  color: transparent !important;
 }
 
-.dashboard-skeleton .stat-card-skeleton,
-.dashboard-skeleton .date-balance-skeleton,
-.dashboard-skeleton .chart-skeleton,
-.dashboard-skeleton .notification-skeleton {
-  animation: shimmer 1.5s infinite;
-  background: linear-gradient(
-    to right,
-    var(--skeleton-highlight) 8%,
-    var(--skeleton-bg) 18%,
-    var(--skeleton-highlight) 33%
-  );
-  background-size: 400px 100px;
-  position: relative;
-  overflow: hidden;
+/* Content is server-rendered: show it immediately, fade in gently */
+.fade-in {
+  animation: fadeIn 0.25s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .api-skeleton,
+  .fade-in {
+    animation: none;
+  }
 }
 .dashboard {
   padding: 20px;
@@ -1130,3 +1262,178 @@ select:not(#filterNavigateMenu),
   width: 25px;
   height: 25px;
 }
+
+/* Fixed Navbar & Docked Sidebar */
+body.fixed .main-header,
+.main-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1030 !important;
+}
+
+body.fixed .content-wrapper,
+body.fixed .right-side,
+.content-wrapper,
+.right-side {
+  padding-top: 50px !important;
+}
+
+@media (max-width: 767px) {
+  body.fixed .content-wrapper,
+  body.fixed .right-side,
+  .content-wrapper,
+  .right-side {
+    /* top bar is a single 50px row on mobile */
+    padding-top: 50px !important;
+  }
+}
+
+body.fixed .main-sidebar,
+.main-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  padding-top: 50px !important;
+  z-index: 850 !important;
+}
+
+@media (max-width: 767px) {
+  body.fixed .main-sidebar,
+  .main-sidebar {
+    padding-top: 50px !important;
+    z-index: 825 !important;
+  }
+}
+
+/* Sidebar scroll: only scrolls when items overflow viewport (e.g. expanded submenu) */
+.main-sidebar .sidebar {
+  height: calc(100vh - 50px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+@media (max-width: 767px) {
+  .main-sidebar .sidebar {
+    height: calc(100vh - 50px) !important;
+    /* keep the last menu items clear of the bottom nav */
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.sidebar-mini.sidebar-collapse .main-sidebar,
+.sidebar-mini.sidebar-collapse .sidebar,
+.sidebar-collapse .main-sidebar,
+.sidebar-collapse .sidebar {
+  overflow: visible !important;
+  height: auto !important;
+}
+
+/* Profile Dropdown Trigger (Pill button matching theme toggle and notifications) */
+.navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 38px !important;
+  padding: 0 12px 0 6px !important;
+  border-radius: 8px !important;
+  margin: 0 4px !important;
+  color: #64748b !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  line-height: normal !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+  background-color: transparent !important;
+  text-decoration: none !important;
+}
+
+.navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle:hover,
+.navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle:focus,
+.navbar-custom-menu .navbar-nav > li.user-menu.open > a.dropdown-toggle {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: #2563eb !important;
+  text-decoration: none !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle {
+  color: #94a3b8 !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle:hover,
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle:focus,
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu.open > a.dropdown-toggle {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #60a5fa !important;
+}
+
+.navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle .user-image {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  border-radius: 50% !important;
+  margin-right: 8px !important;
+  margin-top: 0 !important;
+  float: none !important;
+  object-fit: cover !important;
+  border: 1.5px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle .user-image {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* User Profile Dropdown Menu Card Styling */
+.navbar-custom-menu .navbar-nav > li.user-menu > .dropdown-menu {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden !important;
+  margin-top: 6px !important;
+  right: 4px !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > .dropdown-menu {
+  background-color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > .dropdown-menu > li.user-header {
+  background-color: #0f172a !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > .dropdown-menu > .user-body {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > .dropdown-menu > .user-body a {
+  color: #cbd5e1 !important;
+}
+
+.dark-mode .navbar-custom-menu .navbar-nav > li.user-menu > .dropdown-menu > .user-footer {
+  background-color: #1e293b !important;
+}
+
+

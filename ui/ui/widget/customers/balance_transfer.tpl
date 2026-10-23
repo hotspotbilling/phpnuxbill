@@ -6,6 +6,7 @@
         </div>
         <div class="box-body p-0">
             <form method="post" onsubmit="return askConfirm()" role="form" action="{Text::url('home')}">
+                <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <div class="form-group">
                     <div class="col-sm-5">
                         <input type="text" id="username" name="username" class="form-control" required

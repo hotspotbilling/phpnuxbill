@@ -10,7 +10,7 @@
                         {else if $_bill['type'] == 'PPPOE'}
                             {if $_c['pppoe_plan']==''}PPPOE Plan{else}{$_c['pppoe_plan']}{/if}
                         {else if $_bill['type'] == 'VPN'}
-                            {if $_c['pppoe_plan']==''}VPN Plan{else}{$_c['vpn_plan']}{/if}
+                            {if $_c['vpn_plan']==''}VPN Plan{else}{$_c['vpn_plan']}{/if}
                         {/if}
                     </div>
                 </div>
@@ -52,6 +52,20 @@
                         <td class="small mb15 text-danger">
                             {if $_bill['time'] ne ''}
                                 {Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}
+                                {if $_bill['status'] == 'on'}
+                                    {assign var="days_left" value=(strtotime($_bill['expiration']) - time()) / 86400}
+                                    {if $days_left <= 0}
+                                        <span class="label label-danger pull-right">{Lang::T('Expired')}</span>
+                                    {elseif $days_left <= 1}
+                                        <span class="label label-danger pull-right">{Lang::T('Expires Today')}</span>
+                                    {elseif $days_left <= 3}
+                                        <span class="label label-warning pull-right">{ceil($days_left)}
+                                            {Lang::T('days left')}</span>
+                                    {else}
+                                        <span class="label label-success pull-right">{ceil($days_left)}
+                                            {Lang::T('days left')}</span>
+                                    {/if}
+                                {/if}
                             {/if}&nbsp;
                         </td>
                     </tr>
@@ -107,7 +121,7 @@
                             <td class="small text-primary text-uppercase text-normal">{Lang::T('Login Status')}</td>
                             <td class="small mb15">
                                 {if $logged == '1'}
-                                    <a href="http://{$hostname}/status" class="btn btn-success btn-xs btn-block">
+                                    <a href="http://{$hostname|escape:'html'}/status" class="btn btn-success btn-xs btn-block">
                                         {Lang::T('You are Online, Check Status')}</a>
                                 {else}
                                     <a href="{Text::url('home&mikrotik=login')}"
@@ -119,8 +133,8 @@
                     {/if}
                     <tr>
                         <td class="small text-primary text-uppercase text-normal">
-                            {if $_bill['status'] == 'on' && $_bill['prepaid'] != 'YES'}
-                                <a href="{Text::url('home&deactivate=', $_bill['id'])}"
+                            {if $_bill['status'] == 'on' && $_bill['prepaid'] != 'yes'}
+                                <a href="{Text::url('home&deactivate=', $_bill['id'], '&stoken=', App::getToken())}"
                                     onclick="return ask(this, '{Lang::T('Deactivate')}?')" class="btn btn-danger btn-xs"><i
                                         class="glyphicon glyphicon-trash"></i></a>
                             {/if}

@@ -23,7 +23,7 @@
 </script>
 <!--End of Tawk.to Script-->
 {/if}
-<script src="{$app_url}/ui/ui/scripts/public.js"></script>
+<script src="{$app_url}/ui/ui/scripts/public.js?2026.10.22.2"></script>
 </body>
 
 </html>

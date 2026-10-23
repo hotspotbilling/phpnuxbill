@@ -140,6 +140,10 @@
         margin: 0 8px;
     }
 
+    .announcement-panel {
+        order: -1;
+    }
+
     @media (max-width: 768px) {
         .otp-form-wrapper {
             flex-direction: column;
@@ -201,6 +205,10 @@
                     </div>
                     <small class="form-text">{Lang::T('We will send an OTP code to verify your phone number')}</small>
                 </div>
+
+                {if !empty($captcha_widget)}
+                    {$captcha_widget}
+                {/if}
 
                 <div class="form-actions">
                     <a href="{Text::url('login')}" class="btn btn-secondary">{Lang::T('Back to Login')}</a>

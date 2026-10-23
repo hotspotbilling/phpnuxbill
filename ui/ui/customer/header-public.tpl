@@ -11,18 +11,9 @@
         var appUrl = '{$app_url}';
     </script>
 
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.public.css">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.public.css?2026.10.22.4">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
 </head>
 
-
 <body>
-    <div class="background">
-        <div class="animated-bg">
-            <div class="floating-shape shape1"></div>
-            <div class="floating-shape shape2"></div>
-            <div class="floating-shape shape3"></div>
-            <div class="floating-shape shape4"></div>
-            <div class="floating-shape shape5"></div>
-        </div>
-    </div>
+    <div class="background"></div>

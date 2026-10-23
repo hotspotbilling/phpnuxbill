@@ -14,11 +14,45 @@
     }
 
     /* Register specific layout adjustments */
+    .login-container {
+        align-items: flex-start;
+    }
+
+    .announcement-panel {
+        order: -1;
+        align-self: flex-start;
+    }
+
     .register-form-wrapper {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 15px;
+        gap: 20px;
         margin-bottom: 20px;
+        width: 100%;
+        max-width: 880px;
+    }
+
+    @media (max-width: 1100px) {
+        .login-container {
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        .announcement-panel {
+            width: 100% !important;
+            max-width: 880px !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .register-form-wrapper {
+            grid-template-columns: 1fr;
+            max-width: 440px;
+        }
+
+        .announcement-panel {
+            max-width: 440px !important;
+        }
     }
 
     .card-header-section {
@@ -228,9 +262,9 @@
                         {/if}
                     </div>
                 </div>
+                {/if}
+                {$customFields}
             </div>
-            {/if}
-            {$customFields}
         </div>
 
 
@@ -271,6 +305,10 @@
                     </div>
                 </div>
                 
+                {if !empty($captcha_widget)}
+                    {$captcha_widget}
+                {/if}
+
                 <button type="submit" class="login-btn">
                     <span class="btn-text">{Lang::T('Register Now')}</span>
                     <div class="btn-loader">
@@ -289,6 +327,7 @@
                     </a>
                 </div>
             </div>
+        </div>
 
     </form>
 </div>

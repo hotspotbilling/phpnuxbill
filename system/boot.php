@@ -20,7 +20,7 @@ function _notify($msg, $type = 'e')
 }
 
 $ui = new Smarty();
-$ui->assign('_kolaps', $_COOKIE['kolaps']);
+$ui->assign('_kolaps', (!empty($_COOKIE['kolaps']) && $_COOKIE['kolaps'] === 'true'));
 if (!empty($config['theme']) && $config['theme'] != 'default') {
     $_theme = APP_URL . '/' . $UI_PATH . '/themes/' . $config['theme'];
     $ui->setTemplateDir([

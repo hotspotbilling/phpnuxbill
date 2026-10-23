@@ -216,8 +216,8 @@
   ],
   "2025.10.9": [
     "ALTER TABLE `tbl_customers` ADD `referral_code` VARCHAR(25) DEFAULT '' COMMENT 'Referral code' AFTER `email`;",
-    "CREATE TABLE `tbl_referral_relationships` (`id` int(11) NOT NULL,`referrer_id` int(11) NOT NULL COMMENT 'Customer who referred', `referred_id` int(11) NOT NULL COMMENT 'Customer who was referred', `referral_code` varchar(25) NOT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp()) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
-    "CREATE TABLE `tbl_referral_rewards` (`id` int(11) NOT NULL,`relationship_id` int(11) NOT NULL,`referrer_id` int(11) NOT NULL,`referred_id` int(11) NOT NULL,`reward_type` enum('balance','discount','plan_extension') NOT NULL DEFAULT 'balance',`reward_for` varchar(20) DEFAULT 'referrer' COMMENT 'referrer or referred',`reward_amount` decimal(10,2) NOT NULL DEFAULT 0.00,`status` enum('pending','processed','claimed') NOT NULL DEFAULT 'pending',`created_at` timestamp NOT NULL DEFAULT current_timestamp(),`processed_at` timestamp NULL DEFAULT NULL,`calculation_type` enum('fixed','percentage') DEFAULT 'fixed',`percentage_value` decimal(10,2) DEFAULT NULL,`purchase_amount` decimal(10,2) DEFAULT NULL,`actual_discount_amount` decimal(10,2) DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+    "CREATE TABLE IF NOT EXISTS `tbl_referral_relationships` (`id` int(11) NOT NULL AUTO_INCREMENT,`referrer_id` int(11) NOT NULL COMMENT 'Customer who referred', `referred_id` int(11) NOT NULL COMMENT 'Customer who was referred', `referral_code` varchar(25) NOT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp(), PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+    "CREATE TABLE IF NOT EXISTS `tbl_referral_rewards` (`id` int(11) NOT NULL AUTO_INCREMENT,`relationship_id` int(11) NOT NULL,`referrer_id` int(11) NOT NULL,`referred_id` int(11) NOT NULL,`reward_type` enum('balance','discount','plan_extension') NOT NULL DEFAULT 'balance',`reward_for` varchar(20) DEFAULT 'referrer' COMMENT 'referrer or referred',`reward_amount` decimal(10,2) NOT NULL DEFAULT 0.00,`status` enum('pending','processed','claimed') NOT NULL DEFAULT 'pending',`created_at` timestamp NOT NULL DEFAULT current_timestamp(),`processed_at` timestamp NULL DEFAULT NULL,`calculation_type` enum('fixed','percentage') DEFAULT 'fixed',`percentage_value` decimal(10,2) DEFAULT NULL,`purchase_amount` decimal(10,2) DEFAULT NULL,`actual_discount_amount` decimal(10,2) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
     "INSERT INTO `tbl_appconfig` (`setting`, `value`) VALUES ('referral_enabled', 'yes'), ('referrer_reward_type', 'balance'), ('referrer_reward_amount', '0.00'), ('referred_reward_type', 'balance'), ('referred_reward_amount', '0.00'), ('min_purchase_amount', '0.00'), ('referral_code_length', '8'), ('require_purchase', 'yes');",
     "INSERT INTO `tbl_widgets` (`orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (6, 1, 'Customer', 1, 'Referrals', 'referrals', '');",
     "ALTER TABLE `rad_acct` ADD COLUMN `dateUpdated` timestamp NULL DEFAULT NULL;"
@@ -246,5 +246,32 @@
   "2026.10.10": [
     "ALTER TABLE `tbl_push_subscriptions` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;",
     "ALTER TABLE `tbl_push_subscriptions` MODIFY `endpoint` TEXT DEFAULT NULL;"
+  ],
+  "2026.10.21": [
+    "CREATE TABLE IF NOT EXISTS `tbl_referral_relationships` (`id` int(11) NOT NULL AUTO_INCREMENT, `referrer_id` int(11) NOT NULL COMMENT 'Customer who referred', `referred_id` int(11) NOT NULL COMMENT 'Customer who was referred', `referral_code` varchar(25) NOT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp(), PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+    "CREATE TABLE IF NOT EXISTS `tbl_referral_rewards` (`id` int(11) NOT NULL AUTO_INCREMENT, `relationship_id` int(11) NOT NULL, `referrer_id` int(11) NOT NULL, `referred_id` int(11) NOT NULL, `reward_type` enum('balance','discount','plan_extension') NOT NULL DEFAULT 'balance', `reward_for` varchar(20) DEFAULT 'referrer' COMMENT 'referrer or referred', `reward_amount` decimal(10,2) NOT NULL DEFAULT 0.00, `status` enum('pending','processed','claimed') NOT NULL DEFAULT 'pending', `created_at` timestamp NOT NULL DEFAULT current_timestamp(), `processed_at` timestamp NULL DEFAULT NULL, `calculation_type` enum('fixed','percentage') DEFAULT 'fixed', `percentage_value` decimal(10,2) DEFAULT NULL, `purchase_amount` decimal(10,2) DEFAULT NULL, `actual_discount_amount` decimal(10,2) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
+    "ALTER TABLE `tbl_referral_relationships` ADD PRIMARY KEY (`id`);",
+    "ALTER TABLE `tbl_referral_relationships` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;",
+    "ALTER TABLE `tbl_referral_rewards` ADD PRIMARY KEY (`id`);",
+    "ALTER TABLE `tbl_referral_rewards` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;",
+    "ALTER TABLE `tbl_referral_rewards` ADD COLUMN IF NOT EXISTS `calculation_type` enum('fixed','percentage') DEFAULT 'fixed';",
+    "ALTER TABLE `tbl_referral_rewards` ADD COLUMN IF NOT EXISTS `percentage_value` decimal(10,2) DEFAULT NULL;",
+    "ALTER TABLE `tbl_referral_rewards` ADD COLUMN IF NOT EXISTS `purchase_amount` decimal(10,2) DEFAULT NULL;",
+    "ALTER TABLE `tbl_referral_rewards` ADD COLUMN IF NOT EXISTS `actual_discount_amount` decimal(10,2) DEFAULT NULL;",
+    "ALTER TABLE `tbl_referral_rewards` ADD COLUMN IF NOT EXISTS `reward_for` varchar(20) DEFAULT 'referrer' COMMENT 'referrer or referred';"
+  ],
+  "2026.10.22": [
+    "UPDATE tbl_widgets SET widget='referrals', title='Referrals' WHERE user='Customer' AND widget='referral_program';",
+    "DELETE t1 FROM tbl_widgets t1 INNER JOIN tbl_widgets t2 ON t1.user=t2.user AND t1.widget=t2.widget AND t1.id>t2.id WHERE t1.user='Customer' AND t1.widget='referrals';",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=1, w.orders=1 WHERE w.user='Customer' AND w.widget='unpaid_order' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=1, w.orders=2 WHERE w.user='Customer' AND w.widget='announcement' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=1, w.orders=3 WHERE w.user='Customer' AND w.widget='active_internet_plan' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=2, w.orders=1 WHERE w.user='Customer' AND w.widget='account_info' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=2, w.orders=2 WHERE w.user='Customer' AND w.widget='voucher_activation' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=3, w.orders=1 WHERE w.user='Customer' AND w.widget='balance_transfer' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=3, w.orders=2 WHERE w.user='Customer' AND w.widget='recharge_a_friend' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=3, w.orders=3 WHERE w.user='Customer' AND w.widget='referrals' AND (c.value IS NULL OR c.value='6,6');",
+    "UPDATE tbl_appconfig SET value='4,4,4' WHERE setting='dashboard_Customer' AND value='6,6';",
+    "INSERT INTO tbl_appconfig (setting, value) SELECT 'dashboard_Customer','4,4,4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tbl_appconfig WHERE setting='dashboard_Customer');"
   ]
 }

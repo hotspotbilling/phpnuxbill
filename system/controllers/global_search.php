@@ -68,6 +68,8 @@ $quickActions = [
     'voucher' => ['title' => Lang::T('Generate Vouchers'), 'sub' => Lang::T('Batch voucher generator'), 'url' => getUrl('plan/voucher'), 'icon' => 'fa-ticket'],
     'logs' => ['title' => Lang::T('Activity Logs'), 'sub' => Lang::T('System event logs'), 'url' => getUrl('logs'), 'icon' => 'fa-history'],
     'settings' => ['title' => Lang::T('General Settings'), 'sub' => Lang::T('Configure application preferences'), 'url' => getUrl('settings/app'), 'icon' => 'fa-cog'],
+    'redis' => ['title' => Lang::T('Redis Cache'), 'sub' => Lang::T('Manage Redis memory cache and performance'), 'url' => getUrl('settings/redis'), 'icon' => 'fa-bolt'],
+    'cache' => ['title' => Lang::T('Redis Cache'), 'sub' => Lang::T('Manage Redis memory cache and performance'), 'url' => getUrl('settings/redis'), 'icon' => 'fa-bolt'],
     'backup' => ['title' => Lang::T('Database Backup'), 'sub' => Lang::T('Database status and backup'), 'url' => getUrl('settings/dbstatus'), 'icon' => 'fa-database'],
 ];
 

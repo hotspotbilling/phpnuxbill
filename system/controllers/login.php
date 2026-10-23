@@ -232,6 +232,17 @@ switch ($do) {
             ]);
             exit;
         }
+
+        // Verify Captcha if enabled
+        $captchaResult = Captcha::verify('customer');
+        if (!$captchaResult['success']) {
+            echo json_encode([
+                'success' => false,
+                'message' => $captchaResult['message'],
+                'data' => []
+            ]);
+            exit;
+        }
         
         $result = performLogin($username, $password, true);
         
@@ -245,6 +256,17 @@ switch ($do) {
         if (!Csrf::check($csrf_token)) {
             _msglog('e', Lang::T('Invalid or Expired CSRF Token'));
             r2(getUrl('login'));
+        }
+
+        // Verify Captcha if enabled
+        $captchaResult = Captcha::verify('customer');
+        if (!$captchaResult['success']) {
+            if ($isApi) {
+                showResult(false, $captchaResult['message']);
+            } else {
+                _msglog('e', $captchaResult['message']);
+                r2(getUrl('login'));
+            }
         }
         
         $result = performLogin($username, $password, false);
@@ -540,6 +562,7 @@ switch ($do) {
             $ui->assign('wallpaper', $wallpaper);
             $ui->assign('favicon', $favicon);
             $ui->assign('csrf_token', $csrf_token);
+            $ui->assign('captcha_widget', Captcha::renderWidget('customer'));
             $ui->assign('_title', Lang::T('Login'));
             switch ($config['login_page_type']) {
                 case 'custom':

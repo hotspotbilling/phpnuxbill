@@ -183,9 +183,29 @@
         border-color: #667eea;
     }
 
+    .announcement-panel {
+        order: -1;
+    }
+
+    @media (max-width: 1100px) {
+        .login-container {
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        .announcement-panel {
+            width: 100% !important;
+            max-width: 880px !important;
+        }
+    }
+
     @media (max-width: 768px) {
         .register-form-wrapper {
             grid-template-columns: 1fr;
+        }
+
+        .announcement-panel {
+            max-width: 440px !important;
         }
     }
 </style>

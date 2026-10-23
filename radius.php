@@ -42,7 +42,12 @@ try {
             $CHAPchallenge = _req('CHAPchallenge');
             $isCHAP = false;
             if (!empty($CHAPassword)) {
-                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
+                $c = (class_exists('RedisCache') && RedisCache::isRadiusCacheEnabled())
+                    ? RedisCache::remember('rad:cust_chap:' . md5($username), RedisCache::getRadiusTTL(), function () use ($username) {
+                        $row = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
+                        return $row ? $row->as_array() : null;
+                    })
+                    : ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
                 if ($c) {
                     if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                         $password = $c['password'];
@@ -68,7 +73,12 @@ try {
                         }
                     }
                 } else {
-                    $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY pppoe_username = ?", [$username])->where('status', 'Active')->find_one();
+                    $c = (class_exists('RedisCache') && RedisCache::isRadiusCacheEnabled())
+                        ? RedisCache::remember('rad:cust_pppoe:' . md5($username), RedisCache::getRadiusTTL(), function () use ($username) {
+                            $row = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY pppoe_username = ?", [$username])->where('status', 'Active')->find_one();
+                            return $row ? $row->as_array() : null;
+                        })
+                        : ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->where_raw("BINARY pppoe_username = ?", [$username])->where('status', 'Active')->find_one();
                     if ($c) {
                         if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                             $password = $c['password'];
@@ -108,7 +118,12 @@ try {
                 $username = Text::alphanumeric($username, "-_.,");
                 $d = ORM::for_table('tbl_voucher')->where_raw("BINARY code = ?", [$username])->find_one();
             } else {
-                $d = ORM::for_table('tbl_customers')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
+                $d = (class_exists('RedisCache') && RedisCache::isRadiusCacheEnabled())
+                    ? RedisCache::remember('rad:cust_auth:' . md5($username), RedisCache::getRadiusTTL(), function () use ($username) {
+                        $row = ORM::for_table('tbl_customers')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
+                        return $row ? $row->as_array() : null;
+                    })
+                    : ORM::for_table('tbl_customers')->where_raw("BINARY username = ?", [$username])->where('status', 'Active')->find_one();
                 if ($d['password'] != $password) {
                     if ($d['pppoe_password'] != $password) {
                         unset($d);
@@ -423,8 +438,20 @@ try {
 function process_radiust_rest($tur, $code)
 {
     global $config;
-    $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
-    $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
+    if (class_exists('RedisCache') && RedisCache::isRadiusCacheEnabled()) {
+        $ttl = RedisCache::getRadiusTTL();
+        $plan = RedisCache::remember('rad:plan:' . (int)$tur['plan_id'], $ttl, function () use ($tur) {
+            $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+            return $p ? $p->as_array() : null;
+        });
+        $bw = ($plan && !empty($plan['id_bw'])) ? RedisCache::remember('rad:bw:' . (int)$plan['id_bw'], $ttl, function () use ($plan) {
+            $b = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
+            return $b ? $b->as_array() : null;
+        }) : null;
+    } else {
+        $plan = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+        $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
+    }
     // Count User Onlines
     $USRon = ORM::for_table('rad_acct')
         ->where_raw(

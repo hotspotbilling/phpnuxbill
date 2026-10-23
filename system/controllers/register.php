@@ -54,6 +54,12 @@ $otpPath = $CACHE_PATH . File::pathFixer('/sms/');
 
 switch ($do) {
     case 'post':
+        // Verify Captcha if enabled
+        $captchaResult = Captcha::verify('customer');
+        if (!$captchaResult['success']) {
+            r2(getUrl('register'), 'e', $captchaResult['message']);
+        }
+
         $otp_code = _post('otp_code');
         $username = alphanumeric(_post('username'), "+_.@-");
         $email = _post('email');
@@ -239,6 +245,7 @@ switch ($do) {
                 $ui->assign('wallpaper', $wallpaper);
                 $ui->assign('favicon', $favicon);
                 $ui->assign('csrf_token', $csrf_token);
+                $ui->assign('captcha_widget', Captcha::renderWidget('customer'));
                 $ui->assign('_title', Lang::T('Login'));
                 $ui->assign('customFields', User::getFormCustomField($ui, true));
                 switch ($config['login_page_type']) {
@@ -257,6 +264,10 @@ switch ($do) {
         if ($_c['sms_otp_registration'] == 'yes') {
             $phone_number = _post('phone_number');
             if (!empty($phone_number)) {
+                $captchaResult = Captcha::verify('customer');
+                if (!$captchaResult['success']) {
+                    r2(getUrl('register'), 'e', $captchaResult['message']);
+                }
                 $d = ORM::for_table('tbl_customers')->where('username', $phone_number)->find_one();
                 if ($d) {
                     r2(getUrl('register'), 's', Lang::T('Account already exists'));
@@ -292,6 +303,7 @@ switch ($do) {
                     $ui->display('customer/register-otp.tpl');
                 }
             } else {
+                $ui->assign('captcha_widget', Captcha::renderWidget('customer'));
                 $ui->assign('_title', Lang::T('Register'));
                 $ui->assign('referral_code', isset($referral_code) ? $referral_code : null);
                 run_hook('view_otp_register'); #HOOK
@@ -327,6 +339,7 @@ switch ($do) {
             $ui->assign('wallpaper', $wallpaper);
             $ui->assign('favicon', $favicon);
             $ui->assign('csrf_token', $csrf_token);
+            $ui->assign('captcha_widget', Captcha::renderWidget('customer'));
             $ui->assign('_title', Lang::T('Login'));
             $ui->assign('customFields', User::getFormCustomField($ui, true));
             $ui->assign('username', "");

@@ -62,6 +62,34 @@
     .dark .isp-text-blue {
         color: #63b3ed !important;
     }
+    .net-tab-btn {
+        border: none;
+        background: transparent;
+        color: #718096;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .net-tab-btn:hover {
+        color: #2d3748;
+    }
+    .net-tab-btn.active {
+        background: rgba(66, 153, 225, 0.15) !important;
+        color: #3182ce !important;
+    }
+    .dark-mode .net-tab-btn, .dark .net-tab-btn {
+        color: #a0aec0;
+    }
+    .dark-mode .net-tab-btn:hover, .dark .net-tab-btn:hover {
+        color: #edf2f7;
+    }
+    .dark-mode .net-tab-btn.active, .dark .net-tab-btn.active {
+        background: rgba(66, 153, 225, 0.25) !important;
+        color: #63b3ed !important;
+    }
 </style>
 
 <!-- Stats Cards (100% Real Database Values) -->
@@ -171,17 +199,182 @@
 
 <!-- Second Charts Row -->
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6 isp-margin-bottom-6">
-    <!-- Network Status Chart -->
+    <!-- Network Status Chart (Routers + Radius Server & NAS) -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
-            <h2 id="network-status-title" class="isp-text-lg isp-font-semibold">{Lang::T('Network Status')}</h2>
-            <div class="isp-flex isp-align-center">
-                <span class="isp-status-indicator {if $routers_offline == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+            <div class="isp-flex isp-align-center" style="gap: 8px;">
+                <h2 id="network-status-title" class="isp-text-lg isp-font-semibold">{Lang::T('Network Status')}</h2>
+                {if $radius_enabled}
+                    <span class="badge" style="font-size: 11px; padding: 2px 8px; border-radius: 9999px; font-weight: 500; {if $radius_online}background: rgba(72, 187, 120, 0.15); color: #48bb78;{else}background: rgba(245, 101, 101, 0.15); color: #f56565;{/if}" title="FreeRADIUS AAA Engine">
+                        <i class="fa fa-server" style="margin-right: 4px;"></i>RADIUS {if $radius_online}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}
+                    </span>
+                {/if}
+            </div>
+            <div class="isp-flex isp-align-center" style="gap: 6px;">
+                <span class="isp-status-indicator {if $offline_network_nodes == 0}isp-status-online{else}isp-status-warning{/if}"></span>
                 <span id="network-status-uptime" class="isp-text-xs">{$network_uptime}% {Lang::T('uptime')}</span>
             </div>
         </div>
-        <div class="isp-chart-container">
+        <div class="isp-chart-container" style="position: relative;">
             <canvas id="networkChart"></canvas>
+        </div>
+
+        <div style="margin-top: 14px; border-top: 1px solid var(--border-color, rgba(0,0,0,0.06)); padding-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div class="isp-flex isp-space-x-1" id="network-tab-btns">
+                    <button type="button" class="net-tab-btn active" data-tab="routers">
+                        <i class="fa fa-sitemap" style="margin-right: 4px;"></i>{Lang::T('Routers')} ({$routers_total})
+                    </button>
+                    {if $radius_enabled}
+                        <button type="button" class="net-tab-btn" data-tab="radius">
+                            <i class="fa fa-server" style="margin-right: 4px;"></i>{Lang::T('Radius')} ({if $radius_nas_count > 0}{$radius_nas_count} NAS{else}Server{/if})
+                        </button>
+                    {/if}
+                    <button type="button" class="net-tab-btn" data-tab="all">
+                        {Lang::T('All Nodes')} ({$total_network_nodes})
+                    </button>
+                </div>
+                <div id="network-action-link">
+                    <a href="{Text::url('routers')}" id="net-manage-link" style="font-size: 11px; color: #4299e1; text-decoration: none; font-weight: 500;">{Lang::T('Manage Routers')} &rarr;</a>
+                </div>
+            </div>
+
+            <!-- Tab 1: Routers List -->
+            <div id="net-tab-routers" class="net-tab-content">
+                {if !empty($routers_list)}
+                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;">
+                        {foreach $routers_list as $r}
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="isp-status-indicator {if strcasecmp($r['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                                    <div>
+                                        <strong style="font-size: 12px;">{$r['name']}</strong>
+                                        {if !empty($r['ip_address'])}
+                                            <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$r['ip_address']}</span>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <span class="badge {if strcasecmp($r['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                                    {$r['status']}
+                                </span>
+                            </div>
+                        {/foreach}
+                    </div>
+                {else}
+                    <div style="padding: 10px; font-size: 12px; opacity: 0.6; text-align: center;">
+                        {Lang::T('No Routers Configured')}
+                    </div>
+                {/if}
+            </div>
+
+            <!-- Tab 2: Radius Overview & NAS Clients -->
+            {if $radius_enabled}
+            <div id="net-tab-radius" class="net-tab-content" style="display: none;">
+                <!-- Radius Server Status Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.04); border: 1px solid rgba(66, 153, 225, 0.12); margin-bottom: 6px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="isp-status-indicator {if $radius_online}isp-status-online{else}isp-status-warning{/if}"></span>
+                        <div>
+                            <strong style="font-size: 12px;">FreeRADIUS AAA Engine</strong>
+                            <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$radius_host}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        {if $radius_active_sessions > 0}
+                            <span class="badge" style="font-size: 10px; padding: 2px 6px; background: rgba(66, 153, 225, 0.15); color: #3182ce;">
+                                <i class="fa fa-users"></i> {$radius_active_sessions} {Lang::T('Sessions')}
+                            </span>
+                        {/if}
+                        <span class="badge {if $radius_online}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                            {if $radius_online}Online{else}Offline{/if}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Radius NAS Clients List -->
+                {if !empty($radius_nas_list)}
+                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 100px; overflow-y: auto;">
+                        {foreach $radius_nas_list as $nas}
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="isp-status-indicator {if strcasecmp($nas['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                                    <div>
+                                        <strong style="font-size: 12px;">{$nas['shortname']}</strong>
+                                        <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$nas['nasname']}</span>
+                                        {if !empty($nas['routers'])}
+                                            <span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">({$nas['routers']})</span>
+                                        {/if}
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span class="badge" style="font-size: 9px; padding: 1px 5px; opacity: 0.7; background: rgba(0,0,0,0.05);">{$nas['type']}</span>
+                                    <span class="badge {if strcasecmp($nas['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                                        {$nas['status']}
+                                    </span>
+                                </div>
+                            </div>
+                        {/foreach}
+                    </div>
+                {else}
+                    <div style="padding: 8px 10px; font-size: 11px; opacity: 0.7; text-align: center; background: rgba(0,0,0,0.02); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>{Lang::T('No Radius NAS configured yet.')}</span>
+                        <a href="{Text::url('radius/nas-add')}" class="btn btn-xs btn-primary" style="font-size: 10px; padding: 2px 8px;">+ {Lang::T('Add NAS')}</a>
+                    </div>
+                {/if}
+            </div>
+            {/if}
+
+            <!-- Tab 3: All Nodes -->
+            <div id="net-tab-all" class="net-tab-content" style="display: none;">
+                <div style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;">
+                    {if $radius_enabled}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.04); border: 1px solid rgba(66, 153, 225, 0.12);">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="isp-status-indicator {if $radius_online}isp-status-online{else}isp-status-warning{/if}"></span>
+                                <div>
+                                    <strong style="font-size: 12px;">Radius Server</strong>
+                                    <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$radius_host}</span>
+                                </div>
+                            </div>
+                            <span class="badge {if $radius_online}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                                {if $radius_online}Online{else}Offline{/if}
+                            </span>
+                        </div>
+                    {/if}
+                    {foreach $routers_list as $r}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="isp-status-indicator {if strcasecmp($r['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                                <div>
+                                    <strong style="font-size: 12px;">[Router] {$r['name']}</strong>
+                                    {if !empty($r['ip_address'])}
+                                        <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$r['ip_address']}</span>
+                                    {/if}
+                                </div>
+                            </div>
+                            <span class="badge {if strcasecmp($r['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                                {$r['status']}
+                            </span>
+                        </div>
+                    {/foreach}
+                    {if !empty($radius_nas_list)}
+                        {foreach $radius_nas_list as $nas}
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="isp-status-indicator {if strcasecmp($nas['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                                    <div>
+                                        <strong style="font-size: 12px;">[NAS] {$nas['shortname']}</strong>
+                                        <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$nas['nasname']}</span>
+                                    </div>
+                                </div>
+                                <span class="badge {if strcasecmp($nas['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                                    {$nas['status']}
+                                </span>
+                            </div>
+                        {/foreach}
+                    {/if}
+                </div>
+            </div>
         </div>
     </div>
 
@@ -463,23 +656,61 @@
             });
         }
 
-        // 3. Network Status Chart (Online vs Offline Routers)
+        // 3. Network Status Chart (Online vs Offline Routers & Radius Nodes)
         const netCanvas = document.getElementById('networkChart');
         if (netCanvas && dData.network) {
             const netCtx = netCanvas.getContext('2d');
+            const totalNodes = dData.network.total !== undefined ? dData.network.total : (dData.network.values ? (dData.network.values[0] + dData.network.values[1]) : 0);
+            const onlineCount = dData.network.online !== undefined ? dData.network.online : (dData.network.values ? dData.network.values[0] : 0);
+            const offlineCount = dData.network.offline !== undefined ? dData.network.offline : (dData.network.values ? dData.network.values[1] : 0);
+            const uptimePct = dData.network.uptime !== undefined ? dData.network.uptime : (totalNodes > 0 ? Math.round((onlineCount / totalNodes) * 100) : 100);
+
+            const chartData = totalNodes > 0 ? [onlineCount, offlineCount] : [1];
+            const chartColors = totalNodes > 0 ? [colors.green, colors.red] : [isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'];
+            const chartLabels = totalNodes > 0 ? ['Online', 'Offline'] : ['No Nodes'];
+
+            const centerPlugin = {
+                id: 'networkCenterText',
+                beforeDraw: function (chart) {
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) return;
+                    ctx.save();
+                    const centerX = (chartArea.left + chartArea.right) / 2;
+                    const centerY = (chartArea.top + chartArea.bottom) / 2;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    if (totalNodes > 0) {
+                        ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                        ctx.fillStyle = isDark ? '#ffffff' : '#1a202c';
+                        ctx.fillText(uptimePct + '%', centerX, centerY - 10);
+
+                        ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                        ctx.fillStyle = isDark ? '#a0aec0' : '#718096';
+                        ctx.fillText(onlineCount + '/' + totalNodes + ' Online', centerX, centerY + 16);
+                    } else {
+                        ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                        ctx.fillStyle = isDark ? '#a0aec0' : '#718096';
+                        ctx.fillText('0 Nodes', centerX, centerY - 6);
+
+                        ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+                        ctx.fillText('None configured', centerX, centerY + 14);
+                    }
+                    ctx.restore();
+                }
+            };
+
             networkChart = new Chart(netCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: dData.network.labels,
+                    labels: chartLabels,
                     datasets: [{
-                        data: dData.network.values,
-                        backgroundColor: [
-                            colors.green,
-                            colors.red
-                        ],
+                        data: chartData,
+                        backgroundColor: chartColors,
                         borderWidth: 0
                     }]
                 },
+                plugins: [centerPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -487,7 +718,56 @@
                     plugins: {
                         legend: {
                             position: 'right',
-                            labels: { color: textColor, usePointStyle: true, boxWidth: 8 }
+                            labels: {
+                                color: textColor,
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                generateLabels: function (chart) {
+                                    if (totalNodes === 0) {
+                                        return [{
+                                            text: 'No Nodes Configured',
+                                            fillStyle: isDark ? '#4a5568' : '#cbd5e0',
+                                            strokeStyle: isDark ? '#4a5568' : '#cbd5e0',
+                                            lineWidth: 0,
+                                            pointStyle: 'circle'
+                                        }];
+                                    }
+                                    return [
+                                        {
+                                            text: 'Online: ' + onlineCount + ' (' + uptimePct + '%)',
+                                            fillStyle: colors.green,
+                                            strokeStyle: colors.green,
+                                            lineWidth: 0,
+                                            pointStyle: 'circle'
+                                        },
+                                        {
+                                            text: 'Offline: ' + offlineCount,
+                                            fillStyle: colors.red,
+                                            strokeStyle: colors.red,
+                                            lineWidth: 0,
+                                            pointStyle: 'circle'
+                                        }
+                                    ];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    if (totalNodes === 0) return ' No network nodes found';
+                                    return ' ' + ctx.label + ': ' + ctx.parsed + (ctx.parsed === 1 ? ' Node' : ' Nodes');
+                                },
+                                afterLabel: function (ctx) {
+                                    if (ctx.label === 'Online' && dData.network.radius_enabled) {
+                                        const rOn = dData.network.routers_online || 0;
+                                        const rTot = dData.network.routers_total || 0;
+                                        const radOn = dData.network.radius_online ? 'Online' : 'Offline';
+                                        const nasCount = dData.network.radius_nas_count || 0;
+                                        return ' Routers: ' + rOn + '/' + rTot + ' | Radius: ' + radOn + (nasCount ? ' (' + nasCount + ' NAS)' : '');
+                                    }
+                                    return '';
+                                }
+                            }
                         }
                     }
                 }
@@ -921,6 +1201,39 @@
                             }
                         };
                         consumptionChart.update();
+                    }
+                });
+            });
+        }
+
+        // 5. Network Status Tabs (Routers vs Radius vs All Nodes)
+        const netTabBtns = document.getElementById('network-tab-btns');
+        const netManageLink = document.getElementById('net-manage-link');
+        if (netTabBtns) {
+            netTabBtns.querySelectorAll('.net-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    netTabBtns.querySelectorAll('.net-tab-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+
+                    const tab = this.getAttribute('data-tab');
+                    document.querySelectorAll('.net-tab-content').forEach(c => {
+                        c.style.display = 'none';
+                    });
+                    const target = document.getElementById('net-tab-' + tab);
+                    if (target) {
+                        target.style.display = 'block';
+                    }
+
+                    if (netManageLink) {
+                        if (tab === 'radius') {
+                            netManageLink.innerHTML = 'Manage Radius NAS &rarr;';
+                            netManageLink.href = '?_route=radius/nas-list';
+                        } else {
+                            netManageLink.innerHTML = 'Manage Routers &rarr;';
+                            netManageLink.href = '?_route=routers';
+                        }
                     }
                 });
             });
