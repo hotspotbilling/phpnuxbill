@@ -422,6 +422,9 @@ switch ($do) {
                     // change customer password to voucher code
                     $user->password = $voucher;
                     $user->save();
+                    if (class_exists('RedisCache')) {
+                        RedisCache::forgetRadiusCustomer($user['username']);
+                    }
                     // voucher activation
                     if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $voucher)) {
                         $v1->status = "1";
@@ -470,6 +473,9 @@ switch ($do) {
                         // if failed to recharge, restore old password
                         $user->password = $oldPass;
                         $user->save();
+                        if (class_exists('RedisCache')) {
+                            RedisCache::forgetRadiusCustomer($user['username']);
+                        }
                         r2(getUrl('login'), 'e', Lang::T("Failed to activate voucher"));
                     }
                 } else {

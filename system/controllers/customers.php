@@ -743,6 +743,10 @@ switch ($action) {
             $c->state = $state;
             $c->zip = $zip;
             $c->save();
+            if (class_exists('RedisCache')) {
+                RedisCache::forgetRadiusCustomer($oldusername);
+                RedisCache::forgetRadiusCustomer($username);
+            }
 
 
             // Update Customers Attributes values in tbl_customers_fields table

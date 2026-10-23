@@ -97,10 +97,6 @@
                 </div>
             </div>
 
-            {if !empty($captcha_widget)}
-                {$captcha_widget}
-            {/if}
-
             <button type="submit" class="login-btn">
                 <span class="btn-text">{Lang::T('Activate Voucher')}</span>
                 <div class="btn-loader">

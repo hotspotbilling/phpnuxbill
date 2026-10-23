@@ -235,7 +235,7 @@
                     </button>
                 </div>
                 <div id="network-action-link">
-                    <a href="{Text::url('routers')}" id="net-manage-link" style="font-size: 11px; color: #4299e1; text-decoration: none; font-weight: 500;">{Lang::T('Manage Routers')} &rarr;</a>
+                    <a href="{Text::url('routers')}" id="net-manage-link" data-routers-url="{Text::url('routers')}" data-radius-url="{Text::url('radius/nas-list')}" style="font-size: 11px; color: #4299e1; text-decoration: none; font-weight: 500;">{Lang::T('Manage Routers')} &rarr;</a>
                 </div>
             </div>
 
@@ -1229,10 +1229,10 @@
                     if (netManageLink) {
                         if (tab === 'radius') {
                             netManageLink.innerHTML = 'Manage Radius NAS &rarr;';
-                            netManageLink.href = '?_route=radius/nas-list';
+                            netManageLink.href = netManageLink.getAttribute('data-radius-url');
                         } else {
                             netManageLink.innerHTML = 'Manage Routers &rarr;';
-                            netManageLink.href = '?_route=routers';
+                            netManageLink.href = netManageLink.getAttribute('data-routers-url');
                         }
                     }
                 });

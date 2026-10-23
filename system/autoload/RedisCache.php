@@ -119,7 +119,7 @@ class RedisCache
             try {
                 $cached = $redis->get($fullKey);
                 if ($cached !== false && $cached !== null) {
-                    return unserialize($cached);
+                    return unserialize($cached, ['allowed_classes' => false]);
                 }
             } catch (Throwable $e) {
                 // Ignore cache read failures and fall through to callback
@@ -150,7 +150,7 @@ class RedisCache
         }
         try {
             $data = $redis->get(self::$prefix . $key);
-            return $data !== false ? unserialize($data) : null;
+            return $data !== false ? unserialize($data, ['allowed_classes' => false]) : null;
         } catch (Throwable $e) {
             return null;
         }
@@ -197,12 +197,29 @@ class RedisCache
             return 0;
         }
         try {
-            $keys = $redis->keys(self::$prefix . $pattern);
-            if (!empty($keys)) {
-                return (int) $redis->del($keys);
-            }
+            $deleted = 0;
+            $it = null;
+            do {
+                $keys = $redis->scan($it, self::$prefix . $pattern, 100);
+                if (is_array($keys) && !empty($keys)) {
+                    $deleted += (int) $redis->unlink($keys);
+                }
+            } while ($it > 0);
+            return $deleted;
         } catch (Throwable $e) {}
         return 0;
+    }
+
+    /**
+     * Invalidate all RADIUS customer cache entries for a username
+     */
+    public static function forgetRadiusCustomer(?string $username): void
+    {
+        if ($username === null || $username === '') {
+            return;
+        }
+        $h = md5($username);
+        self::del('rad:cust_chap:' . $h, 'rad:cust_pppoe:' . $h, 'rad:cust_auth:' . $h);
     }
 
     /**
@@ -305,8 +322,15 @@ class RedisCache
             $stats['misses'] = $misses;
             $stats['hit_ratio'] = $total > 0 ? round(($hits / $total) * 100, 1) : 0;
 
-            $allKeys = $redis->keys(self::$prefix . '*');
-            $stats['total_keys'] = is_array($allKeys) ? count($allKeys) : 0;
+            $totalKeys = 0;
+            $it = null;
+            do {
+                $batch = $redis->scan($it, self::$prefix . '*', 100);
+                if (is_array($batch)) {
+                    $totalKeys += count($batch);
+                }
+            } while ($it > 0);
+            $stats['total_keys'] = $totalKeys;
         } catch (Throwable $e) {}
 
         return $stats;
@@ -392,6 +416,7 @@ class RedisCache
         if ($radius_enabled) {
             try {
                 $nas_records = ORM::for_table('nas', 'radius')
+                    ->select_many('id', 'nasname', 'shortname', 'type', 'routers')
                     ->order_by_asc('shortname')
                     ->find_array();
                 $radius_online = true;
@@ -807,9 +832,9 @@ class RedisCache
             $ttl = self::getDashboardTTL();
             self::set('dash:metrics_dynamic', $data, $ttl);
 
-            // Also pre-warm classic widgets for Admin/Sales/Agent in background
+            // Pre-warm classic widgets for Admin only; Agent/Sales output is cached per admin session
             if (!empty($WIDGET_PATH) && is_dir($WIDGET_PATH)) {
-                foreach (['Admin', 'Sales', 'Agent'] as $tipeUser) {
+                foreach (['Admin'] as $tipeUser) {
                     try {
                         $widgets = ORM::for_table('tbl_widgets')->where("enabled", 1)->where('user', $tipeUser)->order_by_asc("orders")->findArray();
                         $count = count($widgets);

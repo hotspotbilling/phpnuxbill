@@ -55,9 +55,16 @@ $otpPath = $CACHE_PATH . File::pathFixer('/sms/');
 switch ($do) {
     case 'post':
         // Verify Captcha if enabled
-        $captchaResult = Captcha::verify('customer');
-        if (!$captchaResult['success']) {
-            r2(getUrl('register'), 'e', $captchaResult['message']);
+        // An OTP submission for a phone that already passed CAPTCHA when requesting the OTP needs no second check
+        $otpCaptchaDone = ($config['sms_otp_registration'] == 'yes')
+            && !empty(_post('otp_code'))
+            && !empty($_SESSION['register_captcha_phone'])
+            && hash_equals((string) $_SESSION['register_captcha_phone'], (string) alphanumeric(_post('phone_number'), "+_.@-"));
+        if (!$otpCaptchaDone) {
+            $captchaResult = Captcha::verify('customer');
+            if (!$captchaResult['success']) {
+                r2(getUrl('register'), 'e', $captchaResult['message']);
+            }
         }
 
         $otp_code = _post('otp_code');
@@ -188,6 +195,7 @@ switch ($do) {
                 if ($config['reg_nofify_admin'] == 'yes') {
                     sendTelegram($config['CompanyName'] . ' - ' . Lang::T('New User Registration') . "\n\nFull Name: " . $fullname . "\nUsername: " . $username . "\nEmail: " . $email . "\nPhone Number: " . $phone_number . "\nAddress: " . $address);
                 }
+                unset($_SESSION['register_captcha_phone']);
                 r2(getUrl('login'), 's', Lang::T('Register Success! You can login now'));
             } else {
                 $ui->assign('username', $username);
@@ -268,6 +276,7 @@ switch ($do) {
                 if (!$captchaResult['success']) {
                     r2(getUrl('register'), 'e', $captchaResult['message']);
                 }
+                $_SESSION['register_captcha_phone'] = alphanumeric($phone_number, "+_.@-");
                 $d = ORM::for_table('tbl_customers')->where('username', $phone_number)->find_one();
                 if ($d) {
                     r2(getUrl('register'), 's', Lang::T('Account already exists'));

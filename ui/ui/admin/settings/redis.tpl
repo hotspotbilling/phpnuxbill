@@ -344,7 +344,12 @@
                     <div class="form-group">
                         <label class="col-md-4 control-label">{Lang::T('Redis Password')}</label>
                         <div class="col-md-5">
-                            <input class="form-control" type="password" name="redis_pass" value="{$_c['redis_pass']|default:''}" placeholder="{Lang::T('Leave blank if no password')}">
+                            <input class="form-control" type="password" name="redis_pass" value="" autocomplete="new-password" placeholder="{if !empty($_c['redis_pass'])}{Lang::T('Password is set. Leave blank to keep it')}{else}{Lang::T('Leave blank if no password')}{/if}">
+                            {if !empty($_c['redis_pass'])}
+                            <div class="checkbox">
+                                <label><input type="checkbox" name="redis_pass_clear" value="1"> {Lang::T('Clear stored password')}</label>
+                            </div>
+                            {/if}
                         </div>
                     </div>
 

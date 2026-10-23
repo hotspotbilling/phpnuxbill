@@ -1220,6 +1220,13 @@ switch ($action) {
             $host = _post('redis_host', '127.0.0.1');
             $port = (int) _post('redis_port', 6379);
             $pass = _post('redis_pass');
+            if ($pass === '' || $pass === null) {
+                // Retain the stored password when the field is left empty
+                $pass = (string) ($config['redis_pass'] ?? '');
+            }
+            if (isset($_POST['redis_pass_clear'])) {
+                $pass = '';
+            }
             $res = RedisCache::testConnection($host, $port, $pass);
             if ($res['success']) {
                 r2(getUrl('settings/redis'), 's', $res['message']);
@@ -1255,7 +1262,9 @@ switch ($action) {
                 'redis_enabled' => isset($_POST['redis_enabled']) ? 1 : 0,
                 'redis_host' => trim(_post('redis_host', '127.0.0.1')),
                 'redis_port' => (int) _post('redis_port', 6379),
-                'redis_pass' => _post('redis_pass', ''),
+                'redis_pass' => isset($_POST['redis_pass_clear'])
+                    ? ''
+                    : (_post('redis_pass', '') !== '' ? _post('redis_pass', '') : (string) ($config['redis_pass'] ?? '')),
                 'redis_cache_dashboard' => isset($_POST['redis_cache_dashboard']) ? 1 : 0,
                 'redis_dashboard_ttl' => max(5, (int) _post('redis_dashboard_ttl', 60)),
                 'redis_cache_radius' => isset($_POST['redis_cache_radius']) ? 1 : 0,

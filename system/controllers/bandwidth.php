@@ -65,6 +65,7 @@ switch ($action) {
         $d = ORM::for_table('tbl_bandwidth')->find_one($id);
         if ($d) {
             $d->delete();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:bw:' . (int) $d['id']); }
             r2(getUrl('bandwidth/list'), 's', Lang::T('Data Deleted Successfully'));
         }
         break;
@@ -177,6 +178,7 @@ switch ($action) {
             $d->rate_up_unit = $rate_up_unit;
             $d->burst = $burst;
             $d->save();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:bw:' . (int) $d['id']); }
 
             r2(getUrl('bandwidth/list'), 's', Lang::T('Data Updated Successfully'));
         } else {

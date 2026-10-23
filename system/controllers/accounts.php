@@ -42,6 +42,9 @@ switch ($action) {
                     r2(getUrl('accounts/change-password'), 'e', 'Both Password should be same');
                 }
                 $user->password = $npass;
+                if (class_exists('RedisCache')) {
+                    RedisCache::forgetRadiusCustomer($user['username']);
+                }
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->find_many();
                 foreach ($turs as $tur) {
                     // if has active plan, change the password to devices

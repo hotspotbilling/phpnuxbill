@@ -149,9 +149,9 @@
         function updateSearchPlaceholder() {
             if (!searchEl) return;
             if (window.innerWidth <= 767) {
-                searchEl.setAttribute('placeholder', '{Lang::T("Search customers, routers, plans...")}');
+                searchEl.setAttribute('placeholder', {Lang::T("Search customers, routers, plans...")|json_encode});
             } else {
-                searchEl.setAttribute('placeholder', '{Lang::T("Search customers, routers, plans...")} (⌘K)');
+                searchEl.setAttribute('placeholder', {Lang::T("Search customers, routers, plans...")|cat:" (⌘K)"|json_encode});
             }
         }
         updateSearchPlaceholder();

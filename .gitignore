@@ -64,3 +64,4 @@ system/uploads/invoices/**
 !system/uploads/invoices/index.html
 mobile_app/**
 CLAUDE.md
+smarty_compile_test.php

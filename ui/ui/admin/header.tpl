@@ -121,6 +121,7 @@
                                     </svg></i>
                             </a>
                         </li>
+                        {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                         <li>
                             <a class="toggle-container" href="{Text::url('settings/notifications')}" title="{Lang::T('Notifications')}">
                                 <i class="toggle-icon">
@@ -138,6 +139,7 @@
                                 </i>
                             </a>
                         </li>
+                        {/if}
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="{$app_url}/{$UPLOAD_PATH}{$_admin['photo']}.thumb.jpg"

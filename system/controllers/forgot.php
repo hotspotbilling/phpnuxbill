@@ -8,6 +8,7 @@ $step = _req('step', 0);
 $otpPath = $CACHE_PATH . File::pathFixer('/forgot/');
 
 if ($step == '-1') {
+    unset($_SESSION['forgot_captcha_user']);
     $_COOKIE['forgot_username'] = '';
     setcookie('forgot_username', '', time() - 3600, '/');
     $step = 0;
@@ -22,11 +23,14 @@ if ($step == 1) {
     $username = _post('username');
     if (!empty($username)) {
         // Verify Captcha on fresh submission
-        if (empty($_COOKIE['forgot_username']) || isset($_POST['cf-turnstile-response']) || isset($_POST['g-recaptcha-response'])) {
+        // Use a server-side marker tied to the username; the forgot_username cookie is client-controlled
+        $captchaPassed = isset($_SESSION['forgot_captcha_user']) && hash_equals((string) $_SESSION['forgot_captcha_user'], (string) $username);
+        if (!$captchaPassed || isset($_POST['cf-turnstile-response']) || isset($_POST['g-recaptcha-response'])) {
             $captchaResult = Captcha::verify('customer');
             if (!$captchaResult['success']) {
                 r2(getUrl('forgot'), 'e', $captchaResult['message']);
             }
+            $_SESSION['forgot_captcha_user'] = $username;
         }
         $ui->assign('username', $username);
         if (!file_exists($otpPath)) {
@@ -80,6 +84,9 @@ if ($step == 1) {
                 $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
                 $user->password = $pass;
                 $user->save();
+                if (class_exists('RedisCache')) {
+                    RedisCache::forgetRadiusCustomer($username);
+                }
                 $ui->assign('username', $username);
                 $ui->assign('passsword', $pass);
                 $ui->assign('notify_t', 's');
@@ -88,6 +95,7 @@ if ($step == 1) {
                     unlink($otpPath);
                 }
                 setcookie('forgot_username', '', time() - 3600, '/');
+                unset($_SESSION['forgot_captcha_user']);
             } else {
                 r2(getUrl('forgot&step=1'), 'e', Lang::T('Invalid Username or Verification Code'));
             }

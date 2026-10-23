@@ -169,6 +169,7 @@ switch ($action) {
                     $d->device = 'MikrotikHotspot';
                 }
                 $d->save();
+                if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
             }
             $ui->assign('d', $d);
             $b = ORM::for_table('tbl_bandwidth')->find_many();
@@ -212,6 +213,7 @@ switch ($action) {
                 }
             }
             $d->delete();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             r2(getUrl('services/hotspot'), 's', Lang::T('Data Deleted Successfully'));
         }
@@ -409,6 +411,7 @@ switch ($action) {
                 $d->expired_date = 20;
             }
             $d->save();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -548,6 +551,7 @@ switch ($action) {
                     $d->device = 'MikrotikPppoe';
                 }
                 $d->save();
+                if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
             }
             $ui->assign('d', $d);
             $p = ORM::for_table('tbl_pool')->where('routers', ($d['is_radius']) ? 'radius' : $d['routers'])->find_many();
@@ -599,6 +603,7 @@ switch ($action) {
                 }
             }
             $d->delete();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             r2(getUrl('services/pppoe'), 's', Lang::T('Data Deleted Successfully'));
         }
@@ -789,6 +794,7 @@ switch ($action) {
                 $d->expired_date = 0;
             }
             $d->save();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -839,6 +845,7 @@ switch ($action) {
         if ($d) {
             run_hook('delete_balance'); #HOOK
             $d->delete();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
             r2(getUrl('services/balance'), 's', Lang::T('Data Deleted Successfully'));
         }
         break;
@@ -874,6 +881,7 @@ switch ($action) {
             $d->price_old = $price_old;
             $d->prepaid = 'yes';
             $d->save();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             r2(getUrl('services/balance'), 's', Lang::T('Data Updated Successfully'));
         } else {
@@ -1040,6 +1048,7 @@ switch ($action) {
                     $d->device = 'MikrotikVpn';
                 }
                 $d->save();
+                if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
             }
             $ui->assign('d', $d);
             $p = ORM::for_table('tbl_pool')->where('routers', ($d['is_radius']) ? 'radius' : $d['routers'])->find_many();
@@ -1091,6 +1100,7 @@ switch ($action) {
                 }
             }
             $d->delete();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             r2(getUrl('services/vpn'), 's', Lang::T('Data Deleted Successfully'));
         }
@@ -1281,6 +1291,7 @@ switch ($action) {
                 $d->expired_date = 0;
             }
             $d->save();
+            if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {

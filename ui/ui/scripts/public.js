@@ -379,13 +379,14 @@ async function performLoginAPI(username, password) {
     if (data.success) {
       return data;
     } else {
-      // Reset captcha widgets if verification failed
-      if (typeof turnstile !== "undefined" && turnstile.reset) {
-        try { turnstile.reset(); } catch (e) {}
-      }
-      if (typeof grecaptcha !== "undefined" && grecaptcha.reset) {
-        try { grecaptcha.reset(); } catch (e) {}
-      }
+      const resetCaptchaWidgets = () => {
+        if (typeof turnstile !== "undefined" && turnstile.reset) {
+          try { turnstile.reset(); } catch (e) {}
+        }
+        if (typeof grecaptcha !== "undefined" && grecaptcha.reset) {
+          try { grecaptcha.reset(); } catch (e) {}
+        }
+      };
 
       // If CSRF token error, try to refresh and retry once
       if (
@@ -403,11 +404,11 @@ async function performLoginAPI(username, password) {
             password: password,
             csrf_token: newToken,
           });
-          if (turnstileInput && turnstileInput.value) {
-            retryFormData.append("cf-turnstile-response", turnstileInput.value);
+          if (turnstileToken) {
+            retryFormData.append("cf-turnstile-response", turnstileToken);
           }
-          if (recaptchaInput && recaptchaInput.value) {
-            retryFormData.append("g-recaptcha-response", recaptchaInput.value);
+          if (recaptchaToken) {
+            retryFormData.append("g-recaptcha-response", recaptchaToken);
           }
 
           const retryResponse = await fetch(app_url + "login/api", {
@@ -427,6 +428,8 @@ async function performLoginAPI(username, password) {
           }
         }
       }
+      // Reset captcha widgets only after the attempt (and any retry) failed
+      resetCaptchaWidgets();
       throw new Error(data.message || "Login failed");
     }
   } catch (error) {

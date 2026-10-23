@@ -53,7 +53,7 @@
                             {if $_bill['time'] ne ''}
                                 {Lang::dateAndTimeFormat($_bill['expiration'],$_bill['time'])}
                                 {if $_bill['status'] == 'on'}
-                                    {assign var="days_left" value=(strtotime($_bill['expiration']) - time()) / 86400}
+                                    {assign var="days_left" value=(strtotime($_bill['expiration']|cat:' '|cat:$_bill['time']) - time()) / 86400}
                                     {if $days_left <= 0}
                                         <span class="label label-danger pull-right">{Lang::T('Expired')}</span>
                                     {elseif $days_left <= 1}

@@ -78,11 +78,11 @@
         </table>&nbsp;&nbsp;
     </div>
     <script>
-        (function() {
+        document.addEventListener('DOMContentLoaded', function() {
             if (window.ClipboardJS) {
                 new ClipboardJS('.copy-account-btn');
             }
-        })();
+        });
     </script>
     {if $abills && count($abills)>0}
         <div class="box-header">

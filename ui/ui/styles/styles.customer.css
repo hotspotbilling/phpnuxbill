@@ -981,6 +981,15 @@ select:not(#filterNavigateMenu),
   color: var(--nav-text);
 }
 
+/* Label lives inside the FAB link so tapping it opens the package page */
+.floating-button .nav-label {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
 .nav-item-fab.active .nav-label {
   color: var(--nav-text-active);
 }
@@ -1267,7 +1276,7 @@ select:not(#filterNavigateMenu),
 body.fixed .main-header,
 .main-header {
   position: fixed !important;
-  top: 0 !important;
+  top: env(safe-area-inset-top, 0px) !important;
   left: 0 !important;
   right: 0 !important;
   z-index: 1030 !important;
@@ -1277,7 +1286,7 @@ body.fixed .content-wrapper,
 body.fixed .right-side,
 .content-wrapper,
 .right-side {
-  padding-top: 50px !important;
+  padding-top: calc(50px + env(safe-area-inset-top, 0px)) !important;
 }
 
 @media (max-width: 767px) {
@@ -1286,7 +1295,7 @@ body.fixed .right-side,
   .content-wrapper,
   .right-side {
     /* top bar is a single 50px row on mobile */
-    padding-top: 50px !important;
+    padding-top: calc(50px + env(safe-area-inset-top, 0px)) !important;
   }
 }
 
@@ -1297,21 +1306,21 @@ body.fixed .main-sidebar,
   left: 0 !important;
   bottom: 0 !important;
   height: 100vh !important;
-  padding-top: 50px !important;
+  padding-top: calc(50px + env(safe-area-inset-top, 0px)) !important;
   z-index: 850 !important;
 }
 
 @media (max-width: 767px) {
   body.fixed .main-sidebar,
   .main-sidebar {
-    padding-top: 50px !important;
+    padding-top: calc(50px + env(safe-area-inset-top, 0px)) !important;
     z-index: 825 !important;
   }
 }
 
 /* Sidebar scroll: only scrolls when items overflow viewport (e.g. expanded submenu) */
 .main-sidebar .sidebar {
-  height: calc(100vh - 50px) !important;
+  height: calc(100vh - 50px - env(safe-area-inset-top, 0px)) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch;
