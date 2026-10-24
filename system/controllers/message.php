@@ -57,56 +57,88 @@ EOT;
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
 
-        // Get form data
-        $id_customer = $_POST['id_customer'];
-        $message = $_POST['message'];
-        $via = $_POST['via'];
+        $id_customer = $_POST['id_customer'] ?? '';
+        $message = $_POST['message'] ?? '';
+        $subject = $_POST['subject'] ?? '';
+        $channels = ['email', 'sms', 'wa', 'inbox'];
 
-        // Check if fields are empty
-        if ($id_customer == '' or $message == '' or $via == '') {
-            r2(getUrl('message/send'), 'e', Lang::T('All field is required'));
-        } else {
-            // Get customer details from the database
-            $c = ORM::for_table('tbl_customers')->find_one($id_customer);
 
-            // Replace placeholders in the message with actual values
-            $message = str_replace('[[name]]', $c['fullname'], $message);
-            $message = str_replace('[[user_name]]', $c['username'], $message);
-            $message = str_replace('[[phone]]', $c['phonenumber'], $message);
-            $message = str_replace('[[company_name]]', $config['CompanyName'], $message);
-            if (strpos($message, '[[payment_link]]') !== false) {
-                // token only valid for 1 day, for security reason
-                $token = User::generateToken($c['id'], 1);
-                if (!empty($token['token'])) {
-                    $tur = ORM::for_table('tbl_user_recharges')
-                        ->where('customer_id', $c['id'])
-                        //->where('namebp', $package)
-                        ->find_one();
-                    if ($tur) {
-                        $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
-                        $message = str_replace('[[payment_link]]', $url, $message);
-                    }
-                } else {
-                    $message = str_replace('[[payment_link]]', '', $message);
+        // Validate subject based on the selected channel
+        if (empty($id_customer)) {
+            r2(getUrl('message/send'), 'e', Lang::T('Please select a customer'));
+        }
+
+        if (empty($subject) && (isset($_POST['email']) || isset($_POST['inbox']))) {
+            r2(getUrl('message/send'), 'e', Lang::T('Subject is required'));
+        }
+
+        if (empty($message)) {
+            r2(getUrl('message/send'), 'e', Lang::T('Message is required'));
+        }
+
+        if (count(array_intersect_key(array_flip($channels), $_POST)) === 0) {
+            r2(getUrl('message/send'), 'e', Lang::T('Please select at least one channel type'));
+        }
+
+        $customer = ORM::for_table('tbl_customers')->find_one($id_customer);
+        if (!$customer) {
+            r2(getUrl('message/send'), 'e', Lang::T('Customer not found'));
+        }
+
+        // Replace placeholders in message and subject
+        $currentMessage = str_replace(
+            ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
+            [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
+            $message
+        );
+
+        $currentSubject = str_replace(
+            ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
+            [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
+            $subject
+        );
+
+        if (strpos($message, '[[payment_link]]') !== false) {
+            $token = User::generateToken($customer['id'], 1);
+            if (!empty($token['token'])) {
+                $tur = ORM::for_table('tbl_user_recharges')
+                    ->where('customer_id', $customer['id'])
+                    ->find_one();
+                if ($tur) {
+                    $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
+                    $currentMessage = str_replace('[[payment_link]]', $url, $currentMessage);
                 }
-            }
-
-
-            //Send the message
-            if ($via == 'sms' || $via == 'both') {
-                $smsSent = Message::sendSMS($c['phonenumber'], $message);
-            }
-
-            if ($via == 'wa' || $via == 'both') {
-                $waSent = Message::sendWhatsapp($c['phonenumber'], $message);
-            }
-
-            if (isset($smsSent) || isset($waSent)) {
-                r2(getUrl('message/send'), 's', Lang::T('Message Sent Successfully'));
             } else {
-                r2(getUrl('message/send'), 'e', Lang::T('Failed to send message'));
+                $currentMessage = str_replace('[[payment_link]]', '', $currentMessage);
             }
         }
+
+        // Send the message through the selected channels
+        $smsSent = $waSent = $emailSent = $inboxSent = false;
+
+        if (isset($_POST['sms'])) {
+            $smsSent = Message::sendSMS($customer['phonenumber'], $currentMessage);
+        }
+
+        if (isset($_POST['wa'])) {
+            $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentMessage);
+        }
+
+        if (isset($_POST['email'])) {
+            $emailSent = Message::sendEmail($customer['email'], $currentSubject, $currentMessage);
+        }
+
+        if (isset($_POST['inbox'])) {
+            $inboxSent = Message::addToInbox($customer['id'], $currentSubject, $currentMessage, 'Admin');
+        }
+
+        // Check if any message was sent successfully
+        if ($smsSent || $waSent || $emailSent || $inboxSent) {
+            r2(getUrl('message/send'), 's', Lang::T('Message Sent Successfully'));
+        } else {
+            r2(getUrl('message/send'), 'e', Lang::T('Failed to send message'));
+        }
+
         break;
 
     case 'send_bulk':
@@ -129,15 +161,31 @@ EOT;
         // Get request parameters
         $group = $_REQUEST['group'] ?? '';
         $message = $_REQUEST['message'] ?? '';
-        $via = $_REQUEST['via'] ?? '';
         $batch = $_REQUEST['batch'] ?? 100;
         $page = $_REQUEST['page'] ?? 0;
         $router = $_REQUEST['router'] ?? null;
-        $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on' ? true : false;
+        $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on';
         $service = $_REQUEST['service'] ?? '';
+        $subject = $_REQUEST['subject'] ?? '';
+        $channels = ['email', 'sms', 'wa', 'inbox'];
+        $selectedChannels = [];
 
-        if (empty($group) || empty($message) || empty($via) || empty($service)) {
-            die(json_encode(['status' => 'error', 'message' => 'All fields are required']));
+        foreach ($channels as $channel) {
+            if (isset($_REQUEST[$channel]) && $_REQUEST[$channel] == '1') {
+                $selectedChannels[] = $channel;
+            }
+        }
+
+        if (empty($selectedChannels)) {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Please select at least one channel type')]));
+        }
+
+        if (empty($group) || empty($message) || empty($service)) {
+            die(json_encode(['status' => 'error', 'message' => LANG::T('All fields are required')]));
+        }
+
+        if (array_intersect($selectedChannels, ['email', 'inbox']) && empty($subject)) {
+            die(json_encode(['status' => 'error', 'message' => LANG::T('Subject is required') . '.']));
         }
 
         // Get batch of customers based on group
@@ -153,7 +201,7 @@ EOT;
                 default:
                     $router = ORM::for_table('tbl_routers')->find_one($router);
                     if (!$router) {
-                        die(json_encode(['status' => 'error', 'message' => 'Invalid router']));
+                        die(json_encode(['status' => 'error', 'message' => LANG::T('Invalid router')]));
                     }
                     $routerName = $router->name;
                     break;
@@ -200,6 +248,9 @@ EOT;
                 ['tbl_customers.phonenumber', 'phonenumber'],
                 ['tbl_user_recharges.customer_id', 'customer_id'],
                 ['tbl_customers.fullname', 'fullname'],
+                ['tbl_customers.username', 'username'],
+                ['tbl_customers.email', 'email'],
+                ['tbl_customers.service_type', 'service_type'],
             ]);
             $customers = $query->find_array();
         } else {
@@ -287,13 +338,25 @@ EOT;
         $totalSMSFailed = 0;
         $totalWhatsappSent = 0;
         $totalWhatsappFailed = 0;
+        $totalEmailSent = 0;
+        $totalEmailFailed = 0;
+        $totalInboxSent = 0;
+        $totalInboxFailed = 0;
         $batchStatus = [];
+        //$subject = $config['CompanyName'] . ' ' . Lang::T('Notification Message');
+        $from = 'Admin';
 
         foreach ($customers as $customer) {
             $currentMessage = str_replace(
                 ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
                 [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
                 $message
+            );
+
+            $currentSubject = str_replace(
+                ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
+                [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
+                $subject
             );
 
             $phoneNumber = preg_replace('/\D/', '', $customer['phonenumber']);
@@ -310,30 +373,115 @@ EOT;
             if ($test) {
                 $batchStatus[] = [
                     'name' => $customer['fullname'],
-                    'phone' => $customer['phonenumber'],
+                    'sent' => $customer['phonenumber'],
+                    'channel' => implode(', ', array_map('ucfirst', $selectedChannels)),
                     'status' => 'Test Mode',
                     'message' => $currentMessage,
                     'service' => $service,
                     'router' => $routerName,
                 ];
             } else {
-                if ($via == 'sms' || $via == 'both') {
+                if (isset($_REQUEST['sms']) && $_REQUEST['sms'] == '1') {
                     if (Message::sendSMS($customer['phonenumber'], $currentMessage)) {
                         $totalSMSSent++;
-                        $batchStatus[] = ['name' => $customer['fullname'], 'phone' => $customer['phonenumber'], 'status' => 'SMS Sent', 'message' => $currentMessage];
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['phonenumber'],
+                            'channel' => 'SMS',
+                            'status' => 'SMS Sent',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
                     } else {
                         $totalSMSFailed++;
-                        $batchStatus[] = ['name' => $customer['fullname'], 'phone' => $customer['phonenumber'], 'status' => 'SMS Failed', 'message' => $currentMessage];
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['phonenumber'],
+                            'channel' => 'SMS',
+                            'status' => 'SMS Failed',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
                     }
                 }
 
-                if ($via == 'wa' || $via == 'both') {
+                if (isset($_REQUEST['wa']) && $_REQUEST['wa'] == '1') {
                     if (Message::sendWhatsapp($customer['phonenumber'], $currentMessage)) {
                         $totalWhatsappSent++;
-                        $batchStatus[] = ['name' => $customer['fullname'], 'phone' => $customer['phonenumber'], 'status' => 'WhatsApp Sent', 'message' => $currentMessage];
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['phonenumber'],
+                            'channel' => 'WhatsApp',
+                            'status' => 'WhatsApp Sent',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
                     } else {
                         $totalWhatsappFailed++;
-                        $batchStatus[] = ['name' => $customer['fullname'], 'phone' => $customer['phonenumber'], 'status' => 'WhatsApp Failed', 'message' => $currentMessage];
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['phonenumber'],
+                            'channel' => 'WhatsApp',
+                            'status' => 'WhatsApp Failed',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
+                    }
+                }
+
+                if (isset($_REQUEST['email']) && $_REQUEST['email'] == '1') {
+                    if (Message::sendEmail($customer['email'], $currentSubject, $currentMessage)) {
+                        $totalEmailSent++;
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['email'],
+                            'channel' => 'Email',
+                            'status' => 'Email Sent',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
+                    } else {
+                        $totalEmailFailed++;
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['email'],
+                            'channel' => 'Email',
+                            'status' => 'Email Failed',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
+                    }
+                }
+
+                if (isset($_REQUEST['inbox']) && $_REQUEST['inbox'] == '1') {
+                    if (Message::addToInbox($customer['customer_id'], $currentSubject, $currentMessage, $from)) {
+                        $totalInboxSent++;
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['username'],
+                            'channel' => 'Inbox',
+                            'status' => 'Inbox Message Sent',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
+                    } else {
+                        $totalInboxFailed++;
+                        $batchStatus[] = [
+                            'name' => $customer['fullname'],
+                            'sent' => $customer['username'],
+                            'channel' => 'Inbox',
+                            'status' => 'Inbox Message Failed',
+                            'message' => $currentMessage,
+                            'service' => $service,
+                            'router' => $routerName,
+                        ];
                     }
                 }
             }
@@ -348,11 +496,9 @@ EOT;
             'page' => $page + 1,
             'batchStatus' => $batchStatus,
             'message' => $currentMessage,
-            'totalSent' => $totalSMSSent + $totalWhatsappSent,
-            'totalFailed' => $totalSMSFailed + $totalWhatsappFailed,
+            'totalSent' => $totalSMSSent + $totalWhatsappSent + $totalEmailSent + $totalInboxSent,
+            'totalFailed' => $totalSMSFailed + $totalWhatsappFailed + $totalEmailFailed + $totalInboxFailed,
             'hasMore' => $hasMore,
-            'service' => $service,
-            'router' => $routerName,
         ]);
         break;
 
@@ -365,17 +511,21 @@ EOT;
             // Get the posted data
             $customerIds = $_POST['customer_ids'] ?? [];
             $via = $_POST['message_type'] ?? '';
+            $subject = $_POST['subject'] ?? '';
             $message = isset($_POST['message']) ? trim($_POST['message']) : '';
             if (empty($customerIds) || empty($message) || empty($via)) {
                 echo json_encode(['status' => 'error', 'message' => Lang::T('Invalid customer IDs, Message, or Message Type.')]);
                 exit;
             }
 
+            if ($via === 'all' || $via === 'email' || $via === 'inbox' && empty($subject)) {
+                die(json_encode(['status' => 'error', 'message' => LANG::T('Subject is required to send message using') . ' ' . $via . '.']));
+            }
+
             // Prepare to send messages
             $sentCount = 0;
             $failedCount = 0;
-            $subject = Lang::T('Notification Message');
-            $form = 'Admin';
+            $from = 'Admin';
 
             foreach ($customerIds as $customerId) {
                 $customer = ORM::for_table('tbl_customers')->where('id', $customerId)->find_one();
@@ -391,7 +541,7 @@ EOT;
                             $messageSent = Message::sendWhatsapp($customer['phonenumber'], $message);
                         }
                         if (!$messageSent && ($via === 'inbox' || $via === 'all')) {
-                            Message::addToInbox($customer['id'], $subject, $message, $form);
+                            Message::addToInbox($customer['id'], $subject, $message, $from);
                             $messageSent = true;
                         }
                         if (!$messageSent && ($via === 'email' || $via === 'all')) {

@@ -54,7 +54,10 @@ switch ($action) {
         $query = ORM::for_table('tbl_transactions')
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-            ->order_by_desc('id');
+			->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
         if (count($tps) > 0) {
             $query->where_in('type', $tps);
         }
@@ -71,8 +74,8 @@ switch ($action) {
         if (count($plns) > 0) {
             $query->where_in('plan_name', $plns);
         }
-        $x =  $query->find_array();
-        $xy =  $query->sum('price');
+        $x = $query->find_array();
+        $xy = $query->sum('price');
 
         $ui->assign('sd', $sd);
         $ui->assign('ed', $ed);
@@ -114,7 +117,10 @@ switch ($action) {
         $query = ORM::for_table('tbl_transactions')
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
             ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-            ->order_by_desc('id');
+            ->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
         if (count($tps) > 0) {
             $query->where_in('type', $tps);
         }
@@ -131,13 +137,13 @@ switch ($action) {
         if (count($plns) > 0) {
             $query->where_in('plan_name', $plns);
         }
-        $x =  $query->find_array();
-        $xy =  $query->sum('price');
+        $x = $query->find_array();
+        $xy = $query->sum('price');
 
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
 
-        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
+        $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
         if (file_exists($UPLOAD_PATH . '/logo.png')) {
             $logo = $UPLOAD_URL_PATH . '/logo.png';
         } else {
@@ -154,10 +160,11 @@ switch ($action) {
 				</div>
 				<div id="logo"><img id="image" src="' . $logo . '" alt="logo" /></div>
 			</div>
-			<div id="header">' . Lang::T('All Transactions at Date') . ': ' . Lang::dateAndTimeFormat($sd, $ts) .' - '. Lang::dateAndTimeFormat($ed, $te) . '</div>
+			<div id="header">' . Lang::T('All Transactions at Date') . ': ' . Lang::dateAndTimeFormat($sd, $ts) . ' - ' . Lang::dateAndTimeFormat($ed, $te) . '</div>
 			<table id="customers">
 				<tr>
 				<th>' . Lang::T('Username') . '</th>
+                <th>' . Lang::T('Fullname') . '</th>
 				<th>' . Lang::T('Plan Name') . '</th>
 				<th>' . Lang::T('Type') . '</th>
 				<th>' . Lang::T('Plan Price') . '</th>
@@ -170,6 +177,7 @@ switch ($action) {
             foreach ($x as $value) {
 
                 $username = $value['username'];
+                $fullname = $value['fullname'];
                 $plan_name = $value['plan_name'];
                 $type = $value['type'];
                 $price = $config['currency_code'] . ' ' . number_format($value['price'], 0, $config['dec_point'], $config['thousands_sep']);
@@ -181,6 +189,7 @@ switch ($action) {
 
                 $html .= "<tr" . (($c = !$c) ? ' class="alt"' : ' class=""') . ">" . "
 				<td>$username</td>
+                <td>$fullname</td>
 				<td>$plan_name</td>
 				<td>$type</td>
 				<td align='right'>$price</td>
@@ -245,7 +254,7 @@ $style
 $html
 EOF;
             $mpdf->WriteHTML($nhtml);
-            $mpdf->Output('phpnuxbill_reports_'.date('Ymd_His') . '.pdf', 'D');
+            $mpdf->Output('phpnuxbill_reports_' . date('Ymd_His') . '.pdf', 'D');
         } else {
             echo 'No Data';
         }
@@ -258,13 +267,17 @@ EOF;
         $stype = _post('stype');
 
         $d = ORM::for_table('tbl_transactions');
+        $d->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
         if ($stype != '') {
             $d->where('type', $stype);
         }
         $d->where_gte('recharged_on', $fdate);
         $d->where_lte('recharged_on', $tdate);
         $d->order_by_desc('id');
-        $x =  $d->find_many();
+        $x = $d->find_many();
 
         $dr = ORM::for_table('tbl_transactions');
         if ($stype != '') {
@@ -290,6 +303,10 @@ EOF;
         $tdate = _post('tdate');
         $stype = _post('stype');
         $d = ORM::for_table('tbl_transactions');
+        $d->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
+            ->select('tbl_transactions.*')
+            ->select('tbl_customers.fullname', 'fullname')
+            ->order_by_desc('tbl_transactions.id');
         if ($stype != '') {
             $d->where('type', $stype);
         }
@@ -297,7 +314,7 @@ EOF;
         $d->where_gte('recharged_on', $fdate);
         $d->where_lte('recharged_on', $tdate);
         $d->order_by_desc('id');
-        $x =  $d->find_many();
+        $x = $d->find_many();
 
         $dr = ORM::for_table('tbl_transactions');
         if ($stype != '') {
@@ -311,7 +328,7 @@ EOF;
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);
 
-        $UPLOAD_URL_PATH = str_replace($root_path, '',  $UPLOAD_PATH);
+        $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
         if (file_exists($UPLOAD_PATH . '/logo.png')) {
             $logo = $UPLOAD_URL_PATH . '/logo.png';
         } else {
@@ -332,6 +349,7 @@ EOF;
 			<table id="customers">
 				<tr>
 				<th>' . Lang::T('Username') . '</th>
+                <th>' . Lang::T('Fullname') . '</th>
 				<th>' . Lang::T('Plan Name') . '</th>
 				<th>' . Lang::T('Type') . '</th>
 				<th>' . Lang::T('Plan Price') . '</th>
@@ -344,6 +362,7 @@ EOF;
             foreach ($x as $value) {
 
                 $username = $value['username'];
+                $fullname = $value['fullname'];
                 $plan_name = $value['plan_name'];
                 $type = $value['type'];
                 $price = $config['currency_code'] . ' ' . number_format($value['price'], 0, $config['dec_point'], $config['thousands_sep']);
@@ -355,7 +374,8 @@ EOF;
 
                 $html .= "<tr" . (($c = !$c) ? ' class="alt"' : ' class=""') . ">" . "
 				<td>$username</td>
-				<td>$plan_name</td>
+                <td>$fullname</td>
+                <td>$plan_name</td>
 				<td>$type</td>
 				<td align='right'>$price</td>
 				<td>$recharged_on </td>

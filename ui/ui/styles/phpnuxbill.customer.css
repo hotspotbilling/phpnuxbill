@@ -750,3 +750,7 @@ select:not(#filterNavigateMenu),
     color: inherit;
     margin-right: -59px;
 }
+
+.modern-skin-dark .main-header .navbar > a {
+    color: #f5f5f5;
+}

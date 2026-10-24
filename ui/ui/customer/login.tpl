@@ -53,7 +53,12 @@
                                 placeholder="{Lang::T('Password')}">
                         </div>
                     </div>
-
+                    {if $_c['turnstile_client_enabled']=='1' && $_c['turnstile_site_key'] ne ''}
+                        <div class="form-group">
+                            <div class="cf-turnstile" data-sitekey="{$_c['turnstile_site_key']}" data-theme="auto" data-action="client_login"></div>
+                        </div>
+                        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                    {/if}
                     <div class="clearfix hidden">
                         <div class="{$app_url}/ui-checkbox ui-checkbox-primary right">
                             <label>

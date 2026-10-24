@@ -93,7 +93,7 @@ class MikrotikHotspot
         $printRequest->setQuery(RouterOS\Query::where('name', $from));
         $id = $client->sendSync($printRequest)->getProperty('.id');
 
-        if (!empty($cid)) {
+        if (!empty($id)) {
             $setRequest = new RouterOS\Request('/ip/hotspot/user/set');
             $setRequest->setArgument('numbers', $id);
             $setRequest->setArgument('name', $to);

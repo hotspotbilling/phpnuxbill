@@ -18,12 +18,20 @@ body {
 }
 
 .modern-skin-dark .main-header .navbar {
-    background: rgb(28 36 52);
+    background: rgb(251, 251, 251);
 }
 
 .modern-skin-dark .main-sidebar .sidebar {
     background-color: rgb(28 36 52);
     bottom: 0;
+}
+
+.modern-skin-dark .main-header .navbar .navbar-custom-menu>.navbar-nav>li>a {
+    color: #337ab7;
+}
+
+.modern-skin-dark .main-header .navbar>a {
+    color: #337ab7;
 }
 
 .modern-skin-dark .main-sidebar {
@@ -103,7 +111,7 @@ body {
 }
 
 .main-footer {
-    background: rgb(28 36 52);
+    background: #ffffff;
     padding: 15px;
     color: rgb(100 116 139);
     border-top: 1px solid #d2d6de;
@@ -175,15 +183,20 @@ body {
 }
 
 .content .row [class*=col-] .box {
-    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-    box-shadow: 0px 4px 30px rgba(221, 224, 255, .54);
-    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
-    -ms-box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
     -webkit-border-radius: 1px !important;
     -moz-border-radius: 1px !important;
     -ms-border-radius: 1px !important;
+    border: 1px solid #7f00ff;
     border-radius: 15px !important;
-    border-color: rgba(221, 224, 255, .54);
+}
+
+.dark-mode .content .row [class*=col-] .box {
+    -webkit-border-radius: 1px !important;
+    -moz-border-radius: 1px !important;
+    -ms-border-radius: 1px !important;
+    border: 2px solid;
+    border-radius: 15px !important;
+    border-color: #4a5568;
 }
 
 .box.box-solid.box-primary>.box-header {
@@ -595,7 +608,7 @@ input:checked+.slider:before {
 .dark-mode .main-sidebar,
 .dark-mode .main-sidebar .sidebar,
 .dark-mode .sidebar-menu li>a {
-    background-color: #1a202c;
+    background-color: #151521;
     color: #cbd5e0;
 }
 
@@ -612,11 +625,11 @@ input:checked+.slider:before {
 .dark-mode .content-header,
 .dark-mode .content-wrapper,
 .dark-mode .right-side {
-    background-color: #2d3748;
+    background-color: #151521;
 }
 
 .dark-mode .main-footer {
-    background-color: #1a202c;
+    background-color: #161414;
     color: #cbd5e0;
 }
 
@@ -907,7 +920,7 @@ select:not(#filterNavigateMenu),
 
 .dark-mode .table th,
 .dark-mode .table td {
-    background-color: #333;
+    background-color: #1e1e2d;
     border-color: #444;
     color: #ddd;
 }
@@ -1120,6 +1133,8 @@ select:not(#filterNavigateMenu),
     background-color: #353638;
 
 }
+
+
 
 /* Dark Mode - Select2 Dropdown ends here */
 

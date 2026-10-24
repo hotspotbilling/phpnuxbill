@@ -58,3 +58,5 @@ docs/**
 !docs/insomnia.rest.json
 !system/uploads/paid.png
 system/uploads/invoices/**
+!system/uploads/invoices/
+!system/uploads/invoices/index.html

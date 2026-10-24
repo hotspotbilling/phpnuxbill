@@ -103,7 +103,6 @@
                         <div class="col-md-9">
                             <input type="username" class="form-control" id="pppoe_username" name="pppoe_username"
                                 onkeyup="checkUsername(this, '0')">
-                            <span class="help-block">{Lang::T('Not Working for freeradius')}</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -119,14 +118,12 @@
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
                                 onkeyup="checkIP(this, '0')">
-                            <span class="help-block">{Lang::T('Also Working for freeradius')}</span>
                         </div>
                     </div>
                     <span class="help-block">
                         {Lang::T('User Cannot change this, only admin. if it Empty it will use Customer Credentials')}
                     </span>
                 </div>
-                <div class="panel-heading"></div>
                 <div class="panel-body">
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Send welcome message')}</label>
@@ -139,12 +136,14 @@
                     </div>
                     <div class="form-group" id="method" style="display: none;">
                         <label class="col-md-3 control-label">{Lang::T('Notification via')}</label>
-                        <label class="col-md-3 control-label"><input type="checkbox" name="sms" value="1">
+                        <label class="col-md-1 control-label"><input type="checkbox" name="sms" value="1">
                             {Lang::T('SMS')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="wa" value="1">
+                        <label class="col-md-1 control-label"><input type="checkbox" name="wa" value="1">
                             {Lang::T('WA')}</label>
-                        <label class="col-md-2 control-label"><input type="checkbox" name="mail" value="1">
+                        <label class="col-md-1 control-label"><input type="checkbox" name="mail" value="1">
                             {Lang::T('Email')}</label>
+                        <label class="col-md-1 control-label"><input type="checkbox" name="inbox" value="1">
+                            {Lang::T('Inbox')}</label>
                     </div>
                 </div>
             </div>

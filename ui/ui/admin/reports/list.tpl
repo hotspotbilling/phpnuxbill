@@ -94,10 +94,11 @@
                                     <a href="{Text::url('export/pdf-by-date&')}{$filter}" class="btn btn-default"><i
                                             class="fa fa-file-pdf-o"></i></a>
                                 </th>
-                                <th colspan="7"></th>
+                                <th colspan="8"></th>
                             </tr>
                             <tr>
                                 <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Fullname')}</th>
                                 <th>{Lang::T('Type')}</th>
                                 <th>{Lang::T('Plan Name')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
@@ -111,6 +112,7 @@
                             {foreach $d as $ds}
                                 <tr>
                                     <td>{$ds['username']}</td>
+                                    <td>{$ds['fullname']}</td>
                                     <td>{$ds['type']}</td>
                                     <td>{$ds['plan_name']}</td>
                                     <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>
@@ -122,9 +124,8 @@
                             {/foreach}
                             <tr>
                                 <th>{Lang::T('Total')}</th>
-                                <td colspan="2"></td>
                                 <th class="text-right">{Lang::moneyFormat($dr)}</th>
-                                <td colspan="4"></td>
+                                <td colspan="7"></td>
                             </tr>
                         </tbody>
                     </table>

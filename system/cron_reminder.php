@@ -49,7 +49,7 @@ foreach ($d as $ds) {
         } else {
             $price = $p['price'];
         }
-        if ($ds['expiration'] == $day7 && $config['notification_reminder_7day'] !== 'no') {
+        if ($ds['expiration'] == $day7 && $config['notification_reminder_7days'] !== 'no') {
             try {
                 echo Message::sendPackageNotification(
                     $c,
@@ -58,10 +58,11 @@ foreach ($d as $ds) {
                     Message::getMessageType($p['type'], Lang::getNotifText('reminder_7_day')),
                     $config['user_notification_reminder']
                 ) . "\n";
+				sleep(1); // Add 1 second delay after sending notification
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 7-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
-        } else if ($ds['expiration'] == $day3 && $config['notification_reminder_3day'] !== 'no') {
+        } else if ($ds['expiration'] == $day3 && $config['notification_reminder_3days'] !== 'no') {
             try {
                 echo Message::sendPackageNotification(
                     $c,
@@ -70,6 +71,7 @@ foreach ($d as $ds) {
                     Message::getMessageType($p['type'], Lang::getNotifText('reminder_3_day')),
                     $config['user_notification_reminder']
                 ) . "\n";
+				sleep(1); // Add 1 second delay after sending notification
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 3-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }
@@ -82,6 +84,7 @@ foreach ($d as $ds) {
                     Message::getMessageType($p['type'], Lang::getNotifText('reminder_1_day')),
                     $config['user_notification_reminder']
                 ) . "\n";
+				sleep(1); // Add 1 second delay after sending notification
             } catch (Exception $e) {
                 sendTelegram("Cron Reminder failed to send 1-day reminder to " . $ds['username'] . " Error: " . $e->getMessage());
             }

@@ -45,6 +45,6 @@ class Password
         $chapid = substr($CHAPassword, 0, 2);
         $result = hex2bin($chapid) . $realPassword . hex2bin(substr($CHAPChallenge, 2));
         $response = $chapid . md5($result);
-        return ($response != $CHAPassword);
+        return ($response == $CHAPassword);
     }
 }

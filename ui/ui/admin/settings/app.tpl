@@ -73,8 +73,8 @@
                     <label class="col-md-3 control-label"><i class="glyphicon glyphicon-print"></i>
                         {Lang::T('Print Max Char')}</label>
                     <div class="col-md-5">
-                        <input type="number" required class="form-control" id="printer_cols" placeholder="37"
-                            name="printer_cols" value="{$_c['printer_cols']}">
+                        <input type="number" class="form-control" id="printer_cols" placeholder="37"
+                            name="printer_cols" value="{if empty($_c['printer_cols'])}37{else}{$_c['printer_cols']}{/if}">
                     </div>
                     <span class="help-block col-md-4">{Lang::T('For invoice print using Thermal
                         Printer')}</span>
@@ -109,7 +109,7 @@
                 <div class="form-group">
                     <label class="col-md-3 control-label">{Lang::T('Income reset date')}</label>
                     <div class="col-md-5">
-                        <input type="number" required class="form-control" id="reset_day" placeholder="20" min="1"
+                        <input type="number" class="form-control" id="reset_day" placeholder="20" min="1"
                             max="28" step="1" name="reset_day" value="{$_c['reset_day']}">
                     </div>
                     <span class="help-block col-md-4">{Lang::T('Income will reset every this day')}</span>
@@ -155,7 +155,7 @@
             <h3 class="panel-title">
                 <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseLoginPage"
                     aria-expanded="true" aria-controls="collapseLoginPage">
-                    {Lang::T('Customer Login Page Settings')}
+                    {Lang::T('Customer Login Page')}
                 </a>
             </h3>
         </div>
@@ -255,6 +255,37 @@
     </div>
 
     <div class="panel">
+        <div class="panel-heading" role="tab" id="Coupon">
+            <h4 class="panel-title">
+                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
+                    href="#collapseCoupon" aria-expanded="false" aria-controls="collapseCoupon">
+                    {Lang::T('Coupons')}
+                </a>
+            </h4>
+        </div>
+        <div id="collapseCoupon" class="panel-collapse collapse" role="tabpanel">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">{Lang::T('Enable Coupon')}</label>
+                    <div class="col-md-5">
+                        <select name="enable_coupons" id="enable_coupons" class="form-control text-muted">
+                            <option value="no">{Lang::T('No')}</option>
+                            <option value="yes" {if $_c['enable_coupons'] == 'yes'}selected="selected" {/if}>{Lang::T('Yes')}
+                            </option>
+                        </select>
+                    </div>
+                    <p class="help-block col-md-4">
+                        <small>{Lang::T('Enable or disable coupons')}</small>
+                    </p>
+                </div>
+                <button class="btn btn-success btn-block" type="submit">
+                    {Lang::T('Save Changes')}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
         <div class="panel-heading" role="tab" id="Registration">
             <h4 class="panel-title">
                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
@@ -287,17 +318,17 @@
                     </p>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Registration Username')}</label>
+                    <label class="col-md-3 control-label">{Lang::T('Registration Method')}</label>
                     <div class="col-md-5">
                         <select name="registration_username" id="voucher_format" class="form-control">
                             <option value="username" {if $_c['registration_username']=='username' }selected="selected"
-                                {/if}>Username
+                                {/if}>{Lang::T('Usernames')}
                             </option>
                             <option value="email" {if $_c['registration_username']=='email' }selected="selected" {/if}>
                                 Email
                             </option>
                             <option value="phone" {if $_c['registration_username']=='phone' }selected="selected" {/if}>
-                                Phone Number
+                                {Lang::T('Phone Number')}
                             </option>
                         </select>
                     </div>
@@ -391,7 +422,6 @@
         </div>
     </div>
 
-
     <div class="panel">
         <div class="panel-heading" role="tab" id="Security">
             <h4 class="panel-title">
@@ -403,66 +433,126 @@
         </div>
         <div id="collapseSecurity" class="panel-collapse collapse" role="tabpanel">
             <div class="panel-body">
+                <hr class="clearfix">
+                <h4 class="col-md-12" style="margin-top:0">{Lang::T('Session & Timeout')}</h4>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
-                    <div class="col-md-5">
-                        <label class="switch">
-                            <input type="checkbox" id="enable_session_timeout" value="1" name="enable_session_timeout"
-                                {if $_c['enable_session_timeout']==1}checked{/if}>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                <label class="col-md-3 control-label">{Lang::T('Enable Session Timeout')}</label>
+                <div class="col-md-5">
+                    <label class="switch">
+                    <input type="checkbox" id="enable_session_timeout" value="1" name="enable_session_timeout"
+                            {if $_c['enable_session_timeout']==1}checked{/if}>
+                    <span class="slider"></span>
+                    </label>
                 </div>
+                <p class="help-block col-md-4">{Lang::T('Logout Admin if not Available/Online a period of time')}</p>
+                </div>
+    
                 <div class="form-group" id="timeout_duration_input" style="display: none;">
-                    <label class="col-md-3 control-label">{Lang::T('Timeout Duration')}</label>
-                    <div class="col-md-5">
-                        <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
-                            name="session_timeout_duration" id="session_timeout_duration"
-                            placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
-                    </div>
-                    <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx
-                            minutes')}
-                    </p>
+                <label class="col-md-3 control-label">{Lang::T('Timeout Duration')}</label>
+                <div class="col-md-5">
+                    <input type="number" value="{$_c['session_timeout_duration']}" class="form-control"
+                        name="session_timeout_duration" id="session_timeout_duration"
+                        placeholder="{Lang::T('Enter the session timeout duration (minutes)')}" min="1">
                 </div>
+                <p class="help-block col-md-4">{Lang::T('Idle Timeout, Logout Admin if Idle for xx minutes')}</p>
+                </div>
+    
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Single Admin Session')}</label>
-                    <div class="col-md-5">
-                        <select name="single_session" id="single_session" class="form-control">
-                            <option value="no">
-                                {Lang::T('No')}</option>
-                            <option value="yes" {if $_c['single_session']=='yes' }selected="selected" {/if}>
-                                {Lang::T('Yes')}
-                            </option>
-                        </select>
-                    </div>
-                    <p class="help-block col-md-4">
-                        {Lang::T('Admin can only have single session login, it will logout another session')}
-                    </p>
+                <label class="col-md-3 control-label">{Lang::T('Single Admin Session')}</label>
+                <div class="col-md-5">
+                    <select name="single_session" id="single_session" class="form-control">
+                    <option value="no">{Lang::T('No')}</option>
+                    <option value="yes" {if $_c['single_session']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}</option>
+                    </select>
                 </div>
-
+                <p class="help-block col-md-4">{Lang::T('Admin can only have single session login, it will logout another session')}</p>
+                </div>
+    
+                <hr class="clearfix">
+                <h4 class="col-md-12" style="margin-top:0">{Lang::T('Cross Site Request Forgery')}</h4>
                 <div class="form-group">
-                    <label class="col-md-3 control-label">{Lang::T('Enable CSRF Validation')}</label>
-                    <div class="col-md-5">
-                        <select name="csrf_enabled" id="csrf_enabled" class="form-control">
-                            <option value="no">
-                                {Lang::T('No')}</option>
-                            <option value="yes" {if $_c['csrf_enabled']=='yes' }selected="selected" {/if}>
-                                {Lang::T('Yes')}
-                            </option>
-                        </select>
-                    </div>
-                    <p class="help-block col-md-4">
-                        <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery"
-                            target="_blank">{Lang::T('Cross-site request forgery')}</a>
-                    </p>
+                <label class="col-md-3 control-label">{Lang::T('Enable CSRF Validation')}</label>
+                <div class="col-md-5">
+                    <select name="csrf_enabled" id="csrf_enabled" class="form-control">
+                    <option value="no">{Lang::T('No')}</option>
+                    <option value="yes" {if $_c['csrf_enabled']=='yes' }selected="selected" {/if}>{Lang::T('Yes')}</option>
+                    </select>
                 </div>
+                <p class="help-block col-md-4">
+                    <a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery" target="_blank">{Lang::T('Cross-site request forgery')}</a>
+                </p>
+                </div>
+    
+                <hr class="clearfix">
+                <h4 class="col-md-12" style="margin-top:0">{Lang::T('Cloudflare Turnstile')}</h4>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">Turnstile Site Key</label>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="turnstile_site_key"
+                        value="{$_c['turnstile_site_key']|escape}" placeholder="1x0000..." autocomplete="off">
+                </div>
+                <p class="help-block col-md-4">{Lang::T('Public key used for verification on the client side.')}</p>
+                </div>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">Turnstile Secret Key</label>
+                <div class="col-md-5">
+                    <input type="password" class="form-control" name="turnstile_secret_key"
+                        onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'"
+                        value="{$_c['turnstile_secret_key']|escape}" placeholder="{Lang::T('Leave blank to keep unchanged')}" autocomplete="off">
+                </div>
+                <p class="help-block col-md-4"><a href="https://developers.cloudflare.com/turnstile/" target="_blank">{Lang::T('Learn more about Turnstile')}</a></p>
+                </div>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">{Lang::T('Enable on Admin Login')}</label>
+                <div class="col-md-5">
+                    <select name="turnstile_admin_enabled" id="turnstile_admin_enabled" class="form-control">
+                    <option value="0">{Lang::T('No')}</option>
+                    <option value="1" {if $_c['turnstile_admin_enabled']=='1'}selected="selected"{/if}>{Lang::T('Yes')}</option>
+                    </select>
+                </div>
+                <p class="help-block col-md-4">{Lang::T('Enable Turnstile for admin login page.')}</p>
+                </div>
+    
+                <div class="form-group">
+                <label class="col-md-3 control-label">{Lang::T('Enable on Customer Login')}</label>
+                <div class="col-md-5">
+                    <select name="turnstile_client_enabled" id="turnstile_client_enabled" class="form-control">
+                    <option value="0">{Lang::T('No')}</option>
+                    <option value="1" {if $_c['turnstile_client_enabled']=='1'}selected="selected"{/if}>{Lang::T('Yes')}</option>
+                    </select>
+                </div>
+                <p class="help-block col-md-4">{Lang::T('Enable Turnstile for customer login page.')}</p>
+                </div>
+    
                 <button class="btn btn-success btn-block" type="submit">
-                    {Lang::T('Save Changes')}
+                {Lang::T('Save Changes')}
                 </button>
             </div>
         </div>
+
+        <script>
+            (function ($) {
+                function toggleTimeoutInput() {
+                var isChecked = $('#enable_session_timeout').is(':checked');
+                $('#timeout_duration_input').toggle(isChecked);
+                $('#session_timeout_duration').prop('required', isChecked);
+                }
+                function requireTurnstileSiteKey() {
+                var anyEnabled = $('#turnstile_admin_enabled').val() === '1' ||
+                                $('#turnstile_client_enabled').val() === '1';
+                $('input[name="turnstile_site_key"]').prop('required', anyEnabled);
+                }
+                $(function(){
+                toggleTimeoutInput();
+                requireTurnstileSiteKey();
+                $('#enable_session_timeout').on('change', toggleTimeoutInput);
+                $('#turnstile_admin_enabled, #turnstile_client_enabled').on('change', requireTurnstileSiteKey);
+                });
+            })(jQuery);
+        </script>
     </div>
 
     <div class="panel">

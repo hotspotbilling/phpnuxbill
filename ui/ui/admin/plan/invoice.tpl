@@ -6,7 +6,7 @@
             <div class="panel-heading">{$in['invoice']}</div>
             <div class="panel-body">
                 {if !empty($logo)}
-                    <center><img src="{$app_url}/{$logo}?"></center>
+                    <center><img src="{$app_url}/{$logo}?" class="img-responsive"></center>
                 {/if}
                 <form class="form-horizontal" method="post" action="{Text::url('')}plan/print" target="_blank">
                     <pre id="content"

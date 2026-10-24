@@ -26,6 +26,7 @@
             <div class="table-responsive">
                 <table class="table table-bordered table-condensed table-striped " style="background: #ffffff">
                     <th class="text-center">{Lang::T('Username')}</th>
+                    <th class="text-center">{Lang::T('Fullname')}</th>
                     <th class="text-center">{Lang::T('Plan Name')}</th>
                     <th class="text-center">{Lang::T('Type')}</th>
                     <th class="text-center">{Lang::T('Plan Price')}</th>
@@ -36,6 +37,7 @@
                     {foreach $d as $ds}
                         <tr>
                             <td>{$ds['username']}</td>
+                            <td>{$ds['fullname']}</td>
                             <td class="text-center">{$ds['plan_name']}</td>
                             <td class="text-center">{$ds['type']}</td>
                             <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>

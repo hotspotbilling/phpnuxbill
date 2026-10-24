@@ -33,6 +33,7 @@
                             <tr>
                                 <th>{Lang::T('Invoice')}</th>
                                 <th>{Lang::T('Username')}</th>
+                                <th>{Lang::T('Fullname')}</th>
                                 <th>{Lang::T('Plan Name')}</th>
                                 <th>{Lang::T('Plan Price')}</th>
                                 <th>{Lang::T('Type')}</th>
@@ -48,6 +49,7 @@
                                         style="cursor:pointer;">{$ds['invoice']}</td>
                                     <td onclick="window.location.href = '{Text::url('')}customers/viewu/{$ds['username']}'"
                                         style="cursor:pointer;">{$ds['username']}</td>
+                                    <td>{$ds['fullname']}</td>
                                     <td>{$ds['plan_name']}</td>
                                     <td>{Lang::moneyFormat($ds['price'])}</td>
                                     <td>{$ds['type']}</td>

@@ -140,7 +140,6 @@
                         <div class="col-md-9">
                             <input type="username" class="form-control" id="pppoe_username" name="pppoe_username"
                                 onkeyup="checkUsername(this, {$d['id']})" value="{$d['pppoe_username']}">
-                            <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -157,7 +156,6 @@
                         <div class="col-md-9">
                             <input type="text" class="form-control" id="pppoe_ip" name="pppoe_ip"
                                 onkeyup="checkIP(this, {$d['id']})" value="{$d['pppoe_ip']}">
-                            <span class="help-block">{Lang::T('Not Working with Freeradius Mysql')}</span>
                         </div>
                     </div>
                     <span class="help-block">

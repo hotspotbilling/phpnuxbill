@@ -32,6 +32,12 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Batch Name')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" name="batch_name" value="" placeholder="{Lang::T('Batch 1')}">
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Number of Vouchers')}</label>
                         <div class="col-md-6">
                             <input type="text" class="form-control" name="numbervoucher" value="1">
