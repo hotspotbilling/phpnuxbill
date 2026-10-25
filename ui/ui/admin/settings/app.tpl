@@ -775,6 +775,14 @@
                         <p class="help-block col-md-4">{Lang::T('Time in minutes of inactivity before considering session stale')}</p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('REST Secret')}</label>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" id="radius_rest_secret" name="radius_rest_secret"
+                                autocomplete="off" value="{$_c['radius_rest_secret']|escape}">
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('When set, radius.php only answers FreeRADIUS requests that send it as the X-Radius-Token header or as ?token= in the REST uri')}</p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label"></label>
                         <p class="help-block col-md-4"><a
                                 href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius"

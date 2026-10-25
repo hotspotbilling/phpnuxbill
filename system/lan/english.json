@@ -3910,5 +3910,15 @@
     "Marketplace_automatic_checks": "Marketplace automatic checks",
     "Sync_the_Marketplace_store__detect_plugin__gateway__device_and_theme_updates__and_send_the_Telegram_notification__Every_6_hours__Recommended_": "Sync the Marketplace store, detect plugin, gateway, device and theme updates, and send the Telegram notification. Every 6 hours [Recommended]",
     "Command_line_only__it_cannot_be_run_from_the_web__Turn_the_notification_on_or_off_in_Marketplace___Tools___Settings_": "Command line only, it cannot be run from the web. Turn the notification on or off in Marketplace > Tools > Settings.",
-    "Asset": "Asset"
+    "Asset": "Asset",
+    "Hotspot_Payment_Gateway__Azampay_": "Hotspot Payment Gateway [Azampay]",
+    "Environment": "Environment",
+    "SandBox_or_Testing": "SandBox or Testing",
+    "Live_or_Production": "Live or Production",
+    "Sandbox": "Sandbox",
+    "is_for_testing_purpose__please_switch_to": "is for testing purpose, please switch to",
+    "Live": "Live",
+    "in_production_": "in production.",
+    "REST_Secret": "REST Secret",
+    "When_set__radius_php_only_answers_FreeRADIUS_requests_that_send_it_as_the_X_Radius_Token_header_or_as__token__in_the_REST_uri": "When set, radius.php only answers FreeRADIUS requests that send it as the X-Radius-Token header or as ?token= in the REST uri"
 }

@@ -65,6 +65,8 @@ if ($config['dashboard_type'] === 'dynamic') {
 
     if (class_exists('RedisCache') && RedisCache::isDashboardCacheEnabled()) {
         $data = RedisCache::remember('dash:metrics_dynamic', RedisCache::getDashboardTTL(), [RedisCache::class, 'calculateDynamicDashboard']);
+    } elseif (class_exists('RedisCache') && RedisCache::isDashboardFileCacheEnabled()) {
+        $data = RedisCache::rememberFile('dash:metrics_dynamic', RedisCache::getDashboardTTL(), [RedisCache::class, 'calculateDynamicDashboard']);
     } else {
         $data = RedisCache::calculateDynamicDashboard();
     }
@@ -125,6 +127,9 @@ if ($config['dashboard_type'] === 'dynamic') {
         // Agent/Sales widget output may depend on the logged-in admin, so scope the cache per admin
         $widgetCacheKey = 'dash:widgets_' . $tipeUser . ($tipeUser === 'Admin' ? '' : '_' . (int) $admin['id']);
         $widgets = RedisCache::remember($widgetCacheKey, RedisCache::getDashboardTTL(), $computeWidgets);
+    } elseif (class_exists('RedisCache') && RedisCache::isDashboardFileCacheEnabled()) {
+        $tipeKey = 'dash:widgets_' . $tipeUser . ($tipeUser === 'Admin' ? '' : '_' . (int) $admin['id']);
+        $widgets = RedisCache::rememberFile($tipeKey, RedisCache::getDashboardTTL(), $computeWidgets);
     } else {
         $widgets = $computeWidgets();
     }

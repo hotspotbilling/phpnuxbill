@@ -88,6 +88,45 @@ class RedisCache
     }
 
     /**
+     * Dashboard data is cached in files (system/cache/dash_*.temp, same TTL) when Redis cannot do it: Redis not
+     * enabled, or enabled but unreachable. Not used when an admin turned Redis on and dashboard caching off.
+     */
+    public static function isDashboardFileCacheEnabled(): bool
+    {
+        global $config;
+        if (self::isDashboardCacheEnabled()) {
+            return false;
+        }
+        return empty($config['redis_enabled']) || !empty($config['redis_cache_dashboard']);
+    }
+
+    /** File-based cache-aside, same contract as remember(). The "?refresh=1" button deletes the *.temp files. */
+    public static function rememberFile(string $key, int $ttl, callable $callback)
+    {
+        global $CACHE_PATH;
+        $file = rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'dash_' . md5($key) . '.temp';
+        if (is_file($file) && (time() - (int) filemtime($file)) < $ttl) {
+            $raw = @file_get_contents($file);
+            if ($raw !== false && $raw !== '') {
+                $cached = @unserialize($raw, ['allowed_classes' => false]);
+                if ($cached !== false || $raw === serialize(false)) {
+                    return $cached;
+                }
+            }
+        }
+        $result = $callback();
+        if ($result !== null && is_dir(dirname($file)) && is_writable(dirname($file))) {
+            $tmp = $file . '.' . getmypid() . '.tmp';
+            if (@file_put_contents($tmp, serialize($result), LOCK_EX) !== false) {
+                @rename($tmp, $file); // readers never see a half-written file
+            } else {
+                @unlink($tmp);
+            }
+        }
+        return $result;
+    }
+
+    /**
      * Get dashboard TTL (in seconds)
      */
     public static function getDashboardTTL(): int

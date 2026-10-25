@@ -34,17 +34,26 @@ class Password
     }
 
     /**
-     * verify CHAP password
+     * Check a CHAP response (id + md5(id . password . challenge)) against a known password.
+     * CHAPassword and CHAPChallenge come from FreeRADIUS as "0x" + hex. True only when they match.
      * @param string $realPassword
      * @param string $CHAPassword
      * @param string $CHAPChallenge
      * @return bool
      */
-    public static function chap_verify($realPassword, $CHAPassword, $CHAPChallenge){
-        $CHAPassword = substr($CHAPassword, 2);
-        $chapid = substr($CHAPassword, 0, 2);
-        $result = hex2bin($chapid) . $realPassword . hex2bin(substr($CHAPChallenge, 2));
-        $response = $chapid . md5($result);
-        return ($response != $CHAPassword);
+    public static function chap_verify($realPassword, $CHAPassword, $CHAPChallenge)
+    {
+        $strip = function ($v) {
+            $v = (string) $v;
+            return strncasecmp($v, '0x', 2) === 0 ? substr($v, 2) : $v;
+        };
+        $response = $strip($CHAPassword);
+        $challenge = $strip($CHAPChallenge);
+        if (strlen($response) !== 34 || !ctype_xdigit($response) || $challenge === '' || strlen($challenge) % 2 !== 0 || !ctype_xdigit($challenge)) {
+            return false;
+        }
+        $chapid = substr($response, 0, 2);
+        $expected = $chapid . md5(hex2bin($chapid) . $realPassword . hex2bin($challenge));
+        return hash_equals(strtolower($expected), strtolower($response));
     }
 }

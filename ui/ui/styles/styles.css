@@ -4880,6 +4880,9 @@ body.fixed .main-sidebar,
   font-size: 13.5px !important;
   font-weight: 400 !important;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* long plugin names are cut with "..." (full name in the title tooltip) */
   border-radius: 6px;
   margin: 1px 4px;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -6067,3 +6070,82 @@ a.mp-result, a.mp-result:hover { color: inherit !important; text-decoration: non
 
 /* plugin menu entries carry both chevrons; the default theme uses the font one */
 body:not(.shadcn-body) .sidebar-menu .pull-right-container > svg.treeview-chevron { display: none; }
+
+/* Dashboard toolbar: Refresh button (default theme) */
+.dash-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+.dash-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px 7px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: #475569;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.dash-refresh .fa {
+  font-size: 13px;
+  transition: transform 0.45s ease;
+}
+
+.dash-refresh:hover,
+.dash-refresh:focus {
+  color: #2563eb;
+  border-color: #bfdbfe;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.14);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.dash-refresh:hover .fa {
+  transform: rotate(180deg);
+}
+
+.dash-refresh:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.dash-refresh.is-loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.dash-refresh.is-loading .fa {
+  animation: dashRefreshSpin 0.8s linear infinite;
+}
+
+@keyframes dashRefreshSpin {
+  to { transform: rotate(360deg); }
+}
+
+.dark-mode .dash-refresh,
+.dark .dash-refresh {
+  color: #cbd5e1;
+  background: linear-gradient(180deg, #2a3446, #232c3b);
+  border-color: #3b4658;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.dark-mode .dash-refresh:hover,
+.dark .dash-refresh:hover,
+.dark-mode .dash-refresh:focus,
+.dark .dash-refresh:focus {
+  color: #93c5fd;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+}

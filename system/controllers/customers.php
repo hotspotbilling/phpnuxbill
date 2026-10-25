@@ -453,6 +453,10 @@ switch ($action) {
                 $c->delete();
             } catch (Exception $e) {
             }
+            if (class_exists('RedisCache')) {
+                RedisCache::forgetRadiusCustomer($c['username']);
+                RedisCache::forgetRadiusCustomer($c['pppoe_username']);
+            }
             r2(getUrl('customers/list'), 's', Lang::T('User deleted Successfully'));
         }
         break;
@@ -746,6 +750,8 @@ switch ($action) {
             if (class_exists('RedisCache')) {
                 RedisCache::forgetRadiusCustomer($oldusername);
                 RedisCache::forgetRadiusCustomer($username);
+                RedisCache::forgetRadiusCustomer($oldPppoeUsername);
+                RedisCache::forgetRadiusCustomer($pppoe_username);
             }
 
 

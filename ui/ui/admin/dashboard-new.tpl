@@ -1,5 +1,12 @@
 {include file="sections/header.tpl"}
 
+<div class="dash-toolbar">
+    <a href="{Text::url('dashboard')}&refresh=1" class="dash-refresh" title="{Lang::T('Refresh Data')}"
+        onclick="this.classList.add('is-loading')">
+        <i class="fa fa-refresh"></i><span>{Lang::T('Refresh')}</span>
+    </a>
+</div>
+
 <!-- Cron Monitor Status Alert Banner -->
 {if $can_view_system && !empty($system_status.cron)}
 {if $system_status.cron.status == 'danger'}

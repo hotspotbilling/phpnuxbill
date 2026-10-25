@@ -273,7 +273,7 @@ try {
                 }
                 $html .= '<li' . $classAttr . '>';
                 if (!empty($kids)) {
-                    $html .= '<a href="#">';
+                    $html .= '<a href="#" title="' . htmlspecialchars(strip_tags($item['name']), ENT_QUOTES) . '">';
                 } else {
                     // Hierarchical routes (function contains '/') route via the plugin system;
                     // core controllers (system/controllers/<function>.php) route directly;
@@ -284,7 +284,7 @@ try {
                         $ctrlFile = $root_path . File::pathFixer('system/controllers/' . $item['function'] . '.php');
                         $menuUrl = is_file($ctrlFile) ? getUrl($item['function']) : getUrl('plugin/' . $item['function']);
                     }
-                    $html .= '<a href="' . $menuUrl . '">';
+                    $html .= '<a href="' . $menuUrl . '" title="' . htmlspecialchars(strip_tags($item['name']), ENT_QUOTES) . '">';
                 }
                 $html .= _menu_icon($item['icon'] ?? '', true);
                 $html .= '<span class="text">' . $item['name'] . '</span>';
@@ -307,7 +307,7 @@ try {
                             $kidCtrlFile = $root_path . File::pathFixer('system/controllers/' . $kid['function'] . '.php');
                             $kidMenuUrl = is_file($kidCtrlFile) ? getUrl($kid['function']) : getUrl('plugin/' . $kid['function']);
                         }
-                        $html .= '<li' . $kidActive . '><a href="' . $kidMenuUrl . '">';
+                        $html .= '<li' . $kidActive . '><a href="' . $kidMenuUrl . '" title="' . htmlspecialchars(strip_tags($kid['name']), ENT_QUOTES) . '">';
                         $html .= _menu_icon($kid['icon'] ?? '');
                         if (!empty($kid['label'])) {
                             $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $kid['color'] . '">' . $kid['label'] . '</small></span>';

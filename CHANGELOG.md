@@ -4,6 +4,18 @@
 
 ## 2026.10.25
 
+- Dashboard data (dynamic metrics and classic widgets) is cached in `system/cache/dash_*.temp` for the dashboard TTL when Redis is not enabled or not reachable; the Refresh button clears it
+- Security: FreeRADIUS REST endpoint (`radius.php`)
+  - `Password::chap_verify()` returned true for a wrong password and false for the right one; it now compares correctly (constant time) and rejects malformed CHAP input
+  - Customers are always checked against their own (main or PPPoE) password; the "username = password" / empty-password voucher fallback no longer lets anyone in as an existing customer
+  - Inactive/banned customers can no longer authorize, and are never treated as vouchers; a voucher login needs a real `tbl_voucher` row for the `radius` router
+  - Strict constant-time password comparison (no `0e123 == 0e999` type juggling)
+  - Optional shared secret (Settings > FreeRadius > REST secret): send it as header `X-Radius-Token` (`update request { &REST-HTTP-Header += "X-Radius-Token: <secret>" }` before `rest`) or add `&token=<secret>` to the REST uri; unset keeps the old open behaviour
+  - Vouchers are claimed atomically, so two simultaneous logins cannot both activate one
+  - Shared-device limit identifies the device by its MAC instead of a client-chosen field
+  - Data usage counts `Acct-*-Gigawords` (sessions over 4 GiB were undercounted) and `Mikrotik-Total-Limit-Gigawords` carries limits above 4 GiB; add `&acctInputGigawords=...&acctOutputGigawords=...` to the accounting uri (already in the documented config)
+  - Usage is summed in SQL once per login instead of loading every accounting row twice
+  - RADIUS Redis cache is also cleared for PPPoE usernames on customer edit and delete
 - Marketplace overhaul
   - Hub, plugins, payment gateways, themes and device drivers share one layout, filters, search and sorting (Free / Premium / New / Watchlist, Updates, Issues)
   - Hub-wide search across installed items and every store, with install buttons on results
