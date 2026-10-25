@@ -1475,10 +1475,22 @@ body.fixed .main-sidebar,
   display: none;
 }
 
-.sidebar-menu > li > a {
+/* long plugin names are cut with "..." (the full name is in the title tooltip). Only while the sidebar is expanded:
+   collapsed links have hover labels positioned outside the link, which overflow:hidden would clip. */
+body:not(.sidebar-collapse) .sidebar-menu > li > a {
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* long plugin names are cut with "..." (the full name is in the title tooltip) */
+  text-overflow: ellipsis;
+}
+
+/* the entry's chevron is the "down" glyph (AdminLTE only rotates fa-angle-left): turn it when the group is open */
+.sidebar-menu > li > a > .pull-right-container .fa-angle-down {
+  display: inline-block;
+  transition: transform 0.25s ease;
+}
+
+.sidebar-menu > li.menu-open > a > .pull-right-container .fa-angle-down {
+  transform: rotate(180deg);
 }
 
 /* submenu: one calm panel, labels indented under the parent's label, smaller than the top-level items */
