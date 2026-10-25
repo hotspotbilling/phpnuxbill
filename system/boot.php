@@ -136,13 +136,19 @@ function _menu_icon($icon, $placeholder = false)
             : '';
     }
     if (stripos($icon, '<svg') === 0 || stripos($icon, '<img') === 0) {
-        if (preg_match('/^<(?:svg|img)\b[^>]*?\bclass\s*=\s*"([^"]*)"/i', $icon, $m)) {
-            if (!preg_match('/(^|\s)icon(\s|$)/', $m[1])) {
-                $icon = preg_replace('/^(<(?:svg|img)\b[^>]*?\bclass\s*=\s*")/i', '$1icon ', $icon, 1);
+        // add "icon" to the existing class attribute (single or double quoted) or create one; never duplicate it
+        return preg_replace_callback('/^<(svg|img)\b([^>]*)>?/i', function ($m) {
+            $attrs = $m[2];
+            $rest = substr($m[0], strlen($m[1]) + 1 + strlen($attrs));
+            if (preg_match('/\sclass\s*=\s*(["\'])(.*?)\1/is', $attrs, $c, PREG_OFFSET_CAPTURE)) {
+                if (!preg_match('/(^|\s)icon(\s|$)/', $c[2][0])) {
+                    $attrs = substr_replace($attrs, trim('icon ' . $c[2][0]), $c[2][1], strlen($c[2][0]));
+                }
+            } else {
+                $attrs = ' class="icon"' . $attrs;
             }
-            return $icon;
-        }
-        return preg_replace('/^<(svg|img)\b/i', '<$1 class="icon"', $icon, 1);
+            return '<' . $m[1] . $attrs . $rest;
+        }, $icon, 1);
     }
     return '<i class="icon ' . htmlspecialchars($icon, ENT_QUOTES) . '"></i>';
 }

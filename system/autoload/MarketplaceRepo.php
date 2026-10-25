@@ -17,6 +17,7 @@ class MarketplaceRepo
 {
     public const OFFICIAL = 'https://hotspotbilling.github.io/Plugin-Repository/repository.json';
     private const TTL = 86400;
+    private const RETRY_BACKOFF = 900; // seconds to wait after a failed background refresh
 
     /** @var array|null merged repository for this request */
     private static $loaded = null;
@@ -163,11 +164,21 @@ class MarketplaceRepo
         if (!function_exists('fastcgi_finish_request')) {
             return;
         }
+        if (self::retryAfter($url) > time()) {
+            return; // the last background refresh failed: stay on the old copy for now
+        }
         self::$refreshQueue[$url] = true;
         if (!self::$refreshRegistered) {
             self::$refreshRegistered = true;
             register_shutdown_function([self::class, 'refreshQueued']);
         }
+    }
+
+    /** Timestamp before which a failed background refresh of this repository is not retried */
+    private static function retryAfter(string $url): int
+    {
+        $f = Extensions::cacheDir() . DIRECTORY_SEPARATOR . 'repo_' . md5($url) . '.retry';
+        return is_file($f) ? (int) filemtime($f) + self::RETRY_BACKOFF : 0;
     }
 
     /** Runs at shutdown: closes the response, then re-downloads each queued repository (one process at a time per repo) */
@@ -184,17 +195,32 @@ class MarketplaceRepo
             @fastcgi_finish_request();
         }
         foreach (array_keys(self::$refreshQueue) as $url) {
-            $lock = Extensions::cacheDir() . DIRECTORY_SEPARATOR . 'repo_' . md5($url) . '.lock';
-            if (is_file($lock) && (time() - filemtime($lock)) < 120) {
-                continue; // another request is already refreshing it
+            $base = Extensions::cacheDir() . DIRECTORY_SEPARATOR . 'repo_' . md5($url);
+            // an exclusive non-blocking lock held for the whole download: a second request cannot bypass or remove it,
+            // and the OS drops it if this process dies
+            $handle = @fopen($base . '.lock', 'c');
+            if (!$handle) {
+                continue;
             }
-            @touch($lock);
+            if (!flock($handle, LOCK_EX | LOCK_NB)) {
+                fclose($handle); // another request is already refreshing it
+                continue;
+            }
             try {
-                self::fetch($url);
+                if (self::retryAfter($url) > time()) {
+                    continue; // a recent attempt failed
+                }
+                if (self::fetch($url) === null) {
+                    @touch($base . '.retry');
+                } else {
+                    @unlink($base . '.retry');
+                }
             } catch (Throwable $e) {
-                // the old copy keeps serving
+                @touch($base . '.retry'); // the old copy keeps serving; back off before trying again
+            } finally {
+                flock($handle, LOCK_UN);
+                fclose($handle);
             }
-            @unlink($lock);
         }
         self::$refreshQueue = [];
     }
