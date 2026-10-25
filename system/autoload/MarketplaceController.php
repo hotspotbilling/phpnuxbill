@@ -233,8 +233,8 @@ class MarketplaceController
                 'blocked' => Extensions::licenseMissing($type, $slug, $manifest),
             ],
             'store' => $store,
-            'github' => $store['github'] ?? ($manifest['github'] ?? ''),
-            'url' => $store['url'] ?? ($manifest['url'] ?? ''),
+            'github' => Extensions::httpUrl($store['github'] ?? ($manifest['github'] ?? '')),
+            'url' => Extensions::httpUrl($store['url'] ?? ($manifest['url'] ?? '')),
             'paid' => !empty($store['ispaid']),
         ];
         $card['info_json'] = Extensions::infoJson([

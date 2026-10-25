@@ -77,7 +77,7 @@
             <input type="hidden" name="csrf_token" value="{$csrf_token}">
             <select id="mp-backup-select" class="form-control mp-narrow">
                 {foreach $installed_list as $i}
-                <option value="{$i.type}:{$i.slug}">{$i.type} &middot; {$i.name}</option>
+                <option value="{$i.type|escape}:{$i.slug|escape}">{$i.type|escape} &middot; {$i.name|escape}</option>
                 {/foreach}
             </select>
             <button type="submit" class="mp-filter"><i class="fa fa-save"></i> {Lang::T('Back up now')}</button>
@@ -90,9 +90,9 @@
             <tbody>
             {foreach $backups as $b}
             <tr>
-                <td><span class="mp-badge mp-badge--folder">{$b.type}</span> <strong>{$b.slug}</strong></td>
+                <td><span class="mp-badge mp-badge--folder">{$b.type|escape}</span> <strong>{$b.slug|escape}</strong></td>
                 <td>{$b.reason}</td>
-                <td>{if $b.version}v{$b.version}{else}&ndash;{/if}</td>
+                <td>{if $b.version}v{$b.version|escape}{else}&ndash;{/if}</td>
                 <td>{$b.time|date_format:'%Y-%m-%d %H:%M'}</td>
                 <td>{($b.size/1024)|string_format:'%.1f'} KB</td>
                 <td class="mp-actions-cell">

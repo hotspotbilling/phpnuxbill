@@ -83,9 +83,11 @@ class MarketplaceUpdates
         return $out;
     }
 
-    private static function clean(string $s): string
+    /** Normalised comparison key: community gateways are published as phpnuxbill-xyz-payment-gateway */
+    private static function normalize(string $type, string $s): string
     {
-        return str_replace(['phpnuxbill', 'paymentgateway', 'gateway', 'payment'], '', preg_replace('/[^a-z0-9]/', '', strtolower($s)));
+        $s = preg_replace('/[^a-z0-9]/', '', strtolower($s));
+        return $type === 'gateway' ? str_replace(['phpnuxbill', 'paymentgateway', 'gateway', 'payment'], '', $s) : $s;
     }
 
     /** Find the store entry that corresponds to an installed extension */
@@ -101,12 +103,15 @@ class MarketplaceUpdates
                 return $item;
             }
         }
-        if ($type === 'gateway' || $type === 'device') { // community gateways are published as phpnuxbill-xyz-payment-gateway
-            $c = self::clean($slug);
-            foreach ($list as $item) {
-                $ci = self::clean((string) ($item['id'] ?? ''));
-                if ($c !== '' && $ci !== '' && ($ci === $c || strpos($ci, $c) !== false || strpos($c, $ci) !== false)) {
-                    return $item;
+        if ($type === 'gateway' || $type === 'device') {
+            // exact match on the normalised id only: substring matching would hide e.g. "RadiusRest" behind "Radius"
+            $c = self::normalize($type, $slug);
+            if ($c !== '') {
+                foreach ($list as $item) {
+                    $ci = self::normalize($type, (string) ($item['id'] ?? ''));
+                    if ($ci !== '' && $ci === $c) {
+                        return $item;
+                    }
                 }
             }
         }

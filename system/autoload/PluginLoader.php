@@ -114,21 +114,32 @@ class PluginLoader
             ];
         }
 
+        // The remote answer is cached so page views never wait on the network (6 hours; failures are cached too)
+        global $CACHE_PATH;
+        $cacheFile = $CACHE_PATH . DIRECTORY_SEPARATOR . 'plugin_update_' . md5($updateUrl) . '.json';
+        $ttl = 6 * 3600;
         $latest = null;
-        try {
-            $data = Http::getData($updateUrl, 10);
-            if ($data !== false && $data !== '') {
-                $json = json_decode($data, true);
-                if (is_array($json)) {
-                    // Support GitHub releases API format (tag_name) and generic format (version)
-                    $latest = $json['tag_name'] ?? $json['version'] ?? null;
-                    if ($latest && str_starts_with($latest, 'v')) {
-                        $latest = substr($latest, 1);
+        $cached = is_file($cacheFile) ? json_decode((string) file_get_contents($cacheFile), true) : null;
+        if (is_array($cached) && isset($cached['t']) && (time() - (int) $cached['t']) < $ttl) {
+            $latest = $cached['latest'] ?? null;
+        } else {
+            try {
+                $data = Http::getData($updateUrl, [], 5000, 10000);
+                if ($data !== false && $data !== '') {
+                    $json = json_decode($data, true);
+                    if (is_array($json)) {
+                        // Support GitHub releases API format (tag_name) and generic format (version)
+                        $raw = $json['tag_name'] ?? $json['version'] ?? null;
+                        $latest = is_string($raw) || is_numeric($raw) ? (string) $raw : null;
+                        if ($latest && str_starts_with($latest, 'v')) {
+                            $latest = substr($latest, 1);
+                        }
                     }
                 }
+            } catch (Throwable $e) {
+                // Silently fail — update check is non-critical
             }
-        } catch (Throwable $e) {
-            // Silently fail — update check is non-critical
+            @file_put_contents($cacheFile, json_encode(['t' => time(), 'latest' => $latest]), LOCK_EX);
         }
 
         $available = false;
@@ -247,7 +258,7 @@ class PluginLoader
         $code = file_get_contents($src);
         $uiSrc = $PLUGIN_PATH . DIRECTORY_SEPARATOR . 'ui' . DIRECTORY_SEPARATOR;
         $tpls = [];
-        foreach (glob($uiSrc . $slug . '*.tpl') ?: [] as $t) {
+        foreach (Extensions::flatTemplates('plugin', $slug) as $t) {
             $tpls[basename($t)] = true;
         }
         if (preg_match_all('/[\'"]([A-Za-z0-9_\-\/]+\.tpl)[\'"]/', $code, $mm)) {
@@ -311,8 +322,8 @@ class PluginLoader
         if (unlink($src)) {
             $removed++;
         }
-        $uiSrc = $PLUGIN_PATH . DIRECTORY_SEPARATOR . 'ui' . DIRECTORY_SEPARATOR;
-        foreach (glob($uiSrc . $slug . '*.tpl') ?: [] as $t) {
+        // only templates owned by this slug ("<slug>.tpl" or "<slug>_*.tpl"), never another legacy plugin's
+        foreach (Extensions::flatTemplates('plugin', $slug) as $t) {
             if (unlink($t)) {
                 $removed++;
             }

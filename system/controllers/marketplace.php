@@ -78,8 +78,9 @@ if ($action === 'watch') {
     _mp_json(['ok' => true, 'watched' => $on, 'count' => count(MarketplaceController::watchlist())]);
 }
 if ($action === 'readme') {
-    $html = Extensions::readmeHtml((string) _get('repo'));
-    _mp_json(['ok' => true, 'html' => $html]);
+    // accepts only a GitHub "owner/name" identifier
+    $ownerName = Extensions::githubSlug((string) _get('repo'));
+    _mp_json(['ok' => $ownerName !== null, 'html' => $ownerName === null ? '' : Extensions::readmeHtml($ownerName)]);
 }
 
 // ---- tools: settings, backups, activity -------------------------------------------

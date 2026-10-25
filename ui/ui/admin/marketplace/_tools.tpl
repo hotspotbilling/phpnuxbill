@@ -2,7 +2,7 @@
 <div class="mp-card__tools">
     <button type="button" class="mp-mini" data-details><i class="fa fa-info-circle"></i> {Lang::T('Details')}</button>
     {if $c.license.required}
-    <button type="button" class="mp-mini" data-license="{$c.slug}"><i class="fa fa-key"></i> {Lang::T('License')}</button>
+    <button type="button" class="mp-mini" data-license="{$c.slug|escape}"><i class="fa fa-key"></i> {Lang::T('License')}</button>
     {/if}
     {if $c.update.available}
     <form method="post" action="{Text::url('marketplace/', $route, '/update/', $c.slug)}" class="mp-inline">

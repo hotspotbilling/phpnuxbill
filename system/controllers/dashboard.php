@@ -9,8 +9,17 @@ _admin();
 $ui->assign('_title', Lang::T('Dashboard'));
 $ui->assign('_admin', $admin);
 
+// Infrastructure data (disk, RAM, cron, services, sessions) is for SuperAdmin/Admin only
+$canViewSystem = in_array($admin['user_type'], ['SuperAdmin', 'Admin'], true);
+$ui->assign('can_view_system', $canViewSystem);
+
 if (isset($_GET['ajax_system_status'])) {
     header('Content-Type: application/json');
+    if (!$canViewSystem) {
+        http_response_code(403);
+        echo json_encode(['error' => 'forbidden']);
+        exit;
+    }
     echo json_encode(SystemInfo::getInfo());
     exit;
 }
@@ -64,10 +73,25 @@ if ($config['dashboard_type'] === 'dynamic') {
         $ui->assign($key, $val);
     }
 
-    // Always ensure fresh real-time system metrics (CPU, RAM, Uptime, Cron, DB) are assigned
-    $systemStatus = SystemInfo::getInfo();
-    $ui->assign('system_status', $systemStatus);
-    $ui->assign('online_users', $systemStatus['online_users'] ?? SystemInfo::getOnlineUsers());
+    // Volatile metrics are never cached: computed once per request and merged into the cached chart payload
+    if ($canViewSystem) {
+        $systemStatus = SystemInfo::getInfo();
+        $ui->assign('system_status', $systemStatus);
+        $ui->assign('online_users', $systemStatus['online_users']);
+        $dashJson = json_decode($data['dashboard_data_json'] ?? '{}', true);
+        $dashJson = is_array($dashJson) ? $dashJson : [];
+        $dashJson['systemStatus'] = $systemStatus; // replaces anything an older cache entry may still carry
+        $ui->assign('dashboard_data_json', json_encode($dashJson));
+    } else {
+        $ui->assign('system_status', []);
+        $ui->assign('online_users', SystemInfo::getOnlineUsers());
+        // a cache entry written by an older version may still carry infrastructure data: never pass it on
+        $dashJson = json_decode($data['dashboard_data_json'] ?? '{}', true);
+        if (is_array($dashJson)) {
+            unset($dashJson['systemStatus']);
+            $ui->assign('dashboard_data_json', json_encode($dashJson));
+        }
+    }
 
     $ui->display('admin/dashboard-new.tpl');
 } else {

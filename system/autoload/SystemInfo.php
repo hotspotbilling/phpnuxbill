@@ -428,7 +428,7 @@ class SystemInfo
             if (RedisCache::isConnected()) {
                 $redisOnline = true;
                 $stats = RedisCache::getStats();
-                $redisInfo = 'Redis v' . ($stats['version'] ?? 'N/A') . ' • ' . ($stats['memory_used'] ?? 'OK') . ' • Uptime: ' . ($stats['uptime'] ?? 'N/A');
+                $redisInfo = 'Redis v' . ($stats['version'] ?? 'N/A') . ' • ' . ($stats['used_memory'] ?? 'OK') . ' • Uptime: ' . ($stats['uptime'] ?? 'N/A');
             } elseif (!empty($config['redis_enabled'])) {
                 $redisInfo = Lang::T('Configured but unreachable');
             }
@@ -485,79 +485,60 @@ class SystemInfo
 
         // 1. Radius REST Online Users (table rad_acct in database)
         // Sessions updated by radius.php with acctstatustype IN ('Start', 'Interim-Update') OR NULL, and != 'Stop'
+        $restActive = "(acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL)";
+        $restNotStopped = "(acctstatustype != 'Stop' OR acctstatustype IS NULL)";
         $restOnline = 0;
         $restUsers = 0;
         try {
             $restOnline = (int) ORM::for_table('rad_acct')
-                ->where_raw("(acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL)")
-                ->where_raw("(acctstatustype != 'Stop' OR acctstatustype IS NULL)")
+                ->where_raw($restActive)
+                ->where_raw($restNotStopped)
                 ->count();
-            $restUsers = (int) ORM::for_table('rad_acct')
-                ->where_raw("(acctstatustype = 'Start' OR acctstatustype = 'Interim-Update' OR acctstatustype IS NULL)")
-                ->where_raw("(acctstatustype != 'Stop' OR acctstatustype IS NULL)")
-                ->count('DISTINCT username');
         } catch (Throwable $e) {
             $restOnline = 0;
+        }
+        try {
+            $row = ORM::for_table('rad_acct')
+                ->select_expr('COUNT(DISTINCT username)', 'n')
+                ->where_raw($restActive)
+                ->where_raw($restNotStopped)
+                ->find_one();
+            $restUsers = $row ? (int) $row->n : 0;
+        } catch (Throwable $e) {
             $restUsers = 0;
         }
 
         // 2. Radius MySQL Online Users (table radacct in database)
-        // Sessions in FreeRADIUS with acctstoptime IS NULL
+        // Sessions in FreeRADIUS with acctstoptime IS NULL. Each figure has its own try so one failure keeps the other.
         $mysqlOnline = 0;
         $mysqlUsers = 0;
         if ($radiusEnabled) {
-            try {
-                $mysqlOnline = (int) ORM::for_table('radacct', 'radius')
-                    ->where_null('acctstoptime')
-                    ->count();
-                $mysqlUsers = (int) ORM::for_table('radacct', 'radius')
-                    ->where_null('acctstoptime')
-                    ->count('DISTINCT username');
-            } catch (Throwable $e) {
+            foreach ([['radacct', 'radius'], ['radacct', null]] as [$tbl, $conn]) {
                 try {
-                    $mysqlOnline = (int) ORM::for_table('radacct')
-                        ->where_null('acctstoptime')
-                        ->count();
-                    $mysqlUsers = (int) ORM::for_table('radacct')
-                        ->where_null('acctstoptime')
-                        ->count('DISTINCT username');
-                } catch (Throwable $e2) {
+                    $q = $conn ? ORM::for_table($tbl, $conn) : ORM::for_table($tbl);
+                    $mysqlOnline = (int) $q->where_null('acctstoptime')->count();
+                    break;
+                } catch (Throwable $e) {
                     $mysqlOnline = 0;
+                }
+            }
+            foreach ([['radacct', 'radius'], ['radacct', null]] as [$tbl, $conn]) {
+                try {
+                    $q = $conn ? ORM::for_table($tbl, $conn) : ORM::for_table($tbl);
+                    $row = $q->select_expr('COUNT(DISTINCT username)', 'n')->where_null('acctstoptime')->find_one();
+                    $mysqlUsers = $row ? (int) $row->n : 0;
+                    break;
+                } catch (Throwable $e) {
                     $mysqlUsers = 0;
                 }
             }
         }
 
-        // 3. Mikrotik API Online Users (Hotspot active + PPPoE active via RouterOS API)
-        $mikrotikHotspot = 0;
-        $mikrotikPppoe = 0;
-        $routersCount = 0;
-        try {
-            $routers = ORM::for_table('tbl_routers')->where('enabled', 1)->find_array();
-            foreach ($routers as $r) {
-                if (strcasecmp($r['status'] ?? '', 'online') === 0) {
-                    $routersCount++;
-                    try {
-                        $client = Mikrotik::getClient($r['ip_address'], $r['username'], $r['password'], $r['port'] ?? null, 1);
-                        if ($client) {
-                            try {
-                                $reqH = new PEAR2\Net\RouterOS\Request('/ip/hotspot/active/print');
-                                $reqH->setArgument('.proplist', '.id');
-                                $resH = $client->sendSync($reqH);
-                                $mikrotikHotspot += count($resH);
-                            } catch (Throwable $eH) {}
-
-                            try {
-                                $reqP = new PEAR2\Net\RouterOS\Request('/ppp/active/print');
-                                $reqP->setArgument('.proplist', '.id');
-                                $resP = $client->sendSync($reqP);
-                                $mikrotikPppoe += count($resP);
-                            } catch (Throwable $eP) {}
-                        }
-                    } catch (Throwable $e) {}
-                }
-            }
-        } catch (Throwable $e) {}
+        // 3. Mikrotik API Online Users (Hotspot active + PPPoE active via RouterOS API), cached for a short time
+        $mt = self::getMikrotikOnline();
+        $mikrotikHotspot = $mt['hotspot'];
+        $mikrotikPppoe = $mt['pppoe'];
+        $routersCount = $mt['routers'];
         $mikrotikOnline = $mikrotikHotspot + $mikrotikPppoe;
 
         // Fetch recent active sessions for detailed tab view
@@ -610,6 +591,64 @@ class SystemInfo
             'radius_enabled'    => $radiusEnabled,
             'routers_checked'   => $routersCount
         ];
+    }
+
+    /**
+     * Hotspot + PPP active-session counts from every online router. Opening RouterOS connections on each
+     * dashboard load/refresh is slow, so the totals are cached for 30 seconds (Redis when connected, otherwise a file).
+     * Mikrotik::getClient($ip, $user, $pass, $port, $timeout) accepts the 1-second timeout used here.
+     */
+    private static function getMikrotikOnline(): array
+    {
+        $compute = function (): array {
+            $out = ['hotspot' => 0, 'pppoe' => 0, 'routers' => 0];
+            try {
+                foreach (ORM::for_table('tbl_routers')->where('enabled', 1)->find_array() as $r) {
+                    if (strcasecmp($r['status'] ?? '', 'online') !== 0) {
+                        continue;
+                    }
+                    $out['routers']++;
+                    try {
+                        $client = Mikrotik::getClient($r['ip_address'], $r['username'], $r['password'], $r['port'] ?? null, 1);
+                        if (!$client) {
+                            continue;
+                        }
+                        try {
+                            $reqH = new PEAR2\Net\RouterOS\Request('/ip/hotspot/active/print');
+                            $reqH->setArgument('.proplist', '.id');
+                            $out['hotspot'] += count($client->sendSync($reqH));
+                        } catch (Throwable $eH) {
+                        }
+                        try {
+                            $reqP = new PEAR2\Net\RouterOS\Request('/ppp/active/print');
+                            $reqP->setArgument('.proplist', '.id');
+                            $out['pppoe'] += count($client->sendSync($reqP));
+                        } catch (Throwable $eP) {
+                        }
+                    } catch (Throwable $e) {
+                    }
+                }
+            } catch (Throwable $e) {
+            }
+            return $out;
+        };
+
+        $ttl = 30;
+        if (class_exists('RedisCache') && RedisCache::isConnected()) {
+            $res = RedisCache::remember('dash:mikrotik_online', $ttl, $compute);
+            return is_array($res) ? $res : $compute();
+        }
+        global $CACHE_PATH;
+        $file = $CACHE_PATH . DIRECTORY_SEPARATOR . 'mikrotik_online.cache';
+        if (is_file($file) && (time() - filemtime($file)) < $ttl) {
+            $cached = json_decode((string) @file_get_contents($file), true);
+            if (is_array($cached) && isset($cached['hotspot'], $cached['pppoe'], $cached['routers'])) {
+                return $cached;
+            }
+        }
+        $res = $compute();
+        @file_put_contents($file, json_encode($res), LOCK_EX);
+        return $res;
     }
 
     /**

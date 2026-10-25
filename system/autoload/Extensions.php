@@ -29,7 +29,45 @@ class Extensions
 
     public static function validSlug(string $slug): bool
     {
-        return (bool) preg_match('/^[A-Za-z0-9_-]+$/', $slug);
+        // "ui", "index" and "readme" are shared folders/files inside the type roots, never extensions
+        return (bool) preg_match('/^[A-Za-z0-9_-]+$/', $slug)
+            && !in_array(strtolower($slug), ['ui', 'index', 'readme'], true);
+    }
+
+    /**
+     * Templates (<root>/ui/*.tpl) that belong to a FLAT plugin or gateway: exactly "<slug>.tpl" or "<slug>_*.tpl".
+     * A template that matches a longer sibling slug ("hotspot_pg-addpay.tpl" when removing "hotspot") is excluded.
+     * @return string[] absolute paths
+     */
+    public static function flatTemplates(string $type, string $slug): array
+    {
+        if (!in_array($type, ['plugin', 'gateway'], true) || !self::validSlug($slug)) {
+            return [];
+        }
+        $root = self::root($type);
+        // names of every OTHER installed extension (flat files and folder extensions) that is longer than this slug
+        $names = [];
+        foreach (glob($root . DIRECTORY_SEPARATOR . '*.php') ?: [] as $f) {
+            $names[] = basename($f, '.php');
+        }
+        foreach (glob($root . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . self::manifestName($type)) ?: [] as $mf) {
+            $names[] = basename(dirname($mf));
+        }
+        $others = array_values(array_filter(array_unique($names), fn($s) => $s !== 'index' && $s !== $slug && strlen($s) > strlen($slug)));
+        $out = [];
+        foreach (glob($root . DIRECTORY_SEPARATOR . 'ui' . DIRECTORY_SEPARATOR . $slug . '*.tpl') ?: [] as $t) {
+            $base = basename($t, '.tpl');
+            if ($base !== $slug && strpos($base, $slug . '_') !== 0) {
+                continue;
+            }
+            foreach ($others as $o) {
+                if ($base === $o || strpos($base, $o . '_') === 0) {
+                    continue 2;
+                }
+            }
+            $out[] = $t;
+        }
+        return $out;
     }
 
     /** Gateways and devices are called as {slug}_function() / new {Slug}, so they must be identifiers */
@@ -450,6 +488,31 @@ class Extensions
 
     // ----------------------------------------------------------------- GitHub
 
+    /** Only http(s) URLs may become links; anything else (javascript:, data:, ...) becomes '' */
+    public static function httpUrl($url): string
+    {
+        $url = is_string($url) ? trim($url) : '';
+        return preg_match('#^https?://#i', $url) && filter_var($url, FILTER_VALIDATE_URL) ? $url : '';
+    }
+
+    /** "owner/name" (letters, digits, . _ -) or null. Accepts a github.com URL and reduces it to that form. */
+    public static function githubSlug(string $in): ?string
+    {
+        $in = trim($in);
+        if (($url = self::githubRepo($in)) !== null) {
+            $in = substr($url, strlen('https://github.com/'));
+        }
+        if (!preg_match('/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/', $in)) {
+            return null;
+        }
+        foreach (explode('/', $in) as $part) {
+            if ($part === '.' || $part === '..') { // would escape the repository path on the raw host
+                return null;
+            }
+        }
+        return $in;
+    }
+
     /** Normalise to https://github.com/owner/repo or null */
     public static function githubRepo(string $url): ?string
     {
@@ -459,19 +522,18 @@ class Extensions
         return null;
     }
 
-    /** README of a GitHub repo rendered to safe HTML (cached 24h). Empty string if none. */
-    public static function readmeHtml(string $githubUrl): string
+    /** README of a GitHub "owner/name" repository rendered to safe HTML (cached 24h). Empty string if none. */
+    public static function readmeHtml(string $ownerName): string
     {
-        $repo = self::githubRepo($githubUrl);
-        if ($repo === null) {
+        $path = self::githubSlug($ownerName);
+        if ($path === null) {
             return '';
         }
         $dir = self::privateDir('readme');
-        $cache = $dir . DIRECTORY_SEPARATOR . md5($repo) . '.html';
+        $cache = $dir . DIRECTORY_SEPARATOR . md5($path) . '.html';
         if (is_file($cache) && time() - filemtime($cache) < 86400) {
             return (string) file_get_contents($cache);
         }
-        $path = substr($repo, strlen('https://github.com/'));
         $md = '';
         foreach (['README.md', 'readme.md', 'Readme.md'] as $name) {
             $data = Http::getData('https://raw.githubusercontent.com/' . $path . '/HEAD/' . $name, [], 4000, 6000);

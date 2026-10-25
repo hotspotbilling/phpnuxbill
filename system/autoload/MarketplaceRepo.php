@@ -101,25 +101,30 @@ class MarketplaceRepo
             $cache = self::cacheFile($url);
             $json = null;
             $state = 'cache';
-            $fresh = is_file($cache) && (time() - filemtime($cache)) < self::TTL;
-            if (!$force && $fresh) {
-                $json = json_decode((string) file_get_contents($cache), true);
-            }
-            if (!is_array($json)) {
+            $cached = is_file($cache) ? json_decode((string) file_get_contents($cache), true) : null;
+            $cached = is_array($cached) && self::looksLikeRepo($cached) ? $cached : null;
+            if (!$force && $cached !== null) {
+                // passive page load: never wait on the network when a copy exists, even an old one
+                // (sync / cron refresh it); an old copy is reported as "stale"
+                $json = $cached;
+                $state = (time() - filemtime($cache)) < self::TTL ? 'cache' : 'stale';
+            } else {
+                // forced sync, or nothing cached yet
                 $json = self::fetch($url);
                 $state = $json ? 'online' : 'error';
-                if (!$json && is_file($cache)) {
-                    $json = json_decode((string) file_get_contents($cache), true);
-                    $state = $json ? 'stale' : 'error';
+                if (!$json && $cached !== null) {
+                    $json = $cached;
+                    $state = 'stale';
                 }
             }
             $json = is_array($json) ? $json : [];
             $count = 0;
             foreach (array_keys($merged) as $key) {
                 foreach ((array) ($json[$key] ?? []) as $item) {
-                    if (!is_array($item) || empty($item['id'])) {
+                    if (!is_array($item) || empty($item['id']) || !is_string($item['id']) || !preg_match('/^[A-Za-z0-9_.-]+$/', $item['id'])) {
                         continue;
                     }
+                    $item = self::sanitizeItem($item);
                     $k = $key . '|' . strtolower($item['id']);
                     if (isset($seen[$k])) {
                         continue;
@@ -139,6 +144,18 @@ class MarketplaceRepo
             ];
         }
         return self::$loaded = $merged;
+    }
+
+    /** Store entries are untrusted: text becomes plain strings, links must be http(s), GitHub sources must be real repos */
+    private static function sanitizeItem(array $item): array
+    {
+        foreach (['name', 'description', 'author', 'last_update'] as $k) {
+            $item[$k] = isset($item[$k]) && is_scalar($item[$k]) ? (string) $item[$k] : '';
+        }
+        $item['url'] = Extensions::httpUrl($item['url'] ?? '');
+        $item['github'] = Extensions::githubRepo(isset($item['github']) && is_string($item['github']) ? $item['github'] : '') ?? '';
+        $item['ispaid'] = !empty($item['ispaid']);
+        return $item;
     }
 
     /** Re-download everything. Returns per-repo status; the previous cache survives a failed download. */
@@ -170,7 +187,7 @@ class MarketplaceRepo
     public static function online(): bool
     {
         foreach (self::status() as $s) {
-            if ($s['state'] === 'online' || $s['state'] === 'cache') {
+            if ($s['state'] !== 'error') { // a stale copy still serves the pages
                 return true;
             }
         }

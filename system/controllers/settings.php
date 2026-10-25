@@ -28,8 +28,14 @@ switch ($action) {
     case 'devices':
         $devices = [];
         foreach (DeviceLoader::all() as $dev => $entry) {
-            require_once $entry['file'];
-            $dvc = new $dev;
+            try {
+                if (DeviceLoader::load($dev) === null) {
+                    continue; // file does not define the expected class
+                }
+                $dvc = new $dev;
+            } catch (Throwable $e) {
+                continue; // a broken driver must not take the page down
+            }
             if (method_exists($dvc, 'description')) {
                 $arr = $dvc->description();
                 $arr['file'] = $dev;

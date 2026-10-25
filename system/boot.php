@@ -37,8 +37,11 @@ if ($activeTheme) {
     }
     $themeChain[] = $themeDir;
 
-    // Resolve parent theme chain
-    $parent = $themeMeta['parent'] ?? null;
+    // Resolve parent theme chain. A parent from theme.json is only trusted when it is a plain slug string.
+    $themeSlugOk = function ($v) {
+        return is_string($v) && preg_match('/^[A-Za-z0-9_-]+$/', $v) === 1 ? $v : null;
+    };
+    $parent = $themeSlugOk($themeMeta['parent'] ?? null);
     $seen = [$activeTheme => true];
     while ($parent && !isset($seen[$parent])) {
         $parentDir = File::pathFixer($UI_PATH . '/themes/' . $parent);
@@ -48,7 +51,7 @@ if ($activeTheme) {
             $parentMetaFile = $parentDir . '/theme.json';
             if (is_file($parentMetaFile)) {
                 $pm = json_decode(file_get_contents($parentMetaFile), true);
-                $parent = $pm['parent'] ?? null;
+                $parent = is_array($pm) ? $themeSlugOk($pm['parent'] ?? null) : null;
             } else {
                 $parent = null;
             }
@@ -116,7 +119,7 @@ $ui->assign('csrf_token', Csrf::generateAndStoreToken());
 // Core menu: Marketplace — direct single item navigation to Marketplace hub
 register_menu('Marketplace', true, 'marketplace', 'AFTER_LOGS',
     '<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0"/><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4"/><path d="M5 21l0 -10.15"/><path d="M19 21l0 -10.15"/><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4"/></svg>',
-    '', 'success', []);
+    '', 'success', ['SuperAdmin', 'Admin']);
 
 function _msglog($type, $msg)
 {

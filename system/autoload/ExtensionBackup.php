@@ -29,7 +29,7 @@ class ExtensionBackup
         $root = Extensions::root($type);
         $rel = [];
         $folder = $root . DIRECTORY_SEPARATOR . $slug;
-        if (is_dir($folder) && !is_link($folder)) {
+        if (is_dir($folder) && !is_link($folder) && Extensions::isFolder($type, $slug)) {
             $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS));
             foreach ($it as $f) {
                 if ($f->isFile() && !$f->isLink()) {
@@ -43,7 +43,7 @@ class ExtensionBackup
                 $rel[] = $slug . '.php';
             }
             if ($type === 'plugin' || $type === 'gateway') {
-                foreach (glob($root . DIRECTORY_SEPARATOR . 'ui' . DIRECTORY_SEPARATOR . $slug . '*.tpl') ?: [] as $t) {
+                foreach (Extensions::flatTemplates($type, $slug) as $t) {
                     $rel[] = 'ui' . DIRECTORY_SEPARATOR . basename($t);
                 }
             }
@@ -54,7 +54,7 @@ class ExtensionBackup
     /**
      * @return array ['ok'=>bool, 'message'=>string, 'file'=>?string]
      */
-    public static function create(string $type, string $slug, string $reason): array
+    public static function create(string $type, string $slug, string $reason, ?string $protect = null): array
     {
         $files = self::files($type, $slug);
         if (!$files) {
@@ -84,15 +84,19 @@ class ExtensionBackup
         if (!$zip->close() || !is_file($path)) {
             return ['ok' => false, 'message' => 'Could not write backup archive', 'file' => null];
         }
-        self::prune($type, $slug);
+        self::prune($type, $slug, $protect);
         return ['ok' => true, 'message' => 'Backup created', 'file' => $name];
     }
 
-    private static function prune(string $type, string $slug): void
+    /** Keep the newest N backups of one extension; $protect (a file being restored) is never deleted */
+    private static function prune(string $type, string $slug, ?string $protect = null): void
     {
         $mine = array_filter(self::all(), fn($b) => $b['type'] === $type && $b['slug'] === $slug);
         usort($mine, fn($a, $b) => $b['time'] <=> $a['time']);
         foreach (array_slice($mine, self::keep()) as $old) {
+            if ($protect !== null && $old['file'] === $protect) {
+                continue;
+            }
             @unlink(self::dir() . DIRECTORY_SEPARATOR . $old['file']);
         }
     }
@@ -173,7 +177,7 @@ class ExtensionBackup
             $z->close();
             return ['ok' => false, 'message' => 'Target folder is not writable'];
         }
-        $pre = self::create($type, $slug, 'prerestore');
+        $pre = self::create($type, $slug, 'prerestore', $file);
         if (!$pre['ok'] && self::files($type, $slug)) {
             $z->close();
             return ['ok' => false, 'message' => 'Could not snapshot the current version: ' . $pre['message']];

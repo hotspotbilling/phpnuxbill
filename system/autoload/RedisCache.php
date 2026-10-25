@@ -785,8 +785,7 @@ class RedisCache
                 'labels' => $blockLabels,
                 'values' => $blockCounts
             ],
-            'equipment' => $equipmentData,
-            'systemStatus' => SystemInfo::getInfo()
+            'equipment' => $equipmentData
         ];
 
         return [
@@ -818,8 +817,6 @@ class RedisCache
             'offline_network_nodes' => $offline_network_nodes,
             'network_uptime' => $network_uptime,
             'peak_hour_str' => $peak_hour_str,
-            'online_users' => $allDashboardData['systemStatus']['online_users'] ?? SystemInfo::getOnlineUsers(),
-            'system_status' => $allDashboardData['systemStatus'],
             'dashboard_data_json' => json_encode($allDashboardData)
         ];
     }

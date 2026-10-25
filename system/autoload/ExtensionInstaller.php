@@ -432,7 +432,9 @@ class ExtensionInstaller
         $root = Extensions::root($type);
         $folder = $root . DIRECTORY_SEPARATOR . $slug;
         $flat = $root . DIRECTORY_SEPARATOR . $slug . '.php';
-        if (!is_dir($folder) && !is_file($flat)) {
+        // a directory only counts as an extension when it carries its manifest (never "ui/" or other shared folders)
+        $isFolder = Extensions::isFolder($type, $slug);
+        if (!$isFolder && !is_file($flat)) {
             return ['ok' => false, 'message' => 'Not found'];
         }
         if (!is_writable($root)) {
@@ -447,14 +449,27 @@ class ExtensionInstaller
                 return ['ok' => false, 'message' => $used . ' plan(s) still use this driver. Move them to another device first.'];
             }
         }
-        if ($type === 'theme' && ($config['theme'] ?? '') === $slug) {
-            return ['ok' => false, 'message' => 'Cannot uninstall the active theme. Switch to another theme first.'];
+        if ($type === 'theme') {
+            if (($config['theme'] ?? '') === $slug) {
+                return ['ok' => false, 'message' => 'Cannot uninstall the active theme. Switch to another theme first.'];
+            }
+            // refuse to remove a theme the active theme inherits from
+            $cur = (string) ($config['theme'] ?? '');
+            $seen = [];
+            while ($cur !== '' && $cur !== 'default' && Extensions::validSlug($cur) && !isset($seen[$cur])) {
+                $seen[$cur] = true;
+                $parent = Extensions::manifest('theme', $cur)['parent'] ?? '';
+                $cur = is_string($parent) ? $parent : '';
+                if ($cur === $slug) {
+                    return ['ok' => false, 'message' => 'This theme is the parent of the active theme. Switch themes first.'];
+                }
+            }
         }
         $b = ExtensionBackup::create($type, $slug, 'uninstall');
         if (!$b['ok'] && class_exists('ZipArchive')) {
             return ['ok' => false, 'message' => 'Aborted, could not back up first: ' . $b['message']];
         }
-        if ($type === 'plugin' && is_dir($folder)) {
+        if ($type === 'plugin' && $isFolder) {
             $hook = PluginLoader::runUninstall($slug);
             if (!$hook['success']) {
                 return ['ok' => false, 'message' => 'Uninstall hook failed: ' . $hook['message']];
@@ -463,14 +478,14 @@ class ExtensionInstaller
             $state['disabled'] = array_values(array_diff($state['disabled'] ?? [], [$slug]));
             file_put_contents(Extensions::cacheDir() . DIRECTORY_SEPARATOR . 'plugins.json', json_encode($state));
         }
-        Extensions::deleteTree($folder);
+        if ($isFolder) {
+            Extensions::deleteTree($folder);
+        }
         if (is_file($flat)) {
             @unlink($flat);
         }
-        if ($type === 'plugin' || $type === 'gateway') {
-            foreach (glob($root . DIRECTORY_SEPARATOR . 'ui' . DIRECTORY_SEPARATOR . $slug . '*.tpl') ?: [] as $t) {
-                @unlink($t);
-            }
+        foreach (Extensions::flatTemplates($type, $slug) as $t) {
+            @unlink($t);
         }
         if ($type === 'gateway') {
             $actives = array_filter(array_map('trim', explode(',', (string) ($config['payment_gateway'] ?? ''))));
@@ -523,7 +538,7 @@ class ExtensionInstaller
         if ($type === 'gateway') {
             $uiSrc = $root . DIRECTORY_SEPARATOR . 'ui' . DIRECTORY_SEPARATOR;
             $tpls = [];
-            foreach (glob($uiSrc . $slug . '*.tpl') ?: [] as $t) {
+            foreach (Extensions::flatTemplates('gateway', $slug) as $t) {
                 $tpls[basename($t)] = true;
             }
             if (preg_match_all('/[\'"](?:\[pg\]|pg:)?([A-Za-z0-9_\-\/]+\.tpl)[\'"]/', $code, $mm)) {

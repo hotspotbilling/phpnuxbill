@@ -3893,5 +3893,13 @@
     "Could_not_download_the_repository_archive": "Could not download the repository archive",
     "Upload_a_ZIP_package_containing_a__theme___folder__or_a_theme_json_at_its_root___or_install_from_GitHub_": "Upload a ZIP package containing a \"theme\/\" folder (or a theme.json at its root), or install from GitHub.",
     "Uninstall_this_theme__A_backup_is_saved_first_": "Uninstall this theme? A backup is saved first.",
-    "Themes_live_in_ui_themes_THEME_NAME__with_a_theme_json_manifest__Add__preview____preview_png__to_show_a_screenshot_here__Child_themes_declare_a__parent__and_fall_back_to_parent_templates__functions_php_is_loaded_automatically_when_the_theme_is_active_": "Themes live in ui\/themes\/THEME_NAME\/ with a theme.json manifest. Add \"preview\": \"preview.png\" to show a screenshot here. Child themes declare a \"parent\" and fall back to parent templates. functions.php is loaded automatically when the theme is active."
+    "Themes_live_in_ui_themes_THEME_NAME__with_a_theme_json_manifest__Add__preview____preview_png__to_show_a_screenshot_here__Child_themes_declare_a__parent__and_fall_back_to_parent_templates__functions_php_is_loaded_automatically_when_the_theme_is_active_": "Themes live in ui\/themes\/THEME_NAME\/ with a theme.json manifest. Add \"preview\": \"preview.png\" to show a screenshot here. Child themes declare a \"parent\" and fall back to parent templates. functions.php is loaded automatically when the theme is active.",
+    "Device_Driver": "Device Driver",
+    "Upload_a_ZIP_package__a_device__folder__a_folder_with_device_json__or_a__Class__php_driver___a_single__php_driver__or_install_from_GitHub_": "Upload a ZIP package (a device\/ folder, a folder with device.json, or a <Class>.php driver), a single .php driver, or install from GitHub.",
+    "Driver_Package___zip_or__php_": "Driver Package (.zip or .php)",
+    "Core": "Core",
+    "Plans_using_this_driver": "Plans using this driver",
+    "plans": "plans",
+    "More_device_drivers_available_from_the_repository_": "More device drivers available from the repository.",
+    "A_driver_is_either_one_file_system_devices__Class__php_or_a_folder_system_devices__Class___with_device_json_and__Class__php__Both_work__Drivers_implement_the_device_interface__add_customer__add_plan__connect_customer__etc____Core_drivers_stay_as_single_files_and_cannot_be_removed__a_driver_that_plans_still_use_cannot_be_uninstalled_": "A driver is either one file system\/devices\/<Class>.php or a folder system\/devices\/<Class>\/ with device.json and <Class>.php. Both work. Drivers implement the device interface (add_customer, add_plan, connect_customer, etc.). Core drivers stay as single files and cannot be removed; a driver that plans still use cannot be uninstalled."
 }

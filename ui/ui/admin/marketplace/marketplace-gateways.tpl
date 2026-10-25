@@ -79,17 +79,17 @@
     <div class="mp-grid" id="installed-grid">
         {foreach $gateways as $g}
         <article class="mp-card mp-card--{if $g.active}active{else}inactive{/if}"
-            data-tags="installed {if $g.active}active{else}inactive{/if} {$g.region|lower|replace:' ':''}{if $g.update.available} updates{/if}{if $g.health.status eq 'error'} errors{/if}"
-            data-search="{$g.name|lower} {$g.slug|lower} {$g.region|lower} {$g.author|lower}" data-info="{$g.info_json|escape}">
+            data-tags="installed {if $g.active}active{else}inactive{/if} {$g.region|lower|replace:' ':''|escape}{if $g.update.available} updates{/if}{if $g.health.status eq 'error'} errors{/if}"
+            data-search="{$g.name|lower|escape} {$g.slug|lower|escape} {$g.region|lower|escape} {$g.author|lower|escape}" data-info="{$g.info_json|escape}">
             <div class="mp-card__accent"
                 {if !$g.active}style="background:{if $g.configured}#0ea5e9{else}#94a3b8{/if};" {/if}></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$g.name}</h3>
-                    <small>{$g.slug} &middot; @{$g.author}</small>
+                    <h3>{$g.name|escape}</h3>
+                    <small>{$g.slug|escape} &middot; @{$g.author|escape}</small>
                 </div>
                 <div class="mp-card__tags">
-                    <span class="mp-badge mp-badge--{$g.region|lower|replace:' ':''}">{$g.region}</span>
+                    <span class="mp-badge mp-badge--{$g.region|lower|replace:' ':''|escape}">{$g.region|escape}</span>
                     {if $g.active}
                     <span class="mp-badge mp-badge--active"><i class="fa fa-check-circle"></i> {Lang::T('Active')}</span>
                     {else}
@@ -98,10 +98,10 @@
                 </div>
             </header>
             <div class="mp-card__body">
-                <p title="{$g.description|escape}">{$g.description}</p>
+                <p title="{$g.description|escape}">{$g.description|escape}</p>
             </div>
             <div class="mp-card__meta">
-                <span class="mp-chip"><i class="fa fa-hdd"></i>&nbsp;{$g.file_size}</span>
+                <span class="mp-chip"><i class="fa fa-hdd-o"></i>&nbsp;{$g.file_size|escape}</span>
                 {if $g.configured}
                 <span class="mp-status mp-status--active"><i class="fa fa-cog"></i>&nbsp;{Lang::T('Configured')}</span>
                 {else}
@@ -154,18 +154,18 @@
     <div class="mp-grid" id="available-grid" data-sortable>
         {foreach $available as $rg}
         <article class="mp-card mp-card--available"
-            data-tags="available {if $rg.ispaid}paid{else}free{/if} {$rg.region|lower|replace:' ':''}{if $rg.watched} watch{/if}"
-            data-date="{$rg.last_update}" data-search="{$rg.name|lower} {$rg.id|lower} {$rg.region|lower} {$rg.author|lower}"
+            data-tags="available {if $rg.ispaid}paid{else}free{/if} {$rg.region|lower|replace:' ':''|escape}{if $rg.watched} watch{/if}"
+            data-date="{$rg.last_update|escape}" data-search="{$rg.name|lower|escape} {$rg.id|lower|escape} {$rg.region|lower|escape} {$rg.author|lower|escape}"
             data-info="{$rg.info_json|escape}">
             <div class="mp-card__accent"></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$rg.name}</h3>
-                    <small>@{$rg.author}{if $rg.last_update} &middot; {$rg.last_update}{/if}</small>
+                    <h3>{$rg.name|escape}</h3>
+                    <small>@{$rg.author|escape}{if $rg.last_update} &middot; {$rg.last_update|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
                     {include file="admin/marketplace/_watch.tpl" x=$rg}
-                    <span class="mp-badge mp-badge--{$rg.region|lower|replace:' ':''}">{$rg.region}</span>
+                    <span class="mp-badge mp-badge--{$rg.region|lower|replace:' ':''|escape}">{$rg.region|escape}</span>
                     {if $rg.ispaid}
                     <span class="mp-badge mp-badge--paid">{Lang::T('Premium')}</span>
                     {else}
@@ -174,7 +174,7 @@
                 </div>
             </header>
             <div class="mp-card__body">
-                <p title="{$rg.description|escape}">{$rg.description}</p>
+                <p title="{$rg.description|escape}">{$rg.description|escape}</p>
             </div>
             <footer class="mp-card__actions">
                 {include file="admin/marketplace/_store_actions.tpl" x=$rg route='gateways' disabled=!$writable}

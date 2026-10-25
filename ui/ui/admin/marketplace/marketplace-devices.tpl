@@ -78,25 +78,25 @@
     <div class="mp-grid">
         {foreach $devices as $device}
         <article class="mp-card mp-card--active"
-            data-tags="installed {$device.category|lower}{if $device.update.available} updates{/if}{if $device.health.status eq 'error'} errors{/if}"
-            data-search="{$device.name|lower} {$device.slug|lower} {$device.category|lower} {$device.author|lower}"
+            data-tags="installed {$device.category|lower|escape}{if $device.update.available} updates{/if}{if $device.health.status eq 'error'} errors{/if}"
+            data-search="{$device.name|lower|escape} {$device.slug|lower|escape} {$device.category|lower|escape} {$device.author|lower|escape}"
             data-info="{$device.info_json|escape}">
             <div class="mp-card__accent"></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$device.name}</h3>
-                    <small>{$device.slug}{if $device.author} &middot; @{$device.author}{/if}</small>
+                    <h3>{$device.name|escape}</h3>
+                    <small>{$device.slug|escape}{if $device.author} &middot; @{$device.author|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
-                    <span class="mp-badge mp-badge--{$device.category|lower}">{$device.category}</span>
+                    <span class="mp-badge mp-badge--{$device.category|lower|escape}">{$device.category|escape}</span>
                     {if $device.core}<span class="mp-badge mp-badge--theme">{Lang::T('Core')}</span>{/if}
                 </div>
             </header>
             <div class="mp-card__body">
-                <p>{if $device.description}{$device.description}{else}{Lang::T('No description available.')}{/if}</p>
+                <p>{if $device.description}{$device.description|escape}{else}{Lang::T('No description available.')}{/if}</p>
             </div>
             <div class="mp-card__meta">
-                <span class="mp-chip"><i class="fa fa-hdd"></i>&nbsp;{$device.size}</span>
+                <span class="mp-chip"><i class="fa fa-hdd-o"></i>&nbsp;{$device.size|escape}</span>
                 {if $device.plans > 0}<span class="mp-chip" title="{Lang::T('Plans using this driver')}"><i class="fa fa-list"></i>&nbsp;{$device.plans} {Lang::T('plans')}</span>{/if}
                 {include file="admin/marketplace/_status.tpl" c=$device}
             </div>
@@ -135,12 +135,12 @@
     <div class="mp-grid" data-sortable>
         {foreach $available as $d}
         <article class="mp-card mp-card--available" data-tags="available {if $d.ispaid}paid{else}free{/if}{if $d.watched} watch{/if}"
-            data-date="{$d.last_update}" data-search="{$d.name|lower} {$d.id|lower} {$d.author|lower}" data-info="{$d.info_json|escape}">
+            data-date="{$d.last_update|escape}" data-search="{$d.name|lower|escape} {$d.id|lower|escape} {$d.author|lower|escape}" data-info="{$d.info_json|escape}">
             <div class="mp-card__accent"></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$d.name}</h3>
-                    <small>@{$d.author}{if $d.last_update} &middot; {$d.last_update}{/if}</small>
+                    <h3>{$d.name|escape}</h3>
+                    <small>@{$d.author|escape}{if $d.last_update} &middot; {$d.last_update|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
                     {include file="admin/marketplace/_watch.tpl" x=$d}
@@ -152,7 +152,7 @@
                 </div>
             </header>
             <div class="mp-card__body">
-                <p title="{$d.description|escape}">{$d.description}</p>
+                <p title="{$d.description|escape}">{$d.description|escape}</p>
             </div>
             <footer class="mp-card__actions">
                 {include file="admin/marketplace/_store_actions.tpl" x=$d route='devices' disabled=!$writable}

@@ -168,7 +168,7 @@ system/plugin/<slug>/
 
 **Helper:** `pluginAssetUrl($slug, $path)` returns a URL to `system/plugin/<slug>/assets/<path>`.
 
-**Lifecycle:** `install.php` runs on Marketplace activate; `uninstall.php` runs on delete. Both are CSRF + SuperAdmin guarded.
+**Lifecycle:** `install.php` runs on Marketplace activate; `uninstall.php` runs on delete. Both are CSRF-protected and restricted to `SuperAdmin` and `Admin` (the same roles as the legacy Plugin Manager and every Marketplace controller).
 
 **Enable/disable state:** stored in `system/cache/plugins.json` (`PluginLoader::setActive()` / `getState()`).
 

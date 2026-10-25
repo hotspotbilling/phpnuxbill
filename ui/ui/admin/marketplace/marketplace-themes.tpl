@@ -20,7 +20,7 @@
             </div>
             <div class="mp-stats">
                 <div class="mp-stat"><b>{$stats.total + 1}</b><span>{Lang::T('Themes')}</span></div>
-                <div class="mp-stat"><b>{if $active_theme eq 'default'}Default{else}{$active_theme}{/if}</b><span>{Lang::T('Active')}</span></div>
+                <div class="mp-stat"><b>{if $active_theme eq 'default'}Default{else}{$active_theme|escape}{/if}</b><span>{Lang::T('Active')}</span></div>
                 <div class="mp-stat"><b>{$stats.updates}</b><span>{Lang::T('Updates')}</span></div>
                 <div class="mp-stat"><b>{$stats.child}</b><span>{Lang::T('Child')}</span></div>
             </div>
@@ -33,7 +33,7 @@
             <p>{Lang::T('Activate a theme to apply it across your panel.')}</p>
         </div>
         <div class="mp-toolbar">
-            <span class="mp-chip mp-chip--ok">{Lang::T('Active')}: {$active_theme}</span>
+            <span class="mp-chip mp-chip--ok">{Lang::T('Active')}: {$active_theme|escape}</span>
             <a href="{Text::url('marketplace/sync&from=themes')}" class="mp-filter"
                 title="{Lang::T('Refresh repository and check for updates')}"><i class="fa fa-refresh"></i> {Lang::T('Sync Store')}</a>
             <button class="mp-filter" id="toggle-upload" type="button"><i class="fa fa-upload"></i> {Lang::T('Upload Theme')}</button>
@@ -94,7 +94,7 @@
         {foreach $themes as $t}
         <article class="mp-card mp-card--{if $t.active}active{else}inactive{/if}"
             data-tags="{if $t.active}active{else}inactive{/if}{if $t.parent} child{/if}{if $t.has_functions} functions{/if}{if $t.update.available} updates{/if}{if $t.health.status eq 'error'} errors{/if}"
-            data-search="{$t.name|lower} {$t.slug|lower} {$t.author|lower}" data-info="{$t.info_json|escape}">
+            data-search="{$t.name|lower|escape} {$t.slug|lower|escape} {$t.author|lower|escape}" data-info="{$t.info_json|escape}">
             <div class="mp-card__accent"></div>
             {if $t.preview}
             <div class="mp-card__preview"><img src="{$t.preview}" alt="{$t.name|escape}" loading="lazy"></div>
@@ -103,8 +103,8 @@
             {/if}
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$t.name}</h3>
-                    <small>{$t.slug}{if $t.author} &middot; @{$t.author}{/if}</small>
+                    <h3>{$t.name|escape}</h3>
+                    <small>{$t.slug|escape}{if $t.author} &middot; @{$t.author|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
                     {if $t.active}
@@ -113,11 +113,11 @@
                 </div>
             </header>
             <div class="mp-card__body">
-                <p>{if $t.description}{$t.description}{else}{Lang::T('No description provided.')}{/if}</p>
+                <p>{if $t.description}{$t.description|escape}{else}{Lang::T('No description provided.')}{/if}</p>
             </div>
             <div class="mp-card__meta">
-                <span class="mp-chip">v{$t.version}</span>
-                {if $t.parent}<span class="mp-badge mp-badge--legacy">{Lang::T('Child of')} {$t.parent}</span>{/if}
+                <span class="mp-chip">v{$t.version|escape}</span>
+                {if $t.parent}<span class="mp-badge mp-badge--legacy">{Lang::T('Child of')} {$t.parent|escape}</span>{/if}
                 {if $t.has_functions}<span class="mp-badge mp-badge--folder"><i class="fa fa-code"></i>&nbsp;functions.php</span>{/if}
                 {include file="admin/marketplace/_status.tpl" c=$t}
             </div>
@@ -154,19 +154,19 @@
     <div class="mp-grid" data-sortable>
         {foreach $available as $x}
         <article class="mp-card mp-card--available" data-tags="available {if $x.ispaid}paid{else}free{/if}{if $x.watched} watch{/if}"
-            data-date="{$x.last_update}" data-search="{$x.name|lower} {$x.id|lower} {$x.author|lower}" data-info="{$x.info_json|escape}">
+            data-date="{$x.last_update|escape}" data-search="{$x.name|lower|escape} {$x.id|lower|escape} {$x.author|lower|escape}" data-info="{$x.info_json|escape}">
             <div class="mp-card__accent"></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$x.name}</h3>
-                    <small>@{$x.author}{if $x.last_update} &middot; {$x.last_update}{/if}</small>
+                    <h3>{$x.name|escape}</h3>
+                    <small>@{$x.author|escape}{if $x.last_update} &middot; {$x.last_update|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
                     {include file="admin/marketplace/_watch.tpl" x=$x}
                     {if $x.ispaid}<span class="mp-badge mp-badge--paid">{Lang::T('Premium')}</span>{else}<span class="mp-badge mp-badge--free">{Lang::T('Free')}</span>{/if}
                 </div>
             </header>
-            <div class="mp-card__body"><p title="{$x.description|escape}">{$x.description}</p></div>
+            <div class="mp-card__body"><p title="{$x.description|escape}">{$x.description|escape}</p></div>
             <footer class="mp-card__actions">
                 {include file="admin/marketplace/_store_actions.tpl" x=$x route='themes' disabled=!$writable}
             </footer>

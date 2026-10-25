@@ -24,6 +24,10 @@ if (in_array($action, ['activate', 'deactivate'], true)) {
     if ($slug === '' || !Extensions::validSlug($slug)) {
         r2(getUrl('marketplace/plugins'), 'e', Lang::T('Invalid plugin slug.'));
     }
+    // only installed folder plugins can be toggled; legacy flat plugins always load and unknown slugs must not pollute plugins.json
+    if (!isset(PluginLoader::$plugins[$slug])) {
+        r2(getUrl('marketplace/plugins'), 'e', Lang::T('Plugin not found. Legacy plugins cannot be activated or paused; convert them to folder style first.'));
+    }
     if ($action === 'activate') {
         $manifest = PluginLoader::$plugins[$slug] ?? [];
         $issues = Extensions::check($manifest);

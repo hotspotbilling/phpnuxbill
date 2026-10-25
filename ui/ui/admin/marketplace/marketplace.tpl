@@ -16,7 +16,7 @@
                     <a href="{Text::url('marketplace/sync')}" class="mp-hero-btn">
                         <i class="fa fa-refresh"></i> {Lang::T('Sync & Check Updates')}
                     </a>
-                    <span><i class="fa fa-clock"></i> {Lang::T('Last synced')}:
+                    <span><i class="fa fa-clock-o"></i> {Lang::T('Last synced')}:
                         <strong>{$diagnostics.last_sync}</strong></span>
                     <span title="{Lang::T('Last update check')}"><i class="fa fa-history"></i> {$diagnostics.checked}</span>
                     <span>
@@ -78,9 +78,9 @@
         <ul class="mp-list">
             {foreach $pending_updates as $u}
             <li>
-                <span class="mp-badge mp-badge--folder">{$u.type}</span>
-                <a href="{Text::url('marketplace/')}{if $u.type eq 'plugin'}plugins{elseif $u.type eq 'gateway'}gateways{elseif $u.type eq 'device'}devices{else}themes{/if}">{$u.name}</a>
-                <span class="mp-muted">{if $u.current}{$u.current}{else}?{/if} &rarr; {$u.latest}{if $u.basis eq 'estimated'} ({Lang::T('estimated')}){/if}</span>
+                <span class="mp-badge mp-badge--folder">{$u.type|escape}</span>
+                <a href="{Text::url('marketplace/')}{if $u.type eq 'plugin'}plugins{elseif $u.type eq 'gateway'}gateways{elseif $u.type eq 'device'}devices{else}themes{/if}">{$u.name|escape}</a>
+                <span class="mp-muted">{if $u.current}{$u.current|escape}{else}?{/if} &rarr; {$u.latest|escape}{if $u.basis eq 'estimated'} ({Lang::T('estimated')}){/if}</span>
             </li>
             {/foreach}
         </ul>
@@ -99,8 +99,8 @@
         <ul class="mp-list">
             {foreach $problems as $p}
             <li>
-                <span class="mp-badge mp-badge--legacy">{$p.type}</span>
-                <a href="{Text::url('marketplace/')}{if $p.type eq 'plugin'}plugins{elseif $p.type eq 'gateway'}gateways{elseif $p.type eq 'device'}devices{else}themes{/if}">{$p.name}</a>
+                <span class="mp-badge mp-badge--legacy">{$p.type|escape}</span>
+                <a href="{Text::url('marketplace/')}{if $p.type eq 'plugin'}plugins{elseif $p.type eq 'gateway'}gateways{elseif $p.type eq 'device'}devices{else}themes{/if}">{$p.name|escape}</a>
                 <span class="mp-muted">{$p.message|escape}</span>
             </li>
             {/foreach}
@@ -170,7 +170,7 @@
         <article class="mp-hub-card">
             <div class="mp-hub-card__top">
                 <div class="mp-hub-icon mp-hub-icon--themes"><i class="fa fa-paint-brush"></i></div>
-                <span class="mp-chip">{Lang::T('Active')}: {$stats.active_theme}</span>
+                <span class="mp-chip">{Lang::T('Active')}: {$stats.active_theme|escape}</span>
             </div>
             <div class="mp-hub-card__body">
                 <h3>{Lang::T('Themes & UI Skins')}</h3>
@@ -233,8 +233,8 @@
                 {/if}></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$item.name}</h3>
-                    <small>@{$item.author}{if $item.last_update} &middot; {$item.last_update}{/if}</small>
+                    <h3>{$item.name|escape}</h3>
+                    <small>@{$item.author|escape}{if $item.last_update} &middot; {$item.last_update|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
                     {include file="admin/marketplace/_watch.tpl" x=$item}
@@ -247,25 +247,23 @@
                 </div>
             </header>
             <div class="mp-card__body">
-                <p title="{$item.description|escape}">{$item.description}</p>
+                <p title="{$item.description|escape}">{$item.description|escape}</p>
             </div>
             <footer class="mp-card__actions">
-                {if $item.url}
-                <a href="{$item.url}" target="_blank" rel="noopener noreferrer" class="mp-act"
+                {if $item.url|substr:0:4|lower == 'http'}
+                <a href="{$item.url|escape}" target="_blank" rel="noopener noreferrer" class="mp-act"
                     title="{Lang::T('Provider Portal')}">
                     <i class="fa fa-external-link"></i> {Lang::T('Details')}
                 </a>
                 {/if}
-                <a href="{$item.target_url}" class="mp-act mp-act--primary" title="{Lang::T('Browse Section')}">
-                    <i class="fa fa-folderpen"></i> {Lang::T('Browse')}
+                <a href="{$item.target_url|escape}" class="mp-act mp-act--primary" title="{Lang::T('Browse Section')}">
+                    <i class="fa fa-folder-open"></i> {Lang::T('Browse')}
                 </a>
             </footer>
         </article>
         {/foreach}
     </div>
     {/if}
-
-    </div>
 
     {if $watched}
     <div class="mp-section">
@@ -280,8 +278,8 @@
             <div class="mp-card__accent"></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$item.name}</h3>
-                    <small>@{$item.author}{if $item.last_update} &middot; {$item.last_update}{/if}</small>
+                    <h3>{$item.name|escape}</h3>
+                    <small>@{$item.author|escape}{if $item.last_update} &middot; {$item.last_update|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
                     {include file="admin/marketplace/_watch.tpl" x=$item}
@@ -289,14 +287,15 @@
                     {if $item.ispaid}<span class="mp-badge mp-badge--paid">{Lang::T('Premium')}</span>{else}<span class="mp-badge mp-badge--free">{Lang::T('Free')}</span>{/if}
                 </div>
             </header>
-            <div class="mp-card__body"><p title="{$item.description|escape}">{$item.description}</p></div>
+            <div class="mp-card__body"><p title="{$item.description|escape}">{$item.description|escape}</p></div>
             <footer class="mp-card__actions">
-                <a href="{$item.target_url}" class="mp-act mp-act--primary"><i class="fa fa-folder-open"></i> {Lang::T('Browse')}</a>
+                <a href="{$item.target_url|escape}" class="mp-act mp-act--primary"><i class="fa fa-folder-open"></i> {Lang::T('Browse')}</a>
             </footer>
         </article>
         {/foreach}
     </div>
     {/if}
+    </div>{* /#mp-hub-main *}
 
     <div class="mp-diag-bar">
         <div class="mp-diag-bar__head">
@@ -306,7 +305,7 @@
 
         <div class="mp-diag-grid">
             <div class="mp-diag-item">
-                <span><i class="fa fa-file-archive"></i> ZIP Extension</span>
+                <span><i class="fa fa-file-archive-o"></i> ZIP Extension</span>
                 {if $diagnostics.zip_enabled}<span class="badge badge-success">{Lang::T('Enabled')}</span>
                 {else}<span class="badge badge-danger">{Lang::T('Disabled')}</span>{/if}
             </div>

@@ -78,13 +78,13 @@
         {foreach $plugins as $plugin}
         <article
             class="mp-card mp-card--{if $plugin.active}active{else}inactive{/if}{if $plugin.type eq 'legacy'} mp-card--legacy{/if}"
-            data-tags="{$plugin.type} {if $plugin.active}active{else}inactive{/if}{if $plugin.update.available} updates{/if}{if $plugin.health.status eq 'error'} errors{/if}"
-            data-search="{$plugin.name|lower} {$plugin.slug|lower}" data-info="{$plugin.info_json|escape}">
+            data-tags="{$plugin.type|escape} {if $plugin.active}active{else}inactive{/if}{if $plugin.update.available} updates{/if}{if $plugin.health.status eq 'error'} errors{/if}"
+            data-search="{$plugin.name|lower|escape} {$plugin.slug|lower|escape}" data-info="{$plugin.info_json|escape}">
             <div class="mp-card__accent"></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$plugin.name}</h3>
-                    <small>{$plugin.slug}</small>
+                    <h3>{$plugin.name|escape}</h3>
+                    <small>{$plugin.slug|escape}</small>
                 </div>
                 <div class="mp-card__tags">
                     {if $plugin.type eq 'folder'}
@@ -95,10 +95,10 @@
                 </div>
             </header>
             <div class="mp-card__body">
-                <p>{if $plugin.description}{$plugin.description}{else}{Lang::T('No description provided.')}{/if}</p>
+                <p>{if $plugin.description}{$plugin.description|escape}{else}{Lang::T('No description provided.')}{/if}</p>
             </div>
             <div class="mp-card__meta">
-                {if $plugin.version}<span class="mp-chip">v{$plugin.version}</span>{/if}
+                {if $plugin.version}<span class="mp-chip">v{$plugin.version|escape}</span>{/if}
                 {if $plugin.active}
                 <span class="mp-status mp-status--active"><span class="mp-dot mp-dot--active"></span>{Lang::T('Active')}</span>
                 {else}
@@ -107,6 +107,8 @@
                 {include file="admin/marketplace/_status.tpl" c=$plugin}
             </div>
             <footer class="mp-card__actions">
+                {* legacy flat plugins always load; they cannot be paused or activated, only converted or removed *}
+                {if $plugin.type neq 'legacy'}
                 {if $plugin.active}
                 <form method="post" action="{Text::url('marketplace/plugins/deactivate/', $plugin.slug)}" class="mp-act-form">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
@@ -119,6 +121,7 @@
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <button type="submit" class="mp-act mp-act--success" title="{Lang::T('Activate')}"><i class="fa fa-play"></i> {Lang::T('Activate')}</button>
                 </form>
+                {/if}
                 {/if}
                 <form method="post" action="{Text::url('marketplace/plugins/uninstall/', $plugin.slug)}" class="mp-act-form">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
@@ -151,13 +154,13 @@
         {foreach $available as $plg}
         <article class="mp-card mp-card--available"
             data-tags="available {if $plg.ispaid}paid{else}free{/if}{if $plg.watched} watch{/if}"
-            data-date="{$plg.last_update}" data-search="{$plg.name|lower} {$plg.id|lower} {$plg.author|lower}"
+            data-date="{$plg.last_update|escape}" data-search="{$plg.name|lower|escape} {$plg.id|lower|escape} {$plg.author|lower|escape}"
             data-info="{$plg.info_json|escape}">
             <div class="mp-card__accent"></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
-                    <h3>{$plg.name}</h3>
-                    <small>@{$plg.author}{if $plg.last_update} &middot; {$plg.last_update}{/if}</small>
+                    <h3>{$plg.name|escape}</h3>
+                    <small>@{$plg.author|escape}{if $plg.last_update} &middot; {$plg.last_update|escape}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
                     {include file="admin/marketplace/_watch.tpl" x=$plg}
@@ -169,7 +172,7 @@
                 </div>
             </header>
             <div class="mp-card__body">
-                <p title="{$plg.description|escape}">{$plg.description}</p>
+                <p title="{$plg.description|escape}">{$plg.description|escape}</p>
             </div>
             <footer class="mp-card__actions">
                 {include file="admin/marketplace/_store_actions.tpl" x=$plg route='plugins' disabled=!$writable}

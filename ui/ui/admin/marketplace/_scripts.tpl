@@ -3,7 +3,7 @@
     MP.csrf = '{$csrf_token}';
     MP.base = '{Text::url('marketplace/')}';
     MP.route = '{$route|default:''}';
-    MP.t = {};
+    MP.t = { };
     MP.t.neu = '{Lang::T('New')|escape:'javascript'}';
     MP.t.install = '{Lang::T('Install')|escape:'javascript'}';
     MP.t.update = '{Lang::T('Update')|escape:'javascript'}';
@@ -180,6 +180,8 @@
             dl.appendChild(dd);
         }
         function link(href, text) {
+            // only http(s) URLs become clickable; anything else is shown as plain text
+            if (!/^https?:\/\//i.test(String(href || ''))) return document.createTextNode(text || '');
             var a = el('a', 'mp-link', text);
             a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
             return a;
@@ -237,7 +239,8 @@
             rt.hidden = true; rb.hidden = true; rb.textContent = '';
             if (info.github) {
                 rt.hidden = false; rb.hidden = false; rb.textContent = MP.t.loading;
-                fetch(MP.base + 'readme&repo=' + encodeURIComponent(info.github), { credentials: 'same-origin' })
+                var ownerName = String(info.github).replace(/^https:\/\/github\.com\//i, '').replace(/\/+$/, '');
+                fetch(MP.base + 'readme&repo=' + encodeURIComponent(ownerName), { credentials: 'same-origin' })
                     .then(function (r) { return r.json(); })
                     .then(function (j) {
                         if (j.html) rb.innerHTML = j.html; // server-side escaped markdown subset

@@ -5561,39 +5561,90 @@ span.isp-text-blue {
     box-shadow: none;
 }
 
-/* Core Status Badge System */
-.badge {
+/* Core Status Badge System (scoped: marketplace + dashboard panels only, so other pages keep Bootstrap badges) */
+.mp-wrap .badge,
+.mp-diag-item .badge,
+.sys-stat-card .badge,
+.isp-card .badge {
     font-weight: 600 !important;
 }
-.badge.badge-success,
-.badge-success {
+
+.mp-wrap .badge.badge-success,
+.mp-wrap .badge-success,
+.mp-diag-item .badge.badge-success,
+.mp-diag-item .badge-success,
+.sys-stat-card .badge.badge-success,
+.sys-stat-card .badge-success,
+.isp-card .badge.badge-success,
+.isp-card .badge-success {
     background-color: #38a169 !important;
     color: #ffffff !important;
 }
-.badge.badge-danger,
-.badge-danger {
+
+.mp-wrap .badge.badge-danger,
+.mp-wrap .badge-danger,
+.mp-diag-item .badge.badge-danger,
+.mp-diag-item .badge-danger,
+.sys-stat-card .badge.badge-danger,
+.sys-stat-card .badge-danger,
+.isp-card .badge.badge-danger,
+.isp-card .badge-danger {
     background-color: #e53e3e !important;
     color: #ffffff !important;
 }
-.badge.badge-warning,
-.badge-warning {
+
+.mp-wrap .badge.badge-warning,
+.mp-wrap .badge-warning,
+.mp-diag-item .badge.badge-warning,
+.mp-diag-item .badge-warning,
+.sys-stat-card .badge.badge-warning,
+.sys-stat-card .badge-warning,
+.isp-card .badge.badge-warning,
+.isp-card .badge-warning {
     background-color: #dd6b20 !important;
     color: #ffffff !important;
 }
-.badge.badge-secondary,
-.badge.badge-default,
-.badge-secondary,
-.badge-default {
+
+.mp-wrap .badge.badge-secondary,
+.mp-wrap .badge.badge-default,
+.mp-wrap .badge-secondary,
+.mp-wrap .badge-default,
+.mp-diag-item .badge.badge-secondary,
+.mp-diag-item .badge.badge-default,
+.mp-diag-item .badge-secondary,
+.mp-diag-item .badge-default,
+.sys-stat-card .badge.badge-secondary,
+.sys-stat-card .badge.badge-default,
+.sys-stat-card .badge-secondary,
+.sys-stat-card .badge-default,
+.isp-card .badge.badge-secondary,
+.isp-card .badge.badge-default,
+.isp-card .badge-secondary,
+.isp-card .badge-default {
     background-color: #718096 !important;
     color: #ffffff !important;
 }
-.badge.badge-primary,
-.badge-primary {
+
+.mp-wrap .badge.badge-primary,
+.mp-wrap .badge-primary,
+.mp-diag-item .badge.badge-primary,
+.mp-diag-item .badge-primary,
+.sys-stat-card .badge.badge-primary,
+.sys-stat-card .badge-primary,
+.isp-card .badge.badge-primary,
+.isp-card .badge-primary {
     background-color: #3182ce !important;
     color: #ffffff !important;
 }
-.badge.badge-info,
-.badge-info {
+
+.mp-wrap .badge.badge-info,
+.mp-wrap .badge-info,
+.mp-diag-item .badge.badge-info,
+.mp-diag-item .badge-info,
+.sys-stat-card .badge.badge-info,
+.sys-stat-card .badge-info,
+.isp-card .badge.badge-info,
+.isp-card .badge-info {
     background-color: #319795 !important;
     color: #ffffff !important;
 }

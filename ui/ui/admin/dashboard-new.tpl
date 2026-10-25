@@ -1,59 +1,68 @@
 {include file="sections/header.tpl"}
 
 <!-- Cron Monitor Status Alert Banner -->
-{if !empty($system_status.cron)}
-    {if $system_status.cron.status == 'danger'}
-        <div class="isp-card isp-rounded-lg isp-padding-4 isp-margin-bottom-6" style="border-left: 4px solid #f56565; background: rgba(245, 101, 101, 0.08);">
-            <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 10px;">
-                <div class="isp-flex isp-align-center" style="gap: 12px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(245, 101, 101, 0.2); display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 18px;">
-                        <i class="fa fa-exclamation-triangle"></i>
-                    </div>
-                    <div>
-                        <strong style="color: #e53e3e; font-size: 14px;">{Lang::T('Cron appears not to have been set up or is not running')}</strong>
-                        <p style="margin: 2px 0 0; font-size: 12px; opacity: 0.85;">{$system_status.cron.message}</p>
-                    </div>
-                </div>
-                <div class="isp-flex isp-align-center" style="gap: 8px;">
-                    <span class="badge badge-danger" style="font-size: 11px; padding: 4px 8px;">{Lang::T('Offline')}</span>
-                    <span style="font-size: 11px; opacity: 0.7;">{Lang::T('Run via CLI')}: <code>php system/cron.php</code></span>
-                </div>
+{if $can_view_system && !empty($system_status.cron)}
+{if $system_status.cron.status == 'danger'}
+<div class="isp-card isp-rounded-lg isp-padding-4 isp-margin-bottom-6"
+    style="border-left: 4px solid #f56565; background: rgba(245, 101, 101, 0.08);">
+    <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 10px;">
+        <div class="isp-flex isp-align-center" style="gap: 12px;">
+            <div
+                style="width: 40px; height: 40px; border-radius: 50%; background: rgba(245, 101, 101, 0.2); display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 18px;">
+                <i class="fa fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <strong style="color: #e53e3e; font-size: 14px;">{Lang::T('Cron appears not to have been set up or is
+                    not running')}</strong>
+                <p style="margin: 2px 0 0; font-size: 12px; opacity: 0.85;">{$system_status.cron.message}</p>
             </div>
         </div>
-    {elseif $system_status.cron.status == 'warning'}
-        <div class="isp-card isp-rounded-lg isp-padding-4 isp-margin-bottom-6" style="border-left: 4px solid #ed8936; background: rgba(237, 137, 54, 0.08);">
-            <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 10px;">
-                <div class="isp-flex isp-align-center" style="gap: 12px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(237, 137, 54, 0.2); display: flex; align-items: center; justify-content: center; color: #ed8936; font-size: 18px;">
-                        <i class="fa fa-clock-o"></i>
-                    </div>
-                    <div>
-                        <strong style="color: #dd6b20; font-size: 14px;">{Lang::T('Cron has not run for over 1 hour. Please check your setup.')}</strong>
-                        <p style="margin: 2px 0 0; font-size: 12px; opacity: 0.85;">{$system_status.cron.message}</p>
-                    </div>
-                </div>
-                <div class="isp-flex isp-align-center" style="gap: 8px;">
-                    <span class="badge badge-warning" style="font-size: 11px; padding: 4px 8px;">{Lang::T('Delayed')}</span>
-                    <span style="font-size: 11px; opacity: 0.7;">{Lang::T('Last ran')}: {$system_status.cron.run_date}</span>
-                </div>
+        <div class="isp-flex isp-align-center" style="gap: 8px;">
+            <span class="badge badge-danger" style="font-size: 11px; padding: 4px 8px;">{Lang::T('Offline')}</span>
+            <span style="font-size: 11px; opacity: 0.7;">{Lang::T('Run via CLI')}:
+                <code>php system/cron.php</code></span>
+        </div>
+    </div>
+</div>
+{elseif $system_status.cron.status == 'warning'}
+<div class="isp-card isp-rounded-lg isp-padding-4 isp-margin-bottom-6"
+    style="border-left: 4px solid #ed8936; background: rgba(237, 137, 54, 0.08);">
+    <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 10px;">
+        <div class="isp-flex isp-align-center" style="gap: 12px;">
+            <div
+                style="width: 40px; height: 40px; border-radius: 50%; background: rgba(237, 137, 54, 0.2); display: flex; align-items: center; justify-content: center; color: #ed8936; font-size: 18px;">
+                <i class="fa fa-clock-o"></i>
+            </div>
+            <div>
+                <strong style="color: #dd6b20; font-size: 14px;">{Lang::T('Cron has not run for over 1 hour. Please
+                    check your setup.')}</strong>
+                <p style="margin: 2px 0 0; font-size: 12px; opacity: 0.85;">{$system_status.cron.message}</p>
             </div>
         </div>
-    {else}
-        <div class="isp-card isp-rounded-lg isp-padding-3 isp-margin-bottom-6" style="border-left: 4px solid #48bb78; background: rgba(72, 187, 120, 0.06);">
-            <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 8px;">
-                <div class="isp-flex isp-align-center" style="gap: 10px;">
-                    <i class="fa fa-check-circle" style="color: #48bb78; font-size: 16px;"></i>
-                    <span style="font-size: 12px; font-weight: 500;">
-                        <strong>{Lang::T('Cron Job')}:</strong> {Lang::T('Cron Job last ran on')}: <strong>{$system_status.cron.run_date}</strong> ({$system_status.cron.time_ago})
-                    </span>
-                </div>
-                <div class="isp-flex isp-align-center" style="gap: 8px;">
-                    <span class="badge badge-success" style="font-size: 10px; padding: 2px 8px;">{Lang::T('Healthy')}</span>
-                    <span style="font-size: 11px; opacity: 0.7;">{Lang::T('Uptime')}: {$system_status.uptime.formatted}</span>
-                </div>
-            </div>
+        <div class="isp-flex isp-align-center" style="gap: 8px;">
+            <span class="badge badge-warning" style="font-size: 11px; padding: 4px 8px;">{Lang::T('Delayed')}</span>
+            <span style="font-size: 11px; opacity: 0.7;">{Lang::T('Last ran')}: {$system_status.cron.run_date}</span>
         </div>
-    {/if}
+    </div>
+</div>
+{else}
+<div class="isp-card isp-rounded-lg isp-padding-3 isp-margin-bottom-6"
+    style="border-left: 4px solid #48bb78; background: rgba(72, 187, 120, 0.06);">
+    <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 8px;">
+        <div class="isp-flex isp-align-center" style="gap: 10px;">
+            <i class="fa fa-check-circle" style="color: #48bb78; font-size: 16px;"></i>
+            <span style="font-size: 12px; font-weight: 500;">
+                <strong>{Lang::T('Cron Job')}:</strong> {Lang::T('Cron Job last ran on')}:
+                <strong>{$system_status.cron.run_date}</strong> ({$system_status.cron.time_ago})
+            </span>
+        </div>
+        <div class="isp-flex isp-align-center" style="gap: 8px;">
+            <span class="badge badge-success" style="font-size: 10px; padding: 2px 8px;">{Lang::T('Healthy')}</span>
+            <span style="font-size: 11px; opacity: 0.7;">{Lang::T('Uptime')}: {$system_status.uptime.formatted}</span>
+        </div>
+    </div>
+</div>
+{/if}
 {/if}
 
 <!-- Stats Cards (100% Real Database Values) -->
@@ -64,12 +73,15 @@
             <div id="total-customers-content">
                 <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Total Customers')}</p>
                 <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{$c_all}</p>
-                <p class="isp-text-sm {if $c_percentage_change >= 0}isp-text-green{else}isp-text-red{/if} isp-margin-top-1 isp-flex isp-align-center">
-                    <i class="fas {if $c_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
+                <p
+                    class="isp-text-sm {if $c_percentage_change >= 0}isp-text-green{else}isp-text-red{/if} isp-margin-top-1 isp-flex isp-align-center">
+                    <i
+                        class="fas {if $c_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
                     {$c_percentage_change}% {Lang::T('from last month')}
                 </p>
             </div>
-            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-blue-light isp-flex isp-align-center isp-justify-center">
+            <div
+                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-blue-light isp-flex isp-align-center isp-justify-center">
                 <i class="fa fa-users" style="color: #4299e1; font-size: 18px;"></i>
             </div>
         </div>
@@ -82,11 +94,13 @@
                 <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Active Connections')}</p>
                 <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{$u_act}</p>
                 <p class="isp-text-sm isp-text-green isp-margin-top-1 isp-flex isp-align-center">
-                    <i class="fas {if $c_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
+                    <i
+                        class="fas {if $c_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
                     {$u_act_pct}% {Lang::T('Active')} {if $u_expired > 0}• {$u_expired} {Lang::T('Expired')}{/if}
                 </p>
             </div>
-            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-green-light isp-flex isp-align-center isp-justify-center">
+            <div
+                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-green-light isp-flex isp-align-center isp-justify-center">
                 <i class="fas fa-wifi isp-text-green"></i>
             </div>
         </div>
@@ -100,24 +114,32 @@
                     <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Online Users')}</p>
                     <span class="live-dot-pulse" title="{Lang::T('Live Online Real-time')}"></span>
                 </div>
-                <p class="isp-text-2xl isp-font-bold isp-margin-top-1" id="online-users-total">{$online_users.total|default:0}</p>
+                <p class="isp-text-2xl isp-font-bold isp-margin-top-1" id="online-users-total">
+                    {$online_users.total|default:0}</p>
                 <div class="isp-margin-top-1 isp-flex isp-align-center" style="flex-wrap: wrap; gap: 4px;">
-                    <span class="badge" style="font-size: 10px; padding: 2px 5px; background: rgba(66, 153, 225, 0.12); color: #3182ce; font-weight: 600;" title="{Lang::T('Mikrotik API (Hotspot & PPPoE)')}">
+                    <span class="badge"
+                        style="font-size: 10px; padding: 2px 5px; background: rgba(66, 153, 225, 0.12); color: #3182ce; font-weight: 600;"
+                        title="{Lang::T('Mikrotik API (Hotspot & PPPoE)')}">
                         MT: <span id="online-users-mt">{$online_users.mikrotik|default:0}</span>
                     </span>
-                    {if $online_users.radius_enabled || $config.radius_enable}
-                        <span class="badge" style="font-size: 10px; padding: 2px 5px; background: rgba(72, 187, 120, 0.12); color: #38a169; font-weight: 600;" title="{Lang::T('Radius REST (rad_acct via radius.php)')}">
-                            REST: <span id="online-users-rest">{$online_users.rest|default:0}</span>
-                        </span>
-                        <span class="badge" style="font-size: 10px; padding: 2px 5px; background: rgba(159, 122, 234, 0.12); color: #805ad5; font-weight: 600;" title="{Lang::T('Radius FreeRADIUS (radacct)')}">
-                            SQL: <span id="online-users-mysql">{$online_users.mysql|default:0}</span>
-                        </span>
+                    {if $online_users.radius_enabled}
+                    <span class="badge"
+                        style="font-size: 10px; padding: 2px 5px; background: rgba(72, 187, 120, 0.12); color: #38a169; font-weight: 600;"
+                        title="{Lang::T('Radius REST (rad_acct via radius.php)')}">
+                        REST: <span id="online-users-rest">{$online_users.rest|default:0}</span>
+                    </span>
+                    <span class="badge"
+                        style="font-size: 10px; padding: 2px 5px; background: rgba(159, 122, 234, 0.12); color: #805ad5; font-weight: 600;"
+                        title="{Lang::T('Radius FreeRADIUS (radacct)')}">
+                        SQL: <span id="online-users-mysql">{$online_users.mysql|default:0}</span>
+                    </span>
                     {else}
-                        <span style="font-size: 10px; opacity: 0.65;">{Lang::T('API Live')}</span>
+                    <span style="font-size: 10px; opacity: 0.65;">{Lang::T('API Live')}</span>
                     {/if}
                 </div>
             </div>
-            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-flex isp-align-center isp-justify-center" style="background: rgba(56, 178, 172, 0.15);">
+            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-flex isp-align-center isp-justify-center"
+                style="background: rgba(56, 178, 172, 0.15);">
                 <i class="fa fa-signal" style="color: #319795; font-size: 18px;"></i>
             </div>
         </div>
@@ -129,12 +151,15 @@
             <div id="monthly-revenue-content">
                 <p class="isp-text-sm isp-font-medium isp-text-gray-dark">{Lang::T('Monthly Revenue')}</p>
                 <p class="isp-text-2xl isp-font-bold isp-margin-top-1">{Lang::moneyFormat($imonth)}</p>
-                <p class="isp-text-sm {if $rev_percentage_change >= 0}isp-text-green{else}isp-text-red{/if} isp-margin-top-1 isp-flex isp-align-center">
-                    <i class="fas {if $rev_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
+                <p
+                    class="isp-text-sm {if $rev_percentage_change >= 0}isp-text-green{else}isp-text-red{/if} isp-margin-top-1 isp-flex isp-align-center">
+                    <i
+                        class="fas {if $rev_percentage_change >= 0}fa-arrow-up{else}fa-arrow-down{/if} isp-margin-right-1"></i>
                     {$rev_percentage_change}% {Lang::T('from last month')}
                 </p>
             </div>
-            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-purple-light isp-flex isp-align-center isp-justify-center">
+            <div
+                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-purple-light isp-flex isp-align-center isp-justify-center">
                 <i class="fas fa-dollar-sign isp-text-purple"></i>
             </div>
         </div>
@@ -151,33 +176,41 @@
                     {$iday_count} {Lang::T('Transactions')}
                 </p>
             </div>
-            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-yellow-light isp-flex isp-align-center isp-justify-center">
+            <div
+                class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-yellow-light isp-flex isp-align-center isp-justify-center">
                 <i class="fas fa-coins isp-text-yellow"></i>
             </div>
         </div>
     </div>
 </div>
 
+{if $can_view_system}
 <!-- System Status & Resource Monitoring -->
 <div class="isp-card isp-padding-6 isp-rounded-lg isp-margin-bottom-6">
     <div class="sys-header-bar">
         <div class="isp-flex isp-align-center" style="gap: 12px;">
-            <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(66, 153, 225, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div
+                style="width: 38px; height: 38px; border-radius: 8px; background: rgba(66, 153, 225, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <i class="fa fa-server" style="color: #3182ce; font-size: 18px;"></i>
             </div>
             <div>
-                <h2 class="isp-text-lg isp-font-semibold" style="margin: 0; line-height: 1.2;">{Lang::T('System Status & Resources')}</h2>
+                <h2 class="isp-text-lg isp-font-semibold" style="margin: 0; line-height: 1.2;">{Lang::T('System Status &
+                    Resources')}</h2>
                 <span class="isp-text-xs" style="opacity: 0.7; display: block; margin-top: 4px;">
-                    {$system_status.os.hostname} • {$system_status.os.name} ({$system_status.os.arch}) • PHP {$system_status.os.php} • {Lang::T('Uptime')}: <span id="sys-uptime-subtitle" style="font-weight: 600;">{$system_status.uptime.formatted}</span>
+                    {$system_status.os.hostname} • {$system_status.os.name} ({$system_status.os.arch}) • PHP
+                    {$system_status.os.php} • {Lang::T('Uptime')}: <span id="sys-uptime-subtitle"
+                        style="font-weight: 600;">{$system_status.uptime.formatted}</span>
                 </span>
             </div>
         </div>
         <div class="isp-flex isp-align-center" style="gap: 8px;">
-            <span class="isp-flex isp-align-center isp-text-xs" style="gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(72, 187, 120, 0.1); color: #48bb78; font-weight: 500;">
+            <span class="isp-flex isp-align-center isp-text-xs"
+                style="gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(72, 187, 120, 0.1); color: #48bb78; font-weight: 500;">
                 <span class="isp-status-indicator isp-status-online" style="margin: 0;"></span>
                 <span>{Lang::T('Live System')}</span>
             </span>
-            <button type="button" id="btn-refresh-sysinfo" class="isp-button isp-button-secondary" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px;">
+            <button type="button" id="btn-refresh-sysinfo" class="isp-button isp-button-secondary"
+                style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px;">
                 <i class="fa fa-refresh" id="sysinfo-refresh-icon"></i>
                 <span>{Lang::T('Refresh')}</span>
             </button>
@@ -190,11 +223,14 @@
         <div class="sys-stat-card">
             <div>
                 <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-2">
-                    <span class="isp-text-xs isp-font-semibold" style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
+                    <span class="isp-text-xs isp-font-semibold"
+                        style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
                         <i class="fa fa-hdd-o isp-margin-right-1" style="color: #4299e1;"></i>{Lang::T('Disk Storage')}
                     </span>
-                    <span class="badge {if $system_status.disk.status == 'danger'}badge-danger{elseif $system_status.disk.status == 'warning'}badge-warning{else}badge-success{/if}" style="font-size: 10px;">
-                        {$system_status.disk.percent}% {Lang::T('Used')}
+                    <span id="disk-pct-badge"
+                        class="badge {if $system_status.disk.status == 'danger'}badge-danger{elseif $system_status.disk.status == 'warning'}badge-warning{else}badge-success{/if}"
+                        style="font-size: 10px;">
+                        <span id="disk-pct-val">{$system_status.disk.percent}</span>% {Lang::T('Used')}
                     </span>
                 </div>
                 <div style="height: 140px; position: relative;">
@@ -208,7 +244,8 @@
                 </div>
                 <div class="isp-flex isp-justify-between" style="margin-bottom: 2px;">
                     <span style="opacity: 0.7;">{Lang::T('Free')}:</span>
-                    <span id="disk-free-val" style="color: #48bb78; font-weight: 500;">{$system_status.disk.free_formatted}</span>
+                    <span id="disk-free-val"
+                        style="color: #48bb78; font-weight: 500;">{$system_status.disk.free_formatted}</span>
                 </div>
                 <div class="isp-flex isp-justify-between">
                     <span style="opacity: 0.7;">{Lang::T('Total')}:</span>
@@ -221,11 +258,15 @@
         <div class="sys-stat-card">
             <div>
                 <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-2">
-                    <span class="isp-text-xs isp-font-semibold" style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
-                        <i class="fa fa-microchip isp-margin-right-1" style="color: #9f7aea;"></i>{Lang::T('Memory (RAM)')}
+                    <span class="isp-text-xs isp-font-semibold"
+                        style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
+                        <i class="fa fa-microchip isp-margin-right-1" style="color: #9f7aea;"></i>{Lang::T('Memory
+                        (RAM)')}
                     </span>
-                    <span class="badge {if $system_status.ram.status == 'danger'}badge-danger{elseif $system_status.ram.status == 'warning'}badge-warning{else}badge-success{/if}" style="font-size: 10px;">
-                        {$system_status.ram.percent}% {Lang::T('Used')}
+                    <span id="ram-pct-badge"
+                        class="badge {if $system_status.ram.status == 'danger'}badge-danger{elseif $system_status.ram.status == 'warning'}badge-warning{else}badge-success{/if}"
+                        style="font-size: 10px;">
+                        <span id="ram-pct-val">{$system_status.ram.percent}</span>% {Lang::T('Used')}
                     </span>
                 </div>
                 <div style="height: 140px; position: relative;">
@@ -239,11 +280,13 @@
                 </div>
                 <div class="isp-flex isp-justify-between" style="margin-bottom: 2px;">
                     <span style="opacity: 0.7;">{Lang::T('Free')}:</span>
-                    <span id="ram-free-val" style="color: #48bb78; font-weight: 500;">{$system_status.ram.free_formatted}</span>
+                    <span id="ram-free-val"
+                        style="color: #48bb78; font-weight: 500;">{$system_status.ram.free_formatted}</span>
                 </div>
                 <div class="isp-flex isp-justify-between">
                     <span style="opacity: 0.7;">PHP {Lang::T('Limit')}:</span>
-                    <span style="opacity: 0.85;">{$system_status.ram.php_memory_used} / {$system_status.ram.php_memory_limit}</span>
+                    <span style="opacity: 0.85;">{$system_status.ram.php_memory_used} /
+                        {$system_status.ram.php_memory_limit}</span>
                 </div>
             </div>
         </div>
@@ -252,11 +295,15 @@
         <div class="sys-stat-card">
             <div>
                 <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-2">
-                    <span class="isp-text-xs isp-font-semibold" style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
-                        <i class="fa fa-tachometer isp-margin-right-1" style="color: #ed8936;"></i>{Lang::T('CPU Utilization')}
+                    <span class="isp-text-xs isp-font-semibold"
+                        style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
+                        <i class="fa fa-tachometer isp-margin-right-1" style="color: #ed8936;"></i>{Lang::T('CPU
+                        Utilization')}
                     </span>
-                    <span class="badge {if $system_status.cpu.status == 'danger'}badge-danger{elseif $system_status.cpu.status == 'warning'}badge-warning{else}badge-success{/if}" style="font-size: 10px;">
-                        {$system_status.cpu.cores} {Lang::T('Cores')}
+                    <span id="cpu-cores-badge"
+                        class="badge {if $system_status.cpu.status == 'danger'}badge-danger{elseif $system_status.cpu.status == 'warning'}badge-warning{else}badge-success{/if}"
+                        style="font-size: 10px;">
+                        <span id="cpu-cores-val">{$system_status.cpu.cores}</span> {Lang::T('Cores')}
                     </span>
                 </div>
                 <div style="height: 140px; position: relative;">
@@ -272,7 +319,8 @@
                     <span style="opacity: 0.7;">{Lang::T('Architecture')}:</span>
                     <span>{$system_status.os.arch}</span>
                 </div>
-                <div class="isp-flex isp-justify-between" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <div class="isp-flex isp-justify-between"
+                    style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <span style="opacity: 0.7;">{Lang::T('Model')}:</span>
                     <span style="opacity: 0.85;" title="{$system_status.cpu.model}">{$system_status.cpu.model}</span>
                 </div>
@@ -283,19 +331,28 @@
         <div class="sys-stat-card">
             <div>
                 <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-2">
-                    <span class="isp-text-xs isp-font-semibold" style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
-                        <i class="fa fa-database isp-margin-right-1" style="color: #38b2ac;"></i>{Lang::T('Database & Uptime')}
+                    <span class="isp-text-xs isp-font-semibold"
+                        style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
+                        <i class="fa fa-database isp-margin-right-1" style="color: #38b2ac;"></i>{Lang::T('Database &
+                        Uptime')}
                     </span>
-                    <span class="badge badge-success" style="font-size: 10px;">
-                        <i class="fa fa-circle" style="font-size: 8px; margin-right: 3px;"></i>{$system_status.database.status}
+                    <span id="db-status-badge"
+                        class="badge {if $system_status.database.status == 'online'}badge-success{else}badge-danger{/if}"
+                        style="font-size: 10px;">
+                        <i class="fa fa-circle" style="font-size: 8px; margin-right: 3px;"></i><span
+                            id="db-status-val">{$system_status.database.status|escape}</span>
                     </span>
                 </div>
 
                 <div style="padding: 10px 0;">
                     <div style="margin-bottom: 10px;">
-                        <span class="isp-text-xs" style="opacity: 0.65; display: block;">{Lang::T('System Uptime')}</span>
-                        <strong class="isp-text-xl" style="color: #3182ce; font-family: monospace;" id="sys-uptime-val">{$system_status.uptime.formatted}</strong>
-                        <span class="isp-text-xs" style="opacity: 0.6; display: block; font-size: 10px; margin-top: 1px;">Boot: {$system_status.uptime.boot_time}</span>
+                        <span class="isp-text-xs" style="opacity: 0.65; display: block;">{Lang::T('System
+                            Uptime')}</span>
+                        <strong class="isp-text-xl" style="color: #3182ce; font-family: monospace;"
+                            id="sys-uptime-val">{$system_status.uptime.formatted}</strong>
+                        <span class="isp-text-xs"
+                            style="opacity: 0.6; display: block; font-size: 10px; margin-top: 1px;">Boot:
+                            {$system_status.uptime.boot_time}</span>
                     </div>
 
                     <div style="background: rgba(0,0,0,0.03); border-radius: 6px; padding: 8px 10px; font-size: 11px;">
@@ -305,17 +362,20 @@
                         </div>
                         <div class="isp-flex isp-justify-between" style="margin-bottom: 3px;">
                             <span style="opacity: 0.7;">{Lang::T('Latency')}:</span>
-                            <span style="color: #48bb78; font-weight: 600;" id="db-latency-val">{$system_status.database.latency_ms} ms</span>
+                            <span style="color: #48bb78; font-weight: 600;"
+                                id="db-latency-val">{$system_status.database.latency_ms} ms</span>
                         </div>
                         <div class="isp-flex isp-justify-between">
                             <span style="opacity: 0.7;">{Lang::T('Size & Tables')}:</span>
-                            <span>{$system_status.database.size_formatted} ({$system_status.database.tables_count} {Lang::T('tables')})</span>
+                            <span>{$system_status.database.size_formatted} ({$system_status.database.tables_count}
+                                {Lang::T('tables')})</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: 6px; font-size: 10px; opacity: 0.65; text-align: right;">
+            <div
+                style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: 6px; font-size: 10px; opacity: 0.65; text-align: right;">
                 <span>DB: <code>{$system_status.database.name}</code></span>
             </div>
         </div>
@@ -324,61 +384,77 @@
     <!-- Services Status Matrix -->
     <div>
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-3">
-            <h3 class="isp-text-sm isp-font-semibold" style="margin: 0; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.75;">
+            <h3 class="isp-text-sm isp-font-semibold"
+                style="margin: 0; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.75;">
                 <i class="fa fa-cogs isp-margin-right-1"></i>{Lang::T('Services Status Matrix')}
             </h3>
-            <span class="isp-text-xs" style="opacity: 0.6;">{count($system_status.services)} {Lang::T('Core Services')}</span>
+            <span class="isp-text-xs" style="opacity: 0.6;">{count($system_status.services)} {Lang::T('Core
+                Services')}</span>
         </div>
 
         <div class="sys-services-grid" id="services-status-matrix">
             {foreach $system_status.services as $svc}
-                <div class="sys-service-card">
-                    <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
-                        <div style="width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; {if $svc.badge_class == 'success'}background: rgba(72, 187, 120, 0.12); color: #48bb78;{elseif $svc.badge_class == 'warning'}background: rgba(237, 137, 54, 0.12); color: #ed8936;{elseif $svc.badge_class == 'danger'}background: rgba(245, 101, 101, 0.12); color: #f56565;{else}background: rgba(160, 174, 192, 0.12); color: #718096;{/if}">
-                            <i class="{$svc.icon}" style="font-size: 14px;"></i>
-                        </div>
-                        <div style="min-width: 0; flex: 1;">
-                            <div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{$svc.name}</div>
-                            <div style="font-size: 10px; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{$svc.info}">{$svc.info}</div>
-                        </div>
+            <div class="sys-service-card">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+                    <div
+                        style="width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; {if $svc.badge_class == 'success'}background: rgba(72, 187, 120, 0.12); color: #48bb78;{elseif $svc.badge_class == 'warning'}background: rgba(237, 137, 54, 0.12); color: #ed8936;{elseif $svc.badge_class == 'danger'}background: rgba(245, 101, 101, 0.12); color: #f56565;{else}background: rgba(160, 174, 192, 0.12); color: #718096;{/if}">
+                        <i class="{$svc.icon}" style="font-size: 14px;"></i>
                     </div>
-                    <span class="badge {if $svc.badge_class == 'success'}badge-success{elseif $svc.badge_class == 'warning'}badge-warning{elseif $svc.badge_class == 'danger'}badge-danger{else}badge-default badge-secondary{/if}">
-                        {$svc.status_label}
-                    </span>
+                    <div style="min-width: 0; flex: 1;">
+                        <div
+                            style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {$svc.name}</div>
+                        <div style="font-size: 10px; opacity: 0.65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                            title="{$svc.info}">{$svc.info}</div>
+                    </div>
                 </div>
+                <span
+                    class="badge {if $svc.badge_class == 'success'}badge-success{elseif $svc.badge_class == 'warning'}badge-warning{elseif $svc.badge_class == 'danger'}badge-danger{else}badge-default badge-secondary{/if}">
+                    {$svc.status_label}
+                </span>
+            </div>
             {/foreach}
         </div>
     </div>
 </div>
 
+{/if}
+
 <!-- Dedicated Live Online Users Multi-Gateway Card (Bigger Card with Separate Columns) -->
 <div class="isp-card isp-padding-6 isp-rounded-lg isp-margin-bottom-6" id="card-online-users-multitech">
     <!-- Header -->
-    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06);">
+    <div
+        style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06);">
         <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(56, 178, 172, 0.12); display: flex; align-items: center; justify-content: center; color: #319795; flex-shrink: 0;">
+            <div
+                style="width: 42px; height: 42px; border-radius: 10px; background: rgba(56, 178, 172, 0.12); display: flex; align-items: center; justify-content: center; color: #319795; flex-shrink: 0;">
                 <i class="fa fa-wifi" style="font-size: 20px;"></i>
             </div>
             <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <h2 class="isp-text-lg isp-font-semibold" style="margin: 0;">{Lang::T('Live Online Users & Accounting')}</h2>
-                    <span class="badge badge-success" style="font-size: 11px; padding: 3px 8px; display: inline-flex; align-items: center; gap: 5px;">
+                    <h2 class="isp-text-lg isp-font-semibold" style="margin: 0;">{Lang::T('Live Online Users &
+                        Accounting')}</h2>
+                    <span class="badge badge-success"
+                        style="font-size: 11px; padding: 3px 8px; display: inline-flex; align-items: center; gap: 5px;">
                         <span class="live-dot-pulse"></span>
                         <span>{Lang::T('Real-Time Live')}</span>
                     </span>
                 </div>
                 <p class="isp-text-xs" style="margin: 2px 0 0; opacity: 0.7;">
-                    {Lang::T('Monitored across 3 technologies: Mikrotik RouterOS API, Radius REST API (rad_acct), and FreeRADIUS MySQL (radacct)')}
+                    {Lang::T('Monitored across 3 technologies: Mikrotik RouterOS API, Radius REST API (rad_acct), and
+                    FreeRADIUS MySQL (radacct)')}
                 </p>
             </div>
         </div>
         <div style="display: flex; align-items: center; gap: 14px;">
             <div style="text-align: right;">
                 <span class="isp-text-xs" style="opacity: 0.65; display: block;">{Lang::T('Total Active Online')}</span>
-                <span class="isp-text-2xl isp-font-bold" style="color: #319795;" id="big-card-total-online">{$online_users.total|default:0}</span>
+                <span class="isp-text-2xl isp-font-bold" style="color: #319795;"
+                    id="big-card-total-online">{$online_users.total|default:0}</span>
             </div>
-            <a href="{Text::url('customers/list')}" class="isp-button isp-button-secondary" style="font-size: 11px; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
-                <i class="fa fa-users" style="margin-right: 4px;"></i>{Lang::T('View Customers')} &rarr;
+            <a href="{Text::url('customers/list')}" class="isp-button isp-button-secondary"
+                style="font-size: 11px; padding: 6px 12px; border-radius: 6px; text-decoration: none;">
+                <i class="fa fa-users" style="margin-right: 4px;"></i>{Lang::T('View Customers')}
             </a>
         </div>
     </div>
@@ -388,16 +464,19 @@
         <!-- Column 1: Mikrotik API -->
         <div class="online-tech-col" style="border-top: 3px solid #4299e1;">
             <div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                     <div>
-                        <span class="badge" style="font-size: 10px; padding: 2px 6px; background: rgba(66, 153, 225, 0.15); color: #3182ce; font-weight: 600;">
+                        <span class="badge"
+                            style="font-size: 10px; padding: 2px 6px; background: rgba(66, 153, 225, 0.15); color: #3182ce; font-weight: 600;">
                             <i class="fa fa-microchip" style="margin-right: 4px;"></i>RouterOS API
                         </span>
                         <h3 style="font-size: 15px; font-weight: 700; margin: 6px 0 2px;">{Lang::T('Mikrotik API')}</h3>
                         <p style="font-size: 11px; opacity: 0.7; margin: 0;">Hotspot & PPPoE Active Sessions</p>
                     </div>
                     <div style="text-align: right;">
-                        <span class="isp-text-2xl isp-font-bold" style="color: #3182ce;" id="big-col-mt-total">{$online_users.mikrotik|default:0}</span>
+                        <span class="isp-text-2xl isp-font-bold" style="color: #3182ce;"
+                            id="big-col-mt-total">{$online_users.mikrotik|default:0}</span>
                         <span style="font-size: 10px; display: block; opacity: 0.6;">{Lang::T('Online')}</span>
                     </div>
                 </div>
@@ -405,15 +484,18 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
                     <div class="online-tech-stat-box">
                         <span style="font-size: 10px; opacity: 0.65; display: block;">{Lang::T('Hotspot Active')}</span>
-                        <strong style="font-size: 14px; color: #3182ce;" id="big-col-mt-hotspot">{$online_users.mikrotik_hotspot|default:0}</strong>
+                        <strong style="font-size: 14px; color: #3182ce;"
+                            id="big-col-mt-hotspot">{$online_users.mikrotik_hotspot|default:0}</strong>
                     </div>
                     <div class="online-tech-stat-box">
                         <span style="font-size: 10px; opacity: 0.65; display: block;">{Lang::T('PPPoE Active')}</span>
-                        <strong style="font-size: 14px; color: #3182ce;" id="big-col-mt-pppoe">{$online_users.mikrotik_pppoe|default:0}</strong>
+                        <strong style="font-size: 14px; color: #3182ce;"
+                            id="big-col-mt-pppoe">{$online_users.mikrotik_pppoe|default:0}</strong>
                     </div>
                 </div>
 
-                <div style="font-size: 11px; opacity: 0.75; padding: 8px 10px; background: rgba(66, 153, 225, 0.04); border-radius: 6px; margin-bottom: 10px;">
+                <div
+                    style="font-size: 11px; opacity: 0.75; padding: 8px 10px; background: rgba(66, 153, 225, 0.04); border-radius: 6px; margin-bottom: 10px;">
                     <div class="isp-flex isp-justify-between" style="margin-bottom: 3px;">
                         <span>{Lang::T('Routers Checked')}:</span>
                         <strong>{$online_users.routers_checked} {Lang::T('Active')}</strong>
@@ -425,10 +507,12 @@
                 </div>
             </div>
 
-            <div style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+            <div
+                style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 10px; opacity: 0.6;">/ip/hotspot/active & /ppp/active</span>
-                <a href="{Text::url('routers')}" style="font-size: 11px; color: #4299e1; text-decoration: none; font-weight: 500;">
-                    {Lang::T('Manage Routers')} &rarr;
+                <a href="{Text::url('routers')}"
+                    style="font-size: 11px; color: #4299e1; text-decoration: none; font-weight: 500;">
+                    {Lang::T('Manage Routers')}
                 </a>
             </div>
         </div>
@@ -436,16 +520,19 @@
         <!-- Column 2: Radius REST API (rad_acct via radius.php) -->
         <div class="online-tech-col" style="border-top: 3px solid #38a169;">
             <div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                     <div>
-                        <span class="badge" style="font-size: 10px; padding: 2px 6px; background: rgba(72, 187, 120, 0.15); color: #38a169; font-weight: 600;">
+                        <span class="badge"
+                            style="font-size: 10px; padding: 2px 6px; background: rgba(72, 187, 120, 0.15); color: #38a169; font-weight: 600;">
                             <i class="fa fa-exchange" style="margin-right: 4px;"></i>REST / HTTP
                         </span>
                         <h3 style="font-size: 15px; font-weight: 700; margin: 6px 0 2px;">{Lang::T('Radius REST')}</h3>
                         <p style="font-size: 11px; opacity: 0.7; margin: 0;">Auth & Acct via <code>radius.php</code></p>
                     </div>
                     <div style="text-align: right;">
-                        <span class="isp-text-2xl isp-font-bold" style="color: #38a169;" id="big-col-rest-total">{$online_users.rest|default:0}</span>
+                        <span class="isp-text-2xl isp-font-bold" style="color: #38a169;"
+                            id="big-col-rest-total">{$online_users.rest|default:0}</span>
                         <span style="font-size: 10px; display: block; opacity: 0.6;">{Lang::T('Sessions')}</span>
                     </div>
                 </div>
@@ -457,34 +544,39 @@
                     </div>
                     <div class="online-tech-stat-box">
                         <span style="font-size: 10px; opacity: 0.65; display: block;">{Lang::T('Unique Users')}</span>
-                        <strong style="font-size: 14px; color: #38a169;" id="big-col-rest-users">{$online_users.rest_users|default:0}</strong>
+                        <strong style="font-size: 14px; color: #38a169;"
+                            id="big-col-rest-users">{$online_users.rest_users|default:0}</strong>
                     </div>
                 </div>
 
                 <!-- Sessions List / Placeholder -->
-                <div style="max-height: 120px; overflow-y: auto; background: rgba(72, 187, 120, 0.04); border-radius: 6px; padding: 6px; font-size: 11px; margin-bottom: 10px;">
+                <div
+                    style="max-height: 120px; overflow-y: auto; background: rgba(72, 187, 120, 0.04); border-radius: 6px; padding: 6px; font-size: 11px; margin-bottom: 10px;">
                     {if !empty($online_users.rest_sessions)}
-                        {foreach $online_users.rest_sessions as $rs}
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: rgba(255,255,255,0.7); border-radius: 4px; margin-bottom: 3px;">
-                                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;">
-                                    <strong>{$rs.username}</strong> {if !empty($rs.framedipaddress)}<span style="opacity: 0.6; font-size: 10px;">({$rs.framedipaddress})</span>{/if}
-                                </span>
-                                <span style="font-size: 10px; opacity: 0.6;">{$rs.acctstarttime}</span>
-                            </div>
-                        {/foreach}
+                    {foreach $online_users.rest_sessions as $rs}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: rgba(255,255,255,0.7); border-radius: 4px; margin-bottom: 3px;">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;">
+                            <strong>{$rs.username|escape}</strong> {if !empty($rs.framedipaddress)}<span
+                                style="opacity: 0.6; font-size: 10px;">({$rs.framedipaddress|escape})</span>{/if}
+                        </span>
+                        <span style="font-size: 10px; opacity: 0.6;">{$rs.acctstarttime|escape}</span>
+                    </div>
+                    {/foreach}
                     {else}
-                        <div style="text-align: center; padding: 12px 6px; opacity: 0.6; font-size: 11px;">
-                            {if $online_users.rest > 0}
-                                {$online_users.rest} {Lang::T('active sessions recorded in rad_acct')}
-                            {else}
-                                {Lang::T('No active accounting sessions in rad_acct')}
-                            {/if}
-                        </div>
+                    <div style="text-align: center; padding: 12px 6px; opacity: 0.6; font-size: 11px;">
+                        {if $online_users.rest > 0}
+                        {$online_users.rest} {Lang::T('active sessions recorded in rad_acct')}
+                        {else}
+                        {Lang::T('No active accounting sessions in rad_acct')}
+                        {/if}
+                    </div>
                     {/if}
                 </div>
             </div>
 
-            <div style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+            <div
+                style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 10px; opacity: 0.6;">radius.php?action=accounting</span>
                 <span class="badge badge-success" style="font-size: 10px; padding: 2px 6px;">Active</span>
             </div>
@@ -493,16 +585,20 @@
         <!-- Column 3: Radius MySQL FreeRADIUS (radacct) -->
         <div class="online-tech-col" style="border-top: 3px solid #805ad5;">
             <div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
                     <div>
-                        <span class="badge" style="font-size: 10px; padding: 2px 6px; background: rgba(159, 122, 234, 0.15); color: #805ad5; font-weight: 600;">
+                        <span class="badge"
+                            style="font-size: 10px; padding: 2px 6px; background: rgba(159, 122, 234, 0.15); color: #805ad5; font-weight: 600;">
                             <i class="fa fa-database" style="margin-right: 4px;"></i>FreeRADIUS AAA
                         </span>
                         <h3 style="font-size: 15px; font-weight: 700; margin: 6px 0 2px;">{Lang::T('Radius MySQL')}</h3>
-                        <p style="font-size: 11px; opacity: 0.7; margin: 0;">Accounting in <code>radacct</code> Table</p>
+                        <p style="font-size: 11px; opacity: 0.7; margin: 0;">Accounting in <code>radacct</code> Table
+                        </p>
                     </div>
                     <div style="text-align: right;">
-                        <span class="isp-text-2xl isp-font-bold" style="color: #805ad5;" id="big-col-mysql-total">{$online_users.mysql|default:0}</span>
+                        <span class="isp-text-2xl isp-font-bold" style="color: #805ad5;"
+                            id="big-col-mysql-total">{$online_users.mysql|default:0}</span>
                         <span style="font-size: 10px; display: block; opacity: 0.6;">{Lang::T('Sessions')}</span>
                     </div>
                 </div>
@@ -514,41 +610,47 @@
                     </div>
                     <div class="online-tech-stat-box">
                         <span style="font-size: 10px; opacity: 0.65; display: block;">{Lang::T('Unique Users')}</span>
-                        <strong style="font-size: 14px; color: #805ad5;" id="big-col-mysql-users">{$online_users.mysql_users|default:0}</strong>
+                        <strong style="font-size: 14px; color: #805ad5;"
+                            id="big-col-mysql-users">{$online_users.mysql_users|default:0}</strong>
                     </div>
                 </div>
 
                 <!-- Sessions List / Placeholder -->
-                <div style="max-height: 120px; overflow-y: auto; background: rgba(159, 122, 234, 0.04); border-radius: 6px; padding: 6px; font-size: 11px; margin-bottom: 10px;">
+                <div
+                    style="max-height: 120px; overflow-y: auto; background: rgba(159, 122, 234, 0.04); border-radius: 6px; padding: 6px; font-size: 11px; margin-bottom: 10px;">
                     {if !empty($online_users.mysql_sessions)}
-                        {foreach $online_users.mysql_sessions as $ms}
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: rgba(255,255,255,0.7); border-radius: 4px; margin-bottom: 3px;">
-                                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;">
-                                    <strong>{$ms.username}</strong> {if !empty($ms.framedipaddress)}<span style="opacity: 0.6; font-size: 10px;">({$ms.framedipaddress})</span>{/if}
-                                </span>
-                                <span style="font-size: 10px; opacity: 0.6;">{$ms.acctstarttime}</span>
-                            </div>
-                        {/foreach}
+                    {foreach $online_users.mysql_sessions as $ms}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: rgba(255,255,255,0.7); border-radius: 4px; margin-bottom: 3px;">
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;">
+                            <strong>{$ms.username|escape}</strong> {if !empty($ms.framedipaddress)}<span
+                                style="opacity: 0.6; font-size: 10px;">({$ms.framedipaddress|escape})</span>{/if}
+                        </span>
+                        <span style="font-size: 10px; opacity: 0.6;">{$ms.acctstarttime|escape}</span>
+                    </div>
+                    {/foreach}
                     {else}
-                        <div style="text-align: center; padding: 12px 6px; opacity: 0.6; font-size: 11px;">
-                            {if $online_users.mysql > 0}
-                                {$online_users.mysql} {Lang::T('active sessions recorded in radacct')}
-                            {else}
-                                {Lang::T('No active accounting sessions in radacct (acctstoptime IS NULL)')}
-                            {/if}
-                        </div>
+                    <div style="text-align: center; padding: 12px 6px; opacity: 0.6; font-size: 11px;">
+                        {if $online_users.mysql > 0}
+                        {$online_users.mysql} {Lang::T('active sessions recorded in radacct')}
+                        {else}
+                        {Lang::T('No active accounting sessions in radacct (acctstoptime IS NULL)')}
+                        {/if}
+                    </div>
                     {/if}
                 </div>
             </div>
 
-            <div style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+            <div
+                style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 10px; opacity: 0.6;">acctstoptime IS NULL</span>
-                {if $online_users.radius_enabled || $config.radius_enable}
-                    <a href="{Text::url('radius/nas-list')}" style="font-size: 11px; color: #805ad5; text-decoration: none; font-weight: 500;">
-                        {Lang::T('Radius NAS')} &rarr;
-                    </a>
+                {if $online_users.radius_enabled}
+                <a href="{Text::url('radius/nas-list')}"
+                    style="font-size: 11px; color: #805ad5; text-decoration: none; font-weight: 500;">
+                    {Lang::T('Radius NAS')}
+                </a>
                 {else}
-                    <span style="font-size: 10px; opacity: 0.5;">{Lang::T('Radius Disabled')}</span>
+                <span style="font-size: 10px; opacity: 0.5;">{Lang::T('Radius Disabled')}</span>
                 {/if}
             </div>
         </div>
@@ -562,10 +664,14 @@
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
             <h2 id="sales-report-title" class="isp-text-lg isp-font-semibold">{Lang::T('Sales Report')}</h2>
             <div class="isp-flex isp-space-x-2" id="sales-timeframe-btns">
-                <button type="button" class="isp-button isp-button-day active" data-timeframe="day">{Lang::T('Day')}</button>
-                <button type="button" class="isp-button isp-button-secondary" data-timeframe="week">{Lang::T('Week')}</button>
-                <button type="button" class="isp-button isp-button-secondary" data-timeframe="month">{Lang::T('Month')}</button>
-                <button type="button" class="isp-button isp-button-secondary" data-timeframe="year">{Lang::T('Year')}</button>
+                <button type="button" class="isp-button isp-button-day active"
+                    data-timeframe="day">{Lang::T('Day')}</button>
+                <button type="button" class="isp-button isp-button-secondary"
+                    data-timeframe="week">{Lang::T('Week')}</button>
+                <button type="button" class="isp-button isp-button-secondary"
+                    data-timeframe="month">{Lang::T('Month')}</button>
+                <button type="button" class="isp-button isp-button-secondary"
+                    data-timeframe="year">{Lang::T('Year')}</button>
             </div>
         </div>
         <div class="isp-chart-container">
@@ -578,9 +684,12 @@
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
             <h2 id="customer-growth-title" class="isp-text-lg isp-font-semibold">{Lang::T('Customer Growth')}</h2>
             <div class="isp-flex isp-space-x-2" id="customer-filter-btns">
-                <button type="button" class="isp-button isp-button-day active" data-filter="all">{Lang::T('All')}</button>
-                <button type="button" class="isp-button isp-button-secondary" data-filter="new">{Lang::T('New')}</button>
-                <button type="button" class="isp-button isp-button-secondary" data-filter="churned">{Lang::T('Churned')}</button>
+                <button type="button" class="isp-button isp-button-day active"
+                    data-filter="all">{Lang::T('All')}</button>
+                <button type="button" class="isp-button isp-button-secondary"
+                    data-filter="new">{Lang::T('New')}</button>
+                <button type="button" class="isp-button isp-button-secondary"
+                    data-filter="churned">{Lang::T('Churned')}</button>
             </div>
         </div>
         <div class="isp-chart-container">
@@ -597,13 +706,17 @@
             <div class="isp-flex isp-align-center" style="gap: 8px;">
                 <h2 id="network-status-title" class="isp-text-lg isp-font-semibold">{Lang::T('Network Status')}</h2>
                 {if $radius_enabled}
-                    <span class="badge" style="font-size: 11px; padding: 2px 8px; border-radius: 9999px; font-weight: 500; {if $radius_online}background: rgba(72, 187, 120, 0.15); color: #48bb78;{else}background: rgba(245, 101, 101, 0.15); color: #f56565;{/if}" title="FreeRADIUS AAA Engine">
-                        <i class="fa fa-server" style="margin-right: 4px;"></i>RADIUS {if $radius_online}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}
-                    </span>
+                <span class="badge"
+                    style="font-size: 11px; padding: 2px 8px; border-radius: 9999px; font-weight: 500; {if $radius_online}background: rgba(72, 187, 120, 0.15); color: #48bb78;{else}background: rgba(245, 101, 101, 0.15); color: #f56565;{/if}"
+                    title="FreeRADIUS AAA Engine">
+                    <i class="fa fa-server" style="margin-right: 4px;"></i>RADIUS {if
+                    $radius_online}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}
+                </span>
                 {/if}
             </div>
             <div class="isp-flex isp-align-center" style="gap: 6px;">
-                <span class="isp-status-indicator {if $offline_network_nodes == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                <span
+                    class="isp-status-indicator {if $offline_network_nodes == 0}isp-status-online{else}isp-status-warning{/if}"></span>
                 <span id="network-status-uptime" class="isp-text-xs">{$network_uptime}% {Lang::T('uptime')}</span>
             </div>
         </div>
@@ -612,53 +725,63 @@
         </div>
 
         <div style="margin-top: 14px; border-top: 1px solid var(--border-color, rgba(0,0,0,0.06)); padding-top: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
                 <div class="isp-flex isp-space-x-1" id="network-tab-btns">
                     <button type="button" class="net-tab-btn active" data-tab="routers">
                         <i class="fa fa-sitemap" style="margin-right: 4px;"></i>{Lang::T('Routers')} ({$routers_total})
                     </button>
                     <button type="button" class="net-tab-btn" data-tab="online">
-                        <i class="fa fa-users" style="margin-right: 4px;"></i>{Lang::T('Online Users')} (<span id="net-tab-online-count">{$online_users.total|default:0}</span>)
+                        <i class="fa fa-users" style="margin-right: 4px;"></i>{Lang::T('Online Users')} (<span
+                            id="net-tab-online-count">{$online_users.total|default:0}</span>)
                     </button>
                     {if $radius_enabled}
-                        <button type="button" class="net-tab-btn" data-tab="radius">
-                            <i class="fa fa-server" style="margin-right: 4px;"></i>{Lang::T('Radius')} ({if $radius_nas_count > 0}{$radius_nas_count} NAS{else}Server{/if})
-                        </button>
+                    <button type="button" class="net-tab-btn" data-tab="radius">
+                        <i class="fa fa-server" style="margin-right: 4px;"></i>{Lang::T('Radius')} ({if
+                        $radius_nas_count > 0}{$radius_nas_count} NAS{else}Server{/if})
+                    </button>
                     {/if}
                     <button type="button" class="net-tab-btn" data-tab="all">
                         {Lang::T('All Nodes')} ({$total_network_nodes})
                     </button>
                 </div>
                 <div id="network-action-link">
-                    <a href="{Text::url('routers')}" id="net-manage-link" data-routers-url="{Text::url('routers')}" data-radius-url="{Text::url('radius/nas-list')}" data-online-url="{Text::url('customers/list')}" style="font-size: 11px; color: #4299e1; text-decoration: none; font-weight: 500;">{Lang::T('Manage Routers')} &rarr;</a>
+                    <a href="{Text::url('routers')}" id="net-manage-link" data-routers-url="{Text::url('routers')}"
+                        data-radius-url="{Text::url('radius/nas-list')}" data-online-url="{Text::url('customers/list')}"
+                        style="font-size: 11px; color: #4299e1; text-decoration: none; font-weight: 500;">{Lang::T('Manage
+                        Routers')}</a>
                 </div>
             </div>
 
             <!-- Tab 1: Routers List -->
             <div id="net-tab-routers" class="net-tab-content">
                 {if !empty($routers_list)}
-                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;">
-                        {foreach $routers_list as $r}
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span class="isp-status-indicator {if strcasecmp($r['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
-                                    <div>
-                                        <strong style="font-size: 12px;">{$r['name']}</strong>
-                                        {if !empty($r['ip_address'])}
-                                            <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$r['ip_address']}</span>
-                                        {/if}
-                                    </div>
-                                </div>
-                                <span class="badge {if strcasecmp($r['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
-                                    {$r['status']}
-                                </span>
+                <div style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;">
+                    {foreach $routers_list as $r}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span
+                                class="isp-status-indicator {if strcasecmp($r['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                            <div>
+                                <strong style="font-size: 12px;">{$r['name']}</strong>
+                                {if !empty($r['ip_address'])}
+                                <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$r['ip_address']}</span>
+                                {/if}
                             </div>
-                        {/foreach}
+                        </div>
+                        <span
+                            class="badge {if strcasecmp($r['status'], 'online') == 0}badge-success{else}badge-danger{/if}"
+                            style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                            {$r['status']}
+                        </span>
                     </div>
+                    {/foreach}
+                </div>
                 {else}
-                    <div style="padding: 10px; font-size: 12px; opacity: 0.6; text-align: center;">
-                        {Lang::T('No Routers Configured')}
-                    </div>
+                <div style="padding: 10px; font-size: 12px; opacity: 0.6; text-align: center;">
+                    {Lang::T('No Routers Configured')}
+                </div>
                 {/if}
             </div>
 
@@ -666,9 +789,11 @@
             {if $radius_enabled}
             <div id="net-tab-radius" class="net-tab-content" style="display: none;">
                 <!-- Radius Server Status Row -->
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.04); border: 1px solid rgba(66, 153, 225, 0.12); margin-bottom: 6px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.04); border: 1px solid rgba(66, 153, 225, 0.12); margin-bottom: 6px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span class="isp-status-indicator {if $radius_online}isp-status-online{else}isp-status-warning{/if}"></span>
+                        <span
+                            class="isp-status-indicator {if $radius_online}isp-status-online{else}isp-status-warning{/if}"></span>
                         <div>
                             <strong style="font-size: 12px;">FreeRADIUS AAA Engine</strong>
                             <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$radius_host}</span>
@@ -676,11 +801,13 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         {if $radius_active_sessions > 0}
-                            <span class="badge" style="font-size: 10px; padding: 2px 6px; background: rgba(66, 153, 225, 0.15); color: #3182ce;">
-                                <i class="fa fa-users"></i> {$radius_active_sessions} {Lang::T('Sessions')}
-                            </span>
+                        <span class="badge"
+                            style="font-size: 10px; padding: 2px 6px; background: rgba(66, 153, 225, 0.15); color: #3182ce;">
+                            <i class="fa fa-users"></i> {$radius_active_sessions} {Lang::T('Sessions')}
+                        </span>
                         {/if}
-                        <span class="badge {if $radius_online}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                        <span class="badge {if $radius_online}badge-success{else}badge-danger{/if}"
+                            style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
                             {if $radius_online}Online{else}Offline{/if}
                         </span>
                     </div>
@@ -688,33 +815,41 @@
 
                 <!-- Radius NAS Clients List -->
                 {if !empty($radius_nas_list)}
-                    <div style="display: flex; flex-direction: column; gap: 6px; max-height: 100px; overflow-y: auto;">
-                        {foreach $radius_nas_list as $nas}
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span class="isp-status-indicator {if strcasecmp($nas['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
-                                    <div>
-                                        <strong style="font-size: 12px;">{$nas['shortname']}</strong>
-                                        <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$nas['nasname']}</span>
-                                        {if !empty($nas['routers'])}
-                                            <span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">({$nas['routers']})</span>
-                                        {/if}
-                                    </div>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="badge" style="font-size: 9px; padding: 1px 5px; opacity: 0.7; background: rgba(0,0,0,0.05);">{$nas['type']}</span>
-                                    <span class="badge {if strcasecmp($nas['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
-                                        {$nas['status']}
-                                    </span>
-                                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; max-height: 100px; overflow-y: auto;">
+                    {foreach $radius_nas_list as $nas}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span
+                                class="isp-status-indicator {if strcasecmp($nas['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                            <div>
+                                <strong style="font-size: 12px;">{$nas['shortname']}</strong>
+                                <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$nas['nasname']}</span>
+                                {if !empty($nas['routers'])}
+                                <span
+                                    style="font-size: 10px; opacity: 0.5; margin-left: 4px;">({$nas['routers']})</span>
+                                {/if}
                             </div>
-                        {/foreach}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span class="badge"
+                                style="font-size: 9px; padding: 1px 5px; opacity: 0.7; background: rgba(0,0,0,0.05);">{$nas['type']}</span>
+                            <span
+                                class="badge {if strcasecmp($nas['status'], 'online') == 0}badge-success{else}badge-danger{/if}"
+                                style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                                {$nas['status']}
+                            </span>
+                        </div>
                     </div>
+                    {/foreach}
+                </div>
                 {else}
-                    <div style="padding: 8px 10px; font-size: 11px; opacity: 0.7; text-align: center; background: rgba(0,0,0,0.02); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                        <span>{Lang::T('No Radius NAS configured yet.')}</span>
-                        <a href="{Text::url('radius/nas-add')}" class="btn btn-xs btn-primary" style="font-size: 10px; padding: 2px 8px;">+ {Lang::T('Add NAS')}</a>
-                    </div>
+                <div
+                    style="padding: 8px 10px; font-size: 11px; opacity: 0.7; text-align: center; background: rgba(0,0,0,0.02); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>{Lang::T('No Radius NAS configured yet.')}</span>
+                    <a href="{Text::url('radius/nas-add')}" class="btn btn-xs btn-primary"
+                        style="font-size: 10px; padding: 2px 8px;">+ {Lang::T('Add NAS')}</a>
+                </div>
                 {/if}
             </div>
             {/if}
@@ -723,50 +858,61 @@
             <div id="net-tab-all" class="net-tab-content" style="display: none;">
                 <div style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;">
                     {if $radius_enabled}
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.04); border: 1px solid rgba(66, 153, 225, 0.12);">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="isp-status-indicator {if $radius_online}isp-status-online{else}isp-status-warning{/if}"></span>
-                                <div>
-                                    <strong style="font-size: 12px;">Radius Server</strong>
-                                    <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$radius_host}</span>
-                                </div>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.04); border: 1px solid rgba(66, 153, 225, 0.12);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span
+                                class="isp-status-indicator {if $radius_online}isp-status-online{else}isp-status-warning{/if}"></span>
+                            <div>
+                                <strong style="font-size: 12px;">Radius Server</strong>
+                                <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$radius_host}</span>
                             </div>
-                            <span class="badge {if $radius_online}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
-                                {if $radius_online}Online{else}Offline{/if}
-                            </span>
                         </div>
+                        <span class="badge {if $radius_online}badge-success{else}badge-danger{/if}"
+                            style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                            {if $radius_online}Online{else}Offline{/if}
+                        </span>
+                    </div>
                     {/if}
                     {foreach $routers_list as $r}
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="isp-status-indicator {if strcasecmp($r['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
-                                <div>
-                                    <strong style="font-size: 12px;">[Router] {$r['name']}</strong>
-                                    {if !empty($r['ip_address'])}
-                                        <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$r['ip_address']}</span>
-                                    {/if}
-                                </div>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span
+                                class="isp-status-indicator {if strcasecmp($r['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                            <div>
+                                <strong style="font-size: 12px;">[Router] {$r['name']}</strong>
+                                {if !empty($r['ip_address'])}
+                                <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$r['ip_address']}</span>
+                                {/if}
                             </div>
-                            <span class="badge {if strcasecmp($r['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
-                                {$r['status']}
-                            </span>
                         </div>
+                        <span
+                            class="badge {if strcasecmp($r['status'], 'online') == 0}badge-success{else}badge-danger{/if}"
+                            style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                            {$r['status']}
+                        </span>
+                    </div>
                     {/foreach}
                     {if !empty($radius_nas_list)}
-                        {foreach $radius_nas_list as $nas}
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span class="isp-status-indicator {if strcasecmp($nas['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
-                                    <div>
-                                        <strong style="font-size: 12px;">[NAS] {$nas['shortname']}</strong>
-                                        <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$nas['nasname']}</span>
-                                    </div>
-                                </div>
-                                <span class="badge {if strcasecmp($nas['status'], 'online') == 0}badge-success{else}badge-danger{/if}" style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
-                                    {$nas['status']}
-                                </span>
+                    {foreach $radius_nas_list as $nas}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 6px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span
+                                class="isp-status-indicator {if strcasecmp($nas['status'], 'online') == 0}isp-status-online{else}isp-status-warning{/if}"></span>
+                            <div>
+                                <strong style="font-size: 12px;">[NAS] {$nas['shortname']}</strong>
+                                <span style="font-size: 11px; opacity: 0.6; margin-left: 6px;">{$nas['nasname']}</span>
                             </div>
-                        {/foreach}
+                        </div>
+                        <span
+                            class="badge {if strcasecmp($nas['status'], 'online') == 0}badge-success{else}badge-danger{/if}"
+                            style="font-size: 10px; padding: 2px 8px; font-weight: 500;">
+                            {$nas['status']}
+                        </span>
+                    </div>
+                    {/foreach}
                     {/if}
                 </div>
             </div>
@@ -774,12 +920,16 @@
             <!-- Tab 4: Online Users Breakdown & Real-Time Sessions -->
             <div id="net-tab-online" class="net-tab-content" style="display: none;">
                 <!-- 3 Technologies Overview Mini Grid -->
-                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px;">
                     <!-- Tech 1: Mikrotik RouterOS API -->
-                    <div style="padding: 8px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.05); border: 1px solid rgba(66, 153, 225, 0.15);">
+                    <div
+                        style="padding: 8px 10px; border-radius: 6px; background: rgba(66, 153, 225, 0.05); border: 1px solid rgba(66, 153, 225, 0.15);">
                         <div class="isp-flex isp-justify-between isp-align-center" style="margin-bottom: 4px;">
-                            <strong style="font-size: 11px; color: #3182ce;"><i class="fa fa-microchip" style="margin-right: 4px;"></i>Mikrotik API</strong>
-                            <span class="badge badge-primary" style="font-size: 10px;" id="tab-mt-total">{$online_users.mikrotik|default:0}</span>
+                            <strong style="font-size: 11px; color: #3182ce;"><i class="fa fa-microchip"
+                                    style="margin-right: 4px;"></i>Mikrotik API</strong>
+                            <span class="badge badge-primary" style="font-size: 10px;"
+                                id="tab-mt-total">{$online_users.mikrotik|default:0}</span>
                         </div>
                         <div style="font-size: 10px; opacity: 0.75; display: flex; justify-content: space-between;">
                             <span>Hotspot: <b id="tab-mt-hotspot">{$online_users.mikrotik_hotspot|default:0}</b></span>
@@ -788,10 +938,13 @@
                     </div>
 
                     <!-- Tech 2: Radius REST API (rad_acct table via radius.php) -->
-                    <div style="padding: 8px 10px; border-radius: 6px; background: rgba(72, 187, 120, 0.05); border: 1px solid rgba(72, 187, 120, 0.15);">
+                    <div
+                        style="padding: 8px 10px; border-radius: 6px; background: rgba(72, 187, 120, 0.05); border: 1px solid rgba(72, 187, 120, 0.15);">
                         <div class="isp-flex isp-justify-between isp-align-center" style="margin-bottom: 4px;">
-                            <strong style="font-size: 11px; color: #38a169;"><i class="fa fa-exchange" style="margin-right: 4px;"></i>Radius REST</strong>
-                            <span class="badge badge-success" style="font-size: 10px;" id="tab-rest-total">{$online_users.rest|default:0}</span>
+                            <strong style="font-size: 11px; color: #38a169;"><i class="fa fa-exchange"
+                                    style="margin-right: 4px;"></i>Radius REST</strong>
+                            <span class="badge badge-success" style="font-size: 10px;"
+                                id="tab-rest-total">{$online_users.rest|default:0}</span>
                         </div>
                         <div style="font-size: 10px; opacity: 0.75; display: flex; justify-content: space-between;">
                             <span>Table: <code>rad_acct</code></span>
@@ -800,10 +953,14 @@
                     </div>
 
                     <!-- Tech 3: Radius FreeRADIUS MySQL (radacct table) -->
-                    <div style="padding: 8px 10px; border-radius: 6px; background: rgba(159, 122, 234, 0.05); border: 1px solid rgba(159, 122, 234, 0.15);">
+                    <div
+                        style="padding: 8px 10px; border-radius: 6px; background: rgba(159, 122, 234, 0.05); border: 1px solid rgba(159, 122, 234, 0.15);">
                         <div class="isp-flex isp-justify-between isp-align-center" style="margin-bottom: 4px;">
-                            <strong style="font-size: 11px; color: #805ad5;"><i class="fa fa-database" style="margin-right: 4px;"></i>Radius MySQL</strong>
-                            <span class="badge" style="font-size: 10px; background: rgba(159, 122, 234, 0.2); color: #805ad5;" id="tab-sql-total">{$online_users.mysql|default:0}</span>
+                            <strong style="font-size: 11px; color: #805ad5;"><i class="fa fa-database"
+                                    style="margin-right: 4px;"></i>Radius MySQL</strong>
+                            <span class="badge"
+                                style="font-size: 10px; background: rgba(159, 122, 234, 0.2); color: #805ad5;"
+                                id="tab-sql-total">{$online_users.mysql|default:0}</span>
                         </div>
                         <div style="font-size: 10px; opacity: 0.75; display: flex; justify-content: space-between;">
                             <span>Table: <code>radacct</code></span>
@@ -815,27 +972,40 @@
                 <!-- Sessions List / Details -->
                 <div style="max-height: 110px; overflow-y: auto;">
                     {if !empty($online_users.rest_sessions)}
-                        <div style="font-size: 10px; font-weight: 600; opacity: 0.7; margin: 4px 0 2px;"><i class="fa fa-exchange" style="color: #38a169; margin-right: 4px;"></i>Radius REST (rad_acct) Sessions:</div>
-                        {foreach $online_users.rest_sessions as $rs}
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.02); margin-bottom: 3px; font-size: 11px;">
-                                <span><i class="fa fa-user" style="opacity: 0.6; margin-right: 4px;"></i><strong>{$rs.username}</strong> {if !empty($rs.framedipaddress)}({$rs.framedipaddress}){/if}</span>
-                                <span style="opacity: 0.6; font-size: 10px;">{$rs.acctstarttime}</span>
-                            </div>
-                        {/foreach}
+                    <div style="font-size: 10px; font-weight: 600; opacity: 0.7; margin: 4px 0 2px;"><i
+                            class="fa fa-exchange" style="color: #38a169; margin-right: 4px;"></i>Radius REST (rad_acct)
+                        Sessions:</div>
+                    {foreach $online_users.rest_sessions as $rs}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.02); margin-bottom: 3px; font-size: 11px;">
+                        <span><i class="fa fa-user"
+                                style="opacity: 0.6; margin-right: 4px;"></i><strong>{$rs.username|escape}</strong> {if
+                            !empty($rs.framedipaddress)}({$rs.framedipaddress|escape}){/if}</span>
+                        <span style="opacity: 0.6; font-size: 10px;">{$rs.acctstarttime|escape}</span>
+                    </div>
+                    {/foreach}
                     {/if}
                     {if !empty($online_users.mysql_sessions)}
-                        <div style="font-size: 10px; font-weight: 600; opacity: 0.7; margin: 4px 0 2px;"><i class="fa fa-database" style="color: #805ad5; margin-right: 4px;"></i>Radius MySQL (radacct) Sessions:</div>
-                        {foreach $online_users.mysql_sessions as $ms}
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.02); margin-bottom: 3px; font-size: 11px;">
-                                <span><i class="fa fa-user" style="opacity: 0.6; margin-right: 4px;"></i><strong>{$ms.username}</strong> {if !empty($ms.framedipaddress)}({$ms.framedipaddress}){/if}</span>
-                                <span style="opacity: 0.6; font-size: 10px;">{$ms.acctstarttime}</span>
-                            </div>
-                        {/foreach}
+                    <div style="font-size: 10px; font-weight: 600; opacity: 0.7; margin: 4px 0 2px;"><i
+                            class="fa fa-database" style="color: #805ad5; margin-right: 4px;"></i>Radius MySQL (radacct)
+                        Sessions:</div>
+                    {foreach $online_users.mysql_sessions as $ms}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.02); margin-bottom: 3px; font-size: 11px;">
+                        <span><i class="fa fa-user"
+                                style="opacity: 0.6; margin-right: 4px;"></i><strong>{$ms.username|escape}</strong> {if
+                            !empty($ms.framedipaddress)}({$ms.framedipaddress|escape}){/if}</span>
+                        <span style="opacity: 0.6; font-size: 10px;">{$ms.acctstarttime|escape}</span>
+                    </div>
+                    {/foreach}
                     {/if}
-                    {if empty($online_users.rest_sessions) && empty($online_users.mysql_sessions) && $online_users.total == 0}
-                        <div style="padding: 10px; font-size: 11px; opacity: 0.65; text-align: center; background: rgba(0,0,0,0.02); border-radius: 6px;">
-                            <i class="fa fa-info-circle" style="margin-right: 4px;"></i>{Lang::T('No active sessions currently found in rad_acct (REST), radacct (MySQL), or connected Mikrotik routers.')}
-                        </div>
+                    {if empty($online_users.rest_sessions) && empty($online_users.mysql_sessions) && $online_users.total
+                    == 0}
+                    <div
+                        style="padding: 10px; font-size: 11px; opacity: 0.65; text-align: center; background: rgba(0,0,0,0.02); border-radius: 6px;">
+                        <i class="fa fa-info-circle" style="margin-right: 4px;"></i>{Lang::T('No active sessions
+                        currently found in rad_acct (REST), radacct (MySQL), or connected Mikrotik routers.')}
+                    </div>
                     {/if}
                 </div>
             </div>
@@ -847,8 +1017,10 @@
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
             <h2 id="services-trx-title" class="isp-text-lg isp-font-semibold">{Lang::T('Transactions by Service')}</h2>
             <div class="isp-flex isp-space-x-2" id="trx-metric-btns">
-                <button type="button" class="isp-button isp-button-day active" data-metric="totals">{Lang::T('Revenue')}</button>
-                <button type="button" class="isp-button isp-button-secondary" data-metric="counts">{Lang::T('Count')}</button>
+                <button type="button" class="isp-button isp-button-day active"
+                    data-metric="totals">{Lang::T('Revenue')}</button>
+                <button type="button" class="isp-button isp-button-secondary"
+                    data-metric="counts">{Lang::T('Count')}</button>
             </div>
         </div>
         <div class="isp-chart-container">
@@ -900,8 +1072,10 @@
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
             <h2 id="top-plans-title" class="isp-text-lg isp-font-semibold">{Lang::T('Top Selling Plans')}</h2>
             <div class="isp-flex isp-space-x-2" id="topplans-metric-btns">
-                <button type="button" class="isp-button isp-button-day active" data-metric="counts">{Lang::T('Count')}</button>
-                <button type="button" class="isp-button isp-button-secondary" data-metric="totals">{Lang::T('Revenue')}</button>
+                <button type="button" class="isp-button isp-button-day active"
+                    data-metric="counts">{Lang::T('Count')}</button>
+                <button type="button" class="isp-button isp-button-secondary"
+                    data-metric="totals">{Lang::T('Revenue')}</button>
             </div>
         </div>
         <div class="isp-chart-container">
@@ -915,7 +1089,8 @@
             <h2 id="hourly-activity-title" class="isp-text-lg isp-font-semibold">{Lang::T('Hourly Activity (24h)')}</h2>
             <div class="isp-flex isp-align-center">
                 <span class="isp-status-indicator isp-status-online"></span>
-                <span id="hourly-peak-time" class="isp-text-xs"><i class="fas fa-clock isp-margin-right-1"></i>Peak: {$peak_hour_str}</span>
+                <span id="hourly-peak-time" class="isp-text-xs"><i class="fas fa-clock isp-margin-right-1"></i>Peak:
+                    {$peak_hour_str}</span>
             </div>
         </div>
         <div class="isp-chart-container">
@@ -943,7 +1118,8 @@
             <h2 id="equipment-status-title" class="isp-text-lg isp-font-semibold">{Lang::T('System Inventory')}</h2>
             <div class="isp-flex isp-align-center isp-space-x-2">
                 <span class="isp-flex isp-align-center isp-text-xs">
-                    <span class="isp-status-indicator {if $routers_offline == 0}isp-status-online{else}isp-status-warning{/if} isp-margin-right-1"></span>
+                    <span
+                        class="isp-status-indicator {if $routers_offline == 0}isp-status-online{else}isp-status-warning{/if} isp-margin-right-1"></span>
                     {$network_uptime}% {Lang::T('Online')}
                 </span>
             </div>
@@ -1588,11 +1764,12 @@
 
                     ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     ctx.fillStyle = isDark ? '#ffffff' : '#1a202c';
-                    ctx.fillText(diskPct + '%', centerX, centerY - 6);
+                    const dk = (dData.systemStatus && dData.systemStatus.disk) || diskData;
+                    ctx.fillText((Number(dk.percent) || 0) + '%', centerX, centerY - 6);
 
                     ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     ctx.fillStyle = isDark ? '#a0aec0' : '#718096';
-                    ctx.fillText('Used: ' + diskData.used_formatted, centerX, centerY + 14);
+                    ctx.fillText('Used: ' + dk.used_formatted, centerX, centerY + 14);
                     ctx.restore();
                 }
             };
@@ -1617,7 +1794,8 @@
                         tooltip: {
                             callbacks: {
                                 label: function (ctx) {
-                                    return ctx.label + ': ' + (ctx.dataIndex === 0 ? diskData.used_formatted : diskData.free_formatted);
+                                    const dk = (dData.systemStatus && dData.systemStatus.disk) || diskData;
+                                    return ctx.label + ': ' + (ctx.dataIndex === 0 ? dk.used_formatted : dk.free_formatted);
                                 }
                             }
                         }
@@ -1649,11 +1827,12 @@
 
                     ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     ctx.fillStyle = isDark ? '#ffffff' : '#1a202c';
-                    ctx.fillText(ramPct + '%', centerX, centerY - 6);
+                    const rm = (dData.systemStatus && dData.systemStatus.ram) || ramData;
+                    ctx.fillText((Number(rm.percent) || 0) + '%', centerX, centerY - 6);
 
                     ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     ctx.fillStyle = isDark ? '#a0aec0' : '#718096';
-                    ctx.fillText('Used: ' + ramData.used_formatted, centerX, centerY + 14);
+                    ctx.fillText('Used: ' + rm.used_formatted, centerX, centerY + 14);
                     ctx.restore();
                 }
             };
@@ -1678,7 +1857,8 @@
                         tooltip: {
                             callbacks: {
                                 label: function (ctx) {
-                                    return ctx.label + ': ' + (ctx.dataIndex === 0 ? ramData.used_formatted : ramData.free_formatted);
+                                    const rm = (dData.systemStatus && dData.systemStatus.ram) || ramData;
+                                    return ctx.label + ': ' + (ctx.dataIndex === 0 ? rm.used_formatted : rm.free_formatted);
                                 }
                             }
                         }
@@ -1709,11 +1889,12 @@
 
                     ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     ctx.fillStyle = isDark ? '#ffffff' : '#1a202c';
-                    ctx.fillText(cpuPct + '%', centerX, centerY - 6);
+                    const cp = (dData.systemStatus && dData.systemStatus.cpu) || cpuData;
+                    ctx.fillText((Number(cp.percent) || 0) + '%', centerX, centerY - 6);
 
                     ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
                     ctx.fillStyle = isDark ? '#a0aec0' : '#718096';
-                    ctx.fillText((cpuData.cores || 1) + ' Cores', centerX, centerY + 14);
+                    ctx.fillText((cp.cores || 1) + ' Cores', centerX, centerY + 14);
                     ctx.restore();
                 }
             };
@@ -1875,13 +2056,13 @@
 
                     if (netManageLink) {
                         if (tab === 'radius') {
-                            netManageLink.innerHTML = 'Manage Radius NAS &rarr;';
+                            netManageLink.innerHTML = 'Manage Radius NAS';
                             netManageLink.href = netManageLink.getAttribute('data-radius-url');
                         } else if (tab === 'online') {
-                            netManageLink.innerHTML = 'View Customers &rarr;';
+                            netManageLink.innerHTML = 'View Customers';
                             netManageLink.href = netManageLink.getAttribute('data-online-url');
                         } else {
-                            netManageLink.innerHTML = 'Manage Routers &rarr;';
+                            netManageLink.innerHTML = 'Manage Routers';
                             netManageLink.href = netManageLink.getAttribute('data-routers-url');
                         }
                     }
@@ -1903,6 +2084,15 @@
                         if (data) {
                             dData.systemStatus = data;
                             const colors = getThemeColors();
+                            const setBadge = function (badgeId, valId, status, text) {
+                                const b = document.getElementById(badgeId);
+                                if (b) {
+                                    b.classList.remove('badge-success', 'badge-warning', 'badge-danger');
+                                    b.classList.add(status === 'danger' ? 'badge-danger' : (status === 'warning' ? 'badge-warning' : 'badge-success'));
+                                }
+                                const v = document.getElementById(valId);
+                                if (v && text !== undefined) v.textContent = text;
+                            };
 
                             // 1. Update Disk
                             if (diskChart && data.disk) {
@@ -1912,6 +2102,7 @@
                                 diskChart.data.datasets[0].data = [diskUsed, diskFree];
                                 diskChart.data.datasets[0].backgroundColor[0] = diskPct >= 90 ? colors.red : (diskPct >= 80 ? colors.orange : colors.blue);
                                 diskChart.update();
+                                setBadge('disk-pct-badge', 'disk-pct-val', data.disk.status, data.disk.percent);
                                 const usedEl = document.getElementById('disk-used-val');
                                 if (usedEl) usedEl.textContent = data.disk.used_formatted;
                                 const freeEl = document.getElementById('disk-free-val');
@@ -1928,6 +2119,7 @@
                                 ramChart.data.datasets[0].data = [ramUsed, ramFree];
                                 ramChart.data.datasets[0].backgroundColor[0] = ramPct >= 90 ? colors.red : (ramPct >= 80 ? colors.orange : colors.purple);
                                 ramChart.update();
+                                setBadge('ram-pct-badge', 'ram-pct-val', data.ram.status, data.ram.percent);
                                 const rUsedEl = document.getElementById('ram-used-val');
                                 if (rUsedEl) rUsedEl.textContent = data.ram.used_formatted;
                                 const rFreeEl = document.getElementById('ram-free-val');
@@ -1940,6 +2132,7 @@
                                 cpuChart.data.datasets[0].data = [cpuPct, Math.max(0, 100 - cpuPct)];
                                 cpuChart.data.datasets[0].backgroundColor[0] = cpuPct >= 90 ? colors.red : (cpuPct >= 75 ? colors.orange : colors.teal);
                                 cpuChart.update();
+                                setBadge('cpu-cores-badge', 'cpu-cores-val', data.cpu.status, data.cpu.cores);
                                 const loadEl = document.getElementById('cpu-load-val');
                                 if (loadEl) loadEl.textContent = data.cpu.load_string;
                             }
@@ -1951,6 +2144,7 @@
                             if (subUptimeEl && data.uptime) subUptimeEl.textContent = data.uptime.formatted;
                             const latencyEl = document.getElementById('db-latency-val');
                             if (latencyEl && data.database) latencyEl.textContent = data.database.latency_ms + ' ms';
+                            if (data.database) setBadge('db-status-badge', 'db-status-val', data.database.status === 'online' ? 'success' : 'danger', data.database.status);
 
                             // 5. Update Online Users (Live - Mikrotik API, Radius REST, Radius MySQL)
                             if (data.online_users) {
