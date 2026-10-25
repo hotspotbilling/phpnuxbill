@@ -99,6 +99,9 @@ $_notifmsg_default = json_decode(file_get_contents($UPLOAD_PATH . DIRECTORY_SEPA
 
 //register all plugin
 foreach (glob(File::pathFixer($PLUGIN_PATH . DIRECTORY_SEPARATOR . '*.php')) as $filename) {
+    if (PluginLoader::isShadowed($filename)) {
+        continue; // converted to folder style, loaded by PluginLoader
+    }
     try {
         include $filename;
     } catch (Throwable $e) {
@@ -107,6 +110,8 @@ foreach (glob(File::pathFixer($PLUGIN_PATH . DIRECTORY_SEPARATOR . '*.php')) as 
         //ignore plugin error
     }
 }
+// folder-style plugins: system/plugin/<slug>/plugin.json
+PluginLoader::loadAll();
 
 $result = ORM::for_table('tbl_appconfig')->find_many();
 foreach ($result as $value) {
@@ -289,6 +294,24 @@ function showResult($success, $message = '', $result = [], $meta = [])
 function getUrl($url)
 {
     return Text::url($url);
+}
+
+/**
+ * Build a public URL to a plugin asset file.
+ * Static files in system/plugin/<slug>/assets/ are served directly by the web server
+ * (system/plugin/ has no .htaccess blocking static files; root .htaccess only rewrites
+ * non-existent file requests to index.php).
+ *
+ * @param string $slug Plugin folder slug
+ * @param string $path Path within assets/ (e.g. 'css/style.css')
+ * @return string Full asset URL
+ */
+function pluginAssetUrl($slug, $path = '')
+{
+    global $root_path;
+    $cleanSlug = preg_replace('/[^A-Za-z0-9_-]/', '', $slug);
+    $cleanPath = ltrim($path, '/');
+    return rtrim(APP_URL, '/') . '/system/plugin/' . $cleanSlug . '/assets/' . $cleanPath;
 }
 
 function generateUniqueNumericVouchers($totalVouchers, $length = 8)

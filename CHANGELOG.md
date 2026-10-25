@@ -2,6 +2,21 @@
 
 # CHANGELOG
 
+## 2026.10.23
+
+- Plugin & Theme System overhaul (Phase 1-4)
+  - Folder-based plugins with `plugin.json` manifest (`system/plugin/<slug>/`)
+  - `PluginLoader`: scan, load, enable/disable, convert legacy plugins
+  - Converted 11 legacy plugins to folder style: `wga`, `semaphore`, `radon_rest`, all `hotspot_pg-*`
+  - `register_submenu()` + manifest `menus` array support (nested sidebar menus)
+  - Marketplace UI (`?_route=marketplace`) — activate/deactivate/convert/delete plugins
+  - Plugin Manager renamed to "Plugin Manager (Legacy)"
+  - `install.php` / `uninstall.php` lifecycle hooks
+  - `update_url` version checking via GitHub releases API
+  - `pluginAssetUrl()` helper for plugin static assets
+  - Theme system: `theme.json` manifest, child theme fallback, `functions.php` auto-load
+  - Themes page (`?_route=themes`) — list and activate themes
+
 ## 2025.11.1
 
 - Added complete customer referral system

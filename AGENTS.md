@@ -115,6 +115,7 @@ switch ($action) {
 
 See [Plugin List](https://github.com/orgs/hotspotbilling/repositories?q=plugin)
 
+### Legacy flat plugins (`system/plugin/*.php`)
 Plugins are auto-included at boot: `glob($PLUGIN_PATH . '/*.php')`. Each file registers via:
 
 ```php
@@ -127,6 +128,49 @@ register_hook('hook_name', 'function_name');                   // Hook lifecycle
 | `SETTINGS`, `AFTER_DASHBOARD`, `CUSTOMERS`, `PREPAID`, `SERVICES`, `REPORTS`, `VOUCHER`, `AFTER_ORDER`, `NETWORK`, `AFTER_PAYMENTGATEWAY` | `ORDER`, `HISTORY`, `ACCOUNTS` |
 
 URL `?_route=plugin/functionName` → `call_user_func('functionName')`. Templates go in `system/plugin/ui/`.
+
+### Folder-based plugins (`system/plugin/<slug>/`)
+One folder = one plugin with a `plugin.json` manifest. Loaded by `PluginLoader::loadAll()` at boot (after legacy glob). A folder plugin shadows (replaces) a legacy flat plugin with the same slug.
+
+**Layout:**
+```
+system/plugin/<slug>/
+├── plugin.json        # name, slug, version, description, author, requires_php, main, [menus], [update_url]
+├── <slug>.php         # main file (register_menu / register_hook)
+├── controllers/       # additional route handlers
+├── includes/          # extra PHP includes
+├── ui/                # Smarty templates (added to template dirs)
+├── assets/            # public static files (served at APP_URL/system/plugin/<slug>/assets/)
+├── lan/               # language files
+├── install.php        # (optional) runs on activation via Marketplace
+└── uninstall.php      # (optional) runs on deletion via Marketplace
+```
+
+**plugin.json example:**
+```json
+{
+  "name": "My Plugin",
+  "slug": "my_plugin",
+  "version": "1.0.0",
+  "description": "Plugin description",
+  "author": "Author Name",
+  "requires_php": "8.2",
+  "main": "my_plugin.php",
+  "update_url": "https://api.github.com/repos/user/repo/releases/latest",
+  "menus": [
+    { "type": "menu", "name": "My Plugin", "admin": true, "function": "my_plugin_dashboard", "position": "AFTER_DASHBOARD", "icon": "icon-box", "auth": [] },
+    { "type": "submenu", "parent": "my_plugin_dashboard", "name": "Settings", "admin": true, "function": "my_plugin_settings", "position": "AFTER_DASHBOARD", "auth": ["SuperAdmin"] }
+  ]
+}
+```
+
+**Menu routes:** Core controllers (`system/controllers/<function>.php`) route directly via `?_route=<function>`; plugin functions route via `?_route=plugin/<function>`.
+
+**Helper:** `pluginAssetUrl($slug, $path)` returns a URL to `system/plugin/<slug>/assets/<path>`.
+
+**Lifecycle:** `install.php` runs on Marketplace activate; `uninstall.php` runs on delete. Both are CSRF + SuperAdmin guarded.
+
+**Enable/disable state:** stored in `system/cache/plugins.json` (`PluginLoader::setActive()` / `getState()`).
 
 ## Payment Gateways
 

@@ -9,6 +9,12 @@ _admin();
 $ui->assign('_title', Lang::T('Dashboard'));
 $ui->assign('_admin', $admin);
 
+if (isset($_GET['ajax_system_status'])) {
+    header('Content-Type: application/json');
+    echo json_encode(SystemInfo::getInfo());
+    exit;
+}
+
 if (isset($_GET['refresh'])) {
     if (class_exists('RedisCache')) {
         RedisCache::flushPattern('dash:*');
@@ -57,6 +63,11 @@ if ($config['dashboard_type'] === 'dynamic') {
     foreach ($data as $key => $val) {
         $ui->assign($key, $val);
     }
+
+    // Always ensure fresh real-time system metrics (CPU, RAM, Uptime, Cron, DB) are assigned
+    $systemStatus = SystemInfo::getInfo();
+    $ui->assign('system_status', $systemStatus);
+    $ui->assign('online_users', $systemStatus['online_users'] ?? SystemInfo::getOnlineUsers());
 
     $ui->display('admin/dashboard-new.tpl');
 } else {

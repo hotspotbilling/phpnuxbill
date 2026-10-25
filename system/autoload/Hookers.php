@@ -35,6 +35,36 @@ function register_menu($name, $admin, $function, $position, $icon = '', $label =
     ];
 }
 
+/**
+ * Register a submenu item under a parent menu function.
+ * Renders as a nested <ul class="treeview-menu"> inside the parent in boot.php.
+ *
+ * @param string $parentFunction The function name of the parent register_menu() item
+ * @param string $name           Name of the menu
+ * @param bool   $admin          true if for admin and false for customer
+ * @param string $function       function to run after menu clicks
+ * @param string $position       position of menu (must match parent's position)
+ * @param string $icon           icon class
+ * @param string $label          badge label
+ * @param string $color          badge color
+ * @param array  $auth           authorization list
+ */
+function register_submenu($parentFunction, $name, $admin, $function, $position, $icon = '', $label = '', $color = 'success', $auth = [])
+{
+    global $menu_registered;
+    $menu_registered[] = [
+        "name" => $name,
+        "admin" => $admin,
+        "position" => $position,
+        "icon" => $icon,
+        "function" => $function,
+        "label" => $label,
+        "color" => $color,
+        "auth" => $auth,
+        "parent" => $parentFunction,
+    ];
+}
+
 $hook_registered = array();
 
 function register_hook($action, $function){
