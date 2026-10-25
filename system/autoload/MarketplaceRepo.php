@@ -178,6 +178,7 @@ class MarketplaceRepo
     private static function retryAfter(string $url): int
     {
         $f = Extensions::cacheDir() . DIRECTORY_SEPARATOR . 'repo_' . md5($url) . '.retry';
+        clearstatcache(true, $f); // the marker is touched by other requests: read its current mtime
         return is_file($f) ? (int) filemtime($f) + self::RETRY_BACKOFF : 0;
     }
 

@@ -136,15 +136,39 @@ function _menu_icon($icon, $placeholder = false)
             : '';
     }
     if (stripos($icon, '<svg') === 0 || stripos($icon, '<img') === 0) {
-        // add "icon" to the existing class attribute (single or double quoted) or create one; never duplicate it
-        return preg_replace_callback('/^<(svg|img)\b([^>]*)>?/i', function ($m) {
+        // add "icon" to the real class attribute (found by walking the attributes, so "class" inside another
+        // attribute's quoted value is ignored) or create one; never duplicate it
+        return preg_replace_callback('/^<(svg|img)((?:[^>"\']|"[^"]*"|\'[^\']*\')*)>?/i', function ($m) {
             $attrs = $m[2];
             $rest = substr($m[0], strlen($m[1]) + 1 + strlen($attrs));
-            if (preg_match('/\sclass\s*=\s*(["\'])(.*?)\1/is', $attrs, $c, PREG_OFFSET_CAPTURE)) {
-                if (!preg_match('/(^|\s)icon(\s|$)/', $c[2][0])) {
-                    $attrs = substr_replace($attrs, trim('icon ' . $c[2][0]), $c[2][1], strlen($c[2][0]));
+            $found = false;
+            if (preg_match_all('/\s+([^\s"\'=\/>]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'>]+)))?/', $attrs, $all, PREG_OFFSET_CAPTURE)) {
+                foreach ($all[1] as $i => $name) {
+                    if (strcasecmp($name[0], 'class') !== 0) {
+                        continue;
+                    }
+                    $found = true;
+                    foreach ([2, 3, 4] as $g) {
+                        $v = $all[$g][$i];
+                        if ($v[1] < 0) {
+                            continue;
+                        }
+                        if (!preg_match('/(^|\s)icon(\s|$)/', $v[0])) {
+                            $new = trim('icon ' . $v[0]);
+                            if ($g === 4) {
+                                $new = '"' . $new . '"'; // unquoted value needs quotes once it holds two classes
+                            }
+                            $attrs = substr_replace($attrs, $new, $v[1], strlen($v[0]));
+                        }
+                        break 2;
+                    }
+                    // valueless class attribute
+                    $attrs = substr_replace($attrs, ' class="icon"', $name[1] - 1, 0);
+                    $attrs = preg_replace('/(\sclass="icon")\s+class(?=[\s\/>]|$)/i', '$1', $attrs, 1);
+                    break;
                 }
-            } else {
+            }
+            if (!$found) {
                 $attrs = ' class="icon"' . $attrs;
             }
             return '<' . $m[1] . $attrs . $rest;
