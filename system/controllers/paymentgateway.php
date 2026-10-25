@@ -13,8 +13,12 @@ $ui->assign('_admin', $admin);
 switch ($action) {
     case 'delete':
         $pg = alphanumeric($routes[2]);
-        if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $pg . '.php')) {
-            deleteFile($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR, $pg);
+        if (GatewayLoader::exists($pg)) {
+            // goes through the installer so the gateway is backed up first and folder-style gateways are removed whole
+            $res = ExtensionInstaller::uninstall('gateway', $pg);
+            if (!$res['ok']) {
+                r2(getUrl('paymentgateway'), 'e', $res['message']);
+            }
         }
         r2(getUrl('paymentgateway'), 's', Lang::T('Payment Gateway Deleted'));
 
@@ -64,8 +68,8 @@ switch ($action) {
             r2(getUrl('paymentgateway'), 's', Lang::T('Payment Gateway saved successfully'));
         }
 
-        if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) {
-            include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php';
+        if (GatewayLoader::file($action) !== null) {
+            include GatewayLoader::file($action);
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (function_exists($action . '_save_config')) {
                     call_user_func($action . '_save_config');
@@ -83,12 +87,7 @@ switch ($action) {
             if (!empty($action)) {
                 r2(getUrl('paymentgateway'), 'w', Lang::T('Payment Gateway Not Found'));
             } else {
-                $files = scandir($PAYMENTGATEWAY_PATH);
-                foreach ($files as $file) {
-                    if (pathinfo($file, PATHINFO_EXTENSION) == 'php') {
-                        $pgs[] = str_replace('.php', '', $file);
-                    }
-                }
+                $pgs = GatewayLoader::names();
                 $ui->assign('_title', 'Payment Gateway Settings');
                 $ui->assign('pgs', $pgs);
                 $ui->assign('actives', explode(',', $config['payment_gateway']));

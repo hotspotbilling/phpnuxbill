@@ -21,8 +21,8 @@
             <div class="mp-stats">
                 <div class="mp-stat"><b>{$stats.total + 1}</b><span>{Lang::T('Themes')}</span></div>
                 <div class="mp-stat"><b>{if $active_theme eq 'default'}Default{else}{$active_theme}{/if}</b><span>{Lang::T('Active')}</span></div>
+                <div class="mp-stat"><b>{$stats.updates}</b><span>{Lang::T('Updates')}</span></div>
                 <div class="mp-stat"><b>{$stats.child}</b><span>{Lang::T('Child')}</span></div>
-                <div class="mp-stat"><b>{$stats.functions}</b><span>{Lang::T('Functions')}</span></div>
             </div>
         </div>
     </section>
@@ -34,32 +34,36 @@
         </div>
         <div class="mp-toolbar">
             <span class="mp-chip mp-chip--ok">{Lang::T('Active')}: {$active_theme}</span>
-            <button class="mp-filter" id="toggle-upload" type="button"><i class="fa fa-upload"></i>
-                {Lang::T('Upload Theme')}</button>
+            <a href="{Text::url('marketplace/sync&from=themes')}" class="mp-filter"
+                title="{Lang::T('Refresh repository and check for updates')}"><i class="fa fa-refresh"></i> {Lang::T('Sync Store')}</a>
+            <button class="mp-filter" id="toggle-upload" type="button"><i class="fa fa-upload"></i> {Lang::T('Upload Theme')}</button>
         </div>
     </div>
 
     {include file="admin/marketplace/_upload.tpl"
         up_title=Lang::T('Upload a Theme')
-        up_hint=Lang::T('Upload a ZIP package containing a "theme/" folder.')
+        up_hint=Lang::T('Upload a ZIP package containing a "theme/" folder (or a theme.json at its root), or install from GitHub.')
         up_action="{Text::url('marketplace/themes/upload')}"
         up_file_name='zip_theme'
         up_file_label=Lang::T('Theme Package (.zip)')
         up_accept='application/zip,.zip'
-        up_gh=true}
+        up_gh=true
+        up_disabled=!$writable}
 
     <div class="mp-filters">
         <button class="mp-filter is-active" data-filter="all">{Lang::T('All')} <b>{$stats.total + 1}</b></button>
         <button class="mp-filter" data-filter="active">{Lang::T('Active')}</button>
         <button class="mp-filter" data-filter="child">{Lang::T('Child')} <b>{$stats.child}</b></button>
         <button class="mp-filter" data-filter="functions">{Lang::T('Functions')} <b>{$stats.functions}</b></button>
+        <button class="mp-filter" data-filter="updates">{Lang::T('Updates')} <b>{$stats.updates}</b></button>
+        <button class="mp-filter" data-filter="errors">{Lang::T('Issues')} <b>{$stats.errors}</b></button>
     </div>
 
     <div class="mp-grid">
         <article class="mp-card mp-card--{if $active_theme eq 'default'}active{else}inactive{/if}"
-            data-tags="builtin {if $active_theme eq 'default'}active{else}inactive{/if}"
-            data-search="default theme built-in ui/ui">
+            data-tags="builtin {if $active_theme eq 'default'}active{else}inactive{/if}" data-search="default theme built-in ui/ui">
             <div class="mp-card__accent"></div>
+            <div class="mp-card__preview mp-card__preview--default"><i class="fa fa-desktop"></i></div>
             <header class="mp-card__head">
                 <div class="mp-card__title">
                     <h3>{Lang::T('Default Theme')}</h3>
@@ -68,35 +72,35 @@
                 <div class="mp-card__tags">
                     <span class="mp-badge mp-badge--theme">{Lang::T('Built-in')}</span>
                     {if $active_theme eq 'default'}
-                    <span class="mp-badge mp-badge--active"><i class="fa fa-check-circle"></i>
-                        {Lang::T('Active')}</span>
+                    <span class="mp-badge mp-badge--active"><i class="fa fa-check-circle"></i> {Lang::T('Active')}</span>
                     {/if}
                 </div>
             </header>
-            <div class="mp-card__body">
-                <p>{Lang::T('The built-in default theme.')}</p>
-            </div>
+            <div class="mp-card__body"><p>{Lang::T('The built-in default theme.')}</p></div>
             <footer class="mp-card__actions">
                 {if $active_theme neq 'default'}
                 <form method="post" action="{Text::url('marketplace/themes/default')}" class="mp-act-form">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <button type="button" class="mp-act mp-act--primary"
-                        onclick="return ask(this, '{Lang::T('Switch to the default theme?')}')"
-                        title="{Lang::T('Switch to default')}">
-                        <i class="fa fa-undo"></i> {Lang::T('Switch to default')}</button>
+                        onclick="return ask(this, '{Lang::T('Switch to the default theme?')|escape:'javascript'}')"
+                        title="{Lang::T('Switch to default')}"><i class="fa fa-undo"></i> {Lang::T('Switch to default')}</button>
                 </form>
                 {else}
-                <button type="button" class="mp-act" disabled><i class="fa fa-check-circle"></i>
-                    {Lang::T('Active')}</button>
+                <button type="button" class="mp-act" disabled><i class="fa fa-check-circle"></i> {Lang::T('Active')}</button>
                 {/if}
             </footer>
         </article>
 
         {foreach $themes as $t}
         <article class="mp-card mp-card--{if $t.active}active{else}inactive{/if}"
-            data-tags="{if $t.active}active{else}inactive{/if}{if $t.parent} child{/if}{if $t.has_functions} functions{/if}"
-            data-search="{$t.name|lower} {$t.slug|lower} {$t.author|lower}">
+            data-tags="{if $t.active}active{else}inactive{/if}{if $t.parent} child{/if}{if $t.has_functions} functions{/if}{if $t.update.available} updates{/if}{if $t.health.status eq 'error'} errors{/if}"
+            data-search="{$t.name|lower} {$t.slug|lower} {$t.author|lower}" data-info="{$t.info_json|escape}">
             <div class="mp-card__accent"></div>
+            {if $t.preview}
+            <div class="mp-card__preview"><img src="{$t.preview}" alt="{$t.name|escape}" loading="lazy"></div>
+            {else}
+            <div class="mp-card__preview mp-card__preview--empty"><i class="fa fa-paint-brush"></i></div>
+            {/if}
             <header class="mp-card__head">
                 <div class="mp-card__title">
                     <h3>{$t.name}</h3>
@@ -104,8 +108,7 @@
                 </div>
                 <div class="mp-card__tags">
                     {if $t.active}
-                    <span class="mp-badge mp-badge--active"><i class="fa fa-check-circle"></i>
-                        {Lang::T('Active')}</span>
+                    <span class="mp-badge mp-badge--active"><i class="fa fa-check-circle"></i> {Lang::T('Active')}</span>
                     {/if}
                 </div>
             </header>
@@ -114,37 +117,63 @@
             </div>
             <div class="mp-card__meta">
                 <span class="mp-chip">v{$t.version}</span>
-                {if $t.parent}
-                <span class="mp-badge mp-badge--legacy">{Lang::T('Child of')} {$t.parent}</span>
-                {/if}
-                {if $t.has_functions}
-                <span class="mp-badge mp-badge--folder"><i class="fa fa-code"></i>&nbsp;functions.php</span>
-                {/if}
+                {if $t.parent}<span class="mp-badge mp-badge--legacy">{Lang::T('Child of')} {$t.parent}</span>{/if}
+                {if $t.has_functions}<span class="mp-badge mp-badge--folder"><i class="fa fa-code"></i>&nbsp;functions.php</span>{/if}
+                {include file="admin/marketplace/_status.tpl" c=$t}
             </div>
             <footer class="mp-card__actions">
                 {if !$t.active}
                 <form method="post" action="{Text::url('marketplace/themes/activate/', $t.slug)}" class="mp-act-form">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <button type="button" class="mp-act mp-act--success"
-                        onclick="return ask(this, '{Lang::T('Activate this theme?')}')" title="{Lang::T('Activate')}">
-                        <i class="fa fa-check"></i> {Lang::T('Activate')}</button>
+                        onclick="return ask(this, '{Lang::T('Activate this theme?')|escape:'javascript'}')" title="{Lang::T('Activate')}"><i class="fa fa-check"></i> {Lang::T('Activate')}</button>
                 </form>
-                <form method="post" action="{Text::url('marketplace/themes/uninstall/', $t.slug)}"
-                    class="mp-act-form">
+                <form method="post" action="{Text::url('marketplace/themes/uninstall/', $t.slug)}" class="mp-act-form">
                     <input type="hidden" name="csrf_token" value="{$csrf_token}">
-                    <button type="button" class="mp-act mp-act--danger"
-                        onclick="return ask(this, '{Lang::T('Uninstall this theme? This cannot be undone.')}')"
-                        title="{Lang::T('Uninstall')}">
-                        <i class="fa fa-trash"></i> {Lang::T('Uninstall')}</button>
+                    <button type="button" class="mp-act mp-act--danger" {if !$writable}disabled{/if}
+                        onclick="return ask(this, '{Lang::T('Uninstall this theme? A backup is saved first.')|escape:'javascript'}')"
+                        title="{Lang::T('Uninstall')}"><i class="fa fa-trash"></i> {Lang::T('Uninstall')}</button>
                 </form>
                 {else}
-                <button type="button" class="mp-act" disabled><i class="fa fa-check-circle"></i>
-                    {Lang::T('Active')}</button>
+                <button type="button" class="mp-act" disabled><i class="fa fa-check-circle"></i> {Lang::T('Active')}</button>
                 {/if}
+            </footer>
+            {include file="admin/marketplace/_tools.tpl" c=$t route='themes' can_convert=false disabled=!$writable}
+        </article>
+        {/foreach}
+    </div>
+
+    {if $available}
+    <div class="mp-section" data-mp-section>
+        <div>
+            <h2>{Lang::T('Discover Themes')}</h2>
+            <p>{Lang::T('Themes published in your repositories.')}</p>
+        </div>
+        <span class="mp-chip">{$available|@count} {Lang::T('available')}</span>
+    </div>
+    <div class="mp-grid" data-sortable>
+        {foreach $available as $x}
+        <article class="mp-card mp-card--available" data-tags="available {if $x.ispaid}paid{else}free{/if}{if $x.watched} watch{/if}"
+            data-date="{$x.last_update}" data-search="{$x.name|lower} {$x.id|lower} {$x.author|lower}" data-info="{$x.info_json|escape}">
+            <div class="mp-card__accent"></div>
+            <header class="mp-card__head">
+                <div class="mp-card__title">
+                    <h3>{$x.name}</h3>
+                    <small>@{$x.author}{if $x.last_update} &middot; {$x.last_update}{/if}</small>
+                </div>
+                <div class="mp-card__tags">
+                    {include file="admin/marketplace/_watch.tpl" x=$x}
+                    {if $x.ispaid}<span class="mp-badge mp-badge--paid">{Lang::T('Premium')}</span>{else}<span class="mp-badge mp-badge--free">{Lang::T('Free')}</span>{/if}
+                </div>
+            </header>
+            <div class="mp-card__body"><p title="{$x.description|escape}">{$x.description}</p></div>
+            <footer class="mp-card__actions">
+                {include file="admin/marketplace/_store_actions.tpl" x=$x route='themes' disabled=!$writable}
             </footer>
         </article>
         {/foreach}
     </div>
+    {/if}
 
     <div class="mp-empty mp-noresults" id="mp-noresults"><i class="fa fa-search"></i>
         <h4>{Lang::T('No matching results')}</h4>
@@ -153,11 +182,11 @@
 
     <section class="mp-install mp-install--info">
         <h3><i class="fa fa-info-circle"></i> {Lang::T('About Themes')}</h3>
-        <p>{Lang::T('Themes live in ui/themes/THEME_NAME/ with a theme.json manifest. Child themes declare a "parent" and fall back to parent templates. functions.php is loaded automatically when the theme is active.')}
-        </p>
+        <p>{Lang::T('Themes live in ui/themes/THEME_NAME/ with a theme.json manifest. Add "preview": "preview.png" to show a screenshot here. Child themes declare a "parent" and fall back to parent templates. functions.php is loaded automatically when the theme is active.')}</p>
     </section>
 </div>
 
-{include file="admin/marketplace/_scripts.tpl"}
+{include file="admin/marketplace/_drawer.tpl"}
+{include file="admin/marketplace/_scripts.tpl" route='themes'}
 
 {include file="sections/footer.tpl"}

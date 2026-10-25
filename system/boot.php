@@ -93,6 +93,11 @@ $ui->addTemplateDir($PLUGIN_PATH . File::pathFixer('/ui/'), 'plugin');
 foreach (PluginLoader::$templateDirs as $pluginTplDir) {
     $ui->addTemplateDir($pluginTplDir); // folder plugins: templates resolvable by plain name
 }
+// folder-style payment gateways: plain template names, plus the "pg:name.tpl" resource for both layouts
+foreach (GatewayLoader::templateDirs() as $gatewayTplDir) {
+    $ui->addTemplateDir($gatewayTplDir);
+}
+$ui->registerResource('pg', new SmartyPgResource());
 $ui->setCompileDir(File::pathFixer($UI_PATH . '/compiled/'));
 $ui->setConfigDir(File::pathFixer($UI_PATH . '/conf/'));
 $ui->setCacheDir(File::pathFixer($UI_PATH . '/cache/'));

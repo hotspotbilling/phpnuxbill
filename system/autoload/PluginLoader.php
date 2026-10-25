@@ -19,6 +19,8 @@ class PluginLoader
     public static $plugins = [];
     /** @var array template dirs contributed by active folder plugins */
     public static $templateDirs = [];
+    /** @var array slug => message for folder plugins whose main file threw while loading (shown as health in the Marketplace) */
+    public static $errors = [];
 
     private static function stateFile(): string
     {
@@ -183,7 +185,8 @@ class PluginLoader
                 try {
                     include_once $main;
                 } catch (Throwable $e) {
-                    //ignore plugin error
+                    // never break the app for one plugin, but remember why it failed
+                    self::$errors[$slug] = get_class($e) . ': ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')';
                 }
             }
 

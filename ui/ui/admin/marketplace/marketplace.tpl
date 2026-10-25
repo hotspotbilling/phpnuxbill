@@ -14,15 +14,25 @@
                 </p>
                 <div class="mp-hero__actions">
                     <a href="{Text::url('marketplace/sync')}" class="mp-hero-btn">
-                        <i class="fa fa-refresh"></i> {Lang::T('Sync Repository')}
+                        <i class="fa fa-refresh"></i> {Lang::T('Sync & Check Updates')}
                     </a>
                     <span><i class="fa fa-clock"></i> {Lang::T('Last synced')}:
                         <strong>{$diagnostics.last_sync}</strong></span>
+                    <span title="{Lang::T('Last update check')}"><i class="fa fa-history"></i> {$diagnostics.checked}</span>
                     <span>
                         {if $diagnostics.repo_online}<i class="fa fa-circle" style="color:#34d399;"></i>
                         {Lang::T('Repository available')} ({$stats.repo_total})
                         {else}<i class="fa fa-circle" style="color:#f87171;"></i> {Lang::T('Repository unreachable')}{/if}
                     </span>
+                    {if $diagnostics.repo_stale}
+                    <span class="mp-hero-warn"><i class="fa fa-exclamation-triangle"></i>
+                        {Lang::T('Store data is over a week old. Sync to get the latest extensions.')}</span>
+                    {/if}
+                </div>
+                <div class="mp-search">
+                    <i class="fa fa-search"></i>
+                    <input type="text" id="mp-hub-search" autocomplete="off"
+                        placeholder="{Lang::T('Search all plugins, gateways, and devices...')}">
                 </div>
             </div>
             <div class="mp-stats">
@@ -33,6 +43,70 @@
             </div>
         </div>
     </section>
+
+    <section id="mp-results" class="mp-results" hidden>
+        <div class="mp-section">
+            <div>
+                <h2>{Lang::T('Search Results')}</h2>
+                <p id="mp-results-count"></p>
+            </div>
+            <button type="button" class="mp-filter" id="mp-results-clear"><i class="fa fa-times"></i>
+                {Lang::T('Clear')}</button>
+        </div>
+        <div class="mp-grid" id="mp-results-grid"></div>
+        <div class="mp-empty" id="mp-results-empty" hidden><i class="fa fa-search"></i>
+            <h4>{Lang::T('No matching results')}</h4>
+            <p>{Lang::T('Try a different search term or filter.')}</p>
+        </div>
+    </section>
+
+    <div id="mp-hub-main">
+    {if $pending_updates}
+    <section class="mp-panel mp-panel--update">
+        <div class="mp-panel__head">
+            <div>
+                <h2><i class="fa fa-arrow-circle-up"></i> {$pending_updates|@count} {Lang::T('update(s) available')}</h2>
+                <p>{Lang::T('Each update backs up the current version first, so it can be rolled back from Tools.')}</p>
+            </div>
+            <form method="post" action="{Text::url('marketplace/updateall')}">
+                <input type="hidden" name="csrf_token" value="{$csrf_token}">
+                <button type="button" class="mp-filter is-active"
+                    onclick="return ask(this, '{Lang::T('Update every extension listed? Each one is backed up first.')|escape:'javascript'}')">
+                    <i class="fa fa-download"></i> {Lang::T('Update all')}</button>
+            </form>
+        </div>
+        <ul class="mp-list">
+            {foreach $pending_updates as $u}
+            <li>
+                <span class="mp-badge mp-badge--folder">{$u.type}</span>
+                <a href="{Text::url('marketplace/')}{if $u.type eq 'plugin'}plugins{elseif $u.type eq 'gateway'}gateways{elseif $u.type eq 'device'}devices{else}themes{/if}">{$u.name}</a>
+                <span class="mp-muted">{if $u.current}{$u.current}{else}?{/if} &rarr; {$u.latest}{if $u.basis eq 'estimated'} ({Lang::T('estimated')}){/if}</span>
+            </li>
+            {/foreach}
+        </ul>
+    </section>
+    {/if}
+
+    {if $problems}
+    <section class="mp-panel mp-panel--error">
+        <div class="mp-panel__head">
+            <div>
+                <h2><i class="fa fa-exclamation-triangle"></i> {$problems|@count} {Lang::T('extension(s) with problems')}</h2>
+                <p>{Lang::T('These have a PHP error or failed to load. Fix, update, or restore a previous version from Tools.')}</p>
+            </div>
+            <a href="{Text::url('marketplace/tools')}" class="mp-filter"><i class="fa fa-wrench"></i> {Lang::T('Open Tools')}</a>
+        </div>
+        <ul class="mp-list">
+            {foreach $problems as $p}
+            <li>
+                <span class="mp-badge mp-badge--legacy">{$p.type}</span>
+                <a href="{Text::url('marketplace/')}{if $p.type eq 'plugin'}plugins{elseif $p.type eq 'gateway'}gateways{elseif $p.type eq 'device'}devices{else}themes{/if}">{$p.name}</a>
+                <span class="mp-muted">{$p.message|escape}</span>
+            </li>
+            {/foreach}
+        </ul>
+    </section>
+    {/if}
 
     <div class="mp-section">
         <div>
@@ -163,6 +237,7 @@
                     <small>@{$item.author}{if $item.last_update} &middot; {$item.last_update}{/if}</small>
                 </div>
                 <div class="mp-card__tags">
+                    {include file="admin/marketplace/_watch.tpl" x=$item}
                     <span class="mp-badge {$item.badge_class}">{$item.category_type}</span>
                     {if $item.ispaid}
                     <span class="mp-badge mp-badge--paid">{Lang::T('Premium')}</span>
@@ -184,6 +259,39 @@
                 <a href="{$item.target_url}" class="mp-act mp-act--primary" title="{Lang::T('Browse Section')}">
                     <i class="fa fa-folderpen"></i> {Lang::T('Browse')}
                 </a>
+            </footer>
+        </article>
+        {/foreach}
+    </div>
+    {/if}
+
+    </div>
+
+    {if $watched}
+    <div class="mp-section">
+        <div>
+            <h2><i class="fa fa-star mp-gold"></i> {Lang::T('Your Watchlist')}</h2>
+            <p>{Lang::T('Store items you starred to come back to.')}</p>
+        </div>
+    </div>
+    <div class="mp-grid">
+        {foreach $watched as $item}
+        <article class="mp-card mp-card--available">
+            <div class="mp-card__accent"></div>
+            <header class="mp-card__head">
+                <div class="mp-card__title">
+                    <h3>{$item.name}</h3>
+                    <small>@{$item.author}{if $item.last_update} &middot; {$item.last_update}{/if}</small>
+                </div>
+                <div class="mp-card__tags">
+                    {include file="admin/marketplace/_watch.tpl" x=$item}
+                    <span class="mp-badge mp-badge--folder">{$item.category_type}</span>
+                    {if $item.ispaid}<span class="mp-badge mp-badge--paid">{Lang::T('Premium')}</span>{else}<span class="mp-badge mp-badge--free">{Lang::T('Free')}</span>{/if}
+                </div>
+            </header>
+            <div class="mp-card__body"><p title="{$item.description|escape}">{$item.description}</p></div>
+            <footer class="mp-card__actions">
+                <a href="{$item.target_url}" class="mp-act mp-act--primary"><i class="fa fa-folder-open"></i> {Lang::T('Browse')}</a>
             </footer>
         </article>
         {/foreach}
@@ -240,5 +348,76 @@
         </div>
     </div>
 </div>
+
+<script type="application/json" id="mp-catalog">{$catalog_json nofilter}</script>
+<script>
+    (function () {
+        var input = document.getElementById('mp-hub-search');
+        var catalogEl = document.getElementById('mp-catalog');
+        if (!input || !catalogEl) return;
+        var catalog = [];
+        try { catalog = JSON.parse(catalogEl.textContent); } catch (e) { }
+        var main = document.getElementById('mp-hub-main');
+        var panel = document.getElementById('mp-results');
+        var grid = document.getElementById('mp-results-grid');
+        var count = document.getElementById('mp-results-count');
+        var none = document.getElementById('mp-results-empty');
+        var routes = { plugin: 'plugins', gateway: 'gateways', device: 'devices', theme: 'themes' };
+        var badge = { plugin: 'mp-badge--folder', gateway: 'mp-badge--gateway', device: 'mp-badge--device', theme: 'mp-badge--theme' };
+
+        function el(tag, cls, text) {
+            var n = document.createElement(tag);
+            if (cls) n.className = cls;
+            if (text !== undefined) n.textContent = text;
+            return n;
+        }
+        function card(it) {
+            var a = el('article', 'mp-card mp-card--' + (it.state === 'installed' ? 'active' : 'available') + ' mp-result');
+            a.appendChild(el('div', 'mp-card__accent'));
+            var head = el('header', 'mp-card__head');
+            var title = el('div', 'mp-card__title');
+            title.appendChild(el('h3', '', it.name));
+            title.appendChild(el('small', '', it.author ? '@' + it.author : ''));
+            var tags = el('div', 'mp-card__tags');
+            tags.appendChild(el('span', 'mp-badge ' + badge[it.ctype], it.type));
+            tags.appendChild(el('span', 'mp-badge ' + (it.state === 'installed' ? 'mp-badge--active' : (it.paid ? 'mp-badge--paid' : 'mp-badge--free')),
+                it.state === 'installed' ? '{Lang::T('Installed')|escape:'javascript'}' : (it.paid ? '{Lang::T('Premium')|escape:'javascript'}' : '{Lang::T('Free')|escape:'javascript'}')));
+            head.appendChild(title); head.appendChild(tags); a.appendChild(head);
+            var body = el('div', 'mp-card__body'); body.appendChild(el('p', '', it.desc || '')); a.appendChild(body);
+            var foot = el('footer', 'mp-card__actions');
+            var browse = el('a', 'mp-act', '{Lang::T('Browse')|escape:'javascript'}');
+            browse.href = it.url; foot.appendChild(browse);
+            if (it.state === 'store' && MP.t.writable) {
+                var f = el('form', 'mp-act-form'); f.method = 'post';
+                f.action = MP.base + routes[it.ctype] + '/install/' + encodeURIComponent(it.id);
+                var h = el('input'); h.type = 'hidden'; h.name = 'csrf_token'; h.value = MP.csrf; f.appendChild(h);
+                var b = el('button', 'mp-act mp-act--primary'); b.type = 'button';
+                var ic = el('i', 'fa fa-download'); b.appendChild(ic); b.appendChild(document.createTextNode(' ' + MP.t.install));
+                b.addEventListener('click', function () { return ask(b, MP.t.confirmInstall); });
+                f.appendChild(b); foot.appendChild(f);
+            }
+            a.appendChild(foot);
+            return a;
+        }
+        function run() {
+            var q = input.value.toLowerCase().trim();
+            if (!q) { panel.hidden = true; main.hidden = false; return; }
+            var words = q.split(/\s+/);
+            var hits = catalog.filter(function (it) {
+                var hay = (it.name + ' ' + it.desc + ' ' + it.author + ' ' + it.type).toLowerCase();
+                return words.every(function (w) { return hay.indexOf(w) !== -1; });
+            }).sort(function (a, b) { return (a.state === b.state ? 0 : a.state === 'installed' ? -1 : 1); });
+            grid.textContent = '';
+            hits.slice(0, 60).forEach(function (it) { grid.appendChild(card(it)); });
+            count.textContent = hits.length + ' {Lang::T('results')|escape:'javascript'}';
+            none.hidden = hits.length > 0;
+            main.hidden = true; panel.hidden = false;
+        }
+        input.addEventListener('input', run);
+        document.getElementById('mp-results-clear').addEventListener('click', function () { input.value = ''; run(); input.focus(); });
+    })();
+</script>
+
+{include file="admin/marketplace/_scripts.tpl"}
 
 {include file="sections/footer.tpl"}

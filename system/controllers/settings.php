@@ -26,27 +26,22 @@ switch ($action) {
         r2(APP_URL . '/docs');
         break;
     case 'devices':
-        $files = scandir($DEVICE_PATH);
         $devices = [];
-        foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if ($ext == 'php') {
-                $dev = pathinfo($file, PATHINFO_FILENAME);
-                require_once $DEVICE_PATH . DIRECTORY_SEPARATOR . $file;
-                $dvc = new $dev;
-                if (method_exists($dvc, 'description')) {
-                    $arr = $dvc->description();
-                    $arr['file'] = $dev;
-                    $devices[] = $arr;
-                } else {
-                    $devices[] = [
-                        'title' => $dev,
-                        'description' => '',
-                        'author' => 'unknown',
-                        'url' => [],
-                        'file' => $dev
-                    ];
-                }
+        foreach (DeviceLoader::all() as $dev => $entry) {
+            require_once $entry['file'];
+            $dvc = new $dev;
+            if (method_exists($dvc, 'description')) {
+                $arr = $dvc->description();
+                $arr['file'] = $dev;
+                $devices[] = $arr;
+            } else {
+                $devices[] = [
+                    'title' => $entry['manifest']['name'] ?? $dev,
+                    'description' => $entry['manifest']['description'] ?? '',
+                    'author' => $entry['manifest']['author'] ?? 'unknown',
+                    'url' => [],
+                    'file' => $dev
+                ];
             }
         }
         $ui->assign('_title', Lang::T('Devices'));

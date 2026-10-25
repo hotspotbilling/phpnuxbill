@@ -2,6 +2,31 @@
 
 # CHANGELOG
 
+## 2026.10.25
+
+- Marketplace overhaul
+  - Hub, plugins, payment gateways, themes and device drivers share one layout, filters, search and sorting (Free / Premium / New / Watchlist, Updates, Issues)
+  - Hub-wide search across installed items and every store, with install buttons on results
+  - Details drawer with README preview (GitHub), version, requirements, health, licence and update info
+  - Watchlist: star store items and revisit them on the hub
+  - Update detection for plugins, gateways, devices and themes; per-item Update and hub "Update all"
+  - Automatic backups (zip, `system/cache/backups/`) before every install, update, convert and uninstall; restore, download and manual backup in Marketplace > Tools
+  - Install safety: PHP syntax lint of the whole package, `requires_php` / `requires_extensions` / `requires_version` / `requires_plugins` checks, zip-slip protection, GitHub-only sources, writable-folder checks
+  - Health: syntax errors and plugin load errors are flagged on cards and on the hub; broken gateways/themes cannot be enabled
+  - Licence keys for premium extensions (`requires_license`, optional `license_check_url`); activation is blocked until a valid key is saved
+  - Activity history written to `tbl_logs` (type `Marketplace`)
+  - Custom store repositories (https `repository.json`) next to the official one; repositories may also publish `themes`
+  - Scheduled sync + Telegram notification: `php system/cron/marketplace_sync.php`
+  - Theme previews (`"preview": "preview.png"` in `theme.json`)
+- Payment gateways and device drivers can use the folder layout like plugins
+  - Gateway: `system/paymentgateway/<slug>/gateway.json` + `<slug>.php` + `ui/`
+  - Device: `system/devices/<Class>/device.json` + `<Class>.php`
+  - Flat files keep working; "Convert to folder" is available per extension
+  - New `GatewayLoader` / `DeviceLoader`; gateway templates load by plain name or `pg:name.tpl`
+  - Checkout, callback and payment-status code now resolve gateways through `GatewayLoader` (only installed gateways can be included)
+- Old `?_route=themes` page now redirects to Marketplace > Themes
+- Fixed: global `min-height:100%` rule collapsed marketplace cards; shadcn theme showed dark marketplace colours in light mode
+
 ## 2026.10.23
 
 - Plugin & Theme System overhaul (Phase 1-4)

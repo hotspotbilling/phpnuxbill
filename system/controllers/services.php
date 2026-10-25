@@ -92,13 +92,7 @@ switch ($action) {
         $ui->assign('valids', ORM::for_table('tbl_plans')->getEnum("validity_unit"));
         $ui->assign('routers', array_column(ORM::for_table('tbl_plans')->distinct()->select("routers")->where('tbl_plans.type', 'Hotspot')->whereNotEqual('routers', '')->findArray(), 'routers'));
         $devices = [];
-        $files = scandir($DEVICE_PATH);
-        foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if ($ext == 'php') {
-                $devices[] = pathinfo($file, PATHINFO_FILENAME);
-            }
-        }
+        $devices = DeviceLoader::names();
         $ui->assign('devices', $devices);
         $query = ORM::for_table('tbl_bandwidth')
             ->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))
@@ -146,13 +140,7 @@ switch ($action) {
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
         $devices = [];
-        $files = scandir($DEVICE_PATH);
-        foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if ($ext == 'php') {
-                $devices[] = pathinfo($file, PATHINFO_FILENAME);
-            }
-        }
+        $devices = DeviceLoader::names();
         $ui->assign('devices', $devices);
         run_hook('view_add_plan'); #HOOK
         $ui->display('admin/hotspot/add.tpl');
@@ -175,13 +163,7 @@ switch ($action) {
             $b = ORM::for_table('tbl_bandwidth')->find_many();
             $ui->assign('b', $b);
             $devices = [];
-            $files = scandir($DEVICE_PATH);
-            foreach ($files as $file) {
-                $ext = pathinfo($file, PATHINFO_EXTENSION);
-                if ($ext == 'php') {
-                    $devices[] = pathinfo($file, PATHINFO_FILENAME);
-                }
-            }
+            $devices = DeviceLoader::names();
             $ui->assign('devices', $devices);
             //select expired plan
             if ($d['is_radius']) {
@@ -471,13 +453,7 @@ switch ($action) {
         $ui->assign('valids', ORM::for_table('tbl_plans')->getEnum("validity_unit"));
         $ui->assign('routers', array_column(ORM::for_table('tbl_plans')->distinct()->select("routers")->whereNotEqual('routers', '')->findArray(), 'routers'));
         $devices = [];
-        $files = scandir($DEVICE_PATH);
-        foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if ($ext == 'php') {
-                $devices[] = pathinfo($file, PATHINFO_FILENAME);
-            }
-        }
+        $devices = DeviceLoader::names();
         $ui->assign('devices', $devices);
         $query = ORM::for_table('tbl_bandwidth')
             ->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))
@@ -527,13 +503,7 @@ switch ($action) {
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
         $devices = [];
-        $files = scandir($DEVICE_PATH);
-        foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if ($ext == 'php') {
-                $devices[] = pathinfo($file, PATHINFO_FILENAME);
-            }
-        }
+        $devices = DeviceLoader::names();
         $ui->assign('devices', $devices);
         run_hook('view_add_ppoe'); #HOOK
         $ui->display('admin/pppoe/add.tpl');
@@ -564,13 +534,7 @@ switch ($action) {
             }
             $ui->assign('r', $r);
             $devices = [];
-            $files = scandir($DEVICE_PATH);
-            foreach ($files as $file) {
-                $ext = pathinfo($file, PATHINFO_EXTENSION);
-                if ($ext == 'php') {
-                    $devices[] = pathinfo($file, PATHINFO_FILENAME);
-                }
-            }
+            $devices = DeviceLoader::names();
             $ui->assign('devices', $devices);
             //select expired plan
             if ($d['is_radius']) {
@@ -968,13 +932,7 @@ switch ($action) {
         $ui->assign('valids', ORM::for_table('tbl_plans')->getEnum("validity_unit"));
         $ui->assign('routers', array_column(ORM::for_table('tbl_plans')->distinct()->select("routers")->whereNotEqual('routers', '')->findArray(), 'routers'));
         $devices = [];
-        $files = scandir($DEVICE_PATH);
-        foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if ($ext == 'php') {
-                $devices[] = pathinfo($file, PATHINFO_FILENAME);
-            }
-        }
+        $devices = DeviceLoader::names();
         $ui->assign('devices', $devices);
         $query = ORM::for_table('tbl_bandwidth')
             ->left_outer_join('tbl_plans', array('tbl_bandwidth.id', '=', 'tbl_plans.id_bw'))
@@ -1024,13 +982,7 @@ switch ($action) {
         $r = ORM::for_table('tbl_routers')->find_many();
         $ui->assign('r', $r);
         $devices = [];
-        $files = scandir($DEVICE_PATH);
-        foreach ($files as $file) {
-            $ext = pathinfo($file, PATHINFO_EXTENSION);
-            if ($ext == 'php') {
-                $devices[] = pathinfo($file, PATHINFO_FILENAME);
-            }
-        }
+        $devices = DeviceLoader::names();
         $ui->assign('devices', $devices);
         run_hook('view_add_vpn'); #HOOK
         $ui->display('admin/vpn/add.tpl');
@@ -1061,13 +1013,7 @@ switch ($action) {
             }
             $ui->assign('r', $r);
             $devices = [];
-            $files = scandir($DEVICE_PATH);
-            foreach ($files as $file) {
-                $ext = pathinfo($file, PATHINFO_EXTENSION);
-                if ($ext == 'php') {
-                    $devices[] = pathinfo($file, PATHINFO_FILENAME);
-                }
-            }
+            $devices = DeviceLoader::names();
             $ui->assign('devices', $devices);
             //select expired plan
             if ($d['is_radius']) {

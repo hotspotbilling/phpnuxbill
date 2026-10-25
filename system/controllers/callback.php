@@ -9,8 +9,8 @@
 $action = $routes['1'];
 
 
-if (file_exists($PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php')) {
-    include $PAYMENTGATEWAY_PATH . DIRECTORY_SEPARATOR . $action . '.php';
+if (GatewayLoader::file($action) !== null) {
+    include GatewayLoader::file($action);
     if (function_exists($action . '_payment_notification')) {
         run_hook('callback_payment_notification'); #HOOK
         call_user_func($action . '_payment_notification');

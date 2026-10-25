@@ -17,7 +17,7 @@
             <input type="url" name="gh_url" placeholder="https://github.com/username/repository">
         </div>
         {/if}
-        <button type="button" class="mp-submit"
+        <button type="button" class="mp-submit" {if isset($up_disabled) && $up_disabled}disabled{/if}
             onclick="return ask(this, '{Lang::T('Warning, installing unknown source can damage your server, continue?')}')">
             <i class="fa fa-download"></i> {Lang::T('Install')}
         </button>
