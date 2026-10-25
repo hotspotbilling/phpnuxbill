@@ -177,6 +177,29 @@ function _menu_icon($icon, $placeholder = false)
     return '<i class="icon ' . htmlspecialchars($icon, ENT_QUOTES) . '"></i>';
 }
 
+/**
+ * Assign the sidebar slots ($_MENU_AFTER_DASHBOARD ...) for one audience, 'admin' or 'customer'. Slots the other
+ * audience fills are cleared, so an admin plugin menu can never show in the customer portal (or the reverse) just
+ * because both sessions are open in the same browser.
+ */
+function _menu_publish($audience)
+{
+    global $ui;
+    $all = isset($GLOBALS['_menus_by_audience']) ? $GLOBALS['_menus_by_audience'] : [];
+    $slots = [];
+    foreach ($all as $byPosition) {
+        foreach ($byPosition as $pos => $html) {
+            $slots[$pos] = '';
+        }
+    }
+    foreach (isset($all[$audience]) ? $all[$audience] : [] as $pos => $html) {
+        $slots[$pos] = $html;
+    }
+    foreach ($slots as $pos => $html) {
+        $ui->assign('_MENU_' . $pos, $html);
+    }
+}
+
 function _msglog($type, $msg)
 {
     $_SESSION['ntype'] = $type;
@@ -240,16 +263,18 @@ try {
                 stripos($routes[1], $menu['function']) === 0
             );
             $pos = $menu['position'];
+            $aud = $isAdmin ? 'admin' : 'customer'; // admin and customer pages share slot names such as AFTER_DASHBOARD
             if (!empty($menu['parent'])) {
-                $children[$pos][$menu['parent']][] = $menu;
+                $children[$aud][$pos][$menu['parent']][] = $menu;
             } else {
-                $topLevel[$pos][] = $menu;
+                $topLevel[$aud][$pos][] = $menu;
             }
         }
-        foreach ($topLevel as $pos => $items) {
+        foreach ($topLevel as $aud => $byPosition) {
+        foreach ($byPosition as $pos => $items) {
             $html = '';
             foreach ($items as $item) {
-                $kids = isset($children[$pos][$item['function']]) ? $children[$pos][$item['function']] : array();
+                $kids = isset($children[$aud][$pos][$item['function']]) ? $children[$aud][$pos][$item['function']] : array();
                 $isActive = !empty($item['_active']);
                 foreach ($kids as $kid) {
                     if (!empty($kid['_active'])) {
@@ -286,7 +311,7 @@ try {
                     }
                     $html .= '<a href="' . $menuUrl . '" title="' . htmlspecialchars(strip_tags($item['name']), ENT_QUOTES) . '">';
                 }
-                $html .= _menu_icon($item['icon'] ?? '', true);
+                $html .= _menu_icon($item['icon'] ?? '', true) . ' '; // the space matches the built-in markup: the customer sidebar is inline, not flex
                 $html .= '<span class="text">' . $item['name'] . '</span>';
                 if (!empty($item['label'])) {
                     $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $item['color'] . '">' . $item['label'] . '</small></span>';
@@ -308,7 +333,7 @@ try {
                             $kidMenuUrl = is_file($kidCtrlFile) ? getUrl($kid['function']) : getUrl('plugin/' . $kid['function']);
                         }
                         $html .= '<li' . $kidActive . '><a href="' . $kidMenuUrl . '" title="' . htmlspecialchars(strip_tags($kid['name']), ENT_QUOTES) . '">';
-                        $html .= _menu_icon($kid['icon'] ?? '');
+                        $html .= _menu_icon($kid['icon'] ?? '') . ' ';
                         if (!empty($kid['label'])) {
                             $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $kid['color'] . '">' . $kid['label'] . '</small></span>';
                         }
@@ -318,11 +343,13 @@ try {
                 }
                 $html .= '</li>';
             }
-            $menus[$pos] = $html;
+            $menus[$aud][$pos] = $html;
         }
-        foreach ($menus as $k => $v) {
-            $ui->assign('_MENU_' . $k, $v);
         }
+        // Every page gets only its own audience's menus: the controller's _admin() / _auth() call publishes them
+        // (see _menu_publish). Pages that call neither get the admin menus when an admin is signed in, else the customer ones.
+        $GLOBALS['_menus_by_audience'] = $menus;
+        _menu_publish(Admin::getID() ? 'admin' : 'customer');
         unset($menus, $menu_registered, $topLevel, $children);
         include($sys_render);
     } else {

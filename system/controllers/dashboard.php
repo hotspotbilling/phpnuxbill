@@ -28,11 +28,16 @@ if (isset($_GET['refresh'])) {
     if (class_exists('RedisCache')) {
         RedisCache::flushPattern('dash:*');
     }
-    $files = scandir($CACHE_PATH);
-    foreach ($files as $file) {
-        $ext = pathinfo($file, PATHINFO_EXTENSION);
-        if (is_file($CACHE_PATH . DIRECTORY_SEPARATOR . $file) && $ext == 'temp') {
-            unlink($CACHE_PATH . DIRECTORY_SEPARATOR . $file);
+    // *.temp in the cache folder (older versions wrote the dashboard cache there) and in cache/dashboard/
+    foreach ([$CACHE_PATH, $CACHE_PATH . DIRECTORY_SEPARATOR . 'dashboard'] as $cacheDir) {
+        if (!is_dir($cacheDir)) {
+            continue;
+        }
+        foreach (scandir($cacheDir) as $file) {
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            if (is_file($cacheDir . DIRECTORY_SEPARATOR . $file) && $ext == 'temp') {
+                unlink($cacheDir . DIRECTORY_SEPARATOR . $file);
+            }
         }
     }
     r2(getUrl('dashboard'), 's', 'Data Refreshed');

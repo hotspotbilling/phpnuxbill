@@ -56,6 +56,7 @@ docs/**
 !docs/*.html
 !docs/*.md
 .htaccess
+!system/cache/.htaccess
 .idea
 !docs/insomnia.rest.json
 !system/uploads/paid.png

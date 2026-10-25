@@ -4,7 +4,11 @@
 
 ## 2026.10.25
 
-- Dashboard data (dynamic metrics and classic widgets) is cached in `system/cache/dash_*.temp` for the dashboard TTL when Redis is not enabled or not reachable; the Refresh button clears it
+- Fixed: plugin menus registered with `admin = true` (e.g. Skeleton, My Plugin) showed in the customer portal sidebar whenever an admin session was open in the same browser; admin and customer menus are now kept apart (`_menu_publish()`, called by `_admin()` / `_auth()`)
+- Skeleton sample plugin now has both an admin and a customer menu with submenus (SVG icons); the plugin starter used slot names the templates never print (`DASHBOARD`, `ACCOUNTS`) and a submenu in a different slot than its parent, so its menus never showed - fixed, and the slot lists in the docs now match the templates
+- Customer portal sidebar: plugin menus with submenus are styled (stray second chevron removed, font icons aligned with the built-in 24px icons, submenu indented under the parent label, long names cut with an ellipsis)
+- Default theme, collapsed sidebar: the icon rail scrolls when it is taller than the window (last items such as Community were cut off); each submenu flyout is one card with its title inside it, and long menus (Settings) stay inside the screen and scroll
+- Dashboard data (dynamic metrics and classic widgets) is cached in `system/cache/dashboard/dash_*.temp` (folder is blocked over HTTP) for the dashboard TTL when Redis is not enabled or not reachable; the Refresh button clears it
 - Security: FreeRADIUS REST endpoint (`radius.php`)
   - `Password::chap_verify()` returned true for a wrong password and false for the right one; it now compares correctly (constant time) and rejects malformed CHAP input
   - Customers are always checked against their own (main or PPPoE) password; the "username = password" / empty-password voucher fallback no longer lets anyone in as an existing customer

@@ -219,6 +219,9 @@ function _req($param, $defvalue = '')
 function _auth($login = true)
 {
     if (User::getID()) {
+        if ($login && function_exists('_menu_publish')) {
+            _menu_publish('customer'); // a customer page: only customer menu entries
+        }
         return true;
     } else {
         if ($login) {
@@ -232,6 +235,9 @@ function _auth($login = true)
 function _admin($login = true)
 {
     if (Admin::getID()) {
+        if ($login && function_exists('_menu_publish')) {
+            _menu_publish('admin'); // an admin page: only admin menu entries
+        }
         return true;
     } else {
         if ($login) {

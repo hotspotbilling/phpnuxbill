@@ -3920,5 +3920,11 @@
     "Live": "Live",
     "in_production_": "in production.",
     "REST_Secret": "REST Secret",
-    "When_set__radius_php_only_answers_FreeRADIUS_requests_that_send_it_as_the_X_Radius_Token_header_or_as__token__in_the_REST_uri": "When set, radius.php only answers FreeRADIUS requests that send it as the X-Radius-Token header or as ?token= in the REST uri"
+    "When_set__radius_php_only_answers_FreeRADIUS_requests_that_send_it_as_the_X_Radius_Token_header_or_as__token__in_the_REST_uri": "When set, radius.php only answers FreeRADIUS requests that send it as the X-Radius-Token header or as ?token= in the REST uri",
+    "Hotspot_Voucher": "Hotspot Voucher",
+    "Click_Here_to_Print": "Click Here to Print",
+    "Print_side_by_side__it_will_easy_to_cut": "Print side by side, it will easy to cut",
+    "Skeleton_Details": "Skeleton Details",
+    "A_customer_submenu_entry__it_has_the_same_slot__AFTER_DASHBOARD__as_its_parent_": "A customer submenu entry: it has the same slot (AFTER_DASHBOARD) as its parent.",
+    "This_customer_page_and_its_submenu_are_declared_in_plugin_json_with__admin___false_": "This customer page and its submenu are declared in plugin.json with \"admin\": false."
 }

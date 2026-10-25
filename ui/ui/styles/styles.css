@@ -5115,6 +5115,91 @@ body.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview
 }
 
 
+/* ==========================================================================
+   Collapsed sidebar (default theme, desktop). The icon rail scrolls when it is taller than the window (so the
+   last items, e.g. Community, stay reachable); labels and submenus therefore cannot be absolutely positioned
+   inside it, because the rail would clip them. They are position:fixed and footer.tpl feeds them the row's
+   position (--li-top) and the clamped flyout position. Each flyout is one card with its title row inside it.
+   ========================================================================== */
+.sidebar-menu .treeview-menu > li.treeview-header-title {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  /* a transformed ancestor would turn position:fixed into "relative to the sidebar" and clip it again */
+  body:not(.shadcn-body).sidebar-mini.sidebar-collapse .main-sidebar {
+    transform: none !important;
+    -webkit-transform: none !important;
+  }
+
+  body:not(.shadcn-body).sidebar-collapse .main-sidebar .sidebar {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none;
+  }
+
+  body:not(.shadcn-body).sidebar-collapse .main-sidebar .sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* plain items: label pill beside the icon */
+  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li:not(.treeview):hover > a > span:not(.pull-right-container) {
+    position: fixed !important;
+    left: 56px !important;
+    top: calc(var(--li-top, 0px) + 19px) !important;
+  }
+
+  /* submenu items: the label is replaced by the title row inside the flyout card */
+  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview > a > span:not(.pull-right-container),
+  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right-container) {
+    display: none !important;
+  }
+
+  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu {
+    position: fixed !important;
+    top: var(--li-top, 0px) !important; /* footer.tpl moves it up with an inline !important when it would run off the screen */
+    left: 50px !important;
+    width: 220px !important;
+    min-width: 220px !important;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 0 6px 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    scrollbar-width: thin;
+  }
+
+  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li.treeview-header-title {
+    display: block !important;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0 0 5px 0 !important;
+    padding: 11px 16px 9px !important;
+    list-style: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #f8fafc;
+    background-color: #1e293b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px 8px 0 0;
+    box-sizing: border-box !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li > a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+
 /* ============================================================
    Marketplace — Plugin page (unique design + dark mode)
    ============================================================ */

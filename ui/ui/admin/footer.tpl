@@ -310,6 +310,27 @@
     var listAttApi;
     var posAttApi = 0;
     $(document).ready(function () {
+        // Collapsed sidebar: every submenu flyout carries its own title row, and labels/flyouts are placed
+        // (position:fixed, see styles.css) from the hovered row so the scrollable icon rail never clips them
+        $('.sidebar-menu > li.treeview').each(function () {
+            var $li = $(this);
+            var title = $.trim($li.find('> a > span').not('.pull-right-container').first().text());
+            var $menu = $li.children('.treeview-menu');
+            if (title && $menu.length && !$menu.children('.treeview-header-title').length) {
+                $menu.prepend($('<li class="treeview-header-title"></li>').append($('<span></span>').text(title)));
+            }
+        });
+        $('.sidebar-menu > li').on('mouseenter', function () {
+            if (!$('body').hasClass('sidebar-collapse') || $(window).width() <= 767) return;
+            var gap = 12, vh = window.innerHeight, liTop = this.getBoundingClientRect().top;
+            this.style.setProperty('--li-top', liTop + 'px');
+            var $menu = $(this).children('.treeview-menu');
+            if (!$menu.length) return;
+            $menu[0].style.setProperty('top', liTop + 'px', 'important');
+            $menu.css('maxHeight', (vh - gap * 2) + 'px');
+            var h = Math.min($menu.outerHeight(), vh - gap * 2);
+            $menu[0].style.setProperty('top', Math.max(Math.min(liTop, vh - gap - h), gap) + 'px', 'important');
+        });
         $('.select2').select2({ theme: "bootstrap" });
         $('.select2tag').select2({ theme: "bootstrap", tags: true });
         var listAtts = document.querySelectorAll(`button[type="submit"]`);

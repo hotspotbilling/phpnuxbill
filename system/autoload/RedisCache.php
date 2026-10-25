@@ -88,7 +88,7 @@ class RedisCache
     }
 
     /**
-     * Dashboard data is cached in files (system/cache/dash_*.temp, same TTL) when Redis cannot do it: Redis not
+     * Dashboard data is cached in files (system/cache/dashboard/dash_*.temp, same TTL) when Redis cannot do it: Redis not
      * enabled, or enabled but unreachable. Not used when an admin turned Redis on and dashboard caching off.
      */
     public static function isDashboardFileCacheEnabled(): bool
@@ -103,8 +103,8 @@ class RedisCache
     /** File-based cache-aside, same contract as remember(). The "?refresh=1" button deletes the *.temp files. */
     public static function rememberFile(string $key, int $ttl, callable $callback)
     {
-        global $CACHE_PATH;
-        $file = rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'dash_' . md5($key) . '.temp';
+        // system/cache/dashboard/ holds revenue and customer figures: it gets a deny-all .htaccess and an empty index.html
+        $file = Extensions::privateDir('dashboard') . DIRECTORY_SEPARATOR . 'dash_' . md5($key) . '.temp';
         if (is_file($file) && (time() - (int) filemtime($file)) < $ttl) {
             $raw = @file_get_contents($file);
             if ($raw !== false && $raw !== '') {

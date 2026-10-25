@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/phpnuxbill.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2026.10.22.13" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2026.10.25.3" />
     <script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/clipboard.min.js"></script>
 

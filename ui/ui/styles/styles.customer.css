@@ -1446,3 +1446,69 @@ body.fixed .main-sidebar,
 }
 
 
+
+/* ==========================================================================
+   Plugin menu entries with submenus (customer sidebar). The customer portal does not load styles.css,
+   so what the admin sidebar gets there is repeated here.
+   ========================================================================== */
+/* font-class icons ("fa fa-cube") line up with the built-in 24px svg icons */
+.sidebar-menu i.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px !important;
+  min-width: 24px;
+  height: 24px;
+  margin-right: 5px;
+  font-size: 19px;
+  line-height: 24px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.sidebar-menu .icon {
+  flex-shrink: 0;
+}
+
+/* entries carry two chevrons (font + svg for the shadcn admin theme): the portal uses the font one */
+.sidebar-menu .pull-right-container > svg.treeview-chevron {
+  display: none;
+}
+
+.sidebar-menu > li > a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* long plugin names are cut with "..." (the full name is in the title tooltip) */
+}
+
+/* submenu: one calm panel, labels indented under the parent's label, smaller than the top-level items */
+.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu {
+  padding: 4px 0 8px 0;
+  border-left: 0;
+  background-color: rgba(0, 0, 0, 0.22);
+}
+
+.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a {
+  display: block;
+  padding: 8px 14px 8px 54px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a .icon {
+  width: 18px;
+  height: 18px;
+  margin: 0 8px 0 -26px; /* a submenu icon sits in the indent, left of the label */
+  font-size: 15px;
+}
+
+.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li.active > a {
+  font-weight: 600;
+}
