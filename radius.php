@@ -10,7 +10,21 @@
  *    - is it allow to login
  * Accounting
  *    - log
- **/
+ *
+ * MYSQL TUNING
+ *
+ * [mysqld]
+ * # Increase max connections (adjust according to server RAM).
+ * # Rough estimate: ~10MB per connection for buffer
+ * max_connections = 500
+
+ * # Close idle connections sooner (default 28800 = 8 hours!)
+ * wait_timeout = 60
+ * interactive_timeout = 60
+
+ * # Ensure persistent connections do not disconnect prematurely
+ * max_allowed_packet = 64M
+ */
 
 header("Content-Type: application/json");
 
@@ -42,7 +56,7 @@ try {
             $CHAPchallenge = _req('CHAPchallenge');
             $isCHAP = false;
             if (!empty($CHAPassword)) {
-                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("(BINARY username = ? OR BINARY pppoe_username = ?) AND status = 'Active'", array($username, $username))->find_one();
                 if ($c) {
                     if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                         $password = $c['password'];
@@ -67,33 +81,6 @@ try {
                             }
                         }
                     }
-                } else {
-                    $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
-                    if ($c) {
-                        if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
-                            $password = $c['password'];
-                            $isVoucher = false;
-                            $isCHAP = true;
-                        } else if (!empty($c['pppoe_password']) && Password::chap_verify($c['pppoe_password'], $CHAPassword, $CHAPchallenge)) {
-                            $password = $c['pppoe_password'];
-                            $isVoucher = false;
-                            $isCHAP = true;
-                        } else {
-                            // check if voucher
-                            if (Password::chap_verify($username, $CHAPassword, $CHAPchallenge)) {
-                                $isVoucher = true;
-                                $password = $username;
-                            } else {
-                                // no password is voucher
-                                if (Password::chap_verify('', $CHAPassword, $CHAPchallenge)) {
-                                    $isVoucher = true;
-                                    $password = $username;
-                                } else {
-                                    show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
-                                }
-                            }
-                        }
-                    }
                 }
             } else {
                 if (!empty($username) && empty($password)) {
@@ -109,9 +96,9 @@ try {
             }
             if ($username == $password) {
                 $username = Text::alphanumeric($username, "-_.,");
-                $d = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$username'")->find_one();
+                $d = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = ?", array($username))->find_one();
             } else {
-                $d = ORM::for_table('tbl_customers')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                $d = ORM::for_table('tbl_customers')->whereRaw("BINARY username = ? AND status = 'Active'", array($username))->find_one();
                 if ($d['password'] != $password) {
                     if ($d['pppoe_password'] != $password) {
                         unset($d);
@@ -136,57 +123,31 @@ try {
             $CHAPchallenge = _req('CHAPchallenge');
             $isCHAP = false;
             if (!empty($CHAPassword)) {
-                $c = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                $inputUsername = $username;
+                $c = ORM::for_table('tbl_customers')->select('password')->select('username')->select('pppoe_password')->whereRaw("(BINARY username = ? OR BINARY pppoe_username = ?) AND status = 'Active'", array($username, $username))->find_one();
                 if ($c) {
                     if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
                         $password = $c['password'];
+                        $username = $c['username'];
                         $isVoucher = false;
                         $isCHAP = true;
                     } else if (!empty($c['pppoe_password']) && Password::chap_verify($c['pppoe_password'], $CHAPassword, $CHAPchallenge)) {
                         $password = $c['pppoe_password'];
+                        $username = $c['username'];
                         $isVoucher = false;
                         $isCHAP = true;
                     } else {
                         // check if voucher
-                        if (Password::chap_verify($username, $CHAPassword, $CHAPchallenge)) {
+                        if (Password::chap_verify($inputUsername, $CHAPassword, $CHAPchallenge)) {
                             $isVoucher = true;
-                            $password = $username;
+                            $password = $inputUsername;
                         } else {
                             // no password is voucher
                             if (Password::chap_verify('', $CHAPassword, $CHAPchallenge)) {
                                 $isVoucher = true;
-                                $password = $username;
+                                $password = $inputUsername;
                             } else {
                                 show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
-                            }
-                        }
-                    }
-                } else {
-                    $c = ORM::for_table('tbl_customers')->select('password')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
-                    if ($c) {
-                        if (Password::chap_verify($c['password'], $CHAPassword, $CHAPchallenge)) {
-                            $password = $c['password'];
-                            $username = $c['username'];
-                            $isVoucher = false;
-                            $isCHAP = true;
-                        } else if (!empty($c['pppoe_password']) && Password::chap_verify($c['pppoe_password'], $CHAPassword, $CHAPchallenge)) {
-                            $password = $c['pppoe_password'];
-                            $username = $c['username'];
-                            $isVoucher = false;
-                            $isCHAP = true;
-                        } else {
-                            // check if voucher
-                            if (Password::chap_verify($username, $CHAPassword, $CHAPchallenge)) {
-                                $isVoucher = true;
-                                $password = $username;
-                            } else {
-                                // no password is voucher
-                                if (Password::chap_verify('', $CHAPassword, $CHAPchallenge)) {
-                                    $isVoucher = true;
-                                    $password = $username;
-                                } else {
-                                    show_radius_result(['Reply-Message' => 'Username or Password is wrong'], 401);
-                                }
                             }
                         }
                     }
@@ -203,18 +164,18 @@ try {
                     ], 401);
                 }
             }
-            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = ?", array($username))->find_one();
             if (!$tur) {
                 // if check if pppoe_username
-                $c = ORM::for_table('tbl_customers')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
+                $c = ORM::for_table('tbl_customers')->select('username')->select('pppoe_password')->whereRaw("BINARY pppoe_username = ?", array($username))->find_one();
                 if ($c) {
                     $username = $c['username'];
-                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = ?", array($username))->find_one();
                 }
             }
             if ($tur) {
                 if (!$isVoucher && !$isCHAP) {
-                    $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = '$username' AND status = 'Active'")->find_one();
+                    $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY username = ? AND status = 'Active'", array($username))->find_one();
                     if ($d) {
                         if ($d['password'] != $password) {
                             if ($d['pppoe_password'] != $password) {
@@ -222,7 +183,7 @@ try {
                             }
                         }
                     } else {
-                        $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY pppoe_username = '$username' AND status = 'Active'")->find_one();
+                        $d = ORM::for_table('tbl_customers')->select('password')->select('pppoe_password')->whereRaw("BINARY pppoe_username = ? AND status = 'Active'", array($username))->find_one();
                         if ($d) {
                             if ($d['password'] != $password) {
                                 if ($d['pppoe_password'] != $password) {
@@ -236,14 +197,14 @@ try {
             } else {
                 if ($isVoucher) {
                     $username = Text::alphanumeric($username, "-_.,");
-                    $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$username' AND routers = 'radius'")->find_one();
+                    $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = ? AND routers = 'radius'", array($username))->find_one();
                     if ($v) {
                         if ($v['status'] == 0) {
                             if (Package::rechargeUser(0, $v['routers'], $v['id_plan'], "Voucher", $username)) {
                                 $v->status = "1";
                                 $v->used_date = date('Y-m-d H:i:s');
                                 $v->save();
-                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+                                $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = ?", array($username))->find_one();
                                 if ($tur) {
                                     process_radiust_rest($tur, $code);
                                 } else {
@@ -274,7 +235,7 @@ try {
             }
             header("HTTP/1.1 200 ok");
             $d = ORM::for_table('rad_acct')
-                ->whereRaw("BINARY username = '$username' AND macaddr = '" . _post('macAddr') . "' AND nasid = '" . _post('nasid') . "'")
+                ->whereRaw("BINARY username = ? AND macaddr = ? AND nasid = ?", array($username, _post('macAddr'), _post('nasid')))
                 ->findOne();
             if (!$d) {
                 $d = ORM::for_table('rad_acct')->create();
@@ -303,13 +264,13 @@ try {
             $d->macaddr = _post('macAddr');
             $d->dateAdded = date('Y-m-d H:i:s');
             // pastikan data akunting yang disimpan memang customer aktif phpnuxbill
-            $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username' AND `status` = 'on' AND `routers` = 'radius'")->find_one();
+             $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = ? AND `status` = 'on' AND (`routers` = 'radius' OR `routers` = 'Radius')", array($username))->find_one();
             if (!$tur) {
                 // check if pppoe_username
-                $c = ORM::for_table('tbl_customers')->select('username')->whereRaw("BINARY pppoe_username = '$username'")->find_one();
+                $c = ORM::for_table('tbl_customers')->select('username')->whereRaw("BINARY pppoe_username = ?", array($username))->find_one();
                 if ($c) {
                     $username = $c['username'];
-                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = '$username'")->find_one();
+                    $tur = ORM::for_table('tbl_user_recharges')->whereRaw("BINARY username = ?", array($username))->find_one();
                 }
             }
             if ($tur) {
@@ -321,7 +282,7 @@ try {
                         $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
                         if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {
                             $attrs['reply:Mikrotik-Total-Limit'] = 0;
-                            show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
+                            show_radius_result(["control:Auth-Type" => "Reject", 'Reply-Message' => 'You have exceeded your data limit.'], 401);
                         }
                     }
                 }
@@ -358,14 +319,21 @@ function process_radiust_rest($tur, $code)
     $bw = ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']);
     // Count User Onlines
     $USRon = ORM::for_table('rad_acct')
-        ->whereRaw("BINARY username = '" . $tur['username'] . "' AND acctStatusType = 'Start'")
+        ->whereRaw("BINARY username = ? AND acctStatusType = 'Start'", array($tur['username']))
         ->find_array();
+
     // get all the IP
     $ips = array_column($USRon, 'framedipaddress');
-    // check if user reach shared_users limit but IP is not in the list active
-    if (count($USRon) >= $plan['shared_users'] && $plan['type'] == 'Hotspot' && !in_array(_post('framedIPAddress'), $ips)) {
-        show_radius_result(["control:Auth-Type" => "Accept", 'Reply-Message' => 'You are already logged in - access denied (' . $USRon . ')'], 401);
+
+    // Check if user reached shared_users limit, Hotspot only, and current IP is not already active
+    if ($plan['type'] == 'Hotspot' && count($USRon) >= (int)$plan['shared_users'] && !in_array(_post('framedIPAddress'), $ips, true)) {
+        if ((int)$plan['shared_users'] == 1) {
+            show_radius_result(["control:Auth-Type" => "Reject", 'Reply-Message' => 'You are already logged in from another location, Please wait for 5 minutes.'], 401);
+        } else {
+            show_radius_result(["control:Auth-Type" => "Reject", 'Reply-Message' => 'You have reached your shared device limit, Please disconnect other devices and try again.'], 401);
+        }
     }
+
     if ($bw['rate_down_unit'] == 'Kbps') {
         $unitdown = 'K';
     } else {
@@ -387,6 +355,17 @@ function process_radiust_rest($tur, $code)
 
     $attrs = [];
     $timeexp = strtotime($tur['expiration'] . ' ' . $tur['time']);
+  // --- Kode pengecekan masa aktif ---
+    if ($timeexp < time()) {
+        show_radius_result([
+            "control:Auth-Type" => "Reject",
+            "reply:Reply-Message" => "Sorry, your account's active period has expired (" . $tur['expiration'] . ")"
+        ], 401);
+        exit;
+    }
+    // --- AKHIR KODE TAMBAHAN ---
+
+
     $attrs['reply:Reply-Message'] = 'success';
     $attrs['Simultaneous-Use'] = $plan['shared_users'];
     $attrs['reply:Mikrotik-Wireless-Comment'] = $plan['name_plan'] . ' | ' . $tur['expiration'] . ' ' . $tur['time'];
@@ -405,7 +384,7 @@ function process_radiust_rest($tur, $code)
 
     if ($plan['typebp'] == "Limited") {
         if ($plan['limit_type'] == "Data_Limit" || $plan['limit_type'] == "Both_Limit") {
-            $raddact = ORM::for_table('rad_acct')->whereRaw("BINARY username = '$tur[username]'")->where('acctstatustype', 'Start')->find_one();
+            $raddact = ORM::for_table('rad_acct')->whereRaw("BINARY username = ?", array($tur['username']))->where('acctstatustype', 'Start')->find_one();
             $totalUsage = intval($raddact['acctOutputOctets']) + intval($raddact['acctInputOctets']);
             $attrs['reply:Mikrotik-Total-Limit'] = Text::convertDataUnit($plan['data_limit'], $plan['data_unit']) - $totalUsage;
             if ($attrs['reply:Mikrotik-Total-Limit'] < 0) {

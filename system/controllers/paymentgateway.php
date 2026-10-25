@@ -25,7 +25,8 @@ switch ($action) {
         $query->selects('id', 'username', 'gateway', 'gateway_trx_id', 'plan_id', 'plan_name', 'routers_id', 'routers', 'price', 'pg_url_payment', 'payment_method', 'payment_channel', 'expired_date', 'created_date', 'paid_date', 'trx_invoice', 'status');
         $query->where('gateway', $pg);
         if (!empty($q)) {
-            $query->whereRaw("(gateway_trx_id LIKE '%$q%' OR username LIKE '%$q%' OR routers LIKE '%$q%' OR plan_name LIKE '%$q%')");
+            $like = '%' . $q . '%';
+            $query->whereRaw("(gateway_trx_id LIKE ? OR username LIKE ? OR routers LIKE ? OR plan_name LIKE ?)", [$like, $like, $like, $like]);
             $append_url = 'q=' . urlencode($q);
         }
         $pgs = Paginator::findMany($query, ["search" => $search], 50, $append_url);

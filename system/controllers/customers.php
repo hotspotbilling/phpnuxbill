@@ -847,9 +847,11 @@ switch ($action) {
         $append_url = "&order=" . urlencode($order) . "&filter=" . urlencode($filter) . "&orderby=" . urlencode($orderby);
 
         if ($search != '') {
+            $like = '%' . $search . '%';
             $query = ORM::for_table('tbl_customers')
-                ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' " .
-                    "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' AND status='$filter'");
+                ->whereRaw("username LIKE ? OR fullname LIKE ? OR address LIKE ? " .
+                    "OR phonenumber LIKE ? OR email LIKE ? AND status = ?",
+                    [$like, $like, $like, $like, $like, $filter]);
         } else {
             $query = ORM::for_table('tbl_customers');
             $query->where("status", $filter);

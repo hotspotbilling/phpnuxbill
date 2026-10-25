@@ -1030,63 +1030,123 @@ switch ($action) {
         echo json_encode($array);
         break;
     case 'dbrestore':
-        if ($_app_stage == 'Demo') {
-            r2(getUrl('settings/dbstatus'), 'e', 'You cannot perform this action in Demo mode');
-        }
-        if (!in_array($admin['user_type'], ['SuperAdmin'])) {
-            _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
-        }
-        if (file_exists($_FILES['json']['tmp_name'])) {
-            $suc = 0;
-            $fal = 0;
-            $json = json_decode(file_get_contents($_FILES['json']['tmp_name']), true);
-            try {
-                ORM::raw_execute("SET FOREIGN_KEY_CHECKS=0;");
-            } catch (Throwable $e) {
-            } catch (Exception $e) {
-            }
-            try {
-                ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=0;");
-            } catch (Throwable $e) {
-            } catch (Exception $e) {
-            }
-            foreach ($json as $table => $records) {
-                ORM::raw_execute("TRUNCATE $table;");
-                foreach ($records as $rec) {
-                    try {
-                        $t = ORM::for_table($table)->create();
-                        foreach ($rec as $k => $v) {
-                            $t->set($k, $v);
-                        }
-                        if ($t->save()) {
-                            $suc++;
-                        } else {
-                            $fal++;
-                        }
-                    } catch (Throwable $e) {
-                        $fal++;
-                    } catch (Exception $e) {
-                        $fal++;
-                    }
-                }
-            }
-            try {
-                ORM::raw_execute("SET FOREIGN_KEY_CHECKS=1;");
-            } catch (Throwable $e) {
-            } catch (Exception $e) {
-            }
-            try {
-                ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=1;");
-            } catch (Throwable $e) {
-            } catch (Exception $e) {
-            }
-            if (file_exists($_FILES['json']['tmp_name']))
-                unlink($_FILES['json']['tmp_name']);
-            r2(getUrl('settings/dbstatus'), 's', "Restored $suc success $fal failed");
-        } else {
-            r2(getUrl('settings/dbstatus'), 'e', 'Upload failed');
-        }
-        break;
+		if ($_app_stage == 'Demo') {
+			r2(getUrl('settings/dbstatus'), 'e', 'You cannot perform this action in Demo mode');
+		}
+		if (!in_array($admin['user_type'], ['SuperAdmin'])) {
+			_alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
+		}
+		if (file_exists($_FILES['json']['tmp_name'])) {
+			set_time_limit(0);
+			ini_set('memory_limit', '-1');
+			ob_implicit_flush(true);
+			ob_end_flush();
+
+			$suc = 0;
+			$fal = 0;
+			$json = json_decode(file_get_contents($_FILES['json']['tmp_name']), true);
+
+			$batch_size = 500;
+
+			try {
+				ORM::raw_execute("SET FOREIGN_KEY_CHECKS=0;");
+			} catch (Throwable $e) {
+			} catch (Exception $e) {
+			}
+			try {
+				ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=0;");
+			} catch (Throwable $e) {
+			} catch (Exception $e) {
+			}
+
+			foreach ($json as $table => $records) {
+				ORM::raw_execute("TRUNCATE $table;");
+
+				$batch_data = [];
+				$columns = [];
+
+				if (!empty($records)) {
+					$columns = array_keys(reset($records));
+				}
+
+				$current_record_count = 0;
+
+				foreach ($records as $rec) {
+					$batch_data[] = $rec;
+					$current_record_count++;
+
+					if (count($batch_data) >= $batch_size) {
+						try {
+							$values_placeholder = [];
+							$params = [];
+							foreach ($batch_data as $batch_rec) {
+								$record_values = [];
+								foreach ($columns as $col) {
+									$record_values[] = '?';
+									$params[] = $batch_rec[$col] ?? null;
+								}
+								$values_placeholder[] = '(' . implode(', ', $record_values) . ')';
+							}
+
+							if (!empty($values_placeholder)) {
+								$sql = "INSERT INTO $table (" . implode(', ', $columns) . ") VALUES " . implode(', ', $values_placeholder) . ";";
+								ORM::raw_execute($sql, $params);
+								$suc += count($batch_data);
+							}
+						} catch (Throwable $e) {
+							$fal += count($batch_data);
+						} catch (Exception $e) {
+							$fal += count($batch_data);
+						}
+						$batch_data = [];
+					}
+				}
+
+				if (!empty($batch_data)) {
+					try {
+						$values_placeholder = [];
+						$params = [];
+						foreach ($batch_data as $batch_rec) {
+							$record_values = [];
+							foreach ($columns as $col) {
+								$record_values[] = '?';
+								$params[] = $batch_rec[$col] ?? null;
+							}
+							$values_placeholder[] = '(' . implode(', ', $record_values) . ')';
+						}
+
+						if (!empty($values_placeholder)) {
+							$sql = "INSERT INTO $table (" . implode(', ', $columns) . ") VALUES " . implode(', ', $values_placeholder) . ";";
+							ORM::raw_execute($sql, $params);
+							$suc += count($batch_data);
+						}
+					} catch (Throwable $e) {
+						$fal += count($batch_data);
+					} catch (Exception $e) {
+						$fal += count($batch_data);
+					}
+					$batch_data = [];
+				}
+			}
+
+			try {
+				ORM::raw_execute("SET FOREIGN_KEY_CHECKS=1;");
+			} catch (Throwable $e) {
+			} catch (Exception $e) {
+			}
+			try {
+				ORM::raw_execute("SET GLOBAL FOREIGN_KEY_CHECKS=1;");
+			} catch (Throwable $e) {
+			} catch (Exception $e) {
+			}
+
+			if (file_exists($_FILES['json']['tmp_name']))
+				unlink($_FILES['json']['tmp_name']);
+			r2(getUrl('settings/dbstatus'), 's', "Restored $suc success $fal failed");
+		} else {
+			r2(getUrl('settings/dbstatus'), 'e', 'Upload failed');
+		}
+		break;
     case 'language':
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");

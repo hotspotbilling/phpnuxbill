@@ -94,7 +94,7 @@ CREATE TABLE `tbl_payment_gateway` (
 
 DROP TABLE IF EXISTS `tbl_plans`;
 CREATE TABLE `tbl_plans` (
-  `id` int NOT NULL,
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name_plan` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_bw` int NOT NULL,
   `price` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,

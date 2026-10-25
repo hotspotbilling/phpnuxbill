@@ -38,8 +38,10 @@ if ($step == 1) {
                 if ($via == 'email') {
                     $via = 'sms';
                 }
-                $otp = mt_rand(100000, 999999);
-                file_put_contents($otpPath, $otp);
+                $otp = random_int(100000, 999999);
+                // Store the code together with a remaining-attempts budget so the
+                // verification step (step 2) can enforce a lockout. Format: "<otp>|<attempts_left>".
+                file_put_contents($otpPath, $otp . '|5');
                 if ($via == 'sms') {
                     Message::sendSMS($user['phonenumber'], $config['CompanyName'] . " C0de: $otp");
                 } else {
@@ -67,9 +69,14 @@ if ($step == 1) {
     if (!empty($username) && !empty($otp_code)) {
         $otpPath .= sha1($username . $db_pass) . ".txt";
         if (file_exists($otpPath) && time() - filemtime($otpPath) <= 600) {
-            $otp = file_get_contents($otpPath);
-            if ($otp == $otp_code) {
-                $pass = mt_rand(10000, 99999);
+            $stored = file_get_contents($otpPath);
+            // Backward/forward compatible: "<otp>" or "<otp>|<attempts_left>".
+            $parts = explode('|', $stored, 2);
+            $otp = $parts[0];
+            $attemptsLeft = isset($parts[1]) ? (int) $parts[1] : 5;
+            if (hash_equals((string) $otp, (string) $otp_code)) {
+                // Use a cryptographically strong, non-guessable temporary password.
+                $pass = Password::_gen();
                 $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
                 $user->password = $pass;
                 $user->save();
@@ -82,7 +89,21 @@ if ($step == 1) {
                 }
                 setcookie('forgot_username', '', time() - 3600, '/');
             } else {
-                r2(getUrl('forgot&step=1'), 'e', Lang::T('Invalid Username or Verification Code'));
+                // Wrong code: decrement the attempt budget. Once exhausted, invalidate
+                // the code so an attacker cannot brute-force the 6-digit space.
+                $attemptsLeft--;
+                if ($attemptsLeft <= 0) {
+                    if (file_exists($otpPath)) {
+                        unlink($otpPath);
+                    }
+                    r2(getUrl('forgot&step=1'), 'e', Lang::T('Too many invalid attempts, please request a new Verification Code'));
+                } else {
+                    // Preserve filemtime (the 600s window) while updating the counter.
+                    $mtime = filemtime($otpPath);
+                    file_put_contents($otpPath, $otp . '|' . $attemptsLeft);
+                    @touch($otpPath, $mtime);
+                    r2(getUrl('forgot&step=1'), 'e', Lang::T('Invalid Username or Verification Code'));
+                }
             }
         } else {
             if (file_exists($otpPath)) {

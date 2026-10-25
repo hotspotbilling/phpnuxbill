@@ -169,7 +169,8 @@ switch ($action) {
         if (empty($s)) {
             $c = ORM::for_table('tbl_customers')->limit(30)->find_many();
         } else {
-            $c = ORM::for_table('tbl_customers')->where_raw("(`username` LIKE '%$s%' OR `fullname` LIKE '%$s%' OR `phonenumber` LIKE '%$s%' OR `email` LIKE '%$s%')")->limit(30)->find_many();
+            $like = '%' . $s . '%';
+            $c = ORM::for_table('tbl_customers')->where_raw("(`username` LIKE ? OR `fullname` LIKE ? OR `phonenumber` LIKE ? OR `email` LIKE ?)", [$like, $like, $like, $like])->limit(30)->find_many();
         }
         header('Content-Type: application/json');
         foreach ($c as $cust) {

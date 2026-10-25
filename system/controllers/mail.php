@@ -48,7 +48,8 @@ switch ($action) {
         $query = ORM::for_table('tbl_customers_inbox')->where('customer_id', $user['id'])->order_by_desc('date_created');
         $query->limit($limit)->offset($offset);
         if(!empty($q)){
-            $query->whereRaw("(subject like '%$q%' or body like '%$q%')");
+            $like = '%' . $q . '%';
+            $query->whereRaw("(subject LIKE ? OR body LIKE ?)", [$like, $like]);
         }
         $mails = $query->find_array();
         $ui->assign('tipe', '');

@@ -22,7 +22,8 @@ switch ($action) {
     case 'customer':
         if(!empty(_req('search'))){
             $search = _req('search');
-            $query = ORM::for_table('tbl_customers')->whereRaw("coordinates != '' AND fullname LIKE '%$search%' OR username LIKE '%$search%' OR email LIKE '%$search%' OR phonenumber LIKE '%$search%'")->order_by_desc('fullname');
+            $like = '%' . $search . '%';
+            $query = ORM::for_table('tbl_customers')->whereRaw("coordinates != '' AND fullname LIKE ? OR username LIKE ? OR email LIKE ? OR phonenumber LIKE ?", [$like, $like, $like, $like])->order_by_desc('fullname');
             $c = Paginator::findMany($query, ['search' => $search], 50);
         }else{
             $query = ORM::for_table('tbl_customers')->where_not_equal('coordinates','');

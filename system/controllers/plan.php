@@ -1222,10 +1222,17 @@ switch ($action) {
         } else {
             $ui->assign('plans', []);
         }
-        $query = ORM::for_table('tbl_user_recharges')->order_by_desc('id');
+        $query = ORM::for_table('tbl_user_recharges')
+			->left_outer_join('tbl_customers', 'tbl_user_recharges.username = tbl_customers.username')
+            ->select('tbl_user_recharges.*')
+            ->select('tbl_customers.fullname', 'fullname')
+			->order_by_desc('tbl_user_recharges.id');
 
         if ($search != '') {
-            $query->where_like("username", "%$search%");
+            $query->where_raw(
+				'(tbl_user_recharges.username LIKE ? OR tbl_customers.fullname LIKE ?)',
+				array("%$search%", "%$search%")
+			);
         }
         if (!empty($router)) {
             $query->where('routers', $router);
