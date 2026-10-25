@@ -8,11 +8,11 @@
 _admin();
 $ui->assign('_system_menu', 'paymentgateway');
 
-$action = alphanumeric($routes[1]);
+$action = alphanumeric($routes[1], '_');
 $ui->assign('_admin', $admin);
 switch ($action) {
     case 'delete':
-        $pg = alphanumeric($routes[2]);
+        $pg = alphanumeric($routes[2], '_');
         if (GatewayLoader::exists($pg)) {
             // goes through the installer so the gateway is backed up first and folder-style gateways are removed whole
             $res = ExtensionInstaller::uninstall('gateway', $pg);
@@ -23,7 +23,7 @@ switch ($action) {
         r2(getUrl('paymentgateway'), 's', Lang::T('Payment Gateway Deleted'));
 
     case 'audit':
-        $pg = alphanumeric($routes[2]);
+        $pg = alphanumeric($routes[2], '_');
         $q = alphanumeric(_req('q'), '-._ ');
         $query = ORM::for_table('tbl_payment_gateway')->order_by_desc("id");
         $query->selects('id', 'username', 'gateway', 'gateway_trx_id', 'plan_id', 'plan_name', 'routers_id', 'routers', 'price', 'pg_url_payment', 'payment_method', 'payment_channel', 'expired_date', 'created_date', 'paid_date', 'trx_invoice', 'status');
@@ -41,7 +41,7 @@ switch ($action) {
         $ui->display('admin/paymentgateway/audit.tpl');
         break;
     case 'auditview':
-        $pg = alphanumeric($routes[2]);
+        $pg = alphanumeric($routes[2], '_');
         $d = ORM::for_table('tbl_payment_gateway')->find_one($pg);
         $d['pg_request'] = (!empty($d['pg_request']))? Text::jsonArray21Array(json_decode($d['pg_request'], true)) : [];
         $d['pg_paid_response'] = (!empty($d['pg_paid_response']))? Text::jsonArray21Array(json_decode($d['pg_paid_response'], true)) : [];

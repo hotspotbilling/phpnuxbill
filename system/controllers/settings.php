@@ -33,21 +33,21 @@ switch ($action) {
                     continue; // file does not define the expected class
                 }
                 $dvc = new $dev;
+                $row = method_exists($dvc, 'description') ? $dvc->description() : null;
+                if (is_array($row)) {
+                    $row['file'] = $dev;
+                } else {
+                    $row = [
+                        'title' => $entry['manifest']['name'] ?? $dev,
+                        'description' => $entry['manifest']['description'] ?? '',
+                        'author' => $entry['manifest']['author'] ?? 'unknown',
+                        'url' => [],
+                        'file' => $dev
+                    ];
+                }
+                $devices[] = $row;
             } catch (Throwable $e) {
                 continue; // a broken driver must not take the page down
-            }
-            if (method_exists($dvc, 'description')) {
-                $arr = $dvc->description();
-                $arr['file'] = $dev;
-                $devices[] = $arr;
-            } else {
-                $devices[] = [
-                    'title' => $entry['manifest']['name'] ?? $dev,
-                    'description' => $entry['manifest']['description'] ?? '',
-                    'author' => $entry['manifest']['author'] ?? 'unknown',
-                    'url' => [],
-                    'file' => $dev
-                ];
             }
         }
         $ui->assign('_title', Lang::T('Devices'));

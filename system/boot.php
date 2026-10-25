@@ -121,6 +121,32 @@ register_menu('Marketplace', true, 'marketplace', 'AFTER_LOGS',
     '<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0"/><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4"/><path d="M5 21l0 -10.15"/><path d="M19 21l0 -10.15"/><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4"/></svg>',
     '', 'success', ['SuperAdmin', 'Admin']);
 
+/**
+ * Sidebar icon markup that looks like the built-in items. Built-in entries use an inline <svg class="icon">;
+ * plugins pass a Font Awesome / ion class string ("fa fa-cube"), their own <svg> or an <img>. Everything is
+ * given the "icon" class so it is sized and spaced the same way. Top-level items without an icon get a
+ * generic puzzle icon so their labels line up with the rest of the menu.
+ */
+function _menu_icon($icon, $placeholder = false)
+{
+    $icon = trim((string) $icon);
+    if ($icon === '') {
+        return $placeholder
+            ? '<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7h3a1 1 0 0 0 1 -1v-1a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h1a2 2 0 0 1 0 4h-1a1 1 0 0 0 -1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-1a2 2 0 0 0 -4 0v1a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h1a2 2 0 0 0 0 -4h-1a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1"/></svg>'
+            : '';
+    }
+    if (stripos($icon, '<svg') === 0 || stripos($icon, '<img') === 0) {
+        if (preg_match('/^<(?:svg|img)\b[^>]*?\bclass\s*=\s*"([^"]*)"/i', $icon, $m)) {
+            if (!preg_match('/(^|\s)icon(\s|$)/', $m[1])) {
+                $icon = preg_replace('/^(<(?:svg|img)\b[^>]*?\bclass\s*=\s*")/i', '$1icon ', $icon, 1);
+            }
+            return $icon;
+        }
+        return preg_replace('/^<(svg|img)\b/i', '<$1 class="icon"', $icon, 1);
+    }
+    return '<i class="icon ' . htmlspecialchars($icon, ENT_QUOTES) . '"></i>';
+}
+
 function _msglog($type, $msg)
 {
     $_SESSION['ntype'] = $type;
@@ -230,19 +256,15 @@ try {
                     }
                     $html .= '<a href="' . $menuUrl . '">';
                 }
-                if (!empty($item['icon'])) {
-                    if (str_starts_with($item['icon'], '<svg')) {
-                        $html .= $item['icon'];
-                    } else {
-                        $html .= '<i class="' . $item['icon'] . '"></i>';
-                    }
-                }
+                $html .= _menu_icon($item['icon'] ?? '', true);
                 $html .= '<span class="text">' . $item['name'] . '</span>';
                 if (!empty($item['label'])) {
                     $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $item['color'] . '">' . $item['label'] . '</small></span>';
                 }
                 if (!empty($kids)) {
-                    $html .= '<span class="pull-right-container"><i class="fa fa-angle-down pull-right"></i></span>';
+                    // both chevrons are emitted; each theme's CSS shows the one it uses (default: fa-angle-down, shadcn: svg)
+                    $html .= '<span class="pull-right-container"><i class="fa fa-angle-down pull-right"></i>'
+                        . '<svg class="treeview-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6"/></svg></span>';
                 }
                 $html .= '</a>';
                 if (!empty($kids)) {
@@ -256,13 +278,7 @@ try {
                             $kidMenuUrl = is_file($kidCtrlFile) ? getUrl($kid['function']) : getUrl('plugin/' . $kid['function']);
                         }
                         $html .= '<li' . $kidActive . '><a href="' . $kidMenuUrl . '">';
-                        if (!empty($kid['icon'])) {
-                            if (str_starts_with($kid['icon'], '<svg')) {
-                                $html .= $kid['icon'];
-                            } else {
-                                $html .= '<i class="' . $kid['icon'] . '"></i>';
-                            }
-                        }
+                        $html .= _menu_icon($kid['icon'] ?? '');
                         if (!empty($kid['label'])) {
                             $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $kid['color'] . '">' . $kid['label'] . '</small></span>';
                         }

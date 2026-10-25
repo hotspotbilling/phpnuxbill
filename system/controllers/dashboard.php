@@ -84,7 +84,10 @@ if ($config['dashboard_type'] === 'dynamic') {
         $ui->assign('dashboard_data_json', json_encode($dashJson));
     } else {
         $ui->assign('system_status', []);
-        $ui->assign('online_users', SystemInfo::getOnlineUsers());
+        $onlineUsers = SystemInfo::getOnlineUsers();
+        $onlineUsers['rest_sessions'] = [];  // usernames / IPs / MACs of live sessions are admin-only
+        $onlineUsers['mysql_sessions'] = [];
+        $ui->assign('online_users', $onlineUsers);
         // a cache entry written by an older version may still carry infrastructure data: never pass it on
         $dashJson = json_decode($data['dashboard_data_json'] ?? '{}', true);
         if (is_array($dashJson)) {

@@ -22,6 +22,9 @@ class MarketplaceRepo
     private static $loaded = null;
     /** @var array repo url => status for this request */
     private static $status = [];
+    /** @var array url => true: expired caches to refresh after the response has been sent */
+    private static $refreshQueue = [];
+    private static $refreshRegistered = false;
 
     /** @return string[] repositories in priority order */
     public static function urls(): array
@@ -107,7 +110,12 @@ class MarketplaceRepo
                 // passive page load: never wait on the network when a copy exists, even an old one
                 // (sync / cron refresh it); an old copy is reported as "stale"
                 $json = $cached;
-                $state = (time() - filemtime($cache)) < self::TTL ? 'cache' : 'stale';
+                if ((time() - filemtime($cache)) < self::TTL) {
+                    $state = 'cache';
+                } else {
+                    $state = 'stale';
+                    self::queueRefresh($url); // served from the old copy now, refreshed in the background
+                }
             } else {
                 // forced sync, or nothing cached yet
                 $json = self::fetch($url);
@@ -144,6 +152,51 @@ class MarketplaceRepo
             ];
         }
         return self::$loaded = $merged;
+    }
+
+    /**
+     * Refresh an expired cache after the page has been delivered. Only where the response can be closed first
+     * (PHP-FPM / FastCGI); elsewhere the cron job or the Sync button keeps the store current.
+     */
+    private static function queueRefresh(string $url): void
+    {
+        if (!function_exists('fastcgi_finish_request')) {
+            return;
+        }
+        self::$refreshQueue[$url] = true;
+        if (!self::$refreshRegistered) {
+            self::$refreshRegistered = true;
+            register_shutdown_function([self::class, 'refreshQueued']);
+        }
+    }
+
+    /** Runs at shutdown: closes the response, then re-downloads each queued repository (one process at a time per repo) */
+    public static function refreshQueued(): void
+    {
+        if (!self::$refreshQueue) {
+            return;
+        }
+        ignore_user_abort(true);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close(); // do not keep the visitor's session locked while we download
+        }
+        if (function_exists('fastcgi_finish_request')) {
+            @fastcgi_finish_request();
+        }
+        foreach (array_keys(self::$refreshQueue) as $url) {
+            $lock = Extensions::cacheDir() . DIRECTORY_SEPARATOR . 'repo_' . md5($url) . '.lock';
+            if (is_file($lock) && (time() - filemtime($lock)) < 120) {
+                continue; // another request is already refreshing it
+            }
+            @touch($lock);
+            try {
+                self::fetch($url);
+            } catch (Throwable $e) {
+                // the old copy keeps serving
+            }
+            @unlink($lock);
+        }
+        self::$refreshQueue = [];
     }
 
     /** Store entries are untrusted: text becomes plain strings, links must be http(s), GitHub sources must be real repos */

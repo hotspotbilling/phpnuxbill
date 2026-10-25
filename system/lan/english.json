@@ -3901,5 +3901,14 @@
     "Plans_using_this_driver": "Plans using this driver",
     "plans": "plans",
     "More_device_drivers_available_from_the_repository_": "More device drivers available from the repository.",
-    "A_driver_is_either_one_file_system_devices__Class__php_or_a_folder_system_devices__Class___with_device_json_and__Class__php__Both_work__Drivers_implement_the_device_interface__add_customer__add_plan__connect_customer__etc____Core_drivers_stay_as_single_files_and_cannot_be_removed__a_driver_that_plans_still_use_cannot_be_uninstalled_": "A driver is either one file system\/devices\/<Class>.php or a folder system\/devices\/<Class>\/ with device.json and <Class>.php. Both work. Drivers implement the device interface (add_customer, add_plan, connect_customer, etc.). Core drivers stay as single files and cannot be removed; a driver that plans still use cannot be uninstalled."
+    "A_driver_is_either_one_file_system_devices__Class__php_or_a_folder_system_devices__Class___with_device_json_and__Class__php__Both_work__Drivers_implement_the_device_interface__add_customer__add_plan__connect_customer__etc____Core_drivers_stay_as_single_files_and_cannot_be_removed__a_driver_that_plans_still_use_cannot_be_uninstalled_": "A driver is either one file system\/devices\/<Class>.php or a folder system\/devices\/<Class>\/ with device.json and <Class>.php. Both work. Drivers implement the device interface (add_customer, add_plan, connect_customer, etc.). Core drivers stay as single files and cannot be removed; a driver that plans still use cannot be uninstalled.",
+    "Child_of": "Child of",
+    "My_Plugin": "My Plugin",
+    "Nothing_here_yet": "Nothing here yet",
+    "Greeting": "Greeting",
+    "Shown_on_the_customer_page_": "Shown on the customer page.",
+    "Marketplace_automatic_checks": "Marketplace automatic checks",
+    "Sync_the_Marketplace_store__detect_plugin__gateway__device_and_theme_updates__and_send_the_Telegram_notification__Every_6_hours__Recommended_": "Sync the Marketplace store, detect plugin, gateway, device and theme updates, and send the Telegram notification. Every 6 hours [Recommended]",
+    "Command_line_only__it_cannot_be_run_from_the_web__Turn_the_notification_on_or_off_in_Marketplace___Tools___Settings_": "Command line only, it cannot be run from the web. Turn the notification on or off in Marketplace > Tools > Settings.",
+    "Asset": "Asset"
 }

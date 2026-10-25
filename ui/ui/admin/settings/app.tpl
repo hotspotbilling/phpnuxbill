@@ -1378,6 +1378,13 @@
                             # {Lang::T('Clear stale sessions cronjob to run every 5 minutes, this is important only if freeradius module is enabled')}<br>
                            */5 * * * * cd {$dir}cron && {$php} cleanup_stale_sessions.php<br><br>
                         </p>
+                        <br>
+                        <h4><b>{Lang::T('Marketplace automatic checks')}</b></h4>
+                        <p>
+                            # {Lang::T('Sync the Marketplace store, detect plugin, gateway, device and theme updates, and send the Telegram notification. Every 6 hours [Recommended]')}<br>
+                            0 */6 * * * cd {$dir}cron && {$php} marketplace_sync.php<br><br>
+                            <small class="text-muted">{Lang::T('Command line only, it cannot be run from the web. Turn the notification on or off in Marketplace > Tools > Settings.')}</small>
+                        </p>
                     </div>
                 </div>
             </div>

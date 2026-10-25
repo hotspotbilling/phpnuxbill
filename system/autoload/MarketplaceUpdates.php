@@ -87,7 +87,10 @@ class MarketplaceUpdates
     private static function normalize(string $type, string $s): string
     {
         $s = preg_replace('/[^a-z0-9]/', '', strtolower($s));
-        return $type === 'gateway' ? str_replace(['phpnuxbill', 'paymentgateway', 'gateway', 'payment'], '', $s) : $s;
+        if ($type === 'gateway') {
+            return str_replace(['phpnuxbill', 'paymentgateway', 'gateway', 'payment'], '', $s);
+        }
+        return $type === 'device' ? preg_replace('/^phpnuxbill/', '', $s) : $s;
     }
 
     /** Find the store entry that corresponds to an installed extension */

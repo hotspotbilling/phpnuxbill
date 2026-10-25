@@ -162,6 +162,10 @@
         // ---- details drawer -----------------------------------------------------
         var drawer = document.getElementById('mp-drawer');
         var license = document.getElementById('mp-license');
+        // Overlays must be children of <body>: inside the admin layout an ancestor (.content-wrapper uses
+        // transform) makes "position: fixed" relative to the whole page, so the drawer would be page-tall and
+        // its header or its Install footer would sit off-screen depending on how far the page is scrolled.
+        [drawer, license].forEach(function (n) { if (n && n.parentNode !== document.body) document.body.appendChild(n); });
         function closeAll() {
             if (drawer) drawer.hidden = true;
             if (license) license.hidden = true;
