@@ -578,20 +578,34 @@ class SystemInfo
     }
 
     /**
+     * Is the separate "radius" database connection set up (init.php configures it only when radius_enable is on and a
+     * radius user exists)? An unconfigured named connection is just Idiorm's empty default, never a real database.
+     */
+    public static function radiusConnectionConfigured(): bool
+    {
+        $cfg = @ORM::get_config(null, 'radius');
+        return is_array($cfg) && isset($cfg['connection_string']) && strncmp((string) $cfg['connection_string'], 'mysql:', 6) === 0;
+    }
+
+    /**
      * Is RADIUS working? Three signals, because PHP cannot always see the FreeRADIUS service:
-     *  - SQL mode: the separate "radius" database answers (nas table);
+     *  - SQL mode (a radius database is configured): it answers (nas table), otherwise RADIUS is reported down;
      *  - REST mode (freeradius-rest, no radius database): the FreeRADIUS process is running here, or FreeRADIUS has
      *    called radius.php / written rad_acct within a day (covers a FreeRADIUS on another server).
      * @return array ['online'=>bool,'mode'=>'sql'|'rest','info'=>string,'nas'=>?int]
      */
     public static function radiusStatus(): array
     {
-        try {
-            $count = (int) ORM::for_table('nas', 'radius')->count();
-            return ['online' => true, 'mode' => 'sql', 'info' => "Online • {$count} " . Lang::T('NAS Configured'), 'nas' => $count];
-        } catch (Throwable $e) {
-            // no radius database: REST mode, or the database is really down
+        if (self::radiusConnectionConfigured()) {
+            // a radius database is set up: it either answers or RADIUS is down, REST heuristics would hide a real outage
+            try {
+                $count = (int) ORM::for_table('nas', 'radius')->count();
+                return ['online' => true, 'mode' => 'sql', 'info' => "Online • {$count} " . Lang::T('NAS Configured'), 'nas' => $count];
+            } catch (Throwable $e) {
+                return ['online' => false, 'mode' => 'sql', 'info' => Lang::T('Connection Error'), 'nas' => null];
+            }
         }
+        // no radius database (freeradius-rest setup): judge by the process and by FreeRADIUS' requests
         $running = self::radiusProcess();
         $seen = self::radiusLastSeen();
         $ago = max(0, time() - $seen);
