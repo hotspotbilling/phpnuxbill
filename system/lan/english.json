@@ -3926,5 +3926,18 @@
     "Print_side_by_side__it_will_easy_to_cut": "Print side by side, it will easy to cut",
     "Skeleton_Details": "Skeleton Details",
     "A_customer_submenu_entry__it_has_the_same_slot__AFTER_DASHBOARD__as_its_parent_": "A customer submenu entry: it has the same slot (AFTER_DASHBOARD) as its parent.",
-    "This_customer_page_and_its_submenu_are_declared_in_plugin_json_with__admin___false_": "This customer page and its submenu are declared in plugin.json with \"admin\": false."
+    "This_customer_page_and_its_submenu_are_declared_in_plugin_json_with__admin___false_": "This customer page and its submenu are declared in plugin.json with \"admin\": false.",
+    "Cron_Active": "Cron Active",
+    "Cron_Job_last_ran_on___s___s_": "Cron Job last ran on: %s (%s)",
+    "Cron_Job": "Cron Job",
+    "Healthy": "Healthy",
+    "Last_ran": "Last ran",
+    "System_Time": "System Time",
+    "Database_Time": "Database Time",
+    "Server_Clocks": "Server Clocks",
+    "Server_Time": "Server Time",
+    "PHP_Time": "PHP Time",
+    "In_sync": "In sync",
+    "Timezone_differs": "Timezone differs",
+    "Clock_skew": "Clock skew"
 }

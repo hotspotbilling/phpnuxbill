@@ -32,6 +32,11 @@ if (empty($action)) {
     $action = _get('action');
 }
 
+// the dashboard reads this to show the FreeRADIUS engine as online (REST setups have no radius database to ping)
+if (class_exists('SystemInfo')) {
+    SystemInfo::radiusTouch();
+}
+
 //debug
 // if (!empty($action)) {
 //     file_put_contents("$action.json", json_encode([

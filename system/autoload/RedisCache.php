@@ -483,7 +483,8 @@ class RedisCache
                     $radius_active_sessions = 0;
                 }
             } catch (Throwable $e) {
-                $radius_online = false;
+                // no radius database (freeradius-rest setups): judge by FreeRADIUS' requests to radius.php instead
+                $radius_online = SystemInfo::radiusStatus()['online'];
             }
         }
 

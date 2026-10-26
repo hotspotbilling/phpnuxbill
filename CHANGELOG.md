@@ -9,6 +9,8 @@
 - Customer portal sidebar: plugin menus with submenus are styled (stray second chevron removed, font icons aligned with the built-in 24px icons, submenu indented under the parent label, long names cut with an ellipsis while the sidebar is expanded, chevron turns when the group opens)
 - Default theme, collapsed sidebar: the icon rail scrolls when it is taller than the window (last items such as Community were cut off); each submenu flyout is one card with its title inside it, and long menus (Settings) stay inside the screen and scroll
 - Dashboard data (dynamic metrics and classic widgets) is cached in `system/cache/dashboard/dash_*.temp` (folder is blocked over HTTP) for the dashboard TTL when Redis is not enabled or not reachable; the Refresh button clears it
+- Dashboard, Services Status Matrix: a "Server Clocks" card shows the server (OS) time, PHP time and database time with their timezones, ticking live, with an "In sync" / "Clock skew" / "Timezone differs" badge
+- Dashboard: the FreeRADIUS status no longer shows "Offline - Connection Error" on REST setups (freeradius-rest, no separate radius database). Without a radius database it is online when a FreeRADIUS process is running on the server (same `pgrep` check as the System Info plugin) or FreeRADIUS has called `radius.php` / written `rad_acct` within 24 hours, and the card says which
 - Security: FreeRADIUS REST endpoint (`radius.php`)
   - `Password::chap_verify()` returned true for a wrong password and false for the right one; it now compares correctly (constant time) and rejects malformed CHAP input
   - Customers are always checked against their own (main or PPPoE) password; the "username = password" / empty-password voucher fallback no longer lets anyone in as an existing customer

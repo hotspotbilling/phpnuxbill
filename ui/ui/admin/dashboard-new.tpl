@@ -53,20 +53,18 @@
     </div>
 </div>
 {else}
-<div class="isp-card isp-rounded-lg isp-padding-3 isp-margin-bottom-6"
-    style="border-left: 4px solid #48bb78; background: rgba(72, 187, 120, 0.06);">
-    <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 8px;">
-        <div class="isp-flex isp-align-center" style="gap: 10px;">
-            <i class="fa fa-check-circle" style="color: #48bb78; font-size: 16px;"></i>
-            <span style="font-size: 12px; font-weight: 500;">
-                <strong>{Lang::T('Cron Job')}:</strong> {Lang::T('Cron Job last ran on')}:
-                <strong>{$system_status.cron.run_date}</strong> ({$system_status.cron.time_ago})
-            </span>
-        </div>
-        <div class="isp-flex isp-align-center" style="gap: 8px;">
-            <span class="badge badge-success" style="font-size: 10px; padding: 2px 8px;">{Lang::T('Healthy')}</span>
-            <span style="font-size: 11px; opacity: 0.7;">{Lang::T('Uptime')}: {$system_status.uptime.formatted}</span>
-        </div>
+<div class="dash-cron isp-margin-bottom-6">
+    <div class="dash-cron-main">
+        <span class="dash-cron-icon"><i class="fa fa-check"></i></span>
+        <span class="dash-cron-text">
+            <strong>{Lang::T('Cron Job')}:</strong> {Lang::T('Cron Job last ran on')}:
+            <strong>{$system_status.cron.run_date}</strong> <span
+                class="dash-cron-ago">({$system_status.cron.time_ago})</span>
+        </span>
+    </div>
+    <div class="dash-cron-meta">
+        <span class="badge badge-success">{Lang::T('Healthy')}</span>
+        <span class="dash-cron-uptime">{Lang::T('Uptime')}: {$system_status.uptime.formatted}</span>
     </div>
 </div>
 {/if}
@@ -421,6 +419,39 @@
                 </span>
             </div>
             {/foreach}
+            <div class="sys-service-card" id="sys-time-card">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+                    <div
+                        style="width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: rgba(66, 153, 225, 0.12); color: #4299e1;">
+                        <i class="fa fa-clock" style="font-size: 14px;"></i>
+                    </div>
+                    <div style="min-width: 0; flex: 1;">
+                        <div style="font-size: 12px; font-weight: 600;">{Lang::T('Server Clocks')}</div>
+                        <div
+                            style="font-size: 10.5px; line-height: 1.55; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            {Lang::T('Server Time')}: <strong id="srv-time-val"
+                                data-ts="{$system_status.time.server}">{$system_status.time.server|default:'-'}</strong>
+                            <span id="srv-time-tz" style="opacity: 0.65;">{if
+                                $system_status.time.server_tz}({$system_status.time.server_tz}){/if}</span><br>
+                            {Lang::T('PHP Time')}: <strong id="php-time-val"
+                                data-ts="{$system_status.time.php}">{$system_status.time.php}</strong> <span
+                                id="php-time-tz" style="opacity: 0.65;">({$system_status.time.php_tz})</span><br>
+                            {Lang::T('Database Time')}: <strong id="db-time-val"
+                                data-ts="{$system_status.time.database}">{$system_status.time.database|default:'-'}</strong>
+                            <span id="db-time-tz" style="opacity: 0.65;">{if
+                                $system_status.time.database_tz}({$system_status.time.database_tz}){/if}</span>
+                        </div>
+                    </div>
+                </div>
+                {assign var=timeBad value=($system_status.time.skew >= 60 || $system_status.time.tz_mismatch)}
+                <span id="time-drift-badge" class="badge {if $timeBad}badge-warning{else}badge-success{/if}"
+                    data-base="badge" data-ok="badge-success" data-warn="badge-warning" data-t-ok="{Lang::T('In sync')}"
+                    data-t-tz="{Lang::T('Timezone differs')}" data-t-skew="{Lang::T('Clock skew')}">{if
+                    $system_status.time.skew >= 60}{Lang::T('Clock skew')} {if $system_status.time.skew >=
+                    3600}{($system_status.time.skew / 3600)|string_format:"%.1f"} h{else}{($system_status.time.skew /
+                    60)|round} min{/if}{elseif $system_status.time.tz_mismatch}{Lang::T('Timezone
+                    differs')}{else}{Lang::T('In sync')}{/if}</span>
+            </div>
         </div>
     </div>
 </div>
@@ -2149,6 +2180,7 @@
                             if (uptimeEl && data.uptime) uptimeEl.textContent = data.uptime.formatted;
                             const subUptimeEl = document.getElementById('sys-uptime-subtitle');
                             if (subUptimeEl && data.uptime) subUptimeEl.textContent = data.uptime.formatted;
+                            if (window.sysClockSet && data.time) window.sysClockSet(data.time);
                             const latencyEl = document.getElementById('db-latency-val');
                             if (latencyEl && data.database) latencyEl.textContent = data.database.latency_ms + ' ms';
                             if (data.database) setBadge('db-status-badge', 'db-status-val', data.database.status === 'online' ? 'success' : 'danger', data.database.status);
@@ -2205,6 +2237,7 @@
                             if (data.services && Array.isArray(data.services)) {
                                 const sGrid = document.getElementById('services-status-matrix');
                                 if (sGrid) {
+                                    const timeCard = document.getElementById('sys-time-card'); // not a service: keep it
                                     sGrid.innerHTML = data.services.map(svc => {
                                         const isSuccess = svc.badge_class === 'success';
                                         const isDanger = svc.badge_class === 'danger';
@@ -2229,6 +2262,7 @@
                                             </div>
                                         `;
                                     }).join('');
+                                    if (timeCard) sGrid.appendChild(timeCard);
                                 }
                             }
                         }
@@ -2285,5 +2319,50 @@
     });
 </script>
 {/if}
+
+{literal}
+<script>
+    // Server (OS) / PHP / database clocks: ticking from the server's own timestamps (their timezone, not the browser's)
+    (function () {
+        var rows = ['srv', 'php', 'db'].map(function (k) {
+            return { k: k, el: document.getElementById(k + '-time-val'), tz: document.getElementById(k + '-time-tz'), base: null };
+        });
+        var badge = document.getElementById('time-drift-badge');
+        if (!rows[0].el) return;
+        var t0 = Date.now();
+        function parse(s) { return s ? Date.parse(String(s).replace(' ', 'T') + 'Z') : null; }
+        function p2(n) { return String(n).padStart(2, '0'); }
+        function fmt(ms) {
+            var d = new Date(ms);
+            return d.getUTCFullYear() + '-' + p2(d.getUTCMonth() + 1) + '-' + p2(d.getUTCDate()) + ' ' +
+                p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes()) + ':' + p2(d.getUTCSeconds());
+        }
+        function tick() {
+            var el = Date.now() - t0;
+            rows.forEach(function (r) { r.el.textContent = r.base !== null ? fmt(r.base + el) : '-'; });
+        }
+        window.sysClockSet = function (t) {
+            if (!t) return;
+            var src = { srv: [t.server, t.server_tz], php: [t.php, t.php_tz], db: [t.database, t.database_tz] };
+            rows.forEach(function (r) {
+                r.base = parse(src[r.k][0]);
+                if (r.tz) r.tz.textContent = src[r.k][1] ? '(' + src[r.k][1] + ')' : '';
+            });
+            t0 = Date.now();
+            if (badge) {
+                var skew = Number(t.skew) || 0, ok = badge.getAttribute('data-ok'), warn = badge.getAttribute('data-warn');
+                var bad = skew >= 60 || !!t.tz_mismatch;
+                badge.className = (badge.getAttribute('data-base') || '') + ' ' + (bad ? warn : ok);
+                badge.textContent = skew >= 60 ? badge.getAttribute('data-t-skew') + ' ' + (skew >= 3600 ? (skew / 3600).toFixed(1) + ' h' : Math.round(skew / 60) + ' min')
+                    : (t.tz_mismatch ? badge.getAttribute('data-t-tz') : badge.getAttribute('data-t-ok'));
+            }
+            tick();
+        };
+        rows.forEach(function (r) { r.base = parse(r.el.getAttribute('data-ts')); });
+        tick();
+        setInterval(tick, 1000);
+    })();
+</script>
+{/literal}
 
 {include file="sections/footer.tpl"}

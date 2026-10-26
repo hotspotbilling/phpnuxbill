@@ -22,8 +22,10 @@ class SystemInfo
         $db   = self::getDatabaseStatus();
         $onlineUsers = self::getOnlineUsers();
         $services = self::getServicesStatus($cron, $db, $onlineUsers);
+        $time = self::getTimeInfo();
 
         return [
+            'time'         => $time,
             'cron'         => $cron,
             'disk'         => $disk,
             'ram'          => $ram,
@@ -43,6 +45,53 @@ class SystemInfo
                 'web'      => $_SERVER['SERVER_SOFTWARE'] ?? 'CLI / WebServer'
             ]
         ];
+    }
+
+    /**
+     * The three clocks that matter to the app: the server's own (operating system), PHP's and the database's. Times are
+     * "Y-m-d H:i:s" in each one's own timezone, *_ts are epoch seconds.
+     * 'skew' is the largest gap between the real instants in seconds; 'tz_mismatch' is true when PHP and the database
+     * would write different wall-clock times (different timezones), which skews expiry dates and reports.
+     */
+    public static function getTimeInfo(): array
+    {
+        $now = time();
+        $info = [
+            'php' => date('Y-m-d H:i:s', $now), 'php_tz' => date_default_timezone_get(), 'php_ts' => $now,
+            'server' => null, 'server_tz' => '', 'server_ts' => null,
+            'database' => null, 'database_tz' => '', 'database_ts' => null,
+            'skew' => 0, 'tz_mismatch' => false,
+        ];
+        $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+        if (function_exists('exec') && !in_array('exec', $disabled, true) && PHP_OS_FAMILY !== 'Windows') {
+            $out = [];
+            exec("date '+%Y-%m-%d %H:%M:%S|%Z|%s' 2>/dev/null", $out, $rc);
+            $parts = $rc === 0 && isset($out[0]) ? explode('|', $out[0]) : [];
+            if (count($parts) === 3 && ctype_digit($parts[2])) {
+                $info['server'] = $parts[0];
+                $info['server_tz'] = $parts[1];
+                $info['server_ts'] = (int) $parts[2];
+            }
+        }
+        try {
+            ORM::raw_execute("SELECT DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s') AS n, UNIX_TIMESTAMP() AS u, @@session.time_zone AS tz, @@system_time_zone AS stz");
+            $stmt = ORM::get_last_statement();
+            $row = $stmt ? $stmt->fetch(PDO::FETCH_ASSOC) : null;
+            if ($row) {
+                $info['database'] = $row['n'];
+                $info['database_ts'] = (int) $row['u'];
+                $tz = (string) ($row['tz'] ?? '');
+                $info['database_tz'] = $tz === 'SYSTEM' ? (string) ($row['stz'] ?? '') : $tz;
+            }
+        } catch (Throwable $e) {
+            // database offline: shown as unknown
+        }
+        $ts = array_filter([$info['php_ts'], $info['server_ts'], $info['database_ts']], fn($v) => $v !== null);
+        $info['skew'] = max($ts) - min($ts);
+        if ($info['database'] !== null) {
+            $info['tz_mismatch'] = abs(strtotime($info['database']) - strtotime($info['php'])) >= 60;
+        }
+        return $info;
     }
 
     /**
@@ -449,13 +498,9 @@ class SystemInfo
         $radiusOnline = false;
         $radiusInfo = Lang::T('RADIUS Not Enabled');
         if ($radiusEnabled) {
-            try {
-                $count = (int) ORM::for_table('nas', 'radius')->count();
-                $radiusOnline = true;
-                $radiusInfo = "Online • {$count} " . Lang::T('NAS Configured');
-            } catch (Throwable $e) {
-                $radiusInfo = Lang::T('Connection Error');
-            }
+            $rs = self::radiusStatus();
+            $radiusOnline = $rs['online'];
+            $radiusInfo = $rs['info'];
         }
         $services[] = [
             'key'          => 'radius',
@@ -469,6 +514,100 @@ class SystemInfo
         ];
 
         return $services;
+    }
+
+    /** Marks "FreeRADIUS just talked to radius.php" (at most one write a minute); see radiusStatus() */
+    public static function radiusTouch(): void
+    {
+        global $CACHE_PATH;
+        $file = rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'radius_rest.cache';
+        clearstatcache(true, $file);
+        if (!is_file($file) || (time() - (int) filemtime($file)) >= 60) {
+            @file_put_contents($file, (string) time(), LOCK_EX);
+        }
+    }
+
+    /** Time of the last request FreeRADIUS made to radius.php or wrote to rad_acct, 0 = never */
+    public static function radiusLastSeen(): int
+    {
+        global $CACHE_PATH;
+        $seen = 0;
+        $file = rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'radius_rest.cache';
+        clearstatcache(true, $file);
+        if (is_file($file)) {
+            $seen = (int) filemtime($file);
+        }
+        try {
+            $row = ORM::for_table('rad_acct')->select_expr('MAX(dateUpdated)', 'last')->find_one();
+            if ($row && !empty($row['last'])) {
+                $seen = max($seen, (int) strtotime($row['last']));
+            }
+        } catch (Throwable $e) {
+            // no rad_acct table: radius.php has not been set up
+        }
+        return $seen;
+    }
+
+    /**
+     * Is a FreeRADIUS process running on this machine? The same check the System Info plugin uses (pgrep on Linux,
+     * "sc query" on Windows). null = cannot tell (exec disabled, no pgrep): a web server sandbox may also hide processes,
+     * and FreeRADIUS may run on another server, so false alone never proves it is down.
+     */
+    public static function radiusProcess(array $names = ['freeradius', 'radiusd']): ?bool
+    {
+        $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+        if (!function_exists('exec') || in_array('exec', $disabled, true)) {
+            return null;
+        }
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $out = [];
+            exec('sc query ' . escapeshellarg($names[0]) . ' | findstr RUNNING', $out, $rc);
+            return $rc === 0 || !empty($out);
+        }
+        foreach ($names as $n) {
+            $out = [];
+            exec('pgrep -x ' . escapeshellarg($n) . ' 2>/dev/null', $out, $rc);
+            if ($rc === 0) {
+                return true;
+            }
+            if ($rc === 127) {
+                return null; // pgrep is not installed
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Is RADIUS working? Three signals, because PHP cannot always see the FreeRADIUS service:
+     *  - SQL mode: the separate "radius" database answers (nas table);
+     *  - REST mode (freeradius-rest, no radius database): the FreeRADIUS process is running here, or FreeRADIUS has
+     *    called radius.php / written rad_acct within a day (covers a FreeRADIUS on another server).
+     * @return array ['online'=>bool,'mode'=>'sql'|'rest','info'=>string,'nas'=>?int]
+     */
+    public static function radiusStatus(): array
+    {
+        try {
+            $count = (int) ORM::for_table('nas', 'radius')->count();
+            return ['online' => true, 'mode' => 'sql', 'info' => "Online • {$count} " . Lang::T('NAS Configured'), 'nas' => $count];
+        } catch (Throwable $e) {
+            // no radius database: REST mode, or the database is really down
+        }
+        $running = self::radiusProcess();
+        $seen = self::radiusLastSeen();
+        $ago = max(0, time() - $seen);
+        $last = $seen === 0
+            ? Lang::T('no request from FreeRADIUS yet')
+            : Lang::T('last request') . ' ' . ($ago < 90 ? Lang::T('just now') : ($ago < 5400 ? round($ago / 60) . ' ' . Lang::T('min ago') : ($ago < 129600 ? round($ago / 3600) . ' ' . Lang::T('h ago') : round($ago / 86400) . ' ' . Lang::T('days ago'))));
+        // an idle hotspot can be quiet for hours: a day without any request counts as no sign of life
+        $requests = $seen > 0 && $ago < 86400;
+        $online = $running === true || $requests;
+        $state = $running === true ? Lang::T('process running') : ($running === false ? Lang::T('process not found') : '');
+        return [
+            'online' => $online,
+            'mode' => 'rest',
+            'info' => 'REST • ' . ($state !== '' ? $state . ' • ' : '') . $last,
+            'nas' => null,
+        ];
     }
 
     /**
