@@ -29,18 +29,32 @@ $now = time();
 // Find stale REST sessions (rad_acct table)
 // A session is stale if it hasn't been updated in more than $sessionTimeout seconds
 // Use dateUpdated if available (for sessions with interim updates), otherwise fall back to dateAdded
-$staleSessionsRest = ORM::for_table('rad_acct')
-    ->where_raw("(acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL)", ['Start', 'Interim-Update'])
-    ->where_not_null('dateAdded')
-    ->where_raw("UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) > 0 AND UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) < ?", [$now - $sessionTimeout])
-    ->find_many();
+$staleSessionsRest = [];
+try {
+    $staleSessionsRest = ORM::for_table('rad_acct')
+        ->where_raw("(acctstatustype = ? OR acctstatustype = ? OR acctstatustype IS NULL)", ['Start', 'Interim-Update'])
+        ->where_not_null('dateAdded')
+        ->where_raw("UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) > 0 AND UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) < ?", [$now - $sessionTimeout])
+        ->find_many();
+} catch (Throwable $e) {
+    echo "rad_acct is not available, skipping REST sessions: " . $e->getMessage() . "\n";
+}
 
-// Find stale MySQL RADIUS sessions (radacct table)
-$staleSessionsMysql = ORM::for_table('radacct')
-    ->where_null('acctstoptime')
-    ->where_not_null('acctupdatetime')
-    ->where_raw("UNIX_TIMESTAMP(acctupdatetime) < ?", [$now - $sessionTimeout])
-    ->find_many();
+// Find stale MySQL RADIUS sessions (radacct table). It only exists when FreeRADIUS uses the SQL module with
+// install/radius.sql imported (in the separate "radius" database when one is configured). A RADIUS REST setup
+// has no radacct table, so a missing table is not an error: those sessions simply do not exist.
+$radiusConnection = (class_exists('SystemInfo') && SystemInfo::radiusConnectionConfigured()) ? 'radius' : null;
+$staleSessionsMysql = [];
+try {
+    $radacct = $radiusConnection ? ORM::for_table('radacct', $radiusConnection) : ORM::for_table('radacct');
+    $staleSessionsMysql = $radacct
+        ->where_null('acctstoptime')
+        ->where_not_null('acctupdatetime')
+        ->where_raw("UNIX_TIMESTAMP(acctupdatetime) < ?", [$now - $sessionTimeout])
+        ->find_many();
+} catch (Throwable $e) {
+    echo "No radacct table (RADIUS REST only), skipping MySQL sessions\n";
+}
 
 $count = 0;
 
@@ -96,7 +110,7 @@ if (!empty($staleSessionsMysql)) {
             // Use prepared statement for consistency and security
             $ids = implode(',', array_map('intval', $sessionIds));
             $stopTime = date('Y-m-d H:i:s');
-            $db = ORM::get_db();
+            $db = $radiusConnection ? ORM::get_db($radiusConnection) : ORM::get_db();
             $stmt = $db->prepare("UPDATE radacct SET acctstoptime = ? WHERE radacctid IN ($ids)");
             $stmt->execute([$stopTime]);
             
