@@ -20,6 +20,11 @@ if (!$isCli) {
 
 $failed = false; // set when the delete transaction fails, so cron sees a non-zero exit status
 
+// text from the database or from an exception goes into an HTML <pre> in web mode (escaped), but stays raw in CLI output
+$out = function ($text) use ($isCli) {
+    return $isCli ? (string) $text : htmlspecialchars((string) $text);
+};
+
 // Dry-run detection
 $dryRun = false;
 if ($isCli) {
@@ -81,8 +86,7 @@ if ($countCandidates === 0) {
 if ($dryRun) {
     echo ">>> DRY RUN MODE: No deletions will be performed <<<\n";
     foreach ($usernames as $user) {
-        // codes are printed into an HTML page in web mode
-        echo "[DRY RUN] Would delete voucher(s) in tbl_voucher with code = " . htmlspecialchars((string) $user) . "\n";
+        echo "[DRY RUN] Would delete voucher(s) in tbl_voucher with code = " . $out($user) . "\n";
     }
 } else {
     // Get database connection for transaction
@@ -123,7 +127,7 @@ if ($dryRun) {
 
         // Log the error
         _log("Error in clean_expired_vouchers.php: " . $e->getMessage(), 'CRON');
-        echo "ERROR: Transaction failed and was rolled back: " . htmlspecialchars($e->getMessage()) . "\n";
+        echo "ERROR: Transaction failed and was rolled back: " . $out($e->getMessage()) . "\n";
         $failed = true;
     }
 }

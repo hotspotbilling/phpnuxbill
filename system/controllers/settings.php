@@ -239,6 +239,10 @@ switch ($action) {
             $_POST['man_fields_custom'] = isset($_POST['man_fields_custom']) ? 'yes' : 'no';
             $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
             $_POST['enable_session_timeout'] = $enable_session_timeout;
+            // Captcha: which logins are protected, one check box each
+            $_POST['captcha_on_admin'] = isset($_POST['captcha_on_admin']) ? 'yes' : 'no';
+            $_POST['captcha_on_customer'] = isset($_POST['captcha_on_customer']) ? 'yes' : 'no';
+            $_POST['captcha_on_plugin'] = isset($_POST['captcha_on_plugin']) ? 'yes' : 'no';
             if (isset($_POST['turnstile_site_key'])) $_POST['turnstile_site_key'] = trim($_POST['turnstile_site_key']);
             if (isset($_POST['turnstile_secret_key'])) $_POST['turnstile_secret_key'] = trim($_POST['turnstile_secret_key']);
             if (isset($_POST['recaptcha_site_key'])) $_POST['recaptcha_site_key'] = trim($_POST['recaptcha_site_key']);

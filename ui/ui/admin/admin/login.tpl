@@ -15,7 +15,7 @@
     <!-- FontAwesome & Icons -->
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
 
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.9.21">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.27.1">
 </head>
 
 <body class="admin-login-body">

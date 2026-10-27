@@ -18,17 +18,40 @@ class Captcha
     }
 
     /**
-     * Get protection target: 'both', 'admin', 'customer'
+     * The older single setting 'captcha_target': 'all', 'admin', 'customer' or 'plugin' ('both' meant 'all').
+     * Only read until Settings > App has been saved with the check boxes (captcha_on_admin ...).
      */
     public static function getTarget()
     {
         global $config;
-        $target = $config['captcha_target'] ?? 'both';
-        return in_array($target, ['admin', 'customer', 'both']) ? $target : 'both';
+        $target = $config['captcha_target'] ?? 'all';
+        if ($target === 'both') {
+            return 'all';
+        }
+        if ($target === 'merchant') {
+            return 'plugin'; // saved for a short while before the plugin target was named
+        }
+        return in_array($target, ['admin', 'customer', 'plugin', 'all']) ? $target : 'all';
     }
 
     /**
-     * Check if captcha is enabled for a given context ('admin' or 'customer')
+     * Is the captcha switched on for this kind of login? Contexts: 'admin', 'customer', and 'plugin' (the logins
+     * plugins add, such as the Hotspot merchant portal; a plugin asks with Captcha::renderWidget('plugin') and
+     * Captcha::verify('plugin')). Each has its own check box in Settings > App (captcha_on_<context> = yes / no).
+     */
+    public static function isContextOn($context)
+    {
+        global $config;
+        $saved = $config['captcha_on_' . $context] ?? null;
+        if ($saved !== null) {
+            return $saved === 'yes';
+        }
+        $target = self::getTarget();
+        return $target === 'all' || $target === $context;
+    }
+
+    /**
+     * Check if captcha is enabled for a given context ('admin', 'customer' or 'plugin')
      */
     public static function isEnabled($context = 'admin')
     {
@@ -37,8 +60,7 @@ class Captcha
             return false;
         }
 
-        $target = self::getTarget();
-        if ($target !== 'both' && $target !== $context) {
+        if (!self::isContextOn($context)) {
             return false;
         }
 

@@ -4377,6 +4377,37 @@ body.admin-login-body.dark-mode .custom-input:focus {
   box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
+/* The general dark-mode rule `.dark-mode input:focus:not(#...)` (an id in the selector) turns the text of a focused
+   field dark grey; on this dark field that is almost unreadable while typing. Keep the text light. */
+[data-theme="dark"] .admin-login-body .custom-input,
+[data-theme="dark"] .admin-login-body .custom-input:focus,
+body.admin-login-body.dark-mode .custom-input,
+body.admin-login-body.dark-mode .custom-input:focus {
+  color: #f8fafc !important;
+  caret-color: #f8fafc;
+}
+
+/* Browser autofill paints its own light background and dark text: repaint it to match the field */
+.admin-login-body .custom-input:-webkit-autofill,
+.admin-login-body .custom-input:-webkit-autofill:hover,
+.admin-login-body .custom-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #0f172a;
+  transition: background-color 9999s ease-out 0s;
+}
+
+[data-theme="dark"] .admin-login-body .custom-input:-webkit-autofill,
+[data-theme="dark"] .admin-login-body .custom-input:-webkit-autofill:hover,
+[data-theme="dark"] .admin-login-body .custom-input:-webkit-autofill:focus,
+body.admin-login-body.dark-mode .custom-input:-webkit-autofill,
+body.admin-login-body.dark-mode .custom-input:-webkit-autofill:hover,
+body.admin-login-body.dark-mode .custom-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  caret-color: #f8fafc;
+}
+
 /* Password Toggle */
 .admin-login-body .password-toggle-btn {
   position: absolute;

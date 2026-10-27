@@ -174,6 +174,10 @@ class PluginLoader
             if ($slug === 'ui') {
                 continue;
             }
+            // a plugin loaded earlier in this loop may have retired this one (renamed its manifest): skip it
+            if (!is_file($manifestFile)) {
+                continue;
+            }
             $m = json_decode(file_get_contents($manifestFile), true);
             if (!is_array($m)) {
                 continue;

@@ -585,12 +585,12 @@
                     </div>
 
                     <div class="col-md-12" style="margin: 20px 0 15px; padding: 0;">
-                        <hr style="border-top: 1px solid #e5e7eb; margin: 15px 0;">
-                        <h4 style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <hr style="border-top: 1px solid rgba(148, 163, 184, 0.35); margin: 15px 0;">
+                        <h4 style="font-weight: 600; color: inherit; display: flex; align-items: center; gap: 8px;">
                             <i class="glyphicon glyphicon-shield" style="color: #3b82f6;"></i>
                             {Lang::T('Captcha & Bot Protection')}
                         </h4>
-                        <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">
+                        <p style="color: inherit; opacity: 0.7; font-size: 13px; margin-bottom: 20px;">
                             {Lang::T('Protect Admin and Member login from automated brute-force attacks and credential stuffing with Cloudflare Turnstile or Google reCAPTCHA.')}
                         </p>
                     </div>
@@ -617,21 +617,16 @@
 
                     <div class="form-group" id="captcha_target_group">
                         <label class="col-md-3 control-label">{Lang::T('Protected Pages')}</label>
-                        <div class="col-md-5">
-                            <select name="captcha_target" id="captcha_target" class="form-control">
-                                <option value="both" {if empty($_c['captcha_target']) || $_c['captcha_target']=='both'}selected="selected"{/if}>
-                                    {Lang::T('Both Admin & Customer Login')}
-                                </option>
-                                <option value="admin" {if $_c['captcha_target']=='admin'}selected="selected"{/if}>
-                                    {Lang::T('Admin Login Only')}
-                                </option>
-                                <option value="customer" {if $_c['captcha_target']=='customer'}selected="selected"{/if}>
-                                    {Lang::T('Customer Login Only')}
-                                </option>
-                            </select>
+                        <div class="col-md-5" style="padding-top: 0;">
+                            <label class="checkbox-inline" style="margin-right: 18px;"><input type="checkbox" name="captcha_on_admin" value="yes"
+                                    {if Captcha::isContextOn('admin')}checked{/if}> {Lang::T('Admin')}</label>
+                            <label class="checkbox-inline" style="margin-right: 18px;"><input type="checkbox" name="captcha_on_customer" value="yes"
+                                    {if Captcha::isContextOn('customer')}checked{/if}> {Lang::T('Customer')}</label>
+                            <label class="checkbox-inline"><input type="checkbox" name="captcha_on_plugin" value="yes"
+                                    {if Captcha::isContextOn('plugin')}checked{/if}> {Lang::T('Plugins')}</label>
                         </div>
                         <p class="help-block col-md-4">
-                            <small>{Lang::T('Select which login pages require verification.')}</small>
+                            <small>{Lang::T('Tick the logins that require verification. Plugins covers logins plugins add, such as the Hotspot merchant portal.')}</small>
                         </p>
                     </div>
 
