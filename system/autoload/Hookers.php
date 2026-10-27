@@ -87,6 +87,8 @@ function register_route($function, $access = 'admin')
     if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $function)) {
         return;
     }
+    // PHP function names are case-insensitive (plugin/ADMIN_ACTION runs admin_action()), so the registry is too
+    $function = strtolower($function);
     $route_registered[$function] = in_array($access, ['admin', 'customer', 'public'], true) ? $access : 'admin';
 }
 
@@ -98,12 +100,13 @@ function register_route($function, $access = 'admin')
 function plugin_route_access($function)
 {
     global $route_registered, $menu_registered;
+    $function = strtolower((string) $function); // see register_route(): any spelling of the name is the same function
     if (isset($route_registered[$function])) {
         return $route_registered[$function];
     }
     foreach ((array) $menu_registered as $menu) {
         // a menu function may carry a section: "myplugin/settings" runs myplugin()
-        if (isset($menu['function']) && strtok((string) $menu['function'], '/') === $function) {
+        if (isset($menu['function']) && strtolower((string) strtok((string) $menu['function'], '/')) === $function) {
             return 'menu';
         }
     }
@@ -117,6 +120,7 @@ function plugin_route_access($function)
 function plugin_route_warn($function)
 {
     global $CACHE_PATH;
+    $function = strtolower((string) $function);
     $file = rtrim((string) $CACHE_PATH, '/\\') . '/plugin_routes_warned.json';
     $seen = is_file($file) ? (json_decode((string) file_get_contents($file), true) ?: []) : [];
     if (isset($seen[$function]) && time() - (int) $seen[$function] < 86400) {
@@ -124,7 +128,7 @@ function plugin_route_warn($function)
     }
     $seen[$function] = time();
     @file_put_contents($file, json_encode($seen), LOCK_EX);
-    _log("Plugin route '$function' is not declared. It still works, but a later release will refuse it: declare it with register_route('$function', 'public|admin|customer') or in the plugin.json \"routes\" list (see docs/PLUGINS.md).", 'Plugin');
+    _log("Plugin route '$function' is not declared. It still works, but a later release will refuse it: declare it with register_route('$function', 'public|admin|customer') or in the plugin.json \"routes\" list (see PLUGINS.md).", 'Plugin');
 }
 
 $hook_registered = array();

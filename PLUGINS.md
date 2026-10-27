@@ -26,7 +26,10 @@ The core only runs a function when **all** of these are true:
 
 1. it is defined by a file under `system/plugin/` (never a PHP built-in or a core function),
 2. it needs no arguments,
-3. the plugin has **declared** it (below).
+3. the plugin has **declared** it (below), when the site is in *enforce* mode. In *warn* mode (today's default) an
+   undeclared plugin function still runs and is logged; see [Warn mode and enforce mode](#warn-mode-and-enforce-mode).
+
+A function that **is** declared as an `admin` or `customer` route gets its sign-in check in both modes.
 
 ## Declaring what a URL may call
 

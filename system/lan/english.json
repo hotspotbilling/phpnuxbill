@@ -4015,5 +4015,7 @@
     "Tick_the_logins_that_require_verification__Plugins_covers_logins_plugins_add__such_as_the_Hotspot_merchant_portal_": "Tick the logins that require verification. Plugins covers logins plugins add, such as the Hotspot merchant portal.",
     "Theme__automatic__follows_your_device___Click_for_light": "Theme: automatic (follows your device). Click for light",
     "Theme__light__Click_for_dark": "Theme: light. Click for dark",
-    "Theme__dark__Click_for_automatic": "Theme: dark. Click for automatic"
+    "Theme__dark__Click_for_automatic": "Theme: dark. Click for automatic",
+    "Used_for_the_vouchers_a_merchant_or_agent_generates_when_their_own_account_has_no_format__prefix_or_length_set__and_as_the_starting_values_of_the_admin_Vouchers_form__A_merchant_can_still_change_them_for_each_batch__Vouchers_customers_buy_through_a_payment_gateway_use_the_voucher_settings_of_the_General_tab_instead_": "Used for the vouchers a merchant or agent generates when their own account has no format, prefix or length set, and as the starting values of the admin Vouchers form. A merchant can still change them for each batch. Vouchers customers buy through a payment gateway use the voucher settings of the General tab instead.",
+    "Agent_registered_successfully_": "Agent registered successfully!"
 }
