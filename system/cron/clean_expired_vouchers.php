@@ -18,6 +18,8 @@ if (!$isCli) {
     echo "<pre>";
 }
 
+$failed = false; // set when the delete transaction fails, so cron sees a non-zero exit status
+
 // Dry-run detection
 $dryRun = false;
 if ($isCli) {
@@ -32,8 +34,17 @@ if ($isCli) {
         $dryRun = true;
     }
 
-    // Check if the user is authenticated and authorized or valid API key
-    if (!$isCli && (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) && (!isset($_GET['secret']) || $_GET['secret'] !== $config['api_key'])) {
+    // Web preview is for SuperAdmin / Admin (it lists voucher codes) or for a caller that knows the API key.
+    // An empty api_key never matches, and the key is compared in constant time.
+    $webAllowed = false;
+    if (!empty($_SESSION['aid'])) {
+        $staff = ORM::for_table('tbl_users')->find_one((int) $_SESSION['aid']);
+        $webAllowed = $staff && in_array($staff['user_type'], ['SuperAdmin', 'Admin'], true);
+    }
+    if (!$webAllowed && !empty($config['api_key']) && isset($_GET['secret']) && is_string($_GET['secret'])) {
+        $webAllowed = hash_equals((string) $config['api_key'], $_GET['secret']);
+    }
+    if (!$isCli && !$webAllowed) {
         // Log unauthorized access
         _log("Unauthorized access attempt to clean_expired_vouchers.php from " . $_SERVER['REMOTE_ADDR'] . " User-Agent: " . ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'), 'Warning');
 
@@ -43,11 +54,6 @@ if ($isCli) {
         exit(1);
     }
 }
-
-/**
- * Check if current user has permission to view this script
- * @return bool
- */
 
 echo "PHP Time: " . date('Y-m-d H:i:s') . "\n";
 
@@ -75,7 +81,8 @@ if ($countCandidates === 0) {
 if ($dryRun) {
     echo ">>> DRY RUN MODE: No deletions will be performed <<<\n";
     foreach ($usernames as $user) {
-        echo "[DRY RUN] Would delete voucher(s) in tbl_voucher with code = $user\n";
+        // codes are printed into an HTML page in web mode
+        echo "[DRY RUN] Would delete voucher(s) in tbl_voucher with code = " . htmlspecialchars((string) $user) . "\n";
     }
 } else {
     // Get database connection for transaction
@@ -85,32 +92,39 @@ if ($dryRun) {
         // Begin transaction to ensure atomicity
         $db->beginTransaction();
 
-        // Step 2: Delete expired recharges
-        $deletedRecharges = ORM::for_table('tbl_user_recharges')
-            ->where_in('username', $usernames)
-            ->where('status', 'off')
-            ->where('customer_id', '0')
-            ->delete_many();
+        $deletedRecharges = 0;
+        $deletedVouchers = 0;
+        // in chunks: thousands of expired vouchers would make one IN (...) list too big for the query
+        foreach (array_chunk($usernames, 500) as $chunk) {
+            // Step 2: Delete expired recharges
+            $deletedRecharges += ORM::for_table('tbl_user_recharges')
+                ->where_in('username', $chunk)
+                ->where('status', 'off')
+                ->where('customer_id', '0')
+                ->delete_many();
+
+            // Step 3: Delete matching vouchers from tbl_voucher
+            $deletedVouchers += ORM::for_table('tbl_voucher')
+                ->where_in('code', $chunk) // match code = username
+                ->where('status', '1')
+                ->delete_many();
+        }
 
         echo "Deleted $deletedRecharges expired voucher(s) from tbl_user_recharges\n";
-
-        // Step 3: Delete matching vouchers from tbl_voucher
-        $deletedVouchers = ORM::for_table('tbl_voucher')
-            ->where_in('code', $usernames) // match code = username
-            ->where('status', '1')
-            ->delete_many();
-
         echo "Deleted $deletedVouchers vouchers from tbl_voucher\n";
 
         // Commit the transaction if both deletes were successful
         $db->commit();
-    } catch (Exception $e) {
-        // Rollback the transaction on any error
-        $db->rollBack();
+    } catch (Throwable $e) {
+        // Rollback the transaction on any error (there may be none to roll back if it never began)
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
 
         // Log the error
         _log("Error in clean_expired_vouchers.php: " . $e->getMessage(), 'CRON');
-        echo "ERROR: Transaction failed and was rolled back: " . $e->getMessage() . "\n";
+        echo "ERROR: Transaction failed and was rolled back: " . htmlspecialchars($e->getMessage()) . "\n";
+        $failed = true;
     }
 }
 
@@ -130,4 +144,8 @@ if (!$isCli) {
         echo "<p>To run this script via CLI in dry-run mode: <code>php clean_expired_vouchers.php --dry-run</code></p>";
         echo "</div>";
     }
+}
+
+if ($isCli && $failed) {
+    exit(1);
 }

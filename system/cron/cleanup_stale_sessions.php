@@ -29,6 +29,17 @@ $now = time();
 // Find stale REST sessions (rad_acct table)
 // A session is stale if it hasn't been updated in more than $sessionTimeout seconds
 // Use dateUpdated if available (for sessions with interim updates), otherwise fall back to dateAdded
+$failed = false; // any real query failure makes the script exit with status 1
+
+/** Only "table does not exist" (MySQL 1146 / SQLSTATE 42S02) means the table was never created; anything else is a real fault */
+function stale_sessions_table_missing(Throwable $e): bool
+{
+    if (!($e instanceof PDOException)) {
+        return false;
+    }
+    return (isset($e->errorInfo[1]) && (int) $e->errorInfo[1] === 1146) || (string) $e->getCode() === '42S02';
+}
+
 $staleSessionsRest = [];
 try {
     $staleSessionsRest = ORM::for_table('rad_acct')
@@ -37,7 +48,13 @@ try {
         ->where_raw("UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) > 0 AND UNIX_TIMESTAMP(COALESCE(dateUpdated, dateAdded)) < ?", [$now - $sessionTimeout])
         ->find_many();
 } catch (Throwable $e) {
-    echo "rad_acct is not available, skipping REST sessions: " . $e->getMessage() . "\n";
+    if (stale_sessions_table_missing($e)) {
+        echo "No rad_acct table (radius.php has not been used yet), skipping REST sessions\n";
+    } else {
+        $failed = true;
+        echo "Error reading rad_acct: " . $e->getMessage() . "\n";
+        _log("Error reading stale REST sessions: " . $e->getMessage(), 'CRON', 'ERROR');
+    }
 }
 
 // Find stale MySQL RADIUS sessions (radacct table). It only exists when FreeRADIUS uses the SQL module with
@@ -53,7 +70,14 @@ try {
         ->where_raw("UNIX_TIMESTAMP(acctupdatetime) < ?", [$now - $sessionTimeout])
         ->find_many();
 } catch (Throwable $e) {
-    echo "No radacct table (RADIUS REST only), skipping MySQL sessions\n";
+    if (stale_sessions_table_missing($e)) {
+        echo "No radacct table (RADIUS REST only), skipping MySQL sessions\n";
+    } else {
+        // connection refused, access denied, bad column...: a real problem, not a REST-only setup
+        $failed = true;
+        echo "Error reading radacct: " . $e->getMessage() . "\n";
+        _log("Error reading stale MySQL sessions: " . $e->getMessage(), 'CRON', 'ERROR');
+    }
 }
 
 $count = 0;
@@ -126,3 +150,4 @@ if (!empty($staleSessionsMysql)) {
 }
 
 echo "Cleaned up " . $count . " stale sessions\n";
+exit($failed ? 1 : 0);
