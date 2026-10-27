@@ -584,6 +584,23 @@
                         </p>
                     </div>
 
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Plugin Routes')}</label>
+                        <div class="col-md-5">
+                            <select name="plugin_routes_mode" class="form-control">
+                                <option value="warn" {if empty($_c['plugin_routes_mode']) || $_c['plugin_routes_mode']!='enforce'}selected="selected"{/if}>
+                                    {Lang::T('Warn: run undeclared plugin functions and log them')}
+                                </option>
+                                <option value="enforce" {if $_c['plugin_routes_mode']=='enforce'}selected="selected"{/if}>
+                                    {Lang::T('Enforce: only declared plugin routes and menus run')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            <small>{Lang::T('Plugins declare the functions their URLs may call (register_route or plugin.json routes). Enforce refuses everything else; use Warn while older plugins are being updated.')}</small>
+                        </p>
+                    </div>
+
                     <div class="col-md-12" style="margin: 20px 0 15px; padding: 0;">
                         <hr style="border-top: 1px solid rgba(148, 163, 184, 0.35); margin: 15px 0;">
                         <h4 style="font-weight: 600; color: inherit; display: flex; align-items: center; gap: 8px;">

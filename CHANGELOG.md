@@ -2,6 +2,22 @@
 
 # CHANGELOG
 
+## Unreleased
+
+- Plugins: `?_route=plugin/<function>` now runs only functions a plugin has **declared**. A function is declared by its
+  menu (`register_menu`, `register_submenu`, or `"menus"` in `plugin.json`) or as a route: `register_route($function,
+  $access)` or `"routes": [{"function": "...", "access": "public|admin|customer"}]` in `plugin.json`. `admin` and `customer`
+  routes are sign-in checked by the core before the function runs; `public` is for webhooks, callbacks and a plugin's own API.
+  Built-in PHP functions, functions outside `system/plugin/` and functions that need arguments can no longer be called this way.
+  (Before, `plugin/phpinfo` ran PHP's own `phpinfo()`.)
+- **Transition**: Settings > App > *Plugin Routes* (`plugin_routes_mode`). The default, *warn*, still runs an undeclared plugin
+  function and writes one log line a day for it; *enforce* refuses it. The default will become *enforce* in a later
+  release. Update a plugin: declare its routes, then `php skeletons/build.php check plugin system/plugin/<slug>`.
+- New developer guide `docs/PLUGINS.md`; the plugin skeleton declares a sample public webhook route.
+- Hotspot plugin 3.9.0 declares its routes and fixes two missing sign-in checks found while doing so: `hotspot_GenerateVoucher`
+  trusted `is_admin` / `generate_by` from the request (voucher generation without signing in, or charging another merchant),
+  and `hotspot_block_mac` could be used by anyone (now admin only, with a CSRF token).
+
 ## 2026.10.25
 
 - Fixed: plugin menus registered with `admin = true` (e.g. Skeleton, My Plugin) showed in the customer portal sidebar whenever an admin session was open in the same browser; admin and customer menus are now kept apart (`_menu_publish()`, called by `_admin()` / `_auth()`)

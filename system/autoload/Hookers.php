@@ -65,6 +65,68 @@ function register_submenu($parentFunction, $name, $admin, $function, $position, 
     ];
 }
 
+$route_registered = array();
+
+/**
+ * Declare a function a plugin page, webhook or API entry point: ?_route=plugin/<function> may run it.
+ * Menu functions (register_menu / register_submenu, or "menus" in plugin.json) are allowed without this.
+ *
+ * @param string $function PHP function name, no arguments required
+ * @param string $access   who may call it, checked by the core before the function runs:
+ *                         'admin'    a signed-in staff member (_admin())
+ *                         'customer' a signed-in customer (_auth())
+ *                         'public'   anyone: webhooks, payment callbacks, a plugin's own API or login. The function
+ *                                    must do its own checks (a signature, a token, its own session).
+ *                         The default is 'admin', the safe choice when in doubt.
+ * Folder plugins can declare the same in plugin.json: "routes": [{"function": "x_webhook", "access": "public"}].
+ */
+function register_route($function, $access = 'admin')
+{
+    global $route_registered;
+    $function = (string) $function;
+    if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $function)) {
+        return;
+    }
+    $route_registered[$function] = in_array($access, ['admin', 'customer', 'public'], true) ? $access : 'admin';
+}
+
+/**
+ * How a function may be reached through plugin/<function>.
+ * @return string|null 'admin' | 'customer' | 'public' for a declared route, 'menu' for a menu function (it checks the
+ *                     sign-in itself, as it can serve several audiences), null when nothing declares it
+ */
+function plugin_route_access($function)
+{
+    global $route_registered, $menu_registered;
+    if (isset($route_registered[$function])) {
+        return $route_registered[$function];
+    }
+    foreach ((array) $menu_registered as $menu) {
+        // a menu function may carry a section: "myplugin/settings" runs myplugin()
+        if (isset($menu['function']) && strtok((string) $menu['function'], '/') === $function) {
+            return 'menu';
+        }
+    }
+    return null;
+}
+
+/**
+ * plugin/<function> ran a function nothing declares (see register_route). Only warns, at most once a day per function,
+ * so a log does not fill up; the call still goes through unless plugin_routes_mode is 'enforce'.
+ */
+function plugin_route_warn($function)
+{
+    global $CACHE_PATH;
+    $file = rtrim((string) $CACHE_PATH, '/\\') . '/plugin_routes_warned.json';
+    $seen = is_file($file) ? (json_decode((string) file_get_contents($file), true) ?: []) : [];
+    if (isset($seen[$function]) && time() - (int) $seen[$function] < 86400) {
+        return;
+    }
+    $seen[$function] = time();
+    @file_put_contents($file, json_encode($seen), LOCK_EX);
+    _log("Plugin route '$function' is not declared. It still works, but a later release will refuse it: declare it with register_route('$function', 'public|admin|customer') or in the plugin.json \"routes\" list (see docs/PLUGINS.md).", 'Plugin');
+}
+
 $hook_registered = array();
 
 function register_hook($action, $function){

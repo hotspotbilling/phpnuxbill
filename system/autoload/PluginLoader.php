@@ -205,6 +205,18 @@ class PluginLoader
                 }
             }
 
+            // Declared routes from plugin.json: "routes": [{"function": "x_webhook", "access": "public"}] (a plain string
+            // means an admin-only route)
+            if (!empty($m['routes']) && is_array($m['routes']) && function_exists('register_route')) {
+                foreach ($m['routes'] as $route) {
+                    if (is_string($route)) {
+                        register_route($route, 'admin');
+                    } elseif (is_array($route) && !empty($route['function'])) {
+                        register_route($route['function'], $route['access'] ?? 'admin');
+                    }
+                }
+            }
+
             // Declarative menus from plugin.json manifest
             if (!empty($m['menus']) && is_array($m['menus'])) {
                 foreach ($m['menus'] as $mi) {
