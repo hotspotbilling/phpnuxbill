@@ -1,0 +1,529 @@
+/**
+ * Customer portal chrome: header, menu, mobile bar and footer, in a light and a dark theme.
+ *
+ * Loads after styles.customer.css. Light is the default; body.dark-mode (the system / light / dark switch in the header)
+ * swaps the tokens, so there is one set of rules. A theme re-skins the portal by redefining the --cm-* tokens in its own
+ * styles/customer.css (see ui/themes/shadcn/styles/customer.css); the mobile Buy button keeps its markup and classes.
+ */
+
+body.cm-chrome.modern-skin-dark {
+  --cm-bar: rgba(255, 255, 255, 0.86);
+  --cm-solid: #ffffff;
+  --cm-border: #e6eaf0;
+  --cm-text: #1f2937;
+  --cm-muted: #64748b;
+  --cm-hover: #f1f5f9;
+  --cm-accent: #f5b400;
+  --cm-accent-soft: #fff4cf;
+  --cm-accent-text: #8a5a00;
+  --cm-fab-fg: #1a1a1a;
+  --cm-fab-shadow: 0 8px 18px rgba(245, 180, 0, 0.4);
+  --cm-nav-radius: 22px;
+  --cm-radius: 12px;
+  --cm-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px rgba(15, 23, 42, 0.08);
+  --cm-nav-shadow: 0 10px 30px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08);
+  --cm-nav-text: #6b7280;
+  --cm-nav-active: #111827;
+}
+
+body.cm-chrome.modern-skin-dark.dark-mode {
+  --cm-bar: rgba(14, 18, 25, 0.82);
+  --cm-solid: #0e1219;
+  --cm-border: rgba(255, 255, 255, 0.09);
+  --cm-text: #e2e8f0;
+  --cm-muted: #8b93a7;
+  --cm-hover: rgba(255, 255, 255, 0.06);
+  --cm-accent: #ffcc00;
+  --cm-accent-soft: rgba(255, 204, 0, 0.13);
+  --cm-accent-text: #ffcc00;
+  --cm-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.45);
+  --cm-nav-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --cm-nav-text: #8b93a7;
+  --cm-nav-active: #ffffff;
+}
+
+/* ---------- top bar ---------- */
+body.cm-chrome.modern-skin-dark .main-header {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* the frosted bar is a layer behind the header, not the header itself: a blurred backdrop on the element that also holds
+   the open dropdowns renders those with a grey wash in some browsers */
+body.cm-chrome.modern-skin-dark .main-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  background: var(--cm-bar);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--cm-border);
+  pointer-events: none;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .logo {
+  background: transparent;
+  color: var(--cm-text);
+  border: 0;
+  box-shadow: none;
+  text-align: center;
+  padding: 0 12px;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .logo:hover {
+  background: transparent;
+  color: var(--cm-text);
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+body.cm-chrome.modern-skin-dark .cm-name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* The legacy dark skin paints every top-bar button #3d4e68 !important on :hover, :focus, :active and :visited (a "#" link
+   counts as visited, so the account button stayed navy) and the account button forces its own padding and blue hover.
+   The states are restated here with !important. */
+body.cm-chrome.modern-skin-dark .main-header .navbar .sidebar-toggle,
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a,
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:visited,
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:active {
+  color: var(--cm-muted) !important;
+  background-color: transparent !important;
+  border-radius: 10px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar .sidebar-toggle:hover,
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:hover,
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:focus,
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li.open > a {
+  color: var(--cm-text) !important;
+  background-color: var(--cm-hover) !important;
+}
+
+/* account button: pill with the balance and the avatar, even padding (the legacy rule left 12px empty on the right) */
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li.user-menu > a.dropdown-toggle {
+  height: 40px !important;
+  margin: 5px 2px !important;
+  padding: 0 5px 0 4px !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-custom-menu .navbar-nav > li > a {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 40px;
+  margin: 5px 2px;
+  padding: 0 9px;
+  line-height: 1;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-custom-menu .navbar-nav > li:last-child > a {
+  margin-right: 8px;
+}
+
+body.cm-chrome.modern-skin-dark .toggle-container .toggle-icon {
+  display: flex;
+  color: inherit;
+}
+
+body.cm-chrome.modern-skin-dark.dark-mode .toggle-container .toggle-icon {
+  color: #ffdd57;
+}
+
+/* balance (or name) as a pill, avatar beside it */
+body.cm-chrome.modern-skin-dark .cm-balance {
+  display: inline-block;
+  padding: 5px 11px;
+  margin-right: 8px;
+  border-radius: 99px;
+  background: var(--cm-accent-soft);
+  color: var(--cm-accent-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav > .user-menu > .dropdown-toggle > .user-image {
+  float: none;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  border: 2px solid var(--cm-border);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* unread count as a small badge on the bell, hidden while empty */
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav > .notifications-menu > a > .label {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav > .notifications-menu > a > .label:empty {
+  display: none;
+}
+
+/* dropdowns: one rounded card for language, inbox and account */
+/* the older skins and the dark-mode block paint these surfaces with !important, so they need it here too */
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu {
+  margin-top: 6px;
+  padding: 0;
+  overflow: hidden;
+  background: var(--cm-solid) !important;
+  color: var(--cm-text);
+  border: 1px solid var(--cm-border) !important;
+  border-radius: 14px;
+  box-shadow: var(--cm-shadow) !important;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > li.user-header {
+  height: auto;
+  padding: 18px 16px 12px;
+  background: var(--cm-hover) !important;
+  background-image: none !important;
+  color: var(--cm-text);
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > li.user-header > p,
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > li.user-header > p > small {
+  color: var(--cm-text);
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > li.user-header > p > small {
+  color: var(--cm-muted);
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > li.user-header > img {
+  border: 2px solid var(--cm-border);
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > .user-body,
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > .user-footer,
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > li.footer > a {
+  background: var(--cm-solid) !important;
+  color: var(--cm-text);
+  border-color: var(--cm-border) !important;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-custom-menu .navbar-nav > li.user-menu > .dropdown-menu > .user-body a {
+  color: var(--cm-text) !important;
+}
+
+/* the legacy dark skin dims the whole page to 70% black behind the account menu; the menu is a floating card now */
+body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li.user-menu ul::before {
+  display: none;
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > .user-body a,
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu .menu > li > a {
+  color: var(--cm-text);
+  border-color: var(--cm-border);
+}
+
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu .menu > li > a:hover,
+body.cm-chrome.modern-skin-dark .main-header .navbar-nav .dropdown-menu > li.footer > a:hover {
+  background: var(--cm-hover);
+}
+
+/* ---------- menu (desktop and the slide-in menu on phones) ---------- */
+body.cm-chrome.modern-skin-dark .main-sidebar {
+  background: var(--cm-solid);
+  border-right: 1px solid var(--cm-border);
+  box-shadow: none;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar,
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu {
+  background: transparent;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar {
+  padding: 12px 6px;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li > a {
+  display: flex;
+  align-items: center;
+  margin: 2px 4px;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--cm-muted);
+  border: 0;
+  border-radius: var(--cm-radius);
+  font-size: 14.5px;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li > a:hover,
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li > a:focus {
+  background: var(--cm-hover);
+  color: var(--cm-text);
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li.active > a {
+  background: var(--cm-accent-soft);
+  color: var(--cm-accent-text);
+  border-radius: var(--cm-radius);
+  margin: 2px 4px;
+}
+
+body.cm-chrome.modern-skin-dark .sidebar-menu .icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  flex: none;
+}
+
+/* entries with a submenu: the chevron (and any label) sits at the far right of the row; with flex rows the float that used to
+   push it there does nothing. Long names are cut inside the row. */
+body.cm-chrome.modern-skin-dark .sidebar-menu > li > a > .pull-right-container {
+  position: static;
+  display: flex;
+  align-items: center;
+  margin: 0 0 0 auto;
+  padding-left: 8px;
+  right: auto;
+  top: auto;
+}
+
+body.cm-chrome.modern-skin-dark .sidebar-menu > li > a > .pull-right-container > .pull-right {
+  float: none;
+}
+
+body.cm-chrome.modern-skin-dark:not(.sidebar-collapse) .sidebar-menu > li > a > span:not(.pull-right-container) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* an open group: its parent row stays plain, only the active child gets the pill */
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li.treeview.menu-open > a {
+  background: transparent;
+  color: var(--cm-text);
+}
+
+/* submenu: indented under the parent's label with a thin guide line, rounded rows like the top level */
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu {
+  margin: 2px 4px 6px 22px;
+  padding: 2px 0 2px 8px;
+  border-left: 2px solid var(--cm-border);
+  background: transparent;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a {
+  display: flex;
+  align-items: center;
+  margin: 1px 0;
+  padding: 8px 10px;
+  color: var(--cm-muted);
+  background: transparent !important;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a:hover {
+  color: var(--cm-text);
+  background: var(--cm-hover) !important;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li.active > a {
+  color: var(--cm-accent-text);
+  background: var(--cm-accent-soft) !important;
+  font-weight: 600;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a .icon {
+  width: 18px;
+  height: 18px;
+  margin: 0 8px 0 0;
+  font-size: 15px;
+}
+
+/* collapsed to icons: the label that pops out on hover follows the theme */
+body.cm-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li:hover > a > span:not(.pull-right) {
+  background: var(--cm-solid);
+  color: var(--cm-text);
+  border-radius: 0 var(--cm-radius) var(--cm-radius) 0;
+  box-shadow: var(--cm-shadow);
+}
+
+/* collapsed to the 50px icon rail (desktop): the expanded side padding and icon margin would leave a narrow pill off to the
+   left, so the rail centres each icon in a pill that fills the rail */
+@media (min-width: 768px) {
+  body.cm-chrome.modern-skin-dark.sidebar-collapse .main-sidebar .sidebar {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  body.cm-chrome.modern-skin-dark.sidebar-collapse .main-sidebar .sidebar .sidebar-menu > li > a {
+    justify-content: center;
+    margin: 2px 5px;
+    padding: 10px 0;
+  }
+
+  body.cm-chrome.modern-skin-dark.sidebar-collapse .main-sidebar .sidebar .sidebar-menu > li.active > a {
+    margin: 2px 5px;
+  }
+
+  body.cm-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu .icon {
+    margin-right: 0;
+  }
+
+  /* hovering a group in the rail opens its submenu as a flyout card beside it */
+  body.cm-chrome.modern-skin-dark.sidebar-collapse .main-sidebar .sidebar .sidebar-menu > li:hover > .treeview-menu {
+    margin: 0;
+    padding: 6px;
+    background: var(--cm-solid);
+    border: 1px solid var(--cm-border);
+    border-radius: 0 12px 12px 0;
+    box-shadow: var(--cm-shadow);
+  }
+
+  body.cm-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li > a > .pull-right-container {
+    display: none;
+  }
+}
+
+/* ---------- footer ---------- */
+body.cm-chrome.modern-skin-dark .main-footer.cm-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 18px 25px;
+  background: transparent;
+  color: var(--cm-muted);
+  border-top: 1px solid var(--cm-border);
+  font-size: 13px;
+}
+
+body.cm-chrome.modern-skin-dark .cm-footer a {
+  color: var(--cm-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+body.cm-chrome.modern-skin-dark .cm-footer a:hover {
+  color: var(--cm-text);
+  text-decoration: underline;
+}
+
+body.cm-chrome.modern-skin-dark .cm-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- phones: floating bottom bar, Buy button stays raised in the middle ---------- */
+@media (max-width: 768px) {
+  body.cm-chrome.modern-skin-dark .bottom-nav {
+    --nav-bg: var(--cm-solid);
+    --nav-text: var(--cm-nav-text);
+    --nav-text-active: var(--cm-nav-active);
+    --nav-accent: var(--cm-accent);
+    --nav-ring: var(--cm-solid);
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    min-height: 62px;
+    padding-bottom: 0;
+    background: var(--cm-solid);
+    border: 1px solid var(--cm-border);
+    border-radius: var(--cm-nav-radius);
+    box-shadow: var(--cm-nav-shadow);
+  }
+
+  /* tighter top-bar icons so the balance pill reads in full */
+  body.cm-chrome.modern-skin-dark .main-header .navbar-custom-menu .navbar-nav > li > a {
+    margin: 5px 1px;
+    padding: 0 7px;
+  }
+
+  body.cm-chrome.modern-skin-dark .navbar-custom-menu .user-menu > a > span.cm-balance {
+    max-width: 110px;
+    margin-right: 6px;
+    padding: 5px 9px;
+  }
+
+  /* the active tab is a soft pill behind its icon and label, not a line on the edge */
+  body.cm-chrome.modern-skin-dark .bottom-nav .nav-item:not(.nav-item-fab).active::after {
+    top: 6px;
+    width: 58px;
+    height: calc(100% - 12px);
+    border-radius: 16px;
+    background: var(--cm-accent-soft);
+    z-index: -1;
+  }
+
+  body.cm-chrome.modern-skin-dark .bottom-nav .nav-item-fab::after {
+    display: none;
+  }
+
+  body.cm-chrome.modern-skin-dark .bottom-nav .nav-item.active .nav-icon {
+    color: var(--cm-accent-text);
+  }
+
+  body.cm-chrome.modern-skin-dark .bottom-nav .floating-button,
+  body.cm-chrome.modern-skin-dark .bottom-nav .floating-button:hover,
+  body.cm-chrome.modern-skin-dark .bottom-nav .floating-button:focus {
+    color: var(--cm-fab-fg);
+    box-shadow: var(--cm-fab-shadow);
+  }
+
+  body.cm-chrome.modern-skin-dark .bottom-nav .nav-item-fab.active .floating-button {
+    box-shadow: 0 0 0 3px var(--cm-solid), 0 0 0 5px var(--cm-accent), var(--cm-fab-shadow);
+  }
+
+  /* the bar floats, so the page and the footer clear it: 62px + 10px gap + the raised button's overhang */
+  body.cm-chrome.modern-skin-dark .content-wrapper {
+    padding-bottom: 16px;
+  }
+
+  body.cm-chrome.modern-skin-dark .main-footer.cm-footer {
+    padding: 16px 16px calc(100px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* the menu's scrollbar was white on white */
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar {
+  scrollbar-color: var(--cm-border) transparent;
+}
+
+body.cm-chrome.modern-skin-dark .main-sidebar .sidebar::-webkit-scrollbar-thumb {
+  background: var(--cm-border);
+}

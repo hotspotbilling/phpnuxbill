@@ -19,6 +19,12 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2026.10.25.4" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/customer-modern.css?2026.10.28.1" />
+    {if !empty($_theme_customer_css)}
+    {foreach $_theme_customer_css as $themeCss}
+    <link rel="stylesheet" href="{$themeCss}" />
+    {/foreach}
+    {/if}
     <script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/clipboard.min.js"></script>
 
@@ -32,7 +38,17 @@
 
 </head>
 
-<body class="hold-transition modern-skin-dark sidebar-mini fixed">
+<body class="hold-transition modern-skin-dark cm-chrome sidebar-mini fixed{if $_kolaps} sidebar-collapse{/if}">
+    <script>
+        /* apply the saved light / dark / system choice before anything paints (the switch in the footer keeps it in step) */
+        (function () {
+            try {
+                var mode = localStorage.getItem('mode') || 'system';
+                var dark = mode === 'dark' || (mode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (dark) { document.body.classList.add('dark-mode'); }
+            } catch (e) { }
+        })();
+    </script>
     <!-- Modal -->
     <div class="modal fade" id="subscribeModal" tabindex="-1" role="dialog" aria-labelledby="subscribeModalLabel">
         <div class="modal-dialog" role="document">
@@ -128,8 +144,8 @@
     <div class="wrapper">
         <header class="main-header" style="position:fixed; width: 100%">
             <a href="{Text::url('home')}" class="logo">
-                <span class="logo-mini"><b>N</b>uX</span>
-                <span class="logo-lg">{$_c['CompanyName']}</span>
+                <span class="logo-mini"><b>{$_c['CompanyName']|truncate:1:''|upper|escape}</b></span>
+                <span class="logo-lg"><span class="cm-name">{$_c['CompanyName']}</span></span>
             </a>
             <nav class="navbar navbar-static-top">
                 <a href="#" class="sidebar-toggle toggle" data-toggle="push-menu" role="button">
@@ -197,10 +213,9 @@
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 {if $_c['enable_balance'] == 'yes'}
-                                <span
-                                    style="color: whitesmoke;">&nbsp;{Lang::moneyFormat($_user['balance'])}&nbsp;</span>
+                                <span class="cm-balance">{Lang::moneyFormat($_user['balance'])}</span>
                                 {else}
-                                <span>{$_user['fullname']}</span>
+                                <span class="cm-balance cm-balance-name">{$_user['fullname']}</span>
                                 {/if}
                                 <img src="{$app_url}/{$UPLOAD_PATH}{$_user['photo']}.thumb.jpg"
                                     onerror="this.src='https://www.gravatar.com/avatar/{$_user['email']|default:'user@example.com'|md5}?d=mp'" class="user-image"

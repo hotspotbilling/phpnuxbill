@@ -4,6 +4,14 @@
 
 ## Unreleased
 
+- Customer portal: new header, menu, mobile bar and footer with a light and a dark theme that follow the existing system /
+  light / dark switch (before, the header and menu were always dark). Frosted top bar with a logo mark, balance as a pill,
+  rounded account / inbox / language dropdowns, rounded menu items, a floating mobile bar with a soft active-tab pill, and a
+  slim footer that clears the bar. The raised Buy button keeps its place and markup. The saved theme is applied before the
+  page paints (no light flash). The account dropdown no longer dims the whole page. Styles: `ui/ui/styles/customer-modern.css`.
+- Themes: a theme can restyle the customer portal chrome by shipping `styles/customer.css` (loaded after the core styles,
+  parent theme first). The shadcn theme now has one: a Zinc / neutral skin that redefines the `--cm-*` tokens.
+
 - Plugins: `?_route=plugin/<function>` now runs only functions a plugin has **declared**. A function is declared by its
   menu (`register_menu`, `register_submenu`, or `"menus"` in `plugin.json`) or as a route: `register_route($function,
   $access)` or `"routes": [{"function": "...", "access": "public|admin|customer"}]` in `plugin.json`. `admin` and `customer`

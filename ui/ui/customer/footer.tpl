@@ -1,26 +1,21 @@
 </section>
 </div>
-{if isset($_c['CompanyFooter'])}
-<footer class="main-footer">
-    {$_c['CompanyFooter']}
-    <div class="pull-right">
-        <a href="javascript:showPrivacy()">Privacy</a>
-        &bull;
-        <a href="javascript:showTaC()">T &amp; C</a>
+<footer class="main-footer cm-footer">
+    <div class="cm-footer-text">
+        {if isset($_c['CompanyFooter'])}
+        {$_c['CompanyFooter']}
+        {else}
+        PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener"
+            target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener"
+            target="_blank">AdminLTE</a>
+        {/if}
     </div>
-</footer>
-{else}
-<footer class="main-footer">
-    PHPNuxBill by <a href="https://github.com/hotspotbilling/phpnuxbill" rel="nofollow noreferrer noopener"
-        target="_blank">iBNuX</a>, Theme by <a href="https://adminlte.io/" rel="nofollow noreferrer noopener"
-        target="_blank">AdminLTE</a>
-    <div class="pull-right">
+    <nav class="cm-footer-links" aria-label="Legal">
         <a href="javascript:showPrivacy()">Privacy</a>
-        &bull;
+        <span aria-hidden="true">&bull;</span>
         <a href="javascript:showTaC()">T &amp; C</a>
-    </div>
+    </nav>
 </footer>
-{/if}
 </div>
 
 
@@ -89,6 +84,18 @@
 </script>
 <!--End of Tawk.to Script-->
 {/if}
+<script>
+    /* remember the menu collapsed to icons (desktop): the header reads this cookie, the same one the admin menu uses */
+    (function () {
+        function remember(collapsed) {
+            if (window.innerWidth > 767) {
+                document.cookie = 'kolaps=' + (collapsed ? 'true' : 'false') + '; max-age=' + (30 * 24 * 60 * 60) + '; path=/; SameSite=Lax';
+            }
+        }
+        $(document).on('collapsed.pushMenu', function () { remember(true); });
+        $(document).on('expanded.pushMenu', function () { remember(false); });
+    })();
+</script>
 <script>
     const toggleIcon = document.getElementById('toggleIcon');
     const body = document.body;

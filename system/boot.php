@@ -82,6 +82,19 @@ if ($activeTheme) {
 $ui->assign('_theme', $_theme);
 $ui->assign('_theme_meta', $themeMeta);
 
+// A theme restyles the customer portal chrome (header, menus, footer) by shipping styles/customer.css: it loads after
+// the core customer styles, parent theme first so the child wins. The file time busts the browser cache on a change.
+$themeCustomerCss = [];
+if ($activeTheme) {
+    foreach (array_reverse($themeChain) as $tDir) {
+        $cssFile = $tDir . '/styles/customer.css';
+        if (is_file($cssFile)) {
+            $themeCustomerCss[] = APP_URL . '/' . $UI_PATH . '/themes/' . basename($tDir) . '/styles/customer.css?' . filemtime($cssFile);
+        }
+    }
+}
+$ui->assign('_theme_customer_css', $themeCustomerCss);
+
 // Load theme functions.php if present (child first, then parents)
 if ($activeTheme) {
     foreach ($themeChain as $tDir) {

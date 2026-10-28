@@ -4017,5 +4017,21 @@
     "Theme__light__Click_for_dark": "Theme: light. Click for dark",
     "Theme__dark__Click_for_automatic": "Theme: dark. Click for automatic",
     "Used_for_the_vouchers_a_merchant_or_agent_generates_when_their_own_account_has_no_format__prefix_or_length_set__and_as_the_starting_values_of_the_admin_Vouchers_form__A_merchant_can_still_change_them_for_each_batch__Vouchers_customers_buy_through_a_payment_gateway_use_the_voucher_settings_of_the_General_tab_instead_": "Used for the vouchers a merchant or agent generates when their own account has no format, prefix or length set, and as the starting values of the admin Vouchers form. A merchant can still change them for each batch. Vouchers customers buy through a payment gateway use the voucher settings of the General tab instead.",
-    "Agent_registered_successfully_": "Agent registered successfully!"
+    "Agent_registered_successfully_": "Agent registered successfully!",
+    "Webhook_URL_copied_": "Webhook URL copied!",
+    "Transaction_with_this_Reference_ID__capc45a91eccbc61063aded_failed__Please_try_again_": "Transaction with this Reference ID: capc45a91eccbc61063aded failed. Please try again.",
+    "Welcome_to_AlwaysOn_Hotspot_Merchant__your_account_details_are__Username__merchant_Password__123456_Account_Balance__2000_Assigned_Routers__1_Welcome_Aboard": "Welcome to AlwaysOn Hotspot Merchant, your account details are: Username: merchant Password: 123456 Account Balance: 2000 Assigned Routers: 1 Welcome Aboard",
+    "has_created_Merchant_merchant_successfully_": "has created Merchant merchant successfully!",
+    "Merchant_created_successfully_": "Merchant created successfully!",
+    "A_fixed_partner_rate_is_set_on_your_account__so_the_tier_rate_does_not_apply": "A fixed partner rate is set on your account, so the tier rate does not apply",
+    "Give_Azampay_exactly_this_URL__the_token_in_it_is_how_this_site_knows_a_callback_is_real_": "Give Azampay exactly this URL, the token in it is how this site knows a callback is real.",
+    "Hotspot_Payment_Gateway__Sslcommerz_": "Hotspot Payment Gateway [Sslcommerz]",
+    "SSLCommerz_Payment_Gateway": "SSLCommerz Payment Gateway",
+    "STORE_ID": "STORE ID",
+    "STORE_PASSWORD": "STORE PASSWORD",
+    "ENVIRONMENT": "ENVIRONMENT",
+    "CURRENCY": "CURRENCY",
+    "If_the_transaction_currency_is_not_BDT__then_it_will_be_converted_to_BDT_based_on_the_current_convert_rate": "If the transaction currency is not BDT, then it will be converted to BDT based on the current convert rate",
+    "IPN_URL": "IPN URL",
+    "_IPN_URL__so_that_your_server_can_listen_at_the_right_moment_when_payment_is_done_at_Bank_End": " IPN URL: so that your server can listen at the right moment when payment is done at Bank End"
 }
