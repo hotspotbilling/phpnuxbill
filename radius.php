@@ -58,10 +58,7 @@ try {
         case 'authorize':
             $who = radius_identify(radius_credentials());
             $username = $who['username'];
-            $tur = ORM::for_table('tbl_user_recharges')
-                ->where_raw("BINARY username = ?", [$username])
-                ->where('routers', 'radius')
-                ->find_one();
+            $tur = radius_find_recharge($username);
             if ($tur) {
                 process_radiust_rest($tur);
             } else if ($who['voucher']) {
@@ -75,10 +72,7 @@ try {
                     ORM::raw_execute("UPDATE tbl_voucher SET status = '0', used_date = NULL WHERE id = ?", [$v['id']]);
                     show_radius_result(['Reply-Message' => 'Voucher activation failed.'], 401);
                 }
-                $tur = ORM::for_table('tbl_user_recharges')
-                    ->where_raw("BINARY username = ?", [$username])
-                    ->where('routers', 'radius')
-                    ->find_one();
+                $tur = radius_find_recharge($username);
                 if ($tur) {
                     process_radiust_rest($tur);
                 } else {
@@ -191,6 +185,21 @@ function radius_credentials()
 function radius_reject($message = 'Username or Password is wrong')
 {
     show_radius_result(['Reply-Message' => $message], 401);
+}
+
+/**
+ * The recharge a RADIUS login is checked against. A username can have more than one row (an old expired plan next to the
+ * new one, for example when two customer records share a phone number): the live one must win, otherwise a customer
+ * with an active plan is told it has expired.
+ */
+function radius_find_recharge($username)
+{
+    return ORM::for_table('tbl_user_recharges')
+        ->where_raw("BINARY username = ?", [$username])
+        ->where('routers', 'radius')
+        ->order_by_expr("status = 'on' DESC")
+        ->order_by_desc('id')
+        ->find_one();
 }
 
 /** Does the PAP password or CHAP response in the request match this stored password? Never true for an empty one. */
