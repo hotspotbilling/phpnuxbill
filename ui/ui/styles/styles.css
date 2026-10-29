@@ -1531,8 +1531,10 @@ select:not(#filterNavigateMenu),
 }
 
 /* Content is server-rendered: show it immediately, fade in gently */
+/* "backwards", not "both": holding the end frame keeps a transform on the element, and any transform makes it the
+   reference box for position:fixed children (a floating button then sits at the bottom of the page, not the screen) */
 .fade-in {
-  animation: fadeIn 0.25s ease-out both;
+  animation: fadeIn 0.25s ease-out backwards;
 }
 
 @keyframes fadeIn {
