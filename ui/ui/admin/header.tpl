@@ -31,6 +31,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.27.1" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.10.29.5" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
      {if isset($xheader)}
@@ -47,7 +48,7 @@
     </script>
 </head>
 
-<body class="hold-transition modern-skin-dark sidebar-mini {if $_kolaps}sidebar-collapse{/if}">
+<body class="hold-transition modern-skin-dark as-chrome sidebar-mini {if $_kolaps}sidebar-collapse{/if}">
     <script>
         if (document.documentElement.classList.contains('dark-mode')) {
             document.body.classList.add('dark-mode');

@@ -1,0 +1,262 @@
+/**
+ * Admin chrome (core theme): a white and a dark side menu, and a footer pinned to the bottom of the screen. Both follow
+ * the system / light / dark switch in the top bar (body.dark-mode).
+ *
+ * Loads after styles.css, which paints the menu navy in both modes and gives the collapsed rail and its hover flyouts
+ * hard-coded dark !important colours, so those are restated here from tokens. The shadcn admin theme has its own header,
+ * menu and footer styles and does not load this file.
+ */
+
+body.as-chrome.modern-skin-dark {
+  --as-bg: #ffffff;
+  --as-sub: #f8fafc;
+  --as-border: #e6eaf0;
+  --as-text: #1f2937;
+  --as-muted: #64748b;
+  --as-hover: #f1f5f9;
+  --as-accent: #2563eb;
+  --as-active-bg: #e8f0fe;
+  --as-active-text: #1d4ed8;
+  --as-flyout-shadow: 0 10px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
+  --as-btn-hover: rgba(0, 0, 0, 0.05);
+  --as-btn-hover-text: #2563eb;
+}
+
+body.as-chrome.modern-skin-dark.dark-mode {
+  --as-bg: #0f141c;
+  --as-sub: rgba(255, 255, 255, 0.03);
+  --as-border: rgba(255, 255, 255, 0.08);
+  --as-text: #e2e8f0;
+  --as-muted: #94a3b8;
+  --as-hover: rgba(255, 255, 255, 0.07);
+  --as-accent: #60a5fa;
+  --as-active-bg: rgba(59, 130, 246, 0.18);
+  --as-active-text: #93c5fd;
+  --as-flyout-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --as-btn-hover: rgba(255, 255, 255, 0.08);
+  --as-btn-hover-text: #60a5fa;
+}
+
+/* ---------- top bar buttons: the same soft hover as the collapse button ---------- */
+/* The older dark skin paints every top-bar button #3d4e68 !important on :hover, :focus, :active and :visited (a "#" link
+   counts as visited), which showed as a dark block on the theme toggle and the account button. */
+body.as-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a,
+body.as-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:visited,
+body.as-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:active {
+  background-color: transparent !important;
+}
+
+body.as-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:hover,
+body.as-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li > a:focus,
+body.as-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li.open > a {
+  background-color: var(--as-btn-hover) !important;
+  color: var(--as-btn-hover-text) !important;
+}
+
+/* the collapse button is the same 38px rounded square as the buttons on the right, so its hover is the same size
+   (it had 15px / 16px padding, which made the hover block about 52px) */
+body.as-chrome.modern-skin-dark .main-header .navbar .sidebar-toggle {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  margin: 6px 8px;
+  border-radius: 8px;
+  line-height: 1;
+}
+
+/* ---------- logo cell above the menu ---------- */
+body.as-chrome.modern-skin-dark .main-header .logo {
+  background: var(--as-bg);
+  color: var(--as-text);
+  border-right: 1px solid var(--as-border);
+  box-shadow: none;
+}
+
+body.as-chrome.modern-skin-dark .main-header .logo:hover {
+  background: var(--as-bg);
+  color: var(--as-text);
+}
+
+/* ---------- menu surface ---------- */
+body.as-chrome.modern-skin-dark .main-sidebar {
+  background: var(--as-bg);
+  border-right: 1px solid var(--as-border);
+  box-shadow: none;
+}
+
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar,
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu {
+  background: transparent;
+}
+
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar {
+  scrollbar-color: var(--as-border) transparent;
+}
+
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar::-webkit-scrollbar-thumb {
+  background: var(--as-border);
+}
+
+/* ---------- items ---------- */
+body.as-chrome.modern-skin-dark .sidebar-menu > li > a,
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li > a {
+  background-color: transparent !important;
+  color: var(--as-muted) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu > li > a:hover,
+body.as-chrome.modern-skin-dark .sidebar-menu > li > a:focus,
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li > a:hover {
+  background-color: var(--as-hover) !important;
+  color: var(--as-text) !important;
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu > li.active > a,
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li.active > a {
+  background-color: var(--as-active-bg) !important;
+  color: var(--as-active-text) !important;
+  font-weight: 600;
+}
+
+/* an open group: the parent row stays plain, only the active child is filled */
+body.as-chrome.modern-skin-dark .sidebar-menu > li.treeview.menu-open > a,
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li.treeview.menu-open > a {
+  background-color: transparent !important;
+  color: var(--as-text) !important;
+}
+
+/* ---------- submenu ---------- */
+body.as-chrome.modern-skin-dark .sidebar-menu .treeview-menu {
+  background: var(--as-sub);
+  border-left: 2px solid var(--as-accent) !important;
+}
+
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a {
+  color: var(--as-muted) !important;
+  background-color: transparent !important;
+}
+
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li > a:hover {
+  color: var(--as-text) !important;
+  background-color: var(--as-hover) !important;
+}
+
+body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li.active > a,
+body.as-chrome.modern-skin-dark .sidebar-menu .treeview-menu > li.active > a {
+  color: var(--as-active-text) !important;
+  background-color: var(--as-active-bg) !important;
+}
+
+/* ---------- collapsed to the icon rail: active item, hover, and the flyouts that open beside it ---------- */
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.active > a,
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.active > a {
+  background-color: var(--as-active-bg) !important;
+  color: var(--as-active-text) !important;
+}
+
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li > a:hover,
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li > a:hover {
+  background-color: var(--as-hover) !important;
+  color: var(--as-text) !important;
+}
+
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li:not(.treeview):hover > a > span:not(.pull-right-container),
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li:not(.treeview):hover > a > span:not(.pull-right-container),
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right-container),
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right-container) {
+  background-color: var(--as-bg) !important;
+  color: var(--as-text) !important;
+  border-color: var(--as-border) !important;
+  box-shadow: var(--as-flyout-shadow) !important;
+}
+
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu,
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu {
+  background-color: var(--as-bg) !important;
+  border-color: var(--as-border) !important;
+  box-shadow: var(--as-flyout-shadow) !important;
+}
+
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li > a,
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li > a {
+  color: var(--as-muted) !important;
+}
+
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li > a:hover,
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li > a:hover {
+  background-color: var(--as-hover) !important;
+  color: var(--as-text) !important;
+}
+
+body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li.active > a,
+body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li.active > a {
+  background-color: var(--as-active-bg) !important;
+  color: var(--as-active-text) !important;
+}
+
+/* ---------- footer: a slim bar fixed to the bottom of the screen ---------- */
+/* it starts where the menu ends (230px open, 50px collapsed, 0 on phones where the menu slides over the page) */
+body.as-chrome.modern-skin-dark .main-footer {
+  position: fixed;
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 830;
+  box-sizing: border-box;
+  height: 46px;
+  min-height: 0 !important; /* a legacy rule gives .main-footer min-height: 100%, which would stretch it over the page */
+  max-height: none;
+  margin-left: 0 !important;
+  padding: 0 20px;
+  line-height: 45px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--as-bg);
+  color: var(--as-muted);
+  border-top: 1px solid var(--as-border);
+  font-size: 13px;
+  transition: left 0.3s ease;
+}
+
+body.as-chrome.modern-skin-dark .main-footer .pull-right {
+  line-height: inherit;
+}
+
+body.as-chrome.modern-skin-dark .main-footer a {
+  color: var(--as-active-text);
+}
+
+/* the page ends above the footer, not under it, with a gap so the last box does not touch the bar */
+body.as-chrome.modern-skin-dark .content-wrapper {
+  padding-bottom: 66px;
+}
+
+/* phones: the text wraps to two lines next to the version badge instead of being cut with "..." */
+@media (max-width: 767px) {
+  body.as-chrome.modern-skin-dark .main-footer {
+    padding: 6px 14px;
+    font-size: 12px;
+    line-height: 16px;
+    white-space: normal;
+  }
+
+  body.as-chrome.modern-skin-dark .main-footer .pull-right {
+    margin-left: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  body.as-chrome.modern-skin-dark .main-footer {
+    left: 230px;
+  }
+
+  body.as-chrome.modern-skin-dark.sidebar-collapse .main-footer {
+    left: 50px;
+  }
+}

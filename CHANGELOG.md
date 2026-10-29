@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+- Admin: the side menu now has a white and a dark theme that follow the system / light / dark switch (before, it was navy in
+  both, and each item in dark mode was its own boxed row). Covers the open menu, submenus, the collapsed icon rail and the
+  flyouts that open beside it, and the logo cell above the menu. The footer is now pinned to the bottom of the screen (it starts
+  where the menu ends, and the page ends above it). Styles: `ui/ui/styles/admin-chrome.css`. The shadcn admin theme has its
+  own menu and footer styles and is not affected.
 - Customer portal: new header, menu, mobile bar and footer with a light and a dark theme that follow the existing system /
   light / dark switch (before, the header and menu were always dark). Frosted top bar with a logo mark, balance as a pill,
   rounded account / inbox / language dropdowns, rounded menu items, a floating mobile bar with a soft active-tab pill, and a
