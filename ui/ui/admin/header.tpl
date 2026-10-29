@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.10.27.1" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.10.29.5" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.10.29.11" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
      {if isset($xheader)}
@@ -71,8 +71,15 @@
     <div class="wrapper">
         <header class="main-header">
             <a href="{Text::url('dashboard')}" class="logo">
-                <span class="logo-mini"><b>NUX</b></span>
+                <span class="logo-mini"><b>{$_c['CompanyName']|truncate:1:''|upper|escape}</b></span>
                 <span class="logo-lg">{$_c['CompanyName']}</span>
+            </a>
+            <a href="#" class="as-edge-toggle" data-toggle="push-menu" role="button" aria-label="Toggle menu"
+                onclick="return setKolaps()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 6l-6 6l6 6" />
+                </svg>
             </a>
             <nav class="navbar navbar-static-top">
                 <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button" onclick="return setKolaps()">

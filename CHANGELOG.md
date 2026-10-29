@@ -23,10 +23,12 @@
   routes are sign-in checked by the core before the function runs; `public` is for webhooks, callbacks and a plugin's own API.
   Built-in PHP functions, functions outside `system/plugin/` and functions that need arguments can no longer be called this way.
   (Before, `plugin/phpinfo` ran PHP's own `phpinfo()`.)
-- **Transition**: Settings > App > *Plugin Routes* (`plugin_routes_mode`). The default, *warn*, still runs an undeclared plugin
+- **Transition**: Settings > General Settings > Security > *Plugin Routes* (`plugin_routes_mode`). The default, *warn*, still runs an undeclared plugin
   function and writes one log line a day for it; *enforce* refuses it. The default will become *enforce* in a later
   release. Update a plugin: declare its routes, then `php skeletons/build.php check plugin system/plugin/<slug>`.
-- New developer guide `PLUGINS.md`; the plugin skeleton declares a sample public webhook route.
+- New developer guide `PLUGINS.md`; the plugin skeleton declares a sample public webhook route. It now also explains how to publish
+  a plugin and serve updates (versions, `update_url`, `repository.json`, what the Update button does, migrations), and how payment
+  gateways, device drivers and themes differ (manifests, layout, contracts, package detection, what an update replaces).
 - Hotspot plugin 3.9.0 declares its routes and fixes two missing sign-in checks found while doing so: `hotspot_GenerateVoucher`
   trusted `is_admin` / `generate_by` from the request (voucher generation without signing in, or charging another merchant),
   and `hotspot_block_mac` could be used by anyone (now admin only, with a CSRF token).

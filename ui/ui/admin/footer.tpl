@@ -13,6 +13,22 @@
 <script src="{$app_url}/ui/ui/scripts/pace.min.js"></script>
 <script src="{$app_url}/ui/ui/summernote/summernote.min.js"></script>
 <script src="{$app_url}/ui/ui/scripts/custom.js?2026.10.9.14"></script>
+<script>
+    // the pinned footer can grow on phones: tell the stylesheet its real height so the page always ends above it
+    (function () {
+        var footer = document.querySelector('.main-footer');
+        if (!footer) return;
+        function measure() {
+            document.documentElement.style.setProperty('--as-footer-h', footer.offsetHeight + 'px');
+        }
+        measure();
+        if (window.ResizeObserver) {
+            new ResizeObserver(measure).observe(footer);
+        } else {
+            window.addEventListener('resize', measure);
+        }
+    })();
+</script>
 
 <script>
     // Enhanced Live Command Palette Search Handler

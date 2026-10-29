@@ -364,7 +364,7 @@
                         <div class="col-md-5">
                             <select name="dashboard_type" id="dashboard_type" class="form-control">
                                 <option value="default" {if $_c['dashboard_type']=='default' }selected="selected" {/if}>
-                                    {Lang::T('Default')}</option>
+                                    {Lang::T('Classic')}</option>
                                 <option value="dynamic" {if $_c['dashboard_type']=='dynamic' }selected="selected" {/if}>
                                     {Lang::T('Dynamic')}</option>
                             </select>

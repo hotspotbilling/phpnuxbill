@@ -8,7 +8,7 @@
 // a menu function, or a route (register_route() / "routes" in plugin.json, with who may call it). It used to run any
 // PHP function by name, built-in ones included (plugin/phpinfo ...).
 //
-// plugin_routes_mode (Settings > App): 'warn' (the default) still runs an undeclared plugin function and logs it once
+// plugin_routes_mode (Settings > General Settings > Security): 'warn' (the default) still runs an undeclared plugin function and logs it once
 // a day; 'enforce' refuses it. See PLUGINS.md.
 global $PLUGIN_PATH, $config, $_app_stage;
 $pluginFunction = (string) ($routes[1] ?? '');

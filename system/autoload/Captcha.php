@@ -19,7 +19,7 @@ class Captcha
 
     /**
      * The older single setting 'captcha_target': 'all', 'admin', 'customer' or 'plugin' ('both' meant 'all').
-     * Only read until Settings > App has been saved with the check boxes (captcha_on_admin ...).
+     * Only read until Settings > General Settings > Security has been saved with the check boxes (captcha_on_admin ...).
      */
     public static function getTarget()
     {
@@ -37,7 +37,7 @@ class Captcha
     /**
      * Is the captcha switched on for this kind of login? Contexts: 'admin', 'customer', and 'plugin' (the logins
      * plugins add, such as the Hotspot merchant portal; a plugin asks with Captcha::renderWidget('plugin') and
-     * Captcha::verify('plugin')). Each has its own check box in Settings > App (captcha_on_<context> = yes / no).
+     * Captcha::verify('plugin')). Each has its own check box in Settings > General Settings > Security (captcha_on_<context> = yes / no).
      */
     public static function isContextOn($context)
     {

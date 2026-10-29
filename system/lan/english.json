@@ -4033,5 +4033,14 @@
     "CURRENCY": "CURRENCY",
     "If_the_transaction_currency_is_not_BDT__then_it_will_be_converted_to_BDT_based_on_the_current_convert_rate": "If the transaction currency is not BDT, then it will be converted to BDT based on the current convert rate",
     "IPN_URL": "IPN URL",
-    "_IPN_URL__so_that_your_server_can_listen_at_the_right_moment_when_payment_is_done_at_Bank_End": " IPN URL: so that your server can listen at the right moment when payment is done at Bank End"
+    "_IPN_URL__so_that_your_server_can_listen_at_the_right_moment_when_payment_is_done_at_Bank_End": " IPN URL: so that your server can listen at the right moment when payment is done at Bank End",
+    "Plugin_Routes": "Plugin Routes",
+    "Warn__run_undeclared_plugin_functions_and_log_them": "Warn: run undeclared plugin functions and log them",
+    "Enforce__only_declared_plugin_routes_and_menus_run": "Enforce: only declared plugin routes and menus run",
+    "Plugins_declare_the_functions_their_URLs_may_call__register_route_or_plugin_json_routes___Enforce_refuses_everything_else__use_Warn_while_older_plugins_are_being_updated_": "Plugins declare the functions their URLs may call (register_route or plugin.json routes). Enforce refuses everything else; use Warn while older plugins are being updated.",
+    "Save_as_template": "Save as template",
+    "Template_Name": "Template Name",
+    "Voucher_Package": "Voucher Package",
+    "Counter": "Counter",
+    "Classic": "Classic"
 }

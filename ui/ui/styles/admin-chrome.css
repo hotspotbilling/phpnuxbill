@@ -232,14 +232,19 @@ body.as-chrome.modern-skin-dark .main-footer a {
   color: var(--as-active-text);
 }
 
-/* the page ends above the footer, not under it, with a gap so the last box does not touch the bar */
+/* the page ends above the footer, not under it, with a gap so the last box does not touch the bar.
+   --as-footer-h is the footer's real height, set by a small script in footer.tpl (it can grow on phones); 46px is the
+   fallback when that has not run. */
 body.as-chrome.modern-skin-dark .content-wrapper {
-  padding-bottom: 66px;
+  padding-bottom: calc(var(--as-footer-h, 46px) + 20px);
 }
 
-/* phones: the text wraps to two lines next to the version badge instead of being cut with "..." */
+/* phones: the text wraps next to the version badge instead of being cut with "...", and the bar grows to fit it
+   (two lines at most widths, three on the narrowest screens or with long translations) */
 @media (max-width: 767px) {
   body.as-chrome.modern-skin-dark .main-footer {
+    height: auto;
+    min-height: 46px !important;
     padding: 6px 14px;
     font-size: 12px;
     line-height: 16px;
@@ -258,5 +263,74 @@ body.as-chrome.modern-skin-dark .content-wrapper {
 
   body.as-chrome.modern-skin-dark.sidebar-collapse .main-footer {
     left: 50px;
+  }
+}
+
+/* ---------- collapse button on the menu's edge, level with the company logo ---------- */
+/* A round chevron centred on the menu's right border, in line with the logo. It points left while the menu is open and
+   turns to point right once it is collapsed. It lives in the top bar (which stacks above the menu) and replaces the
+   hamburger there on desktop; on phones the hamburger opens the slide-in menu. */
+@media (min-width: 768px) {
+  body.as-chrome.modern-skin-dark .main-header .navbar .sidebar-toggle {
+    display: none;
+  }
+
+  body.as-chrome.modern-skin-dark .as-edge-toggle {
+    position: absolute;
+    top: 11px;
+    left: 216px;
+    z-index: 1040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--as-bg);
+    color: var(--as-muted);
+    border: 1px solid var(--as-border);
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.14);
+    text-decoration: none;
+    transition: left 0.3s ease, color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  body.as-chrome.modern-skin-dark.sidebar-collapse .as-edge-toggle {
+    left: 36px; /* the rail is 50px wide */
+  }
+
+  /* the collapsed logo (the company's first letter) stays clear of the button that overlaps the rail's right edge */
+  body.as-chrome.modern-skin-dark.sidebar-collapse .main-header .logo {
+    padding: 0;
+  }
+
+  body.as-chrome.modern-skin-dark.sidebar-collapse .main-header .logo > .logo-mini {
+    display: block;
+    width: 50px; /* the full rail, so the letter is centred in it; the button starts at 36px, right of the letter */
+    margin: 0;
+    font-size: 18px;
+    text-align: center;
+  }
+
+  body.as-chrome.modern-skin-dark .as-edge-toggle:hover,
+  body.as-chrome.modern-skin-dark .as-edge-toggle:focus {
+    background: var(--as-hover);
+    color: var(--as-btn-hover-text);
+    border-color: var(--as-btn-hover-text);
+    text-decoration: none;
+    outline: 0;
+  }
+
+  body.as-chrome.modern-skin-dark .as-edge-toggle svg {
+    transition: transform 0.3s ease;
+  }
+
+  body.as-chrome.modern-skin-dark.sidebar-collapse .as-edge-toggle svg {
+    transform: rotate(180deg);
+  }
+}
+
+@media (max-width: 767px) {
+  body.as-chrome.modern-skin-dark .as-edge-toggle {
+    display: none;
   }
 }
