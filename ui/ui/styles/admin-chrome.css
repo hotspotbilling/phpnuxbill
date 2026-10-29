@@ -237,6 +237,10 @@ body.as-chrome.modern-skin-dark .main-footer a {
    fallback when that has not run. */
 body.as-chrome.modern-skin-dark .content-wrapper {
   padding-bottom: calc(var(--as-footer-h, 46px) + 20px);
+  /* AdminLTE's layout script sets min-height inline to (window - footer), which assumed a footer in the page flow.
+     The footer is fixed now, so on a short page that left a strip of the lighter page background between the end of
+     the content and the footer. The content area fills the whole screen instead; the footer sits on top of it. */
+  min-height: 100vh !important;
 }
 
 /* phones: the text wraps next to the version badge instead of being cut with "...", and the bar grows to fit it

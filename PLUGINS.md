@@ -300,11 +300,90 @@ after an update has to create it when its own code runs.
 
 ## Questions
 
-*My webhook stopped working in enforce mode.* Declare it with `access: public`.
+### Routes and access
 
-*My page asks for a login twice.* Declaring it `admin` makes the core check first; your own `_admin()` can go.
+**My webhook stopped working in enforce mode.**
+It is not declared, so the core refuses it. Add it to `"routes"` in `plugin.json` (or call `register_route()`) with
+`"access": "public"`, then check it with `php skeletons/build.php check plugin <folder>`. A webhook has no signed-in user, so
+`public` is correct, and the function must verify the caller itself (a signature, a secret in the URL).
 
-*I only have a menu.* Then there is nothing to do: menu functions are declared by their menu.
+**How do I find the functions I forgot to declare?**
+In warn mode the core writes one line a day per function to the system log (Logs menu, type *Plugin*): `Plugin route 'x' is
+not declared ...`. The check command finds them without waiting for traffic: it reads your PHP, templates and scripts for
+`plugin/<function>` addresses and prints what is missing, ready to paste into `plugin.json`.
 
-*My function needs arguments.* It cannot be a route. Make a no-argument function that reads `$_GET` / `$_POST` and
-calls it.
+**My page asks for a login twice.**
+Declaring the function `admin` (or `customer`) makes the core run the sign-in check before your function, so your own
+`_admin()` / `_auth()` can go. Keeping it is harmless.
+
+**I only have a menu.**
+Then there is nothing to do: a menu function is declared by its menu. `"function": "myplugin/settings"` declares
+`myplugin`, which reads `$routes[2]` to know which page to show. It must do its own sign-in check, because one function can
+serve several pages.
+
+**My function needs arguments.**
+It cannot be a route; the core only calls functions with no required parameters. Make a no-argument function that reads
+`$_GET` / `$_POST` and calls the real one.
+
+**Does a `public` route need a CSRF token?**
+Not when the caller is a provider's server (a payment webhook cannot send one): verify its signature instead. A browser
+form that changes data does need `Csrf::check(_post('csrf_token'))`, and such a route should be `admin` or `customer`, not
+`public`.
+
+**Does the capitalisation of the URL matter?**
+No. PHP function names are not case sensitive, so the core treats `plugin/MyPlugin_Hook` and `plugin/myplugin_hook` as the
+same function, and your declarations match either way.
+
+**Why must a plugin never `die("message")`?**
+The same controllers also serve the JSON mode (`system/api.php`). `die()` bypasses it and prints raw text. Use `r2()` to
+redirect with a notice, or `showResult()`, and both modes work.
+
+**Where is the Plugin Routes switch, and how do I try enforce safely?**
+Settings > General Settings > Security tab > *Plugin Routes*. Try *Enforce* on a test site first: click through every plugin
+page and fire every webhook once. Anything that answers "Function not found" is missing from `"routes"`. On a non-live site
+the message names the function and how to declare it.
+
+### Updates and the marketplace
+
+**I released a new version but admins do not see the update.**
+Check, in this order:
+1. `version` in `plugin.json` is higher than the installed one (`version_compare`, so `1.10.0` is newer than `1.9.0`).
+2. The new code is pushed to the repository's default branch (`master` or `main`). The marketplace downloads that branch,
+   not a tag or a release file.
+3. Something announces it: `update_url` answers with the new version, or `last_update` is bumped in `repository.json`.
+4. The `update_url` answer is cached for 6 hours. The admin can press *Check for updates* to skip the wait.
+5. The repository entry's `id` equals your plugin's folder name, and it has a `github` address. Without a matching entry or
+   an `update_url` there is nothing to compare against.
+
+**The update installed, but my new table or setting is missing.**
+`install.php` runs only on the first install, never on an update. Create tables and settings in code that runs when the plugin
+loads, guarded by a stored version (see *What the admin's site does on Update*).
+
+**I deleted a file in the new version, but it is still on admins' sites.**
+An update copies files over the installed folder and removes nothing. Keep the old file as a harmless stub, or have your
+migration delete it.
+
+**Can I serve the plugin from my own server or CDN instead of GitHub?**
+The repository list (`repository.json`) can live anywhere over `https`, and so can your `update_url`. The package itself is
+still downloaded from `github.com` today. An admin can always upload any `.zip` by hand under Marketplace > Plugins.
+
+**My repository is private.**
+The admin has to enter a GitHub username and token in Settings > General Settings > GitHub Auth, or the download fails. The
+README shown on the plugin's card is fetched without that token, so a private plugin shows no README.
+
+**My README images do not show in the Marketplace.**
+The marketplace renders a small, safe Markdown subset (headings, lists, code, links, bold, italic) and removes images on
+purpose, so remote images cannot track the admin. Put what matters in text; screenshots belong on your own page, linked from
+`url` in the repository entry.
+
+### Menus and loading
+
+**My plugin has no menu, or does not load at all.**
+Errors in a plugin file are swallowed while plugins load, so a PHP syntax error simply means no menu. Run
+`php -l` on every file (`php -l myplugin.php includes/*.php`). Then check the menu itself: `"admin": true` for staff and
+`false` for customers, a position name the header actually prints (`AFTER_DASHBOARD` ... see the skeleton README), and for a
+submenu the **same position and audience as its parent**. An unmet `requires_php` also stops a folder plugin loading.
+
+**Which is better, a folder plugin or a single file?**
+A folder plugin (`plugin.json` + `<slug>.php`). It declares menus and routes in JSON, keeps templates in its own `ui/`, has
+`install.php` / `uninstall.php`, and the marketplace can update and back it up cleanly. Single files still work.

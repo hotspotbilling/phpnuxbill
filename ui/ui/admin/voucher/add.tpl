@@ -7,7 +7,8 @@
             <div class="panel-heading">{Lang::T('Add Vouchers')}</div>
             <div class="panel-body">
 
-                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}plan/voucher-post">
+                <form class="form-horizontal" method="post" role="form" action="{Text::url('')}plan/voucher-post" id="voucherForm">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Type')}</label>
                         <div class="col-md-6">
@@ -40,8 +41,15 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Number of Vouchers')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="numbervoucher" value="1">
+                            <input type="number" class="form-control" name="numbervoucher" id="numbervoucher" value="1"
+                                min="1" max="{$voucher_max}" required>
+                            <div style="margin-top:6px">
+                                {foreach [10, 50, 100, 500, 1000] as $n}
+                                <button type="button" class="btn btn-default btn-xs vg-count" data-n="{$n}">{$n}</button>
+                                {/foreach}
+                            </div>
                         </div>
+                        <p class="help-block col-md-4">{Lang::T('Up to')} {$voucher_max} {Lang::T('at a time')}</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Voucher Format')}</label>
@@ -65,15 +73,28 @@
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Voucher Prefix')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="prefix" placeholder="NUX-"
-                                value="{$_c['voucher_prefix']}">
+                            <input type="text" class="form-control" name="prefix" id="prefix" placeholder="NUX-"
+                                maxlength="20" pattern="[A-Za-z0-9_\-]*" value="{$_c['voucher_prefix']}">
                         </div>
                         <p class="help-block col-md-4">NUX-VoUCHeRCOdE</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Length Code')}</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="lengthcode" value="12">
+                            <input type="number" class="form-control" name="lengthcode" id="lengthcode" value="12" min="4"
+                                max="32" required>
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('4 to 32, at least 6 for Numbers')}</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('Preview')}</label>
+                        <div class="col-md-6">
+                            <div class="well well-sm" style="margin:0">
+                                <div style="font-family:monospace;font-size:20px;letter-spacing:1px;word-break:break-all"
+                                    id="vgExample">-</div>
+                                <div class="text-muted" style="margin-top:4px" id="vgSummary"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -126,6 +147,38 @@
             printers.style.display = 'none';
         }
     }
+
+    // example code and a one-line summary that follow the form.
+    // jQuery is loaded by the footer, after this block, so everything waits for the page to finish loading.
+    window.addEventListener('load', function () {
+        var $ = window.jQuery, max = {$voucher_max};
+        if (!$) return;
+        function sample(format, len) {
+            var pool = format === 'numbers' ? '0123456789' : format === 'low' ? '0123456789abcdef' : '0123456789ABCDEF', out = '';
+            for (var i = 0; i < len; i++) {
+                var c = pool.charAt(Math.floor(Math.random() * pool.length));
+                out += (format === 'rand' && Math.random() < 0.5) ? c.toLowerCase() : c;
+            }
+            return out;
+        }
+        function refresh() {
+            var len = Math.max(0, Math.min(32, parseInt($('#lengthcode').val(), 10) || 0));
+            var n = parseInt($('#numbervoucher').val(), 10) || 0;
+            var fmt = $('#voucher_format').val();
+            $('#vgExample').text(($('#prefix').val() || '') + sample(fmt, len));
+            var plan = $('#plan option:selected');
+            var txt = n + ' {Lang::T('vouchers')}';
+            if (plan.val()) txt += ' \u2022 ' + $.trim(plan.text()).replace(/\s+/g, ' ');
+            var bad = n < 1 || n > max || len < 4 || (fmt === 'numbers' && len < 6);
+            $('#vgSummary').text(txt).css('color', bad ? '#c0392b' : '');
+            $('#voucherForm button[type=submit]').prop('disabled', bad);
+        }
+        $('#voucherForm').on('input change keyup', 'input, select', refresh);
+        // iCheck / select2 fire jQuery events, not native ones, so listen on the elements themselves too
+        $('#voucher_format, #plan, #server').on('change', refresh);
+        $('.vg-count').on('click', function () { $('#numbervoucher').val($(this).data('n')); refresh(); });
+        refresh();
+    });
 </script>
 
 {include file="sections/footer.tpl"}

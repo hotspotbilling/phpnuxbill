@@ -420,10 +420,10 @@ body.cm-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li:hover > a > 
 /* ---------- footer ---------- */
 body.cm-chrome.modern-skin-dark .main-footer.cm-footer {
   display: flex;
-  flex-direction: column;
+  flex-flow: row wrap;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px 14px;
   text-align: center;
   padding: 18px 25px;
   background: transparent;
@@ -515,7 +515,7 @@ body.cm-chrome.modern-skin-dark .cm-footer-links {
   }
 
   body.cm-chrome.modern-skin-dark .main-footer.cm-footer {
-    padding: 16px 16px calc(100px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 16px calc(128px + env(safe-area-inset-bottom, 0px));
   }
 }
 

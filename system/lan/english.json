@@ -4042,5 +4042,13 @@
     "Template_Name": "Template Name",
     "Voucher_Package": "Voucher Package",
     "Counter": "Counter",
-    "Classic": "Classic"
+    "Classic": "Classic",
+    "You_are_already_logged_in_": "You are already logged in.",
+    "Attention": "Attention",
+    "Payout_approved_and_notification_sent_": "Payout approved and notification sent.",
+    "Cash_Payout_Receipt": "Cash Payout Receipt",
+    "Delete_photo": "Delete photo",
+    "Up_to": "Up to",
+    "at_a_time": "at a time",
+    "4_to_32__at_least_6_for_Numbers": "4 to 32, at least 6 for Numbers"
 }

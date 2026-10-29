@@ -668,6 +668,8 @@ switch ($action) {
         $ui->assign('p', $p);
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
+        $ui->assign('csrf_token', Csrf::generateAndStoreToken());
+        $ui->assign('voucher_max', 1000);
         run_hook('view_add_voucher'); #HOOK
         $ui->display('admin/voucher/add.tpl');
         break;
@@ -843,15 +845,34 @@ switch ($action) {
         $voucherPerPage = _post('voucher_per_page', '36');
         $batch_name = _post('batch_name', '');
 
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('plan/add-voucher/'), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
+        }
+
         $msg = '';
         if (empty($type) || empty($plan) || empty($server) || empty($numbervoucher) || empty($lengthcode)) {
             $msg .= Lang::T('All fields are required') . '<br>';
         }
         if (!Validator::UnsignedNumber($numbervoucher)) {
             $msg .= 'The Number of Vouchers must be a number' . '<br>';
+        } elseif ($numbervoucher > 1000) {
+            $msg .= Lang::T('You can create at most 1000 vouchers at a time') . '<br>';
         }
         if (!Validator::UnsignedNumber($lengthcode)) {
             $msg .= "The Length Code must be a number<br>";
+        } elseif ($lengthcode > 32) {
+            $msg .= Lang::T('The Length Code can be 32 at most') . '<br>';
+        } elseif ($lengthcode < 4) {
+            $msg .= Lang::T('The Length Code must be at least 4') . '<br>';
+        } elseif ($voucher_format == 'numbers' && $lengthcode < 6) {
+            $msg .= "The Length Code must be more than 6 for numbers<br>";
+        }
+        // the prefix is printed on vouchers and typed by customers: keep it to letters, digits, - and _
+        if ($prefix !== '' && !preg_match('/^[A-Za-z0-9_-]{1,20}$/', $prefix)) {
+            $msg .= Lang::T('The prefix can only have letters, numbers, - and _ (20 at most)') . '<br>';
+        }
+        if ($msg == '' && !ORM::for_table('tbl_plans')->find_one($plan)) {
+            $msg .= Lang::T('Plan Not Found') . '<br>';
         }
 
         if ($msg == '') {
@@ -873,21 +894,38 @@ switch ($action) {
             $vouchers = [];
             $newVoucherIds = [];
 
-            if ($voucher_format == 'numbers') {
-                if ($lengthcode < 6) {
-                    $msg .= "The Length Code must be more than 6 for numbers<br>";
+            // codes that already exist (with this prefix) are skipped and drawn again, so a batch never repeats a voucher
+            $makeCode = function () use ($voucher_format, $lengthcode) {
+                $code = strtoupper(substr(md5(random_bytes(16)), 0, $lengthcode));
+                if ($voucher_format == 'low') {
+                    return strtolower($code);
                 }
-                $vouchers = generateUniqueNumericVouchers($numbervoucher, $lengthcode);
-            } else {
-                for ($i = 0; $i < $numbervoucher; $i++) {
-                    $code = strtoupper(substr(md5(time() . rand(10000, 99999)), 0, $lengthcode));
-                    if ($voucher_format == 'low') {
-                        $code = strtolower($code);
-                    } else if ($voucher_format == 'rand') {
-                        $code = Lang::randomUpLowCase($code);
+                return $voucher_format == 'rand' ? Lang::randomUpLowCase($code) : $code;
+            };
+            $vouchers = [];
+            $tries = 0;
+            while (count($vouchers) < $numbervoucher && $tries < 20) {
+                $tries++;
+                $need = $numbervoucher - count($vouchers);
+                $batch = [];
+                if ($voucher_format == 'numbers') {
+                    $batch = generateUniqueNumericVouchers($need, $lengthcode);
+                } else {
+                    for ($i = 0; $i < $need; $i++) {
+                        $batch[] = $makeCode();
                     }
-                    $vouchers[] = $code;
                 }
+                $taken = array_column(ORM::for_table('tbl_voucher')->select('code')
+                    ->where_in('code', array_map(fn($c) => "$prefix$c", $batch))->find_array(), 'code');
+                foreach ($batch as $c) {
+                    if (!in_array("$prefix$c", $taken, true)) {
+                        $vouchers[$c] = $c;
+                    }
+                }
+            }
+            $vouchers = array_values($vouchers);
+            if (count($vouchers) < $numbervoucher) {
+                r2(getUrl('plan/add-voucher/'), 'e', Lang::T('Not enough unused codes at this length, use a longer Length Code'));
             }
 
             ORM::raw_execute('START TRANSACTION');
@@ -950,7 +988,7 @@ switch ($action) {
 
             r2(getUrl('plan/voucher'), 's', Lang::T('Create Vouchers Successfully'));
         } else {
-            r2(getUrl('plan/add-voucher/') . $id, 'e', $msg);
+            r2(getUrl('plan/add-voucher/'), 'e', $msg);
         }
         break;
 
