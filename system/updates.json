@@ -294,5 +294,9 @@
     "UPDATE tbl_widgets w LEFT JOIN tbl_appconfig c ON c.setting='dashboard_Customer' SET w.position=3, w.orders=3 WHERE w.user='Customer' AND w.widget='referrals' AND (c.value IS NULL OR c.value='6,6');",
     "UPDATE tbl_appconfig SET value='4,4,4' WHERE setting='dashboard_Customer' AND value='6,6';",
     "INSERT INTO tbl_appconfig (setting, value) SELECT 'dashboard_Customer','4,4,4' FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM tbl_appconfig WHERE setting='dashboard_Customer');"
+  ],
+  "2026.10.23": [
+    "UPDATE tbl_voucher v JOIN (SELECT MIN(id) AS keep_id, code FROM tbl_voucher GROUP BY code HAVING COUNT(*) > 1) d ON v.code = d.code AND v.id <> d.keep_id SET v.code = CONCAT(LEFT(v.code, 45), '-dup', v.id)",
+    "ALTER TABLE tbl_voucher DROP INDEX idx_voucher_code, ADD UNIQUE KEY idx_voucher_code (code)"
   ]
 }

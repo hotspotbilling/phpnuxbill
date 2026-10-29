@@ -894,14 +894,21 @@ switch ($action) {
             $vouchers = [];
             $newVoucherIds = [];
 
-            // codes that already exist (with this prefix) are skipped and drawn again, so a batch never repeats a voucher
+            // Codes are drawn at random. Ones that already exist (with this prefix) are skipped here, and the database
+            // refuses a repeat (unique index on tbl_voucher.code), so a code taken by a request running at the same
+            // moment is caught when it is inserted and replaced by a new one.
             $makeCode = function () use ($voucher_format, $lengthcode) {
+                if ($voucher_format == 'numbers') {
+                    return generateUniqueNumericVouchers(1, $lengthcode)[0];
+                }
                 $code = strtoupper(substr(md5(random_bytes(16)), 0, $lengthcode));
                 if ($voucher_format == 'low') {
                     return strtolower($code);
                 }
                 return $voucher_format == 'rand' ? Lang::randomUpLowCase($code) : $code;
             };
+            // the column compares without case, so "abc" and "ABC" count as the same code
+            $key = fn($c) => strtolower("$prefix$c");
             $vouchers = [];
             $tries = 0;
             while (count($vouchers) < $numbervoucher && $tries < 20) {
@@ -915,11 +922,11 @@ switch ($action) {
                         $batch[] = $makeCode();
                     }
                 }
-                $taken = array_column(ORM::for_table('tbl_voucher')->select('code')
-                    ->where_in('code', array_map(fn($c) => "$prefix$c", $batch))->find_array(), 'code');
+                $taken = array_flip(array_map('strtolower', array_column(ORM::for_table('tbl_voucher')->select('code')
+                    ->where_in('code', array_map(fn($c) => "$prefix$c", $batch))->find_array(), 'code')));
                 foreach ($batch as $c) {
-                    if (!in_array("$prefix$c", $taken, true)) {
-                        $vouchers[$c] = $c;
+                    if (!isset($taken[$key($c)])) {
+                        $vouchers[$key($c)] = $c;
                     }
                 }
             }
@@ -927,21 +934,38 @@ switch ($action) {
             if (count($vouchers) < $numbervoucher) {
                 r2(getUrl('plan/add-voucher/'), 'e', Lang::T('Not enough unused codes at this length, use a longer Length Code'));
             }
+            $inBatch = array_flip(array_map($key, $vouchers));
 
             ORM::raw_execute('START TRANSACTION');
             try {
                 foreach ($vouchers as $code) {
-                    $d = ORM::for_table('tbl_voucher')->create();
-                    $d->type = $type;
-                    $d->routers = $server;
-                    $d->id_plan = $plan;
-                    $d->code = "$prefix$code";
-                    $d->user = '0';
-                    $d->status = '0';
-                    $d->generated_by = $admin['id'];
-                    $d->batch_name = $batch_name;
-                    $d->save();
-                    $newVoucherIds[] = $d->id();
+                    for ($attempt = 1;; $attempt++) {
+                        try {
+                            $d = ORM::for_table('tbl_voucher')->create();
+                            $d->type = $type;
+                            $d->routers = $server;
+                            $d->id_plan = $plan;
+                            $d->code = "$prefix$code";
+                            $d->user = '0';
+                            $d->status = '0';
+                            $d->generated_by = $admin['id'];
+                            $d->batch_name = $batch_name;
+                            $d->save();
+                            $newVoucherIds[] = $d->id();
+                            break;
+                        } catch (PDOException $e) {
+                            // 1062 / SQLSTATE 23000: that code was taken meanwhile. A failed INSERT does not undo the
+                            // transaction, so draw another code and try again.
+                            $duplicate = (string) $e->getCode() === '23000' || (int) ($e->errorInfo[1] ?? 0) === 1062;
+                            if (!$duplicate || $attempt >= 10) {
+                                throw $e;
+                            }
+                            do {
+                                $code = $makeCode();
+                            } while (isset($inBatch[$key($code)]));
+                            $inBatch[$key($code)] = true;
+                        }
+                    }
                 }
                 ORM::raw_execute('COMMIT');
             } catch (Throwable $e) {

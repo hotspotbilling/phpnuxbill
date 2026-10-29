@@ -411,7 +411,7 @@ ALTER TABLE `tbl_user_recharges`
 
 ALTER TABLE `tbl_voucher`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_voucher_code` (`code`),
+  ADD UNIQUE KEY `idx_voucher_code` (`code`),
   ADD KEY `idx_voucher_status_plan` (`status`, `id_plan`),
   ADD KEY `idx_voucher_routers` (`routers`);
 

@@ -89,7 +89,8 @@ php skeletons/build.php check plugin system/plugin/acme_sms
 ```
 
 It reads the plugin's PHP, templates and scripts for `plugin/<function>` addresses, compares them with the declared
-menus and routes, and prints what is missing, ready to paste into `plugin.json`. It exits with 1 when something
+menus and routes, and prints what is missing (paste it into `"routes"` in `plugin.json`, or add `register_route()` lines in a
+single-file plugin). It exits with 1 when something
 needs declaring, so it can run in a plugin's own CI.
 
 ## Updating an older plugin: three steps
@@ -310,7 +311,9 @@ It is not declared, so the core refuses it. Add it to `"routes"` in `plugin.json
 **How do I find the functions I forgot to declare?**
 In warn mode the core writes one line a day per function to the system log (Logs menu, type *Plugin*): `Plugin route 'x' is
 not declared ...`. The check command finds them without waiting for traffic: it reads your PHP, templates and scripts for
-`plugin/<function>` addresses and prints what is missing, ready to paste into `plugin.json`.
+`plugin/<function>` addresses and prints what is missing. In a folder plugin, paste those into `"routes"` in `plugin.json`.
+A single-file plugin has no `plugin.json`: add one `register_route('<function>', '<access>');` line per missing address
+next to your `register_menu()` calls, then run the check again.
 
 **My page asks for a login twice.**
 Declaring the function `admin` (or `customer`) makes the core run the sign-in check before your function, so your own
@@ -379,8 +382,10 @@ purpose, so remote images cannot track the admin. Put what matters in text; scre
 ### Menus and loading
 
 **My plugin has no menu, or does not load at all.**
-Errors in a plugin file are swallowed while plugins load, so a PHP syntax error simply means no menu. Run
-`php -l` on every file (`php -l myplugin.php includes/*.php`). Then check the menu itself: `"admin": true` for staff and
+Errors in a plugin file are swallowed while plugins load, so a PHP syntax error simply means no menu. Lint
+every file, one `php -l` per file (PHP older than 8.3 accepts only one file per call):
+`find system/plugin/myplugin -name '*.php' -exec php -l {} \;` (or `php -l system/plugin/myplugin.php` for a single-file
+plugin). Then check the menu itself: `"admin": true` for staff and
 `false` for customers, a position name the header actually prints (`AFTER_DASHBOARD` ... see the skeleton README), and for a
 submenu the **same position and audience as its parent**. An unmet `requires_php` also stops a folder plugin loading.
 
