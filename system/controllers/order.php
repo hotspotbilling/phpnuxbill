@@ -167,11 +167,11 @@ switch ($action) {
             r2(getUrl('order/buy/') . (($trx['routers_id'] == 0) ? $trx['routers'] : $trx['routers_id']) . '/' . $trx['plan_id'], 'w', Lang::T("Checking payment"));
         }
         if ($routes['3'] == 'check') {
-            if (GatewayLoader::file($trx['gateway']) === null) {
+            if (GatewayLoader::runFile($trx['gateway']) === null) {
                 r2(getUrl('order/view/') . $trxid, 'e', Lang::T("No Payment Gateway Available"));
             }
             run_hook('customer_check_payment_status'); #HOOK
-            include GatewayLoader::file($trx['gateway']);
+            include_once GatewayLoader::runFile($trx['gateway']);
             call_user_func($trx['gateway'] . '_validate_config');
             call_user_func($trx['gateway'] . '_get_status', $trx, $user);
         } else if ($routes['3'] == 'cancel') {
@@ -556,10 +556,10 @@ switch ($action) {
             r2(getUrl('order/gateway/') . $routes[2] . '/' . $routes[3], 'w', Lang::T("Please select Payment Gateway"));
         }
         run_hook('customer_buy_plan'); #HOOK
-        if (GatewayLoader::file($gateway) === null) {
+        if (GatewayLoader::runFile($gateway) === null) {
             r2(getUrl('order/gateway/') . $routes[2] . '/' . $routes[3], 'w', Lang::T("No Payment Gateway Available"));
         }
-        include GatewayLoader::file($gateway);
+        include_once GatewayLoader::runFile($gateway);
         call_user_func($gateway . '_validate_config');
 
         switch (_post('custom')) {

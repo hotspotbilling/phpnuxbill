@@ -4,6 +4,26 @@
 
 ## Unreleased
 
+- Marketplace licences: an extension can now run its own licence rules with `register_license($slug, $statusFn, $saveFn, $type)`:
+  the developer owns the key format, server and storage, and the core only shows the License button, the badge and the result
+  (and keeps **Activate** disabled until the state is `valid`). A manifest flag is editable by the customer, so it is now documented
+  as a reminder only. `PLUGINS.md` > Licensing.
+- Licensing for payment gateways and device drivers: `"license_provider": true` in `gateway.json` / `device.json` makes the core include
+  the file once to find its `register_license()`; the extension is not used (checkout, status check, webhook, plans) until the
+  developer's status function says `valid`. The skeletons for plugins, gateways, devices and themes now demonstrate every
+  developer API with comments (`skeletons/*`), `build.php new device` also renames the lowercase helper prefix, and the payment
+  gateway controllers `include_once` the gateway file.
+- Licence tiers: the status callback of `register_license()` can return `features`, `license_has($slug, $feature)` tells whether
+  the licence unlocks one, and a menu or submenu in `plugin.json` can carry `"feature": "name"` to be hidden without it.
+- Marketplace licences (manifest mode): an extension with `requires_license: true` is now **not run** until a valid key is saved, not just
+  blocked from the Activate button. Plugins are not loaded (no menu, route or hook), payment gateways are not used at checkout,
+  in the status check or in the callback, device drivers are not used by plans, and a theme falls back to the default look.
+  Installing is unchanged, and Marketplace still lists the extension and takes the key. New optional manifest key
+  `license_public_key` (base64 Ed25519): the `license_check_url` answer must then carry `expires` and a `signature` over
+  `type|slug|host|key|expires`, which is checked locally on every request, so editing the database or copying the key to another
+  domain no longer works. `php system/cron/marketplace_sync.php` asks again before a signed answer expires. Details in
+  `PLUGINS.md` > Licensing.
+
 - Admin: the side menu now has a white and a dark theme that follow the system / light / dark switch (before, it was navy in
   both, and each item in dark mode was its own boxed row). Covers the open menu, submenus, the collapsed icon rail and the
   flyouts that open beside it, and the logo cell above the menu. The footer is now pinned to the bottom of the screen (it starts

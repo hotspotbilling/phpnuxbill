@@ -23,6 +23,9 @@ include __DIR__ . '/../../init.php';
 
 $result = MarketplaceUpdates::run(true, true);
 
+// signed licences expire: ask the publisher again before they do
+$licenses = Extensions::refreshLicenses();
+
 echo date('Y-m-d H:i:s') . ' repositories: ';
 foreach (MarketplaceRepo::status() as $r) {
     echo $r['url'] . ' [' . $r['state'] . ', ' . $r['count'] . "] ";

@@ -219,7 +219,7 @@ class MarketplaceController
     public static function installedCard(string $type, string $slug, array $base, ?string $mainFile, array $manifest, ?array $store, array $updatesIndex): array
     {
         $upd = $updatesIndex[$type . ':' . $slug] ?? null;
-        $req = !empty($manifest['requires_license']) || (!empty($store['ispaid']) && !empty($manifest['license_check_url']));
+        $req = Extensions::licenseProvider($type, $slug) !== null || !empty($manifest['requires_license']) || (!empty($store['ispaid']) && !empty($manifest['license_check_url']));
         $licState = Extensions::licenseStatus($type, $slug)['state'];
         $card = $base + [
             'slug' => $slug,
@@ -229,7 +229,7 @@ class MarketplaceController
             'license' => [
                 'required' => $req,
                 'state' => $licState,
-                'has_key' => Extensions::license($type, $slug) !== '',
+                'has_key' => Extensions::licenseProvider($type, $slug) ? $licState !== 'none' : Extensions::license($type, $slug) !== '',
                 'blocked' => Extensions::licenseMissing($type, $slug, $manifest),
             ],
             'store' => $store,

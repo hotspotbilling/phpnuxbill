@@ -25,6 +25,10 @@ $ui->assign('_kolaps', (!empty($_COOKIE['kolaps']) && $_COOKIE['kolaps'] === 'tr
 $themeMeta = [];
 $themeChain = []; // ordered list of theme dirs (child first, then parent(s), then default)
 $activeTheme = !empty($config['theme']) && $config['theme'] != 'default' ? $config['theme'] : null;
+// a theme that needs a licence falls back to the default look until a valid key is saved
+if ($activeTheme && Extensions::licenseMissing('theme', $activeTheme, Extensions::manifest('theme', $activeTheme))) {
+    $activeTheme = null;
+}
 
 if ($activeTheme) {
     $themeDir = File::pathFixer($UI_PATH . '/themes/' . $activeTheme);
@@ -326,7 +330,7 @@ try {
                 }
                 $html .= _menu_icon($item['icon'] ?? '', true) . ' '; // the space matches the built-in markup: the customer sidebar is inline, not flex
                 $html .= '<span class="text">' . $item['name'] . '</span>';
-                if (!empty($item['label'])) {
+                if (!empty($item['label']) && is_scalar($item['label'])) { // an array here (wrong argument order) printed "Array"
                     $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $item['color'] . '">' . $item['label'] . '</small></span>';
                 }
                 if (!empty($kids)) {
@@ -347,7 +351,7 @@ try {
                         }
                         $html .= '<li' . $kidActive . '><a href="' . $kidMenuUrl . '" title="' . htmlspecialchars(strip_tags($kid['name']), ENT_QUOTES) . '">';
                         $html .= _menu_icon($kid['icon'] ?? '') . ' ';
-                        if (!empty($kid['label'])) {
+                        if (!empty($kid['label']) && is_scalar($kid['label'])) {
                             $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $kid['color'] . '">' . $kid['label'] . '</small></span>';
                         }
                         $html .= '<span class="text">' . $kid['name'] . '</span></a></li>';

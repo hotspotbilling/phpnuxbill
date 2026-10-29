@@ -192,6 +192,11 @@ class PluginLoader
             if (!empty($m['requires_php']) && version_compare(PHP_VERSION, $m['requires_php'], '<')) {
                 continue;
             }
+            // a plugin that needs a licence is not loaded until a valid key is saved (Marketplace > the plugin's card)
+            if (!empty($m['requires_license']) && Extensions::licenseMissing('plugin', $slug, $m)) {
+                self::$plugins[$slug]['license_blocked'] = true;
+                continue;
+            }
             if (is_dir($dir . DIRECTORY_SEPARATOR . 'ui')) {
                 self::$templateDirs[] = $dir . DIRECTORY_SEPARATOR . 'ui' . DIRECTORY_SEPARATOR;
             }
@@ -221,6 +226,11 @@ class PluginLoader
             if (!empty($m['menus']) && is_array($m['menus'])) {
                 foreach ($m['menus'] as $mi) {
                     if (!is_array($mi)) {
+                        continue;
+                    }
+                    // "feature": hide this menu unless the plugin's licence (register_license) unlocks that feature, or any
+                    // valid licence for "licensed". Only hides the entry: the page itself must check license_has() too.
+                    if (!empty($mi['feature']) && is_string($mi['feature']) && !Extensions::licenseHas('plugin', $slug, $mi['feature'])) {
                         continue;
                     }
                     $type = $mi['type'] ?? 'menu';

@@ -100,6 +100,125 @@ needs declaring, so it can run in a plugin's own CI.
 3. Remove your own `_admin()` check from a function you declared `admin` if you like; the core does it, doing it twice
    is harmless.
 
+## `plugin.json` reference
+
+The manifest of a folder plugin (`system/plugin/<slug>/plugin.json`). The core reads it as plain data and never runs it, so
+treat everything in it as public and editable by the customer. Menus, routes and licence rules can live in PHP instead (see the
+last column).
+
+**What is required.** Technically only the file itself: it must exist and hold a JSON object, otherwise the folder is not
+treated as a plugin. Every key below is optional, but a plugin with no `name`, `version` or `description` looks unfinished in
+Marketplace, so set at least those and `author`.
+
+### A complete manifest
+
+```json
+{
+  "name": "Acme SMS",
+  "slug": "acme_sms",
+  "version": "1.2.0",
+  "description": "Send SMS through Acme.",
+  "author": "Acme Ltd",
+  "url": "https://acme.example/sms",
+  "main": "acme_sms.php",
+
+  "requires_php": "8.2",
+  "requires_version": "2025.11.1",
+  "requires_extensions": ["curl", "mbstring"],
+  "requires_plugins": ["hotspot"],
+
+  "update_url": "https://acme.example/sms/latest.json",
+  "github": "https://github.com/acme/acme_sms",
+
+  "routes": [
+    { "function": "acme_sms_webhook", "access": "public" },
+    { "function": "acme_sms_send_test", "access": "admin" }
+  ],
+  "menus": [
+    { "type": "menu", "name": "Acme SMS", "admin": true, "function": "acme_sms", "position": "AFTER_MESSAGE",
+      "icon": "ion ion-chatbox", "label": "New", "color": "success", "auth": ["SuperAdmin", "Admin"] },
+    { "type": "submenu", "parent": "acme_sms", "name": "Settings", "admin": true, "function": "acme_sms/settings",
+      "position": "AFTER_MESSAGE", "auth": ["SuperAdmin", "Admin"] }
+  ]
+}
+```
+
+### Identity
+
+| Key | Required | Type | If missing | Notes |
+|---|---|---|---|---|
+| `name` | recommended | string | the folder name | Shown on the Marketplace card |
+| `slug` | no | string | the folder name | **Ignored.** The folder name is the slug; keep the key equal to it for readers |
+| `version` | recommended | string | `1.0.0` is shown | Plain dotted numbers (`1.2.0`), compared with `version_compare()`. Raise it on every release |
+| `description` | recommended | string | empty | One line on the card |
+| `author` | no | string | empty | Shown on the card |
+| `url` | no | string | none | Link on the card (http / https only) |
+| `main` | no | string | `<slug>.php` | The file the core includes on every request. Must be inside the plugin folder, or it is not loaded |
+
+### Requirements (checked before install, update and activation)
+
+| Key | Required | Type | Effect when not met |
+|---|---|---|---|
+| `requires_php` | no | string, e.g. `"8.2"` | **Blocks** install, update and activation; the plugin is not loaded |
+| `requires_version` | no | string, e.g. `"2025.11.1"` | **Blocks** (compared with the billing system's version) |
+| `requires_extensions` | no | array of PHP extension names | **Blocks** when one is not loaded |
+| `requires_plugins` | no | array of plugin folder names | **Warns only**: the plugin is missing or paused, but install is allowed |
+
+### Updates
+
+| Key | Required | Type | Notes |
+|---|---|---|---|
+| `update_url` | no | https URL | Answers JSON with `version` (or a GitHub release's `tag_name`); cached 6 hours. Without it the update check uses the store's `last_update` instead |
+| `github` | no | `https://github.com/<owner>/<repo>` | Where **Update** downloads the package (`master`, then `main`). Only github.com is supported |
+
+Neither is secret. Both are read for every installed plugin on every Marketplace page, loaded or not, so they cannot move into PHP.
+
+### Licence (optional)
+
+| Key | Required | Type | Notes |
+|---|---|---|---|
+| `requires_license` | no | boolean | Manifest mode only: the plugin is not loaded until a valid key is saved. **Do not set it** if you use `register_license()` in PHP, or the plugin never loads to register |
+| `license_check_url` | no | https URL | Manifest mode: the core POSTs `key`, `slug`, `type`, `domain` and expects `{"valid": true}` |
+| `license_public_key` | no | base64 Ed25519 key | Manifest mode: the answer must then carry `expires` and a `signature` |
+
+A customer can edit all three. For anything you sell, put the rules in PHP instead (see *Licensing a paid extension*).
+
+### `routes` (or `register_route()` in PHP)
+
+An array of declarations. Each entry is a string (an `admin` route) or an object:
+
+| Key | Required | Notes |
+|---|---|---|
+| `function` | **yes** | A plain PHP function name that needs no arguments and is defined under `system/plugin/` |
+| `access` | no, default `admin` | `admin`, `customer` or `public` (see *Declaring what a URL may call*) |
+
+### `menus` (or `register_menu()` / `register_submenu()` in PHP)
+
+An array of menu entries. The core registers them in order, **after** your main file has run.
+
+| Key | Required | Type | Default | Notes |
+|---|---|---|---|---|
+| `type` | no | `menu` or `submenu` | `menu` | |
+| `name` | **yes** | string | | The text in the menu. An entry with no `name` shows an empty item |
+| `function` | **yes** | string | | The function that handles the page. `acme_sms/settings` runs `acme_sms()` with `$routes[2] = 'settings'`. An entry with no `function` is skipped |
+| `admin` | no | boolean | `false` | `true` for the staff menu, `false` for the customer portal. A submenu needs the same value as its parent |
+| `position` | no | string | `AFTER_DASHBOARD` | A slot the menu templates print, for example `AFTER_MESSAGE` or `SETTINGS` (list in the skeleton README). A submenu needs the same position as its parent |
+| `parent` | submenu: **yes** | string | | The `function` of the parent menu. A submenu with no `parent` is skipped |
+| `icon` | no | string | none | An icon class (`ion ion-cube`, `fa fa-cog`) or an inline `<svg>` |
+| `label` | no | string | none | A small badge, for example `New`. Text only |
+| `color` | no | string | `success` | Badge colour: `success`, `danger`, `warning`, `info`, `primary` |
+| `auth` | no | array of roles | everyone | `SuperAdmin`, `Admin`, `Report`, `Agent`, `Sales`, `Asset`, `Support`. Empty means all |
+| `feature` | no | string | none | Show this entry only when the plugin's licence unlocks that feature (see *Licence tiers*) |
+
+### What can move into PHP
+
+| In `plugin.json` | The same thing in PHP |
+|---|---|
+| `routes` | `register_route('fn', 'public')` |
+| `menus` | `register_menu(...)`, `register_submenu(...)` (mind the argument order) |
+| `requires_license`, `license_*` | `register_license(...)` and `license_has(...)` |
+| `name`, `version`, `description`, `author`, `main`, `requires_*`, `update_url`, `github`, `url` | stays in the manifest: the core needs them without running your code |
+
 ## Publishing and serving updates
 
 How an admin learns your plugin has a new version, and what happens when they press **Update** in Marketplace.
@@ -223,8 +342,26 @@ Each has its own starter with a README: `skeletons/gateway/`, `skeletons/device/
 
 All four manifests share the same keys for versions and requirements: `name`, `slug`, `version`, `description`, `author`,
 `main`, `requires_php`, `requires_extensions`, `requires_version`, `requires_plugins`, `requires_license`,
-`license_check_url`, `update_url`, `github` (a theme has no `main`, `requires_extensions` or `requires_plugins`). Gateways add
+`license_check_url`, `license_public_key`, `update_url`, `github` (a theme has no `main`, `requires_extensions` or `requires_plugins`). Gateways add
 `region`, devices add `category` (`Mikrotik`, `Radius`, `Voucher` or `Other`), themes add `parent` and `preview`. `update_url` and `github` work exactly as described above for any of them.
+
+### What differs from `plugin.json`
+
+The identity, requirement, licence and update keys behave as in the `plugin.json` reference above (all optional). Gateways, drivers
+and themes have no `routes` or `menus`: a gateway's webhook is `callback/<slug>`, a driver is called by the billing engine and a theme
+is only templates. Only these keys differ:
+
+| Manifest | Key | Required | Notes |
+|---|---|---|---|
+| `gateway.json` | `main` | no, default `<slug>.php` | The file included on demand. A folder with no such file is not listed |
+| `gateway.json` | `region` | no | Groups the gateway in Marketplace (`Global`, `Africa`, `Indonesia`, `Bangladesh`, `India`, `Middle East` or `Other`). Guessed from the slug and description when missing, otherwise `Other` |
+| `gateway.json`, `device.json` | `license_provider` | no, default `false` | Set `true` when the file calls `register_license(..., 'gateway' / 'device')`. Gateway and driver files are only included on demand, so the core includes the file once to find the licence rules; it then refuses to use the extension until your status function answers `valid`. Folder style only. Do not combine with `requires_license` |
+| `device.json` | `slug` | no, but must match | The folder name **and** the PHP class name. The core does `new <slug>` |
+| `device.json` | `main` | no, default `<slug>.php` | The file that defines that class |
+| `device.json` | `category` | no | `Mikrotik`, `Radius`, `Voucher` or `Other`, to group the driver. Guessed from the class name's prefix when missing, otherwise `Other` |
+| `theme.json` | `parent` | no | A plain theme folder name. Templates the theme does not override fall back to the parent, then to the default. Leave it out for a theme that stands alone |
+| `theme.json` | `preview` | no | An image path inside the theme folder for the Marketplace card. Without it the core looks for `preview.png`, `preview.jpg`, `preview.webp` or a `screenshot.*` |
+| `theme.json` | `main`, `requires_extensions`, `requires_plugins` | not needed | A theme has no PHP entry point |
 
 ### Payment gateways
 
@@ -287,9 +424,112 @@ all.
 Because only plugins get `install.php` and only on the first install, a gateway or driver that needs a new table or setting
 after an update has to create it when its own code runs.
 
+## Licensing a paid extension
+
+**You decide how your extension is licensed.** The core does not own the rules: a manifest flag is only a file the
+customer can edit, so the real check has to live in your own code. The core gives you two things: a **License** button on your
+extension's Marketplace card, and a place to show the result. Everything else (key format, your server, how the key is stored,
+what happens without one) is yours.
+
+### 1. Register your licence rules (recommended)
+
+In your plugin's main file, next to `register_menu()`:
+
+```php
+register_license('acme_sms', 'acme_sms_license_status', 'acme_sms_license_save');
+
+// current state, called on every Marketplace page and whenever the core asks
+function acme_sms_license_status()
+{
+    // read your own storage, check your own signature, call your own server: anything you like
+    $key = acme_sms_stored_key();
+    if ($key === '') {
+        return ['state' => 'none', 'message' => 'Enter your licence key'];
+    }
+    return acme_sms_verify_offline($key)          // e.g. an Ed25519 signature bound to this domain
+        ? ['state' => 'valid', 'message' => 'Licensed to ' . $_SERVER['HTTP_HOST']]
+        : ['state' => 'invalid', 'message' => 'This key is not valid for this site'];
+}
+
+// the admin pressed License and typed a key
+function acme_sms_license_save($key)
+{
+    $ok = acme_sms_activate_on_my_server(trim($key), parse_url(APP_URL, PHP_URL_HOST));
+    if ($ok) {
+        acme_sms_store_key($key);
+    }
+    return ['state' => $ok ? 'valid' : 'invalid', 'message' => $ok ? 'Thank you' : 'Rejected'];
+}
+```
+
+Both callbacks answer `true` / `false`, or `['state' => 'valid' | 'invalid' | 'unchecked' | 'none', 'message' => '...']`. A callback
+that throws counts as `invalid`. The core shows the badge (*License needed* until `valid`, *Licensed* after), shows your
+`message` to the admin, and refuses the Marketplace **Activate** button until `state` is `valid`.
+
+`register_license($slug, $status, $save, $type)` takes `'plugin'` (default), `'gateway'`, `'device'` or `'theme'` as `$type`. A
+plugin is always loaded (that is how it registers), so **your code must guard itself**: call
+`Extensions::licenseMissing('plugin', 'acme_sms', [])` (or your own status function) at the top of the main file and `return`
+before registering menus, routes and hooks, and again in anything sensitive such as a webhook or a cron job. Spread a few
+checks around rather than one, and do not name them after the licence.
+
+Do **not** set `requires_license` in `plugin.json` when you use `register_license()`: that flag makes the core skip loading the
+plugin until a key exists, so it would never get to register.
+
+### Licence tiers: hide menus and features
+
+A licence can unlock only part of a plugin (for example Hotspot for everyone, Merchants only with the merchant licence). Have
+your status callback list what the key unlocks:
+
+```php
+return ['state' => 'valid', 'features' => ['core', 'merchants'], 'message' => 'Merchant licence'];
+```
+
+Then ask with `license_has('acme_sms', 'merchants')` (the feature `licensed` means any valid licence). Two places use it:
+
+* **Menus in `plugin.json`**: add `"feature": "merchants"` to a menu or submenu and it is only registered when the licence unlocks
+  that feature. With no licence, or no `register_license()`, it is hidden.
+
+  ```json
+  { "type": "submenu", "parent": "hotspot", "name": "Merchants", "admin": true, "function": "hotspot/merchant/admin", "feature": "merchants" }
+  ```
+* **Menus in code**: `if (license_has('acme_sms', 'merchants')) { register_submenu(...); }`.
+
+Hiding a menu is cosmetic. The page and its actions must check `license_has()` themselves (and an unlicensed request should end
+with `r2()` or `showResult()`), because a hidden menu does not stop someone typing the address. The `"feature"` key lives in the
+manifest, which the customer can edit, so it only decides what the menu shows; the real gate is the check in your code.
+
+### 2. Make editing and reading hard
+
+PHP is source code: whoever installs the extension can read it and remove a check. Nothing in the core can change that. What
+helps, in order of effect:
+
+* **Verify offline, with a signature.** Give each customer a key that is your Ed25519 signature over their domain (and an expiry).
+  Embed only the *public* key in your code and check with `sodium_crypto_sign_verify_detached()`. A key cannot be forged, and it
+  does not work on another domain. Needs PHP's `sodium` extension, which ships with PHP 7.2+.
+* **Ship encoded.** Run the main files through ionCube or SourceGuardian (the server then needs the loader), so the checks cannot
+  simply be edited out.
+* **Call home occasionally** from cron (`register_hook('cronjob_end', ...)`) so you can revoke a key; keep working through a short
+  outage.
+
+This keeps honest customers honest, stops key sharing and lets you revoke. It cannot stop a determined person with the source.
+
+### 3. The simple manifest mode (only a reminder)
+
+For a free-form "type a key" box with no logic of your own, a manifest can declare `"requires_license": true`, optionally with
+`"license_check_url"` (an https endpoint the core POSTs `key`, `slug`, `type`, `domain` to, answering `{"valid": true}`) and
+`"license_public_key"` (base64 Ed25519; the answer must then carry `expires` and a `signature` over
+`type|slug|host|key|expires`, checked on every request). The core then does not run the extension until a valid key exists
+(a plugin is not loaded, a gateway is not used at checkout or in its webhook, a driver is not used by plans, a theme falls back
+to the default). Because the manifest is editable (set it to `false` and the core stops checking), treat this mode as a convenience for
+open-source or low-value extensions and use section 1 for anything you sell.
+
 ## Other parts of the contract
 
-* **Menus**: see the skeleton README for `position`, `auth`, icons and the admin / customer split.
+* **Menus**: see the skeleton README for `position`, `auth`, icons and the admin / customer split. The argument order matters:
+  `register_menu($name, $admin, $function, $position, $icon, $label, $color, $auth)` and
+  `register_submenu($parentFunction, $name, $admin, $function, $position, $icon, $label, $color, $auth)`. Skipping `$label` and
+  `$color` and passing the `$auth` array as the sixth or seventh argument puts it in the wrong slot (it used to show as a badge
+  reading "Array"), and the menu then has no role restriction. Pass `''` and `'success'` to skip them, or use `plugin.json`.
 * **Hooks**: `register_hook('cronjob_end', 'myplugin_cron');` Find names with `grep -rn "run_hook(" system/`.
 * **Settings**: rows in `tbl_appconfig` (`myplugin_*`), available in `$config` and in templates as `$_c`.
 * **Database**: create tables in `install.php`; there are no migrations. Use Idiorm (`ORM::for_table(...)`).

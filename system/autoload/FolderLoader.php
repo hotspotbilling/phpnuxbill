@@ -73,6 +73,19 @@ abstract class FolderLoader
         return static::all()[$slug]['file'] ?? null;
     }
 
+    /**
+     * The main PHP file to actually run (checkout, webhook, driver): like file(), but null while the extension
+     * needs a licence it does not have. file() stays unfiltered so Marketplace can still list it and take the key.
+     */
+    public static function runFile(string $slug): ?string
+    {
+        $e = static::all()[$slug] ?? null;
+        if ($e === null || Extensions::licenseMissing(static::TYPE, $slug, $e['manifest'])) {
+            return null;
+        }
+        return $e['file'];
+    }
+
     public static function isFolder(string $slug): bool
     {
         return !empty(static::all()[$slug]['folder']);

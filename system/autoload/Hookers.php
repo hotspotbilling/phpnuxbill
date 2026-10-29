@@ -68,6 +68,28 @@ function register_submenu($parentFunction, $name, $admin, $function, $position, 
 $route_registered = array();
 
 /**
+ * Let an extension run its own licence rules. The developer decides how a key looks, where it is checked and how it is
+ * stored; Marketplace shows the License button and the result. Both callbacks answer true / false or
+ * ['state' => 'valid'|'invalid'|'unchecked'|'none', 'message' => '...']:
+ *   register_license('acme_sms', 'acme_sms_license_status', 'acme_sms_license_save');
+ * $type is 'plugin' (default), 'gateway', 'device' or 'theme'.
+ */
+function register_license($slug, $statusFunction, $saveFunction, $type = 'plugin')
+{
+    Extensions::registerLicense($type, $slug, $statusFunction, $saveFunction);
+}
+
+/**
+ * Does the extension's licence unlock a feature (a name from the "features" its status callback returned, or "licensed" for
+ * any valid licence)? Use it to guard pages and to decide which menus to register:
+ *   if (license_has('acme_sms', 'merchants')) { register_menu(...); }
+ */
+function license_has($slug, $feature, $type = 'plugin')
+{
+    return Extensions::licenseHas($type, $slug, $feature);
+}
+
+/**
  * Declare a function a plugin page, webhook or API entry point: ?_route=plugin/<function> may run it.
  * Menu functions (register_menu / register_submenu, or "menus" in plugin.json) are allowed without this.
  *

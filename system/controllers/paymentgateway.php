@@ -69,7 +69,7 @@ switch ($action) {
         }
 
         if (GatewayLoader::file($action) !== null) {
-            include GatewayLoader::file($action);
+            include_once GatewayLoader::file($action);
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (function_exists($action . '_save_config')) {
                     call_user_func($action . '_save_config');

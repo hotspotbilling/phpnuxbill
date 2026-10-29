@@ -425,65 +425,267 @@ class Extensions
 
     // ---------------------------------------------------------------- licence
 
+    /** @var array|null licence rows read straight from tbl_appconfig (plugins load before $config is filled) */
+    private static $licenseRows = null;
+
+    private static function licenseConfig(string $key): string
+    {
+        global $config;
+        if (isset($config[$key])) {
+            return (string) $config[$key];
+        }
+        if (self::$licenseRows === null) {
+            self::$licenseRows = [];
+            try {
+                foreach (ORM::for_table('tbl_appconfig')->where_like('setting', 'license\\_%')->find_array() as $r) {
+                    self::$licenseRows[$r['setting']] = (string) $r['value'];
+                }
+            } catch (Throwable $e) {
+                // no database yet (installer): nothing is licensed
+            }
+        }
+        return self::$licenseRows[$key] ?? '';
+    }
+
+    /** @var array "type:slug" => ['status' => callable, 'save' => callable] licence providers the extensions registered */
+    private static $licenseProviders = [];
+
+    /**
+     * An extension that decides its own licence rules registers them (register_license() in init.php): the developer owns
+     * the key format, the server, the storage and the checks, and the core only shows the License button and its result.
+     * $status() returns the current state, $save($key) takes the key the admin typed; both answer true / false or
+     * ['state' => 'valid'|'invalid'|'unchecked'|'none' (or 'valid' => bool), 'message' => '...'].
+     */
+    public static function registerLicense(string $type, string $slug, $status, $save): void
+    {
+        if (is_callable($status) && is_callable($save)) {
+            self::$licenseProviders[$type . ':' . $slug] = ['status' => $status, 'save' => $save];
+        }
+    }
+
+    /** @var array "type:slug" => true once the main file of a gateway / driver was included to look for its provider */
+    private static $providerLoaded = [];
+
+    public static function licenseProvider(string $type, string $slug): ?array
+    {
+        $k = $type . ':' . $slug;
+        if (!isset(self::$licenseProviders[$k]) && ($type === 'gateway' || $type === 'device') && !isset(self::$providerLoaded[$k])) {
+            // A gateway or driver file is only included on demand, so its register_license() has not run yet. A manifest that
+            // says "license_provider": true asks the core to include the file (once) to find it. include_once, because the
+            // billing code includes the same file later.
+            self::$providerLoaded[$k] = true;
+            $e = ($type === 'gateway' ? GatewayLoader::all() : DeviceLoader::all())[$slug] ?? null;
+            if ($e !== null && !empty($e['manifest']['license_provider']) && is_file($e['file'])) {
+                try {
+                    include_once $e['file'];
+                } catch (Throwable $t) {
+                    // a broken file simply registers nothing, and the extension then counts as unlicensed
+                }
+            }
+        }
+        return self::$licenseProviders[$k] ?? null;
+    }
+
+    /** Run one provider callback and normalise its answer; a callback that throws counts as invalid */
+    private static function providerCall($fn, array $args = []): array
+    {
+        try {
+            $r = call_user_func_array($fn, $args);
+        } catch (Throwable $e) {
+            return ['state' => 'invalid', 'message' => 'Licence check failed: ' . $e->getMessage()];
+        }
+        if (is_bool($r)) {
+            return ['state' => $r ? 'valid' : 'invalid', 'message' => ''];
+        }
+        if (!is_array($r)) {
+            return ['state' => 'unchecked', 'message' => is_string($r) ? $r : ''];
+        }
+        $state = $r['state'] ?? (array_key_exists('valid', $r) ? ($r['valid'] ? 'valid' : 'invalid') : 'unchecked');
+        $features = is_array($r['features'] ?? null) ? array_values(array_filter(array_map('strval', $r['features']))) : [];
+        return [
+            'state' => in_array($state, ['valid', 'invalid', 'unchecked', 'none'], true) ? $state : 'unchecked',
+            'message' => (string) ($r['message'] ?? ''),
+            'features' => $features,
+        ];
+    }
+
+    /**
+     * Does this extension's licence unlock a feature? The developer's status callback lists them:
+     * ['state' => 'valid', 'features' => ['merchants', 'tokens']]. The feature "licensed" means any valid licence.
+     * Without a registered licence provider, or without a valid licence, the answer is no.
+     */
+    public static function licenseHas(string $type, string $slug, string $feature): bool
+    {
+        $p = self::licenseProvider($type, $slug);
+        if ($p === null) {
+            return false;
+        }
+        $st = self::providerCall($p['status']);
+        return $st['state'] === 'valid' && ($feature === 'licensed' || in_array($feature, $st['features'], true));
+    }
+
     public static function license(string $type, string $slug): string
     {
-        return (string) self::config('license_' . $type . '_' . $slug, '');
+        return self::licenseConfig('license_' . $type . '_' . $slug);
     }
 
     public static function licenseStatus(string $type, string $slug): array
     {
-        $raw = self::config('license_status_' . $type . '_' . $slug, '');
-        $s = is_string($raw) ? json_decode($raw, true) : null;
+        if ($p = self::licenseProvider($type, $slug)) {
+            return self::providerCall($p['status']);
+        }
+        $raw = self::licenseConfig('license_status_' . $type . '_' . $slug);
+        $s = $raw !== '' ? json_decode($raw, true) : null;
         return is_array($s) ? $s : ['state' => self::license($type, $slug) !== '' ? 'unchecked' : 'none'];
     }
 
+    private static function storeLicense(string $type, string $slug, string $key, array $status): void
+    {
+        self::setConfig('license_' . $type . '_' . $slug, $key);
+        self::setConfig('license_status_' . $type . '_' . $slug, json_encode($status));
+        self::$licenseRows = null;
+    }
+
+    /** The text the publisher signs: bound to this extension, this site's host, the key and an expiry (0 = never) */
+    public static function licenseMessage(string $type, string $slug, string $key, int $expires): string
+    {
+        return implode('|', [$type, $slug, strtolower((string) parse_url(APP_URL, PHP_URL_HOST)), $key, $expires]);
+    }
+
     /**
-     * Save a licence key. When the manifest declares license_check_url the key is verified remotely
-     * (POST key, slug, domain; expects JSON {"valid": true|false, "message": "..."}).
+     * Is the stored answer really signed by the publisher (manifest license_public_key, base64 Ed25519) for this site
+     * and key, and not expired? Checked locally on every request, so editing the database cannot fake a licence.
+     */
+    public static function licenseSignatureOk(string $type, string $slug, array $manifest, string $key, array $status): bool
+    {
+        if (!function_exists('sodium_crypto_sign_verify_detached') || $key === '') {
+            return false;
+        }
+        $pk = base64_decode((string) ($manifest['license_public_key'] ?? ''), true);
+        $sig = base64_decode((string) ($status['signature'] ?? ''), true);
+        if ($pk === false || $sig === false || strlen($pk) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES || strlen($sig) !== SODIUM_CRYPTO_SIGN_BYTES) {
+            return false;
+        }
+        $expires = (int) ($status['expires'] ?? 0);
+        if ($expires > 0 && $expires < time()) {
+            return false;
+        }
+        try {
+            return sodium_crypto_sign_verify_detached($sig, self::licenseMessage($type, $slug, $key, $expires), $pk);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Ask the publisher's endpoint about a key (POST key, slug, type, domain; expects JSON
+     * {"valid": true|false, "message": "...", "expires": unix|0, "signature": "base64"}).
+     * Returns the status to store, or null when there is no endpoint or it did not answer.
+     */
+    private static function queryLicense(string $type, string $slug, string $key, array $manifest): ?array
+    {
+        $url = $manifest['license_check_url'] ?? '';
+        if (!is_string($url) || !preg_match('#^https://#i', $url)) {
+            return null;
+        }
+        $res = Http::postData($url, [
+            'key' => $key,
+            'slug' => $slug,
+            'type' => $type,
+            'domain' => parse_url(APP_URL, PHP_URL_HOST),
+        ]);
+        $j = is_string($res) ? json_decode($res, true) : null;
+        if (!is_array($j) || !array_key_exists('valid', $j)) {
+            return null;
+        }
+        $status = [
+            'state' => $j['valid'] ? 'valid' : 'invalid',
+            'message' => (string) ($j['message'] ?? ($j['valid'] ? 'Licence valid' : 'Licence rejected')),
+            'checked' => time(),
+        ];
+        if (!empty($manifest['license_public_key'])) {
+            $status['expires'] = (int) ($j['expires'] ?? 0);
+            $status['signature'] = (string) ($j['signature'] ?? '');
+            if ($j['valid'] && !self::licenseSignatureOk($type, $slug, $manifest, $key, $status)) {
+                $status['state'] = 'invalid';
+                $status['message'] = function_exists('sodium_crypto_sign_verify_detached')
+                    ? 'The licence answer is not signed by the publisher for this site'
+                    : 'The PHP sodium extension is needed to verify this licence';
+            }
+        }
+        return $status;
+    }
+
+    /**
+     * Save a licence key. When the manifest declares license_check_url the key is verified remotely; with
+     * license_public_key the answer must also carry the publisher's signature.
      */
     public static function saveLicense(string $type, string $slug, string $key, array $manifest = []): array
     {
         $key = trim($key);
-        self::setConfig('license_' . $type . '_' . $slug, $key);
+        if ($p = self::licenseProvider($type, $slug)) {
+            return self::providerCall($p['save'], [$key]); // the developer's code stores the key, wherever it likes
+        }
         if ($key === '') {
-            self::setConfig('license_status_' . $type . '_' . $slug, json_encode(['state' => 'none']));
+            self::storeLicense($type, $slug, '', ['state' => 'none']);
             return ['state' => 'none', 'message' => 'Licence removed'];
         }
-        $status = ['state' => 'unchecked', 'message' => 'Saved (no verification endpoint)', 'checked' => time()];
-        $url = $manifest['license_check_url'] ?? '';
-        if (is_string($url) && preg_match('#^https://#i', $url)) {
-            $res = Http::postData($url, [
-                'key' => $key,
-                'slug' => $slug,
-                'type' => $type,
-                'domain' => parse_url(APP_URL, PHP_URL_HOST),
-            ]);
-            $j = is_string($res) ? json_decode($res, true) : null;
-            if (is_array($j) && array_key_exists('valid', $j)) {
-                $status = [
-                    'state' => $j['valid'] ? 'valid' : 'invalid',
-                    'message' => (string) ($j['message'] ?? ($j['valid'] ? 'Licence valid' : 'Licence rejected')),
-                    'checked' => time(),
-                ];
-            } else {
-                $status = ['state' => 'unchecked', 'message' => 'Verification endpoint did not answer', 'checked' => time()];
+        $status = self::queryLicense($type, $slug, $key, $manifest);
+        if ($status === null) {
+            $status = !empty($manifest['license_check_url'])
+                ? ['state' => 'unchecked', 'message' => 'Verification endpoint did not answer', 'checked' => time()]
+                : ['state' => 'unchecked', 'message' => 'Saved (no verification endpoint)', 'checked' => time()];
+        }
+        self::storeLicense($type, $slug, $key, $status);
+        return $status;
+    }
+
+    /**
+     * Ask again about every stored key (cron, before a signed answer expires). An endpoint that does not answer keeps
+     * the stored answer until it expires; one that says the key is no longer valid revokes it.
+     * @return int how many keys were refreshed
+     */
+    public static function refreshLicenses(): int
+    {
+        $n = 0;
+        foreach (self::TYPES as $type) {
+            foreach (array_keys(MarketplaceUpdates::installed($type)) as $slug) {
+                $manifest = self::manifest($type, $slug);
+                $key = self::license($type, $slug);
+                if (self::licenseProvider($type, $slug) || $key === '' || empty($manifest['requires_license']) || empty($manifest['license_check_url'])) {
+                    continue;
+                }
+                $status = self::queryLicense($type, $slug, $key, $manifest);
+                if ($status !== null) {
+                    self::storeLicense($type, $slug, $key, $status);
+                    $n++;
+                }
             }
         }
-        self::setConfig('license_status_' . $type . '_' . $slug, json_encode($status));
-        return $status;
+        return $n;
     }
 
     /** True when the manifest demands a licence and none usable is stored */
     public static function licenseMissing(string $type, string $slug, array $manifest): bool
     {
+        if ($p = self::licenseProvider($type, $slug)) {
+            return self::providerCall($p['status'])['state'] !== 'valid'; // the developer's own rules
+        }
         if (empty($manifest['requires_license'])) {
             return false;
         }
-        $st = self::licenseStatus($type, $slug)['state'];
-        if (self::license($type, $slug) === '' || $st === 'invalid') {
+        $key = self::license($type, $slug);
+        if ($key === '') {
             return true;
         }
-        return !empty($manifest['license_check_url']) && $st !== 'valid';
+        $status = self::licenseStatus($type, $slug);
+        if (!empty($manifest['license_public_key'])) {
+            return !self::licenseSignatureOk($type, $slug, $manifest, $key, $status); // the stored "state" is not trusted
+        }
+        if ($status['state'] === 'invalid') {
+            return true;
+        }
+        return !empty($manifest['license_check_url']) && $status['state'] !== 'valid';
     }
 
     // ----------------------------------------------------------------- GitHub

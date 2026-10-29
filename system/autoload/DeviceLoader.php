@@ -16,7 +16,7 @@ class DeviceLoader extends FolderLoader
     /** Include a driver file once and return its class name (or null) */
     public static function load(string $slug): ?string
     {
-        $file = static::file($slug);
+        $file = static::runFile($slug);
         if ($file === null) {
             return null;
         }

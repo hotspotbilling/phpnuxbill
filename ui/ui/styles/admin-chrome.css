@@ -270,6 +270,108 @@ body.as-chrome.modern-skin-dark .content-wrapper {
   }
 }
 
+/* ---------- menu badges: the $label / $color of register_menu() and register_submenu() ---------- */
+/* a small soft pill; the colour comes from the bg-* class the menu code puts on it (success, danger, warning, info, primary).
+   The older skin gave every badge a pale fill with pale text, which could barely be read. */
+body.as-chrome.modern-skin-dark .sidebar-menu .label {
+  --b-bg: #e2e8f0;
+  --b-fg: #334155;
+  --b-ring: rgba(51, 65, 85, 0.18);
+  display: inline-flex;
+  align-items: center;
+  float: none;
+  margin: 0;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+  background: var(--b-bg) !important;
+  color: var(--b-fg) !important;
+  box-shadow: inset 0 0 0 1px var(--b-ring);
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-success,
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-green {
+  --b-bg: #dcfce7;
+  --b-fg: #166534;
+  --b-ring: rgba(22, 101, 52, 0.22);
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-danger,
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-red {
+  --b-bg: #fee2e2;
+  --b-fg: #991b1b;
+  --b-ring: rgba(153, 27, 27, 0.22);
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-warning,
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-yellow {
+  --b-bg: #fef3c7;
+  --b-fg: #92400e;
+  --b-ring: rgba(146, 64, 14, 0.22);
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-info,
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-aqua {
+  --b-bg: #cffafe;
+  --b-fg: #155e75;
+  --b-ring: rgba(21, 94, 117, 0.22);
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-primary,
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-blue,
+body.as-chrome.modern-skin-dark .sidebar-menu .label.bg-light-blue {
+  --b-bg: #dbeafe;
+  --b-fg: #1e40af;
+  --b-ring: rgba(30, 64, 175, 0.22);
+}
+
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label {
+  --b-bg: rgba(148, 163, 184, 0.18);
+  --b-fg: #cbd5e1;
+  --b-ring: rgba(148, 163, 184, 0.3);
+}
+
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-success,
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-green {
+  --b-bg: rgba(34, 197, 94, 0.16);
+  --b-fg: #86efac;
+  --b-ring: rgba(34, 197, 94, 0.35);
+}
+
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-danger,
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-red {
+  --b-bg: rgba(248, 113, 113, 0.16);
+  --b-fg: #fca5a5;
+  --b-ring: rgba(248, 113, 113, 0.35);
+}
+
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-warning,
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-yellow {
+  --b-bg: rgba(251, 191, 36, 0.16);
+  --b-fg: #fcd34d;
+  --b-ring: rgba(251, 191, 36, 0.35);
+}
+
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-info,
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-aqua {
+  --b-bg: rgba(34, 211, 238, 0.16);
+  --b-fg: #67e8f9;
+  --b-ring: rgba(34, 211, 238, 0.35);
+}
+
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-primary,
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-blue,
+body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-light-blue {
+  --b-bg: rgba(96, 165, 250, 0.18);
+  --b-fg: #93c5fd;
+  --b-ring: rgba(96, 165, 250, 0.38);
+}
+
 /* ---------- collapse button on the menu's edge, level with the company logo ---------- */
 /* A round chevron centred on the menu's right border, in line with the logo. It points left while the menu is open and
    turns to point right once it is collapsed. It lives in the top bar (which stacks above the menu) and replaces the

@@ -796,7 +796,7 @@ class Package
         }
         if (!empty($plan['device'])) {
             // flat (Device.php) or folder style (Device/Device.php)
-            return DeviceLoader::file($plan['device']) ?? $DEVICE_PATH . DIRECTORY_SEPARATOR . $plan['device'] . '.php';
+            return DeviceLoader::runFile($plan['device']) ?? $DEVICE_PATH . DIRECTORY_SEPARATOR . $plan['device'] . '.php';
         }
         if ($plan['is_radius'] == 1) {
             $plan->device = 'Radius';
