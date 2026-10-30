@@ -518,7 +518,7 @@ This keeps honest customers honest, stops key sharing and lets you revoke. It ca
 For a free-form "type a key" box with no logic of your own, a manifest can declare `"requires_license": true`, optionally with
 `"license_check_url"` (an https endpoint the core POSTs `key`, `slug`, `type`, `domain` to, answering `{"valid": true}`) and
 `"license_public_key"` (base64 Ed25519; the answer must then carry `expires` and a `signature` over
-`type|slug|host|key|expires`, checked on every request). The core then does not run the extension until a valid key exists
+`type|slug|host|key|expires|valid`, checked on every request). The core then does not run the extension until a valid key exists
 (a plugin is not loaded, a gateway is not used at checkout or in its webhook, a driver is not used by plans, a theme falls back
 to the default). Because the manifest is editable (set it to `false` and the core stops checking), treat this mode as a convenience for
 open-source or low-value extensions and use section 1 for anything you sell.

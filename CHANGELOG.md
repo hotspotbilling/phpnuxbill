@@ -20,7 +20,7 @@
   in the status check or in the callback, device drivers are not used by plans, and a theme falls back to the default look.
   Installing is unchanged, and Marketplace still lists the extension and takes the key. New optional manifest key
   `license_public_key` (base64 Ed25519): the `license_check_url` answer must then carry `expires` and a `signature` over
-  `type|slug|host|key|expires`, which is checked locally on every request, so editing the database or copying the key to another
+  `type|slug|host|key|expires|valid`, which is checked locally on every request, so editing the database or copying the key to another
   domain no longer works. `php system/cron/marketplace_sync.php` asks again before a signed answer expires. Details in
   `PLUGINS.md` > Licensing.
 

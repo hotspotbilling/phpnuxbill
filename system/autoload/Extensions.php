@@ -521,7 +521,7 @@ class Extensions
             return false;
         }
         $st = self::providerCall($p['status']);
-        return $st['state'] === 'valid' && ($feature === 'licensed' || in_array($feature, $st['features'], true));
+        return $st['state'] === 'valid' && ($feature === 'licensed' || in_array($feature, $st['features'] ?? [], true));
     }
 
     public static function license(string $type, string $slug): string
@@ -546,10 +546,13 @@ class Extensions
         self::$licenseRows = null;
     }
 
-    /** The text the publisher signs: bound to this extension, this site's host, the key and an expiry (0 = never) */
+    /**
+     * The text the publisher signs: bound to this extension, this site's host, the key, an expiry (0 = never) and the verdict
+     * "valid", so a signature can only exist for an answer that said the key is valid (a revoked answer cannot be replayed).
+     */
     public static function licenseMessage(string $type, string $slug, string $key, int $expires): string
     {
-        return implode('|', [$type, $slug, strtolower((string) parse_url(APP_URL, PHP_URL_HOST)), $key, $expires]);
+        return implode('|', [$type, $slug, strtolower((string) parse_url(APP_URL, PHP_URL_HOST)), $key, $expires, 'valid']);
     }
 
     /**
@@ -680,7 +683,8 @@ class Extensions
         }
         $status = self::licenseStatus($type, $slug);
         if (!empty($manifest['license_public_key'])) {
-            return !self::licenseSignatureOk($type, $slug, $manifest, $key, $status); // the stored "state" is not trusted
+            // both must hold: the stored state says valid AND the publisher's signature (which covers "valid") checks out
+            return ($status['state'] ?? '') !== 'valid' || !self::licenseSignatureOk($type, $slug, $manifest, $key, $status);
         }
         if ($status['state'] === 'invalid') {
             return true;

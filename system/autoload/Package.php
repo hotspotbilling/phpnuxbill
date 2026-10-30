@@ -796,7 +796,11 @@ class Package
         }
         if (!empty($plan['device'])) {
             // flat (Device.php) or folder style (Device/Device.php)
-            return DeviceLoader::runFile($plan['device']) ?? $DEVICE_PATH . DIRECTORY_SEPARATOR . $plan['device'] . '.php';
+            if (DeviceLoader::exists($plan['device'])) {
+                // a known driver that is not allowed to run (no valid licence) is a denial: never fall back to a flat file path
+                return DeviceLoader::runFile($plan['device']) ?? "none";
+            }
+            return $DEVICE_PATH . DIRECTORY_SEPARATOR . $plan['device'] . '.php'; // legacy: a device the loader does not know
         }
         if ($plan['is_radius'] == 1) {
             $plan->device = 'Radius';
