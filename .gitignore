@@ -65,4 +65,3 @@ system/uploads/invoices/**
 !system/uploads/invoices/index.html
 mobile_app/**
 CLAUDE.md
-skeletons/**

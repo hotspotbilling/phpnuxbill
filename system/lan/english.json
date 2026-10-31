@@ -4055,5 +4055,9 @@
     "Saved__no_verification_endpoint_": "Saved (no verification endpoint)",
     "Licence_removed": "Licence removed",
     "Skel_Test": "Skel Test",
-    "Enter_your_licence_key": "Enter your licence key"
+    "Enter_your_licence_key": "Enter your licence key",
+    "Enter_your_coupon_code": "Enter your coupon code",
+    "Apply_Coupon": "Apply Coupon",
+    "Please_select_Payment_Gateway": "Please select Payment Gateway",
+    "days_left": "days left"
 }

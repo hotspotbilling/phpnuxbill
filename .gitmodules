@@ -1,0 +1,3 @@
+[submodule "skeletons"]
+	path = skeletons
+	url = https://github.com/hotspotbilling/phpnuxbill-ultimate-extensions-starter.git

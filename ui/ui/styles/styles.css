@@ -797,6 +797,14 @@ input:checked + .slider:before {
   background-color: #2d3748;
 }
 
+/* Bootstrap's .well is a pale grey box; on a dark page it kept that fill and its text turned unreadable */
+.dark-mode .well {
+  background-color: #2d3748;
+  border-color: #3a4558;
+  color: #e2e8f0;
+  box-shadow: none;
+}
+
 .dark-mode .search-container {
   background-color: #2d3748;
   color: #cbd5e0;

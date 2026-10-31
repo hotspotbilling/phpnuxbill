@@ -351,10 +351,11 @@ try {
                         }
                         $html .= '<li' . $kidActive . '><a href="' . $kidMenuUrl . '" title="' . htmlspecialchars(strip_tags($kid['name']), ENT_QUOTES) . '">';
                         $html .= _menu_icon($kid['icon'] ?? '') . ' ';
-                        if (!empty($kid['label']) && is_scalar($kid['label'])) {
+                        $html .= '<span class="text">' . $kid['name'] . '</span>';
+                        if (!empty($kid['label']) && is_scalar($kid['label'])) { // after the name, so the badge sits at the end of the row
                             $html .= '<span class="pull-right-container"><small class="label pull-right bg-' . $kid['color'] . '">' . $kid['label'] . '</small></span>';
                         }
-                        $html .= '<span class="text">' . $kid['name'] . '</span></a></li>';
+                        $html .= '</a></li>';
                     }
                     $html .= '</ul>';
                 }

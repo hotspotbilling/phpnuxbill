@@ -273,6 +273,31 @@ body.as-chrome.modern-skin-dark .content-wrapper {
 /* ---------- menu badges: the $label / $color of register_menu() and register_submenu() ---------- */
 /* a small soft pill; the colour comes from the bg-* class the menu code puts on it (success, danger, warning, info, primary).
    The older skin gave every badge a pale fill with pale text, which could barely be read. */
+/* the row is a flex line so the name stays on the left and the badge on the right, on one line */
+body.as-chrome.modern-skin-dark .sidebar-menu .treeview-menu > li > a {
+  display: flex;
+  align-items: center;
+  padding-right: 10px !important;
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu .treeview-menu > li > a > .text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu .treeview-menu > li > a > .pull-right-container {
+  flex: none;
+}
+
+body.as-chrome.modern-skin-dark .sidebar-menu li .treeview-menu li > a > .pull-right-container {
+  position: static;
+  display: flex;
+  align-items: center;
+  margin: 0 0 0 auto;
+  padding-left: 8px;
+}
+
 body.as-chrome.modern-skin-dark .sidebar-menu .label {
   --b-bg: #e2e8f0;
   --b-fg: #334155;
