@@ -533,8 +533,17 @@ body.cm-chrome.modern-skin-dark .sidebar-menu li .treeview-menu li > a > .pull-r
   position: static;
   display: flex;
   align-items: center;
+  flex: none;
   margin: 0 0 0 auto;
   padding-left: 8px;
+}
+
+/* a long submenu name is cut so the badge stays inside the row */
+body.cm-chrome.modern-skin-dark .sidebar-menu li .treeview-menu li > a > .text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 body.cm-chrome.modern-skin-dark .sidebar-menu .label {
