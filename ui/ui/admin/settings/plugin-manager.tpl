@@ -1,169 +1,202 @@
 {include file="sections/header.tpl"}
 
+<style>
+    /* 1. WARNA TEMA SIDEBAR (Disesuaikan dari Foto 2) */
+    :root {
+        --sidebar-bg: #2b344a; 
+        --accent-purple: #3f4095; 
+        --border-purple: #8e44ad;
+    }
+
+    /* Info Github - Warna Sidebar Dark */
+    .custom-alert-sidebar {
+        background: var(--sidebar-bg);
+        border-left: 5px solid var(--border-purple);
+        color: white;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .custom-alert-sidebar a { color: #ffcc00; font-weight: bold; }
+
+    /* Panel Pemasang - Kotak Tegas No Radius */
+    .panel-sidebar {
+        border: 1px solid var(--sidebar-bg);
+        border-radius: 0 !important;
+        margin-bottom: 25px;
+    }
+    .panel-sidebar .panel-heading {
+        background: var(--sidebar-bg) !important;
+        color: white !important;
+        border-radius: 0 !important;
+        border: none;
+    }
+
+    /* 2. KOTAK PLUGIN COMPACT */
+    .plugin-card {
+        border: 1px solid var(--border-purple); 
+        border-radius: 4px;
+        background: #fff;
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        height: 260px; 
+        overflow: hidden;
+    }
+    .plugin-header { padding: 8px 12px; border-bottom: 1px solid #eee; background: #fcfcfc; }
+    .plugin-title { font-size: 14px; font-weight: bold; color: var(--sidebar-bg); margin: 0; }
+    .plugin-body { padding: 10px; flex-grow: 1; overflow-y: auto; font-size: 12px; color: #666; }
+    .plugin-footer { display: flex; border-top: 1px solid #eee; }
+    .plugin-footer .btn { flex: 1; border-radius: 0; margin: 0; border: none; padding: 8px 5px; font-size: 11px; }
+
+    /* 3. PAGINATION PROFESIONAL */
+    .pagination-container { text-align: center; margin: 20px 0; }
+    .page-btn { 
+        margin: 0 2px; 
+        border-radius: 2px; 
+        border: 1px solid #ddd;
+        background: #fff;
+        padding: 4px 10px;
+        cursor: pointer;
+    }
+    .page-btn.active { background: var(--border-purple); color: white; border-color: var(--border-purple); }
+</style>
+
 {if empty($_c['github_token'])}
-    <p class="help-block">{Lang::T('To download from private/paid repository')}, <a
-            href="{Text::url('')}settings/app#GithubAuthentication">
-            {Lang::T('Set your Github Authentication first')}</a></p>
+    <div class="custom-alert-sidebar">
+        <i class="glyphicon glyphicon-info-sign"></i> {Lang::T('To download from private/paid repository')}, 
+        <a href="{Text::url('')}settings/app#GithubAuthentication">{Lang::T('Set your Github Authentication first')}</a>
+    </div>
 {/if}
 
-<form method="post" enctype="multipart/form-data"
-    onsubmit="return ask(this, 'Warning, installing unknown source can damage your server, continue?')"
-    action="{Text::url('')}pluginmanager/dlinstall">
-    <div class="panel panel-primary panel-hovered">
-        <div class="panel-heading">
-            {Lang::T('Plugin Installer')}
-            <div class="btn-group pull-right">
-                <a class="btn btn-warning btn-xs" title="info"
-                    href="https://github.com/hotspotbilling/phpnuxbill/wiki/Installing-Plugin-or-Payment-Gateway"
-                    target="_blank"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> info</a>
-                <a class="btn btn-success btn-xs" title="refresh cache"
-                    href="{Text::url('')}pluginmanager/refresh"><span class="glyphicon glyphicon-refresh"
-                        aria-hidden="true"></span> refresh</a>
-            </div>
-        </div>
-        <div class="panel-body row">
-            <div class="form-group col-md-4">
-                <label>{Lang::T('Upload Zip Plugin/Theme/Device')}</label>
-                <input type="file" name="zip_plugin" accept="application/zip" onchange="this.submit()">
-            </div>
-            <div class="form-group col-md-7">
-                <label>Github url</label>
-                <input type="url" class="form-control" name="gh_url"
-                    placeholder="https://github.com/username/repository">
-            </div>
-            <div class="col-md-1">
-                <br>
-                <button type="submit" class="btn btn-primary">{Lang::T('Install')}</button>
-            </div>
-        </div>
+<div class="panel panel-sidebar">
+    <div class="panel-heading">
+        <h3 class="panel-title">{Lang::T('Plugin Installer')}</h3>
     </div>
-</form>
-
-<div>
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#plugin" aria-controls="plugin" role="tab"
-                data-toggle="tab">{Lang::T('Plugin')}</a></li>
-        <li role="presentation"><a href="#pg" aria-controls="pg" role="tab"
-                data-toggle="tab">{Lang::T('Payment Gateway')}</a>
-        </li>
-        <li role="presentation"><a href="#device" aria-controls="device" role="tab"
-                data-toggle="tab">{Lang::T('Devices')}</a>
-        </li>
-    </ul>
-    <br>
-    <!-- Tab panes -->
-    <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="plugin">
+    <div class="panel-body">
+        <form method="post" enctype="multipart/form-data" action="{Text::url('')}pluginmanager/dlinstall">
             <div class="row">
-                {foreach $plugins as $plugin}
-                    <div class="col-md-4">
-                        <div class="box box-hovered mb20 box-primary">
-                            <div class="box-header">
-                                <h3 class="box-title text1line">{$plugin['name']}</h3>
-                            </div>
-                            <div class="box-body" style="overflow-y: scroll;">
-                                <div style="max-height: 50px; min-height: 50px;">{$plugin['description']}</div>
-                            </div>
-                            <div class="box-footer">
-                                <center><small><i>@{$plugin['author']} Last update: {$plugin['last_update']}</i></small>
-                                </center>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$plugin['url']}" target="_blank" style="color: black;"
-                                        class="btn btn-{if $plugin['ispaid']}warning{else}primary{/if}"><i
-                                            class="glyphicon glyphicon-globe"></i>
-                                        {if $plugin['ispaid']}Buy{else}Web{/if}</a>
-                                    <a href="{$plugin['github']}" target="_blank" style="color: black;"
-                                        class="btn btn-info"><i class="glyphicon glyphicon-align-left"></i> Source</a>
-                                </div>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{Text::url('')}pluginmanager/delete/plugin/{$plugin['id']}"
-                                        onclick="return ask(this, '{Lang::T('Delete')}?')" class="btn btn-danger"><i
-                                            class="glyphicon glyphicon-trash"></i> Delete</a>
-                                    <a {if $zipExt } href="{Text::url('')}pluginmanager/install/plugin/{$plugin['id']}"
-                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                        {else} href="#" onclick="alert('PHP ZIP extension is not installed')"
-                                        {/if}
-                                        style="color: black;" class="btn btn-success"><i
-                                            class="glyphicon glyphicon-circle-arrow-down"></i> Install</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {/foreach}
+                <div class="col-md-5">
+                    <label class="small">File Zip</label>
+                    <input type="file" name="zip_plugin" accept="application/zip" class="form-control input-sm" onchange="this.submit()">
+                </div>
+                <div class="col-md-5">
+                    <label class="small">Github URL</label>
+                    <input type="url" class="form-control input-sm" name="gh_url" placeholder="https://github.com/...">
+                </div>
+                <div class="col-md-2">
+                    <br><button type="submit" class="btn btn-primary btn-sm btn-block" style="border-radius:0; background: var(--accent-purple);">Pasang</button>
+                </div>
             </div>
-        </div>
-        <div role="tabpanel" class="tab-pane" id="pg">
-            <div class="row">
-                {foreach $pgs as $pg}
-                    <div class="col-md-4">
-                        <div class="box box-hovered mb20 box-primary">
-                            <div class="box-header">
-                                <h3 class="box-title text1line">{$pg['name']}</h3>
-                            </div>
-                            <div class="box-body" style="overflow-y: scroll;">
-                                <div style="max-height: 50px; min-height: 50px;">{$pg['description']}</div>
-                            </div>
-                            <div class="box-footer ">
-                                <center><small><i>@{$pg['author']} Last update: {$pg['last_update']}</i></small>
-                                </center>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$pg['url']}" target="_blank" style="color: black;"
-                                        class="btn btn-{if $pg['ispaid']}warning{else}primary{/if}"><i
-                                            class="glyphicon glyphicon-globe"></i>
-                                        {if $pg['ispaid']}Buy{else}Web{/if}
-                                    </a>
-                                    <a href="{$pg['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
-                                            class="glyphicon glyphicon-align-left"></i> Source</a>
-                                    <a {if $zipExt } href="{Text::url('')}pluginmanager/install/payment/{$pg['id']}"
-                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                        {else} href="#" onclick="alert('PHP ZIP extension is not available')"
-                                        {/if}
-                                        style="color: black;" class="btn btn-success"><i
-                                            class="glyphicon glyphicon-circle-arrow-down"></i> Install</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {/foreach}
-            </div>
-        </div>
-        <div role="tabpanel" class="tab-pane" id="device">
-            <div class="row">
-                {foreach $dvcs as $dvc}
-                    <div class="col-md-4">
-                        <div class="box box-hovered mb20 box-primary">
-                            <div class="box-header">
-                                <h3 class="box-title text1line">{$dvc['name']}</h3>
-                            </div>
-                            <div class="box-body" style="overflow-y: scroll;">
-                                <div style="max-height: 50px; min-height: 50px;">{$dvc['description']}</div>
-                            </div>
-                            <div class="box-footer ">
-                                <center><small><i>@{$dvc['author']} Last update: {$dvc['last_update']}</i></small>
-                                </center>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$dvc['url']}" target="_blank" style="color: black;"
-                                        class="btn btn-{if $dvc['ispaid']}warning{else}primary{/if}"><i
-                                            class="glyphicon glyphicon-globe"></i>
-                                        {if $dvc['ispaid']}Buy{else}Web{/if}
-                                    </a>
-                                    <a href="{$dvc['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
-                                            class="glyphicon glyphicon-align-left"></i> Source</a>
-                                    <a {if $zipExt } href="{Text::url('')}pluginmanager/install/device/{$dvc['id']}"
-                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                        {else} href="#" onclick="alert('PHP ZIP extension is not available')"
-                                        {/if}
-                                        style="color: black;" class="btn btn-success"><i
-                                            class="glyphicon glyphicon-circle-arrow-down"></i> Install</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {/foreach}
-            </div>
-        </div>
+        </form>
     </div>
-
 </div>
+
+<ul class="nav nav-tabs" role="tablist">
+    <li class="active"><a href="#tab-plugin" data-toggle="tab">Plugin</a></li>
+    <li><a href="#tab-pg" data-toggle="tab">Payment Gateway</a></li>
+    <li><a href="#tab-device" data-toggle="tab">Devices</a></li>
+</ul>
+
+<div class="tab-content" style="padding-top: 15px;">
+    {function name="render_grid" items=[] type="" id=""}
+        <div role="tabpanel" class="tab-pane {if $id == 'tab-plugin'}active{/if}" id="{$id}">
+            <div class="row list-container">
+                {foreach $items as $item}
+                    <div class="col-md-4 col-sm-6 item-card">
+                        <div class="plugin-card">
+                            <div class="plugin-header">
+                                <span class="label {if $item['ispaid']}label-warning{else}label-success{/if} pull-right" style="font-size:9px;">
+                                    {if $item['ispaid']}Premium{else}Free{/if}
+                                </span>
+                                <h3 class="plugin-title">{$item['name']}</h3>
+                            </div>
+                            <div class="plugin-body">{$item['description']}</div>
+                            <div class="plugin-footer">
+                                <a href="{$item['url']}" target="_blank" class="btn btn-default" title="Web"><i class="glyphicon glyphicon-globe"></i></a>
+                                <a href="{$item['github']}" target="_blank" class="btn btn-info" title="Source"><i class="glyphicon glyphicon-align-left"></i></a>
+                                <a href="{Text::url('')}pluginmanager/delete/{$type}/{$item['id']}" onclick="return ask(this, 'Delete?')" class="btn btn-danger"><i class="glyphicon glyphicon-trash"></i></a>
+                                <a href="{Text::url('')}pluginmanager/install/{$type}/{$item['id']}" class="btn btn-success"><i class="glyphicon glyphicon-download"></i> Install</a>
+                            </div>
+                        </div>
+                    </div>
+                {/foreach}
+            </div>
+            <div class="pagination-area pagination-container"></div>
+        </div>
+    {/function}
+
+    {call name="render_grid" items=$plugins type="plugin" id="tab-plugin"}
+    {call name="render_grid" items=$pgs type="payment" id="tab-pg"}
+    {call name="render_grid" items=$dvcs type="device" id="tab-device"}
+</div>
+
+{literal}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const itemsPerPage = 5;
+
+    function setupPagination(tabId) {
+        const container = document.querySelector('#' + tabId);
+        const items = Array.from(container.querySelectorAll('.item-card'));
+        const paginationWrapper = container.querySelector('.pagination-area');
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+
+        if (totalPages <= 1) return;
+
+        function renderPagination(currentPage) {
+            paginationWrapper.innerHTML = '';
+            
+            // Logika Pagination Dinamis (Maks 5 angka)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            // Tombol First/Prev <<
+            if (currentPage > 1) {
+                createBtn('<<', 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                if (i > 0) createBtn(i, i, i === currentPage);
+            }
+
+            // Tombol Next/Last >>
+            if (currentPage < totalPages) {
+                createBtn('>>', totalPages);
+            }
+        }
+
+        function createBtn(text, page, isActive = false) {
+            let btn = document.createElement('button');
+            btn.innerText = text;
+            btn.className = "page-btn " + (isActive ? "active" : "");
+            btn.onclick = function() {
+                showPage(page);
+                renderPagination(page);
+                // Scroll ke atas container
+                window.scrollTo({ top: container.offsetTop - 70, behavior: 'smooth' });
+            };
+            paginationWrapper.appendChild(btn);
+        }
+
+        function showPage(page) {
+            items.forEach((item, idx) => {
+                item.style.display = (idx >= (page-1)*itemsPerPage && idx < page*itemsPerPage) ? "block" : "none";
+            });
+        }
+
+        renderPagination(1);
+        showPage(1);
+    }
+
+    setupPagination('tab-plugin');
+    setupPagination('tab-pg');
+    setupPagination('tab-device');
+});
+</script>
+{/literal}
+
 {include file="sections/footer.tpl"}
