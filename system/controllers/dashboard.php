@@ -24,11 +24,14 @@ if (isset($_GET['ajax_system_status'])) {
     exit;
 }
 
-// The role whose widgets this admin sees, the plugin cards they may see, and how many places the layout has
-$tipeUser = $admin['user_type'];
-if (in_array($tipeUser, ['SuperAdmin', 'Admin'])) {
+// The role whose widgets are shown (?user=, Admin by default: an Agent sees the Admin widgets unless asked otherwise).
+// The slot count, the widgets loaded below and the widget ids a saved layout may use all follow this one role.
+$tipeUser = _req("user");
+if (empty($tipeUser)) {
     $tipeUser = 'Admin';
 }
+$ui->assign('tipeUser', $tipeUser);
+// the plugin cards this admin may see, and how many places the layout has
 $dashCards = dashboard_cards($admin['user_type']);
 $slotCount = DashboardLayout::slotCount($config['dashboard_' . $tipeUser] ?? '');
 
@@ -89,12 +92,6 @@ if (isset($_GET['refresh'])) {
     r2(getUrl('dashboard'), 's', 'Data Refreshed');
 }
 
-
-$tipeUser = _req("user");
-if (empty($tipeUser)) {
-    $tipeUser = 'Admin';
-}
-$ui->assign('tipeUser', $tipeUser);
 
 $reset_day = $config['reset_day'];
 if (empty($reset_day)) {

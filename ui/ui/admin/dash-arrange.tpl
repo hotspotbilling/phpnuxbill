@@ -7,7 +7,7 @@
     The page must have the dash_token variable. The layout is saved per admin by ?_route=dashboard/layout.
 *}
 <button type="button" id="dash-arrange-toggle" class="{$btn|default:'btn btn-default'}"
-    data-kind="{$kind|escape}" data-url="{Text::url('dashboard/layout')|escape}" data-token="{$dash_token|escape}"
+    data-kind="{$kind|escape}" data-url="{Text::url('dashboard/layout')|escape}" data-token="{$dash_token|escape}" data-user="{$tipeUser|default:''|escape}"
     data-t-arrange="{Lang::T('Arrange')|escape}" data-t-done="{Lang::T('Done')|escape}"
     data-t-saved="{Lang::T('Layout saved')|escape}" data-t-saving="{Lang::T('Saving...')|escape}"
     data-t-failed="{Lang::T('Could not save. Reload the page and try again.')|escape}"
@@ -53,6 +53,7 @@
     var kind = btn.dataset.kind;
     var T = function (k) { return btn.dataset['t' + k.charAt(0).toUpperCase() + k.slice(1)] || ''; };
     var arranging = false, timer = null, drag = null;
+    var saving = false, queued = null, resetting = false, idle = [];
 
     function lists() {
         return [].slice.call(document.querySelectorAll(kind === 'widgets' ? '.dash-slot' : '.dash-blocks'));
@@ -83,17 +84,34 @@
         var body = new URLSearchParams(data);
         body.set('token', btn.dataset.token);
         body.set('kind', kind);
+        if (btn.dataset.user) body.set('user', btn.dataset.user); /* the role whose widgets this page shows */
         fetch(btn.dataset.url, { method: 'POST', body: body, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(function (r) { return r.json(); })
             .then(function (j) { done(!!(j && j.success)); })
             .catch(function () { done(false); });
     }
+    /* one save at a time: a newer arrangement waits for the write in flight, so an older request can never land last */
+    function flush() {
+        if (saving || queued === null) return;
+        var data = queued;
+        queued = null;
+        saving = true;
+        post({ layout: data }, function (ok) {
+            saving = false;
+            if (queued !== null) { flush(); return; }
+            say(ok ? T('saved') : T('failed'));
+            idle.splice(0).forEach(function (fn) { fn(); });
+        });
+    }
     function save() {
+        if (resetting) return;
         clearTimeout(timer);
         say(T('saving'));
-        timer = setTimeout(function () {
-            post({ layout: JSON.stringify(layout()) }, function (ok) { say(ok ? T('saved') : T('failed')); });
-        }, 350);
+        timer = setTimeout(function () { queued = JSON.stringify(layout()); flush(); }, 350);
+    }
+    /* run fn once no save is waiting or in flight */
+    function whenIdle(fn) {
+        if (!saving && queued === null) fn(); else idle.push(fn);
     }
     function changed() {
         lists().forEach(stamp);
@@ -245,7 +263,17 @@
     }
     reset.addEventListener('click', function () {
         confirmReset(function () {
-            post({ 'do': 'reset' }, function (ok) { if (ok) window.location.reload(); else say(T('failed')); });
+            /* drop any save still waiting (it would recreate the layout), and let the one in flight finish before resetting */
+            resetting = true;
+            clearTimeout(timer);
+            queued = null;
+            whenIdle(function () {
+                post({ 'do': 'reset' }, function (ok) {
+                    if (ok) { window.location.reload(); return; }
+                    resetting = false;
+                    say(T('failed'));
+                });
+            });
         });
     });
 })();
