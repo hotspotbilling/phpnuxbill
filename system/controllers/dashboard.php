@@ -24,6 +24,52 @@ if (isset($_GET['ajax_system_status'])) {
     exit;
 }
 
+// The role whose widgets this admin sees, the plugin cards they may see, and how many places the layout has
+$tipeUser = $admin['user_type'];
+if (in_array($tipeUser, ['SuperAdmin', 'Admin'])) {
+    $tipeUser = 'Admin';
+}
+$dashCards = dashboard_cards($admin['user_type']);
+$slotCount = DashboardLayout::slotCount($config['dashboard_' . $tipeUser] ?? '');
+
+// This page's own token for saving the layout. It lives for the session and is always checked: the core's csrf_token is
+// replaced on every request (system/boot.php), so it cannot be compared with the one a page was given.
+if (empty($_SESSION['dash_layout_token'])) {
+    $_SESSION['dash_layout_token'] = bin2hex(random_bytes(16));
+}
+
+// ?_route=dashboard/layout : save or reset how this admin arranged the dashboard
+if (($routes['1'] ?? '') === 'layout') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !hash_equals($_SESSION['dash_layout_token'], (string) _post('token'))) {
+        showResult(false, Lang::T('Invalid or Expired CSRF Token'));
+    }
+    $kind = _post('kind');
+    if (!in_array($kind, DashboardLayout::KINDS, true)) {
+        showResult(false, Lang::T('Invalid request'));
+    }
+    if (_post('do') === 'reset') {
+        DashboardLayout::reset($kind, $admin['id']);
+        showResult(true, Lang::T('Dashboard layout reset'));
+    }
+    $cardIds = array_column($dashCards, 'id');
+    if ($kind === 'blocks') {
+        $validIds = array_merge(DashboardLayout::BLOCKS, $cardIds);
+    } else {
+        $validIds = $cardIds;
+        foreach (ORM::for_table('tbl_widgets')->select('id')->where('user', $tipeUser)->findMany() as $w) {
+            $validIds[] = 'w' . (int) $w->id;
+        }
+    }
+    $clean = DashboardLayout::sanitize($kind, json_decode((string) _post('layout'), true), $validIds, $slotCount);
+    if ($clean === null) {
+        showResult(false, Lang::T('Invalid request'));
+    }
+    DashboardLayout::save($kind, $admin['id'], $clean);
+    showResult(true, Lang::T('Dashboard layout saved'));
+}
+
+$ui->assign('dash_token', $_SESSION['dash_layout_token']);
+
 if (isset($_GET['refresh'])) {
     if (class_exists('RedisCache')) {
         RedisCache::flushPattern('dash:*');
@@ -103,13 +149,11 @@ if ($config['dashboard_type'] === 'dynamic') {
         }
     }
 
+    $ui->assign('dash_cards', $dashCards);
+    $ui->assign('dash_order', DashboardLayout::blockOrder(DashboardLayout::load('blocks', $admin['id']), $dashCards));
+    run_hook('view_dashboard'); #HOOK
     $ui->display('admin/dashboard-new.tpl');
 } else {
-    $tipeUser = $admin['user_type'];
-    if (in_array($tipeUser, ['SuperAdmin', 'Admin'])) {
-        $tipeUser = 'Admin';
-    }
-
     $computeWidgets = function () use ($WIDGET_PATH, $tipeUser) {
         $widgets = ORM::for_table('tbl_widgets')->where("enabled", 1)->where('user', $tipeUser)->order_by_asc("orders")->findArray();
         $count = count($widgets);
@@ -139,7 +183,8 @@ if ($config['dashboard_type'] === 'dynamic') {
         $widgets = $computeWidgets();
     }
 
-    $ui->assign('widgets', $widgets);
+    // plugin cards are not cached with the widgets (they are cheap and may differ per admin); the admin's own arrangement is applied last
+    $ui->assign('widgets', DashboardLayout::arrangeWidgets((array) $widgets, $dashCards, DashboardLayout::load('widgets', $admin['id']), $slotCount));
     run_hook('view_dashboard'); #HOOK
     $ui->display('admin/dashboard.tpl');
 }

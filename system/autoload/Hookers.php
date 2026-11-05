@@ -155,6 +155,54 @@ function plugin_route_warn($function)
 
 $hook_registered = array();
 
+$dashboard_cards_registered = array();
+
+/**
+ * Register a card for the admin dashboard (both the default and the dynamic dashboard). The card is arranged like any
+ * widget, so each admin can drag it where they want it.
+ * @param string $id letters, digits and underscores, unique per plugin, e.g. 'routely'
+ * @param string $title shown on the card's drag handle while an admin is arranging the dashboard
+ * @param string $function function that returns the card's HTML (return it, do not echo it). Called on every dashboard
+ *  load, so read saved data, never call a slow service. A function that fails or returns nothing is skipped.
+ * @param array $auth user types that see it ['SuperAdmin', 'Admin', 'Agent', 'Sales', ...], empty array for everyone
+ */
+function register_dashboard_card($id, $title, $function, $auth = [])
+{
+    global $dashboard_cards_registered;
+    $id = preg_replace('/[^a-z0-9_]/', '', strtolower((string) $id));
+    if ($id === '') {
+        return;
+    }
+    $dashboard_cards_registered[$id] = ['id' => 'c_' . $id, 'title' => (string) $title, 'function' => $function, 'auth' => (array) $auth];
+}
+
+/**
+ * The registered dashboard cards this admin may see, rendered: [['id' => 'c_x', 'title' => '...', 'html' => '...'], ...]
+ * A card that throws, or whose function is missing, is left out so one plugin cannot break the dashboard.
+ */
+function dashboard_cards($userType)
+{
+    global $dashboard_cards_registered;
+    $out = [];
+    foreach ((array) $dashboard_cards_registered as $card) {
+        if (!empty($card['auth']) && !in_array($userType, $card['auth'], true)) {
+            continue;
+        }
+        if (!is_callable($card['function'])) {
+            continue;
+        }
+        try {
+            $html = call_user_func($card['function']);
+        } catch (Throwable $e) {
+            continue;
+        }
+        if (is_string($html) && trim($html) !== '') {
+            $out[] = ['id' => $card['id'], 'title' => $card['title'], 'html' => $html];
+        }
+    }
+    return $out;
+}
+
 function register_hook($action, $function){
     global $hook_registered;
     $hook_registered[] = [

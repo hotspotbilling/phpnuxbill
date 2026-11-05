@@ -219,6 +219,33 @@ An array of menu entries. The core registers them in order, **after** your main 
 | `requires_license`, `license_*` | `register_license(...)` and `license_has(...)` |
 | `name`, `version`, `description`, `author`, `main`, `requires_*`, `update_url`, `github`, `url` | stays in the manifest: the core needs them without running your code |
 
+## A card on the dashboard
+
+`register_dashboard_card($id, $title, $function, $auth = [])` puts a card on the admin dashboard, on both the default and the dynamic
+dashboard. Call it from your main file, next to `register_menu()`:
+
+```php
+if (function_exists('register_dashboard_card')) { // absent on a core from before dashboard cards: skip it
+    register_dashboard_card('myplugin', 'My plugin', 'myplugin_dashboard_card', ['SuperAdmin', 'Admin']);
+}
+
+function myplugin_dashboard_card()
+{
+    return '<div class="box box-primary"><div class="box-body">Hello</div></div>';
+}
+```
+
+| Argument | |
+| --- | --- |
+| `$id` | Letters, digits and underscores, unique to your plugin. |
+| `$title` | Shown on the card's bar while an admin is arranging the dashboard. |
+| `$function` | Returns the card's HTML as a string. It runs on every dashboard load, so read saved data and never wait on a slow service. A function that throws or returns nothing is skipped. |
+| `$auth` | The user types that see the card; an empty array is everyone. |
+
+A card is arranged like any widget: each admin can drag it, or move it with the arrow buttons (Arrange on the dashboard), and the
+position is saved for that admin. The page does not load your plugin's stylesheet, so put the few styles the card needs in a
+`<style>` block inside the returned HTML, and use `currentColor` and semi-transparent borders so it suits a light or dark theme.
+
 ## Publishing and serving updates
 
 How an admin learns your plugin has a new version, and what happens when they press **Update** in Marketplace.

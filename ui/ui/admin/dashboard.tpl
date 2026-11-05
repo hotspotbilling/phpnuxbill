@@ -5,14 +5,19 @@
         onclick="this.classList.add('is-loading')">
         <i class="fa fa-refresh"></i><span>{Lang::T('Refresh')}</span>
     </a>
+    {include file="admin/dash-arrange.tpl" kind="widgets" btn="dash-refresh"}
 </div>
 
 {function showWidget pos=0}
+<div class="dash-slot" data-slot="{$pos}">
 {foreach $widgets as $w}
 {if $w['position'] == $pos}
+<div class="dash-block" data-block="{$w['block']|escape}" data-title="{$w['title']|escape}">
 {$w['content']}
+</div>
 {/if}
 {/foreach}
+</div>
 {/function}
 
 {assign dtipe value="dashboard_`$tipeUser`"}

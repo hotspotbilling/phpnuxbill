@@ -5,10 +5,13 @@
         onclick="this.classList.add('is-loading')">
         <i class="fa fa-refresh"></i><span>{Lang::T('Refresh')}</span>
     </a>
+    {include file="admin/dash-arrange.tpl" kind="blocks" btn="dash-refresh"}
 </div>
 
+<div class="dash-blocks">
 <!-- Cron Monitor Status Alert Banner -->
 {if $can_view_system && !empty($system_status.cron)}
+<div class="dash-block" data-block="cron" data-title="{Lang::T('Cron status')|escape}" style="order:{$dash_order['cron']|default:0}">
 {if $system_status.cron.status == 'danger'}
 <div class="isp-card isp-rounded-lg isp-padding-4 isp-margin-bottom-6"
     style="border-left: 4px solid #f56565; background: rgba(245, 101, 101, 0.08);">
@@ -68,9 +71,11 @@
     </div>
 </div>
 {/if}
+</div>
 {/if}
 
 <!-- Stats Cards (100% Real Database Values) -->
+<div class="dash-block" data-block="stats" data-title="{Lang::T('Statistics')|escape}" style="order:{$dash_order['stats']|default:0}">
 <div class="top-stats-grid">
     <!-- Card 1: Total Customers -->
     <div class="isp-stat-card isp-card isp-padding-6 isp-rounded-lg">
@@ -188,9 +193,14 @@
         </div>
     </div>
 </div>
+</div>
+{foreach $dash_cards as $c}
+<div class="dash-block" data-block="{$c.id|escape}" data-title="{$c.title|escape}" style="order:{$dash_order[$c.id]|default:0}">{$c.html}</div>
+{/foreach}
 
 {if $can_view_system}
 <!-- System Status & Resource Monitoring -->
+<div class="dash-block" data-block="system" data-title="{Lang::T('System status')|escape}" style="order:{$dash_order['system']|default:0}">
 <div class="isp-card isp-padding-6 isp-rounded-lg isp-margin-bottom-6">
     <div class="sys-header-bar">
         <div class="isp-flex isp-align-center" style="gap: 12px;">
@@ -455,10 +465,12 @@
         </div>
     </div>
 </div>
+</div>
 
 {/if}
 
 <!-- Dedicated Live Online Users Multi-Gateway Card (Bigger Card with Separate Columns) -->
+<div class="dash-block" data-block="online" data-title="{Lang::T('Online users')|escape}" style="order:{$dash_order['online']|default:0}">
 <div class="isp-card isp-padding-6 isp-rounded-lg isp-margin-bottom-6" id="card-online-users-multitech">
     <!-- Header -->
     <div
@@ -694,8 +706,10 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Main Charts Row -->
+<div class="dash-block" data-block="charts1" data-title="{Lang::T('Sales and customer growth')|escape}" style="order:{$dash_order['charts1']|default:0}">
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6 isp-margin-bottom-6">
     <!-- Sales Report Chart -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
@@ -735,8 +749,10 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Second Charts Row -->
+<div class="dash-block" data-block="charts2" data-title="{Lang::T('Network and transactions')|escape}" style="order:{$dash_order['charts2']|default:0}">
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6 isp-margin-bottom-6">
     <!-- Network Status Chart (Routers + Radius Server & NAS) -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
@@ -1066,8 +1082,10 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Third Row with smaller charts -->
+<div class="dash-block" data-block="charts3" data-title="{Lang::T('Router, day and plan activity')|escape}" style="order:{$dash_order['charts3']|default:0}">
 <div class="isp-grid isp-grid-cols-1 isp-grid-cols-md-2 isp-grid-cols-lg-3 isp-gap-6 isp-margin-bottom-6">
     <!-- Router Activity / Usage -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
@@ -1102,9 +1120,11 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Fourth Row: Top Selling Plans & Hourly Activity -->
-<div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6">
+<div class="dash-block" data-block="charts4" data-title="{Lang::T('Top plans and hourly activity')|escape}" style="order:{$dash_order['charts4']|default:0}">
+<div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6 isp-margin-bottom-6">
     <!-- Top Selling Plans -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
@@ -1136,9 +1156,11 @@
         </div>
     </div>
 </div>
+</div>
 
 <!-- Fifth Row: Peak Usage & System Inventory -->
-<div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6 isp-margin-top-6">
+<div class="dash-block" data-block="charts5" data-title="{Lang::T('Peak usage and inventory')|escape}" style="order:{$dash_order['charts5']|default:0}">
+<div class="isp-grid isp-grid-cols-1 isp-grid-cols-lg-2 isp-gap-6">
     <!-- Peak Usage Hours (3-Hour Blocks) -->
     <div class="isp-card isp-padding-6 isp-rounded-lg">
         <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-4">
@@ -1166,6 +1188,8 @@
             <canvas id="equipmentChart"></canvas>
         </div>
     </div>
+</div>
+</div><!-- /dash-blocks -->
 </div>
 
 <!-- Real Database Data Payload -->
