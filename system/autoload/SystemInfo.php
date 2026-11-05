@@ -34,6 +34,7 @@ class SystemInfo
             'database'     => $db,
             'online_users' => $onlineUsers,
             'services'     => $services,
+            'shared_host'  => self::isSharedHosting(),
             'os'           => [
                 'family'   => PHP_OS_FAMILY,
                 'name'     => php_uname('s'),
@@ -45,6 +46,46 @@ class SystemInfo
                 'web'      => $_SERVER['SERVER_SOFTWARE'] ?? 'CLI / WebServer'
             ]
         ];
+    }
+
+    /**
+     * Does this look like shared hosting (cPanel and similar)? There, disk, memory and CPU load are those of the whole
+     * server, which many accounts share, so the System Status cards say so. It is a guess from what PHP can see:
+     *  - a cPanel / CloudLinux footprint on the server, or
+     *  - an account home folder (/home/...) together with open_basedir or the shell functions switched off.
+     * A server where none of this shows (a VPS, a dedicated box, a local PC) gets no note.
+     * The guess can be overruled with the shared_hosting setting in tbl_appconfig: 'yes' always shows the note, 'no' never.
+     */
+    public static function isSharedHosting(): bool
+    {
+        global $config;
+        $forced = strtolower((string) ($config['shared_hosting'] ?? ''));
+        if ($forced === 'yes' || $forced === 'no') {
+            return $forced === 'yes';
+        }
+        static $shared = null;
+        if ($shared !== null) {
+            return $shared;
+        }
+        $shared = false;
+        if (PHP_OS_FAMILY === 'Windows') {
+            return $shared;
+        }
+        // is_dir() can itself be refused by open_basedir: that is not an answer either way, so it is silenced
+        foreach (['/usr/local/cpanel', '/var/cpanel', '/var/.cagefs', '/usr/local/directadmin', '/usr/local/psa'] as $dir) {
+            if (@is_dir($dir)) {
+                return $shared = true;
+            }
+        }
+        $root = str_replace('\\', '/', (string) (defined('FILE_PATH') ? FILE_PATH : getcwd()));
+        if (strpos($root, '/home/') === 0 || strpos($root, '/home2/') === 0 || strpos($root, '/home3/') === 0) {
+            $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+            $shellOff = in_array('exec', $disabled, true) && in_array('shell_exec', $disabled, true);
+            if ((string) ini_get('open_basedir') !== '' || $shellOff) {
+                $shared = true;
+            }
+        }
+        return $shared;
     }
 
     /**
