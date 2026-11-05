@@ -69,7 +69,11 @@ function stale_sessions_close(string $label, string $table, ?string $connection,
         $closed = $stmt->rowCount();
         if ($closed > 0) {
             // one summary line per run, not one per session: the first run after an outage can close thousands
-            _log("Cleaned up {$closed} stale {$label} session(s)" . ($sample !== '' ? " (e.g. {$sample})" : ''), 'CRON');
+            try {
+                _log("Cleaned up {$closed} stale {$label} session(s)" . ($sample !== '' ? " (e.g. {$sample})" : ''), 'CRON');
+            } catch (Throwable $ignored) {
+                // the sessions are already closed: a failed log line must not turn that into a failure
+            }
         }
         return $closed;
     } catch (Throwable $e) {

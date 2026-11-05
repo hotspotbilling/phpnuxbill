@@ -24,11 +24,15 @@ if (isset($_GET['ajax_system_status'])) {
     exit;
 }
 
-// The role whose widgets are shown (?user=, Admin by default: an Agent sees the Admin widgets unless asked otherwise).
+// The role whose widgets are shown: ?user= when given, otherwise the admin's own role (SuperAdmin counts as Admin).
+// A role that has no widgets of its own (Report, Support...) keeps seeing the Admin ones.
 // The slot count, the widgets loaded below and the widget ids a saved layout may use all follow this one role.
 $tipeUser = _req("user");
 if (empty($tipeUser)) {
-    $tipeUser = 'Admin';
+    $tipeUser = in_array($admin['user_type'], ['SuperAdmin', 'Admin'], true) ? 'Admin' : $admin['user_type'];
+    if ($tipeUser !== 'Admin' && ORM::for_table('tbl_widgets')->where('user', $tipeUser)->count() === 0) {
+        $tipeUser = 'Admin';
+    }
 }
 $ui->assign('tipeUser', $tipeUser);
 // the plugin cards this admin may see, and how many places the layout has
