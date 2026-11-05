@@ -25,12 +25,12 @@ if (isset($_GET['ajax_system_status'])) {
 }
 
 // The role whose widgets are shown: ?user= when given, otherwise the admin's own role (SuperAdmin counts as Admin).
-// A role that has no widgets of its own (Report, Support...) keeps seeing the Admin ones.
+// A role that has no enabled widgets of its own (Report, Support...) keeps seeing the Admin ones.
 // The slot count, the widgets loaded below and the widget ids a saved layout may use all follow this one role.
 $tipeUser = _req("user");
 if (empty($tipeUser)) {
     $tipeUser = in_array($admin['user_type'], ['SuperAdmin', 'Admin'], true) ? 'Admin' : $admin['user_type'];
-    if ($tipeUser !== 'Admin' && ORM::for_table('tbl_widgets')->where('user', $tipeUser)->count() === 0) {
+    if ($tipeUser !== 'Admin' && ORM::for_table('tbl_widgets')->where('enabled', 1)->where('user', $tipeUser)->count() === 0) {
         $tipeUser = 'Admin';
     }
 }
