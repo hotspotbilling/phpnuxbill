@@ -235,7 +235,7 @@
     {if !empty($system_status.shared_host)}
     <div id="sys-shared-note" class="isp-text-xs" role="note" style="display: flex; gap: 8px; align-items: flex-start; margin: 0 0 14px; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(66, 153, 225, 0.35); background: rgba(66, 153, 225, 0.1); line-height: 1.5;">
         <i class="fa fa-info-circle" style="color: #3182ce; margin-top: 2px;" aria-hidden="true"></i>
-        <span>{Lang::T('This looks like shared hosting. Disk, memory and CPU below are for the whole server, which other websites share, so a high value here may not be caused by your system.')}</span>
+        <span>{if $system_status.ram.source == 'php'}{Lang::T("This looks like shared hosting. Disk and CPU below are for the whole server, which other websites share, so a high value here may not be caused by your system. Memory shows this site's PHP limit, because the server's memory cannot be read here, so a high value there can come from this application.")}{else}{Lang::T('This looks like shared hosting. Disk, memory and CPU below are for the whole server, which other websites share, so a high value here may not be caused by your system.')}{/if}</span>
     </div>
     {/if}
 

@@ -52,7 +52,8 @@ class SystemInfo
      * Does this look like shared hosting (cPanel and similar)? There, disk, memory and CPU load are those of the whole
      * server, which many accounts share, so the System Status cards say so. It is a guess from what PHP can see:
      *  - a cPanel / CloudLinux footprint on the server, or
-     *  - an account home folder (/home/...) together with open_basedir or the shell functions switched off.
+     *  - an account home folder (/home/..., or /var/www/vhosts/... on Plesk) together with open_basedir or the shell
+     *    functions switched off.
      * A server where none of this shows (a VPS, a dedicated box, a local PC) gets no note.
      * The guess can be overruled with the shared_hosting setting in tbl_appconfig: 'yes' always shows the note, 'no' never.
      */
@@ -77,8 +78,16 @@ class SystemInfo
                 return $shared = true;
             }
         }
+        // account folders of cPanel and similar panels; /var/www/vhosts is Plesk's, whose /usr/local/psa open_basedir often hides
         $root = str_replace('\\', '/', (string) (defined('FILE_PATH') ? FILE_PATH : getcwd()));
-        if (strpos($root, '/home/') === 0 || strpos($root, '/home2/') === 0 || strpos($root, '/home3/') === 0) {
+        $accountRoot = false;
+        foreach (['/home/', '/home2/', '/home3/', '/var/www/vhosts/'] as $prefix) {
+            if (strpos($root, $prefix) === 0) {
+                $accountRoot = true;
+                break;
+            }
+        }
+        if ($accountRoot) {
             $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
             $shellOff = in_array('exec', $disabled, true) && in_array('shell_exec', $disabled, true);
             if ((string) ini_get('open_basedir') !== '' || $shellOff) {
@@ -279,7 +288,9 @@ class SystemInfo
             }
         }
 
+        $source = 'server'; // 'php' = the server's memory cannot be read here, so the card shows this site's PHP limit
         if ($total <= 0) {
+            $source = 'php';
             // Fallback to PHP Memory
             $phpUsed = (float) memory_get_usage(true);
             $limitStr = ini_get('memory_limit');
@@ -312,6 +323,7 @@ class SystemInfo
             'used_formatted'   => self::formatBytes($used),
             'php_memory_used'  => self::formatBytes(memory_get_usage(true)),
             'php_memory_limit' => ini_get('memory_limit') ?: 'Default',
+            'source'           => $source,
             'status'           => $status
         ];
     }

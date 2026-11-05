@@ -4777,5 +4777,6 @@
     "Store_data_is_over_a_week_old__Sync_to_get_the_latest_extensions_": "Store data is over a week old. Sync to get the latest extensions.",
     "This_looks_like_shared_hosting__Disk__memory_and_CPU_below_are_for_the_whole_server__which_other_websites_share__so_a_high_value_here_may_not_be_caused_by_your_system_": "This looks like shared hosting. Disk, memory and CPU below are for the whole server, which other websites share, so a high value here may not be caused by your system.",
     "API_Live": "API Live",
-    "Radius_Disabled": "Radius Disabled"
+    "Radius_Disabled": "Radius Disabled",
+    "This_looks_like_shared_hosting__Disk_and_CPU_below_are_for_the_whole_server__which_other_websites_share__so_a_high_value_here_may_not_be_caused_by_your_system__Memory_shows_this_site_s_PHP_limit__because_the_server_s_memory_cannot_be_read_here__so_a_high_value_there_can_come_from_this_application_": "This looks like shared hosting. Disk and CPU below are for the whole server, which other websites share, so a high value here may not be caused by your system. Memory shows this site's PHP limit, because the server's memory cannot be read here, so a high value there can come from this application."
 }
