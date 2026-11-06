@@ -24,6 +24,7 @@ class User
             $tmp = explode('.', (string) $_COOKIE['uid']);
             if (count($tmp) === 3 && ctype_digit($tmp[0]) && ctype_digit($tmp[1]) && hash_equals(sha1($tmp[0] . '.' . $tmp[1] . '.' . $db_pass), $tmp[2])) {
                 if (time() - (int) $tmp[1] < 86400 * 30 && !self::cookieRevoked($tmp[0], (int) $tmp[1])) {
+                    unset($_SESSION['uid_pv'], $_SESSION['uid_pv_id']); // a session opened from a cookie starts its own fingerprint
                     $_SESSION['uid'] = $tmp[0];
                     return $tmp[0];
                 }
@@ -47,14 +48,21 @@ class User
             return $checked[$uid] = false;
         }
         $fp = Password::fingerprint($row['password']);
-        // The fingerprint belongs to one customer. When the session now names another one (an admin signing in as a customer, a token
-        // login) it starts again for that customer instead of being compared with somebody else's.
-        if (empty($_SESSION['uid_pv']) || (string) ($_SESSION['uid_pv_id'] ?? '') !== (string) $uid) {
+        // The fingerprint belongs to one customer. A session that has none yet starts one now. A session that names another customer than
+        // the one its fingerprint was made for (an admin signing in as a customer) starts again. A fingerprint with no customer
+        // recorded (an older session) is still compared, never refreshed: otherwise a password change would renew it.
+        $have = (string) ($_SESSION['uid_pv'] ?? '');
+        $haveId = (string) ($_SESSION['uid_pv_id'] ?? '');
+        if ($have === '' || ($haveId !== '' && $haveId !== (string) $uid)) {
             $_SESSION['uid_pv'] = $fp;
             $_SESSION['uid_pv_id'] = $uid;
             return $checked[$uid] = true;
         }
-        return $checked[$uid] = hash_equals((string) $_SESSION['uid_pv'], $fp);
+        if (!hash_equals($have, $fp)) {
+            return $checked[$uid] = false;
+        }
+        $_SESSION['uid_pv_id'] = $uid;
+        return $checked[$uid] = true;
     }
 
     private static function revokeFile($uid)

@@ -108,6 +108,11 @@ if (!empty($token)) {
             $admin = Admin::_info();
         } else if ($tipe == 'c') {
             $_SESSION['uid'] = $uid;
+            $apiCustomer = ORM::for_table('tbl_customers')->select('password')->find_one($uid);
+            if ($apiCustomer) { // this session is for this customer
+                $_SESSION['uid_pv'] = Password::fingerprint($apiCustomer['password']);
+                $_SESSION['uid_pv_id'] = $uid;
+            }
         } else {
             showResult(false, Lang::T("Unknown Token"), [], ['login' => true]);
         }

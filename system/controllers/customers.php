@@ -316,6 +316,8 @@ switch ($action) {
         $customer = ORM::for_table('tbl_customers')->find_one($id);
         if ($customer) {
             $_SESSION['uid'] = $id;
+            $_SESSION['uid_pv'] = Password::fingerprint($customer['password']); // this session is for this customer
+            $_SESSION['uid_pv_id'] = $customer['id'];
             User::setCookie($id);
             _alert("You are logging in as $customer[fullname],<br>don't logout just close tab.", 'info', "home", 10);
         }
@@ -672,7 +674,7 @@ switch ($action) {
         if ($oldPppoeIp != $pppoe_ip) {
             $pppoeIpDiff = true;
         }
-        if ($password != '' && $oldPassPassword != $password) {
+        if ($password !== '' && (string) $oldPassPassword !== $password) { // strict: "1e3" and "1000" are different passwords
             $passDiff = true;
         }
 
@@ -728,7 +730,7 @@ switch ($action) {
             if ($userDiff) {
                 $c->username = $username;
             }
-            if ($password != '') {
+            if ($password !== '') {
                 $c->password = $password;
                 if ($passDiff) {
                     User::revokeCookies($c['id']); // only a real change ends the customer's other sessions and remember-me cookies
