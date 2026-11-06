@@ -438,8 +438,11 @@ content changes while a signature is tied to one exact file.
 3. **The first install remembers your public key.** From then on only that key can sign updates for that extension. An entry
    that has another key, or that drops the signature, is refused ("installed with a signed release… not signed by the same
    key"). So even if someone takes over your `repository.json`, they cannot push code without your private key.
-4. A signed extension can only be updated from its repository entry, not from a bare `zip` in its manifest.
-5. An incomplete set (a key without a signature or a version) is refused, never installed unchecked.
+4. **No rollbacks.** A signature never expires, so a site that has version 1.3.0 installed refuses to install an older signed
+   release (1.2.0) from the entry. To go back deliberately, the admin uninstalls first.
+   A signed extension can only be updated from its repository entry, not from a bare `zip` in its manifest.
+5. An incomplete set (a key without a signature or a version) is refused, never installed unchecked, and the Marketplace only
+   shows "Signed" for a complete, well-formed set.
 
 **If you lose or leak the private key.** Nothing already installed breaks, but sites that remember the old key refuse updates
 signed with a new one. Make a new key pair and tell your users to **uninstall and reinstall** once (uninstall forgets the remembered

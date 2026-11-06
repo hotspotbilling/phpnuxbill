@@ -282,7 +282,7 @@ class MarketplaceController
             'url' => $item['url'] ?? '',
             'github' => $item['github'] ?? '',
             'zip' => $item['zip'] ?? '',
-            'signed' => ($item['public_key'] ?? '') !== '',
+            'signed' => ExtensionSignature::wellFormed($item),
             'updated' => $item['last_update'] ?? '',
             'paid' => !empty($item['ispaid']),
             'repo' => $item['repo'] ?? '',

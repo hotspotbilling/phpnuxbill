@@ -38,6 +38,15 @@ class ExtensionSignature
         return is_string($v) && (bool) preg_match('/^[0-9A-Za-z][0-9A-Za-z.+_-]{0,39}$/', $v);
     }
 
+    /** Does a repository entry carry a complete, well-formed set of signing fields on a zip address? The one test the installer and the drawer share. */
+    public static function wellFormed(array $item): bool
+    {
+        return !empty($item['zip'])
+            && self::validKey($item['public_key'] ?? '')
+            && self::validSignature($item['signature'] ?? '')
+            && self::validVersion($item['version'] ?? '');
+    }
+
     public static function message(string $type, string $id, string $version, string $sha256): string
     {
         return 'phpnuxbill-extension:' . $type . ':' . $id . ':' . $version . "\n" . strtolower($sha256);

@@ -637,11 +637,16 @@ class ExtensionInstaller
             if (!ExtensionSignature::available()) {
                 return self::fail('The PHP sodium extension is needed to check this signed package');
             }
-            if (!ExtensionSignature::validKey($key) || !ExtensionSignature::validSignature($sig) || !ExtensionSignature::validVersion((string) ($item['version'] ?? ''))) {
-                return self::fail('The repository entry has an incomplete or malformed signature (public_key, signature and version are all needed)');
-            }
             if (empty($item['zip'])) {
                 return self::fail('Only a package listed with a zip address can be signed');
+            }
+            if (!ExtensionSignature::wellFormed($item)) {
+                return self::fail('The repository entry has an incomplete or malformed signature (public_key, signature and version are all needed)');
+            }
+            // A signature stays valid for ever, so an older signed release must not replace a newer one that is already installed.
+            $installed = (string) (Extensions::getMeta($type, $slugHint)['version'] ?? '');
+            if ($pinned !== '' && $installed !== '' && version_compare((string) $item['version'], $installed, '<')) {
+                return self::fail('Version ' . $item['version'] . ' is older than the installed version ' . $installed . ', so it was not installed. To go back, uninstall it first.');
             }
             $sign = ['public_key' => $key, 'signature' => $sig, 'type' => $type, 'id' => (string) $item['id'], 'version' => (string) $item['version']];
         }
