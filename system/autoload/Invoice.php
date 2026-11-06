@@ -175,7 +175,7 @@ class Invoice
             'company_name' => $config['CompanyName'],
             'company_phone' => $config['phone'],
             'logo' => $logo,
-            'payment_link' => $payLink
+            'payment_link' => APP_URL . '/' . ltrim($payLink, '/') // the template links to it, so it must be absolute
         ];
 
         if (empty($invoiceData['bill_rows'])) {

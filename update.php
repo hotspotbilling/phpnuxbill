@@ -184,7 +184,7 @@ function u_fail($step, $message)
 {
     u_unlock();
     u_page('Update stopped at step ' . (int) $step, '<div class="alert alert-danger">' . u_h($message) . '</div>
-        <p>Nothing was left half-changed.</p><p><a href="update.php" class="btn">Back</a></p>', null, '', ['bad' => (int) $step, 'done' => max(0, (int) $step - 1)]);
+        ' . ((int) $step <= 3 ? '<p>Nothing was left half-changed.</p>' : '<p>The new files are already installed; run the update again to retry this step.</p>') . '<p><a href="update.php" class="btn">Back</a></p>', null, '', ['bad' => (int) $step, 'done' => max(0, (int) $step - 1)]);
 }
 
 // ------------------------------------------------------------------------------------------------ files
@@ -229,6 +229,24 @@ function u_copytree($from, $to, $skipRoot = [], $top = true)
         }
     }
     return $failed;
+}
+
+/** Every file the package would put in the site folder (relative paths), except config.php at the top. */
+function u_pkg_files($folder)
+{
+    $out = [];
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $f) {
+        if (!$f->isFile() || $f->isLink()) {
+            continue;
+        }
+        $rel = str_replace('\\', '/', substr($f->getPathname(), strlen($folder) + 1));
+        if ($rel === 'config.php' || strpos($rel, '.git/') === 0) {
+            continue;
+        }
+        $out[] = $rel;
+    }
+    return $out;
 }
 
 function u_lock_file()
@@ -361,7 +379,7 @@ if ($step === 1) {
     clearstatcache(true, $zipFile);
     $size = (int) @filesize($zipFile);
     $magic = (string) @file_get_contents($zipFile, false, null, 0, 2);
-    if ($http !== 200 || $size < 10240 || $magic !== 'PK') {
+    if ($err !== '' || $http !== 200 || $size < 10240 || $magic !== 'PK') {
         @unlink($zipFile);
         u_fail(1, 'Failed to download the update' . ($err !== '' ? ': ' . $err : ($http !== 200 ? ' (the server answered ' . $http . ')' : ': the answer was not a zip file')) . '.');
     }
@@ -449,9 +467,21 @@ if ($step === 3) {
             }
         }
     }
-    foreach (['version.json', 'index.php', 'update.php'] as $f) {
+    $pkgFiles = u_pkg_files($folder);
+    $created = [];
+    foreach ($pkgFiles as $f) { // everything else the package overwrites is backed up too, and what it adds is remembered for a rollback
+        $inReplaced = false;
+        foreach ($replaced as $d) {
+            if (strpos($f, $d . '/') === 0) {
+                $inReplaced = true;
+            }
+        }
         if (is_file(u_path($f))) {
-            $z->addFile(u_path($f), $f);
+            if (!$inReplaced) {
+                $z->addFile(u_path($f), $f);
+            }
+        } else {
+            $created[] = $f;
         }
     }
     if (!$z->close() || !is_file($backup)) {
@@ -477,6 +507,11 @@ if ($step === 3) {
     if (!$failed) {
         $failed = u_copytree($folder, __DIR__, ['config.php']);
     }
+    foreach ($failed ? [] : $pkgFiles as $f) { // the copy must match the package, file by file
+        if (!is_file(u_path($f)) || filesize(u_path($f)) !== filesize($folder . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $f))) {
+            $failed++;
+        }
+    }
     $versionNow = (string) (json_decode((string) @file_get_contents(u_path('version.json')), true)['version'] ?? '');
     if ($failed || $versionNow !== $run['to'] || !is_file(u_path('system/boot.php'))) {
         foreach ($replaced as $d) { // roll back
@@ -485,12 +520,13 @@ if ($step === 3) {
                 @rename($moved[$d], u_path($d));
             }
         }
-        foreach (['version.json', 'index.php', 'update.php'] as $f) { // restore the entry files from the backup
-            $zr = new ZipArchive();
-            if ($zr->open($backup) === true) {
-                $zr->extractTo(__DIR__, $f);
-                $zr->close();
-            }
+        foreach ($created as $f) { // files the package added
+            @unlink(u_path($f));
+        }
+        $zr = new ZipArchive(); // every file the package overwrote comes back from the backup
+        if ($zr->open($backup) === true) {
+            $zr->extractTo(__DIR__);
+            $zr->close();
         }
         u_rmtree($old);
         u_fail(3, 'Copying the new files failed (' . $failed . ' file(s)); the previous version was put back. A backup is kept at ' . substr($backup, strlen(__DIR__) + 1) . '.');

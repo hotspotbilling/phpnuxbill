@@ -1138,6 +1138,11 @@ select:not(#filterNavigateMenu),
 
     .navbar-custom-menu .user-menu > a > span {
       min-width: 0;
+      flex: 0 1 auto; /* the trigger is inline-flex: the balance is the item that gives way */
+    }
+
+    .navbar-custom-menu .user-menu > a > .user-image {
+      flex: 0 0 auto; /* the avatar keeps its size */
     }
   }
 
