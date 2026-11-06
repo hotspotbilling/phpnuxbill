@@ -4802,5 +4802,16 @@
     "This_copy_of_the_plugin_is_a_development_checkout__it_has_a__git_folder___so_it_is_not_replaced_": "This copy of the plugin is a development checkout (it has a .git folder), so it is not replaced.",
     "Or_package_address___zip_on_any_https_server_": "Or package address (.zip on any https server)",
     "SHA_256_of_the_file__optional__recommended_": "SHA-256 of the file (optional, recommended)",
-    "A_repository_is_a_JSON_file_with_plugins__payment_gateway__devices_and_themes_lists__each_entry_has_id__name__description__ispaid__author__url__github_or_zip__an_https_address_of_a__zip___sha256__optional__and_last_update__Earlier_repositories_win_when_two_list_the_same_id_": "A repository is a JSON file with plugins, payment_gateway, devices and themes lists; each entry has id, name, description, ispaid, author, url, github or zip (an https address of a .zip), sha256 (optional) and last_update. Earlier repositories win when two list the same id."
+    "A_repository_is_a_JSON_file_with_plugins__payment_gateway__devices_and_themes_lists__each_entry_has_id__name__description__ispaid__author__url__github_or_zip__an_https_address_of_a__zip___sha256__optional__and_last_update__Earlier_repositories_win_when_two_list_the_same_id_": "A repository is a JSON file with plugins, payment_gateway, devices and themes lists; each entry has id, name, description, ispaid, author, url, github or zip (an https address of a .zip), sha256 (optional) and last_update. Earlier repositories win when two list the same id.",
+    "You_can_ask_for_another_one_in_10_minutes_": "You can ask for another one in 10 minutes.",
+    "Voucher_activation_success__now_you_can_login": "Voucher activation success, now you can login",
+    "Invalid_Username_or_Verification_Code": "Invalid Username or Verification Code",
+    "Verification_Code_Valid": "Verification Code Valid",
+    "Choose_a_new_password_": "Choose a new password.",
+    "Password_must_be_at_least__n__characters": "Password must be at least {n} characters",
+    "Your_password_was_just_changed__If_this_was_not_you__contact_us_at_once_": "Your password was just changed. If this was not you, contact us at once.",
+    "Your_password_was_changed": "Your password was changed",
+    "Password_changed_successfully__Please_login_again": "Password changed successfully, Please login again",
+    "minutes": "minutes",
+    "Complete_the_captcha_first": "Complete the captcha first"
 }

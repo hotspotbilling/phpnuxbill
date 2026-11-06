@@ -8,29 +8,84 @@
 class Password
 {
 
+    /**
+     * Hash for staff (tbl_users) passwords: bcrypt, salted per password. Customer passwords are NOT hashed with this: they stay in
+     * clear text because the hotspot and FreeRADIUS (PAP/CHAP) need the real password to check a login.
+     */
     public static function _crypt($password)
     {
-        return sha1($password);
+        return password_hash((string) $password, PASSWORD_BCRYPT);
     }
 
+    /** Staff password check. Understands bcrypt and the old unsalted SHA-1; use needsRehash() after a good login to upgrade the latter. */
     public static function _verify($user_input, $hashed_password)
     {
-        if (sha1($user_input) == $hashed_password) {
-            return true;
+        $hashed_password = (string) $hashed_password;
+        if (strncmp($hashed_password, '$2y$', 4) === 0) {
+            return password_verify((string) $user_input, $hashed_password);
         }
-        return false;
+        return hash_equals(strtolower($hashed_password), sha1((string) $user_input));
     }
+
+    /** True when a stored staff hash is the old SHA-1 (or a weaker bcrypt cost) and should be replaced after a successful login. */
+    public static function needsRehash($hashed_password)
+    {
+        $hashed_password = (string) $hashed_password;
+        return strncmp($hashed_password, '$2y$', 4) !== 0 || password_needs_rehash($hashed_password, PASSWORD_BCRYPT);
+    }
+
+    /** Customer password check (stored in clear text, see _crypt). Exact comparison: "1e3" is not "1000" and "0e1" is not "0e2". */
     public static function _uverify($user_input, $hashed_password)
     {
-        if ($user_input == $hashed_password) {
-            return true;
-        }
-        return false;
+        return hash_equals((string) $hashed_password, (string) $user_input);
     }
+
+    /**
+     * A short fingerprint of a stored password. Sessions and remember-me cookies carry it, so changing or resetting the password
+     * ends every session and cookie that was opened with the old one.
+     */
+    public static function fingerprint($storedPassword)
+    {
+        global $db_pass;
+        return substr(hash_hmac('sha256', (string) $storedPassword, (string) $db_pass), 0, 20);
+    }
+
+    /** Simple rules for a new customer password. Returns an error text, or '' when it is fine. */
+    public static function policyError($password, $username = '')
+    {
+        global $config;
+        $min = max(4, (int) ($config['min_password_length'] ?? 6));
+        $password = (string) $password;
+        if (mb_strlen($password) < $min) {
+            return str_replace('{n}', (string) $min, Lang::T('Password must be at least {n} characters'));
+        }
+        if (mb_strlen($password) > 64) {
+            return Lang::T('Password is too long');
+        }
+        if ($username !== '' && strcasecmp($password, (string) $username) === 0) {
+            return Lang::T('Password must not be the same as the username');
+        }
+        if (in_array(strtolower($password), ['password', 'password1', '123456', '1234567', '12345678', '123456789', '1234567890', '111111', '000000', 'qwerty', 'qwerty123', 'abc123', 'iloveyou', 'admin', 'admin123', 'letmein', 'welcome'], true)
+            || preg_match('/^(.)\1+$/u', $password)) {
+            return Lang::T('That password is too easy to guess');
+        }
+        return '';
+    }
+
     public static function _gen()
     {
-        $pass = substr(str_shuffle(str_repeat('ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@#!123456789', 8)), 0, 8);
-        return $pass;
+        return self::random(8);
+    }
+
+    /** A random password from a cryptographic source, without look-alike characters (0/O, 1/l/I). */
+    public static function random($length = 12)
+    {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+        $out = '';
+        for ($i = 0; $i < $length; $i++) {
+            $out .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+        return $out;
     }
 
     /**

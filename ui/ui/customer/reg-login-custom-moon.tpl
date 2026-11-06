@@ -389,7 +389,7 @@
                                     {if $_c.referral_enabled neq 'no'}
                                     <div class="form-group">
                                         {if isset($referral_code) && !empty($referral_code)}
-                                        <input readonly type="text" name="referral_code" value="{$referral_code}">
+                                        <input readonly type="text" name="referral_code" value="{$referral_code|escape}">
                                         {else}
                                         <input type="text" name="referral_code"
                                             placeholder="{Lang::T('Referral Code')} ({Lang::T('Optional')})">

@@ -4,6 +4,11 @@
  *  by https://t.me/ibnux
  **/
 
+// The session cookie is not readable by scripts, is not sent with cross-site POSTs, is marked Secure on https, and a session id the
+// server did not create is never accepted.
+$httpsNow = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+ini_set('session.use_strict_mode', '1');
+session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => $httpsNow, 'httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 /**

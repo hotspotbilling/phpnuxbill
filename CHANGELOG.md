@@ -4,6 +4,24 @@
 
 ## Unreleased
 
+- Sign-in, registration and password-reset hardening:
+  - Fixed: the CSRF setting did not work. `boot.php` made a new token on every request, including the POST that was about to be checked, so a submitted
+    token could never match. `Csrf::generateAndStoreToken()` now returns the session's token while it is valid. Registration (both steps) and
+    voucher activation now check the token too, and their forms carry it.
+  - Fixed: entering a customer's username with a voucher of your own replaced that customer's password with the voucher code. An existing
+    account's password is no longer changed by a voucher; voucher activation is also CSRF-checked and limited per address.
+  - New `AuthThrottle`: attempts are counted on the server (per username from one address, per address, per username), not in the visitor's session,
+    for customer login (web and API), admin login, forgot password, registration codes and voucher activation. Forwarding headers are believed only
+    from a private/loopback peer or an address in the setting `trusted_proxies` (addresses or CIDR ranges, comma separated).
+  - New `Otp`: codes come from `random_int`, only a keyed hash is stored, a code lives 10 minutes and dies after 5 wrong tries. Forgot password
+    no longer shows a generated password: after a right code the customer chooses a new one, is told by SMS/email that it changed, and every session and
+    remember-me cookie opened with the old password ends. Answers no longer reveal whether a username, phone or email exists.
+  - Staff passwords are now bcrypt (`Password::_crypt`); the old unsalted SHA-1 still works and is upgraded on the first good login. Customer
+    passwords stay in clear text because FreeRADIUS/hotspot need them. Password comparisons use `hash_equals` (loose `==` treated "1e3" as "1000").
+  - Admin login regenerates the session id. Remember-me cookies are HttpOnly + SameSite=Lax (Secure on https), die on logout and on password change,
+    and the session cookie is HttpOnly + SameSite=Lax with strict mode. Customers need to sign in once after this update (the mobile app too).
+  - New customer passwords must be at least `min_password_length` (default 6) and not trivial; the public register/forgot pages show their messages
+    and escape what they echo back.
 - Marketplace packages from your own server or CDN: a `repository.json` entry (or a plugin's `plugin.json`) can name `zip`, an https address
   of a `.zip`, instead of `github`, with an optional `sha256` the download must match. Redirects stay on https and a package may be up to
   50 MB. Marketplace > Plugins (and gateways, devices, themes) also accepts a package address with an optional SHA-256. `PLUGINS.md` >

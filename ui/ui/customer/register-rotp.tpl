@@ -37,7 +37,7 @@
     }
 
     .card-title i {
-        color: #667eea;
+        color: #2563eb;
         font-size: 1.1em;
     }
 
@@ -84,9 +84,9 @@
 
     .form-control:focus {
         background: var(--input-bg-focus);
-        border-color: #667eea;
+        border-color: #2563eb;
         outline: none;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
     .form-text {
@@ -114,14 +114,14 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: #2563eb;
         color: white;
         flex: 1;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
     }
 
     .btn-secondary {
@@ -132,7 +132,7 @@
 
     .btn-secondary:hover {
         background: var(--input-bg-focus);
-        border-color: #667eea;
+        border-color: #2563eb;
     }
 
     .separator {
@@ -175,6 +175,7 @@
         </div>
     </div>
     <form action="{Text::url('register')}" method="post" class="otp-form-wrapper">
+        <input type="hidden" name="csrf_token" value="{$csrf_token}">
         <div class="login-card">
             <div class="logo-section">
                 <div class="brand-name">{$_c['CompanyName']}</div>

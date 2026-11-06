@@ -35,29 +35,47 @@ switch ($do) {
         }
         run_hook('admin_login'); #HOOK
         if ($username != '' and $password != '') {
+            // Attempts are counted on the server (not in the visitor's session): per username from one address, per address, and per
+            // username overall, so neither one machine nor a spread-out guesser gets unlimited tries.
+            $ip = AuthThrottle::clientIp();
+            $wait = max(
+                AuthThrottle::blocked('admin-user-ip', $username . '|' . $ip, 5, 900),
+                AuthThrottle::blocked('admin-ip', $ip, 30, 900),
+                AuthThrottle::blocked('admin-user', $username, 25, 900)
+            );
+            if ($wait > 0) {
+                _log('Too many admin login attempts for ' . $username . ' from ' . $ip, 'Security');
+                _alert(Lang::T('Too many login attempts. Please try again later.') . ' (' . AuthThrottle::waitText($wait) . ')', 'danger', "admin");
+            }
             $d = ORM::for_table('tbl_users')->where('username', $username)->find_one();
-            if ($d) {
-                $d_pass = $d['password'];
-                if (Password::_verify($password, $d_pass) == true) {
-                    $_SESSION['aid'] = $d['id'];
-                    $token = Admin::setCookie($d['id']);
-                    $d->last_login = date('Y-m-d H:i:s');
-                    $d->save();
-                    _log($username . ' ' . Lang::T('Login Successful'), $d['user_type'], $d['id']);
-                    if ($isApi) {
-                        if ($token) {
-                            showResult(true, Lang::T('Login Successful'), ['token' => "a." . $token]);
-                        } else {
-                            showResult(false, Lang::T('Invalid Username or Password'));
-                        }
-                    }
-                    _alert(Lang::T('Login Successful'), 'success', "dashboard");
-                } else {
-                    _log($username . ' ' . Lang::T('Failed Login'), $d['user_type']);
-                    _alert(Lang::T('Invalid Username or Password') . ".", 'danger', "admin");
+            // an unknown username costs the same time as a wrong password
+            $ok = $d ? Password::_verify($password, $d['password']) : (Password::_verify($password, '$2y$10$DypQq9WoaMNQk2QXN5haBOqdcI2FmyKO5OjfOyvMVJ4.2nJl2nmIa') && false);
+            if ($d && $ok) {
+                AuthThrottle::clear('admin-user-ip', $username . '|' . $ip);
+                AuthThrottle::clear('admin-user', $username);
+                session_regenerate_id(true); // a session id an attacker planted before the login is worthless afterwards
+                if (Password::needsRehash($d['password'])) {
+                    $d->password = Password::_crypt($password); // old unsalted SHA-1 becomes bcrypt on the first good login
                 }
+                $_SESSION['aid'] = $d['id'];
+                $token = Admin::setCookie($d['id']);
+                $d->last_login = date('Y-m-d H:i:s');
+                $d->save();
+                _log($username . ' ' . Lang::T('Login Successful'), $d['user_type'], $d['id']);
+                if ($isApi) {
+                    if ($token) {
+                        showResult(true, Lang::T('Login Successful'), ['token' => "a." . $token]);
+                    } else {
+                        showResult(false, Lang::T('Invalid Username or Password'));
+                    }
+                }
+                _alert(Lang::T('Login Successful'), 'success', "dashboard");
             } else {
-                _alert(Lang::T('Invalid Username or Password') . "..", 'danger', "admin");
+                AuthThrottle::hit('admin-user-ip', $username . '|' . $ip, 900);
+                AuthThrottle::hit('admin-ip', $ip, 900);
+                AuthThrottle::hit('admin-user', $username, 900);
+                _log($username . ' ' . Lang::T('Failed Login'), $d ? $d['user_type'] : 'Security');
+                _alert(Lang::T('Invalid Username or Password') . ".", 'danger', "admin");
             }
         } else {
             _alert(Lang::T('Invalid Username or Password') . "...", 'danger', "admin");

@@ -21,7 +21,7 @@
                                 {else}
                                     <i class="fas fa-user input-icon"></i>
                                 {/if}
-                                <input type="text" readonly class="form-control" name="username" value="{$username}"
+                                <input type="text" readonly class="form-control" name="username" value="{$username|escape}"
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}"
                                     aria-label="{if $_c['country_code_phone']!= ''}{Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
                             </div>
@@ -31,7 +31,7 @@
                             <label class="visually-hidden">{Lang::T('Verification Code')}</label>
                             <div class="input-wrapper">
                                 <i class="fas fa-key input-icon"></i>
-                                <input type="text" required class="form-control" id="otp_code"
+                                <input type="text" required class="form-control" id="otp_code" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
                                     placeholder="{Lang::T('Verification Code')}" name="otp_code"
                                     aria-label="{Lang::T('Verification Code')}">
                             </div>
@@ -68,22 +68,59 @@
                                 {else}
                                     <i class="fas fa-user input-icon"></i>
                                 {/if}
-                                <input type="text" readonly class="form-control" name="username" value="{$username}"
+                                <input type="text" readonly class="form-control" name="username" value="{$username|escape}"
                                     placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}"
                                     aria-label="{if $_c['country_code_phone']!= ''}{Lang::T('Phone Number')}{else}{Lang::T('Username')}{/if}">
                             </div>
                         </div>
 
+                        <input type="hidden" name="csrf_token" value="{$csrf_token}">
                         <div class="form-group">
-                            <label>{Lang::T('Your Password has been change to')}</label>
-                            <input type="text" readonly class="form-control" value="{$passsword}" onclick="this.select()" 
-                                style="padding-left: 1rem;" aria-label="{Lang::T('New Password')}">
-                            <p style="margin-top: 0.5rem; font-size: 0.85em; color: var(--text-tertiary);">
-                                {Lang::T('Use the password to login, and change the password from password change page')}</p>
+                            <label>{Lang::T('New Password')}</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" required class="form-control" name="npass" minlength="6" maxlength="64"
+                                    autocomplete="new-password" placeholder="{Lang::T('New Password')}"
+                                    aria-label="{Lang::T('New Password')}">
+                            </div>
                         </div>
 
+                        <div class="form-group">
+                            <label>{Lang::T('Confirm New Password')}</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" required class="form-control" name="cnpass" minlength="6" maxlength="64"
+                                    autocomplete="new-password" placeholder="{Lang::T('Confirm New Password')}"
+                                    aria-label="{Lang::T('Confirm New Password')}">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            <span class="btn-text">{Lang::T('Change Password')}</span>
+                        </button>
+
+                        <div class="divider">
+                            <span>{Lang::T('or')}</span>
+                        </div>
+
+                        <a href="{Text::url('forgot&step=-1')}" class="forgot-link" style="display: block; text-align: center;">{Lang::T('Cancel')}</a>
+                    </div>
+                </div>
+            {elseif $step == 3}
+                <div class="login-card">
+                    <div class="logo-section">
+                        <div class="brand-name">{$_c['CompanyName']}</div>
+                        <div class="subtitle">{Lang::T('Success')}</div>
+
+                        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                            <i class="fas fa-circle-half-stroke" id="themeIcon"></i>
+                        </button>
+                    </div>
+
+                    <div class="login-form">
+                        <p style="text-align: center;">{Lang::T('Password changed successfully, Please login again')}</p>
                         <a href="{Text::url('login')}" class="login-btn" style="display: block; text-align: center; line-height: 1rem; padding: 1rem;">
-                            {Lang::T('Back')}
+                            {Lang::T('Back to Login')}
                         </a>
                     </div>
                 </div>

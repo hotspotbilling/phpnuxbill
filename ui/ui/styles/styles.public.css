@@ -20,8 +20,8 @@
   --input-border: #cbd5e1;
   --divider-bg: #e2e8f0;
   --footer-bg: #f8fafc;
-  --stat-item-bg: rgba(99, 102, 241, 0.08);
-  --stat-item-bg-hover: rgba(99, 102, 241, 0.12);
+  --stat-item-bg: rgba(37, 99, 235, 0.08);
+  --stat-item-bg-hover: rgba(37, 99, 235, 0.12);
   --floating-shape-bg: transparent;
 }
 
@@ -42,8 +42,8 @@
     --input-border: #374151;
     --divider-bg: #1f2937;
     --footer-bg: #0b0f17;
-    --stat-item-bg: rgba(99, 102, 241, 0.15);
-    --stat-item-bg-hover: rgba(99, 102, 241, 0.22);
+    --stat-item-bg: rgba(37, 99, 235, 0.15);
+    --stat-item-bg-hover: rgba(37, 99, 235, 0.22);
     --floating-shape-bg: transparent;
   }
 }
@@ -69,8 +69,8 @@ html.theme-dark:root {
   --input-border: #374151 !important;
   --divider-bg: #1f2937 !important;
   --footer-bg: #0b0f17 !important;
-  --stat-item-bg: rgba(99, 102, 241, 0.15) !important;
-  --stat-item-bg-hover: rgba(99, 102, 241, 0.22) !important;
+  --stat-item-bg: rgba(37, 99, 235, 0.15) !important;
+  --stat-item-bg-hover: rgba(37, 99, 235, 0.22) !important;
   --floating-shape-bg: transparent !important;
 }
 
@@ -95,8 +95,8 @@ html.theme-light:root {
   --input-border: #cbd5e1 !important;
   --divider-bg: #e2e8f0 !important;
   --footer-bg: #f8fafc !important;
-  --stat-item-bg: rgba(99, 102, 241, 0.08) !important;
-  --stat-item-bg-hover: rgba(99, 102, 241, 0.12) !important;
+  --stat-item-bg: rgba(37, 99, 235, 0.08) !important;
+  --stat-item-bg-hover: rgba(37, 99, 235, 0.12) !important;
   --floating-shape-bg: transparent !important;
 }
 
@@ -272,7 +272,7 @@ body {
 
 .theme-toggle:hover {
   transform: scale(1.1);
-  border-color: #667eea;
+  border-color: #2563eb;
 }
 
 .theme-toggle i {
@@ -282,21 +282,21 @@ body {
 }
 
 .theme-toggle:hover i {
-  color: #667eea;
+  color: #2563eb;
 }
 
 .logo {
   width: 80px;
   height: 80px;
   margin: 0 auto 1rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #2563eb;
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2rem;
   color: white;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
   transition: all 0.3s ease;
   animation: pulse 2s infinite;
 }
@@ -363,8 +363,7 @@ input[type="date"],
 input[type="time"],
 input[type="datetime-local"],
 input[type="tel"],
-input[type="textarea"]
- {
+.input-wrapper textarea.form-control {
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
   border: 2px solid var(--input-border);
@@ -379,11 +378,15 @@ input[type="textarea"]
 }
 
 input[type="text"]:focus,
-input[type="password"]:focus {
-  border-color: #667eea;
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+.input-wrapper textarea.form-control:focus {
+  border-color: #2563eb;
   background: var(--input-bg-focus);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
 }
 
 input[type="text"]:focus + .input-underline,
@@ -392,8 +395,29 @@ input[type="password"]:focus + .input-underline {
 }
 
 input[type="text"]:focus ~ .input-icon,
-input[type="password"]:focus ~ .input-icon {
-  color: #667eea;
+input[type="password"]:focus ~ .input-icon,
+input[type="email"]:focus ~ .input-icon,
+input[type="number"]:focus ~ .input-icon,
+input[type="tel"]:focus ~ .input-icon,
+.input-wrapper textarea.form-control:focus ~ .input-icon {
+  color: #2563eb;
+}
+
+/* A text area looks like the other fields: the same border, corners and focus ring. (It used to match no rule here, because the
+   old selector input[type="textarea"] can never match a <textarea>, so it kept the thin page-level style.) */
+.input-wrapper textarea.form-control {
+  min-height: 5.5rem;
+  line-height: 1.5;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.input-wrapper:has(> textarea) {
+  align-items: flex-start;
+}
+
+.input-wrapper:has(> textarea) .input-icon {
+  top: 1.2rem;
 }
 
 .input-underline {
@@ -402,7 +426,7 @@ input[type="password"]:focus ~ .input-icon {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #2563eb;
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
@@ -420,7 +444,7 @@ input[type="password"]:focus ~ .input-icon {
 }
 
 .toggle-password:hover {
-  color: #667eea;
+  color: #2563eb;
 }
 
 /* Form Options */
@@ -468,8 +492,8 @@ input[type="password"]:focus ~ .input-icon {
 }
 
 .checkbox-container input:checked + .checkmark {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-color: #667eea;
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .checkbox-container input:checked + .checkmark::after {
@@ -485,14 +509,14 @@ input[type="password"]:focus ~ .input-icon {
 }
 
 .forgot-link {
-  color: #667eea;
+  color: #2563eb;
   text-decoration: none;
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
 .forgot-link:hover {
-  color: #764ba2;
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
@@ -500,7 +524,7 @@ input[type="password"]:focus ~ .input-icon {
 .login-btn {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #2563eb;
   border: none;
   border-radius: 12px;
   color: white;
@@ -515,7 +539,7 @@ input[type="password"]:focus ~ .input-icon {
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
 }
 
 .login-btn:active {
@@ -616,7 +640,7 @@ input[type="password"]:focus ~ .input-icon {
 
 .connection-btn:hover {
   background: var(--input-bg-focus);
-  border-color: #667eea;
+  border-color: #2563eb;
   transform: translateY(-2px);
 }
 
@@ -655,7 +679,7 @@ input[type="password"]:focus ~ .input-icon {
 .announcement-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #2563eb;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -765,9 +789,9 @@ input[type="password"]:focus ~ .input-icon {
   width: 100%;
   padding: 0.75rem;
   background: transparent;
-  border: 2px solid #667eea;
+  border: 2px solid #2563eb;
   border-radius: 12px;
-  color: #667eea;
+  color: #2563eb;
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
@@ -779,7 +803,7 @@ input[type="password"]:focus ~ .input-icon {
 }
 
 .view-all-btn:hover {
-  background: #667eea;
+  background: #2563eb;
   color: white;
   transform: translateY(-2px);
 }
@@ -808,14 +832,14 @@ input[type="password"]:focus ~ .input-icon {
 }
 
 .footer-link {
-  color: #667eea;
+  color: #2563eb;
   text-decoration: none;
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
 .footer-link:hover {
-  color: #764ba2;
+  color: #1d4ed8;
 }
 
 /* Responsive Design */
@@ -900,3 +924,23 @@ a {
   color: var(--text-primary);
   text-decoration: none;
 }
+
+
+/* flash messages on the public pages (register, forgot password, ...) */
+.public-notice {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: min(92vw, 460px);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  background: #0f172a;
+  color: #f8fafc;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+}
+.public-notice--ok { background: #166534; color: #f0fdf4; }
+.public-notice--bad { background: #991b1b; color: #fef2f2; }

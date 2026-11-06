@@ -447,6 +447,11 @@ async function performLoginAPI(username, password) {
 
 // Show notification
 function showNotification(message, type = "info") {
+  // Only problems are shown. Confirmations and hints (theme changed, connecting, form cleared, logged out, login successful)
+  // are not worth a pop-up on the sign-in pages.
+  if (type !== "error" && type !== "warning") {
+    return;
+  }
   // Remove existing notifications
   const existingNotifications = document.querySelectorAll(".notification");
   existingNotifications.forEach((notif) => notif.remove());
@@ -532,13 +537,13 @@ function getNotificationIcon(type) {
 function getNotificationColor(type) {
   switch (type) {
     case "success":
-      return "linear-gradient(135deg, #48bb78, #38a169)";
+      return "#16a34a";
     case "error":
-      return "linear-gradient(135deg, #f56565, #e53e3e)";
+      return "#dc2626";
     case "warning":
-      return "linear-gradient(135deg, #ed8936, #dd6b20)";
+      return "#d97706";
     default:
-      return "linear-gradient(135deg, #667eea, #764ba2)";
+      return "#2563eb";
   }
 }
 

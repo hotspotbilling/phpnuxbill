@@ -116,17 +116,58 @@ class Captcha
             return '
             <div class="form-group captcha-container" style="display: flex; justify-content: center; margin: 15px 0;">
                 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-                <div class="cf-turnstile" data-sitekey="' . $siteKey . '" data-theme="auto"></div>
+                <div class="cf-turnstile" data-sitekey="' . $siteKey . '" data-theme="auto"></div>' . self::gateScript() . '
             </div>';
         } elseif ($provider === 'recaptcha') {
             return '
             <div class="form-group captcha-container" style="display: flex; justify-content: center; margin: 15px 0;">
                 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-                <div class="g-recaptcha" data-sitekey="' . $siteKey . '"></div>
+                <div class="g-recaptcha" data-sitekey="' . $siteKey . '"></div>' . self::gateScript() . '
             </div>';
         }
 
         return '';
+    }
+
+    /**
+     * Keeps the form's submit buttons switched off until the captcha has been solved (and again after it is reset or expires).
+     * It follows the response field the widget fills in, so it works for Turnstile and reCAPTCHA, on every page that prints the widget.
+     * The server still checks the answer; this only stops a visitor pressing a button that cannot succeed.
+     */
+    private static function gateScript()
+    {
+        $hint = htmlspecialchars(Lang::T('Complete the captcha first'), ENT_QUOTES, 'UTF-8');
+        return '
+                <style>.captcha-blocked{opacity:.55;cursor:not-allowed !important;pointer-events:auto}</style>
+                <script>
+                (function () {
+                    var me = document.currentScript, box = me && me.parentNode;
+                    var scope = (box && box.closest && box.closest("form")) || document;
+                    var hint = "' . $hint . '";
+                    function solved() {
+                        var f = scope.querySelector("[name=\\"cf-turnstile-response\\"],[name=\\"g-recaptcha-response\\"]");
+                        return !!(f && f.value);
+                    }
+                    function sync() {
+                        var ok = solved(), list = scope.querySelectorAll("button[type=submit],input[type=submit]");
+                        for (var i = 0; i < list.length; i++) {
+                            var b = list[i];
+                            if (!ok) {
+                                b.disabled = true; b.classList.add("captcha-blocked"); b.title = hint;
+                            } else if (b.classList.contains("captcha-blocked") && !b.classList.contains("loading")) {
+                                b.disabled = false; b.classList.remove("captcha-blocked"); b.removeAttribute("title");
+                            }
+                        }
+                    }
+                    if (scope.addEventListener) {
+                        scope.addEventListener("submit", function (e) {
+                            if (!solved()) { e.preventDefault(); e.stopImmediatePropagation(); }
+                        }, true);
+                    }
+                    sync();
+                    setInterval(sync, 300);
+                })();
+                </script>';
     }
 
     /**

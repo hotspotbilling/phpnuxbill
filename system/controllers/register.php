@@ -50,10 +50,15 @@ if (isset($routes['1'])) {
     $do = 'register-display';
 }
 
-$otpPath = $CACHE_PATH . File::pathFixer('/sms/');
+$ip = AuthThrottle::clientIp();
 
 switch ($do) {
     case 'post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('register'), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
+        }
+        $csrf_token = Csrf::generateAndStoreToken(); // for the form if it has to be shown again
+        $ui->assign('csrf_token', $csrf_token);
         // Verify Captcha if enabled
         // An OTP submission for a phone that already passed CAPTCHA when requesting the OTP needs no second check
         $otpCaptchaDone = ($config['sms_otp_registration'] == 'yes')
@@ -73,6 +78,7 @@ switch ($do) {
         $fullname = _post('fullname');
         $password = _post('password');
         $cpassword = _post('cpassword');
+        $address = _post('address');
         $referral_code = _post('referral_code') ?: ($referral_code ?? null);
 
         // Separate phone number input if OTP is required
@@ -80,15 +86,20 @@ switch ($do) {
 
         $msg = '';
         if (Validator::Length($username, 35, 2) == false) {
-            $msg .= "Username should be between 3 to 55 characters<br>";
+            $msg .= "Username should be between 3 to 35 characters<br>";
         }
         if ($config['man_fields_fname'] == 'yes') {
             if (Validator::Length($fullname, 36, 2) == false) {
-                $msg .= "Full Name should be between 3 to 25 characters<br>";
+                $msg .= "Full Name should be between 3 to 35 characters<br>";
             }
         }
-        if (!Validator::Length($password, 35, 2)) {
-            $msg .= "Password should be between 3 to 35 characters<br>";
+        $policy = Password::policyError($password, $username);
+        if ($policy !== '') {
+            $msg .= $policy . "<br>";
+        }
+        // new accounts are limited per address, so the form cannot be used to flood the customer list
+        if ($wait = AuthThrottle::blocked('register-ip', $ip, 10, 3600)) {
+            $msg .= Lang::T('Too many requests. Please try again later.') . ' (' . AuthThrottle::waitText($wait) . ")<br>";
         }
         if ($config['man_fields_email'] == 'yes') {
             if (!Validator::Email($email)) {
@@ -101,30 +112,31 @@ switch ($do) {
 
         // OTP verification if OTP is enabled
         if ($_c['sms_otp_registration'] == 'yes') {
-            $otpPath .= sha1("$phone_number$db_pass") . ".txt";
             run_hook('validate_otp'); #HOOK
-            // Expire after 10 minutes
-            if (file_exists($otpPath) && time() - filemtime($otpPath) > 1200) {
-                unlink($otpPath);
-                r2(getUrl('register'), 's', 'Verification code expired');
-            } else if (file_exists($otpPath)) {
-                $code = file_get_contents($otpPath);
-                if ($code != $otp_code) {
-                    $ui->assign('username', $username);
-                    $ui->assign('fullname', $fullname);
-                    $ui->assign('address', $address);
-                    $ui->assign('email', $email);
-                    $ui->assign('phone_number', $phone_number);
-                    $ui->assign('notify', 'Wrong Verification code');
-                    $ui->assign('notify_t', 'd');
-                    $ui->assign('_title', Lang::T('Register'));
-                    $ui->display('customer/register-otp.tpl');
-                    exit();
-                } else {
-                    unlink($otpPath);
-                }
-            } else {
-                r2(getUrl('register'), 's', 'No Verification code');
+            $waitIp = AuthThrottle::blocked('register-verify-ip', $ip, 20, 900);
+            $waitPhone = AuthThrottle::blocked('register-verify-phone', $phone_number, 20, 3600);
+            if ($waitIp > 0 || $waitPhone > 0) {
+                r2(getUrl('register'), 'e', Lang::T('Too many requests. Please try again later.') . ' (' . AuthThrottle::waitText(max($waitIp, $waitPhone)) . ')');
+            }
+            $otpState = Otp::check('register', $phone_number, $otp_code);
+            if ($otpState === 'ok') {
+                // the code is used up; carry on
+            } elseif ($otpState === 'bad') {
+                AuthThrottle::hit('register-verify-ip', $ip, 900);
+                AuthThrottle::hit('register-verify-phone', $phone_number, 3600);
+                $ui->assign('username', $username);
+                $ui->assign('fullname', $fullname);
+                $ui->assign('address', $address);
+                $ui->assign('email', $email);
+                $ui->assign('phone_number', $phone_number);
+                $ui->assign('notify', 'Wrong Verification code');
+                $ui->assign('notify_t', 'd');
+                $ui->assign('_title', Lang::T('Register'));
+                $ui->display('customer/register-otp.tpl');
+                exit();
+            } else { // expired, used up by too many wrong tries, or never sent
+                AuthThrottle::hit('register-verify-ip', $ip, 900);
+                r2(getUrl('register'), 'e', $otpState === 'none' ? Lang::T('No Verification code') : Lang::T('Verification code expired, please ask for a new one'));
             }
         }
 
@@ -144,7 +156,7 @@ switch ($do) {
             $d->phonenumber = $phone_number;
             if ($d->save()) {
                 $user = $d->id();
-                if ($config['photo_register'] == 'yes' && !empty($_FILES['photo']['name']) && file_exists($_FILES['photo']['tmp_name'])) {
+                if ($config['photo_register'] == 'yes' && !empty($_FILES['photo']['name']) && is_uploaded_file($_FILES['photo']['tmp_name'])) {
                     if (function_exists('imagecreatetruecolor')) {
                         $hash = md5_file($_FILES['photo']['tmp_name']);
                         $subfolder = substr($hash, 0, 2);
@@ -162,8 +174,9 @@ switch ($do) {
                         $d->save();
                     }
                 }
-                if (file_exists($_FILES['photo']['tmp_name']))
+                if (!empty($_FILES['photo']['tmp_name']) && is_uploaded_file($_FILES['photo']['tmp_name']))
                     unlink($_FILES['photo']['tmp_name']);
+                AuthThrottle::hit('register-ip', $ip, 3600);
                 User::setFormCustomField($user);
 
                 // Process referral code if provided
@@ -271,30 +284,37 @@ switch ($do) {
     default:
         if ($_c['sms_otp_registration'] == 'yes') {
             $phone_number = _post('phone_number');
+            $csrf_token = null;
             if (!empty($phone_number)) {
+                if (!Csrf::check(_post('csrf_token'))) {
+                    r2(getUrl('register'), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
+                }
                 $captchaResult = Captcha::verify('customer');
                 if (!$captchaResult['success']) {
                     r2(getUrl('register'), 'e', $captchaResult['message']);
                 }
+                // every request counts, so numbers cannot be walked through to run up the SMS bill
+                if ($wait = AuthThrottle::blocked('register-otp-ip', $ip, 10, 3600)) {
+                    r2(getUrl('register'), 'e', Lang::T('Too many requests. Please try again later.') . ' (' . AuthThrottle::waitText($wait) . ')');
+                }
+                AuthThrottle::hit('register-otp-ip', $ip, 3600);
                 $_SESSION['register_captcha_phone'] = alphanumeric($phone_number, "+_.@-");
                 $d = ORM::for_table('tbl_customers')->where('username', $phone_number)->find_one();
                 if ($d) {
                     r2(getUrl('register'), 's', Lang::T('Account already exists'));
                 }
-                if (!file_exists($otpPath)) {
-                    mkdir($otpPath);
-                    touch($otpPath . 'index.html');
-                }
-                $otpPath .= sha1($phone_number . $db_pass) . ".txt";
-                if (file_exists($otpPath) && time() - filemtime($otpPath) < 600) {
+                $phone_number = alphanumeric($phone_number, "+_.@-");
+                $csrf_token = Csrf::generateAndStoreToken();
+                $ui->assign('csrf_token', $csrf_token);
+                $otpAge = Otp::age('register', $phone_number);
+                if ($otpAge >= 0 && $otpAge < Otp::TTL) {
                     $ui->assign('phone_number', $phone_number);
-                    $ui->assign('notify', 'Please wait ' . (600 - (time() - filemtime($otpPath))) . ' seconds before sending another SMS');
+                    $ui->assign('notify', 'Please wait ' . (Otp::TTL - $otpAge) . ' seconds before sending another SMS');
                     $ui->assign('notify_t', 'd');
                     $ui->assign('_title', Lang::T('Register'));
                     $ui->display('customer/register-otp.tpl');
                 } else {
-                    $otp = rand(100000, 999999);
-                    file_put_contents($otpPath, $otp);
+                    $otp = Otp::issue('register', $phone_number);
                     if ($config['phone_otp_type'] == 'whatsapp') {
                         Message::sendWhatsapp($phone_number, $config['CompanyName'] . "\n\n" . Lang::T("Registration code") . "\n$otp");
                     } else if ($config['phone_otp_type'] == 'both') {
@@ -312,6 +332,7 @@ switch ($do) {
                     $ui->display('customer/register-otp.tpl');
                 }
             } else {
+                $ui->assign('csrf_token', Csrf::generateAndStoreToken());
                 $ui->assign('captcha_widget', Captcha::renderWidget('customer'));
                 $ui->assign('_title', Lang::T('Register'));
                 $ui->assign('referral_code', isset($referral_code) ? $referral_code : null);
@@ -319,6 +340,7 @@ switch ($do) {
                 $ui->display('customer/register-rotp.tpl');
             }
         } else {
+            $csrf_token = Csrf::generateAndStoreToken();
             $UPLOAD_URL_PATH = str_replace($root_path, '', $UPLOAD_PATH);
             if (!empty($config['login_page_logo']) && file_exists($UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'])) {
                 $login_logo = $UPLOAD_URL_PATH . DIRECTORY_SEPARATOR . $config['login_page_logo'];

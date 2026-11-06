@@ -47,8 +47,8 @@ class Admin
         }
         // Check if the cookie is set and valid
         elseif (isset($_COOKIE['aid'])) {
-            $tmp = explode('.', $_COOKIE['aid']);
-            if (sha1("$tmp[0].$tmp[1].$db_pass") == $tmp[2]) {
+            $tmp = explode('.', (string) $_COOKIE['aid']);
+            if (count($tmp) === 3 && ctype_digit($tmp[0]) && ctype_digit($tmp[1]) && hash_equals(sha1("$tmp[0].$tmp[1].$db_pass"), $tmp[2])) {
                 // Validate the token in the cookie
                 $isValid = self::validateToken($tmp[0], $_COOKIE['aid']);
                 if ($isApi) {

@@ -38,7 +38,7 @@
     }
 
     .card-title i {
-        color: #667eea;
+        color: #2563eb;
         font-size: 1.1em;
     }
 
@@ -107,9 +107,9 @@
 
     .form-control:focus {
         background: var(--input-bg-focus);
-        border-color: #667eea;
+        border-color: #2563eb;
         outline: none;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
 
     .form-control:read-only {
@@ -139,7 +139,7 @@
     }
 
     .toggle-password:hover {
-        color: #667eea;
+        color: #2563eb;
     }
 
     .form-actions {
@@ -162,14 +162,14 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: #2563eb;
         color: white;
         flex: 1;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
     }
 
     .btn-secondary {
@@ -180,7 +180,7 @@
 
     .btn-secondary:hover {
         background: var(--input-bg-focus);
-        border-color: #667eea;
+        border-color: #2563eb;
     }
 
     .announcement-panel {
@@ -232,6 +232,7 @@
 
     <form enctype="multipart/form-data" action="{Text::url('register/post')}" method="post"
         class="register-form-wrapper">
+        <input type="hidden" name="csrf_token" value="{$csrf_token}">
         <div class="login-card">
             <div class="logo-section">
                 <div class="brand-name">{$_c['CompanyName']}</div>
@@ -256,7 +257,7 @@
                     <div class="input-wrapper">
                         <i class="fas fa-phone-alt input-icon"></i>
                         <input type="text" id="phone_number" class="form-control" name="phone_number"
-                            value="{$phone_number}" readonly
+                            value="{$phone_number|escape}" readonly
                             placeholder="{if $_c['country_code_phone']!= ''}{$_c['country_code_phone']} {/if}{Lang::T('Phone Number')}"
                             aria-label="{Lang::T('Phone Number')}">
                     </div>
@@ -267,7 +268,7 @@
                     <label for="otp_code">{Lang::T('SMS Verification Code')}</label>
                     <div class="input-wrapper">
                         <i class="fas fa-key input-icon"></i>
-                        <input type="text" id="otp_code" class="form-control" name="otp_code" value=""
+                        <input type="text" id="otp_code" class="form-control" name="otp_code" value="" inputmode="numeric" autocomplete="one-time-code"
                             placeholder="{Lang::T('Enter verification code')}" required
                             aria-label="{Lang::T('SMS Verification Code')}">
                     </div>
@@ -289,7 +290,7 @@
                     <label for="fullname">{Lang::T('Full Name')}</label>
                     <div class="input-wrapper">
                         <i class="fas fa-user-tag input-icon"></i>
-                        <input type="text" id="fullname" class="form-control" value="{$fullname}" name="fullname" {if
+                        <input type="text" id="fullname" class="form-control" value="{$fullname|escape}" name="fullname" {if
                             $_c['man_fields_fname'] neq 'no' }required{/if} aria-label="{Lang::T('Full Name')}">
                     </div>
                 </div>
@@ -299,7 +300,7 @@
                     <div class="input-wrapper">
                         <i class="fas fa-envelope input-icon"></i>
                         <input type="email" id="email" class="form-control" placeholder="example@email.com"
-                            value="{$email}" name="email" {if $_c['man_fields_email'] neq 'no' }required{/if}
+                            value="{$email|escape}" name="email" {if $_c['man_fields_email'] neq 'no' }required{/if}
                             aria-label="{Lang::T('Email')}">
                     </div>
                 </div>
@@ -308,7 +309,7 @@
                     <label for="address">{Lang::T('Home Address')}</label>
                     <div class="input-wrapper">
                         <i class="fas fa-map-marker-alt input-icon"></i>
-                        <input type="text" id="address" class="form-control" name="address" value="{$address}" {if
+                        <input type="text" id="address" class="form-control" name="address" value="{$address|escape}" {if
                             $_c['man_fields_address'] neq 'no' }required{/if} aria-label="{Lang::T('Home Address')}">
                     </div>
                 </div>
@@ -321,10 +322,10 @@
                         <i class="fas fa-link input-icon"></i>
                         {if isset($referral_code) && !empty($referral_code)}
                         <input type="text" id="referral_code" class="form-control" name="referral_code"
-                            value="{$referral_code}" readonly aria-label="{Lang::T('Referral Code')}">
+                            value="{$referral_code|escape}" readonly aria-label="{Lang::T('Referral Code')}">
                         {else}
                         <input type="text" id="referral_code" class="form-control" name="referral_code"
-                            value="{$referral_code}" placeholder="{Lang::T('Referral Code')} ({Lang::T('Optional')})"
+                            value="{$referral_code|escape}" placeholder="{Lang::T('Referral Code')} ({Lang::T('Optional')})"
                             aria-label="{Lang::T('Referral Code')}">
                         {/if}
                     </div>
@@ -359,7 +360,7 @@
                     <label for="password">{Lang::T('Password')}</label>
                     <div class="input-wrapper">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="password" class="form-control" name="password"
+                        <input type="password" id="password" class="form-control" name="password" autocomplete="new-password"
                             placeholder="{Lang::T('Enter password')}" required aria-label="{Lang::T('Password')}">
                         <button type="button" class="toggle-password" id="togglePassword"
                             aria-label="{Lang::T('Show password')}" aria-pressed="false">
@@ -372,7 +373,7 @@
                     <label for="cpassword">{Lang::T('Confirm Password')}</label>
                     <div class="input-wrapper">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="cpassword" class="form-control" name="cpassword"
+                        <input type="password" id="cpassword" class="form-control" name="cpassword" autocomplete="new-password"
                             placeholder="{Lang::T('Confirm password')}" required
                             aria-label="{Lang::T('Confirm Password')}">
                         <button type="button" class="toggle-password" id="togglePasswordConfirm"

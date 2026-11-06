@@ -12,18 +12,71 @@ class User
     {
         global $db_pass;
         if (isset($_SESSION['uid']) && !empty($_SESSION['uid'])) {
-            return $_SESSION['uid'];
+            if (self::sessionStillValid($_SESSION['uid'])) {
+                return $_SESSION['uid'];
+            }
+            // the account is gone, or its password was changed or reset after this session began
+            unset($_SESSION['uid'], $_SESSION['uid_pv']);
+            self::removeCookie();
+            return 0;
         } else if (isset($_COOKIE['uid'])) {
             // id.time.sha1
-            $tmp = explode('.', $_COOKIE['uid']);
-            if (sha1($tmp[0] . '.' . $tmp[1] . '.' . $db_pass) == $tmp[2]) {
-                if (time() - $tmp[1] < 86400 * 30) {
+            $tmp = explode('.', (string) $_COOKIE['uid']);
+            if (count($tmp) === 3 && ctype_digit($tmp[0]) && ctype_digit($tmp[1]) && hash_equals(sha1($tmp[0] . '.' . $tmp[1] . '.' . $db_pass), $tmp[2])) {
+                if (time() - (int) $tmp[1] < 86400 * 30 && !self::cookieRevoked($tmp[0], (int) $tmp[1])) {
                     $_SESSION['uid'] = $tmp[0];
                     return $tmp[0];
                 }
             }
         }
         return 0;
+    }
+
+    /**
+     * Is this session still good? A session remembers a fingerprint of the password it was opened with (set the first time it is
+     * checked), so a password change or reset ends it everywhere. One small query per request, kept for the rest of the request.
+     */
+    private static function sessionStillValid($uid)
+    {
+        static $checked = [];
+        if (isset($checked[$uid])) {
+            return $checked[$uid];
+        }
+        $row = ORM::for_table('tbl_customers')->select('password')->find_one($uid);
+        if (!$row) {
+            return $checked[$uid] = false;
+        }
+        $fp = Password::fingerprint($row['password']);
+        if (empty($_SESSION['uid_pv'])) {
+            $_SESSION['uid_pv'] = $fp;
+            return $checked[$uid] = true;
+        }
+        return $checked[$uid] = hash_equals((string) $_SESSION['uid_pv'], $fp);
+    }
+
+    private static function revokeFile($uid)
+    {
+        global $db_pass;
+        return Extensions::privateDir('revoked') . DIRECTORY_SEPARATOR . hash_hmac('sha256', 'uid|' . (int) $uid, (string) $db_pass) . '.txt';
+    }
+
+    /** Make every remember-me cookie issued before now stop working for this customer (logout, password change or reset). */
+    public static function revokeCookies($uid)
+    {
+        @file_put_contents(self::revokeFile($uid), (string) time(), LOCK_EX);
+        if (random_int(1, 100) === 1) { // forget revocations older than the longest cookie
+            foreach (glob(dirname(self::revokeFile(0)) . DIRECTORY_SEPARATOR . '*.txt') ?: [] as $f) {
+                if (time() - (int) @filemtime($f) > 86400 * 31) {
+                    @unlink($f);
+                }
+            }
+        }
+    }
+
+    public static function cookieRevoked($uid, $issuedAt)
+    {
+        $f = self::revokeFile($uid);
+        return is_file($f) && $issuedAt <= (int) @file_get_contents($f);
     }
 
     public static function getTawkToHash($email)
@@ -187,7 +240,13 @@ class User
         global $db_pass;
         if (isset($uid)) {
             $token = self::generateToken($uid);
-            setcookie('uid', $token['token'], time() + 86400 * 30, "/");
+            setcookie('uid', $token['token'], [
+                'expires' => time() + 86400 * 30,
+                'path' => '/',
+                'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
             return $token;
         } else {
             return false;
@@ -197,7 +256,13 @@ class User
     public static function removeCookie()
     {
         if (isset($_COOKIE['uid'])) {
-            setcookie('uid', '', time() - 86400, "/");
+            setcookie('uid', '', [
+                'expires' => time() - 86400,
+                'path' => '/',
+                'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
         }
     }
 

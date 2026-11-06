@@ -40,8 +40,17 @@ class Csrf
         return true;
     }
 
+    /**
+     * The token for this session's forms. boot.php asks for it on every request, including the POST that is about to be checked, so
+     * it must hand back the same token while it is still valid: making a new one each time (as it used to) meant a submitted token
+     * could never match and the CSRF setting broke every form. A token past its life is replaced.
+     */
     public static function generateAndStoreToken()
     {
+        if (!empty($_SESSION['csrf_token']) && isset($_SESSION['csrf_token_time']) && time() - $_SESSION['csrf_token_time'] <= self::$tokenExpiration) {
+            $_SESSION['csrf_token_time'] = time(); // lives on while the visitor is active
+            return $_SESSION['csrf_token'];
+        }
         $token = self::generateToken();
         $_SESSION['csrf_token'] = $token;
         $_SESSION['csrf_token_time'] = time();

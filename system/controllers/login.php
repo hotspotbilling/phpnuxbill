@@ -30,7 +30,7 @@ global $isApi;
  */
 function performLogin($username, $password, $isApiCall = false) {
     global $config;
-    
+
     // Input validation
     if (empty($username) || empty($password)) {
         return [
@@ -39,105 +39,39 @@ function performLogin($username, $password, $isApiCall = false) {
             'data' => []
         ];
     }
-    
-    /**
-     * Get client IP address securely, handling proxy headers
-     * @return string Valid IP address or fallback
-     */
-    function getClientIP() {
-        // Use $GLOBALS to reliably access server superglobals and avoid undefined variable issues
-        $server = isset($GLOBALS['_SERVER']) && is_array($GLOBALS['_SERVER']) ? $GLOBALS['_SERVER'] : [];
 
-        // Common proxy headers to check (in order of priority)
-        $headers = [
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_REAL_IP',
-            'HTTP_X_CLIENT_IP',
-            'HTTP_CF_CONNECTING_IP', // Cloudflare
-            'HTTP_CLIENT_IP',
-            'REMOTE_ADDR'
-        ];
-        
-        foreach ($headers as $header) {
-            if (!empty($server[$header])) {
-                $ips = explode(',', $server[$header]);
-                
-                foreach ($ips as $ip) {
-                    $ip = trim($ip);
-                    
-                    // Validate IP and exclude private/reserved ranges for forwarded headers
-                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                        return $ip;
-                    }
-                    
-                    // For REMOTE_ADDR, allow private IPs (internal networks)
-                    if ($header === 'REMOTE_ADDR' && filter_var($ip, FILTER_VALIDATE_IP)) {
-                        return $ip;
-                    }
-                }
-            }
-        }
-        
-        // Final fallback
-        return '127.0.0.1';
-    }
-    
-    // Sanitize inputs
     $username = trim($username);
-    
-    // Rate limiting check with secure IP detection
-    $clientIP = getClientIP();
-    $rateLimitKey = 'login_attempts_' . md5($clientIP);
-    
-    if (!isset($_SESSION[$rateLimitKey])) {
-        $_SESSION[$rateLimitKey] = [];
-    }
-    
-    // Remove attempts older than 15 minutes
-    $_SESSION[$rateLimitKey] = array_filter($_SESSION[$rateLimitKey], function($time) {
-        return (time() - $time) < 900; // 15 minutes
-    });
-    
-    // Check if too many attempts (max 5 per 15 minutes)
-    if (count($_SESSION[$rateLimitKey]) >= 5) {
-        _log("Too many login attempts from IP: $clientIP", 'Security');
+    $clientIP = AuthThrottle::clientIp();
+
+    // Attempts are counted on the server, not in the visitor's session (a script that drops its cookies would start again from
+    // zero every time): per username from one address, per address, and per username overall.
+    $wait = max(
+        AuthThrottle::blocked('login-user-ip', $username . '|' . $clientIP, 5, 900),
+        AuthThrottle::blocked('login-ip', $clientIP, 30, 900),
+        AuthThrottle::blocked('login-user', $username, 25, 900)
+    );
+    if ($wait > 0) {
+        _log("Too many login attempts for $username from IP: $clientIP", 'Security');
         return [
             'success' => false,
-            'message' => Lang::T('Too many login attempts. Please try again later.'),
+            'message' => Lang::T('Too many login attempts. Please try again later.') . ' (' . AuthThrottle::waitText($wait) . ')',
             'data' => []
         ];
     }
-    
+
     try {
         run_hook('customer_login'); #HOOK
-        
-        // Find user by username
+
         $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
-        
-        // Security: Always perform password verification to prevent timing attacks
-        // This ensures consistent execution time regardless of whether user exists
-        $passwordValid = false;
-        $userExists = ($user !== false);
-        
-        if ($userExists) {
-            // User exists - verify against real password hash
-            $passwordValid = Password::_uverify($password, $user['password']);
-        } else {
-            // User doesn't exist - verify against dummy hash to maintain consistent timing
-            // Using a realistic bcrypt hash to ensure same computation time
-            $dummyHash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'; // bcrypt hash of "dummy"
-            Password::_uverify($password, $dummyHash);
-            $passwordValid = false; // Always false for non-existent users
-        }
-        
-        // Add small random delay to further normalize timing (1-5ms)
-        usleep(rand(1000, 5000));
-        
-        // Now evaluate results after consistent timing
-        if (!$userExists) {
-            // Add failed attempt
-            $_SESSION[$rateLimitKey][] = time();
-            _log("Login attempt with non-existent username: $username from IP: $clientIP", 'Security');
+
+        // The password is judged first and the account status after, so a wrong guess never learns whether an account is banned.
+        $passwordValid = $user && Password::_uverify($password, $user['password']);
+
+        if (!$passwordValid) {
+            AuthThrottle::hit('login-user-ip', $username . '|' . $clientIP, 900);
+            AuthThrottle::hit('login-ip', $clientIP, 900);
+            AuthThrottle::hit('login-user', $username, 900);
+            _log(($user ? "Failed login attempt for user: $username" : "Login attempt with non-existent username: $username") . " from IP: $clientIP", 'Security');
             return [
                 'success' => false,
                 'message' => Lang::T('Invalid username or password'),
@@ -145,7 +79,6 @@ function performLogin($username, $password, $isApiCall = false) {
             ];
         }
 
-        // Check account status
         if ($user['status'] == 'Banned') {
             _log("Banned user $username attempted login from IP: $clientIP", 'Security');
             return [
@@ -155,38 +88,26 @@ function performLogin($username, $password, $isApiCall = false) {
             ];
         }
 
-        // Check password verification result
-        if (!$passwordValid) {
-            // Add failed attempt
-            $_SESSION[$rateLimitKey][] = time();
-            _log("Failed login attempt for user: $username from IP: $clientIP", 'Security');
-            return [
-                'success' => false,
-                'message' => Lang::T('Invalid username or password'),
-                'data' => []
-            ];
-        }
-
         // Successful login
+        AuthThrottle::clear('login-user-ip', $username . '|' . $clientIP);
+        AuthThrottle::clear('login-user', $username);
         session_regenerate_id(true); // Regenerate session ID and delete old session
         $_SESSION['uid'] = $user['id'];
+        $_SESSION['uid_pv'] = Password::fingerprint($user['password']);
         $token = User::setCookie($user['id']);
-        
+
         // Update last login time
         $user->last_login = date('Y-m-d H:i:s');
         $user->save();
-        
-        // Clear failed attempts on successful login
-        unset($_SESSION[$rateLimitKey]);
-        
+
         // Log successful login
         _log($username . ' ' . Lang::T('Login Successful'), 'User', $user['id']);
-        
+
         $responseData = [];
-        if ($token) {
-            $responseData['token'] = "u." . $token;
+        if (!empty($token['token'])) {
+            $responseData['token'] = "u." . $token['token'];
         }
-        
+
         // Add user info for API responses
         if ($isApiCall) {
             $responseData['user'] = [
@@ -197,13 +118,13 @@ function performLogin($username, $password, $isApiCall = false) {
                 'last_login' => $user['last_login']
             ];
         }
-        
+
         return [
             'success' => true,
             'message' => Lang::T('Login Successful'),
             'data' => $responseData
         ];
-        
+
     } catch (Exception $e) {
         _log("Login error: " . $e->getMessage(), 'Error');
         return [
@@ -288,12 +209,16 @@ switch ($do) {
         break;
 
     case 'activation':
+        if (!Csrf::check(_post('csrf_token'))) {
+            _msglog('e', Lang::T('Invalid or Expired CSRF Token'));
+            r2(getUrl('login'));
+        }
+        // Voucher codes can be guessed, so wrong tries are counted per address like passwords are
+        $voucherIp = AuthThrottle::clientIp();
+        if ($voucherWait = AuthThrottle::blocked('voucher-ip', $voucherIp, 10, 900)) {
+            _alert(Lang::T('Too many login attempts. Please try again later.') . ' (' . AuthThrottle::waitText($voucherWait) . ')', 'danger', "login");
+        }
         if (!empty(_post('voucher_only'))) {
-            $csrf_token = _post('csrf_token');
-            if (!Csrf::check($csrf_token)) {
-                _msglog('e', Lang::T('Invalid or Expired CSRF Token'));
-                r2(getUrl('login'));
-            }
             $voucher = Text::alphanumeric(_post('voucher_only'), "-_.,");
             $tur = ORM::for_table('tbl_user_recharges')
                 ->where('username', $voucher)
@@ -338,8 +263,9 @@ switch ($do) {
                     _alert(Lang::T('Internet Plan Expired'), 'danger', "login");
                 }
             } else {
-                $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$voucher'")->find_one();
+                $v = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = ?", [$voucher])->find_one();
                 if (!$v) {
+                    AuthThrottle::hit('voucher-ip', $voucherIp, 900);
                     _alert(Lang::T('Voucher invalid'), 'danger', "login");
                 }
                 if ($v['status'] == 0) {
@@ -395,7 +321,7 @@ switch ($do) {
         } else {
             $voucher = Text::alphanumeric(_post('voucher'), "-_.,");
             $username = _post('username');
-            $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$voucher'")->find_one();
+            $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = ?", [$voucher])->find_one();
             if ($v1) {
                 // voucher exists, check customer exists or not
                 $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
@@ -418,13 +344,9 @@ switch ($do) {
                     }
                 }
                 if ($v1['status'] == 0) {
-                    $oldPass = $user['password'];
-                    // change customer password to voucher code
-                    $user->password = $voucher;
-                    $user->save();
-                    if (class_exists('RedisCache')) {
-                        RedisCache::forgetRadiusCustomer($user['username']);
-                    }
+                    // (a new account made by this request has the voucher code as its password; an existing one is left alone.)
+                    // An existing customer's password is never replaced here: typing someone's username with a voucher of your own must
+                    // not let you sign in as them. The voucher only adds its plan; the owner keeps their own password.
                     // voucher activation
                     if (Package::rechargeUser($user['id'], $v1['routers'], $v1['id_plan'], "Voucher", $voucher)) {
                         $v1->status = "1";
@@ -470,12 +392,6 @@ switch ($do) {
                             r2(getUrl('login'), 's', Lang::T("Voucher activation success, now you can login"));
                         }
                     } else {
-                        // if failed to recharge, restore old password
-                        $user->password = $oldPass;
-                        $user->save();
-                        if (class_exists('RedisCache')) {
-                            RedisCache::forgetRadiusCustomer($user['username']);
-                        }
                         r2(getUrl('login'), 'e', Lang::T("Failed to activate voucher"));
                     }
                 } else {
@@ -526,6 +442,7 @@ switch ($do) {
                     }
                 }
             } else {
+                AuthThrottle::hit('voucher-ip', $voucherIp, 900);
                 _msglog('e', Lang::T('Invalid Username or Password'));
                 r2(getUrl('login'));
             }

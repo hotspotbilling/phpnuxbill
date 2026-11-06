@@ -11,9 +11,12 @@
         var appUrl = '{$app_url}';
     </script>
 
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.public.css?2026.10.22.4">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.public.css?2026.11.06.3">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
 </head>
 
 <body>
     <div class="background"></div>
+    {if isset($notify) && $notify neq ''}
+        <div class="public-notice public-notice--{if $notify_t eq 's'}ok{elseif $notify_t eq 'e' or $notify_t eq 'd'}bad{else}info{/if}" role="alert">{$notify|escape|replace:'&lt;br&gt;':'<br>'}</div>
+    {/if}

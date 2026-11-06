@@ -34,9 +34,10 @@ switch ($action) {
             $d_pass = $user['password'];
             $npass = _post('npass');
             $cnpass = _post('cnpass');
-            if ($password == $d_pass) {
-                if (!Validator::Length($password, 36, 2)) {
-                    r2(getUrl('accounts/change-password'), 'e', 'New Password must be 2 to 35 character');
+            if (Password::_uverify($password, $d_pass)) {
+                $policy = Password::policyError($npass, $user['username']);
+                if ($policy !== '') {
+                    r2(getUrl('accounts/change-password'), 'e', $policy);
                 }
                 if ($npass != $cnpass) {
                     r2(getUrl('accounts/change-password'), 'e', 'Both Password should be same');
@@ -62,6 +63,7 @@ switch ($action) {
                 if (class_exists('RedisCache')) {
                     RedisCache::forgetRadiusCustomer($user['username']);
                 }
+                User::revokeCookies($user['id']); // every other device and remember-me cookie signs out too
                 User::removeCookie();
                 session_destroy();
                 _log('[' . $user['username'] . ']: Password changed successfully', 'User', $user['id']);

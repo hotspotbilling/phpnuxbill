@@ -16,6 +16,9 @@ if ((empty($_SESSION['uid']) || !isset($_SESSION['uid'])) && (empty($_SESSION['a
 }
 
 run_hook('customer_logout'); #HOOK
+if (!empty($_SESSION['uid'])) {
+    User::revokeCookies($_SESSION['uid']); // a copied remember-me cookie must not outlive the logout
+}
 if (session_status() == PHP_SESSION_NONE) session_start();
 Admin::removeCookie();
 User::removeCookie();
