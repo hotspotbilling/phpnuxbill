@@ -599,7 +599,9 @@ class ExtensionInstaller
     {
         $store = $opts['store'] ?? [];
         Extensions::setMeta($type, $slug, [
-            'version' => $manifest['version'] ?? '',
+            // A flat or merged package has no manifest: a signed install records the version the developer signed (the signature
+            // covers it), so rollback protection still has a version to compare with.
+            'version' => ($manifest['version'] ?? '') !== '' ? $manifest['version'] : (string) ($opts['signed_version'] ?? ''),
             'repo_updated' => $store['last_update'] ?? '',
             'store_id' => $store['id'] ?? '',
             'installed_at' => date('c'),
@@ -644,9 +646,17 @@ class ExtensionInstaller
                 return self::fail('The repository entry has an incomplete or malformed signature (public_key, signature and version are all needed)');
             }
             // A signature stays valid for ever, so an older signed release must not replace a newer one that is already installed.
-            $installed = (string) (Extensions::getMeta($type, $slugHint)['version'] ?? '');
-            if ($pinned !== '' && $installed !== '' && version_compare((string) $item['version'], $installed, '<')) {
-                return self::fail('Version ' . $item['version'] . ' is older than the installed version ' . $installed . ', so it was not installed. To go back, uninstall it first.');
+            if ($pinned !== '') {
+                $installed = (string) (Extensions::getMeta($type, $slugHint)['version'] ?? '');
+                if ($installed === '') { // fall back to the manifest of the copy on disk
+                    $installed = (string) (Extensions::manifest($type, $slugHint)['version'] ?? '');
+                }
+                if ($installed === '') { // a remembered key with no version to compare with must not become a way round the check
+                    return self::fail($slugHint . ' has a remembered signing key but no recorded version, so a rollback cannot be ruled out and it was not installed. Uninstall it first, then install again.');
+                }
+                if (version_compare((string) $item['version'], $installed, '<')) {
+                    return self::fail('Version ' . $item['version'] . ' is older than the installed version ' . $installed . ', so it was not installed. To go back, uninstall it first.');
+                }
             }
             $sign = ['public_key' => $key, 'signature' => $sig, 'type' => $type, 'id' => (string) $item['id'], 'version' => (string) $item['version']];
         }
@@ -663,7 +673,7 @@ class ExtensionInstaller
                     }
                 }
             }
-            return self::install($type, $dl['dir'], ['reason' => $reason, 'store' => $item, 'source' => $item['repo'] ?? 'store', 'slug' => $slugHint, 'signing_key' => $signed ? $key : '']);
+            return self::install($type, $dl['dir'], ['reason' => $reason, 'store' => $item, 'source' => $item['repo'] ?? 'store', 'slug' => $slugHint, 'signing_key' => $signed ? $key : '', 'signed_version' => $signed ? (string) $item['version'] : '']);
         } finally {
             Extensions::deleteTree($dl['work']);
         }

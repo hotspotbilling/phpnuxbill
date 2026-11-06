@@ -38,10 +38,10 @@ class ExtensionSignature
         return is_string($v) && (bool) preg_match('/^[0-9A-Za-z][0-9A-Za-z.+_-]{0,39}$/', $v);
     }
 
-    /** Does a repository entry carry a complete, well-formed set of signing fields on a zip address? The one test the installer and the drawer share. */
+    /** Does a repository entry carry a complete, well-formed set of signing fields on an https zip address? (MarketplaceRepo already blanks a bad zip when it loads an entry; this does not rely on that.) The one test the installer and the drawer share. */
     public static function wellFormed(array $item): bool
     {
-        return !empty($item['zip'])
+        return Extensions::httpsUrl($item['zip'] ?? '') !== ''
             && self::validKey($item['public_key'] ?? '')
             && self::validSignature($item['signature'] ?? '')
             && self::validVersion($item['version'] ?? '');
