@@ -618,8 +618,8 @@
                         {/if}
                         <footer>
                             © {$smarty.now|date_format:"%Y"} {$_c['CompanyName']}. All rights reserved. <br> <a
-                                href="pages/Privacy_Policy.html">Privacy</a> | <a
-                                href="pages/Terms_and_Conditions.html">Terms
+                                href="{Text::url('privacy')}" target="_blank" rel="noopener">Privacy</a> | <a
+                                href="{Text::url('terms')}" target="_blank" rel="noopener">Terms
                                 &amp;
                                 Conditions</a>
                         </footer>

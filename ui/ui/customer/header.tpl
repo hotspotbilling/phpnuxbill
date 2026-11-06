@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/phpnuxbill.min.css">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/sweetalert2.min.css" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2026.10.25.4" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.customer.css?2026.11.06.12" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/customer-modern.css?2026.10.31.1" />
     {if !empty($_theme_customer_css)}
     {foreach $_theme_customer_css as $themeCss}

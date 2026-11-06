@@ -1,8 +1,8 @@
 <footer class="footer">
     <p>&copy; 2025 {$_c['CompanyName']}. {Lang::T('All rights reserved.')}</p>
     <div class="footer-links">
-        <a href="{$app_url}/privacy" class="footer-link">{Lang::T('Privacy')}</a>
-        <a href="{$app_url}/terms" class="footer-link">{Lang::T('T &amp; C')}</a>
+        <a href="{Text::url('privacy')}" class="footer-link" target="_blank" rel="noopener">{Lang::T('Privacy')}</a>
+        <a href="{Text::url('terms')}" class="footer-link" target="_blank" rel="noopener">{Lang::T('T &amp; C')}</a>
     </div>
 </footer>
 

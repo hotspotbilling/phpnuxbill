@@ -21,6 +21,12 @@
     passwords stay in clear text because FreeRADIUS/hotspot need them. Password comparisons use `hash_equals` (loose `==` treated "1e3" as "1000").
   - Admin login regenerates the session id. Remember-me cookies are HttpOnly + SameSite=Lax (Secure on https), die on logout and on password change,
     and the session cookie is HttpOnly + SameSite=Lax with strict mode. Customers need to sign in once after this update (the mobile app too).
+  - Registration has an "I agree to the Terms and Conditions" box (links to `pages/Terms_and_Conditions.html`): the register button stays off
+    until it is ticked (and until the captcha is solved), and the server refuses a registration without it. The setting `register_terms = no`
+    turns it off.
+  - Fixed: the Privacy and T & C links in the footer of the sign-in, register and forgot-password pages went to routes that did not exist. They now open
+    public pages (`?_route=privacy`, `?_route=terms`, no sign-in needed) that show the text of Pages > Privacy Policy and Terms and Conditions in the
+    same look as the sign-in pages; the register checkbox and the custom "moon" pages link there too.
   - New customer passwords must be at least `min_password_length` (default 6) and not trivial; the public register/forgot pages show their messages
     and escape what they echo back.
 - Marketplace packages from your own server or CDN: a `repository.json` entry (or a plugin's `plugin.json`) can name `zip`, an https address

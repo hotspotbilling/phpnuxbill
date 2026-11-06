@@ -1013,14 +1013,25 @@ select:not(#filterNavigateMenu),
   .main-header .logo {
     float: none;
     width: auto;
-    flex: 0 1 auto;
+    flex: 0 0 auto; /* never squeezed: the logo box clips what does not fit, and the name must not lose its last letter */
     min-width: 0;
-    max-width: 45%;
-    padding: 0 10px;
+    max-width: none;
+    padding: 0 8px;
+  }
+
+  /* The name is shown in full (it takes the width of its own text) up to about thirteen letters, and never gets less than eleven;
+     anything longer is cut with an ellipsis. ch is the width of a digit in the name's own font, so the room follows the font
+     (and a font with wide letters gets wider room instead of clipping the last letter). */
+  .main-header .logo,
+  .main-header .logo .logo-lg {
+    font-size: 16px;
   }
 
   .main-header .logo .logo-lg {
     display: block;
+    width: max-content;
+    min-width: 11ch;
+    max-width: 13ch;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1044,7 +1055,7 @@ select:not(#filterNavigateMenu),
   }
 
   .navbar-custom-menu .navbar-nav > li > a {
-    padding: 12px 9px;
+    padding: 12px 6px;
   }
 
   /* balance chip: truncate instead of pushing icons out */
@@ -1063,6 +1074,52 @@ select:not(#filterNavigateMenu),
     left: auto;
   }
 
+  /* narrow phones: a slimmer balance chip and tighter icons so the name keeps its ten letters */
+  @media (max-width: 380px) {
+    .main-header .logo,
+    .main-header .logo .logo-lg {
+      font-size: 15px;
+    }
+
+    .main-header .logo .logo-lg {
+      max-width: 12ch;
+    }
+
+    .navbar-custom-menu .user-menu > a > span {
+      max-width: 54px;
+      font-size: 12px;
+    }
+
+    .navbar-custom-menu .navbar-nav > li > a {
+      padding: 12px 4px;
+    }
+  }
+
+  @media (max-width: 345px) {
+    .main-header .logo,
+    .main-header .logo .logo-lg {
+      font-size: 14px;
+    }
+
+    .main-header .logo .logo-lg {
+      max-width: 12ch;
+    }
+
+    .navbar-custom-menu .user-menu > a > span {
+      max-width: 40px;
+    }
+
+    .navbar-custom-menu .navbar-nav > li > a {
+      padding: 12px 2px;
+    }
+
+    /* the light/dark switch gives way on the very smallest phones */
+    #toggleIcon {
+      display: none;
+    }
+  }
+
+  /* the floating Buy button opens the menu on phones, so the top-bar menu button stays hidden */
   .toggle {
     display: none;
   }

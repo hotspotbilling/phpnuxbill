@@ -508,6 +508,22 @@
                         </p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Require Terms Agreement')}</label>
+                        <div class="col-md-5">
+                            <select name="register_terms" id="register_terms" class="form-control">
+                                <option value="yes">
+                                    {Lang::T('Yes')}
+                                </option>
+                                <option value="no" {if $_c['register_terms']=='no' }selected="selected" {/if}>
+                                    {Lang::T('No')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4">
+                            {Lang::T('The register page shows an "I agree to the Terms and Conditions" box, and the Register button stays off until it is ticked')}
+                        </p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Mandatory Fields')}</label>
                         <label class="col-md-1 control-label"><input type="checkbox" name="man_fields_email" value="yes"
                                 {if !isset($_c['man_fields_email']) || $_c['man_fields_email'] neq 'no' }checked{/if}>

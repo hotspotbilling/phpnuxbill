@@ -11,7 +11,7 @@
         var appUrl = '{$app_url}';
     </script>
 
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.public.css?2026.11.06.3">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.public.css?2026.11.06.6">
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
 </head>
 

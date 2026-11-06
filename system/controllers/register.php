@@ -59,6 +59,10 @@ switch ($do) {
         }
         $csrf_token = Csrf::generateAndStoreToken(); // for the form if it has to be shown again
         $ui->assign('csrf_token', $csrf_token);
+        // the visitor must have agreed to the Terms and Conditions (switch off with the setting register_terms = no)
+        if (($config['register_terms'] ?? 'yes') !== 'no' && _post('agree_terms') !== 'yes') {
+            r2(getUrl('register'), 'e', Lang::T('Please agree to the Terms and Conditions to register'));
+        }
         // Verify Captcha if enabled
         // An OTP submission for a phone that already passed CAPTCHA when requesting the OTP needs no second check
         $otpCaptchaDone = ($config['sms_otp_registration'] == 'yes')

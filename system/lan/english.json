@@ -4813,5 +4813,9 @@
     "Your_password_was_changed": "Your password was changed",
     "Password_changed_successfully__Please_login_again": "Password changed successfully, Please login again",
     "minutes": "minutes",
-    "Complete_the_captcha_first": "Complete the captcha first"
+    "Complete_the_captcha_first": "Complete the captcha first",
+    "Agree_to_the_Terms_and_Conditions_first": "Agree to the Terms and Conditions first",
+    "Please_agree_to_the_Terms_and_Conditions_to_register": "Please agree to the Terms and Conditions to register",
+    "Require_Terms_Agreement": "Require Terms Agreement",
+    "The_register_page_shows_an__I_agree_to_the_Terms_and_Conditions__box__and_the_Register_button_stays_off_until_it_is_ticked": "The register page shows an \"I agree to the Terms and Conditions\" box, and the Register button stays off until it is ticked"
 }

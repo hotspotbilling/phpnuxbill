@@ -155,7 +155,7 @@ class Captcha
                             var b = list[i];
                             if (!ok) {
                                 b.disabled = true; b.classList.add("captcha-blocked"); b.title = hint;
-                            } else if (b.classList.contains("captcha-blocked") && !b.classList.contains("loading")) {
+                            } else if (b.classList.contains("captcha-blocked") && !b.classList.contains("loading") && !b.classList.contains("terms-blocked")) {
                                 b.disabled = false; b.classList.remove("captcha-blocked"); b.removeAttribute("title");
                             }
                         }
