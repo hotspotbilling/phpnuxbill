@@ -14,6 +14,8 @@
     MP.t.updated = '{Lang::T('Last update')|escape:'javascript'}';
     MP.t.source = '{Lang::T('Source')|escape:'javascript'}';
     MP.t.package = '{Lang::T('Package')|escape:'javascript'}';
+    MP.t.signed = '{Lang::T('Signature')|escape:'javascript'}';
+    MP.t.signedYes = '{Lang::T('Signed by the developer; updates must use the same key')|escape:'javascript'}';
     MP.t.website = '{Lang::T('Website')|escape:'javascript'}';
     MP.t.layout = '{Lang::T('Layout')|escape:'javascript'}';
     MP.t.folder = '{Lang::T('Folder style')|escape:'javascript'}';
@@ -227,6 +229,7 @@
             if (info.url) fact(dl, MP.t.website, link(info.url, info.url));
             if (info.github) fact(dl, MP.t.source, link(info.github, info.github));
             if (info.zip) fact(dl, MP.t.package, link(info.zip, info.zip));
+            if (info.signed) fact(dl, MP.t.signed, MP.t.signedYes);
 
             var acts = document.getElementById('mp-d-actions'); acts.textContent = '';
             var route = info.type === 'plugin' ? 'plugins' : info.type === 'gateway' ? 'gateways' : info.type === 'device' ? 'devices' : 'themes';

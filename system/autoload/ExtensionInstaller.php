@@ -98,41 +98,84 @@ class ExtensionInstaller
 
     /** The most a package download may be, in bytes. */
     private const MAX_PACKAGE = 50 * 1024 * 1024;
+    /** The most a package may take up once unpacked, in bytes. */
+    private const MAX_UNPACKED = 200 * 1024 * 1024;
+    /** Most files a package may hold, and most redirects a download may follow. */
+    private const MAX_ENTRIES = 5000;
+    private const MAX_REDIRECTS = 3;
 
     /**
      * Download a .zip from any https address (a server or CDN of the developer's own) and extract it.
      * Only https is followed, also across redirects; the download stops at 50 MB; when $sha256 is given the file must match it.
+     * $sign (public_key, signature, type, id, version) makes the file also carry the developer's signature: see ExtensionSignature.
      * @return array same shape as downloadGithub (slug is '' : the caller knows the name)
      */
-    public static function downloadZip(string $url, string $sha256 = ''): array
+    public static function downloadZip(string $url, string $sha256 = '', array $sign = []): array
     {
         $url = Extensions::httpsUrl($url);
         if ($url === '') {
             return ['ok' => false, 'message' => 'The package address must start with https://'];
         }
+        $sha256 = strtolower(trim($sha256));
+        if ($sha256 !== '' && !preg_match('/^[0-9a-f]{64}$/', $sha256)) {
+            return ['ok' => false, 'message' => 'The SHA-256 is not valid: it must be 64 hexadecimal characters'];
+        }
         $work = self::workdir();
         $zipFile = $work . DIRECTORY_SEPARATOR . 'package.zip';
         set_time_limit(0);
         $fp = fopen($zipFile, 'w+');
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_CONNECTTIMEOUT => 15,
-            CURLOPT_TIMEOUT => 120,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 3,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
-            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTPS,
-            CURLOPT_FILE => $fp,
-            CURLOPT_USERAGENT => 'PHPNuxBill-Marketplace',
-            CURLOPT_NOPROGRESS => false,
-            CURLOPT_PROGRESSFUNCTION => function ($ch, $total, $got) {
-                return $got > self::MAX_PACKAGE ? 1 : 0; // non-zero aborts the transfer
-            },
-        ]);
-        curl_exec($ch);
-        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        // Redirects are followed by hand so that every hop is checked: https only, never a private or internal address.
+        $http = 0;
+        $error = '';
+        for ($hop = 0; $hop <= self::MAX_REDIRECTS; $hop++) {
+            $target = self::publicTarget($url);
+            if (isset($target['error'])) {
+                $error = $target['error'];
+                break;
+            }
+            ftruncate($fp, 0);
+            rewind($fp);
+            $location = '';
+            $ch = curl_init($url);
+            // the file goes first: if any later option were refused, the body must still never be printed to the page
+            $set = curl_setopt($ch, CURLOPT_FILE, $fp) && curl_setopt_array($ch, [
+                CURLOPT_CONNECTTIMEOUT => 15,
+                CURLOPT_TIMEOUT => 120,
+                CURLOPT_FOLLOWLOCATION => false,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+                CURLOPT_RESOLVE => [$target['host'] . ':' . $target['port'] . ':' . $target['ip']], // connect to the address that was checked
+                CURLOPT_USERAGENT => 'PHPNuxBill-Marketplace',
+                CURLOPT_NOPROGRESS => false,
+                CURLOPT_PROGRESSFUNCTION => function ($ch, $total, $got) {
+                    return $got > self::MAX_PACKAGE ? 1 : 0; // non-zero aborts the transfer
+                },
+                CURLOPT_HEADERFUNCTION => function ($ch, $line) use (&$location) {
+                    if (stripos($line, 'location:') === 0) {
+                        $location = trim(substr($line, 9));
+                    }
+                    return strlen($line);
+                },
+            ]);
+            if ($set) {
+                curl_exec($ch);
+            }
+            $http = $set ? curl_getinfo($ch, CURLINFO_HTTP_CODE) : 0;
+            curl_close($ch);
+            if (in_array($http, [301, 302, 303, 307, 308], true) && $location !== '') {
+                $url = self::absoluteUrl($url, $location);
+                if ($url === '') {
+                    $error = 'The package address redirected somewhere that is not https';
+                    break;
+                }
+                $http = 0;
+                continue;
+            }
+            break;
+        }
         fclose($fp);
+        if ($error === '' && $http >= 300 && $http < 400) {
+            $error = 'The package address redirected too many times';
+        }
         clearstatcache(true, $zipFile);
         $size = (int) @filesize($zipFile);
         $magic = (string) @file_get_contents($zipFile, false, null, 0, 2);
@@ -140,6 +183,9 @@ class ExtensionInstaller
             Extensions::deleteTree($work);
             return ['ok' => false, 'message' => $msg];
         };
+        if ($error !== '') {
+            return $fail($error);
+        }
         if ($http !== 200 || $size < 100) {
             return $fail('Could not download the package');
         }
@@ -152,6 +198,12 @@ class ExtensionInstaller
         if ($sha256 !== '' && !hash_equals($sha256, (string) hash_file('sha256', $zipFile))) {
             return $fail('The package does not match the SHA-256 listed for it, so it was not installed');
         }
+        if ($sign) {
+            $ok = ExtensionSignature::verify((string) ($sign['public_key'] ?? ''), (string) ($sign['signature'] ?? ''), (string) ($sign['type'] ?? ''), (string) ($sign['id'] ?? ''), (string) ($sign['version'] ?? ''), (string) hash_file('sha256', $zipFile));
+            if (!$ok) {
+                return $fail('The package signature is not valid for this file, so it was not installed');
+            }
+        }
         $res = self::extract($zipFile, $work . DIRECTORY_SEPARATOR . 'src');
         @unlink($zipFile);
         if (!$res['ok']) {
@@ -160,11 +212,86 @@ class ExtensionInstaller
         return ['ok' => true, 'message' => 'Downloaded', 'dir' => $res['dir'], 'work' => $work, 'slug' => ''];
     }
 
+    /**
+     * Is this https address one the server may fetch? The host must resolve only to public addresses (nothing loopback, private,
+     * link-local or reserved, which is where an internal service or cloud metadata would sit). Returns the host, port and the
+     * checked address (the download connects to exactly that address, so a DNS answer that changes later gains nothing),
+     * or ['error' => text].
+     */
+    private static function publicTarget(string $url): array
+    {
+        $p = parse_url($url);
+        if (!$p || strtolower($p['scheme'] ?? '') !== 'https' || empty($p['host']) || isset($p['user']) || isset($p['pass'])) {
+            return ['error' => 'The package address must be a plain https:// address'];
+        }
+        $host = strtolower(trim($p['host'], '[]'));
+        $port = (int) ($p['port'] ?? 443);
+        if ($port < 1 || $port > 65535) {
+            return ['error' => 'The package address has an invalid port'];
+        }
+        $ips = [];
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            $ips[] = $host;
+        } else {
+            foreach (@dns_get_record($host, DNS_A | DNS_AAAA) ?: [] as $r) {
+                $ips[] = $r['ip'] ?? $r['ipv6'] ?? '';
+            }
+            if (!$ips) {
+                $ips = @gethostbynamel($host) ?: [];
+            }
+        }
+        $ips = array_values(array_filter($ips));
+        if (!$ips) {
+            return ['error' => 'The package address could not be found'];
+        }
+        foreach ($ips as $ip) {
+            if (!self::publicIp($ip)) {
+                return ['error' => 'The package address points to a private or internal address, so it was not downloaded'];
+            }
+        }
+        $ip = $ips[0];
+        return ['host' => $host, 'port' => $port, 'ip' => strpos($ip, ':') !== false ? '[' . $ip . ']' : $ip];
+    }
+
+    /** Public internet address? Rejects private, loopback, link-local and reserved ranges, and IPv4 inside IPv6. */
+    private static function publicIp(string $ip): bool
+    {
+        if (strpos($ip, ':') !== false) {
+            $bin = @inet_pton($ip);
+            if ($bin === false) {
+                return false;
+            }
+            if (substr($bin, 0, 12) === str_repeat("\0", 10) . "\xff\xff") { // ::ffff:a.b.c.d, 6to4-style mappings: judge the IPv4 part
+                $ip = inet_ntop(substr($bin, 12));
+            } elseif (substr($bin, 0, 2) === "\x20\x02" || substr($bin, 0, 4) === "\x20\x01\x00\x00") { // 6to4 and Teredo tunnel to anything
+                return false;
+            }
+        }
+        return (bool) filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+    }
+
+    /** A redirect's Location as a full https address ('' if it is not one): absolute, protocol-relative or root-relative. */
+    private static function absoluteUrl(string $from, string $location): string
+    {
+        $p = parse_url($from);
+        $base = 'https://' . ($p['host'] ?? '') . (isset($p['port']) ? ':' . $p['port'] : '');
+        if (preg_match('#^https://#i', $location)) {
+            return $location;
+        }
+        if (strpos($location, '//') === 0) {
+            return 'https:' . $location;
+        }
+        if (isset($location[0]) && $location[0] === '/') {
+            return $base . $location;
+        }
+        return ''; // plain http:, other schemes and bare relative paths are not followed
+    }
+
     /** Download a package from whichever source an entry or manifest names: its zip, else its GitHub repository. */
     public static function downloadSource(array $src): array
     {
         if (!empty($src['zip'])) {
-            return self::downloadZip((string) $src['zip'], (string) ($src['sha256'] ?? ''));
+            return self::downloadZip((string) $src['zip'], (string) ($src['sha256'] ?? ''), (array) ($src['sign'] ?? []));
         }
         if (!empty($src['github'])) {
             return self::downloadGithub((string) $src['github']);
@@ -216,6 +343,20 @@ class ExtensionInstaller
             if ($n === '' || $n[0] === '/' || $n[0] === '\\' || strpos($n, '..') !== false || preg_match('/^[A-Za-z]:/', $n)) {
                 $z->close();
                 return ['ok' => false, 'message' => 'The package contains unsafe paths'];
+            }
+        }
+        if ($z->numFiles > self::MAX_ENTRIES) {
+            $z->close();
+            return ['ok' => false, 'message' => 'The package holds too many files (over ' . self::MAX_ENTRIES . ')'];
+        }
+        // a small zip can expand to gigabytes: add up the real sizes first and extract nothing if the total is unreasonable
+        $total = 0;
+        for ($i = 0; $i < $z->numFiles; $i++) {
+            $st = $z->statIndex($i);
+            $total += (int) ($st['size'] ?? 0);
+            if ($total > self::MAX_UNPACKED) {
+                $z->close();
+                return ['ok' => false, 'message' => 'The package is too large once unpacked (over 200 MB)'];
             }
         }
         mkdir($to, 0755, true);
@@ -463,7 +604,7 @@ class ExtensionInstaller
             'store_id' => $store['id'] ?? '',
             'installed_at' => date('c'),
             'source' => $opts['source'] ?? 'upload',
-        ]);
+        ] + (!empty($opts['signing_key']) ? ['signing_key' => $opts['signing_key']] : []));
     }
 
     private static function fail(string $msg): array
@@ -481,13 +622,43 @@ class ExtensionInstaller
         if (empty($item['zip']) && empty($item['github'])) {
             return self::fail('This repository entry has no zip or GitHub source to install from');
         }
-        $dl = self::downloadSource($item);
+        $slugHint = $installedSlug ?: preg_replace('/[^A-Za-z0-9_-]/', '', $item['id']);
+        $key = (string) ($item['public_key'] ?? '');
+        $sig = (string) ($item['signature'] ?? '');
+        // The key an extension was first installed with is remembered. From then on only that key may sign its updates, and an
+        // entry that drops the signature is refused, so taking over the repository file is not enough to push code.
+        $pinned = (string) (Extensions::getMeta($type, $slugHint)['signing_key'] ?? '');
+        if ($pinned !== '' && ($sig === '' || !hash_equals($pinned, $key))) {
+            return self::fail($slugHint . ' was installed with a signed release, and this repository entry is not signed by the same key, so it was not installed. To change the key, uninstall it first.');
+        }
+        $signed = $key !== '' || $sig !== '';
+        $sign = [];
+        if ($signed) {
+            if (!ExtensionSignature::available()) {
+                return self::fail('The PHP sodium extension is needed to check this signed package');
+            }
+            if (!ExtensionSignature::validKey($key) || !ExtensionSignature::validSignature($sig) || !ExtensionSignature::validVersion((string) ($item['version'] ?? ''))) {
+                return self::fail('The repository entry has an incomplete or malformed signature (public_key, signature and version are all needed)');
+            }
+            if (empty($item['zip'])) {
+                return self::fail('Only a package listed with a zip address can be signed');
+            }
+            $sign = ['public_key' => $key, 'signature' => $sig, 'type' => $type, 'id' => (string) $item['id'], 'version' => (string) $item['version']];
+        }
+        $dl = self::downloadSource($item + ['sign' => $sign]);
         if (!$dl['ok']) {
             return self::fail($dl['message']);
         }
         try {
-            $slugHint = $installedSlug ?: preg_replace('/[^A-Za-z0-9_-]/', '', $item['id']);
-            return self::install($type, $dl['dir'], ['reason' => $reason, 'store' => $item, 'source' => $item['repo'] ?? 'store', 'slug' => $slugHint]);
+            if ($signed) { // the signed version must be the version inside the package, or an old signed zip could stand in for a new one
+                foreach (self::detect($type, $dl['dir'], $slugHint) as $it) {
+                    $inside = (string) ($it['manifest']['version'] ?? '');
+                    if ($inside !== '' && $inside !== (string) $item['version']) {
+                        return self::fail('The package is version ' . $inside . ' but the signed version is ' . $item['version'] . ', so it was not installed');
+                    }
+                }
+            }
+            return self::install($type, $dl['dir'], ['reason' => $reason, 'store' => $item, 'source' => $item['repo'] ?? 'store', 'slug' => $slugHint, 'signing_key' => $signed ? $key : '']);
         } finally {
             Extensions::deleteTree($dl['work']);
         }

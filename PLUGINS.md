@@ -355,10 +355,13 @@ Marketplace > Tools > Settings (one per line, `https` only), next to or instead 
 * `id` must equal the plugin's folder name (`slug`), or the entry is not matched to the installed plugin.
 * An entry needs one package source to be installable: `zip` or `github`. Choose either; if both are present, `zip` is used.
 * `zip` is an `https://` address of a `.zip`. Redirects are followed only over `https`, and a package larger than 50 MB is
-  refused. It can be on any server or CDN, with no GitHub account involved.
+  refused, as is one that unpacks to more than 200 MB or holds more than 5,000 files. The address, and every redirect it takes, must lead
+  to a public host: one that resolves to a private, loopback or internal address is refused. It can be on any server or CDN, with no GitHub account involved.
 * `sha256` (optional, recommended) is the file's SHA-256 in 64 hexadecimal characters. When present, the site installs the zip
-  only if it matches. Change it whenever you replace the zip.
+  only if it matches, and an entry whose `sha256` is not 64 hex characters is refused rather than installed unchecked. Change it
+  whenever you replace the zip.
 * An update shows when `last_update` is newer than the installed date, so bump it with every new zip.
+* `version`, `public_key` and `signature` (all three, optional) sign the release: see *Signing your releases* below.
 * `url` is only the link on the card.
 
 A real entry that points at one fixed download address (Routely, a plugin served from its own server). The address always returns the
@@ -370,7 +373,7 @@ newest release, so the entry never needs editing for a new version, and there is
   "name": "Routely | SMS, WhatsApp and VPN",
   "description": "VPN tunnels, SMS and WhatsApp for PHPNuxBill from one Routely account. Use your own Android phones or gateway, or link WhatsApp devices.",
   "ispaid": false,
-  "author": "Focuslinks",
+  "author": "Focuslinkstech",
   "url": "https://routely.focuslinkstech.com.ng/",
   "zip": "https://routely-api.focuslinkstech.com.ng/v1/plugin/releases/routely-latest.zip",
   "last_update": "2026-11-06"
@@ -380,6 +383,73 @@ newest release, so the entry never needs editing for a new version, and there is
 Use `zip` where an older entry has `"github": "https://github.com/..."`. The `github` field only accepts a github.com address, so a
 direct link put there is ignored. Keep a `github` address on the entry as well if sites on an older PHPNuxBill Ultimate should still
 be able to install it: those sites ignore `zip`.
+
+### 6. Signing your releases (optional, recommended)
+
+A SHA-256 only proves a file is the one the repository entry lists. A **signature** proves it was made by you: it can only be
+created with a private key that never leaves your computer, and every site checks it before anything is installed. Use it for
+anything people trust with their billing server.
+
+**The two keys**
+
+| | What it is | Who has it |
+|---|---|---|
+| Private key | A file with 128 hex characters. Signs each release. | Only you. Keep it offline, back it up, never commit or publish it. |
+| Public key | 64 hex characters. Checks signatures. | Everyone: it goes in your repository entry. |
+
+**Step 1. Make the key pair (once).** The PHP `sodium` extension is needed (it ships with PHP; enable `extension=sodium` if it is off):
+
+```
+php skeletons/build.php keygen acme-signing.key
+```
+
+It saves the private key in `acme-signing.key` and prints the public key. It refuses to overwrite an existing file. To print the
+public key again later: `php skeletons/build.php pubkey acme-signing.key`.
+
+**Step 2. For every release, build the zip and sign it.** The version you sign must be the `version` inside the zip's
+`plugin.json` (`gateway.json`, `device.json` or `theme.json`):
+
+```
+php skeletons/build.php sign acme-signing.key acme_voice-1.2.0.zip plugin acme_voice 1.2.0
+```
+
+The arguments are the key file, the zip, the type (`plugin`, `gateway`, `device` or `theme`), the entry `id` and the version.
+It prints the values for your entry:
+
+```json
+{
+  "zip": "https://cdn.acme.example/plugins/acme_voice-1.2.0.zip",
+  "sha256": "…64 hex…",
+  "version": "1.2.0",
+  "public_key": "…64 hex, the same every release…",
+  "signature": "…128 hex, new for every zip…"
+}
+```
+
+**Step 3. Upload the zip and publish the entry.** Put those five keys in the entry next to `id`, `name`, `description` and
+`last_update`. The `zip` must be a *versioned* address (`…-1.2.0.zip`): a fixed "latest" address cannot be signed, because its
+content changes while a signature is tied to one exact file.
+
+**What the admin's site checks**
+
+1. It downloads the zip and only verifies; it never signs. The signature covers the type, the `id`, the `version` and the
+   SHA-256 of the exact file, so it cannot be reused for another extension, an older version, or a changed file.
+2. The `version` inside the package must equal the signed `version`, or the install stops.
+3. **The first install remembers your public key.** From then on only that key can sign updates for that extension. An entry
+   that has another key, or that drops the signature, is refused ("installed with a signed release… not signed by the same
+   key"). So even if someone takes over your `repository.json`, they cannot push code without your private key.
+4. A signed extension can only be updated from its repository entry, not from a bare `zip` in its manifest.
+5. An incomplete set (a key without a signature or a version) is refused, never installed unchecked.
+
+**If you lose or leak the private key.** Nothing already installed breaks, but sites that remember the old key refuse updates
+signed with a new one. Make a new key pair and tell your users to **uninstall and reinstall** once (uninstall forgets the remembered
+key; plugin data and settings are kept in the database). A leaked key means anyone can sign as you, so rotate it at once.
+
+**Good practice**
+
+* Keep the key file off the server and out of git (add `*.key` to `.gitignore`), and keep a copy in a password manager.
+* Sign on the computer that builds your release, not on the web server.
+* Never reuse a version number for a different zip: it needs a new signature, and sites will have already seen the old one.
 
 ### Updates checklist
 

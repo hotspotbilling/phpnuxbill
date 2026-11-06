@@ -8,6 +8,10 @@
   of a `.zip`, instead of `github`, with an optional `sha256` the download must match. Redirects stay on https and a package may be up to
   50 MB. Marketplace > Plugins (and gateways, devices, themes) also accepts a package address with an optional SHA-256. `PLUGINS.md` >
   Publishing and serving updates.
+- Signed Marketplace packages: a `zip` entry can carry `version`, `public_key` and `signature` (Ed25519, made with `php skeletons/build.php
+  keygen|pubkey|sign`). The signature covers type, id, version and the zip's SHA-256. The first install remembers the key; after that only
+  the same key can sign updates, and an unsigned or differently signed entry is refused. `PLUGINS.md` > Signing your releases.
+  Downloads also refuse internal/private hosts at every redirect, packages with more than 5,000 files or over 200 MB unpacked.
 - Marketplace licences: an extension can now run its own licence rules with `register_license($slug, $statusFn, $saveFn, $type)`:
   the developer owns the key format, server and storage, and the core only shows the License button, the badge and the result
   (and keeps **Activate** disabled until the state is `valid`). A manifest flag is editable by the customer, so it is now documented

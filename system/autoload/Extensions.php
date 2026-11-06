@@ -708,13 +708,6 @@ class Extensions
         return stripos($url, 'https://') === 0 ? $url : '';
     }
 
-    /** A SHA-256 as 64 lowercase hex characters, or ''. */
-    public static function sha256Hex($v): string
-    {
-        $v = is_string($v) ? strtolower(trim($v)) : '';
-        return preg_match('/^[0-9a-f]{64}$/', $v) ? $v : '';
-    }
-
     /** "owner/name" (letters, digits, . _ -) or null. Accepts a github.com URL and reduces it to that form. */
     public static function githubSlug(string $in): ?string
     {

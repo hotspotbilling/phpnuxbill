@@ -11,9 +11,10 @@
  * (earlier repositories win), so a reseller can host their own store next to the official one.
  *
  * repository.json keys: plugins, payment_gateway, devices, themes - each a list of
- * {id, name, description, ispaid, author, url, github, zip, sha256, last_update}.
+ * {id, name, description, ispaid, author, url, github, zip, sha256, version, public_key, signature, last_update}.
  * A package comes from "zip" (an https address of a .zip on any server or CDN, optionally pinned by "sha256") or,
- * when there is no zip, from "github" (a github.com repository). When both are present the zip is used.
+ * when there is no zip, from "github" (a github.com repository). When both are present the zip is used. A zip entry may also be
+ * signed (version + public_key + signature, see ExtensionSignature); the key then becomes the only one allowed to update it.
  */
 class MarketplaceRepo
 {
@@ -237,7 +238,13 @@ class MarketplaceRepo
         $item['url'] = Extensions::httpUrl($item['url'] ?? '');
         $item['github'] = Extensions::githubRepo(isset($item['github']) && is_string($item['github']) ? $item['github'] : '') ?? '';
         $item['zip'] = Extensions::httpsUrl($item['zip'] ?? '');
-        $item['sha256'] = Extensions::sha256Hex($item['sha256'] ?? '');
+        // kept as written (lower case): a malformed checksum makes the install refuse, instead of silently skipping the check
+        $item['sha256'] = isset($item['sha256']) && is_scalar($item['sha256']) ? strtolower(trim((string) $item['sha256'])) : '';
+        // signing fields are kept as written (lower case); a malformed or half-present set makes the install refuse
+        foreach (['public_key', 'signature'] as $k) {
+            $item[$k] = isset($item[$k]) && is_scalar($item[$k]) ? strtolower(trim((string) $item[$k])) : '';
+        }
+        $item['version'] = isset($item['version']) && is_scalar($item['version']) ? trim((string) $item['version']) : '';
         $item['ispaid'] = !empty($item['ispaid']);
         return $item;
     }

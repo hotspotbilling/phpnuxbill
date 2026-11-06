@@ -143,6 +143,9 @@ class MarketplaceController
         $store = MarketplaceUpdates::matchStore($type, $slug);
         $manifest = $type === 'plugin' ? (PluginLoader::$plugins[$slug] ?? []) : Extensions::manifest($type, $slug);
         $source = ['zip' => Extensions::httpsUrl($manifest['zip'] ?? ''), 'github' => $manifest['github'] ?? ''];
+        if (!$store && !empty(Extensions::getMeta($type, $slug)['signing_key'])) {
+            return ['ok' => false, 'message' => 'This extension was installed with a signed release, so it can only be updated from its repository entry'];
+        }
         if ($store) {
             $res = ExtensionInstaller::fromStore($type, $store['id'], 'update', $slug);
         } elseif ($source['zip'] !== '' || $source['github'] !== '') {
@@ -186,7 +189,7 @@ class MarketplaceController
         $fieldNames = ['plugin' => 'zip_plugin', 'gateway' => 'gateway_file', 'device' => 'zip_device', 'theme' => 'zip_theme'];
         $file = $_FILES[$fieldNames[$type]] ?? null;
         if ($zipUrl !== '') {
-            $dl = ExtensionInstaller::downloadZip($zipUrl, Extensions::sha256Hex(_post('zip_sha256', '')));
+            $dl = ExtensionInstaller::downloadZip($zipUrl, (string) _post('zip_sha256', ''));
             $source = 'zip';
         } elseif ($gh !== '') {
             $dl = ExtensionInstaller::downloadGithub($gh);
@@ -279,6 +282,7 @@ class MarketplaceController
             'url' => $item['url'] ?? '',
             'github' => $item['github'] ?? '',
             'zip' => $item['zip'] ?? '',
+            'signed' => ($item['public_key'] ?? '') !== '',
             'updated' => $item['last_update'] ?? '',
             'paid' => !empty($item['ispaid']),
             'repo' => $item['repo'] ?? '',
