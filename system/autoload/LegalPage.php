@@ -11,7 +11,8 @@ class LegalPage
     public static function show($file, $title)
     {
         global $ui, $PAGES_PATH;
-        if (!is_file($PAGES_PATH . DIRECTORY_SEPARATOR . $file . '.html')) {
+        // only a plain page name (letters, digits, underscore) ever reaches the path
+        if (!preg_match('/^[A-Za-z0-9_]+$/', (string) $file) || !is_file($PAGES_PATH . DIRECTORY_SEPARATOR . $file . '.html')) {
             $ui->assign('_title', Lang::T('Page not found'));
             $ui->display('customer/404.tpl');
             return;

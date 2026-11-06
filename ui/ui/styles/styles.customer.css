@@ -1010,18 +1010,17 @@ select:not(#filterNavigateMenu),
     height: 50px;
   }
 
+  /* The icons keep the width they need; the name takes everything that is left (so a wide or CJK name uses the room there is) and is cut
+     with an ellipsis only beyond that. It never gets less than eleven letters of room: ch is the width of a digit in its own font. */
   .main-header .logo {
     float: none;
     width: auto;
-    flex: 0 0 auto; /* never squeezed: the logo box clips what does not fit, and the name must not lose its last letter */
-    min-width: 0;
+    flex: 1 1 0;
+    min-width: calc(11ch + 16px);
     max-width: none;
     padding: 0 8px;
   }
 
-  /* The name is shown in full (it takes the width of its own text) up to about thirteen letters, and never gets less than eleven;
-     anything longer is cut with an ellipsis. ch is the width of a digit in the name's own font, so the room follows the font
-     (and a font with wide letters gets wider room instead of clipping the last letter). */
   .main-header .logo,
   .main-header .logo .logo-lg {
     font-size: 16px;
@@ -1029,16 +1028,16 @@ select:not(#filterNavigateMenu),
 
   .main-header .logo .logo-lg {
     display: block;
-    width: max-content;
     min-width: 11ch;
-    max-width: 13ch;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .main-header .navbar {
-    flex: 1 1 auto;
+    width: auto; /* the framework gives it 100% on phones */
+    flex: 0 0 auto;
+    margin-left: auto;
     display: flex;
     justify-content: flex-end;
     min-width: 0;
@@ -1061,7 +1060,7 @@ select:not(#filterNavigateMenu),
   /* balance chip: truncate instead of pushing icons out */
   .navbar-custom-menu .user-menu > a > span {
     display: inline-block;
-    max-width: 72px;
+    max-width: 110px; /* room for a long balance; only an extreme amount is cut */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1074,19 +1073,14 @@ select:not(#filterNavigateMenu),
     left: auto;
   }
 
-  /* narrow phones: a slimmer balance chip and tighter icons so the name keeps its ten letters */
+  /* narrow phones: a smaller name and tighter icons; the balance keeps its full width */
   @media (max-width: 380px) {
     .main-header .logo,
     .main-header .logo .logo-lg {
       font-size: 15px;
     }
 
-    .main-header .logo .logo-lg {
-      max-width: 12ch;
-    }
-
     .navbar-custom-menu .user-menu > a > span {
-      max-width: 54px;
       font-size: 12px;
     }
 
@@ -1099,14 +1093,6 @@ select:not(#filterNavigateMenu),
     .main-header .logo,
     .main-header .logo .logo-lg {
       font-size: 14px;
-    }
-
-    .main-header .logo .logo-lg {
-      max-width: 12ch;
-    }
-
-    .navbar-custom-menu .user-menu > a > span {
-      max-width: 40px;
     }
 
     .navbar-custom-menu .navbar-nav > li > a {

@@ -3,7 +3,7 @@
 <div class="login-container">
     <div class="login-card legal-card">
         <div class="logo-section">
-            <div class="brand-name">{$_c['CompanyName']}</div>
+            <div class="brand-name">{$_c['CompanyName']|escape}</div>
             <div class="subtitle">{$legal_title|escape}</div>
         </div>
 

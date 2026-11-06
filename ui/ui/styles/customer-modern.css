@@ -589,3 +589,26 @@ body.cm-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-aqua { --b-bg:
 body.cm-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-primary,
 body.cm-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-blue,
 body.cm-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-light-blue { --b-bg: rgba(96, 165, 250, 0.18); --b-fg: #93c5fd; --b-ring: rgba(96, 165, 250, 0.38); }
+
+/* Small phones: tighter top-bar icons and account pill, so the company name keeps its room and the balance is never cut */
+@media (max-width: 420px) {
+  body.cm-chrome.modern-skin-dark .main-header .navbar-custom-menu .navbar-nav > li > a {
+    margin: 5px 0;
+    padding: 0 5px;
+  }
+
+  body.cm-chrome.modern-skin-dark .main-header .navbar-custom-menu .navbar-nav > li:last-child > a {
+    margin-right: 4px;
+  }
+
+  body.cm-chrome.modern-skin-dark .main-header .navbar .navbar-custom-menu > .navbar-nav > li.user-menu > a.dropdown-toggle {
+    margin: 5px 0 !important;
+    padding: 0 4px 0 2px !important;
+  }
+
+  body.cm-chrome.modern-skin-dark .navbar-custom-menu .user-menu > a > span.cm-balance {
+    margin-right: 4px;
+    padding: 5px 7px;
+    font-size: 12px;
+  }
+}
