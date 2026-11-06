@@ -16,7 +16,7 @@ class User
                 return $_SESSION['uid'];
             }
             // the account is gone, or its password was changed or reset after this session began
-            unset($_SESSION['uid'], $_SESSION['uid_pv']);
+            unset($_SESSION['uid'], $_SESSION['uid_pv'], $_SESSION['uid_pv_id']);
             self::removeCookie();
             return 0;
         } else if (isset($_COOKIE['uid'])) {
@@ -47,8 +47,11 @@ class User
             return $checked[$uid] = false;
         }
         $fp = Password::fingerprint($row['password']);
-        if (empty($_SESSION['uid_pv'])) {
+        // The fingerprint belongs to one customer. When the session now names another one (an admin signing in as a customer, a token
+        // login) it starts again for that customer instead of being compared with somebody else's.
+        if (empty($_SESSION['uid_pv']) || (string) ($_SESSION['uid_pv_id'] ?? '') !== (string) $uid) {
             $_SESSION['uid_pv'] = $fp;
+            $_SESSION['uid_pv_id'] = $uid;
             return $checked[$uid] = true;
         }
         return $checked[$uid] = hash_equals((string) $_SESSION['uid_pv'], $fp);

@@ -541,7 +541,7 @@ function getNotificationColor(type) {
     case "error":
       return "#dc2626";
     case "warning":
-      return "#d97706";
+      return "#b45309"; // amber dark enough for white text (5:1)
     default:
       return "#2563eb";
   }

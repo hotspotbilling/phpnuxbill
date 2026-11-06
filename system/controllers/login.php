@@ -94,6 +94,7 @@ function performLogin($username, $password, $isApiCall = false) {
         session_regenerate_id(true); // Regenerate session ID and delete old session
         $_SESSION['uid'] = $user['id'];
         $_SESSION['uid_pv'] = Password::fingerprint($user['password']);
+        $_SESSION['uid_pv_id'] = $user['id'];
         $token = User::setCookie($user['id']);
 
         // Update last login time

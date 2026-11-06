@@ -99,10 +99,14 @@ class AuthThrottle
     // ----------------------------------------------------------------- the visitor's address
 
     /**
-     * The address a visitor really comes from. Forwarding headers (CF-Connecting-IP, X-Real-IP, X-Forwarded-For) are believed only
-     * when the connection itself comes from a trusted proxy: a private/loopback address (nginx or a load balancer next to the app)
-     * or one listed in the setting "trusted_proxies" (addresses or CIDR ranges, comma separated, for example Cloudflare's).
-     * Otherwise any visitor could write any address into a header and dodge every limit.
+     * The address a visitor really comes from. Forwarding headers are believed only when the connection itself comes from a proxy the
+     * administrator listed in the setting "trusted_proxies" (addresses or CIDR ranges, comma separated; behind nginx on the same
+     * machine that is 127.0.0.1, behind Cloudflare also its ranges). Private and loopback addresses are NOT trusted on their own: on a
+     * hotspot the visitors themselves are on private addresses and could write anything into a header to dodge every limit.
+     * Without the setting every visitor behind a reverse proxy looks like the proxy, so set it there.
+     *
+     * Order: the X-Forwarded-For chain from the nearest hop outwards (the first address that is not one of our own proxies), then
+     * CF-Connecting-IP, then X-Real-IP, and when none gives an address the connection's own.
      */
     public static function clientIp(): string
     {
@@ -113,16 +117,16 @@ class AuthThrottle
         if (!self::trusted($peer)) {
             return $peer;
         }
-        foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_REAL_IP'] as $h) {
-            $v = trim((string) ($_SERVER[$h] ?? ''));
-            if ($v !== '' && filter_var($v, FILTER_VALIDATE_IP)) {
-                return $v;
-            }
-        }
         $chain = array_reverse(array_map('trim', explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''))));
         foreach ($chain as $ip) { // from the nearest hop outwards: the first one that is not one of our own proxies
             if (filter_var($ip, FILTER_VALIDATE_IP) && !self::trusted($ip)) {
                 return $ip;
+            }
+        }
+        foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_REAL_IP'] as $h) { // set by the listed proxy itself
+            $v = trim((string) ($_SERVER[$h] ?? ''));
+            if ($v !== '' && filter_var($v, FILTER_VALIDATE_IP)) {
+                return $v;
             }
         }
         return $peer;
@@ -131,9 +135,6 @@ class AuthThrottle
     private static function trusted(string $ip): bool
     {
         global $config;
-        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-            return true; // private, loopback, link-local
-        }
         foreach (preg_split('/[\s,]+/', (string) ($config['trusted_proxies'] ?? ''), -1, PREG_SPLIT_NO_EMPTY) as $rule) {
             if (self::inRange($ip, $rule)) {
                 return true;

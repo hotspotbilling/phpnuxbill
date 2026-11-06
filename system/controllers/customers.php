@@ -730,7 +730,9 @@ switch ($action) {
             }
             if ($password != '') {
                 $c->password = $password;
-                User::revokeCookies($c['id']); // the customer's other sessions and remember-me cookies end with the old password
+                if ($passDiff) {
+                    User::revokeCookies($c['id']); // only a real change ends the customer's other sessions and remember-me cookies
+                }
             }
             $c->pppoe_username = $pppoe_username;
             $c->pppoe_password = $pppoe_password;

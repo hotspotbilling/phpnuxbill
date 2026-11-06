@@ -136,14 +136,15 @@ class Captcha
      */
     private static function gateScript()
     {
-        $hint = htmlspecialchars(Lang::T('Complete the captcha first'), ENT_QUOTES, 'UTF-8');
+        // a JavaScript string literal (quotes, backslashes and "</script>" are all made safe), not HTML-escaped text
+        $hint = json_encode(Lang::T('Complete the captcha first'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
         return '
                 <style>.captcha-blocked{opacity:.55;cursor:not-allowed !important;pointer-events:auto}</style>
                 <script>
                 (function () {
                     var me = document.currentScript, box = me && me.parentNode;
                     var scope = (box && box.closest && box.closest("form")) || document;
-                    var hint = "' . $hint . '";
+                    var hint = ' . $hint . ';
                     function solved() {
                         var f = scope.querySelector("[name=\\"cf-turnstile-response\\"],[name=\\"g-recaptcha-response\\"]");
                         return !!(f && f.value);

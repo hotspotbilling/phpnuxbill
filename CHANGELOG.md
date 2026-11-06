@@ -12,7 +12,8 @@
     account's password is no longer changed by a voucher; voucher activation is also CSRF-checked and limited per address.
   - New `AuthThrottle`: attempts are counted on the server (per username from one address, per address, per username), not in the visitor's session,
     for customer login (web and API), admin login, forgot password, registration codes and voucher activation. Forwarding headers are believed only
-    from a private/loopback peer or an address in the setting `trusted_proxies` (addresses or CIDR ranges, comma separated).
+    from an address listed in the setting `trusted_proxies` (addresses or CIDR ranges, comma separated). Behind a reverse proxy set it (for nginx on
+    the same machine: `127.0.0.1`, behind Cloudflare also its ranges); private addresses are not trusted by default because hotspot visitors have them.
   - New `Otp`: codes come from `random_int`, only a keyed hash is stored, a code lives 10 minutes and dies after 5 wrong tries. Forgot password
     no longer shows a generated password: after a right code the customer chooses a new one, is told by SMS/email that it changed, and every session and
     remember-me cookie opened with the old password ends. Answers no longer reveal whether a username, phone or email exists.
