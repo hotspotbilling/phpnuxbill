@@ -96,6 +96,82 @@ class ExtensionInstaller
         return ['ok' => true, 'message' => 'Downloaded', 'dir' => $res['dir'], 'work' => $work, 'slug' => $slug];
     }
 
+    /** The most a package download may be, in bytes. */
+    private const MAX_PACKAGE = 50 * 1024 * 1024;
+
+    /**
+     * Download a .zip from any https address (a server or CDN of the developer's own) and extract it.
+     * Only https is followed, also across redirects; the download stops at 50 MB; when $sha256 is given the file must match it.
+     * @return array same shape as downloadGithub (slug is '' : the caller knows the name)
+     */
+    public static function downloadZip(string $url, string $sha256 = ''): array
+    {
+        $url = Extensions::httpsUrl($url);
+        if ($url === '') {
+            return ['ok' => false, 'message' => 'The package address must start with https://'];
+        }
+        $work = self::workdir();
+        $zipFile = $work . DIRECTORY_SEPARATOR . 'package.zip';
+        set_time_limit(0);
+        $fp = fopen($zipFile, 'w+');
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_TIMEOUT => 120,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_FILE => $fp,
+            CURLOPT_USERAGENT => 'PHPNuxBill-Marketplace',
+            CURLOPT_NOPROGRESS => false,
+            CURLOPT_PROGRESSFUNCTION => function ($ch, $total, $got) {
+                return $got > self::MAX_PACKAGE ? 1 : 0; // non-zero aborts the transfer
+            },
+        ]);
+        curl_exec($ch);
+        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        fclose($fp);
+        clearstatcache(true, $zipFile);
+        $size = (int) @filesize($zipFile);
+        $magic = (string) @file_get_contents($zipFile, false, null, 0, 2);
+        $fail = function ($msg) use ($work) {
+            Extensions::deleteTree($work);
+            return ['ok' => false, 'message' => $msg];
+        };
+        if ($http !== 200 || $size < 100) {
+            return $fail('Could not download the package');
+        }
+        if ($size > self::MAX_PACKAGE) {
+            return $fail('The package is larger than 50 MB');
+        }
+        if ($magic !== 'PK') {
+            return $fail('The address did not return a .zip file');
+        }
+        if ($sha256 !== '' && !hash_equals($sha256, (string) hash_file('sha256', $zipFile))) {
+            return $fail('The package does not match the SHA-256 listed for it, so it was not installed');
+        }
+        $res = self::extract($zipFile, $work . DIRECTORY_SEPARATOR . 'src');
+        @unlink($zipFile);
+        if (!$res['ok']) {
+            return $fail($res['message']);
+        }
+        return ['ok' => true, 'message' => 'Downloaded', 'dir' => $res['dir'], 'work' => $work, 'slug' => ''];
+    }
+
+    /** Download a package from whichever source an entry or manifest names: its zip, else its GitHub repository. */
+    public static function downloadSource(array $src): array
+    {
+        if (!empty($src['zip'])) {
+            return self::downloadZip((string) $src['zip'], (string) ($src['sha256'] ?? ''));
+        }
+        if (!empty($src['github'])) {
+            return self::downloadGithub((string) $src['github']);
+        }
+        return ['ok' => false, 'message' => 'No package source is known'];
+    }
+
     /** @return array same shape as downloadGithub, for an uploaded .zip */
     public static function fromZipUpload(string $tmpFile): array
     {
@@ -402,10 +478,10 @@ class ExtensionInstaller
         if (!$item) {
             return self::fail('Not found in the repository');
         }
-        if (empty($item['github'])) {
-            return self::fail('This repository entry has no GitHub source to install from');
+        if (empty($item['zip']) && empty($item['github'])) {
+            return self::fail('This repository entry has no zip or GitHub source to install from');
         }
-        $dl = self::downloadGithub($item['github']);
+        $dl = self::downloadSource($item);
         if (!$dl['ok']) {
             return self::fail($dl['message']);
         }

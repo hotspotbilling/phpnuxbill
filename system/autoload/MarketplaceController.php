@@ -134,7 +134,7 @@ class MarketplaceController
     }
 
     /**
-     * Re-install an installed extension from its store entry (or its manifest "github" URL),
+     * Re-install an installed extension from its store entry (or its manifest "zip" or "github" URL),
      * backing the current version up first. Used by the Update button and "Update all".
      * @return array installer result
      */
@@ -142,16 +142,16 @@ class MarketplaceController
     {
         $store = MarketplaceUpdates::matchStore($type, $slug);
         $manifest = $type === 'plugin' ? (PluginLoader::$plugins[$slug] ?? []) : Extensions::manifest($type, $slug);
-        $github = $store['github'] ?? ($manifest['github'] ?? '');
+        $source = ['zip' => Extensions::httpsUrl($manifest['zip'] ?? ''), 'github' => $manifest['github'] ?? ''];
         if ($store) {
             $res = ExtensionInstaller::fromStore($type, $store['id'], 'update', $slug);
-        } elseif ($github !== '') {
-            $dl = ExtensionInstaller::downloadGithub($github);
+        } elseif ($source['zip'] !== '' || $source['github'] !== '') {
+            $dl = ExtensionInstaller::downloadSource($source);
             if (!$dl['ok']) {
                 return $dl;
             }
             try {
-                $res = ExtensionInstaller::install($type, $dl['dir'], ['reason' => 'update', 'source' => 'github', 'slug' => $slug]);
+                $res = ExtensionInstaller::install($type, $dl['dir'], ['reason' => 'update', 'source' => $source['zip'] !== '' ? 'zip' : 'github', 'slug' => $slug]);
             } finally {
                 Extensions::deleteTree($dl['work']);
             }
@@ -182,9 +182,13 @@ class MarketplaceController
         global $_app_stage;
         $dl = null;
         $gh = trim((string) _post('gh_url', ''));
+        $zipUrl = trim((string) _post('zip_url', ''));
         $fieldNames = ['plugin' => 'zip_plugin', 'gateway' => 'gateway_file', 'device' => 'zip_device', 'theme' => 'zip_theme'];
         $file = $_FILES[$fieldNames[$type]] ?? null;
-        if ($gh !== '') {
+        if ($zipUrl !== '') {
+            $dl = ExtensionInstaller::downloadZip($zipUrl, Extensions::sha256Hex(_post('zip_sha256', '')));
+            $source = 'zip';
+        } elseif ($gh !== '') {
             $dl = ExtensionInstaller::downloadGithub($gh);
             $source = 'github';
         } elseif ($file && !empty($file['name']) && is_uploaded_file($file['tmp_name'])) {
@@ -234,6 +238,7 @@ class MarketplaceController
             ],
             'store' => $store,
             'github' => Extensions::httpUrl($store['github'] ?? ($manifest['github'] ?? '')),
+            'zip' => Extensions::httpsUrl($store['zip'] ?? ($manifest['zip'] ?? '')),
             'url' => Extensions::httpUrl($store['url'] ?? ($manifest['url'] ?? '')),
             'paid' => !empty($store['ispaid']),
         ];
@@ -247,6 +252,7 @@ class MarketplaceController
             'description' => $base['description'] ?? '',
             'url' => $card['url'],
             'github' => $card['github'],
+            'zip' => $card['zip'],
             'updated' => $store['last_update'] ?? '',
             'paid' => $card['paid'],
             'style' => $card['style'],
@@ -272,6 +278,7 @@ class MarketplaceController
             'description' => $item['description'] ?? '',
             'url' => $item['url'] ?? '',
             'github' => $item['github'] ?? '',
+            'zip' => $item['zip'] ?? '',
             'updated' => $item['last_update'] ?? '',
             'paid' => !empty($item['ispaid']),
             'repo' => $item['repo'] ?? '',

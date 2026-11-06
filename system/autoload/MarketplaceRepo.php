@@ -11,7 +11,9 @@
  * (earlier repositories win), so a reseller can host their own store next to the official one.
  *
  * repository.json keys: plugins, payment_gateway, devices, themes - each a list of
- * {id, name, description, ispaid, author, url, github, last_update}.
+ * {id, name, description, ispaid, author, url, github, zip, sha256, last_update}.
+ * A package comes from "zip" (an https address of a .zip on any server or CDN, optionally pinned by "sha256") or,
+ * when there is no zip, from "github" (a github.com repository). When both are present the zip is used.
  */
 class MarketplaceRepo
 {
@@ -226,7 +228,7 @@ class MarketplaceRepo
         self::$refreshQueue = [];
     }
 
-    /** Store entries are untrusted: text becomes plain strings, links must be http(s), GitHub sources must be real repos */
+    /** Store entries are untrusted: text becomes plain strings, links must be http(s), a zip must be https, GitHub sources must be real repos */
     private static function sanitizeItem(array $item): array
     {
         foreach (['name', 'description', 'author', 'last_update'] as $k) {
@@ -234,6 +236,8 @@ class MarketplaceRepo
         }
         $item['url'] = Extensions::httpUrl($item['url'] ?? '');
         $item['github'] = Extensions::githubRepo(isset($item['github']) && is_string($item['github']) ? $item['github'] : '') ?? '';
+        $item['zip'] = Extensions::httpsUrl($item['zip'] ?? '');
+        $item['sha256'] = Extensions::sha256Hex($item['sha256'] ?? '');
         $item['ispaid'] = !empty($item['ispaid']);
         return $item;
     }

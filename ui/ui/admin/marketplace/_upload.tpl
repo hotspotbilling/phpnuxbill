@@ -16,6 +16,11 @@
             <label>{Lang::T('Or GitHub Repository URL')}</label>
             <input type="url" name="gh_url" placeholder="https://github.com/username/repository">
         </div>
+        <div class="mp-field">
+            <label>{Lang::T('Or package address (.zip on any https server)')}</label>
+            <input type="url" name="zip_url" placeholder="https://cdn.example.com/my-plugin-1.0.0.zip">
+            <input type="text" name="zip_sha256" placeholder="{Lang::T('SHA-256 of the file (optional, recommended)')}" maxlength="64" autocomplete="off" spellcheck="false">
+        </div>
         {/if}
         <button type="button" class="mp-submit" {if isset($up_disabled) && $up_disabled}disabled{/if}
             onclick="return ask(this, '{Lang::T('Warning, installing unknown source can damage your server, continue?')}')">

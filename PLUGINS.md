@@ -169,9 +169,10 @@ Marketplace, so set at least those and `author`.
 | Key | Required | Type | Notes |
 |---|---|---|---|
 | `update_url` | no | https URL | Answers JSON with `version` (or a GitHub release's `tag_name`); cached 6 hours. Without it the update check uses the store's `last_update` instead |
-| `github` | no | `https://github.com/<owner>/<repo>` | Where **Update** downloads the package (`master`, then `main`). Only github.com is supported |
+| `github` | no | `https://github.com/<owner>/<repo>` | Where **Update** downloads the package (`master`, then `main`) |
+| `zip` | no | https URL of a `.zip` | Where **Update** downloads the package from your own server or CDN instead of GitHub. Wins over `github` when both are set |
 
-Neither is secret. Both are read for every installed plugin on every Marketplace page, loaded or not, so they cannot move into PHP.
+None of these is secret. They are read for every installed plugin on every Marketplace page, loaded or not, so they cannot move into PHP.
 
 ### Licence (optional)
 
@@ -285,19 +286,23 @@ message per new version (Marketplace > Tools > Settings can turn that off).
 
 1. Raise `version` in `plugin.json` (and fix anything in `requires_*`, below).
 2. Run `php skeletons/build.php check plugin <folder>` and click through the plugin once.
-3. Commit and **push to the default branch** (`master`, then `main`). The marketplace downloads the branch archive, not a
-   tag or a release asset, so what is on that branch is what admins receive.
-4. Make the new version visible: publish the `update_url` JSON (or create the GitHub release), or bump `last_update` in
-   `repository.json`.
-
-The repository has to be public, unless the admin has entered a GitHub username and token in Settings > General Settings > GitHub Auth.
+3. Put the package where admins download it. Pick one:
+   * **GitHub:** commit and **push to the default branch** (`master`, then `main`). The marketplace downloads the branch
+     archive, not a tag or a release asset, so what is on that branch is what admins receive. The repository has to be public,
+     unless the admin has entered a GitHub username and token in Settings > General Settings > GitHub Auth.
+   * **Your own server or CDN:** zip the plugin (the manifest `plugin.json` at the top of the zip, or inside a single wrapper
+     folder), upload it to an `https` address and set `zip` in `repository.json` (and optionally in `plugin.json`). Add
+     `sha256` with the file's SHA-256 (`shasum -a 256 acme_sms-1.3.0.zip`) so the admin's site refuses a file that was changed
+     on the way. `php skeletons/build.php new plugin <slug> "<Name>"` already makes a zip of this shape.
+4. Make the new version visible: publish the `update_url` JSON (or create the GitHub release), or bump `last_update` (and
+   `sha256`, for a zip) in `repository.json`.
 
 ### 4. What the admin's site does on Update
 
 1. It checks `requires_php`, `requires_version`, `requires_extensions` and `requires_plugins`, and lints every `.php`
    file. A syntax error or an unmet requirement stops the update before anything is touched.
 2. It backs the current version up as a zip in `system/cache/backups/` (restorable from Marketplace > Tools).
-3. It downloads `<github>/archive/refs/heads/master.zip` (or `main`) and **copies the files over the installed folder**.
+3. It downloads the package (your `zip`, else `<github>/archive/refs/heads/master.zip`, or `main`) and **copies the files over the installed folder**.
    Files you delete in a new version stay on the admin's site, and the plugin's own data (tables, `tbl_appconfig` rows,
    uploads) is kept.
 4. `install.php` does **not** run again on an update; it runs once, on first install. Put schema changes in code that runs
@@ -328,6 +333,17 @@ Marketplace > Tools > Settings (one per line, `https` only), next to or instead 
       "url": "https://acme.example/sms",
       "github": "https://github.com/acme/acme_sms",
       "last_update": "2026-10-29"
+    },
+    {
+      "id": "acme_voice",
+      "name": "Acme Voice",
+      "description": "Voice calls through Acme, served from our own CDN.",
+      "author": "Acme",
+      "ispaid": false,
+      "url": "https://acme.example/voice",
+      "zip": "https://cdn.acme.example/plugins/acme_voice-1.0.0.zip",
+      "sha256": "9f2b5c0d7e1a4b83c6d5e0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5",
+      "last_update": "2026-11-06"
     }
   ],
   "payment_gateway": [],
@@ -337,10 +353,33 @@ Marketplace > Tools > Settings (one per line, `https` only), next to or instead 
 ```
 
 * `id` must equal the plugin's folder name (`slug`), or the entry is not matched to the installed plugin.
-* `github` is required to install from the entry. Today packages are fetched from GitHub only: a repository file on your
-  own server can list plugins, but the `.zip` itself is still downloaded from `github.com`. (An admin can always upload any
-  `.zip` by hand under Marketplace > Plugins.)
+* An entry needs one package source to be installable: `zip` or `github`. Choose either; if both are present, `zip` is used.
+* `zip` is an `https://` address of a `.zip`. Redirects are followed only over `https`, and a package larger than 50 MB is
+  refused. It can be on any server or CDN, with no GitHub account involved.
+* `sha256` (optional, recommended) is the file's SHA-256 in 64 hexadecimal characters. When present, the site installs the zip
+  only if it matches. Change it whenever you replace the zip.
+* An update shows when `last_update` is newer than the installed date, so bump it with every new zip.
 * `url` is only the link on the card.
+
+A real entry that points at one fixed download address (Routely, a plugin served from its own server). The address always returns the
+newest release, so the entry never needs editing for a new version, and there is no `sha256` because the file behind it changes:
+
+```json
+{
+  "id": "routely",
+  "name": "Routely | SMS, WhatsApp and VPN",
+  "description": "VPN tunnels, SMS and WhatsApp for PHPNuxBill from one Routely account. Use your own Android phones or gateway, or link WhatsApp devices.",
+  "ispaid": false,
+  "author": "Focuslinks",
+  "url": "https://routely.focuslinkstech.com.ng/",
+  "zip": "https://routely-api.focuslinkstech.com.ng/v1/plugin/releases/routely-latest.zip",
+  "last_update": "2026-11-06"
+}
+```
+
+Use `zip` where an older entry has `"github": "https://github.com/..."`. The `github` field only accepts a github.com address, so a
+direct link put there is ignored. Keep a `github` address on the entry as well if sites on an older PHPNuxBill Ultimate should still
+be able to install it: those sites ignore `zip`.
 
 ### Updates checklist
 
@@ -369,8 +408,8 @@ Each has its own starter with a README: `skeletons/gateway/`, `skeletons/device/
 
 All four manifests share the same keys for versions and requirements: `name`, `slug`, `version`, `description`, `author`,
 `main`, `requires_php`, `requires_extensions`, `requires_version`, `requires_plugins`, `requires_license`,
-`license_check_url`, `license_public_key`, `update_url`, `github` (a theme has no `main`, `requires_extensions` or `requires_plugins`). Gateways add
-`region`, devices add `category` (`Mikrotik`, `Radius`, `Voucher` or `Other`), themes add `parent` and `preview`. `update_url` and `github` work exactly as described above for any of them.
+`license_check_url`, `license_public_key`, `update_url`, `github`, `zip` (a theme has no `main`, `requires_extensions` or `requires_plugins`). Gateways add
+`region`, devices add `category` (`Mikrotik`, `Radius`, `Voucher` or `Other`), themes add `parent` and `preview`. `update_url`, `github` and `zip` work exactly as described above for any of them.
 
 ### What differs from `plugin.json`
 
@@ -622,7 +661,7 @@ Check, in this order:
    not a tag or a release file.
 3. Something announces it: `update_url` answers with the new version, or `last_update` is bumped in `repository.json`.
 4. The `update_url` answer is cached for 6 hours. The admin can press *Check for updates* to skip the wait.
-5. The repository entry's `id` equals your plugin's folder name, and it has a `github` address. Without a matching entry or
+5. The repository entry's `id` equals your plugin's folder name, and it has a `zip` or `github` address. Without a matching entry or
    an `update_url` there is nothing to compare against.
 
 **The update installed, but my new table or setting is missing.**
@@ -634,8 +673,13 @@ An update copies files over the installed folder and removes nothing. Keep the o
 migration delete it.
 
 **Can I serve the plugin from my own server or CDN instead of GitHub?**
-The repository list (`repository.json`) can live anywhere over `https`, and so can your `update_url`. The package itself is
-still downloaded from `github.com` today. An admin can always upload any `.zip` by hand under Marketplace > Plugins.
+Yes. Put the `.zip` on any `https` address and set `zip` (and ideally `sha256`) in your `repository.json` entry, or `zip` in
+`plugin.json` for the Update button. `repository.json` and `update_url` can live on the same server. GitHub is then not used at all.
+Admins can also paste a package address (with its SHA-256) under Marketplace > Plugins > Install a new plugin.
+
+**The install says the package does not match the SHA-256.**
+The file at `zip` is not the one `sha256` describes: a stale CDN cache, a re-uploaded zip, or a `sha256` not updated for the
+new version. Recompute it with `shasum -a 256 <file>` and update `repository.json`.
 
 **My repository is private.**
 The admin has to enter a GitHub username and token in Settings > General Settings > GitHub Auth, or the download fails. The

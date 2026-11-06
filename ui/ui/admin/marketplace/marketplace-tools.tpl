@@ -35,7 +35,7 @@
                 <label class="mp-label" for="mp-repos">{Lang::T('Custom repositories (one https:// URL per line)')}</label>
                 <textarea id="mp-repos" name="marketplace_repos" rows="4" class="form-control"
                     placeholder="https://example.com/my-repository.json">{$repos_text|escape}</textarea>
-                <p class="mp-muted">{Lang::T('A repository is a JSON file with plugins, payment_gateway, devices and themes lists; each entry has id, name, description, ispaid, author, url, github and last_update. Earlier repositories win when two list the same id.')}</p>
+                <p class="mp-muted">{Lang::T('A repository is a JSON file with plugins, payment_gateway, devices and themes lists; each entry has id, name, description, ispaid, author, url, github or zip (an https address of a .zip), sha256 (optional) and last_update. Earlier repositories win when two list the same id.')}</p>
                 <label class="mp-check"><input type="checkbox" name="marketplace_notify" value="yes" {if $notify_on}checked{/if}>
                     {Lang::T('Send a Telegram message when the scheduled check finds new updates')}</label>
                 <label class="mp-label" for="mp-keep">{Lang::T('Backups to keep per extension')}</label>
