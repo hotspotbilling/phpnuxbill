@@ -4,6 +4,27 @@
 
 ## Unreleased
 
+- New look for the installer and the updater: a dark panel with the five steps as numbered ports with status lights (blue = current, green = done, red = failed,
+  all five light up on the last page), a calm form on the right, light and dark colour schemes, and a step strip on phones. The installer gains a "Test the
+  connection" button, a show/hide toggle and strength meter for passwords, and a clear confirmation before replacing an existing database. The updater page
+  keeps its CSS inline because it replaces `ui/` while it runs. The Bootstrap copy in `install/css/` is gone; the installer uses `install/css/installer.css`.
+- Installer and updater review:
+  - Fixed: the installer could be re-run on a live site. `install/step4.php` rewrote `config.php` (pointing the site at the visitor's database, a full
+    takeover) and the setup script starts with DROP TABLE. Every installer page now refuses to run once `config.php` exists, and step 4 never wipes a database
+    that already holds PHPNuxBill tables unless told to.
+  - Fixed: `config.php` was built by pasting the form values into PHP code, so a database password could inject code. Values are now written as escaped string
+    literals; `config.php` is written last, so a failed install leaves nothing half-done; errors in any statement of the setup script are reported.
+  - There is no default `admin` / `admin` any more: the installer asks for the admin password (10+ characters, stored with bcrypt). The requirements page
+    checks what the app really needs (PHP 8.2, mbstring, curl, gd, zip, writable folders), the database password field is a password field, and step 5 can delete
+    the install folder. The old `install/update.php` migration ran without sign-in and is retired.
+  - `update.php` is now SuperAdmin only (any staff member could replace the program files), starts only from a button and a POST with a token (opening it did start
+    a download, so a link on another site could trigger an update from an address of the attacker's choosing), takes only an https GitHub branch zip or the address
+    in `config.php`, checks the download (200, a real zip, size), refuses unsafe zip paths and packages that are not PHPNuxBill or are older than the installed
+    version, backs up the replaced folders to `system/cache/backups/` and puts them back when the copy fails, and reports database errors instead of hiding them
+    (a version with a real error is retried next time; absent FreeRADIUS tables are skipped). An update started by the previous updater continues with
+    `update.php?step=4`.
+  - Fixed: `system/uploads/notifications.default.json`, which `init.php` needs at boot, was never committed (`.gitignore` ignored all of `system/uploads/`), so a copy
+    of the repository stopped at "file not found". `.gitignore` now lets it through; add the file to git.
 - Sign-in, registration and password-reset hardening:
   - Fixed: the CSRF setting did not work. `boot.php` made a new token on every request, including the POST that was about to be checked, so a submitted
     token could never match. `Csrf::generateAndStoreToken()` now returns the session's token while it is valid. Registration (both steps) and

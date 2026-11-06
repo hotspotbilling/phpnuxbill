@@ -24,6 +24,7 @@ ui/ui_custom/**
 !ui/ui_custom/README.md
 system/uploads/**
 !system/uploads/*.default.png
+!system/uploads/notifications.default.json
 system/uploads/sms/**
 !system/uploads/sms/index.html
 system/uploads/system/**

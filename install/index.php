@@ -1,33 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
 
-<head>
-    <title>PHPNuxBill Installer</title>
-    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+/**
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
+ **/
 
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+require __DIR__ . '/lib.php';
+pnb_guard();
+pnb_head('Welcome', 1);
+?>
+<h1>Welcome to PHPNuxBill</h1>
+<p class="lede">Billing for your Mikrotik hotspot and PPPoE customers. Setting it up takes a few minutes: you only need a MySQL database and its login.</p>
 
-    <link type='text/css' href='css/style.css' rel='stylesheet' />
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-</head>
+<ol class="next-list">
+    <li><b>Check the server.</b> We make sure PHP and the folders are ready.</li>
+    <li><b>Connect the database.</b> Host, user, password and name.</li>
+    <li><b>Choose the admin password.</b> There is no default password.</li>
+    <li><b>Done.</b> Sign in and add your router.</li>
+</ol>
 
-<body style='background-color: #FBFBFB;'>
-    <div id='main-container'>
-        <img src="img/logo.png" class="img-responsive" alt="Logo" />
-        <hr>
-        <!--  contents area start  -->
-        <div class="row">
-            <div class="col-md-12">
-                <h4> PHPNuxBill Installer </h4>
-                <h5>Please Read Before Continue</h5>
+<h2>Terms of use</h2>
+<details>
+    <summary>Read the terms</summary>
+    <div class="body">
+
                 <p><strong>Informasi Aplikasi</strong><br>
                     Application Name: PHPNuxBill <br>
                     Release Date: 30/10/2015<br>
                     By: PHPNuxBill [ <a href="https://github.com/hotspotbilling/phpnuxbill" target="_blank">https://github.com/hotspotbilling/phpnuxbill</a> ]<br>
-                    Donasi Paypal: <b>me@ibnux.et</b><br>
+                    Donasi Paypal: <b>me@ibnux.net</b><br>
                     <br>
                     <strong>Syarat Penggunaan:</strong><br>
                     Syarat Penggunaan ini berlaku untuk semua versi.<br><br>
@@ -44,14 +45,11 @@
                         yang mau menjadi pengembangkan aplikasi ini.</li>
                     <li>Penulis berhak setiap saat untuk mengubah ketentuan Syarat Penggunaan tanpa pemberitahuan sebelumnya.</li>
                 </ul>
-            </div>
-            <div class="col-md-12"><br>
-                <a href="step2.php" class="btn btn-primary">Accept &amp; Continue</a>
-            </div>
-        </div>
-        <!--  contents area end  -->
-    </div>
-    <div class="footer">Copyright &copy; 2021 PHPNuxBill. All Rights Reserved<br /><br /></div>
-</body>
 
-</html>
+    </div>
+</details>
+
+<div class="actions">
+    <a href="step2.php" class="btn">Accept the terms and continue</a>
+</div>
+<?php pnb_foot();

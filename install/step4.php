@@ -5,151 +5,160 @@
  *  by https://t.me/ibnux
  **/
 
-//error_reporting (0);
-$appurl = $_POST['appurl'];
-$db_host = $_POST['dbhost'];
-$db_user = $_POST['dbuser'];
-$db_pass = $_POST['dbpass'];
-$db_name = $_POST['dbname'];
-$cn = '0';
-try {
-    $dbh = new pdo(
-        "mysql:host=$db_host;dbname=$db_name",
-        "$db_user",
-        "$db_pass",
-        array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
-    );
-    $cn = '1';
-} catch (PDOException $ex) {
-    $cn = '0';
-}
+require __DIR__ . '/lib.php';
+pnb_guard();
 
-if ($cn == '1') {
-    if (isset($_POST['radius']) && $_POST['radius'] == 'yes') {
-        $input = '<?php
-
-$protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" || $_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
-$host = $_SERVER["HTTP_HOST"];
-$baseDir = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\\\");
-define("APP_URL", $protocol . $host . $baseDir);
-
-// Live, Dev, Demo
-$_app_stage = "Live";
-
-// Database PHPNuxBill
-$db_host	    = "' . $db_host . '";
-$db_user        = "' . $db_user . '";
-$db_pass    	= "' . $db_pass . '";
-$db_name	    = "' . $db_name . '";
-
-// Database Radius
-$radius_host	    = "' . $db_host . '";
-$radius_user        = "' . $db_user . '";
-$radius_pass    	= "' . $db_pass . '";
-$radius_name	    = "' . $db_name . '";
-
-if($_app_stage!="Live"){
-    error_reporting(E_ERROR);
-    ini_set("display_errors", 1);
-    ini_set("display_startup_errors", 1);
-}else{
-    error_reporting(E_ERROR);
-    ini_set("display_errors", 0);
-    ini_set("display_startup_errors", 0);
-}';
-    } else {
-        $input = '<?php
-$protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" || $_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
-$host = $_SERVER["HTTP_HOST"];
-$baseDir = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\\\");
-define("APP_URL", $protocol . $host . $baseDir);
-
-// Live, Dev, Demo
-$_app_stage = "Live";
-
-// Database PHPNuxBill
-$db_host	    = "' . $db_host . '";
-$db_user        = "' . $db_user . '";
-$db_pass	    = "' . $db_pass . '";
-$db_name	    = "' . $db_name . '";
-
-if($_app_stage!="Live"){
-    error_reporting(E_ERROR);
-    ini_set("display_errors", 1);
-    ini_set("display_startup_errors", 1);
-}else{
-    error_reporting(E_ERROR);
-    ini_set("display_errors", 0);
-    ini_set("display_startup_errors", 0);
-}';
+function pnb_back($error, $detail = '')
+{
+    if ($detail !== '') {
+        $_SESSION['pnb_detail'] = $detail;
     }
-    $wConfig = "../config.php";
-    $fh = fopen($wConfig, 'w') or die("Can't create config file, your server does not support 'fopen' function,
-	please create a file named - config.php with following contents- <br/>$input");
-    fwrite($fh, $input);
-    fclose($fh);
-    $sql = file_get_contents('phpnuxbill.sql');
-    $qr = $dbh->exec($sql);
-    if (isset($_POST['radius']) && $_POST['radius'] == 'yes') {
-        $sql = file_get_contents('radius.sql');
-        $qrs = $dbh->exec($sql);
-    }
-} else {
-    header("location: step3.php?_error=1");
+    header('location: step3.php?_error=' . $error);
     exit;
 }
 
+/** Run a script of several SQL statements and surface the first error of ANY of them (a plain exec() only reports the first statement). */
+function pnb_run_sql(PDO $db, $sql)
+{
+    $stmt = $db->query($sql);
+    do {
+        // each rowset is one statement; with exceptions on, a failing statement throws here
+    } while ($stmt->nextRowset());
+}
+
+/** A PHP string literal for config.php: every character is escaped, so no value can end the string and add code. */
+function pnb_lit($v)
+{
+    return var_export((string) $v, true);
+}
+
+// "Test the connection" on the form: answers with JSON and changes nothing
+if (($_GET['action'] ?? '') === 'test') {
+    header('Content-Type: application/json');
+    $answer = function ($ok, $message = '', $extra = []) {
+        echo json_encode(['ok' => $ok, 'message' => $message] + $extra);
+        exit;
+    };
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !pnb_token_ok($_POST['token'] ?? '')) {
+        $answer(false, 'The page expired. Reload it and try again.');
+    }
+    $h = trim((string) ($_POST['dbhost'] ?? ''));
+    $n = trim((string) ($_POST['dbname'] ?? ''));
+    if ($h === '' || !preg_match('/^[A-Za-z0-9_.:\/-]{1,255}$/', $h) || !preg_match('/^[A-Za-z0-9_$-]{1,64}$/', $n) || trim((string) ($_POST['dbuser'] ?? '')) === '') {
+        $answer(false, 'Fill in the host, user and a database name made of letters, digits, _ and -.');
+    }
+    try {
+        $t = new PDO("mysql:host=$h;dbname=$n;charset=utf8mb4", trim((string) $_POST['dbuser']), (string) ($_POST['dbpass'] ?? ''), [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 6]);
+        $answer(true, '', ['existing' => (bool) $t->query("SHOW TABLES LIKE 'tbl\\_users'")->fetchColumn(), 'version' => (string) $t->query('SELECT VERSION()')->fetchColumn()]);
+    } catch (PDOException $e) {
+        $answer(false, 'Could not connect: ' . $e->getMessage());
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('location: step3.php');
+    exit;
+}
+if (!pnb_token_ok($_POST['token'] ?? '')) {
+    pnb_back('token');
+}
+
+$db_host = trim((string) ($_POST['dbhost'] ?? ''));
+$db_user = trim((string) ($_POST['dbuser'] ?? ''));
+$db_pass = (string) ($_POST['dbpass'] ?? '');
+$db_name = trim((string) ($_POST['dbname'] ?? ''));
+$radius = ($_POST['radius'] ?? '') === 'yes';
+$wipe = ($_POST['wipe'] ?? '') === 'yes';
+$adminPass = (string) ($_POST['adminpass'] ?? '');
+$_SESSION['pnb_form'] = ['dbhost' => $db_host, 'dbuser' => $db_user, 'dbname' => $db_name, 'radius' => $radius];
+
+if ($db_host === '' || $db_user === '' || !preg_match('/^[A-Za-z0-9_$-]{1,64}$/', $db_name) || !preg_match('/^[A-Za-z0-9_.:\/-]{1,255}$/', $db_host)) {
+    pnb_back('input');
+}
+if (strlen($adminPass) < 10 || !hash_equals($adminPass, (string) ($_POST['adminpass2'] ?? ''))) {
+    pnb_back('password');
+}
+
+try {
+    $dbh = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+} catch (PDOException $ex) {
+    pnb_back('connect', $ex->getMessage());
+}
+
+// the setup script starts with DROP TABLE IF EXISTS: never wipe a database that already holds a PHPNuxBill without being told
+$existing = $dbh->query("SHOW TABLES LIKE 'tbl\\_users'")->fetchColumn();
+if ($existing && !$wipe) {
+    pnb_back('exists');
+}
+
+try {
+    pnb_run_sql($dbh, (string) file_get_contents(__DIR__ . '/phpnuxbill.sql'));
+    if ($radius) {
+        pnb_run_sql($dbh, (string) file_get_contents(__DIR__ . '/radius.sql'));
+    }
+    $set = $dbh->prepare("UPDATE tbl_users SET password = ? WHERE username = 'admin'");
+    $set->execute([password_hash($adminPass, PASSWORD_BCRYPT)]);
+    if ($set->rowCount() !== 1) {
+        throw new Exception('The administrator account was not created by the setup script.');
+    }
+} catch (Throwable $e) {
+    pnb_back('import', $e->getMessage());
+}
+
+// config.php is written last: when anything above fails there is nothing half-installed to lock the installer
+$config = '<?php
+$protocol = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" || $_SERVER["SERVER_PORT"] == 443) ? "https://" : "http://";
+$host = $_SERVER["HTTP_HOST"];
+$baseDir = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\\\");
+define("APP_URL", $protocol . $host . $baseDir);
+
+// Live, Dev, Demo
+$_app_stage = "Live";
+
+// Database PHPNuxBill
+$db_host = ' . pnb_lit($db_host) . ';
+$db_user = ' . pnb_lit($db_user) . ';
+$db_pass = ' . pnb_lit($db_pass) . ';
+$db_name = ' . pnb_lit($db_name) . ';
+' . ($radius ? '
+// Database Radius
+$radius_host = ' . pnb_lit($db_host) . ';
+$radius_user = ' . pnb_lit($db_user) . ';
+$radius_pass = ' . pnb_lit($db_pass) . ';
+$radius_name = ' . pnb_lit($db_name) . ';
+' : '') . '
+if ($_app_stage != "Live") {
+    error_reporting(E_ERROR);
+    ini_set("display_errors", 1);
+    ini_set("display_startup_errors", 1);
+} else {
+    error_reporting(E_ERROR);
+    ini_set("display_errors", 0);
+    ini_set("display_startup_errors", 0);
+}
+';
+$written = @file_put_contents(pnb_root() . '/config.php', $config, LOCK_EX);
+if ($written === false) {
+    $_SESSION['pnb_done'] = time();
+    pnb_head('Create config.php', 4, ['bad' => true]);
+    echo '<h1>One file to create by hand</h1>
+        <div class="banner warn"><span class="led"></span><p><b>The database is ready, but config.php could not be written</b>, because the site folder is not writable.</p></div>
+        <p>Create a file named <code>config.php</code> in the site folder with exactly this content, then reload the site:</p>
+        <pre class="config">' . pnb_h($config) . '</pre>
+        <div class="actions"><a href="../" class="btn">I created it, open the site</a></div>';
+    pnb_foot();
+    exit;
+}
+@chmod(pnb_root() . '/config.php', 0640);
+$_SESSION['pnb_done'] = time();
+unset($_SESSION['pnb_form'], $_SESSION['pnb_detail']);
+
+pnb_head('Installed', 4);
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <title>PHPNuxBill Installer</title>
-    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <link type='text/css' href='css/style.css' rel='stylesheet' />
-    <link type='text/css' href="css/bootstrap.min.css" rel="stylesheet">
-</head>
-
-<body style='background-color: #FBFBFB;'>
-    <div id='main-container'>
-        <img src="img/logo.png" class="img-responsive" alt="Logo" />
-        <hr>
-
-        <div class="span12">
-            <h4> PHPNuxBill Installer </h4>
-            <?php
-            if ($cn == '1') {
-            ?>
-                <p><strong>Config File Created and Database Imported.</strong><br></p>
-                <form action="step5.php" method="post">
-                    <fieldset>
-                        <legend>Click Continue</legend>
-                        <button type='submit' class='btn btn-primary'>Continue</button>
-                    </fieldset>
-                </form>
-            <?php
-            } elseif ($cn == '2') {
-            ?>
-                <p> MySQL Connection was successfull. An error occured while adding data on MySQL. Unsuccessfull
-                    Installation. Please refer manual installation in the website github.com/ibnux/phpnuxbill/wiki or Contact Telegram @ibnux  for
-                    helping on installation</p>
-            <?php
-            } else {
-            ?>
-                <p> MySQL Connection Failed.</p>
-            <?php
-            }
-            ?>
-        </div>
-    </div>
-
-    <div class="footer">Copyright &copy; 2021 PHPNuxBill. All Rights Reserved<br /><br /></div>
-</body>
-
-</html>
+<h1>The database is ready</h1>
+<p class="lede">The tables are created, the administrator is set up and <code>config.php</code> is written.</p>
+<form action="step5.php" method="post">
+    <input type="hidden" name="token" value="<?= pnb_h(pnb_token()) ?>">
+    <div class="actions"><button type="submit" class="btn">Continue</button></div>
+</form>
+<?php pnb_foot();

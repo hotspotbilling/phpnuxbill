@@ -1105,6 +1105,42 @@ select:not(#filterNavigateMenu),
     }
   }
 
+  /* Very small screens (about 330px and below): nothing may be pushed off the right edge, so the name's guaranteed room is given up
+     and the account pill may shrink (its balance then ends with an ellipsis) before anything leaves the screen. */
+  @media (max-width: 330px) {
+    .main-header .logo,
+    .main-header .logo .logo-lg {
+      min-width: 0;
+    }
+
+    .main-header .navbar {
+      flex: 0 1 auto;
+    }
+
+    .navbar-custom-menu {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .navbar-custom-menu > .navbar-nav {
+      max-width: 100%;
+    }
+
+    .navbar-custom-menu .navbar-nav > li.user-menu {
+      min-width: 0;
+      flex: 0 1 auto;
+    }
+
+    .navbar-custom-menu .navbar-nav > li.user-menu > a.dropdown-toggle {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .navbar-custom-menu .user-menu > a > span {
+      min-width: 0;
+    }
+  }
+
   /* the floating Buy button opens the menu on phones, so the top-bar menu button stays hidden */
   .toggle {
     display: none;

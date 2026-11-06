@@ -1,112 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <title>PHPNuxBill Installer</title>
-    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <link type='text/css' href='css/style.css' rel='stylesheet' />
-    <link type='text/css' href="css/bootstrap.min.css" rel="stylesheet">
-</head>
 <?php
-$sourceDir = $_SERVER['DOCUMENT_ROOT'].'/pages_template';
-$targetDir = $_SERVER['DOCUMENT_ROOT'].'/pages';
 
-function copyDir($src, $dst) {
-    $dir = opendir($src);
-    if (!$dir) {
-        throw new Exception("Cannot open directory: $src");
+/**
+ *  PHP Mikrotik Billing (https://github.com/hotspotbilling/phpnuxbill/)
+ *  by https://t.me/ibnux
+ **/
+
+require __DIR__ . '/lib.php';
+pnb_guard(true);
+
+function pnb_copy_dir($src, $dst)
+{
+    if (!is_dir($dst) && !mkdir($dst, 0755, true)) {
+        throw new Exception("Failed to create directory: $dst");
     }
-
-    if (!file_exists($dst)) {
-        if (!mkdir($dst, 0777, true)) {
-            throw new Exception("Failed to create directory: $dst");
+    foreach (scandir($src) as $f) {
+        if ($f === '.' || $f === '..') {
+            continue;
         }
-    }
-
-    while (false !== ($file = readdir($dir))) {
-        if (($file != '.') && ($file != '..')) {
-            if (is_dir($src . '/' . $file)) {
-                copyDir($src . '/' . $file, $dst . '/' . $file);
-            } else {
-                if (!copy($src . '/' . $file, $dst . '/' . $file)) {
-                    throw new Exception("Failed to copy $src/$file to $dst/$file");
-                }
-            }
+        if (is_dir("$src/$f")) {
+            pnb_copy_dir("$src/$f", "$dst/$f");
+        } elseif (!copy("$src/$f", "$dst/$f")) {
+            throw new Exception("Failed to copy $src/$f");
         }
-    }
-    closedir($dir);
-}
-
-function removeDir($dir) {
-    if (!is_dir($dir)) return;
-    $objects = scandir($dir);
-    foreach ($objects as $object) {
-        if ($object == '.' || $object == '..') continue;
-        if (is_dir($dir . '/' . $object))
-            removeDir($dir . '/' . $object);
-        else
-            if (!unlink($dir . '/' . $object)) {
-                throw new Exception("Failed to delete file: $dir/$object");
-            }
-    }
-    if (!rmdir($dir)) {
-        throw new Exception("Failed to remove directory: $dir");
     }
 }
 
+function pnb_remove_dir($dir)
+{
+    if (!is_dir($dir)) {
+        return true;
+    }
+    foreach (scandir($dir) as $f) {
+        if ($f === '.' || $f === '..') {
+            continue;
+        }
+        is_dir("$dir/$f") && !is_link("$dir/$f") ? pnb_remove_dir("$dir/$f") : @unlink("$dir/$f");
+    }
+    return @rmdir($dir);
+}
+
+$root = pnb_root();
+$notes = [];
+$posted = $_SERVER['REQUEST_METHOD'] === 'POST' && pnb_token_ok($_POST['token'] ?? '');
+
+// the editable pages (Terms, Privacy, ...) start as copies of pages_template
 try {
-    if (!file_exists($sourceDir)) {
-        throw new Exception("Source directory does not exist.");
+    if (is_dir("$root/pages_template") && !is_dir("$root/pages")) {
+        pnb_copy_dir("$root/pages_template", "$root/pages");
+    } elseif (!is_dir("$root/pages")) {
+        $notes[] = 'The folder pages is missing: copy pages_template to pages.';
     }
-
-    copyDir($sourceDir, $targetDir);
-    removeDir($sourceDir);
-
-} catch (Exception $e) {
-    echo 'Error: ', $e->getMessage(), "\n";
+} catch (Throwable $e) {
+    $notes[] = 'Could not prepare the pages folder: ' . $e->getMessage();
 }
-?>
-<body style='background-color: #FBFBFB;'>
-    <div id='main-container'>
-        <img src="img/logo.png" class="img-responsive" alt="Logo" />
-        <hr>
-        <div class="span12">
-            <h4> PHPNuxBill Installer </h4>
-            <p>
-                <strong>Congratulations!</strong><br>
-                You have just install PHPNuxBill !<br><br>
-                <span class="text-danger">But wait!!<br>
-                    <ol>
-                        <li>Don't forget to rename folder <b>pages_example</b> to <b>pages</b>.<br>
-                            if it not yet renamed</li>
-                        <li>Activate <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/Cron-Jobs" target="_blank">Cronjob</a> for Expired and Reminder.</li>
-                        <li>Check <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/How-It-Works---Cara-kerja" target="_blank">how PHPNuxbill Works</a></li>
-                        <li><a href="https://github.com/hotspotbilling/phpnuxbill/wiki#login-page-mikrotik" target="_blank">how to link Mikrotik Login to PHPNuxBill</a></li>
-                        <li>or use <a href="https://github.com/hotspotbilling/phpnuxbill-mikrotik-login-template" target="_blank">Mikrotik Login Template for PHPNuxBill</a></li>
-                    </ol>
-                </span><br><br>
-                To Login Admin Portal:<br>
-                Use this link -
-                <?php
-                $cururl = (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-                $appurl = str_replace('/install/step5.php', '', $cururl);
-                $appurl = str_replace('/system', '', $appurl);
-                echo '<a href="' . $appurl . '/admin">' . $appurl . '/admin</a>';
-                ?>
-                <br>
-                Username: admin<br>
-                Password: admin<br>
-                For security, Delete the <b>install</b> directory inside system folder.
-            </p>
-        </div>
-    </div>
-    <div class="footer">Copyright &copy; 2021 PHPNuxBill. All Rights Reserved<br /><br /></div>
-</body>
 
-</html>
+$deleted = false;
+if ($posted && ($_POST['do'] ?? '') === 'delete') {
+    $deleted = pnb_remove_dir(__DIR__);
+    if ($deleted) {
+        unset($_SESSION['pnb_done'], $_SESSION['pnb_token']);
+        header('location: ../?_route=admin');
+        exit;
+    }
+    $notes[] = 'The install folder could not be deleted from here. Please delete it by hand.';
+}
+
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$base = preg_replace('#/install(/step5\.php)?$#', '', dirname($_SERVER['SCRIPT_NAME']));
+$appurl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . rtrim($base === '/' ? '' : $base, '/');
+pnb_head('Installed', 5, ['all_done' => true]);
+?>
+<svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30"/><path d="M19 33l9 9 17-19"/></svg>
+<h1>PHPNuxBill is installed</h1>
+<p class="lede">Sign in to the admin portal with the user <b>admin</b> and the password you chose.</p>
+<?php foreach ($notes as $n) { ?><div class="banner warn"><span class="led"></span><p><?= pnb_h($n) ?></p></div><?php } ?>
+
+<div class="actions" style="margin-top:0">
+    <a class="btn" href="<?= pnb_h($appurl) ?>/?_route=admin">Open the admin portal</a>
+</div>
+
+<h2>Before you go</h2>
+<ol class="next-list">
+    <li><b>Delete the install folder.</b> It switches itself off once config.php exists, but there is no reason to keep it.
+        <form action="step5.php" method="post" style="margin-top:8px" onsubmit="return confirm('Delete the install folder now?');">
+            <input type="hidden" name="token" value="<?= pnb_h(pnb_token()) ?>">
+            <input type="hidden" name="do" value="delete">
+            <button type="submit" class="btn btn-danger btn-small">Delete it now</button>
+        </form></li>
+    <li><b>Set up the cron job</b> for expiry and reminders. <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/Cron-Jobs" target="_blank" rel="noopener">How to</a></li>
+    <li><b>Link your Mikrotik login page</b> to PHPNuxBill. <a href="https://github.com/hotspotbilling/phpnuxbill/wiki#login-page-mikrotik" target="_blank" rel="noopener">Instructions</a>
+        or use the <a href="https://github.com/hotspotbilling/phpnuxbill-mikrotik-login-template" target="_blank" rel="noopener">login template</a>.</li>
+    <li><b>Learn how it works.</b> <a href="https://github.com/hotspotbilling/phpnuxbill/wiki/How-It-Works---Cara-kerja" target="_blank" rel="noopener">The short guide</a></li>
+</ol>
+<?php pnb_foot();
