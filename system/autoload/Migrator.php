@@ -71,25 +71,43 @@ class Migrator
      */
     public function baseline($upToVersion, array $doneVersions = [])
     {
-        $this->ensureTable();
-        if (!$this->isEmpty()) {
-            return 0;
+        $this->ensureTable(); // DDL commits implicitly, so it stays outside the transaction
+        // all or nothing: a baseline cut off halfway would leave the record non-empty, so a later call would never complete it
+        $own = !$this->db->inTransaction();
+        if ($own) {
+            $this->db->beginTransaction();
         }
-        $n = 0;
-        // A marker row, so that the record is no longer empty even when no version is covered (an unknown starting point, or one older than
-        // every migration): the next run then knows a starting point was chosen. Statement positions start at 0, so -1 never matches one.
-        $this->record(substr(($upToVersion !== '' ? $upToVersion : 'none'), 0, 32), -1, 'baseline', 'baseline', null);
-        foreach ($this->updates as $version => $queries) {
-            $isDone = in_array((string) $version, array_map('strval', $doneVersions), true)
-                || ($upToVersion !== '' && preg_match('/^\d/', $upToVersion) && version_compare((string) $version, $upToVersion, '<='));
-            if ($isDone) {
-                foreach (array_values($queries) as $pos => $q) {
-                    $this->record($version, $pos, $q, 'baseline', null);
+        try {
+            if (!$this->isEmpty()) {
+                if ($own) {
+                    $this->db->commit();
                 }
-                $n++;
+                return 0;
             }
+            $n = 0;
+            // A marker row, so that the record is no longer empty even when no version is covered (an unknown starting point, or one older than
+            // every migration): the next run then knows a starting point was chosen. Statement positions start at 0, so -1 never matches one.
+            $this->record(substr(($upToVersion !== '' ? $upToVersion : 'none'), 0, 32), -1, 'baseline', 'baseline', null);
+            foreach ($this->updates as $version => $queries) {
+                $isDone = in_array((string) $version, array_map('strval', $doneVersions), true)
+                    || ($upToVersion !== '' && preg_match('/^\d/', $upToVersion) && version_compare((string) $version, $upToVersion, '<='));
+                if ($isDone) {
+                    foreach (array_values($queries) as $pos => $q) {
+                        $this->record($version, $pos, $q, 'baseline', null);
+                    }
+                    $n++;
+                }
+            }
+            if ($own) {
+                $this->db->commit();
+            }
+            return $n;
+        } catch (Throwable $e) {
+            if ($own && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
         }
-        return $n;
     }
 
     /** @return array of [version, position, sql] not yet applied, in the order they will run */

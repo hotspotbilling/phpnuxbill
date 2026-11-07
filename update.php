@@ -89,7 +89,7 @@ function u_url_ok($url, $trusted)
     if ($url === $trusted) {
         return preg_match('#^https://#i', $url) === 1;
     }
-    return strpos($url, '..') === false && preg_match('#^https://(?:github\.com|codeload\.github\.com)/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(?:archive/refs/heads/[A-Za-z0-9_./-]+\.zip|zip/refs/heads/[A-Za-z0-9_./-]+)$#', $url) === 1;
+    return strpos($url, '..') === false && preg_match('#^https://(?:github\.com|codeload\.github\.com)/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/(?:archive/refs/(?:heads|tags)/[A-Za-z0-9_./-]+\.zip|archive/[0-9a-f]{7,40}\.zip|zip/refs/heads/[A-Za-z0-9_./-]+)$#', $url) === 1;
 }
 
 // ------------------------------------------------------------------------------------------------ the page
@@ -327,6 +327,13 @@ if ($step === 0) {
         // not important here: the update itself reports database problems
     }
     $urlNow = $_SESSION['update_url'] ?? $update_url;
+    // The old-version list links here with the address to fill in. It only fills the box (the address is checked again when the button is
+    // pressed, and only GitHub zips are accepted); nothing is downloaded until the button.
+    $askedUrl = trim((string) ($_GET['update_url'] ?? ''));
+    $older = !empty($_GET['older']);
+    if ($askedUrl !== '' && u_url_ok($askedUrl, $update_url)) {
+        $urlNow = $askedUrl;
+    }
     $body = '<p>You are running version <b>' . u_h($self_version) . '</b>. Nothing changes until you press the button.</p>';
     foreach ($problems as $p) {
         $body .= '<div class="alert alert-danger">' . u_h($p) . '</div>';
@@ -337,6 +344,8 @@ if ($step === 0) {
         <div class="form-group"><label for="update_url">Download address</label>
             <input type="text" class="form-control" id="update_url" name="update_url" value="' . u_h($urlNow) . '">
             <span class="help-block">An https GitHub branch zip (a fork works too), or the address set as <code>$update_url</code> in config.php.</span></div>
+        <div class="form-group"><label><input type="checkbox" name="allow_older" value="1"' . ($older ? ' checked' : '') . '> Allow an older version (rollback)</label>
+            <span class="help-block">Without this, a package older than the version you run is refused. A rollback puts the old program files back; database changes are not undone, so back up your database first.</span></div>
         <p>The update downloads the package, checks it, <b>backs up</b> the program folders it replaces (<code>system/cache/backups/</code>),
             copies the new files and updates the database. Your <code>config.php</code>, uploads and settings are kept.
             It is safest to back up your database first.</p>
@@ -363,6 +372,7 @@ if ($step === 1) {
     }
     file_put_contents(u_lock_file(), (string) time());
     $_SESSION['update_url'] = $url;
+    $_SESSION['update_older'] = !empty($_POST['allow_older']);
     $run = $_SESSION['update_run'] = ['url' => $url, 'from' => $self_version, 'started' => time()];
 
     $zipFile = u_path('system/cache/phpnuxbill.zip');
@@ -437,9 +447,9 @@ if ($step === 2) {
         u_rmtree($pkg);
         u_fail(2, 'The package could not be unpacked.');
     }
-    if (version_compare($newVersion, $self_version, '<')) {
+    if (version_compare($newVersion, $self_version, '<') && empty($_SESSION['update_older'])) {
         u_rmtree($pkg);
-        u_fail(2, 'This package (' . $newVersion . ') is older than the installed version (' . $self_version . '). Downgrading can break the database, so it was not installed.');
+        u_fail(2, 'This package (' . $newVersion . ') is older than the installed version (' . $self_version . '). Going back is a rollback: tick "Allow an older version" on the first page if you mean it.');
     }
     // look at the database work before any file is replaced, so a refusal here leaves the site exactly as it was
     $look = '';

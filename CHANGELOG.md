@@ -4,6 +4,18 @@
 
 ## Unreleased
 
+- Rollback Update page redesigned: a note on what a rollback does (program files only, the database is not undone), Master and Development tabs with a search box, and one
+  row per version with its message, author, date, a link to the commit and a "Roll back to this" button; the page works on a phone and follows light, dark and the
+  shadcn theme. The Updates card on Community now lays its six buttons out in an even grid that reflows instead of clipping.
+  - Fixed: commit messages were printed as HTML (a commit message could inject markup into the admin's page); they are escaped now.
+  - Fixed: when GitHub refused the request (the anonymous limit is 60 an hour) the page tried to list the error as commits. The list is kept for ten minutes in
+    `system/cache/rollback_*.json`, an error answer is ignored, and an empty list says so. The page is SuperAdmin only, like the updater.
+- Community page redesigned: an Updates card that says whether you are up to date (versions compared properly, not as text), update, download, old-version and changelog
+  actions, a documentation link, help and support tiles, collapsible donation details and a compact credits list. It follows the light and dark switch and the
+  shadcn theme. The install and database buttons show for a SuperAdmin only (they were shown to every admin and then refused by `update.php`).
+- Fixed: "Select Old Version" no longer worked with the new updater (the link's address was ignored, and a package older than the installed one was refused). The link now
+  fills the address and ticks **Allow an older version** on the updater's first page; nothing downloads until the button is pressed, and a rollback needs that box.
+  The updater also accepts GitHub commit and tag zips, which the list links to. The update guide is on the website: Docs > Using the system > Updating and backups.
 - `Migrator` lock is per database (sites sharing a MySQL server no longer block each other), and `system/cron/migrate.php` never guesses the starting point of a
   site with no migration record: it asks for `--baseline=VERSION`, which also honours an old `updates.done.json`.
 - The updater looks at the database work before any file is replaced (step 2), and `php system/cron/migrate.php --status` shows the same: how many changes will run,
@@ -147,7 +159,7 @@
   trusted `is_admin` / `generate_by` from the request (voucher generation without signing in, or charging another merchant),
   and `hotspot_block_mac` could be used by anyone (now admin only, with a CSRF token).
 
-## 2026.10.25
+## 2026.8.25
 
 - Fixed: plugin menus registered with `admin = true` (e.g. Skeleton, My Plugin) showed in the customer portal sidebar whenever an admin session was open in the same browser; admin and customer menus are now kept apart (`_menu_publish()`, called by `_admin()` / `_auth()`)
 - Skeleton sample plugin now has both an admin and a customer menu with submenus (SVG icons); the plugin starter used slot names the templates never print (`DASHBOARD`, `ACCOUNTS`) and a submenu in a different slot than its parent, so its menus never showed - fixed, and the slot lists in the docs now match the templates
@@ -190,7 +202,7 @@
 - Old `?_route=themes` page now redirects to Marketplace > Themes
 - Fixed: global `min-height:100%` rule collapsed marketplace cards; shadcn theme showed dark marketplace colours in light mode
 
-## 2026.10.23
+## 2026.5.23
 
 - Plugin & Theme System overhaul (Phase 1-4)
   - Folder-based plugins with `plugin.json` manifest (`system/plugin/<slug>/`)
