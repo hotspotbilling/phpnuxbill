@@ -450,8 +450,11 @@ if ($step === 2) {
             u_rmtree($pkg);
             u_fail(2, implode(' ', $pf['problems']) . ' Nothing was changed.');
         }
+        foreach ($pf['warnings'] as $w) {
+            $look .= '<div class="alert alert-warning">' . u_h($w) . '</div>';
+        }
         if ($pf['count'] > 0) {
-            $look = '<p>Database changes to apply: <b>' . (int) $pf['count'] . '</b>.';
+            $look .= '<p>Database changes to apply: <b>' . (int) $pf['count'] . '</b>.';
             $big = array_slice($pf['tables'], 0, 3, true);
             if ($big) {
                 $parts = [];

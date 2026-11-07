@@ -43,27 +43,27 @@ $m = new Migrator($db, $root . '/system/updates.json');
 $m->ensureTable();
 $opts = getopt('', ['status', 'baseline:']);
 
+$done = $root . '/system/cache/updates.done.json';
+$doneVersions = is_file($done) ? (json_decode((string) file_get_contents($done), true) ?: []) : [];
+
 if (isset($opts['baseline'])) {
     if (!$m->isEmpty()) {
         fwrite(STDERR, "This site already has a migration record; a baseline is only for a site with none.\n");
         exit(1);
     }
-    echo 'Marked ' . $m->baseline((string) $opts['baseline']) . " version(s) as applied.\n";
+    // versions an older updater recorded as done are honoured as well
+    echo 'Marked ' . $m->baseline((string) $opts['baseline'], $doneVersions) . " version(s) as applied.\n";
     exit(0);
 }
 
 if ($m->isEmpty()) {
+    // Which version the database is really at cannot be read from the files (an update may have brought new files and stopped before the
+    // database), so it is never guessed: say where to start.
     $installed = (string) (json_decode((string) @file_get_contents($root . '/version.json'), true)['version'] ?? '');
-    $done = $root . '/system/cache/updates.done.json';
-    $doneVersions = is_file($done) ? (json_decode((string) file_get_contents($done), true) ?: []) : [];
-    // the site is taken to be at the version in version.json; if an update brought new files but stopped before the database, pass
-    // --baseline=<the version you came from> first
-    echo 'No migration record yet: everything up to ' . ($installed ?: '?') . " counts as applied (use --baseline=VERSION to choose another).\n";
-    if (isset($opts['status'])) {
-        echo "Nothing is changed by --status; run without it to record that starting point and apply anything newer.\n";
-        exit(0);
-    }
-    $m->baseline($installed, $doneVersions);
+    fwrite(STDERR, "This site has no migration record yet, so it is not known which database changes are already in place.\n"
+        . 'Run this first with the version the database was last updated to' . ($installed !== '' ? " (the files say $installed)" : '')
+        . ":\n  php system/cron/migrate.php --baseline=VERSION\n");
+    exit(isset($opts['status']) ? 0 : 1);
 }
 
 $pending = $m->pending();
@@ -81,6 +81,9 @@ if (isset($opts['status'])) {
     }
     foreach ($pf['problems'] as $problem) {
         echo "  PROBLEM: $problem\n";
+    }
+    foreach ($pf['warnings'] as $warning) {
+        echo "  WARNING: $warning\n";
     }
     foreach (array_slice($pending, 0, 50) as [$v, $pos, $sql]) {
         echo '  ' . $v . ' #' . ($pos + 1) . '  ' . mb_strimwidth(preg_replace('/\s+/', ' ', $sql), 0, 100, '...') . "\n";

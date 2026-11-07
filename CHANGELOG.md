@@ -4,9 +4,11 @@
 
 ## Unreleased
 
+- `Migrator` lock is per database (sites sharing a MySQL server no longer block each other), and `system/cron/migrate.php` never guesses the starting point of a
+  site with no migration record: it asks for `--baseline=VERSION`, which also honours an old `updates.done.json`.
 - The updater looks at the database work before any file is replaced (step 2), and `php system/cron/migrate.php --status` shows the same: how many changes will run,
-  the largest tables they touch with rows and size, and it refuses to go on if the database account lacks ALTER/CREATE/DROP/INDEX or the disk where the
-  database lives is too small to rewrite the largest table. The refusal leaves the site exactly as it was.
+  the largest tables they touch with rows and size, and it refuses to go on if the disk where the database lives is too small to rewrite the largest table,
+  and warns (without stopping) when the database account does not appear to have ALTER/CREATE/DROP/INDEX. The refusal leaves the site exactly as it was.
 - Customers see the maintenance page while the database step runs (web updater and `system/cron/migrate.php`), and it is lifted when the last change is done or
   not at all if a change failed. A maintenance mode the admin switched on themselves is never turned off. Staff pages keep working.
 - Install and upgrade now produce the same database (checked by building one from `install/phpnuxbill.sql` and another from the 2025 install plus every

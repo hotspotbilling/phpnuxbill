@@ -24,7 +24,6 @@ class Migrator
 
     private $db;
     private $updates = [];
-    private $lockName = 'phpnuxbill_migrate';
     private $locked = false;
 
     public function __construct(PDO $db, $updatesFile)
@@ -189,12 +188,12 @@ class Migrator
      *
      * @param string|null $updatesFile an updates.json to look at instead of the installed one (the package that is about to be installed)
      * @param string|null $from        the version the site is on, for a site with no record yet
-     * @return array count, tables [name => [rows, mb]], problems (strings that should stop the update), free_mb (null when unknown)
+     * @return array count, tables [name => [rows, mb]], problems (strings that should stop the update), warnings (worth reading, never stop it), free_mb (null when unknown)
      */
     public function preflight($updatesFile = null, $from = null)
     {
         $other = $updatesFile ? new self($this->db, $updatesFile) : $this;
-        $out = ['count' => 0, 'tables' => [], 'problems' => [], 'free_mb' => null];
+        $out = ['count' => 0, 'tables' => [], 'problems' => [], 'warnings' => [], 'free_mb' => null];
         try {
             $grants = implode(' ', $this->db->query('SHOW GRANTS FOR CURRENT_USER()')->fetchAll(PDO::FETCH_COLUMN));
             $all = (bool) preg_match('/\\bALL PRIVILEGES\\b/i', $grants);
@@ -204,14 +203,19 @@ class Migrator
                     $missing[] = $priv;
                 }
             }
+            // only a warning: SHOW GRANTS does not show roles or privileges held through other accounts, so it can be wrong
             if ($missing) {
-                $out['problems'][] = 'The database account lacks ' . implode(', ', $missing) . ' permission, which the changes need.';
-                return $out; // not even the record table can be made
+                $out['warnings'][] = 'The database account does not appear to have ' . implode(', ', $missing) . ' permission, which the changes need.';
             }
         } catch (PDOException $e) {
             // grants cannot be read on this server: the run itself will report a refused statement
         }
-        $this->ensureTable();
+        try {
+            $this->ensureTable();
+        } catch (PDOException $e) {
+            $out['warnings'][] = 'The record table could not be checked: ' . $e->getMessage();
+            return $out;
+        }
         $names = [];
         foreach ($other->pending() as [$v, $pos, $sql]) {
             // a site with no record yet starts from the version it is on
@@ -352,16 +356,22 @@ class Migrator
     }
 
     /** Only one run at a time, from any entry point (the web updater, the command line). */
+    private function lockName()
+    {
+        // GET_LOCK is server-wide, so the name carries the schema: sites sharing one MySQL server can migrate at the same time (name <= 64 chars)
+        return 'pnb_migrate_' . md5((string) $this->db->query('SELECT DATABASE()')->fetchColumn());
+    }
+
     private function lock()
     {
-        $this->locked = (int) $this->db->query("SELECT GET_LOCK('" . $this->lockName . "', 0)")->fetchColumn() === 1;
+        $this->locked = (int) $this->db->query("SELECT GET_LOCK('" . $this->lockName() . "', 0)")->fetchColumn() === 1;
         return $this->locked;
     }
 
     private function unlock()
     {
         if ($this->locked) {
-            $this->db->query("SELECT RELEASE_LOCK('" . $this->lockName . "')")->fetchColumn();
+            $this->db->query("SELECT RELEASE_LOCK('" . $this->lockName() . "')")->fetchColumn();
             $this->locked = false;
         }
     }
