@@ -6776,7 +6776,8 @@ body:not(.shadcn-body) .mp-drawer__panel .mp-d-readme, body:not(.shadcn-body) .m
 .mp-install .mp-field input[type=file] { padding: 0 8px; line-height: 36px; }
 .mp-install .mp-field input[type=file]::file-selector-button { margin: 5px 10px 5px 0; padding: 0 10px; height: 26px; border: 1px solid #c7d2fe; border-radius: 6px; background: transparent; color: inherit; font-size: 12.5px; cursor: pointer; }
 .mp-install .mp-field input + input { margin-top: 8px; }
-.mp-install .mp-field input[type=url]:focus, .mp-install .mp-field input[type=text]:focus { border-color: var(--cv-pri, #4f46e5); box-shadow: 0 0 0 3px var(--cv-pri-soft, rgba(79, 70, 229, .12)); }
+.mp-install .mp-field input[type=url]:focus, .mp-install .mp-field input[type=text]:focus, .mp-install .mp-field input[type=file]:focus-visible { border-color: var(--cv-pri, #4f46e5); box-shadow: 0 0 0 3px var(--cv-pri-soft, rgba(79, 70, 229, .12)); }
+.mp-install .mp-field input[type=file]:focus-visible::file-selector-button { border-color: var(--cv-pri, #4f46e5); }
 .mp-install .mp-field input::placeholder { color: var(--cv-muted, #94a3b8); }
 .mp-install button.mp-submit { height: 38px; margin-top: 20px; }
 .dark-mode .mp-install .mp-field input[type=url], .dark-mode .mp-install .mp-field input[type=text], .dark-mode .mp-install .mp-field input[type=file] { border-color: var(--cv-border, #2d3748); }
@@ -6814,3 +6815,12 @@ body.dark-mode:not(.shadcn-body) .rb-search:not(#filterNavigateMenu):focus { bac
 
 /* the hidden attribute must win over the display set on these (the rollback search and the empty note rely on it) */
 .rb-row[hidden], .rb-empty[hidden], .rb-list[hidden] { display: none !important; }
+/* in dark mode the resting border rule has the same weight as the focus rule and comes later, so the focus border is restated */
+.dark-mode .mp-install .mp-field input[type=url]:focus, .dark-mode .mp-install .mp-field input[type=text]:focus, .dark-mode .mp-install .mp-field input[type=file]:focus-visible,
+.dark-mode .mp-install .mp-field input[type=file]:focus-visible::file-selector-button { border-color: var(--cv-pri, #818cf8); }
+
+/* Typed text in the install panel: the global ".dark-mode input:focus { color: #1f201f }" is meant for the white focus fill, which these fields do not use, so the text colour is fixed with the
+   text-fill colour (it wins over "color") and the caret and placeholder follow. */
+.mp-install .mp-field input { -webkit-text-fill-color: var(--cv-fg, #1e293b); caret-color: var(--cv-fg, #1e293b); }
+.mp-install .mp-field input::placeholder { -webkit-text-fill-color: var(--cv-muted, #94a3b8); }
+.mp-install .mp-field input:-webkit-autofill, .mp-install .mp-field input:-webkit-autofill:focus { -webkit-text-fill-color: var(--cv-fg, #1e293b) !important; -webkit-box-shadow: 0 0 0 1000px var(--cv-bg, #ffffff) inset !important; transition: background-color 9999s ease-out; }

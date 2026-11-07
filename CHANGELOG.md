@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+- Fixed: typed text was near-black in the Marketplace install panel in dark mode. A global rule (`.dark-mode input:focus { color: #1f201f }`) paints focused fields dark for the white focus
+  fill it also forces; the panel keeps its dark fill, so the text was dark on dark. The panel's fields now set the text-fill colour (light in dark mode, dark in light mode), the caret and the
+  placeholder, and the autofill preview. The other pages I restyled already did this.
+- Marketplace install panel: the SHA-256 label is tied to its field (clicking the label focuses it, and screen readers read it with the field), the file picker has a visible keyboard focus
+  (indigo border and ring), and in dark mode the focus border of the URL, text and file fields shows (a later dark-mode border rule was hiding it).
 - Customers list: the "Show" dropdown now shows the page size in use. The controller falls back to 30 when no size is saved, but the dropdown only matched its fixed list, so it showed 10
   while 30 rows were listed; a saved size outside the list (for example 30) is added to the dropdown and selected. The saved size is read as a whole number between 1 and 5000, so a
   damaged cookie can no longer be stored as the setting.
