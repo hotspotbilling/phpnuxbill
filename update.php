@@ -448,7 +448,7 @@ if ($step === 2) {
         $pf = (new Migrator(u_db(), u_path('system/updates.json')))->preflight($folder . DIRECTORY_SEPARATOR . 'system' . DIRECTORY_SEPARATOR . 'updates.json', $self_version);
         if ($pf['problems']) {
             u_rmtree($pkg);
-            u_fail(2, implode(' ', $pf['problems']) . ' Nothing was changed.');
+            u_fail(2, implode(' ', $pf['problems']) . ' No program file was replaced.');
         }
         foreach ($pf['warnings'] as $w) {
             $look .= '<div class="alert alert-warning">' . u_h($w) . '</div>';
@@ -466,7 +466,9 @@ if ($step === 2) {
             $look .= '</p>';
         }
     } catch (Throwable $e) {
-        // the look is a courtesy: the database step reports its own problems
+        // the check could not be completed (database unreachable, unreadable package): no file is replaced on a guess
+        u_rmtree($pkg);
+        u_fail(2, 'The database work could not be checked: ' . $e->getMessage() . ' No program file was replaced.');
     }
     $run['folder'] = $folder;
     $run['to'] = $newVersion;

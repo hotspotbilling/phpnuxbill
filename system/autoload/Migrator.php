@@ -76,6 +76,9 @@ class Migrator
             return 0;
         }
         $n = 0;
+        // A marker row, so that the record is no longer empty even when no version is covered (an unknown starting point, or one older than
+        // every migration): the next run then knows a starting point was chosen. Statement positions start at 0, so -1 never matches one.
+        $this->record(substr(($upToVersion !== '' ? $upToVersion : 'none'), 0, 32), -1, 'baseline', 'baseline', null);
         foreach ($this->updates as $version => $queries) {
             $isDone = in_array((string) $version, array_map('strval', $doneVersions), true)
                 || ($upToVersion !== '' && preg_match('/^\d/', $upToVersion) && version_compare((string) $version, $upToVersion, '<='));
@@ -213,7 +216,8 @@ class Migrator
         try {
             $this->ensureTable();
         } catch (PDOException $e) {
-            $out['warnings'][] = 'The record table could not be checked: ' . $e->getMessage();
+            // without its record table the run cannot start, and what is pending is unknown: the check is incomplete, so it must stop the update
+            $out['problems'][] = 'The migration record table cannot be created or read, so the database changes cannot be checked or applied: ' . $e->getMessage();
             return $out;
         }
         $names = [];
