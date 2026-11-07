@@ -579,7 +579,7 @@ switch ($action) {
 
         $per_page = !empty($_COOKIE['voucher_per_page']) ? $_COOKIE['voucher_per_page'] : (!empty($config['voucher_per_page']) ? $config['voucher_per_page'] : '10');
 
-        $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status);
+        $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status) . "&batch_name=" . urlencode($batch_name);
 
         // option customers
         $ui->assign('customers', ORM::for_table('tbl_voucher')->distinct()->select("user")->whereNotEqual("user", '0')->findArray());

@@ -160,7 +160,12 @@ if ($action === 'tools') {
     $ui->assign('backup_keep', ExtensionBackup::keep());
     $ui->assign('repo_status', MarketplaceRepo::status());
     $ui->assign('backups', ExtensionBackup::all());
-    $ui->assign('logs', Extensions::recentLogs(60));
+    try {
+        $logs = Paginator::findMany(Extensions::logsQuery(), [], 15, '', true);
+    } catch (Throwable $e) {
+        $logs = [];
+    }
+    $ui->assign('logs', $logs ?: []);
     $ui->assign('installed_list', $installedList);
     $ui->assign('updates_pending', count(MarketplaceUpdates::cached()['updates']));
     $ui->assign('zipExt', class_exists('ZipArchive'));

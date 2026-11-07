@@ -1,32 +1,32 @@
 {include file="sections/header.tpl"}
 
-<div class="cl">
-    <div class="cl-top">
-        <p class="cl-sub">{($counts['on'] + $counts['off'])|number_format} {Lang::T('Active Customers')}{if $counts['off'] > 0}, {$counts['off']|number_format} {Lang::T('Expired')}{/if}</p>
-        <div class="cl-actions">
+<div class="ls">
+    <div class="ls-top">
+        <p class="ls-sub">{($counts['on'] + $counts['off'])|number_format} {Lang::T('Active Customers')}{if $counts['off'] > 0}, {$counts['off']|number_format} {Lang::T('Expired')}{/if}</p>
+        <div class="ls-actions">
             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-            <a class="cl-btn" title="{Lang::T('Sync')}" href="{Text::url('')}plan/sync"
+            <a class="ls-btn" title="{Lang::T('Sync')}" href="{Text::url('')}plan/sync"
                 onclick="return ask(this, '{Lang::T('This will sync dan send Customer active package to Mikrotik')}?')"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Sync')}</a>
             {/if}
-            <a href="{Text::url('')}plan/recharge" class="cl-btn cl-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('Recharge Account')}</a>
+            <a href="{Text::url('')}plan/recharge" class="ls-btn ls-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('Recharge Account')}</a>
         </div>
     </div>
 
-    <div class="cl-tabs" role="tablist" aria-label="{Lang::T('Status')}">
+    <div class="ls-tabs" role="tablist" aria-label="{Lang::T('Status')}">
         {$tabUrl = "&search={$search|escape:'url'}&router={$router|escape:'url'}&plan={$plan|escape:'url'}&status="}
-        <a class="cl-tab{if $status eq '' || $status eq '-'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, '-')}" role="tab">{Lang::T('All')} <small>{($counts['on'] + $counts['off'])|number_format}</small></a>
-        <a class="cl-tab{if $status eq 'on'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, 'on')}" role="tab">{Lang::T('Active')} <small>{$counts['on']|number_format}</small></a>
-        <a class="cl-tab{if $status eq 'off'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, 'off')}" role="tab">{Lang::T('Expired')} <small>{$counts['off']|number_format}</small></a>
+        <a class="ls-tab{if $status eq '' || $status eq '-'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, '-')}" role="tab">{Lang::T('All')} <small>{($counts['on'] + $counts['off'])|number_format}</small></a>
+        <a class="ls-tab{if $status eq 'on'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, 'on')}" role="tab">{Lang::T('Active')} <small>{$counts['on']|number_format}</small></a>
+        <a class="ls-tab{if $status eq 'off'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, 'off')}" role="tab">{Lang::T('Expired')} <small>{$counts['off']|number_format}</small></a>
     </div>
 
-    <div class="cl-card">
-        <form id="site-search" class="cl-bar" method="post" action="{Text::url('')}plan/list/">
+    <div class="ls-card">
+        <form id="site-search" class="ls-bar" method="post" action="{Text::url('')}plan/list/">
             <input type="hidden" name="status" value="{$status|escape}">
-            <div class="cl-search">
+            <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
                 <input type="search" autocomplete="off" name="search" placeholder="{Lang::T('Search')}..." value="{$search|escape}" aria-label="{Lang::T('Search')}">
             </div>
-            <label class="cl-field"><span>{Lang::T('Location')}</span>
+            <label class="ls-field"><span>{Lang::T('Location')}</span>
                 <select id="router" name="router" onchange="this.form.submit()">
                     <option value="">{Lang::T('All')}</option>
                     {foreach $routers as $r}
@@ -34,7 +34,7 @@
                     {/foreach}
                 </select>
             </label>
-            <label class="cl-field"><span>{Lang::T('Plan Name')}</span>
+            <label class="ls-field"><span>{Lang::T('Plan Name')}</span>
                 <select id="plan" name="plan" onchange="this.form.submit()">
                     <option value="">{Lang::T('All')}</option>
                     {foreach $plans as $p}
@@ -42,14 +42,14 @@
                     {/foreach}
                 </select>
             </label>
-            <button class="cl-btn cl-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
+            <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
             {if $search neq '' || $router neq '' || $plan neq ''}
-            <a class="cl-btn" href="{Text::url('')}plan/list" title="{Lang::T('Clear Search Query')}"><i class="fa fa-times" aria-hidden="true"></i></a>
+            <a class="ls-btn" href="{Text::url('')}plan/list" title="{Lang::T('Clear Search Query')}"><i class="fa fa-times" aria-hidden="true"></i></a>
             {/if}
         </form>
 
-        <div class="cl-scroll">
-            <table id="datatable" class="cl-table cl-nocheck table-with-loader">
+        <div class="ls-scroll">
+            <table id="datatable" class="ls-table ls-nocheck table-with-loader">
                 <thead>
                     <tr>
                         <th>{Lang::T('Username')}</th>
@@ -60,7 +60,7 @@
                         <th>{Lang::T('Status')}</th>
                         <th>{Lang::T('Method')}</th>
                         <th><a href="{Text::url('')}routers/list">{Lang::T('Location')}</a></th>
-                        <th class="cl-end">{Lang::T('Manage')}</th>
+                        <th class="ls-end">{Lang::T('Manage')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,9 +68,9 @@
                     <tr>
                         <td data-label="{Lang::T('Username')}">
                             {if $ds['customer_id'] == '0'}
-                            <a class="cl-strong" href="{Text::url('plan/voucher/&search=')}{$ds['username']|escape:'url'}">{$ds['username']|escape}</a>
+                            <a class="ls-strong" href="{Text::url('plan/voucher/&search=')}{$ds['username']|escape:'url'}">{$ds['username']|escape}</a>
                             {else}
-                            <a class="cl-strong" href="{Text::url('customers/viewu/')}{$ds['username']|escape:'url'}">{$ds['username']|escape}</a>
+                            <a class="ls-strong" href="{Text::url('customers/viewu/')}{$ds['username']|escape:'url'}">{$ds['username']|escape}</a>
                             {/if}
                         </td>
                         <td data-label="{Lang::T('Plan Name')}">
@@ -87,30 +87,30 @@
                             </span>
                         </td>
                         <td data-label="{Lang::T('Type')}">{$ds['type']|escape}</td>
-                        <td data-label="{Lang::T('Created On')}" class="cl-dim cl-when">{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
-                        <td data-label="{Lang::T('Expires On')}" class="cl-dim cl-when">{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
+                        <td data-label="{Lang::T('Created On')}" class="ls-dim ls-when">{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
+                        <td data-label="{Lang::T('Expires On')}" class="ls-dim ls-when">{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
                         <td data-label="{Lang::T('Status')}">
-                            {if $ds['status'] == 'off'}<span class="cl-pill cl-pill--banned">{Lang::T('Expired')}</span>
-                            {else}<span class="cl-pill cl-pill--active">{Lang::T('Active')}</span>{/if}
+                            {if $ds['status'] == 'off'}<span class="ls-pill ls-pill--banned">{Lang::T('Expired')}</span>
+                            {else}<span class="ls-pill ls-pill--active">{Lang::T('Active')}</span>{/if}
                         </td>
-                        <td data-label="{Lang::T('Method')}" class="cl-dim">{$ds['method']|escape}</td>
+                        <td data-label="{Lang::T('Method')}" class="ls-dim">{$ds['method']|escape}</td>
                         <td data-label="{Lang::T('Location')}">{$ds['routers']|escape}</td>
-                        <td class="cl-end">
-                            <div class="cl-row-actions">
-                                <a href="{Text::url('')}plan/edit/{$ds['id']}" class="cl-btn cl-btn--sm">{Lang::T('Edit')}</a>
+                        <td class="ls-end">
+                            <div class="ls-row-actions">
+                                <a href="{Text::url('')}plan/edit/{$ds['id']}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a>
                                 {if $ds['status']=='off' && $_c['extend_expired']}
-                                <a href="javascript:extend('{$ds['id']}')" class="cl-btn cl-btn--sm cl-btn--primary">{Lang::T('Extend')}</a>
+                                <a href="javascript:extend('{$ds['id']}')" class="ls-btn ls-btn--sm ls-btn--primary">{Lang::T('Extend')}</a>
                                 {/if}
                                 {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
                                 <a href="{Text::url('')}plan/delete/{$ds['id']}" id="{$ds['id']}" title="{Lang::T('Delete')}" aria-label="{Lang::T('Delete')}"
-                                    onclick="return ask(this, '{Lang::T('Delete')}?')" class="cl-btn cl-btn--sm cl-btn--icon cl-btn--danger"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                    onclick="return ask(this, '{Lang::T('Delete')}?')" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                 {/if}
                             </div>
                         </td>
                     </tr>
                     {foreachelse}
-                    <tr class="cl-none"><td colspan="9">
-                        <div class="cl-empty"><b>{Lang::T('No customers found')}</b>
+                    <tr class="ls-none"><td colspan="9">
+                        <div class="ls-empty"><b>{Lang::T('No customers found')}</b>
                             <a href="{Text::url('plan/recharge')}">{Lang::T('Recharge Account')}</a></div>
                     </td></tr>
                     {/foreach}

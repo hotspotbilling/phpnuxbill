@@ -4,6 +4,16 @@
 
 ## Unreleased
 
+- Fixed: the Referral page cards (the four stat cards, charts and tables) had a hard-coded white background; they are now transparent with the neutral border and 12px radius used on the dashboard, in light and dark mode. The coloured left edge on the stat cards stays.
+- Changed: Coupons and the Referral relationships and top-referrers tables use the shared list kit. Coupon codes are blurred until hovered or tapped, and a bulk bar with Delete Selected appears when coupons are ticked (the delete button no longer errors for roles that cannot delete).
+- Fixed: log rows written without a type showed an empty badge. `_log()` now records the type "System" when none is given, and the Activity log shows "System" for older rows with no type. The Keep logs field and the Clean up button no longer wrap or look unstyled, and red buttons in the list kit are red at rest.
+- Changed: the shared list kit now also styles Administrators, Routers, Port Pool, RADIUS NAS, Activity, RADIUS and Message logs, Payment Gateway audit, Activation report, Daily report and Invoices. Secrets (router address and user, RADIUS passwords) are blurred until hovered or tapped. Log text is now escaped when shown.
+- Changed: the Balance, Bandwidth and IP Pool lists use the shared list kit (toolbar with search, table with row actions and icon delete, phone card layout, empty state). Links and actions are unchanged.
+- Changed: the Hotspot, PPPoE and VPN plan lists use the shared list kit: one toolbar for search and filters, a single table with a Disabled pill and a Postpaid chip, time and data limits in one column, right-aligned prices, phone card layout, and an empty state. Filters, actions and links are unchanged.
+- Changed: the customers-list table, toolbar, tabs, pills and buttons are now a shared list kit under neutral `ls-*` names (they were `cl-*`, customers only), and the Vouchers page uses it: search and filters in one toolbar, status pills, a bulk-delete bar that appears when rows are selected, vouchers blurred until hovered or tapped, a phone card layout, and an empty state. The batch filter is now kept when you change page.
+- Changed: the default admin skin's styles are scoped by its own `body.as-chrome` class (the customer pager also by `body.cm-chrome`) instead of by excluding a named theme, so core no longer mentions any theme. A theme's body does not carry these classes, so its pages look the same as before. Theme names were also removed from code comments and older entries in this file.
+- Changed: the Activity list on Marketplace > Tools is paginated (15 per page) and shows the whole history, not only the latest 60 rows.
+- Changed: the Send Message window on the customers list is redesigned. It shows how many customers are selected, offers the channels as toggle chips, shows the subject field only when a channel needs one, counts characters, and follows light and dark mode with readable typed text.
 - Fixed: typed text was near-black in the Marketplace install panel in dark mode. A global rule (`.dark-mode input:focus { color: #1f201f }`) paints focused fields dark for the white focus
   fill it also forces; the panel keeps its dark fill, so the text was dark on dark. The panel's fields now set the text-fill colour (light in dark mode, dark in light mode), the caret and the
   placeholder, and the autofill preview. The other pages I restyled already did this.
@@ -82,8 +92,7 @@
   - Fixed: when GitHub refused the request (the anonymous limit is 60 an hour) the page tried to list the error as commits. The list is kept for ten minutes in
     `system/cache/rollback_*.json`, an error answer is ignored, and an empty list says so. The page is SuperAdmin only, like the updater.
 - Community page redesigned: an Updates card that says whether you are up to date (versions compared properly, not as text), update, download, old-version and changelog
-  actions, a documentation link, help and support tiles, collapsible donation details and a compact credits list. It follows the light and dark switch and the
-  shadcn theme. The install and database buttons show for a SuperAdmin only (they were shown to every admin and then refused by `update.php`).
+  actions, a documentation link, help and support tiles, collapsible donation details and a compact credits list. It follows the light and dark switch. The install and database buttons show for a SuperAdmin only (they were shown to every admin and then refused by `update.php`).
 - Fixed: "Select Old Version" no longer worked with the new updater (the link's address was ignored, and a package older than the installed one was refused). The link now
   fills the address and ticks **Allow an older version** on the updater's first page; nothing downloads until the button is pressed, and a rollback needs that box.
   The updater also accepts GitHub commit and tag zips, which the list links to. The update guide is on the website: Docs > Using the system > Updating and backups.
@@ -204,15 +213,15 @@
 - Admin: the side menu now has a white and a dark theme that follow the system / light / dark switch (before, it was navy in
   both, and each item in dark mode was its own boxed row). Covers the open menu, submenus, the collapsed icon rail and the
   flyouts that open beside it, and the logo cell above the menu. The footer is now pinned to the bottom of the screen (it starts
-  where the menu ends, and the page ends above it). Styles: `ui/ui/styles/admin-chrome.css`. The shadcn admin theme has its
-  own menu and footer styles and is not affected.
+  where the menu ends, and the page ends above it). Styles: `ui/ui/styles/admin-chrome.css`. A theme with its own menu and
+  footer styles is not affected.
 - Customer portal: new header, menu, mobile bar and footer with a light and a dark theme that follow the existing system /
   light / dark switch (before, the header and menu were always dark). Frosted top bar with a logo mark, balance as a pill,
   rounded account / inbox / language dropdowns, rounded menu items, a floating mobile bar with a soft active-tab pill, and a
   slim footer that clears the bar. The raised Buy button keeps its place and markup. The saved theme is applied before the
   page paints (no light flash). The account dropdown no longer dims the whole page. Styles: `ui/ui/styles/customer-modern.css`.
 - Themes: a theme can restyle the customer portal chrome by shipping `styles/customer.css` (loaded after the core styles,
-  parent theme first). The shadcn theme now has one: a Zinc / neutral skin that redefines the `--cm-*` tokens.
+  parent theme first).
 
 - Plugins: `?_route=plugin/<function>` now runs only functions a plugin has **declared**. A function is declared by its
   menu (`register_menu`, `register_submenu`, or `"menus"` in `plugin.json`) or as a route: `register_route($function,
@@ -271,7 +280,7 @@
   - New `GatewayLoader` / `DeviceLoader`; gateway templates load by plain name or `pg:name.tpl`
   - Checkout, callback and payment-status code now resolve gateways through `GatewayLoader` (only installed gateways can be included)
 - Old `?_route=themes` page now redirects to Marketplace > Themes
-- Fixed: global `min-height:100%` rule collapsed marketplace cards; shadcn theme showed dark marketplace colours in light mode
+- Fixed: global `min-height:100%` rule collapsed marketplace cards; the marketplace showed dark colours in light mode in themes that remap its tokens
 
 ## 2026.5.23
 

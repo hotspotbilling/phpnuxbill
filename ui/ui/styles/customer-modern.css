@@ -3,7 +3,7 @@
  *
  * Loads after styles.customer.css. Light is the default; body.dark-mode (the system / light / dark switch in the header)
  * swaps the tokens, so there is one set of rules. A theme re-skins the portal by redefining the --cm-* tokens in its own
- * styles/customer.css (see ui/themes/shadcn/styles/customer.css); the mobile Buy button keeps its markup and classes.
+ * styles/customer.css; the mobile Buy button keeps its markup and classes.
  */
 
 body.cm-chrome.modern-skin-dark {

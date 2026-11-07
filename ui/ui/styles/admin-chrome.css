@@ -3,8 +3,8 @@
  * the system / light / dark switch in the top bar (body.dark-mode).
  *
  * Loads after styles.css, which paints the menu navy in both modes and gives the collapsed rail and its hover flyouts
- * hard-coded dark !important colours, so those are restated here from tokens. The shadcn admin theme has its own header,
- * menu and footer styles and does not load this file.
+ * hard-coded dark !important colours, so those are restated here from tokens. A theme with its own header,
+ * menu and footer styles does not load this file.
  */
 
 body.as-chrome.modern-skin-dark {

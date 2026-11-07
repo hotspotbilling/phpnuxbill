@@ -3368,7 +3368,7 @@ input[type="text"] {
 /* ==========================================================================
    GLOBAL COMMAND PALETTE SEARCH (DEFAULT THEME ONLY)
    ========================================================================== */
-body:not(.shadcn-body) .topbar-search-wrap {
+body.as-chrome .topbar-search-wrap {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -3380,11 +3380,11 @@ body:not(.shadcn-body) .topbar-search-wrap {
   z-index: 1000;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap:focus-within {
+body.as-chrome .topbar-search-wrap:focus-within {
   width: 360px;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .search-icon {
+body.as-chrome .topbar-search-wrap .search-icon {
   position: absolute;
   left: 12px;
   color: #94a3b8;
@@ -3395,7 +3395,7 @@ body:not(.shadcn-body) .topbar-search-wrap .search-icon {
   z-index: 3;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .searchTerm {
+body.as-chrome .topbar-search-wrap .searchTerm {
   width: 100% !important;
   height: 36px !important;
   padding: 0 62px 0 34px !important;
@@ -3411,13 +3411,13 @@ body:not(.shadcn-body) .topbar-search-wrap .searchTerm {
   margin-bottom: 0 !important;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .searchTerm:focus {
+body.as-chrome .topbar-search-wrap .searchTerm:focus {
   background: #ffffff !important;
   border-color: #3b82f6 !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .searchTerm::placeholder {
+body.as-chrome .topbar-search-wrap .searchTerm::placeholder {
   color: #94a3b8 !important;
   font-size: 12.5px !important;
 }
@@ -3426,8 +3426,8 @@ body:not(.shadcn-body) .topbar-search-wrap .searchTerm::placeholder {
 html.dark-mode .topbar-search-wrap .searchTerm,
 body.dark-mode .topbar-search-wrap .searchTerm,
 [data-theme="dark"] .topbar-search-wrap .searchTerm,
-body:not(.shadcn-body).dark-mode .topbar-search-wrap .searchTerm,
-html.dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm,
+body.as-chrome.dark-mode .topbar-search-wrap .searchTerm,
+html.dark-mode body.as-chrome .topbar-search-wrap .searchTerm,
 .dark-mode #searchOverlay .searchTerm,
 html.dark-mode #searchOverlay .searchTerm,
 body.dark-mode #searchOverlay .searchTerm,
@@ -3442,8 +3442,8 @@ body.dark-mode #searchOverlay .searchTerm,
 html.dark-mode .topbar-search-wrap .searchTerm:focus,
 body.dark-mode .topbar-search-wrap .searchTerm:focus,
 [data-theme="dark"] .topbar-search-wrap .searchTerm:focus,
-body:not(.shadcn-body).dark-mode .topbar-search-wrap .searchTerm:focus,
-html.dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm:focus,
+body.as-chrome.dark-mode .topbar-search-wrap .searchTerm:focus,
+html.dark-mode body.as-chrome .topbar-search-wrap .searchTerm:focus,
 .dark-mode #searchOverlay .searchTerm:focus,
 html.dark-mode #searchOverlay .searchTerm:focus,
 body.dark-mode #searchOverlay .searchTerm:focus,
@@ -3470,7 +3470,7 @@ body.dark-mode .topbar-search-wrap .search-icon,
   color: #71717a !important;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .search-kbd {
+body.as-chrome .topbar-search-wrap .search-kbd {
   position: absolute;
   right: 10px;
   padding: 2px 6px;
@@ -3491,14 +3491,14 @@ body:not(.shadcn-body) .topbar-search-wrap .search-kbd {
 html.dark-mode .topbar-search-wrap .search-kbd,
 body.dark-mode .topbar-search-wrap .search-kbd,
 [data-theme="dark"] .topbar-search-wrap .search-kbd,
-body:not(.shadcn-body).dark-mode .topbar-search-wrap .search-kbd,
+body.as-chrome.dark-mode .topbar-search-wrap .search-kbd,
 .dark-mode #searchOverlay .search-kbd {
   background: #27272a !important;
   border-color: #3f3f46 !important;
   color: #a1a1aa !important;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .search-spinner {
+body.as-chrome .topbar-search-wrap .search-spinner {
   position: absolute;
   right: 36px;
   top: 50%;
@@ -3510,7 +3510,7 @@ body:not(.shadcn-body) .topbar-search-wrap .search-spinner {
   z-index: 3;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .search-clear-btn {
+body.as-chrome .topbar-search-wrap .search-clear-btn {
   position: absolute;
   right: 34px;
   top: 50%;
@@ -3525,7 +3525,7 @@ body:not(.shadcn-body) .topbar-search-wrap .search-clear-btn {
   z-index: 3;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .search-clear-btn:hover {
+body.as-chrome .topbar-search-wrap .search-clear-btn:hover {
   color: #0f172a;
 }
 
@@ -3533,13 +3533,13 @@ body:not(.shadcn-body) .topbar-search-wrap .search-clear-btn:hover {
 html.dark-mode .topbar-search-wrap .search-clear-btn:hover,
 body.dark-mode .topbar-search-wrap .search-clear-btn:hover,
 [data-theme="dark"] .topbar-search-wrap .search-clear-btn:hover,
-body:not(.shadcn-body).dark-mode .topbar-search-wrap .search-clear-btn:hover,
+body.as-chrome.dark-mode .topbar-search-wrap .search-clear-btn:hover,
 .dark-mode #searchOverlay .search-clear-btn:hover {
   color: #f8fafc !important;
 }
 
-body:not(.shadcn-body) .topbar-search-wrap .search-results,
-body:not(.shadcn-body) #searchOverlay .search-results {
+body.as-chrome .topbar-search-wrap .search-results,
+body.as-chrome #searchOverlay .search-results {
   position: absolute;
   top: calc(100% + 6px);
   left: 50%;
@@ -3561,8 +3561,8 @@ body:not(.shadcn-body) #searchOverlay .search-results {
 html.dark-mode .topbar-search-wrap .search-results,
 body.dark-mode .topbar-search-wrap .search-results,
 [data-theme="dark"] .topbar-search-wrap .search-results,
-body:not(.shadcn-body).dark-mode .topbar-search-wrap .search-results,
-html.dark-mode body:not(.shadcn-body) .topbar-search-wrap .search-results,
+body.as-chrome.dark-mode .topbar-search-wrap .search-results,
+html.dark-mode body.as-chrome .topbar-search-wrap .search-results,
 .dark-mode #searchOverlay .search-results,
 html.dark-mode #searchOverlay .search-results,
 body.dark-mode #searchOverlay .search-results,
@@ -3593,11 +3593,11 @@ body.dark-mode #searchOverlay .search-results,
 }
 
 @media (max-width: 991px) and (min-width: 768px) {
-  body:not(.shadcn-body) .topbar-search-wrap {
+  body.as-chrome .topbar-search-wrap {
     width: 240px;
     left: 45%;
   }
-  body:not(.shadcn-body) .topbar-search-wrap:focus-within {
+  body.as-chrome .topbar-search-wrap:focus-within {
     width: 240px;
   }
 }
@@ -3610,8 +3610,8 @@ body.dark-mode #searchOverlay .search-results,
   }
 
   /* Default state on mobile: collapsed / hidden from the topbar */
-  body:not(.shadcn-body) .topbar-search-wrap,
-  body:not(.shadcn-body) #searchOverlay {
+  body.as-chrome .topbar-search-wrap,
+  body.as-chrome #searchOverlay {
     display: none !important;
     position: fixed !important;
     top: 0 !important;
@@ -3631,11 +3631,11 @@ body.dark-mode #searchOverlay .search-results,
     border: none !important;
   }
 
-  .dark-mode body:not(.shadcn-body) .topbar-search-wrap,
-  html.dark-mode body:not(.shadcn-body) .topbar-search-wrap,
-  body.dark-mode body:not(.shadcn-body) .topbar-search-wrap,
-  [data-theme="dark"] body:not(.shadcn-body) .topbar-search-wrap,
-  body:not(.shadcn-body).dark-mode .topbar-search-wrap,
+  .dark-mode body.as-chrome .topbar-search-wrap,
+  html.dark-mode body.as-chrome .topbar-search-wrap,
+  body.dark-mode body.as-chrome .topbar-search-wrap,
+  [data-theme="dark"] body.as-chrome .topbar-search-wrap,
+  body.as-chrome.dark-mode .topbar-search-wrap,
   .dark-mode #searchOverlay,
   html.dark-mode #searchOverlay,
   body.dark-mode #searchOverlay,
@@ -3646,8 +3646,8 @@ body.dark-mode #searchOverlay .search-results,
   }
 
   /* Expanded / active mobile state when search button is tapped */
-  body:not(.shadcn-body) .topbar-search-wrap.is-active-mobile,
-  body:not(.shadcn-body) #searchOverlay.is-active-mobile {
+  body.as-chrome .topbar-search-wrap.is-active-mobile,
+  body.as-chrome #searchOverlay.is-active-mobile {
     display: flex !important;
     animation: searchSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
@@ -3689,13 +3689,13 @@ body.dark-mode #searchOverlay .search-results,
     color: #f4f4f5 !important;
   }
 
-  body:not(.shadcn-body) .topbar-search-wrap .search-kbd,
-  body:not(.shadcn-body) #searchOverlay .search-kbd {
+  body.as-chrome .topbar-search-wrap .search-kbd,
+  body.as-chrome #searchOverlay .search-kbd {
     display: none !important;
   }
 
-  body:not(.shadcn-body) .topbar-search-wrap .searchTerm,
-  body:not(.shadcn-body) #searchOverlay .searchTerm {
+  body.as-chrome .topbar-search-wrap .searchTerm,
+  body.as-chrome #searchOverlay .searchTerm {
     height: 38px !important;
     padding: 0 34px 0 36px !important;
     font-size: 14px !important;
@@ -3707,10 +3707,10 @@ body.dark-mode #searchOverlay .search-results,
     box-shadow: none !important;
   }
 
-  .dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm,
-  html.dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm,
-  body.dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm,
-  [data-theme="dark"] body:not(.shadcn-body) .topbar-search-wrap .searchTerm,
+  .dark-mode body.as-chrome .topbar-search-wrap .searchTerm,
+  html.dark-mode body.as-chrome .topbar-search-wrap .searchTerm,
+  body.dark-mode body.as-chrome .topbar-search-wrap .searchTerm,
+  [data-theme="dark"] body.as-chrome .topbar-search-wrap .searchTerm,
   .dark-mode #searchOverlay .searchTerm,
   html.dark-mode #searchOverlay .searchTerm,
   body.dark-mode #searchOverlay .searchTerm,
@@ -3721,17 +3721,17 @@ body.dark-mode #searchOverlay .search-results,
     box-shadow: none !important;
   }
 
-  body:not(.shadcn-body) .topbar-search-wrap .searchTerm:focus,
-  body:not(.shadcn-body) #searchOverlay .searchTerm:focus {
+  body.as-chrome .topbar-search-wrap .searchTerm:focus,
+  body.as-chrome #searchOverlay .searchTerm:focus {
     background: #ffffff !important;
     border-color: #3b82f6 !important;
     box-shadow: none !important;
   }
 
-  .dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm:focus,
-  html.dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm:focus,
-  body.dark-mode body:not(.shadcn-body) .topbar-search-wrap .searchTerm:focus,
-  [data-theme="dark"] body:not(.shadcn-body) .topbar-search-wrap .searchTerm:focus,
+  .dark-mode body.as-chrome .topbar-search-wrap .searchTerm:focus,
+  html.dark-mode body.as-chrome .topbar-search-wrap .searchTerm:focus,
+  body.dark-mode body.as-chrome .topbar-search-wrap .searchTerm:focus,
+  [data-theme="dark"] body.as-chrome .topbar-search-wrap .searchTerm:focus,
   .dark-mode #searchOverlay .searchTerm:focus,
   html.dark-mode #searchOverlay .searchTerm:focus,
   body.dark-mode #searchOverlay .searchTerm:focus,
@@ -3741,21 +3741,21 @@ body.dark-mode #searchOverlay .search-results,
     box-shadow: none !important;
   }
 
-  body:not(.shadcn-body) .topbar-search-wrap .search-icon,
-  body:not(.shadcn-body) #searchOverlay .search-icon {
+  body.as-chrome .topbar-search-wrap .search-icon,
+  body.as-chrome #searchOverlay .search-icon {
     left: 54px !important;
     font-size: 13px !important;
   }
 
-  body:not(.shadcn-body) .topbar-search-wrap .search-clear-btn,
-  body:not(.shadcn-body) #searchOverlay .search-clear-btn,
-  body:not(.shadcn-body) .topbar-search-wrap .search-spinner,
-  body:not(.shadcn-body) #searchOverlay .search-spinner {
+  body.as-chrome .topbar-search-wrap .search-clear-btn,
+  body.as-chrome #searchOverlay .search-clear-btn,
+  body.as-chrome .topbar-search-wrap .search-spinner,
+  body.as-chrome #searchOverlay .search-spinner {
     right: 18px !important;
   }
 
-  body:not(.shadcn-body) .topbar-search-wrap .search-results,
-  body:not(.shadcn-body) #searchOverlay .search-results {
+  body.as-chrome .topbar-search-wrap .search-results,
+  body.as-chrome #searchOverlay .search-results {
     left: 0 !important;
     right: 0 !important;
     top: 52px !important;
@@ -3775,7 +3775,7 @@ body.dark-mode #searchOverlay .search-results,
   html.dark-mode .topbar-search-wrap .search-results,
   body.dark-mode .topbar-search-wrap .search-results,
   [data-theme="dark"] .topbar-search-wrap .search-results,
-  body:not(.shadcn-body).dark-mode .topbar-search-wrap .search-results,
+  body.as-chrome.dark-mode .topbar-search-wrap .search-results,
   .dark-mode #searchOverlay .search-results {
     border-top-color: #27272a !important;
   }
@@ -5168,35 +5168,35 @@ body.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview
 
 @media (min-width: 768px) {
   /* a transformed ancestor would turn position:fixed into "relative to the sidebar" and clip it again */
-  body:not(.shadcn-body).sidebar-mini.sidebar-collapse .main-sidebar {
+  body.as-chrome.sidebar-mini.sidebar-collapse .main-sidebar {
     transform: none !important;
     -webkit-transform: none !important;
   }
 
-  body:not(.shadcn-body).sidebar-collapse .main-sidebar .sidebar {
+  body.as-chrome.sidebar-collapse .main-sidebar .sidebar {
     overflow-y: auto !important;
     overflow-x: hidden !important;
     scrollbar-width: none;
   }
 
-  body:not(.shadcn-body).sidebar-collapse .main-sidebar .sidebar::-webkit-scrollbar {
+  body.as-chrome.sidebar-collapse .main-sidebar .sidebar::-webkit-scrollbar {
     display: none;
   }
 
   /* plain items: label pill beside the icon */
-  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li:not(.treeview):hover > a > span:not(.pull-right-container) {
+  body.as-chrome.sidebar-collapse .sidebar-menu > li:not(.treeview):hover > a > span:not(.pull-right-container) {
     position: fixed !important;
     left: 56px !important;
     top: calc(var(--li-top, 0px) + 19px) !important;
   }
 
   /* submenu items: the label is replaced by the title row inside the flyout card */
-  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview > a > span:not(.pull-right-container),
-  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right-container) {
+  body.as-chrome.sidebar-collapse .sidebar-menu > li.treeview > a > span:not(.pull-right-container),
+  body.as-chrome.sidebar-collapse .sidebar-menu > li.treeview:hover > a > span:not(.pull-right-container) {
     display: none !important;
   }
 
-  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu {
+  body.as-chrome.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu {
     position: fixed !important;
     top: var(--li-top, 0px) !important; /* footer.tpl moves it up with an inline !important when it would run off the screen */
     left: 50px !important;
@@ -5211,7 +5211,7 @@ body.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview
     scrollbar-width: thin;
   }
 
-  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li.treeview-header-title {
+  body.as-chrome.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li.treeview-header-title {
     display: block !important;
     position: sticky;
     top: 0;
@@ -5233,7 +5233,7 @@ body.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview
     text-overflow: ellipsis;
   }
 
-  body:not(.shadcn-body).sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li > a {
+  body.as-chrome.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li > a {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -6195,7 +6195,7 @@ a.mp-result, a.mp-result:hover { color: inherit !important; text-decoration: non
 .sidebar-menu .icon { flex-shrink: 0; }
 
 /* plugin menu entries carry both chevrons; the default theme uses the font one */
-body:not(.shadcn-body) .sidebar-menu .pull-right-container > svg.treeview-chevron { display: none; }
+body.as-chrome .sidebar-menu .pull-right-container > svg.treeview-chevron { display: none; }
 
 /* Dashboard toolbar: Refresh button (default theme) */
 .dash-toolbar {
@@ -6327,7 +6327,7 @@ body:not(.shadcn-body) .sidebar-menu .pull-right-container > svg.treeview-chevro
   border-radius: 999px;
 }
 
-/* Community page (ui/ui/admin/community.tpl). Tokens follow the active theme (shadcn variables when present) and the admin dark mode. */
+/* Community page (ui/ui/admin/community.tpl). Tokens follow the active theme's variables when it defines them, and the admin dark mode. */
 .cp {
     --cp-ink: var(--foreground, #1e293b);
     --cp-muted: var(--muted-foreground, #64748b);
@@ -6431,7 +6431,7 @@ body.dark-mode .cp {
 body.dark-mode .cp-contrib img { background: #fff; padding: 6px; }
 .cp-banner img { max-width: 100%; height: auto; }
 
-/* Rollback Update page (ui/ui/admin/rollback.tpl). Tokens follow the active theme (shadcn variables when present) and the admin dark mode. */
+/* Rollback Update page (ui/ui/admin/rollback.tpl). Tokens follow the active theme's variables when it defines them, and the admin dark mode. */
 .rb {
     --rb-ink: var(--foreground, #1e293b);
     --rb-muted: var(--muted-foreground, #64748b);
@@ -6498,134 +6498,134 @@ body.dark-mode .rb-search:not(#filterNavigateMenu):focus { background-color: var
 .rb-top { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 @media (max-width: 575px) { .rb-row { grid-template-columns: minmax(0, 1fr); } .rb-btn { justify-content: center; } }
 
-/* Customers list and Active Customers (ui/ui/admin/customers/list.tpl, plan/active.tpl). Tokens follow the admin dark mode and the shadcn variables. */
-.cl {
-    --cl-ink: var(--foreground, #1e293b);
-    --cl-muted: var(--muted-foreground, #64748b);
-    --cl-line: var(--border, #e2e8f0);
-    --cl-card: var(--card, #ffffff);
-    --cl-soft: var(--muted, #f8fafc);
-    --cl-accent: #4f46e5;
-    --cl-accent-soft: rgba(79, 70, 229, .10);
+/* Customers list and Active Customers (ui/ui/admin/customers/list.tpl, plan/active.tpl). Tokens follow the admin dark mode and the theme's variables when it defines them. */
+.ls {
+    --ls-ink: var(--foreground, #1e293b);
+    --ls-muted: var(--muted-foreground, #64748b);
+    --ls-line: var(--border, #e2e8f0);
+    --ls-card: var(--card, #ffffff);
+    --ls-soft: var(--muted, #f8fafc);
+    --ls-accent: #4f46e5;
+    --ls-accent-soft: rgba(79, 70, 229, .10);
     /* search and select fields: the same surface, border, height and radius as the search box in the top bar */
-    --cl-field: var(--input-bg, #f1f5f9);
-    --cl-field-line: #e2e8f0;
-    color: var(--cl-ink);
+    --ls-field: var(--input-bg, #f1f5f9);
+    --ls-field-line: #e2e8f0;
+    color: var(--ls-ink);
     padding: 4px 0 24px;
 }
-body.dark-mode .cl {
-    --cl-ink: var(--foreground, #e2e8f0);
-    --cl-muted: var(--muted-foreground, #94a3b8);
-    --cl-line: var(--border, #2d3748);
-    --cl-card: var(--card, #1e1e2d);
-    --cl-soft: var(--muted, #252536);
-    --cl-accent: #818cf8;
-    --cl-accent-soft: rgba(129, 140, 248, .16);
-    --cl-field: #27272a;
-    --cl-field-line: #3f3f46;
+body.dark-mode .ls {
+    --ls-ink: var(--foreground, #e2e8f0);
+    --ls-muted: var(--muted-foreground, #94a3b8);
+    --ls-line: var(--border, #2d3748);
+    --ls-card: var(--card, #1e1e2d);
+    --ls-soft: var(--muted, #252536);
+    --ls-accent: #818cf8;
+    --ls-accent-soft: rgba(129, 140, 248, .16);
+    --ls-field: #27272a;
+    --ls-field-line: #3f3f46;
 }
-.cl * { box-sizing: border-box; }
-.cl a { text-decoration: none; }
-.cl-top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; }
-.cl-sub { margin: 0; font-size: 14px; color: var(--cl-muted); }
-.cl-actions { display: flex; gap: 8px; }
-.cl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--cl-line); background: var(--cl-card); color: var(--cl-ink) !important; font-size: 13px; font-weight: 600; line-height: 1.2; cursor: pointer; white-space: nowrap; transition: border-color .15s, background .15s; }
-.cl-btn:hover { border-color: var(--cl-accent); background: var(--cl-accent-soft); }
-.cl-btn:focus-visible, .cl-tab:focus-visible { outline: 2px solid var(--cl-accent); outline-offset: 2px; }
-.cl-btn--primary { background: var(--cl-accent); border-color: var(--cl-accent); color: #fff !important; }
-.cl-btn--primary:hover { background: var(--cl-accent); filter: brightness(1.08); }
-.cl-btn--sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
-.cl-btn--icon { padding: 5px 9px; }
+.ls * { box-sizing: border-box; }
+.ls a { text-decoration: none; }
+.ls-top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; }
+.ls-sub { margin: 0; font-size: 14px; color: var(--ls-muted); }
+.ls-actions { display: flex; gap: 8px; }
+.ls-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--ls-line); background: var(--ls-card); color: var(--ls-ink) !important; font-size: 13px; font-weight: 600; line-height: 1.2; cursor: pointer; white-space: nowrap; transition: border-color .15s, background .15s; }
+.ls-btn:hover { border-color: var(--ls-accent); background: var(--ls-accent-soft); }
+.ls-btn:focus-visible, .ls-tab:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+.ls-btn--primary { background: var(--ls-accent); border-color: var(--ls-accent); color: #fff !important; }
+.ls-btn--primary:hover { background: var(--ls-accent); filter: brightness(1.08); }
+.ls-btn--sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
+.ls-btn--icon { padding: 5px 9px; }
 
-.cl-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-.cl-tab { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--cl-line); background: var(--cl-card); color: var(--cl-muted) !important; font-size: 13px; font-weight: 600; }
-.cl-tab small { font-size: 11.5px; font-weight: 600; padding: 0 7px; border-radius: 999px; background: var(--cl-soft); color: var(--cl-muted); }
-.cl-tab:hover { border-color: var(--cl-accent); color: var(--cl-accent) !important; }
-.cl-tab.is-on { background: var(--cl-accent); border-color: var(--cl-accent); color: #fff !important; }
-.cl-tab.is-on small { background: rgba(255, 255, 255, .2); color: #fff; }
+.ls-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.ls-tab { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--ls-line); background: var(--ls-card); color: var(--ls-muted) !important; font-size: 13px; font-weight: 600; }
+.ls-tab small { font-size: 11.5px; font-weight: 600; padding: 0 7px; border-radius: 999px; background: var(--ls-soft); color: var(--ls-muted); }
+.ls-tab:hover { border-color: var(--ls-accent); color: var(--ls-accent) !important; }
+.ls-tab.is-on { background: var(--ls-accent); border-color: var(--ls-accent); color: #fff !important; }
+.ls-tab.is-on small { background: rgba(255, 255, 255, .2); color: #fff; }
 
-.cl-card { min-height: 0 !important; background: var(--cl-card); border: 1px solid var(--cl-line); border-radius: 14px; overflow: hidden; }
-.cl-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--cl-line); background: var(--cl-soft); margin: 0; }
-.cl-search { position: relative; flex: 1 1 240px; min-width: 200px; }
-.cl-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--cl-muted); font-size: 13px; }
-.cl-search input { width: 100%; height: 38px; padding: 0 12px 0 34px; border: 1px solid var(--cl-field-line); border-radius: 8px; background: var(--cl-field); color: var(--cl-ink); font-size: 13px; }
-.cl-search input:focus, .cl-search input:focus-visible, .cl-field select:focus, .cl-field select:focus-visible { outline: none !important; border-color: var(--cl-accent); box-shadow: 0 0 0 3px var(--cl-accent-soft); }
-.cl-field { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 500; font-size: 12.5px; color: var(--cl-muted); }
-.cl-field select { height: 38px; padding: 0 8px; border: 1px solid var(--cl-field-line); border-radius: 8px; background: var(--cl-field); color: var(--cl-ink); font-size: 13px; }
-.cl-bar .cl-btn { height: 38px; border-radius: 8px; }
-.cl-bulk { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 14px; background: var(--cl-accent-soft); border-bottom: 1px solid var(--cl-line); font-size: 13px; }
-.cl-bulk[hidden] { display: none; }
+.ls-card { min-height: 0 !important; background: var(--ls-card); border: 1px solid var(--ls-line); border-radius: 14px; overflow: hidden; }
+.ls-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--ls-line); background: var(--ls-soft); margin: 0; }
+.ls-search { position: relative; flex: 1 1 240px; min-width: 200px; }
+.ls-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ls-muted); font-size: 13px; }
+.ls-search input { width: 100%; height: 38px; padding: 0 12px 0 34px; border: 1px solid var(--ls-field-line); border-radius: 8px; background: var(--ls-field); color: var(--ls-ink); font-size: 13px; }
+.ls-search input:focus, .ls-search input:focus-visible, .ls-field select:focus, .ls-field select:focus-visible { outline: none !important; border-color: var(--ls-accent); box-shadow: 0 0 0 3px var(--ls-accent-soft); }
+.ls-field { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 500; font-size: 12.5px; color: var(--ls-muted); }
+.ls-field select { height: 38px; padding: 0 8px; border: 1px solid var(--ls-field-line); border-radius: 8px; background: var(--ls-field); color: var(--ls-ink); font-size: 13px; }
+.ls-bar .ls-btn { height: 38px; border-radius: 8px; }
+.ls-bulk { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 14px; background: var(--ls-accent-soft); border-bottom: 1px solid var(--ls-line); font-size: 13px; }
+.ls-bulk[hidden] { display: none; }
 
-.cl-scroll { overflow-x: auto; }
-.cl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.cl-table th { padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--cl-muted); white-space: nowrap; border-bottom: 1px solid var(--cl-line); background: var(--cl-card); }
-.cl-table td { padding: 11px 12px; vertical-align: middle; border-bottom: 1px solid var(--cl-line); }
-.cl-table tbody tr:last-child td { border-bottom: 0; }
-.cl-click tbody tr:not(.cl-none) { cursor: pointer; }
-.cl-table tbody tr:not(.cl-none):hover { background: var(--cl-soft); }
-.cl-check { width: 36px; }
+.ls-scroll { overflow-x: auto; }
+.ls-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ls-table th { padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--ls-muted); white-space: nowrap; border-bottom: 1px solid var(--ls-line); background: var(--ls-card); }
+.ls-table td { padding: 11px 12px; vertical-align: middle; border-bottom: 1px solid var(--ls-line); }
+.ls-table tbody tr:last-child td { border-bottom: 0; }
+.ls-click tbody tr:not(.ls-none) { cursor: pointer; }
+.ls-table tbody tr:not(.ls-none):hover { background: var(--ls-soft); }
+.ls-check { width: 36px; }
 /* the global rule that freezes and tints the first column of every table does not suit this list */
-body .cl-table th:first-child, body .cl-table td:first-child { position: static; background-color: transparent; }
-.cl-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cl-end { text-align: right; }
-.cl-dim { color: var(--cl-muted); }
-.cl-when { white-space: nowrap; }
-.cl-who { display: flex; align-items: center; gap: 10px; color: var(--cl-ink) !important; min-width: 190px; }
-.cl-who img { flex: 0 0 38px; width: 38px !important; height: 38px !important; min-width: 38px !important; max-width: 38px !important; }
-.cl-who b { display: block; font-weight: 600; }
-.cl-who small { display: block; color: var(--cl-muted); font-size: 12px; margin-top: 1px; }
-.cl-chip { font-style: normal; font-size: 11px; padding: 1px 7px; margin-left: 4px; border-radius: 999px; background: var(--cl-soft); border: 1px solid var(--cl-line); }
-.cl-contact a { display: block; color: var(--cl-ink) !important; white-space: nowrap; line-height: 1.7; }
-.cl-contact a:hover { color: var(--cl-accent) !important; }
-.cl-contact i { width: 14px; color: var(--cl-muted); text-align: center; }
-.cl-pkg .label { display: inline-block; margin: 1px 0; }
-.cl-table td small.cl-dim { display: block; font-size: 12px; }
-.cl-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--cl-soft); color: var(--cl-muted); }
-.cl-pill--active { background: rgba(22, 163, 74, .13); color: #15803d; }
-.cl-pill--inactive, .cl-pill--limited { background: rgba(217, 119, 6, .14); color: #b45309; }
-.cl-pill--banned, .cl-pill--suspended { background: rgba(220, 38, 38, .12); color: #b91c1c; }
-body.dark-mode .cl-pill--active { color: #4ade80; }
-body.dark-mode .cl-pill--inactive, body.dark-mode .cl-pill--limited { color: #fbbf24; }
-body.dark-mode .cl-pill--banned, body.dark-mode .cl-pill--suspended { color: #f87171; }
-.cl-row-actions { display: inline-flex; gap: 6px; align-items: center; }
-.cl-strong { font-weight: 600; color: var(--cl-ink) !important; }
-.cl-btn--danger:hover { border-color: #dc2626; background: rgba(220, 38, 38, .10); }
-.cl-table td a:not(.cl-btn):not(.cl-who):not(.cl-strong):hover { color: var(--cl-accent); }
-.cl-menu { border-radius: 10px; min-width: 150px; }
-.cl-menu i { width: 16px; color: var(--cl-muted); }
-.cl-empty { padding: 34px 12px; text-align: center; color: var(--cl-muted); line-height: 1.7; }
-.cl-empty b { display: block; color: var(--cl-ink); font-size: 14.5px; }
-.cl-none td { border-bottom: 0; }
+body .ls-table th:first-child, body .ls-table td:first-child { position: static; background-color: transparent; }
+.ls-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ls-end { text-align: right; }
+.ls-dim { color: var(--ls-muted); }
+.ls-when { white-space: nowrap; }
+.ls-who { display: flex; align-items: center; gap: 10px; color: var(--ls-ink) !important; min-width: 190px; }
+.ls-who img { flex: 0 0 38px; width: 38px !important; height: 38px !important; min-width: 38px !important; max-width: 38px !important; }
+.ls-who b { display: block; font-weight: 600; }
+.ls-who small { display: block; color: var(--ls-muted); font-size: 12px; margin-top: 1px; }
+.ls-chip { font-style: normal; font-size: 11px; padding: 1px 7px; margin-left: 4px; border-radius: 999px; background: var(--ls-soft); border: 1px solid var(--ls-line); }
+.ls-contact a { display: block; color: var(--ls-ink) !important; white-space: nowrap; line-height: 1.7; }
+.ls-contact a:hover { color: var(--ls-accent) !important; }
+.ls-contact i { width: 14px; color: var(--ls-muted); text-align: center; }
+.ls-pkg .label { display: inline-block; margin: 1px 0; }
+.ls-table td small.ls-dim { display: block; font-size: 12px; }
+.ls-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--ls-soft); color: var(--ls-muted); }
+.ls-pill--active { background: rgba(22, 163, 74, .13); color: #15803d; }
+.ls-pill--inactive, .ls-pill--limited { background: rgba(217, 119, 6, .14); color: #b45309; }
+.ls-pill--banned, .ls-pill--suspended { background: rgba(220, 38, 38, .12); color: #b91c1c; }
+body.dark-mode .ls-pill--active { color: #4ade80; }
+body.dark-mode .ls-pill--inactive, body.dark-mode .ls-pill--limited { color: #fbbf24; }
+body.dark-mode .ls-pill--banned, body.dark-mode .ls-pill--suspended { color: #f87171; }
+.ls-row-actions { display: inline-flex; gap: 6px; align-items: center; }
+.ls-strong { font-weight: 600; color: var(--ls-ink) !important; }
+.ls-btn--danger:hover { border-color: #dc2626; background: rgba(220, 38, 38, .10); }
+.ls-table td a:not(.ls-btn):not(.ls-who):not(.ls-strong):hover { color: var(--ls-accent); }
+.ls-menu { border-radius: 10px; min-width: 150px; }
+.ls-menu i { width: 16px; color: var(--ls-muted); }
+.ls-empty { padding: 34px 12px; text-align: center; color: var(--ls-muted); line-height: 1.7; }
+.ls-empty b { display: block; color: var(--ls-ink); font-size: 14.5px; }
+.ls-none td { border-bottom: 0; }
 
 @media (max-width: 767px) {
-    .cl-actions { width: 100%; }
-    .cl-actions .cl-btn { flex: 1; }
-    .cl-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
-    .cl-tab { flex: 0 0 auto; }
-    .cl-field { flex: 1 1 140px; }
-    .cl-field select { flex: 1; min-width: 0; }
-    .cl-table thead { display: none; }
-    .cl-table, .cl-table tbody { display: block; }
-    .cl-table tr { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 8px; padding: 12px 14px; border-bottom: 1px solid var(--cl-line); }
-    .cl-table td { grid-column: 2; display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; }
-    .cl-table td[data-label]::before { content: attr(data-label); flex: 0 0 auto; color: var(--cl-muted); font-size: 12px; text-align: left; }
-    .cl-table td.cl-check { grid-column: 1; grid-row: 1; width: auto; padding-top: 10px; display: block; }
-    .cl-click td:nth-child(2) { grid-column: 2; grid-row: 1; text-align: left; }
-    .cl-click td:nth-child(2)::before { content: none; }
-    .cl-nocheck tr { grid-template-columns: minmax(0, 1fr); }
-    .cl-nocheck td { grid-column: 1; }
-    .cl-table td.cl-contact { display: block; text-align: left; }
-    .cl-table td.cl-contact::before { content: none; }
-    .cl-table td > span { text-align: right; }
-    .cl-table td.cl-end { justify-content: flex-start; padding-top: 8px; }
-    .cl-who { min-width: 0; }
-    .cl-none { display: block; }
-    .cl-none td { grid-column: 1 / -1; display: block; text-align: center; }
+    .ls-actions { width: 100%; }
+    .ls-actions .ls-btn { flex: 1; }
+    .ls-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+    .ls-tab { flex: 0 0 auto; }
+    .ls-field { flex: 1 1 140px; }
+    .ls-field select { flex: 1; min-width: 0; }
+    .ls-table thead { display: none; }
+    .ls-table, .ls-table tbody { display: block; }
+    .ls-table tr { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 8px; padding: 12px 14px; border-bottom: 1px solid var(--ls-line); }
+    .ls-table td { grid-column: 2; display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; }
+    .ls-table td[data-label]::before { content: attr(data-label); flex: 0 0 auto; color: var(--ls-muted); font-size: 12px; text-align: left; }
+    .ls-table td.ls-check { grid-column: 1; grid-row: 1; width: auto; padding-top: 10px; display: block; }
+    .ls-click td:nth-child(2) { grid-column: 2; grid-row: 1; text-align: left; }
+    .ls-click td:nth-child(2)::before { content: none; }
+    .ls-nocheck tr { grid-template-columns: minmax(0, 1fr); }
+    .ls-nocheck td { grid-column: 1; }
+    .ls-table td.ls-contact { display: block; text-align: left; }
+    .ls-table td.ls-contact::before { content: none; }
+    .ls-table td > span { text-align: right; }
+    .ls-table td.ls-end { justify-content: flex-start; padding-top: 8px; }
+    .ls-who { min-width: 0; }
+    .ls-none { display: block; }
+    .ls-none td { grid-column: 1 / -1; display: block; text-align: center; }
 }
 
 /* Customer add, edit and view (ui/ui/admin/customers/{add,edit,view}.tpl): the same look as the customers list. Uses the --cv-* tokens above. */
 :root { --cv-radius: 14px; --cv-shadow: none; --cv-pri: #4f46e5; --cv-pri-soft: rgba(79, 70, 229, .10); }
-/* the same surface colours as the customers list (.cl), so the four pages sit on the same background */
+/* the same surface colours as the customers list (.ls), so the four pages sit on the same background */
 .dark-mode, .dark { --cv-bg: #1e1e2d; --cv-fg: #e2e8f0; --cv-muted: #94a3b8; --cv-border: #2d3748; --cv-accent: #252536; --cv-pri: #818cf8; --cv-pri-soft: rgba(129, 140, 248, .16); }
 .customer-view-header { margin-bottom: 16px; }
 .customer-name-heading { font-size: 20px; letter-spacing: -.01em; }
@@ -6659,43 +6659,35 @@ body.dark-mode .customer-action-toolbar .btn.btn-danger:not(.btn-primary) { colo
 .c-badge { padding: 2px 10px; font-size: 12px; border-radius: 999px; letter-spacing: 0; }
 
 /* the global input:focus rule forces a white background (its :not(#id) gives it the weight of an id, so these carry the same) */
-body.dark-mode .cl-search input:not(#filterNavigateMenu):focus, body.dark-mode .cl-field select:not(#filterNavigateMenu):focus { background-color: var(--cl-field) !important; }
+body.dark-mode .ls-search input:not(#filterNavigateMenu):focus, body.dark-mode .ls-field select:not(#filterNavigateMenu):focus { background-color: var(--ls-field) !important; }
 body.dark-mode .edit-form-card input.form-control:not(#filterNavigateMenu):focus, body.dark-mode .edit-form-card textarea.form-control:not(#filterNavigateMenu):focus, body.dark-mode .edit-form-card select.form-control:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
 
-/* core theme: the search and filter fields use the form-field surface of the add and edit pages (the shadcn theme keeps its own) */
-body:not(.shadcn-body) .cl { --cl-field: var(--cv-bg); --cl-field-line: var(--cv-border); }
+/* default admin skin (body.as-chrome): the search and filter fields use the form-field surface of the add and edit pages */
+body.as-chrome .ls { --ls-field: var(--cv-bg); --ls-field-line: var(--cv-border); }
 
-/* pagination under the customers list and Active Customers */
-.cl .pagination { margin: 14px 0; }
-.cl .pagination > li > a { background: var(--cl-card); border-color: var(--cl-line); color: var(--cl-ink); padding: 6px 12px; font-size: 13px; }
-.cl .pagination > li:first-child > a { border-radius: 8px 0 0 8px; }
-.cl .pagination > li:last-child > a { border-radius: 0 8px 8px 0; }
-.cl .pagination > li > a:hover { background: var(--cl-accent-soft); border-color: var(--cl-accent); color: var(--cl-ink); }
-.cl .pagination > .active > a, .cl .pagination > .active > a:hover { background: var(--cl-accent); border-color: var(--cl-accent); color: #fff; }
-.cl .pagination > .disabled > a, .cl .pagination > .disabled > a:hover { background: var(--cl-soft); border-color: var(--cl-line); color: var(--cl-muted); }
 
 /* Typed text stays readable: the browser's autofill and history preview paints the suggested value black, which is invisible on the dark surface. */
-.cl-search input, .cl-field select { -webkit-text-fill-color: var(--cl-ink); caret-color: var(--cl-ink); }
-.cl-search input:-webkit-autofill, .cl-search input:-webkit-autofill:hover, .cl-search input:-webkit-autofill:focus { -webkit-text-fill-color: var(--cl-ink) !important; -webkit-box-shadow: 0 0 0 1000px var(--cl-field) inset !important; caret-color: var(--cl-ink); transition: background-color 9999s ease-out; }
+.ls-search input, .ls-field select { -webkit-text-fill-color: var(--ls-ink); caret-color: var(--ls-ink); }
+.ls-search input:-webkit-autofill, .ls-search input:-webkit-autofill:hover, .ls-search input:-webkit-autofill:focus { -webkit-text-fill-color: var(--ls-ink) !important; -webkit-box-shadow: 0 0 0 1000px var(--ls-field) inset !important; caret-color: var(--ls-ink); transition: background-color 9999s ease-out; }
 .edit-form-card .form-control { -webkit-text-fill-color: var(--cv-fg); caret-color: var(--cv-fg); }
 .edit-form-card .form-control::placeholder { -webkit-text-fill-color: var(--cv-muted); }
 .edit-form-card .form-control:-webkit-autofill, .edit-form-card .form-control:-webkit-autofill:hover, .edit-form-card .form-control:-webkit-autofill:focus { -webkit-text-fill-color: var(--cv-fg) !important; -webkit-box-shadow: 0 0 0 1000px var(--cv-bg) inset !important; transition: background-color 9999s ease-out; }
-.cl-search input::placeholder { -webkit-text-fill-color: var(--cl-muted); }
+.ls-search input::placeholder { -webkit-text-fill-color: var(--ls-muted); }
 
 /* Dashboard (core theme): every card on both dashboards looks like the Routely card: no fill of its own (the page shows through), a 1px neutral
    border and a 12px radius. */
-body:not(.shadcn-body) .dash-blocks .panel, body:not(.shadcn-body) .dash-blocks .box, body:not(.shadcn-body) .dash-blocks .summary-card,
-body:not(.shadcn-body) .dash-slot .panel, body:not(.shadcn-body) .dash-slot .box, body:not(.shadcn-body) .dash-slot .summary-card,
-body:not(.shadcn-body) .dash-block .panel, body:not(.shadcn-body) .dash-block .box, body:not(.shadcn-body) .dash-block .summary-card,
-body:not(.shadcn-body) .dash-block .isp-card, body:not(.shadcn-body) .dash-block .isp-stat-card,
-body:not(.shadcn-body) .dash-block .sys-stat-card, body:not(.shadcn-body) .dash-block .sys-service-card,
-body:not(.shadcn-body) .dash-block .online-tech-col, body:not(.shadcn-body) .dash-block .online-tech-stat-box {
+body.as-chrome .dash-blocks .panel, body.as-chrome .dash-blocks .box, body.as-chrome .dash-blocks .summary-card,
+body.as-chrome .dash-slot .panel, body.as-chrome .dash-slot .box, body.as-chrome .dash-slot .summary-card,
+body.as-chrome .dash-block .panel, body.as-chrome .dash-block .box, body.as-chrome .dash-block .summary-card,
+body.as-chrome .dash-block .isp-card, body.as-chrome .dash-block .isp-stat-card,
+body.as-chrome .dash-block .sys-stat-card, body.as-chrome .dash-block .sys-service-card,
+body.as-chrome .dash-block .online-tech-col, body.as-chrome .dash-block .online-tech-stat-box {
   background-color: transparent !important;
   border: 1px solid rgba(127, 127, 127, 0.28) !important;
   border-radius: 12px !important;
   box-shadow: none !important;
 }
-body:not(.shadcn-body) .dash-blocks .breadcrumb, body:not(.shadcn-body) .dash-slot .breadcrumb, body:not(.shadcn-body) .dash-block .breadcrumb {
+body.as-chrome .dash-blocks .breadcrumb, body.as-chrome .dash-slot .breadcrumb, body.as-chrome .dash-block .breadcrumb {
   background: transparent !important;
   border: 1px solid rgba(127, 127, 127, 0.28);
   border-radius: 12px;
@@ -6703,7 +6695,7 @@ body:not(.shadcn-body) .dash-blocks .breadcrumb, body:not(.shadcn-body) .dash-sl
 }
 
 /* the cron warning keeps its own heading colour (--cron-danger) inside the shared card */
-body:not(.shadcn-body) .panel-cron-danger { overflow: hidden; }
+body.as-chrome .panel-cron-danger { overflow: hidden; }
 
 /* Show/hide on a credential must not move anything: fixed field and button sizes, and the same icon width for both icons. */
 .cred-input { flex: 0 0 120px; width: 120px; min-width: 0; max-width: 120px; height: 22px; line-height: 22px; letter-spacing: normal; box-sizing: border-box; }
@@ -6712,60 +6704,59 @@ body:not(.shadcn-body) .panel-cron-danger { overflow: hidden; }
 .cv-list-item { min-height: 50px; }
 
 /* Customers pages (core theme): the cards look like the Routely card on the dashboard, with no fill of their own (the page shows through), a 1px neutral border and a 12px radius. */
-body:not(.shadcn-body) .cl-card, body:not(.shadcn-body) .cv-card, body:not(.shadcn-body) .edit-form-card, body:not(.shadcn-body) .subscription-card,
-body:not(.shadcn-body) .metric-tile {
+body.as-chrome .ls-card, body.as-chrome .cv-card, body.as-chrome .edit-form-card, body.as-chrome .subscription-card,
+body.as-chrome .metric-tile {
   background-color: transparent !important;
   border: 1px solid rgba(127, 127, 127, 0.28) !important;
   border-radius: 12px !important;
   box-shadow: none !important;
 }
 /* what sits inside a transparent card is tinted lightly instead of using the old card fill */
-body:not(.shadcn-body) .cl-bar { background: rgba(127, 127, 127, 0.06); border-bottom-color: rgba(127, 127, 127, 0.28); }
-body:not(.shadcn-body) .cl-table th { background: transparent; border-bottom-color: rgba(127, 127, 127, 0.28); }
-body:not(.shadcn-body) .cl-table td, body:not(.shadcn-body) .cl-table tr { border-bottom-color: rgba(127, 127, 127, 0.2); }
-body:not(.shadcn-body) .cl-table tbody tr:not(.cl-none):hover { background: rgba(127, 127, 127, 0.07); }
-body:not(.shadcn-body) .cl-bulk { border-bottom-color: rgba(127, 127, 127, 0.28); }
-body:not(.shadcn-body) .cv-card-header, body:not(.shadcn-body) .edit-card-header, body:not(.shadcn-body) .cv-list-item { border-bottom-color: rgba(127, 127, 127, 0.25); }
-body:not(.shadcn-body) .cl-tab, body:not(.shadcn-body) .cl-btn:not(.cl-btn--primary), body:not(.shadcn-body) .cl .pagination > li > a { background-color: transparent; border-color: rgba(127, 127, 127, 0.35); }
-body:not(.shadcn-body) .cl-tab.is-on { background-color: var(--cl-accent); border-color: var(--cl-accent); }
-body:not(.shadcn-body) .cl .pagination > .active > a { background-color: var(--cl-accent); border-color: var(--cl-accent); }
-body:not(.shadcn-body) .customer-action-toolbar .btn:not(.btn-primary), body:not(.shadcn-body) .btn-back-round { background-color: transparent !important; border-color: rgba(127, 127, 127, 0.35) !important; }
+body.as-chrome .ls-bar { background: rgba(127, 127, 127, 0.06); border-bottom-color: rgba(127, 127, 127, 0.28); }
+body.as-chrome .ls-table th { background: transparent; border-bottom-color: rgba(127, 127, 127, 0.28); }
+body.as-chrome .ls-table td, body.as-chrome .ls-table tr { border-bottom-color: rgba(127, 127, 127, 0.2); }
+body.as-chrome .ls-table tbody tr:not(.ls-none):hover { background: rgba(127, 127, 127, 0.07); }
+body.as-chrome .ls-bulk { border-bottom-color: rgba(127, 127, 127, 0.28); }
+body.as-chrome .cv-card-header, body.as-chrome .edit-card-header, body.as-chrome .cv-list-item { border-bottom-color: rgba(127, 127, 127, 0.25); }
+body.as-chrome .ls-tab, body.as-chrome .ls-btn:not(.ls-btn--primary) { background-color: transparent; border-color: rgba(127, 127, 127, 0.35); }
+body.as-chrome .ls-tab.is-on { background-color: var(--ls-accent); border-color: var(--ls-accent); }
+body.as-chrome .customer-action-toolbar .btn:not(.btn-primary), body.as-chrome .btn-back-round { background-color: transparent !important; border-color: rgba(127, 127, 127, 0.35) !important; }
 
 /* fields inside an input group use the same fill as the plain fields, and the buttons beside them follow the page colours */
-body:not(.shadcn-body) .edit-form-card .input-group .form-control { background-color: var(--cv-bg); }
-body:not(.shadcn-body) .edit-form-card .input-group-btn .btn, body:not(.shadcn-body) .edit-form-card .input-group-addon { background-color: var(--cv-accent); border-color: var(--cv-border); color: var(--cv-fg); }
-body:not(.shadcn-body) .edit-form-card .input-group-btn .btn:hover { border-color: var(--cv-pri); background-color: var(--cv-pri-soft); }
+body.as-chrome .edit-form-card .input-group .form-control { background-color: var(--cv-bg); }
+body.as-chrome .edit-form-card .input-group-btn .btn, body.as-chrome .edit-form-card .input-group-addon { background-color: var(--cv-accent); border-color: var(--cv-border); color: var(--cv-fg); }
+body.as-chrome .edit-form-card .input-group-btn .btn:hover { border-color: var(--cv-pri); background-color: var(--cv-pri-soft); }
 
 /* hover and focus on the controls above (the transparent resting styles are more specific than the plain hover rules, so these restate them) */
-body:not(.shadcn-body) .cl-tab:not(.is-on):hover, body:not(.shadcn-body) .cl-btn:not(.cl-btn--primary):hover, body:not(.shadcn-body) .cl .pagination > li:not(.active):not(.disabled) > a:hover {
-  background-color: var(--cl-accent-soft); border-color: var(--cl-accent); color: var(--cl-ink);
+body.as-chrome .ls-tab:not(.is-on):hover, body.as-chrome .ls-btn:not(.ls-btn--primary):hover {
+  background-color: var(--ls-accent-soft); border-color: var(--ls-accent); color: var(--ls-ink);
 }
-body:not(.shadcn-body) .cl-tab:not(.is-on):hover { color: var(--cl-accent) !important; }
-body:not(.shadcn-body) .cl-btn.cl-btn--danger:hover { background-color: rgba(220, 38, 38, .10); border-color: #dc2626; }
-body:not(.shadcn-body) .cl-btn--primary:hover { filter: brightness(1.1); }
-body:not(.shadcn-body) .customer-action-toolbar .btn:not(.btn-primary):hover, body:not(.shadcn-body) .customer-action-toolbar .btn:not(.btn-primary):focus,
-body:not(.shadcn-body) .btn-back-round:hover {
+body.as-chrome .ls-tab:not(.is-on):hover { color: var(--ls-accent) !important; }
+body.as-chrome .ls-btn.ls-btn--danger:hover { background-color: rgba(220, 38, 38, .10); border-color: #dc2626; }
+body.as-chrome .ls-btn--primary:hover { filter: brightness(1.1); }
+body.as-chrome .customer-action-toolbar .btn:not(.btn-primary):hover, body.as-chrome .customer-action-toolbar .btn:not(.btn-primary):focus,
+body.as-chrome .btn-back-round:hover {
   background-color: var(--cv-pri-soft) !important; border-color: var(--cv-pri) !important;
 }
-body:not(.shadcn-body) .customer-action-toolbar .btn.btn-danger:not(.btn-primary):hover { background-color: rgba(220, 38, 38, .10) !important; border-color: #dc2626 !important; }
+body.as-chrome .customer-action-toolbar .btn.btn-danger:not(.btn-primary):hover { background-color: rgba(220, 38, 38, .10) !important; border-color: #dc2626 !important; }
 
 /* Marketplace (core theme): the cards look like the Routely card on the dashboard: no fill of their own (the page shows through), a 1px neutral border and a 12px radius.
    It is done through the tokens, so the hover and active states of the controls keep working. */
-body:not(.shadcn-body) .mp-wrap {
+body.as-chrome .mp-wrap {
   --mp-card: transparent;
   --mp-line: rgba(127, 127, 127, 0.28);
   --mp-footer: rgba(127, 127, 127, 0.06);
 }
-body:not(.shadcn-body) .mp-wrap .mp-card, body:not(.shadcn-body) .mp-wrap .mp-hub-card, body:not(.shadcn-body) .mp-wrap .mp-panel,
-body:not(.shadcn-body) .mp-wrap .mp-empty, body:not(.shadcn-body) .mp-wrap .mp-diag-bar { border-radius: 12px; }
-body:not(.shadcn-body) .mp-wrap .mp-card:not(:hover), body:not(.shadcn-body) .mp-wrap .mp-hub-card:not(:hover) { box-shadow: none; }
-body:not(.shadcn-body) .mp-wrap .mp-act:not([class*="mp-act--"]) { background-color: transparent; border-color: var(--mp-line); }
-body:not(.shadcn-body) .mp-wrap .mp-act:not([class*="mp-act--"]):hover { background-color: rgba(99, 102, 241, 0.12); border-color: var(--mp-accent); }
+body.as-chrome .mp-wrap .mp-card, body.as-chrome .mp-wrap .mp-hub-card, body.as-chrome .mp-wrap .mp-panel,
+body.as-chrome .mp-wrap .mp-empty, body.as-chrome .mp-wrap .mp-diag-bar { border-radius: 12px; }
+body.as-chrome .mp-wrap .mp-card:not(:hover), body.as-chrome .mp-wrap .mp-hub-card:not(:hover) { box-shadow: none; }
+body.as-chrome .mp-wrap .mp-act:not([class*="mp-act--"]) { background-color: transparent; border-color: var(--mp-line); }
+body.as-chrome .mp-wrap .mp-act:not([class*="mp-act--"]):hover { background-color: rgba(99, 102, 241, 0.12); border-color: var(--mp-accent); }
 
 /* The details drawer and the licence dialog float over the page, so unlike the cards they need a fill of their own: the page colour (the menu background) with the neutral border. */
-body:not(.shadcn-body) .mp-drawer__panel, body:not(.shadcn-body) .mp-modal__panel { background: var(--as-bg, #ffffff); border: 1px solid rgba(127, 127, 127, 0.28); }
-body:not(.shadcn-body) .mp-drawer__panel { border-width: 0 0 0 1px; }
-body:not(.shadcn-body) .mp-drawer__panel .mp-d-readme, body:not(.shadcn-body) .mp-drawer__panel pre, body:not(.shadcn-body) .mp-drawer__panel code { background-color: rgba(127, 127, 127, 0.1); }
+body.as-chrome .mp-drawer__panel, body.as-chrome .mp-modal__panel { background: var(--as-bg, #ffffff); border: 1px solid rgba(127, 127, 127, 0.28); }
+body.as-chrome .mp-drawer__panel { border-width: 0 0 0 1px; }
+body.as-chrome .mp-drawer__panel .mp-d-readme, body.as-chrome .mp-drawer__panel pre, body.as-chrome .mp-drawer__panel code { background-color: rgba(127, 127, 127, 0.1); }
 
 /* Install panel (upload, GitHub address, package address + SHA-256): every field is the same control, the fields line up from the top, and the button sits level with the first row. */
 .mp-install form { align-items: flex-start; }
@@ -6784,8 +6775,8 @@ body:not(.shadcn-body) .mp-drawer__panel .mp-d-readme, body:not(.shadcn-body) .m
 .dark-mode .mp-install .mp-field input[type=file]::file-selector-button { border-color: var(--cv-border, #2d3748); }
 body.dark-mode .mp-install .mp-field input[type=text]:not(#filterNavigateMenu):focus, body.dark-mode .mp-install .mp-field input[type=url]:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
 /* the panel itself: no fill (like the other cards), a dashed indigo border */
-body:not(.shadcn-body) .mp-wrap { --mp-install-bg: transparent; }
-body:not(.shadcn-body) .mp-install { border-color: rgba(99, 102, 241, 0.45); }
+body.as-chrome .mp-wrap { --mp-install-bg: transparent; }
+body.as-chrome .mp-install { border-color: rgba(99, 102, 241, 0.45); }
 @media (max-width: 767px) { .mp-install button.mp-submit { margin-top: 0; } }
 .mp-install .mp-field input { text-overflow: ellipsis; }
 
@@ -6805,13 +6796,13 @@ body:not(.shadcn-body) .mp-install { border-color: rgba(99, 102, 241, 0.45); }
 
 /* Community and Rollback Update (core theme): the cards look like the Routely card on the dashboard, with no fill of their own (the page shows through), a 1px neutral border and a 12px radius.
    Done through the page tokens, so hover and active states keep working. */
-body:not(.shadcn-body) .cp { --cp-card: transparent; --cp-line: rgba(127, 127, 127, 0.28); --cp-soft: rgba(127, 127, 127, 0.06); }
-body:not(.shadcn-body) .rb { --rb-card: transparent; --rb-line: rgba(127, 127, 127, 0.28); --rb-soft: rgba(127, 127, 127, 0.06); }
-body:not(.shadcn-body) .cp-card, body:not(.shadcn-body) .rb-card { border-radius: 12px; }
+body.as-chrome .cp { --cp-card: transparent; --cp-line: rgba(127, 127, 127, 0.28); --cp-soft: rgba(127, 127, 127, 0.06); }
+body.as-chrome .rb { --rb-card: transparent; --rb-line: rgba(127, 127, 127, 0.28); --rb-soft: rgba(127, 127, 127, 0.06); }
+body.as-chrome .cp-card, body.as-chrome .rb-card { border-radius: 12px; }
 /* the version search is a form field: it keeps the field surface */
-body:not(.shadcn-body) .rb-search { background-color: var(--cv-bg); border-color: var(--cv-border); }
-body:not(.shadcn-body) .rb-search:focus { border-color: var(--rb-accent); }
-body.dark-mode:not(.shadcn-body) .rb-search:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
+body.as-chrome .rb-search { background-color: var(--cv-bg); border-color: var(--cv-border); }
+body.as-chrome .rb-search:focus { border-color: var(--rb-accent); }
+body.dark-mode.as-chrome .rb-search:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
 
 /* the hidden attribute must win over the display set on these (the rollback search and the empty note rely on it) */
 .rb-row[hidden], .rb-empty[hidden], .rb-list[hidden] { display: none !important; }
@@ -6823,4 +6814,95 @@ body.dark-mode:not(.shadcn-body) .rb-search:not(#filterNavigateMenu):focus { bac
    text-fill colour (it wins over "color") and the caret and placeholder follow. */
 .mp-install .mp-field input { -webkit-text-fill-color: var(--cv-fg, #1e293b); caret-color: var(--cv-fg, #1e293b); }
 .mp-install .mp-field input::placeholder { -webkit-text-fill-color: var(--cv-muted, #94a3b8); }
-.mp-install .mp-field input:-webkit-autofill, .mp-install .mp-field input:-webkit-autofill:focus { -webkit-text-fill-color: var(--cv-fg, #1e293b) !important; -webkit-box-shadow: 0 0 0 1000px var(--cv-bg, #ffffff) inset !important; transition: background-color 9999s ease-out; }
+.mp-install .mp-field input:-webkit-autofill { -webkit-text-fill-color: var(--cv-fg, #1e293b) !important; -webkit-box-shadow: 0 0 0 1000px var(--cv-bg, #ffffff) inset !important; box-shadow: 0 0 0 1000px var(--cv-bg, #ffffff) inset !important; transition: background-color 9999s ease-out; }
+/* focused and autofilled: the inset fill must not replace the focus ring, so both shadows are listed */
+.mp-install .mp-field input:-webkit-autofill:focus { -webkit-text-fill-color: var(--cv-fg, #1e293b) !important; -webkit-box-shadow: 0 0 0 1000px var(--cv-bg, #ffffff) inset, 0 0 0 3px var(--cv-pri-soft, rgba(79, 70, 229, .12)) !important; box-shadow: 0 0 0 1000px var(--cv-bg, #ffffff) inset, 0 0 0 3px var(--cv-pri-soft, rgba(79, 70, 229, .12)) !important; border-color: var(--cv-pri, #4f46e5); }
+
+/* Customers list: Send Message modal (ui/ui/admin/customers/list.tpl). The modal is moved to <body>, so it carries its own tokens, which also feed the .ls-btn buttons inside it. */
+.cm-modal {
+    --ls-ink: #1e293b; --ls-muted: #64748b; --ls-line: #e2e8f0; --ls-card: #ffffff; --ls-soft: #f8fafc;
+    --ls-accent: #4f46e5; --ls-accent-soft: rgba(79, 70, 229, .10);
+    --cm-field: #f1f5f9; --cm-field-line: #e2e8f0;
+}
+body.dark-mode .cm-modal {
+    --ls-ink: #e2e8f0; --ls-muted: #94a3b8; --ls-line: #2d3748; --ls-card: #1e1e2d; --ls-soft: #252536;
+    --ls-accent: #818cf8; --ls-accent-soft: rgba(129, 140, 248, .16);
+    --cm-field: #27272a; --cm-field-line: #3f3f46;
+}
+.cm-modal .modal-dialog { max-width: 520px; width: calc(100% - 24px); }
+.cm-modal .modal-content { background: var(--as-bg, #ffffff); color: var(--ls-ink); border: 1px solid rgba(127, 127, 127, .28); border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, .35); overflow: hidden; }
+.cm-head { display: flex; align-items: center; gap: 12px; padding: 18px 20px 14px; border-bottom: 1px solid rgba(127, 127, 127, .22); }
+.cm-ico { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: var(--ls-accent-soft); color: var(--ls-accent); font-size: 16px; }
+.cm-head__text { flex: 1 1 auto; min-width: 0; }
+.cm-title { margin: 0; font-size: 17px; font-weight: 700; color: var(--ls-ink); line-height: 1.25; }
+.cm-sub { margin: 2px 0 0; font-size: 13px; color: var(--ls-muted); }
+.cm-sub b { color: var(--ls-ink); }
+.cm-x { flex: 0 0 32px; width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--ls-muted); cursor: pointer; }
+.cm-x:hover { background: var(--ls-accent-soft); color: var(--ls-ink); }
+.cm-x:focus-visible, .cm-chip input:focus-visible + span { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+.cm-body { padding: 16px 20px 6px; }
+.cm-group { border: 0; margin: 0 0 14px; padding: 0; min-width: 0; }
+.cm-group legend, .cm-field label { display: block; width: auto; margin: 0 0 6px; padding: 0; border: 0; font-size: 13px; font-weight: 600; color: var(--ls-ink); }
+.cm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cm-chip { position: relative; margin: 0; cursor: pointer; }
+/* the hidden box stays inside its chip: with no positioned parent it sat at the modal's edge, and focusing it scrolled the window */
+.cm-chip input { position: absolute; top: 0; left: 0; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.cm-chip span { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; border: 1px solid rgba(127, 127, 127, .35); background: transparent; color: var(--ls-ink); font-size: 13px; font-weight: 600; transition: border-color .15s, background .15s; }
+.cm-chip span:hover { border-color: var(--ls-accent); background: var(--ls-accent-soft); }
+.cm-chip input:checked + span { border-color: var(--ls-accent); background: var(--ls-accent-soft); color: var(--ls-accent); }
+.cm-field { margin: 0 0 14px; }
+.cm-field[hidden] { display: none !important; }
+.cm-modal .cm-input { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--cm-field-line); border-radius: 8px; background: var(--cm-field); color: var(--ls-ink); -webkit-text-fill-color: var(--ls-ink); caret-color: var(--ls-ink); font-size: 14px; line-height: 1.45; box-shadow: none; resize: vertical; }
+.cm-modal .cm-input::placeholder { color: var(--ls-muted); -webkit-text-fill-color: var(--ls-muted); opacity: 1; }
+body .cm-modal .cm-input:not(#filterNavigateMenu):focus { background: var(--cm-field) !important; border-color: var(--ls-accent); color: var(--ls-ink); -webkit-text-fill-color: var(--ls-ink); outline: 0; box-shadow: 0 0 0 3px var(--ls-accent-soft); }
+.cm-hint { display: block; margin-top: 5px; font-size: 12px; color: var(--ls-muted); text-align: right; }
+.cm-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px 18px; }
+.cm-modal .cm-foot .ls-btn { color: var(--ls-ink) !important; }
+.cm-modal .cm-foot .ls-btn--primary { color: #fff !important; }
+.cm-modal .cm-foot .ls-btn[disabled] { opacity: .6; cursor: progress; }
+@media (max-width: 480px) { .cm-foot { flex-direction: column-reverse; } .cm-foot .ls-btn { width: 100%; } }
+.cm-chip span i { width: 14px; text-align: center; font-size: 14px; }
+
+/* Row action menu (Edit, Sync...) on the customers lists: Bootstrap's white menu followed the page into dark mode. It takes the same surface as the other panels. */
+body.as-chrome .ls-menu { padding: 6px; background: var(--as-bg, #ffffff); border: 1px solid rgba(127, 127, 127, .28); box-shadow: 0 12px 32px rgba(0, 0, 0, .28); z-index: 1100; }
+body.as-chrome .ls-menu > li > a { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; color: var(--ls-ink); font-size: 13px; font-weight: 600; background: transparent; }
+body.as-chrome .ls-menu > li > a:hover, body.as-chrome .ls-menu > li > a:focus { background: var(--ls-accent-soft); color: var(--ls-accent); outline: 0; }
+body.as-chrome .ls-menu > li > a:hover i, body.as-chrome .ls-menu > li > a:focus i { color: var(--ls-accent); }
+body.as-chrome .ls-menu .divider { background: rgba(127, 127, 127, .22); margin: 4px 0; }
+body.dark-mode.as-chrome .ls-menu { background: var(--as-bg, #0f141c); }
+
+.mp-pager { padding: 10px 14px 14px; border-top: 1px solid rgba(127, 127, 127, .22); }
+
+/* Pager, default skin (every list that includes pagination.tpl): separate rounded buttons, transparent with a neutral border, accent on hover and for the current page.
+   The accent follows the page's own token when it has one (--ls-accent on the customers lists, --cv-pri elsewhere). */
+body:is(.as-chrome, .cm-chrome) .pagination { --pg-acc: var(--ls-accent, var(--cv-pri, #4f46e5)); --pg-acc-soft: var(--ls-accent-soft, var(--cv-pri-soft, rgba(79, 70, 229, .12))); }
+body:is(.as-chrome, .cm-chrome) .pagination { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 14px 0; }
+body:is(.as-chrome, .cm-chrome) .pagination > li { float: none; display: inline-block; }
+body:is(.as-chrome, .cm-chrome) .pagination > li > a, body:is(.as-chrome, .cm-chrome) .pagination > li > span { float: none; margin: 0; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(127, 127, 127, .35); background: transparent; color: inherit; font-size: 13px; font-weight: 600; }
+body:is(.as-chrome, .cm-chrome) .pagination > li:not(.active):not(.disabled) > a:hover { border-color: var(--pg-acc); background: var(--pg-acc-soft); color: inherit; }
+body:is(.as-chrome, .cm-chrome) .pagination > li.active > a, body:is(.as-chrome, .cm-chrome) .pagination > li.active > a:hover, body:is(.as-chrome, .cm-chrome) .pagination > li.active > span { background: var(--pg-acc); border-color: var(--pg-acc); color: #fff; box-shadow: none; }
+body:is(.as-chrome, .cm-chrome) .pagination > li.disabled > a, body:is(.as-chrome, .cm-chrome) .pagination > li.disabled > span { background: transparent; opacity: .5; pointer-events: none; }
+body:is(.as-chrome, .cm-chrome) .mp-pager .pagination { margin: 0; }
+
+/* List kit: a secret value (a voucher code) stays blurred until it is hovered, focused or tapped */
+.ls-secret { display: inline-block; font-family: Menlo, Consolas, monospace; font-size: 12.5px; letter-spacing: .04em; padding: 2px 8px; border-radius: 6px; background: var(--ls-soft); border: 1px solid var(--ls-line); filter: blur(5px); transition: filter .15s; cursor: pointer; user-select: all; }
+.ls-secret:hover, .ls-secret:focus { filter: none; outline: 0; }
+
+/* List kit: a second line under a row (a message body or an error) */
+.ls-table tr.ls-subrow td { padding: 8px 12px 12px 36px; color: var(--ls-muted); font-size: 12.5px; background: rgba(127, 127, 127, 0.04); overflow-wrap: anywhere; }
+.ls-table tr.ls-subrow--error td { color: #b91c1c; }
+body.dark-mode .ls-table tr.ls-subrow--error td { color: #f87171; }
+.ls-table tr.ls-subrow:hover { background: transparent; }
+.ls-field input { height: 38px; padding: 0 8px; border: 1px solid var(--ls-field-line); border-radius: 8px; background: var(--ls-field); color: var(--ls-ink); font-size: 13px; -webkit-text-fill-color: var(--ls-ink); }
+
+/* List kit: labelled number field next to a button (Keep logs [90] days  Clean up) and the red action button */
+.ls-field span { white-space: nowrap; }
+.ls-field input[inputmode="numeric"] { width: 72px; text-align: center; }
+.ls-field input:focus { outline: none !important; border-color: var(--ls-accent); box-shadow: 0 0 0 3px var(--ls-accent-soft); background: var(--ls-field) !important; }
+.ls-btn--danger { border-color: rgba(220, 38, 38, .45); color: #dc2626 !important; }
+body.dark-mode .ls-btn--danger { color: #f87171 !important; }
+.ls-btn--danger:hover { border-color: #dc2626; background: rgba(220, 38, 38, .10); }
+.ls-bar + .ls-bar { padding: 12px 14px; gap: 14px; }
+body.as-chrome .ls-btn.ls-btn--danger:not(:hover) { border-color: rgba(220, 38, 38, .45); }
+/* the global dark-mode focus rule carries an id in its selector; the kit's number field restates its fill with the same weight */
+body .ls-field input:not(#filterNavigateMenu):focus, body .ls-search input:not(#filterNavigateMenu):focus { background-color: var(--ls-field) !important; color: var(--ls-ink); -webkit-text-fill-color: var(--ls-ink); }

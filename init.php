@@ -254,7 +254,7 @@ function _log($description, $type = '', $userid = '0')
 {
     $d = ORM::for_table('tbl_logs')->create();
     $d->date = date('Y-m-d H:i:s');
-    $d->type = $type;
+    $d->type = ($type === '' || $type === null) ? 'System' : $type;
     $d->description = $description;
     $d->userid = $userid;
     if (!empty($_SERVER['HTTP_CF_CONNECTING_IP']))   //to check ip is pass from cloudflare tunnel

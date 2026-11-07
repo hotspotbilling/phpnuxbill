@@ -121,7 +121,7 @@
     <section class="mp-panel">
         <div class="mp-panel__head"><div>
             <h2><i class="fa fa-history"></i> {Lang::T('Activity')}</h2>
-            <p>{Lang::T('The latest marketplace actions. The full history is in Logs, type "Marketplace".')}</p>
+            <p>{Lang::T('Every marketplace action, newest first. The same history is in Logs, type "Marketplace".')}</p>
         </div></div>
         {if $logs}
         <div class="mp-tablewrap">
@@ -134,6 +134,7 @@
             </tbody>
         </table>
         </div>
+        <div class="mp-pager">{include file="pagination.tpl"}</div>
         {else}
         <div class="mp-empty"><i class="fa fa-history"></i><h4>{Lang::T('No activity recorded yet')}</h4></div>
         {/if}

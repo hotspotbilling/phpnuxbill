@@ -1,36 +1,36 @@
 {include file="sections/header.tpl"}
 
-<div class="cl">
-    <div class="cl-top">
+<div class="ls">
+    <div class="ls-top">
         <div>
-            <p class="cl-sub">{$total_customers|number_format} {Lang::T('customers')}{if $filter neq 'All'}, {$status_counts[$filter]|default:0|number_format} {Lang::T($filter)}{/if}</p>
+            <p class="ls-sub">{$total_customers|number_format} {Lang::T('customers')}{if $filter neq 'All'}, {$status_counts[$filter]|default:0|number_format} {Lang::T($filter)}{/if}</p>
         </div>
-        <div class="cl-actions">
+        <div class="ls-actions">
             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-            <a class="cl-btn" title="{Lang::T('This will export to CSV')}" href="{Text::url('customers/csv&token=', $csrf_token)}"
+            <a class="ls-btn" title="{Lang::T('This will export to CSV')}" href="{Text::url('customers/csv&token=', $csrf_token)}"
                 onclick="return ask(this, '{Lang::T('This will export to CSV')}?')"><i class="fa fa-download" aria-hidden="true"></i> CSV</a>
             {/if}
-            <a href="{Text::url('customers/add')}" class="cl-btn cl-btn--primary"><i class="fa fa-user-plus" aria-hidden="true"></i> {Lang::T('Add')}</a>
+            <a href="{Text::url('customers/add')}" class="ls-btn ls-btn--primary"><i class="fa fa-user-plus" aria-hidden="true"></i> {Lang::T('Add')}</a>
         </div>
     </div>
 
-    <div class="cl-tabs" role="tablist" aria-label="{Lang::T('Status')}">
+    <div class="ls-tabs" role="tablist" aria-label="{Lang::T('Status')}">
         {$tabUrl = "&order={$order|escape:'url'}&orderby={$orderby|escape:'url'}&search={$search|escape:'url'}&filter="}
-        <a class="cl-tab{if $filter eq 'All'} is-on{/if}" href="{Text::url('customers', $tabUrl, 'All')}" role="tab" aria-selected="{if $filter eq 'All'}true{else}false{/if}">{Lang::T('All')} <small>{$total_customers|number_format}</small></a>
+        <a class="ls-tab{if $filter eq 'All'} is-on{/if}" href="{Text::url('customers', $tabUrl, 'All')}" role="tab" aria-selected="{if $filter eq 'All'}true{else}false{/if}">{Lang::T('All')} <small>{$total_customers|number_format}</small></a>
         {foreach $statuses as $status}
-        <a class="cl-tab{if $filter eq $status} is-on{/if}" href="{Text::url('customers', $tabUrl, $status|escape:'url')}" role="tab" aria-selected="{if $filter eq $status}true{else}false{/if}">{Lang::T($status)} <small>{$status_counts[$status]|default:0|number_format}</small></a>
+        <a class="ls-tab{if $filter eq $status} is-on{/if}" href="{Text::url('customers', $tabUrl, $status|escape:'url')}" role="tab" aria-selected="{if $filter eq $status}true{else}false{/if}">{Lang::T($status)} <small>{$status_counts[$status]|default:0|number_format}</small></a>
         {/foreach}
     </div>
 
-    <div class="cl-card">
-        <form id="site-search" class="cl-bar" method="post" action="{Text::url('customers')}">
+    <div class="ls-card">
+        <form id="site-search" class="ls-bar" method="post" action="{Text::url('customers')}">
             <input type="hidden" name="csrf_token" value="{$csrf_token}">
             <input type="hidden" name="filter" value="{$filter|escape}">
-            <div class="cl-search">
+            <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
                 <input type="search" autocomplete="off" name="search" placeholder="{Lang::T('Search')}..." value="{$search|escape}" aria-label="{Lang::T('Search')}">
             </div>
-            <label class="cl-field"><span>{Lang::T('Order ')}</span>
+            <label class="ls-field"><span>{Lang::T('Order ')}</span>
                 <select id="order" name="order" onchange="this.form.submit()">
                     <option value="username" {if $order eq 'username'}selected{/if}>{Lang::T('Username')}</option>
                     <option value="fullname" {if $order eq 'fullname'}selected{/if}>{Lang::T('First Name')}</option>
@@ -44,43 +44,43 @@
                     <option value="desc" {if $orderby eq 'desc'}selected{/if}>{Lang::T('Descending')}</option>
                 </select>
             </label>
-            <label class="cl-field"><span>{Lang::T('Show')}</span>
+            <label class="ls-field"><span>{Lang::T('Show')}</span>
                 <select id="per_page" name="per_page" onchange="changePerPage(this)">
                     {foreach $per_page_options as $n}
                     <option value="{$n}" {if $cookie eq $n}selected{/if}>{$n}</option>
                     {/foreach}
                 </select>
             </label>
-            <button class="cl-btn cl-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
-            <button class="cl-btn" type="submit" name="export" value="csv" title="{Lang::T('This will export to CSV')}"><i class="fa fa-download" aria-hidden="true"></i> CSV</button>
+            <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
+            <button class="ls-btn" type="submit" name="export" value="csv" title="{Lang::T('This will export to CSV')}"><i class="fa fa-download" aria-hidden="true"></i> CSV</button>
         </form>
 
-        <div class="cl-bulk" id="clBulk" hidden>
+        <div class="ls-bulk" id="clBulk" hidden>
             <span><b id="clBulkN">0</b> {Lang::T('selected')}</span>
-            <button type="button" id="sendMessageToSelected" class="cl-btn cl-btn--primary"><i class="fa fa-paper-plane" aria-hidden="true"></i> {Lang::T('Send Message')}</button>
+            <button type="button" id="sendMessageToSelected" class="ls-btn ls-btn--primary"><i class="fa fa-paper-plane" aria-hidden="true"></i> {Lang::T('Send Message')}</button>
         </div>
 
-        <div class="cl-scroll">
-            <table id="customerTable" class="cl-table cl-click table-with-loader">
+        <div class="ls-scroll">
+            <table id="customerTable" class="ls-table ls-click table-with-loader">
                 <thead>
                     <tr>
-                        <th class="cl-check"><input type="checkbox" id="select-all" aria-label="{Lang::T('Select all')}"></th>
+                        <th class="ls-check"><input type="checkbox" id="select-all" aria-label="{Lang::T('Select all')}"></th>
                         <th>{Lang::T('Full Name')}</th>
                         <th>{Lang::T('Contact')}</th>
                         <th>{Lang::T('Package')}</th>
                         <th>{Lang::T('Service Type')}</th>
-                        <th class="cl-num">{Lang::T('Balance')}</th>
+                        <th class="ls-num">{Lang::T('Balance')}</th>
                         <th>{Lang::T('Status')}</th>
                         <th>{Lang::T('Created On')}</th>
-                        <th class="cl-end">{Lang::T('Manage')}</th>
+                        <th class="ls-end">{Lang::T('Manage')}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {foreach $d as $ds}
                     <tr>
-                        <td class="cl-check"><input type="checkbox" name="customer_ids[]" value="{$ds['id']}" aria-label="{$ds['username']|escape}"></td>
+                        <td class="ls-check"><input type="checkbox" name="customer_ids[]" value="{$ds['id']}" aria-label="{$ds['username']|escape}"></td>
                         <td data-label="{Lang::T('Full Name')}">
-                            <a class="cl-who" href="{Text::url('customers/view/', $ds['id'])}">
+                            <a class="ls-who" href="{Text::url('customers/view/', $ds['id'])}">
                                 {if empty($ds['photo']) || strpos($ds['photo'], 'default') !== false}
                                 <img class="customer-avatar-circle img-circle" src="{$app_url}/{$UPLOAD_PATH}/user.default.jpg" width="38" height="38" alt="">
                                 {else}
@@ -89,30 +89,30 @@
                                 {/if}
                                 <span>
                                     <b>{$ds['fullname']|escape}</b>
-                                    <small>{$ds['username']|escape}{if $ds['account_type']} <em class="cl-chip">{$ds['account_type']|escape}</em>{/if}</small>
+                                    <small>{$ds['username']|escape}{if $ds['account_type']} <em class="ls-chip">{$ds['account_type']|escape}</em>{/if}</small>
                                 </span>
                             </a>
                         </td>
-                        <td data-label="{Lang::T('Contact')}" class="cl-contact">
+                        <td data-label="{Lang::T('Contact')}" class="ls-contact">
                             {if strlen(preg_replace('/\D/', '', $ds['phonenumber'])) >= 5}<a href="tel:{$ds['phonenumber']|escape}" title="{Lang::T('Phone Number')}"><i class="fa fa-phone" aria-hidden="true"></i> {$ds['phonenumber']|escape}</a>{/if}
                             {if strpos($ds['email'], '@') !== false}<a href="mailto:{$ds['email']|escape}" title="{$ds['email']|escape}"><i class="fa fa-envelope" aria-hidden="true"></i> {$ds['email']|escape}</a>{/if}
                             {if $ds['coordinates']}<a href="https://www.google.com/maps/dir//{$ds['coordinates']|escape:'url'}/" target="_blank" rel="noopener" title="{$ds['coordinates']|escape}"><i class="fa fa-map-marker" aria-hidden="true"></i> {Lang::T('Map')}</a>{/if}
                         </td>
-                        <td data-label="{Lang::T('Package')}" class="cl-pkg" api-get-text="{Text::url('autoload/plan_is_active/')}{$ds['id']}"><span class="cl-dim">&bull;</span></td>
+                        <td data-label="{Lang::T('Package')}" class="ls-pkg" api-get-text="{Text::url('autoload/plan_is_active/')}{$ds['id']}"><span class="ls-dim">&bull;</span></td>
                         <td data-label="{Lang::T('Service Type')}">
                             <span>{$ds['service_type']|escape}
-                            {if !empty($ds['pppoe_username']) || !empty($ds['pppoe_ip'])}<small class="cl-dim">{$ds['pppoe_username']|escape}{if !empty($ds['pppoe_username']) && !empty($ds['pppoe_ip'])}:{/if}{$ds['pppoe_ip']|escape}</small>{/if}</span>
+                            {if !empty($ds['pppoe_username']) || !empty($ds['pppoe_ip'])}<small class="ls-dim">{$ds['pppoe_username']|escape}{if !empty($ds['pppoe_username']) && !empty($ds['pppoe_ip'])}:{/if}{$ds['pppoe_ip']|escape}</small>{/if}</span>
                         </td>
-                        <td data-label="{Lang::T('Balance')}" class="cl-num">{Lang::moneyFormat($ds['balance'])}</td>
-                        <td data-label="{Lang::T('Status')}"><span class="cl-pill cl-pill--{$ds['status']|lower|escape}">{Lang::T($ds['status'])}</span></td>
-                        <td data-label="{Lang::T('Created On')}" class="cl-dim cl-when" title="{Lang::dateTimeFormat($ds['created_at'])}">{Lang::dateFormat($ds['created_at'])}</td>
-                        <td class="cl-end">
-                            <div class="cl-row-actions">
-                                <a href="{Text::url('customers/view/')}{$ds['id']}" class="cl-btn cl-btn--sm">{Lang::T('View')}</a>
-                                <a href="{Text::url('plan/recharge/', $ds['id'], '&token=', $csrf_token)}" class="cl-btn cl-btn--sm cl-btn--primary">{Lang::T('Recharge')}</a>
+                        <td data-label="{Lang::T('Balance')}" class="ls-num">{Lang::moneyFormat($ds['balance'])}</td>
+                        <td data-label="{Lang::T('Status')}"><span class="ls-pill ls-pill--{$ds['status']|lower|escape}">{Lang::T($ds['status'])}</span></td>
+                        <td data-label="{Lang::T('Created On')}" class="ls-dim ls-when" title="{Lang::dateTimeFormat($ds['created_at'])}">{Lang::dateFormat($ds['created_at'])}</td>
+                        <td class="ls-end">
+                            <div class="ls-row-actions">
+                                <a href="{Text::url('customers/view/')}{$ds['id']}" class="ls-btn ls-btn--sm">{Lang::T('View')}</a>
+                                <a href="{Text::url('plan/recharge/', $ds['id'], '&token=', $csrf_token)}" class="ls-btn ls-btn--sm ls-btn--primary">{Lang::T('Recharge')}</a>
                                 <span class="dropdown">
-                                    <button type="button" class="cl-btn cl-btn--sm cl-btn--icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{Lang::T('Manage')}"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
-                                    <ul class="dropdown-menu dropdown-menu-right cl-menu">
+                                    <button type="button" class="ls-btn ls-btn--sm ls-btn--icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{Lang::T('Manage')}"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-right ls-menu">
                                         <li><a href="{Text::url('customers/edit/', $ds['id'], '&token=', $csrf_token)}"><i class="fa fa-pencil" aria-hidden="true"></i> {Lang::T('Edit')}</a></li>
                                         <li><a href="{Text::url('customers/sync/', $ds['id'], '&token=', $csrf_token)}"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Sync')}</a></li>
                                     </ul>
@@ -121,8 +121,8 @@
                         </td>
                     </tr>
                     {foreachelse}
-                    <tr class="cl-none"><td colspan="9">
-                        <div class="cl-empty"><b>{Lang::T('No customers found')}</b>
+                    <tr class="ls-none"><td colspan="9">
+                        <div class="ls-empty"><b>{Lang::T('No customers found')}</b>
                             {if $search neq ''}{Lang::T('Nothing matches your search in this status.')} <a href="{Text::url('customers', '&filter=All')}">{Lang::T('Search all statuses')}</a>
                             {else}<a href="{Text::url('customers/add')}">{Lang::T('Add')}</a>{/if}
                         </div>
@@ -135,37 +135,44 @@
     </div>
 </div>
 <!-- Modal for Sending Messages -->
-<div id="sendMessageModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel"
+<div id="sendMessageModal" class="modal fade cm-modal" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="sendMessageModalLabel">{Lang::T('Send Message')}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group" id="via" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 15px;">
-                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="sms" name="sms" value="1">
-                        {Lang::T('SMS')}</label>
-                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="wa" name="wa" value="1">
-                        {Lang::T('WA')}</label>
-                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="email" name="email" value="1">
-                        {Lang::T('Email')}</label>
-                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="inbox" name="inbox" value="1">
-                        {Lang::T('Inbox')}</label>
-                    <label class="control-label" style="display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;"><input type="checkbox" id="push" name="push" value="1">
-                        {Lang::T('Push')}</label>
+            <div class="cm-head">
+                <span class="cm-ico"><i class="fa fa-paper-plane" aria-hidden="true"></i></span>
+                <div class="cm-head__text">
+                    <h5 class="cm-title" id="sendMessageModalLabel">{Lang::T('Send Message')}</h5>
+                    <p class="cm-sub"><b id="cmCount">0</b> {Lang::T('customers selected')}</p>
                 </div>
-                <input type="text" style="margin-bottom: 10px; display: none;" class="form-control" id="subject-content"
-                    placeholder="{Lang::T('Enter message subject here')}">
-                <textarea id="messageContent" class="form-control" rows="4"
-                    placeholder="{Lang::T('Enter your message here...')}"></textarea>
+                <button type="button" class="cm-x" data-dismiss="modal" aria-label="{Lang::T('Close')}"><i class="fa fa-times" aria-hidden="true"></i></button>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{Lang::T('Close')}</button>
-                <button type="button" id="sendMessageButton" class="btn btn-primary">{Lang::T('Send Message')}</button>
+            <div class="cm-body">
+                <fieldset class="cm-group">
+                    <legend>{Lang::T('Send through')}</legend>
+                    <div class="cm-chips" id="via">
+                        <label class="cm-chip"><input type="checkbox" id="sms" name="sms" value="1"><span><i class="fa fa-mobile" aria-hidden="true"></i> {Lang::T('SMS')}</span></label>
+                        <label class="cm-chip"><input type="checkbox" id="wa" name="wa" value="1"><span><i class="fa fa-comment" aria-hidden="true"></i> {Lang::T('WA')}</span></label>
+                        <label class="cm-chip"><input type="checkbox" id="email" name="email" value="1"><span><i class="fa fa-envelope" aria-hidden="true"></i> {Lang::T('Email')}</span></label>
+                        <label class="cm-chip"><input type="checkbox" id="inbox" name="inbox" value="1"><span><i class="fa fa-inbox" aria-hidden="true"></i> {Lang::T('Inbox')}</span></label>
+                        <label class="cm-chip"><input type="checkbox" id="push" name="push" value="1"><span><i class="fa fa-bell" aria-hidden="true"></i> {Lang::T('Push')}</span></label>
+                    </div>
+                </fieldset>
+                <div class="cm-field" id="cmSubjectBox" hidden>
+                    <label for="subject-content">{Lang::T('Subject')}</label>
+                    <input type="text" class="cm-input" id="subject-content" autocomplete="off"
+                        placeholder="{Lang::T('Enter message subject here')}">
+                </div>
+                <div class="cm-field">
+                    <label for="messageContent">{Lang::T('Message')}</label>
+                    <textarea id="messageContent" class="cm-input" rows="5"
+                        placeholder="{Lang::T('Enter your message here...')}"></textarea>
+                    <small class="cm-hint"><span id="cmChars">0</span> {Lang::T('characters')}</small>
+                </div>
+            </div>
+            <div class="cm-foot">
+                <button type="button" class="ls-btn" data-dismiss="modal"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Close')}</button>
+                <button type="button" id="sendMessageButton" class="ls-btn ls-btn--primary"><i class="fa fa-paper-plane" aria-hidden="true"></i> {Lang::T('Send Message')}</button>
             </div>
         </div>
     </div>
@@ -178,17 +185,21 @@
         const inboxCheckbox = document.getElementById('inbox');
         const pushCheckbox = document.getElementById('push');
         const subjectInput = document.getElementById('subject-content');
+        const subjectBox = document.getElementById('cmSubjectBox');
+        const content = document.getElementById('messageContent');
+        const chars = document.getElementById('cmChars');
 
         function toggleSubjectField() {
             if (emailCheckbox.checked || inboxCheckbox.checked || pushCheckbox.checked) {
-                subjectInput.style.display = 'block';
+                subjectBox.hidden = false;
                 subjectInput.required = true;
             } else {
-                subjectInput.style.display = 'none';
+                subjectBox.hidden = true;
                 subjectInput.required = false;
                 subjectInput.value = '';
             }
         }
+        content.addEventListener('input', function () { chars.textContent = content.value.length; });
 
         emailCheckbox.addEventListener('change', toggleSubjectField);
         inboxCheckbox.addEventListener('change', toggleSubjectField);
@@ -218,7 +229,7 @@
         document.querySelectorAll('#customerTable tbody tr').forEach(function (tr) {
             tr.addEventListener('click', function (e) {
                 if (e.target.closest('a, button, input, .dropdown, .label')) { return; }
-                var a = tr.querySelector('.cl-who');
+                var a = tr.querySelector('.ls-who');
                 if (a) { window.location.href = a.href; }
             });
         });
@@ -247,7 +258,7 @@
                 return;
             }
 
-            // Open the modal
+            $('#cmCount').text(selectedCustomerIds.length);
             $('#sendMessageModal').modal('show');
         });
         // Handle sending the message
@@ -329,7 +340,7 @@
                         });
                     }
                     $('#sendMessageModal').modal('hide');
-                    $('#messageContent').val(''); // Clear the message content
+                    $('#messageContent').val('').trigger('input'); // Clear the message content
                 },
                 error: function () {
                     Swal.fire({
@@ -341,7 +352,7 @@
                 },
                 complete: function () {
                     // Re-enable the button and reset text
-                    $('#sendMessageButton').prop('disabled', false).text('{Lang::T('Send Message')}');
+                    $('#sendMessageButton').prop('disabled', false).html('<i class="fa fa-paper-plane" aria-hidden="true"></i> ' + $('<div>').text('{Lang::T('Send Message')}').html());
                 }
             });
         });

@@ -1,70 +1,58 @@
 {include file="sections/header.tpl"}
 
-<div class="row">
-	<div class="col-sm-12">
-		<div class="panel panel-hovered mb20 panel-primary">
-			<div class="panel-heading">{Lang::T('Bandwidth Plans')}</div>
-			<div class="panel-body">
-				<div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
-					<div class="col-md-8">
-						<form id="site-search" method="post" action="{Text::url('bandwidth/list/')}">
-							<div class="input-group">
-								<div class="input-group-addon">
-									<span class="fa fa-search"></span>
-								</div>
-								<input type="text" name="name" class="form-control"
-									placeholder="{Lang::T('Search by Name')}...">
-								<div class="input-group-btn">
-									<button class="btn btn-success" type="submit">{Lang::T('Search')}</button>
-								</div>
-							</div>
-						</form>
-					</div>
-					<div class="col-md-4">
-						<a href="{Text::url('bandwidth/add')}" class="btn btn-primary btn-block"><i
-								class="ion ion-android-add">
-							</i> {Lang::T('New Bandwidth')}</a>
-					</div>&nbsp;
-				</div>
-				<div class="table-responsive">
-					<table class="table table-bordered table-condensed table-striped table_mobile table-with-loader">
-						<thead>
-							<tr>
-								<th>{Lang::T('Bandwidth Name')}</th>
-								<th>{Lang::T('Rate')}</th>
-								<th>Burst</th>
-								<th>{Lang::T('Manage')}</th>
-							</tr>
-						</thead>
-						<tbody>
-							{foreach $d as $ds}
-								<tr>
-									<td>{$ds['name_bw']}</td>
-									<td>{$ds['rate_down']} {$ds['rate_down_unit']} / {$ds['rate_up']} {$ds['rate_up_unit']}
-									</td>
-									<td>{$ds['burst']}</td>
-									<td>
-										<a href="{Text::url('bandwidth/edit/', $ds['id'])}"
-											class="btn btn-sm btn-warning">{Lang::T('Edit')}</a>
-										<a href="{Text::url('bandwidth/delete/', $ds['id'])}" id="{$ds['id']}"
-											class="btn btn-danger btn-sm"
-											onclick="return ask(this, '{Lang::T('Delete')}?')"><i
-												class="glyphicon glyphicon-trash"></i></a>
-									</td>
-								</tr>
-							{/foreach}
-						</tbody>
-					</table>
-				</div>
-				{include file="pagination.tpl"}
-				<div class="bs-callout bs-callout-info" id="callout-navbar-role">
-					<h4>{Lang::T('Create Bandwidth Package for expired Internet Package')}</h4>
-					<p>{Lang::T('When customer expired, you can move it to Expired Internet Package')}</p>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+<div class="ls">
+    <div class="ls-top">
+        <div></div>
+        <div class="ls-actions">
+            <a href="{Text::url('bandwidth/add')}" class="ls-btn ls-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('New Bandwidth')}</a>
+        </div>
+    </div>
+
+    <div class="ls-card">
+        <form id="site-search" class="ls-bar" method="post" action="{Text::url('bandwidth/list/')}">
+            <div class="ls-search">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <input type="search" autocomplete="off" name="name" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
+            </div>
+            <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
+            <a class="ls-btn" title="{Lang::T('Clear Search Query')}" href="{Text::url('bandwidth/list/')}"><i class="fa fa-undo" aria-hidden="true"></i> {Lang::T('Reset')}</a>
+        </form>
+
+        <div class="ls-scroll">
+            <table class="ls-table table-with-loader">
+                <thead>
+                    <tr>
+                        <th>{Lang::T('Bandwidth Name')}</th>
+                        <th>{Lang::T('Rate')}</th>
+                        <th>Burst</th>
+                        <th class="ls-end">{Lang::T('Manage')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $d as $ds}
+                    <tr>
+                        <td data-label="{Lang::T('Bandwidth Name')}"><b class="ls-strong">{$ds['name_bw']|escape}</b></td>
+                        <td data-label="{Lang::T('Rate')}" class="ls-when">{$ds['rate_down']} {$ds['rate_down_unit']} / {$ds['rate_up']} {$ds['rate_up_unit']}</td>
+                        <td data-label="Burst" class="ls-dim">{$ds['burst']|escape}</td>
+                        <td class="ls-end"><div class="ls-row-actions"><a href="{Text::url('bandwidth/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a><a href="{Text::url('bandwidth/delete/', $ds['id'])}" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')}?')"><i class="fa fa-trash" aria-hidden="true"></i></a></div></td>
+                    </tr>
+                    {foreachelse}
+                    <tr class="ls-none"><td colspan="4">
+                        <div class="ls-empty"><b>{Lang::T('No bandwidth plans found')}</b>
+                            <a href="{Text::url('bandwidth/add')}">{Lang::T('New Bandwidth')}</a>
+                        </div>
+                    </td></tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+        {include file="pagination.tpl"}
+    </div>
+
+    <div class="bs-callout bs-callout-info" id="callout-navbar-role">
+        <h4>{Lang::T('Create Bandwidth Package for expired Internet Package')}</h4>
+        <p>{Lang::T('When customer expired, you can move it to Expired Internet Package')}</p>
+    </div>
 </div>
 
 {include file="sections/footer.tpl"}

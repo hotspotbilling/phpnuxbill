@@ -261,6 +261,12 @@ class Extensions
         }
     }
 
+    /** Query over the marketplace activity rows, newest first, for Paginator::findMany(). */
+    public static function logsQuery()
+    {
+        return ORM::for_table('tbl_logs')->where('type', self::LOG_TYPE)->order_by_desc('id');
+    }
+
     public static function recentLogs(int $limit = 50): array
     {
         try {

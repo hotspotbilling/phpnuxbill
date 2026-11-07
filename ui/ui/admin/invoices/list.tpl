@@ -1,51 +1,43 @@
 {include file="sections/header.tpl"}
 
-<!-- Add a Table for Sent History -->
-<div class="panel panel-default">
-    <div class="panel-heading">{Lang::T('Invoices')}</div>
-    <div class="panel-body" style="overflow: auto;"> 
-        <table class="table table-bordered table-with-loader" id="invoiceTable" style="width:100%">
-            <thead>
-                <tr>
-                    <th>{Lang::T('Invoice No')}</th>
-                    <th>{Lang::T('Customer Name')}</th>
-                    <th>{Lang::T('Email')}</th>
-                    <th>{Lang::T('Address')}</th>
-                    <th>{Lang::T('Amount')}</th>
-                    <th>{Lang::T('Status')}</th>
-                    <th>{Lang::T('Created Date')}</th>
-                    <th>{Lang::T('Due Date')}</th>
-                    <th>{Lang::T('Actions')}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {foreach $invoices as $invoice}
-                <tr>
-                    <td>{$invoice->number}</td>
-                    <td>{$invoice->fullname}</td>
-                    <td>{$invoice->email}</td>
-                    <td>{$invoice->address}</td>
-                    <td>{$invoice->amount}</td>
-                    <td>
-                        {if $invoice->status == 'paid'}
-                            <span class="label label-success">{Lang::T('Paid')}</span>
-                        {elseif $invoice->status == 'unpaid'}
-                            <span class="label label-danger">{Lang::T('Unpaid')}</span>
-                        {else}
-                            <span class="label label-warning">{Lang::T('Pending')}</span>
-                        {/if}
-                    </td>
-                    <td>{$invoice->created_at}</td>
-                    <td>{$invoice->due_date}</td>
-                    <td>
-                        <a href="{$app_url}/system/uploads/invoices/{$invoice->filename}" class="btn btn-primary btn-xs">{Lang::T('View')}</a>
-                        <!-- <a href="javascript:void(0);" class="btn btn-danger btn-xs" onclick="deleteInvoice({$invoice->id});">{Lang::T('Delete')}</a>
-                        <a href="javascript:void(0);" class="btn btn-success btn-xs" onclick="sendInvoice({$invoice->id});">{Lang::T('Send')}</a> -->
-                    </td>
-                </tr>
-                {/foreach}
-            </tbody>
-        </table>
+<div class="ls">
+    <div class="ls-card">
+        <div class="ls-scroll">
+            <table class="ls-table table-with-loader" id="invoiceTable">
+                <thead>
+                    <tr>
+                        <th>{Lang::T('Invoice No')}</th>
+                        <th>{Lang::T('Customer Name')}</th>
+                        <th>{Lang::T('Email')}</th>
+                        <th>{Lang::T('Address')}</th>
+                        <th class="ls-num">{Lang::T('Amount')}</th>
+                        <th>{Lang::T('Status')}</th>
+                        <th>{Lang::T('Created Date')}</th>
+                        <th>{Lang::T('Due Date')}</th>
+                        <th class="ls-end">{Lang::T('Actions')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $invoices as $invoice}
+                    <tr>
+                        <td data-label="{Lang::T('Invoice No')}"><b class="ls-strong">{$invoice->number|escape}</b></td>
+                        <td data-label="{Lang::T('Customer Name')}">{$invoice->fullname|escape}</td>
+                        <td data-label="{Lang::T('Email')}">{$invoice->email|escape}</td>
+                        <td data-label="{Lang::T('Address')}" class="ls-dim">{$invoice->address|escape}</td>
+                        <td data-label="{Lang::T('Amount')}" class="ls-num">{$invoice->amount|escape}</td>
+                        <td data-label="{Lang::T('Status')}">
+                            {if $invoice->status == 'paid'}<span class="ls-pill ls-pill--active">{Lang::T('Paid')}</span>
+                            {elseif $invoice->status == 'unpaid'}<span class="ls-pill ls-pill--banned">{Lang::T('Unpaid')}</span>
+                            {else}<span class="ls-pill ls-pill--inactive">{Lang::T('Pending')}</span>{/if}
+                        </td>
+                        <td data-label="{Lang::T('Created Date')}" class="ls-dim ls-when">{$invoice->created_at|escape}</td>
+                        <td data-label="{Lang::T('Due Date')}" class="ls-dim ls-when">{$invoice->due_date|escape}</td>
+                        <td class="ls-end"><div class="ls-row-actions"><a href="{$app_url}/system/uploads/invoices/{$invoice->filename|escape:'url'}" class="ls-btn ls-btn--sm">{Lang::T('View')}</a></div></td>
+                    </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 <script src="{$app_url}/ui/ui/scripts/jquery.min.js"></script>

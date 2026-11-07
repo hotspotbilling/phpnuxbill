@@ -1554,7 +1554,7 @@ body.fixed .main-sidebar,
   flex-shrink: 0;
 }
 
-/* entries carry two chevrons (font + svg for the shadcn admin theme): the portal uses the font one */
+/* entries carry two chevrons (font + svg, for themes that draw their own): the portal uses the font one */
 .sidebar-menu .pull-right-container > svg.treeview-chevron {
   display: none;
 }

@@ -1,192 +1,140 @@
 {include file="sections/header.tpl"}
 
-<div class="row">
-    <div class="col-sm-12">
-        <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">
-                <div class="btn-group pull-right">
-                    <a class="btn btn-primary btn-xs" title="save" href="{Text::url('services/sync/hotspot')}"
-                        onclick="return ask(this, 'This will sync/send hotspot package to Mikrotik?')"><span
-                            class="glyphicon glyphicon-refresh" aria-hidden="true"></span> sync</a>
-                </div>{Lang::T('Hotspot Plans')}
-            </div>
-            <form id="site-search" method="post" action="{Text::url('services/hotspot/')}">
-                <div class="panel-body">
-                    <div class="row row-no-gutters" style="padding: 5px">
-                        <div class="col-lg-2">
-                            <div class="input-group">
-                                <div class="input-group-btn">
-                                    <a class="btn btn-danger" title="Clear Search Query"
-                                        href="{Text::url('services/hotspot/')}"><span
-                                            class="glyphicon glyphicon-remove-circle"></span></a>
-                                </div>
-                                <input type="text" name="name" class="form-control"
-                                    placeholder="{Lang::T('Search by Name')}...">
-                            </div>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="type1" name="type1">
-                                <option value="">{Lang::T('Prepaid')} &amp; {Lang::T('Postpaid')}</option>
-                                <option value="yes" {if $type1 eq 'yes' }selected{/if}>{Lang::T('Prepaid')}</option>
-                                <option value="no" {if $type1 eq 'no' }selected{/if}>{Lang::T('Postpaid')}</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="type2" name="type2">
-                                <option value="">{Lang::T('Type')}</option>
-                                {foreach $type2s as $t}
-                                    <option value="{$t}" {if $type2 eq $t }selected{/if}>{Lang::T($t)}
-                                    </option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="bandwidth" name="bandwidth">
-                                <option value="">Bandwidth</option>
-                                {foreach $bws as $b}
-                                    <option value="{$b['id']}" {if $bandwidth eq $b['id'] }selected{/if}>
-                                        {$b['name_bw']}
-                                    </option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="type3" name="type3">
-                                <option value="">{Lang::T('Category')}</option>
-                                {foreach $type3s as $t}
-                                    <option value="{$t}" {if $type3 eq $t }selected{/if}>{$t}
-                                    </option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="valid" name="valid">
-                                <option value="">{Lang::T('Validity')}</option>
-                                {foreach $valids as $v}
-                                    <option value="{$v}" {if $valid eq $v }selected{/if}>{$v}
-                                    </option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="router" name="router">
-                                <option value="">{Lang::T('Location')}</option>
-                                {foreach $routers as $r}
-                                    <option value="{$r}" {if $router eq $r }selected{/if}>{$r}</option>
-                                {/foreach}
-                                <option value="radius" {if $router eq 'radius' }selected{/if}>Radius</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="device" name="device">
-                                <option value="">{Lang::T('Device')}</option>
-                                {foreach $devices as $r}
-                                    <option value="{$r}" {if $device eq $r }selected{/if}>{$r}</option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <select class="form-control" id="status" name="status">
-                                <option value="-">{Lang::T('Status')}</option>
-                                <option value="1" {if $status eq '1' }selected{/if}>{Lang::T('Active')}</option>
-                                <option value="0" {if $status eq '0' }selected{/if}>{Lang::T('Not Active')}</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-1 col-xs-8">
-                            <button class="btn btn-success btn-block" type="submit"><span
-                                    class="fa fa-search"></span></button>
-                        </div>
-                        <div class="col-lg-1 col-xs-4">
-                            <a href="{Text::url('services/add')}" class="btn btn-primary btn-block"
-                                title="{Lang::T('New Service Package')}"><i class="ion ion-android-add"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            <div class="table-responsive">
-                <div style="margin-left: 5px; margin-right: 5px;">
-                    <table class="table table-bordered table-striped table-condensed table-with-loader">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th colspan="5" class="text-center">{Lang::T('Internet Package')}</th>
-                                <th colspan="2" class="text-center" style="background-color: rgb(246, 244, 244);">
-                                    {Lang::T('Limit')}</th>
-                                <th colspan="2"></th>
-                                <th colspan="2" class="text-center" style="background-color: rgb(243, 241, 172);">
-                                    {Lang::T('Expired')}</th>
-                                <th colspan="3"></th>
-                            </tr>
-                            <tr>
-                                <th>{Lang::T('Name')}</th>
-                                <th>{Lang::T('Type')}</th>
-                                <th><a href="{Text::url('bandwidth/list')}">Bandwidth</a></th>
-                                <th>{Lang::T('Category')}</th>
-                                <th>{Lang::T('Price')}</th>
-                                <th>{Lang::T('Validity')}</th>
-                                <th style="background-color: rgb(246, 244, 244);">{Lang::T('Time')}</th>
-                                <th style="background-color: rgb(246, 244, 244);">{Lang::T('Data')}</th>
-                                <th><a href="{Text::url('routers/list')}">{Lang::T('Location')}</a></th>
-                                <th>{Lang::T('Device')}</th>
-                                <th style="background-color: rgb(243, 241, 172);">{Lang::T('Internet Package')}</th>
-                                <th style="background-color: rgb(243, 241, 172);">{Lang::T('Date')}</th>
-                                <th>{Lang::T('ID')}</th>
-                                <th>{Lang::T('Manage')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {foreach $d as $ds}
-                                <tr {if $ds['enabled'] !=1}class="danger" title="disabled" {elseif $ds['prepaid'] !='yes'
-                                            }class="warning" title="Postpaid" {/if}>
-                                    <td class="headcol">{$ds['name_plan']}</td>
-                                    <td>{if $ds['prepaid'] == no}<b>Postpaid</b>{else}Prepaid{/if} {$ds['plan_type']}</td>
-                                    <td>{$ds['name_bw']}</td>
-                                    <td>{$ds['typebp']}</td>
-                                    <td>{Lang::moneyFormat($ds['price'])}
-                                        {if !empty($ds['price_old'])}
-                                            <sup
-                                                style="text-decoration: line-through; color: red">{Lang::moneyFormat($ds['price_old'])}</sup>
-                                        {/if}
-                                    </td>
-                                    <td>{$ds['validity']} {$ds['validity_unit']}</td>
-                                    <td>{$ds['time_limit']} {$ds['time_unit']}</td>
-                                    <td>{$ds['data_limit']} {$ds['data_unit']}</td>
-                                    <td>
-                                        {if $ds['is_radius']}
-                                            <span class="label label-primary">RADIUS</span>
-                                        {else}
-                                            {if $ds['routers']!=''}
-                                                <a href="{Text::url('routers/edit/0&name=')}{$ds['routers']}">{$ds['routers']}</a>
-                                            {/if}
-                                        {/if}
-                                    </td>
-                                    <td>{$ds['device']}</td>
-                                    <td>{if $ds['plan_expired']}<a
-                                            href="{Text::url('services/edit/')}{$ds['plan_expired']}">{Lang::T('Yes')}</a>{else}{Lang::T('No')}
-                                        {/if}</td>
-                                    <td>{if $ds['prepaid'] == no}{$ds['expired_date']}{/if}</td>
-                                    <td>{$ds['id']}</td>
-                                    <td>
-                                        <a href="{Text::url('services/edit/')}{$ds['id']}"
-                                            class="btn btn-info btn-xs">{Lang::T('Edit')}</a>
-                                        <a href="{Text::url('services/delete/')}{$ds['id']}" id="{$ds['id']}"
-                                            onclick="return ask(this, '{Lang::T('Delete')}?')"
-                                            class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
-                                    </td>
-                                </tr>
-                            {/foreach}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="panel-footer">
-                {include file="pagination.tpl"}
-                <div class="bs-callout bs-callout-info" id="callout-navbar-role">
-                    <h4>{Lang::T('Create expired Internet Package')}</h4>
-                    <p>{Lang::T('When customer expired, you can move it to Expired Internet Package')}</p>
-                </div>
-            </div>
+<div class="ls">
+    <div class="ls-top">
+        <div></div>
+        <div class="ls-actions">
+            <a class="ls-btn" title="{Lang::T('Sync')}" href="{Text::url('services/sync/hotspot')}"
+                onclick="return ask(this, '{Lang::T('This will sync/send hotspot package to Mikrotik')}?')"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Sync')}</a>
+            <a href="{Text::url('services/add')}" class="ls-btn ls-btn--primary" title="{Lang::T('New Service Package')}"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('Add')}</a>
         </div>
+    </div>
+
+    <div class="ls-card">
+        <form id="site-search" class="ls-bar" method="post" action="{Text::url('services/hotspot/')}">
+            <div class="ls-search">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <input type="search" autocomplete="off" name="name" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
+            </div>
+            <label class="ls-field"><span>{Lang::T('Prepaid')}</span>
+                <select id="type1" name="type1">
+                    <option value="">{Lang::T('Prepaid')} &amp; {Lang::T('Postpaid')}</option>
+                    <option value="yes" {if $type1 eq 'yes' }selected{/if}>{Lang::T('Prepaid')}</option>
+                    <option value="no" {if $type1 eq 'no' }selected{/if}>{Lang::T('Postpaid')}</option>
+                </select>
+            </label>
+            <label class="ls-field"><span>{Lang::T('Type')}</span>
+                <select id="type2" name="type2">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $type2s as $t}
+                    <option value="{$t|escape}" {if $type2 eq $t }selected{/if}>{Lang::T($t)}</option>
+                    {/foreach}
+                </select>
+            </label>
+            <label class="ls-field"><span>{Lang::T('Bandwidth')}</span>
+                <select id="bandwidth" name="bandwidth">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $bws as $b}
+                    <option value="{$b['id']}" {if $bandwidth eq $b['id'] }selected{/if}>{$b['name_bw']|escape}</option>
+                    {/foreach}
+                </select>
+            </label>
+            <label class="ls-field"><span>{Lang::T('Category')}</span>
+                <select id="type3" name="type3">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $type3s as $t}
+                    <option value="{$t|escape}" {if $type3 eq $t }selected{/if}>{$t|escape}</option>
+                    {/foreach}
+                </select>
+            </label>
+            <label class="ls-field"><span>{Lang::T('Validity')}</span>
+                <select id="valid" name="valid">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $valids as $v}
+                    <option value="{$v|escape}" {if $valid eq $v }selected{/if}>{$v|escape}</option>
+                    {/foreach}
+                </select>
+            </label>
+            <label class="ls-field"><span>{Lang::T('Location')}</span>
+                <select id="router" name="router">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $routers as $r}
+                    <option value="{$r|escape}" {if $router eq $r }selected{/if}>{$r|escape}</option>
+                    {/foreach}
+                    <option value="radius" {if $router eq 'radius' }selected{/if}>Radius</option>
+                </select>
+            </label>
+            <label class="ls-field"><span>{Lang::T('Device')}</span>
+                <select id="device" name="device">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $devices as $r}
+                    <option value="{$r|escape}" {if $device eq $r }selected{/if}>{$r|escape}</option>
+                    {/foreach}
+                </select>
+            </label>
+            <label class="ls-field"><span>{Lang::T('Status')}</span>
+                <select id="status" name="status">
+                    <option value="-">{Lang::T('All')}</option>
+                    <option value="1" {if $status eq '1' }selected{/if}>{Lang::T('Active')}</option>
+                    <option value="0" {if $status eq '0' }selected{/if}>{Lang::T('Not Active')}</option>
+                </select>
+            </label>
+            <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
+            <a class="ls-btn" title="{Lang::T('Clear Search Query')}" href="{Text::url('services/hotspot/')}"><i class="fa fa-undo" aria-hidden="true"></i> {Lang::T('Reset')}</a>
+        </form>
+
+        <div class="ls-scroll">
+            <table class="ls-table table-with-loader">
+                <thead>
+                    <tr>
+                        <th>{Lang::T('Name')}</th>
+                        <th>{Lang::T('Type')}</th>
+                        <th><a href="{Text::url('bandwidth/list')}">{Lang::T('Bandwidth')}</a></th>
+                        <th>{Lang::T('Category')}</th>
+                        <th class="ls-num">{Lang::T('Price')}</th>
+                        <th>{Lang::T('Validity')}</th>
+                        <th>{Lang::T('Time')} / {Lang::T('Data')}</th>
+                        <th><a href="{Text::url('routers/list')}">{Lang::T('Location')}</a></th>
+                        <th>{Lang::T('Device')}</th>
+                        <th>{Lang::T('Internet Package')}</th>
+                        <th>{Lang::T('Date')}</th>
+                        <th>{Lang::T('ID')}</th>
+                        <th class="ls-end">{Lang::T('Manage')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $d as $ds}
+                    <tr>
+                        <td data-label="{Lang::T('Name')}"><b class="ls-strong">{$ds['name_plan']|escape}</b>{if $ds['enabled'] != 1} <span class="ls-pill ls-pill--banned">{Lang::T('Disabled')}</span>{/if}</td>
+                        <td data-label="{Lang::T('Type')}">{$ds['plan_type']|escape} {if $ds['prepaid'] != 'yes'}<em class="ls-chip">{Lang::T('Postpaid')}</em>{else}<span class="ls-dim">{Lang::T('Prepaid')}</span>{/if}</td>
+                        <td data-label="{Lang::T('Bandwidth')}">{$ds['name_bw']|escape}</td>
+                        <td data-label="{Lang::T('Category')}">{$ds['typebp']|escape}</td>
+                        <td data-label="{Lang::T('Price')}" class="ls-num">{Lang::moneyFormat($ds['price'])}{if !empty($ds['price_old'])} <small class="ls-dim" style="text-decoration: line-through">{Lang::moneyFormat($ds['price_old'])}</small>{/if}</td>
+                        <td data-label="{Lang::T('Validity')}" class="ls-when">{$ds['validity']} {$ds['validity_unit']}</td>
+                        <td data-label="{Lang::T('Limit')}" class="ls-when">{if $ds['time_limit']}{$ds['time_limit']} {$ds['time_unit']}{/if}{if $ds['time_limit'] && $ds['data_limit']} / {/if}{if $ds['data_limit']}{$ds['data_limit']} {$ds['data_unit']}{/if}{if !$ds['time_limit'] && !$ds['data_limit']}<span class="ls-dim">-</span>{/if}</td>
+                        <td data-label="{Lang::T('Location')}">{if $ds['is_radius']}<span class="ls-pill">RADIUS</span>{elseif $ds['routers'] != ''}<a href="{Text::url('routers/edit/0&name=')}{$ds['routers']|escape:'url'}">{$ds['routers']|escape}</a>{/if}</td>
+                        <td data-label="{Lang::T('Device')}">{$ds['device']|escape}</td>
+                        <td data-label="{Lang::T('Internet Plan')}">{if $ds['plan_expired']}<a href="{Text::url('services/edit/', $ds['plan_expired'])}">{Lang::T('Yes')}</a>{else}<span class="ls-dim">{Lang::T('No')}</span>{/if}</td>
+                        <td data-label="{Lang::T('Date')}" class="ls-dim ls-when">{if $ds['prepaid'] == 'no'}{$ds['expired_date']}{/if}</td>
+                        <td data-label="ID" class="ls-dim">{$ds['id']}</td>
+                        <td class="ls-end"><div class="ls-row-actions"><a href="{Text::url('services/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a><a href="{Text::url('services/delete/', $ds['id'])}" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')}?')"><i class="fa fa-trash" aria-hidden="true"></i></a></div></td>
+                    </tr>
+                    {foreachelse}
+                    <tr class="ls-none"><td colspan="13">
+                        <div class="ls-empty"><b>{Lang::T('No plans found')}</b>
+                            <a href="{Text::url('services/add')}">{Lang::T('Add')}</a>
+                        </div>
+                    </td></tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+        {include file="pagination.tpl"}
+    </div>
+
+    <div class="bs-callout bs-callout-info" id="callout-navbar-role">
+        <h4>{Lang::T('Create expired Internet Package')}</h4>
+        <p>{Lang::T('When customer expired, you can move it to Expired Internet Package')}</p>
     </div>
 </div>
 

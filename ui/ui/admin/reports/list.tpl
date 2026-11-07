@@ -82,59 +82,54 @@
                 </div>
             </div>
         </span>
-        <div class="box box-primary box-solid">
-            <div class="table-responsive">&nbsp;&nbsp;
-                <div style="margin-left: 5px; margin-right: 5px;">
-                    <table class="table table-bordered table-condensed">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <a href="{Text::url('export/print-by-date&')}{$filter}" class="btn btn-default"
-                                        target="_blank"><i class="ion ion-printer"></i></a>
-                                    <a href="{Text::url('export/pdf-by-date&')}{$filter}" class="btn btn-default"><i
-                                            class="fa fa-file-pdf-o"></i></a>
-                                </th>
-                                <th colspan="8"></th>
-                            </tr>
-                            <tr>
-                                <th>{Lang::T('Username')}</th>
-                                <th>{Lang::T('Fullname')}</th>
-                                <th>{Lang::T('Type')}</th>
-                                <th>{Lang::T('Plan Name')}</th>
-                                <th>{Lang::T('Plan Price')}</th>
-                                <th>{Lang::T('Created On')}</th>
-                                <th>{Lang::T('Expires On')}</th>
-                                <th>{Lang::T('Method')}</th>
-                                <th>{Lang::T('Routers')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {foreach $d as $ds}
-                                <tr>
-                                    <td>{$ds['username']}</td>
-                                    <td>{$ds['fullname']}</td>
-                                    <td>{$ds['type']}</td>
-                                    <td>{$ds['plan_name']}</td>
-                                    <td class="text-right">{Lang::moneyFormat($ds['price'])}</td>
-                                    <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
-                                    <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
-                                    <td>{$ds['method']}</td>
-                                    <td>{$ds['routers']}</td>
-                                </tr>
-                            {/foreach}
-                            <tr>
-                                <th>{Lang::T('Total')}</th>
-                                <th class="text-right">{Lang::moneyFormat($dr)}</th>
-                                <td colspan="7"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="ls">
+        <div class="ls-card">
+            <div class="ls-bar">
+                <a href="{Text::url('export/print-by-date&')}{$filter}" class="ls-btn" target="_blank" title="{Lang::T('Print')}"><i class="fa fa-print" aria-hidden="true"></i> {Lang::T('Print')}</a>
+                <a href="{Text::url('export/pdf-by-date&')}{$filter}" class="ls-btn" title="PDF"><i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF</a>
             </div>
-            <div class="box-footer">
-                <p class="text-center small text-info">{Lang::T('All Transactions at Date')}:
-                    {Lang::dateAndTimeFormat($sd, $ts)} - {Lang::dateAndTimeFormat($ed, $te)}</p>
+            <div class="ls-scroll">
+                <table class="ls-table">
+                    <thead>
+                        <tr>
+                            <th>{Lang::T('Username')}</th>
+                            <th>{Lang::T('Fullname')}</th>
+                            <th>{Lang::T('Type')}</th>
+                            <th>{Lang::T('Plan Name')}</th>
+                            <th class="ls-num">{Lang::T('Plan Price')}</th>
+                            <th>{Lang::T('Created On')}</th>
+                            <th>{Lang::T('Expires On')}</th>
+                            <th>{Lang::T('Method')}</th>
+                            <th>{Lang::T('Routers')}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {foreach $d as $ds}
+                        <tr>
+                            <td data-label="{Lang::T('Username')}"><b class="ls-strong">{$ds['username']|escape}</b></td>
+                            <td data-label="{Lang::T('Fullname')}">{$ds['fullname']|escape}</td>
+                            <td data-label="{Lang::T('Type')}"><em class="ls-chip">{$ds['type']|escape}</em></td>
+                            <td data-label="{Lang::T('Plan Name')}">{$ds['plan_name']|escape}</td>
+                            <td data-label="{Lang::T('Plan Price')}" class="ls-num">{Lang::moneyFormat($ds['price'])}</td>
+                            <td data-label="{Lang::T('Created On')}" class="ls-when text-success">{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
+                            <td data-label="{Lang::T('Expires On')}" class="ls-when text-danger">{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
+                            <td data-label="{Lang::T('Method')}" class="ls-dim">{$ds['method']|escape}</td>
+                            <td data-label="{Lang::T('Routers')}" class="ls-dim">{$ds['routers']|escape}</td>
+                        </tr>
+                        {foreachelse}
+                        <tr class="ls-none"><td colspan="9"><div class="ls-empty"><b>{Lang::T('No transactions found')}</b></div></td></tr>
+                        {/foreach}
+                        <tr>
+                            <th>{Lang::T('Total')}</th>
+                            <th class="ls-num" colspan="4">{Lang::moneyFormat($dr)}</th>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+            <p class="text-center small text-info" style="margin: 0; padding: 10px;">{Lang::T('All Transactions at Date')}:
+                {Lang::dateAndTimeFormat($sd, $ts)} - {Lang::dateAndTimeFormat($ed, $te)}</p>
+        </div>
         </div>
     </div>
 </div>

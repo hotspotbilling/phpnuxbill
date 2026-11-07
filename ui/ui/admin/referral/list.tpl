@@ -4,8 +4,6 @@
     .stat-card {
         position: relative;
         overflow: hidden;
-        border: none;
-        background: #fff;
         margin-bottom: 15px;
         transition: all 0.3s ease;
     }
@@ -86,6 +84,21 @@
         border-left: 4px solid #2980b9;
     }
 
+    /* Every card on this page: the same transparent surface, neutral border and radius as the dashboard cards, in light and dark mode */
+    .ref-page .panel, .ref-page .stat-card {
+        background: transparent;
+        border: 1px solid rgba(127, 127, 127, 0.28);
+        border-radius: 12px;
+        box-shadow: none;
+    }
+    .ref-page .stat-card.panel-success { border-left: 4px solid #27ae60; }
+    .ref-page .stat-card.panel-warning { border-left: 4px solid #f39c12; }
+    .ref-page .stat-card.panel-info { border-left: 4px solid #3498db; }
+    .ref-page .stat-card.panel-primary { border-left: 4px solid #2980b9; }
+    .ref-page .stat-card:hover { box-shadow: none; border-top-color: rgba(127, 127, 127, 0.5); border-right-color: rgba(127, 127, 127, 0.5); border-bottom-color: rgba(127, 127, 127, 0.5); }
+    .ref-page .panel-heading { background: transparent; border-bottom: 1px solid rgba(127, 127, 127, 0.22); border-radius: 12px 12px 0 0; }
+    .ref-page .stat-label { color: inherit; opacity: 0.7; }
+
     /* Chart Panels */
     .panel-heading {
         display: flex;
@@ -99,7 +112,7 @@
 </style>
 
 <!-- Rewards Overview Section -->
-<div class="row">
+<div class="row ref-page">
     <div class="col-md-12">
         <!-- Stats Cards -->
         <div class="row mb20">
@@ -211,29 +224,26 @@
                     <div class="panel-body">
                         {if $top_referrers && count($top_referrers) > 0}
                         <div class="table-responsive">
-                            <table class="table table-striped table-sm">
+                            <div class="ls"><div class="ls-scroll"><table class="ls-table">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>{Lang::T('Name')}</th>
-                                        <th>{Lang::T('Rewards')}</th>
-                                        <th>{Lang::T('Amount')} ({$_c['currency_code']})</th>
+                                        <th class="ls-num">{Lang::T('Rewards')}</th>
+                                        <th class="ls-num">{Lang::T('Amount')} ({$_c['currency_code']})</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {foreach $top_referrers as $idx => $ref}
                                     <tr>
-                                        <td><strong>{$idx + 1}</strong></td>
-                                        <td>
-                                            <strong>{$ref['fullname']|escape}</strong><br>
-                                            <small>{$ref['username']|escape}</small>
-                                        </td>
-                                        <td><span class="badge badge-primary">{$ref['reward_count']}</span></td>
-                                        <td><strong>{$ref['total_earned']|number_format:2}</strong></td>
+                                        <td class="ls-dim">{$idx + 1}</td>
+                                        <td data-label="{Lang::T('Name')}"><b class="ls-strong">{$ref['fullname']|escape}</b><small class="ls-dim">{$ref['username']|escape}</small></td>
+                                        <td data-label="{Lang::T('Rewards')}" class="ls-num">{$ref['reward_count']}</td>
+                                        <td data-label="{Lang::T('Amount')}" class="ls-num"><b class="ls-strong">{$ref['total_earned']|number_format:2}</b></td>
                                     </tr>
                                     {/foreach}
                                 </tbody>
-                            </table>
+                            </table></div></div>
                         </div>
                         {else}
                         <div class="text-center text-muted" style="padding: 30px;">
@@ -301,15 +311,16 @@
     </div>
 
     <div class="col-sm-12">
-        <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">
-                {Lang::T('Referral Relationships')}
-                <a href="{getUrl('referrals/settings')}" class="btn btn-primary btn-xs pull-right"><i
-                        class="ion ion-gear-a"></i> {Lang::T('Settings')}</a>
+        <div class="ls">
+            <div class="ls-top">
+                <div></div>
+                <div class="ls-actions">
+                    <a href="{getUrl('referrals/settings')}" class="ls-btn"><i class="fa fa-cog" aria-hidden="true"></i> {Lang::T('Settings')}</a>
+                </div>
             </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
+            <div class="ls-card">
+                <div class="ls-scroll">
+                    <table class="ls-table">
                         <thead>
                             <tr>
                                 <th>{Lang::T('Date')}</th>
@@ -318,90 +329,40 @@
                                 <th>{Lang::T('Referred')}</th>
                                 <th>{Lang::T('Referred Status')}</th>
                                 <th>{Lang::T('Referral Code')}</th>
-                                <th>{Lang::T('Rewards')}</th>
-                                <th>{Lang::T('Earned')} ({$_c['currency_code']})</th>
+                                <th class="ls-num">{Lang::T('Rewards')}</th>
+                                <th class="ls-num">{Lang::T('Earned')} ({$_c['currency_code']})</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {if $referrals && count($referrals) > 0}
                             {foreach $referrals as $r}
                             <tr>
-                                <td>
-                                    <small>{$r['created_at']|escape}</small>
+                                <td data-label="{Lang::T('Date')}" class="ls-dim ls-when">{$r['created_at']|escape}</td>
+                                <td data-label="{Lang::T('Referrer')}">
+                                    <b class="ls-strong">{$r['referrer_name']|escape}</b>
+                                    <small class="ls-dim">{$r['referrer_username']|escape}{if $r['referrer_email']} &middot; {$r['referrer_email']|escape}{/if}</small>
                                 </td>
-                                <td>
-                                    <strong>{$r['referrer_name']|escape}</strong><br>
-                                    <small>{$r['referrer_username']|escape}</small>
-                                    {if $r['referrer_email']}
-                                        <br><small style="color: #7f8c8d;">{$r['referrer_email']|escape}</small>
-                                    {/if}
+                                <td data-label="{Lang::T('Referrer Status')}">{if $r['referrer_status'] == 'Active'}<span class="ls-pill ls-pill--active">{Lang::T('Active')}</span>{elseif $r['referrer_status'] == 'Inactive'}<span class="ls-pill ls-pill--inactive">{Lang::T('Inactive')}</span>{else}<span class="ls-pill">{$r['referrer_status']|escape}</span>{/if}</td>
+                                <td data-label="{Lang::T('Referred')}">
+                                    <b class="ls-strong">{$r['referred_name']|escape}</b>
+                                    <small class="ls-dim">{$r['referred_username']|escape}{if $r['referred_email']} &middot; {$r['referred_email']|escape}{/if}</small>
                                 </td>
-                                <td>
-                                    {if $r['referrer_status'] == 'Active'}
-                                        <span class="label label-success">{Lang::T('Active')}</span>
-                                    {elseif $r['referrer_status'] == 'Inactive'}
-                                        <span class="label label-warning">{Lang::T('Inactive')}</span>
-                                    {else}
-                                        <span class="label label-default">{$r['referrer_status']|escape}</span>
-                                    {/if}
-                                </td>
-                                <td>
-                                    <strong>{$r['referred_name']|escape}</strong><br>
-                                    <small>{$r['referred_username']|escape}</small>
-                                    {if $r['referred_email']}
-                                        <br><small style="color: #7f8c8d;">{$r['referred_email']|escape}</small>
-                                    {/if}
-                                </td>
-                                <td>
-                                    {if $r['referred_status'] == 'Active'}
-                                        <span class="label label-success">{Lang::T('Active')}</span>
-                                    {elseif $r['referred_status'] == 'Inactive'}
-                                        <span class="label label-warning">{Lang::T('Inactive')}</span>
-                                    {else}
-                                        <span class="label label-default">{$r['referred_status']|escape}</span>
-                                    {/if}
-                                </td>
-                                <td>
-                                    <code style="background: #f5f5f5; padding: 4px 8px; border-radius: 3px;">
-                                        {$r['referral_code']|escape}
-                                    </code>
-                                </td>
-                                <td>
-                                    {if $r['reward_count'] > 0}
-                                        <span class="badge badge-info" title="Referrer: {$r['referrer_reward_count']}, Referred: {$r['referred_reward_count']}">{$r['reward_count']}</span>
-                                    {else}
-                                        <span class="badge badge-default">0</span>
-                                    {/if}
-                                </td>
-                                <td>
+                                <td data-label="{Lang::T('Referred Status')}">{if $r['referred_status'] == 'Active'}<span class="ls-pill ls-pill--active">{Lang::T('Active')}</span>{elseif $r['referred_status'] == 'Inactive'}<span class="ls-pill ls-pill--inactive">{Lang::T('Inactive')}</span>{else}<span class="ls-pill">{$r['referred_status']|escape}</span>{/if}</td>
+                                <td data-label="{Lang::T('Referral Code')}"><em class="ls-chip">{$r['referral_code']|escape}</em></td>
+                                <td data-label="{Lang::T('Rewards')}" class="ls-num"><span title="Referrer: {$r['referrer_reward_count']}, Referred: {$r['referred_reward_count']}">{$r['reward_count']|default:0}</span></td>
+                                <td data-label="{Lang::T('Earned')}" class="ls-num">
                                     {if $r['total_earned'] > 0}
-                                        <div style="font-size: 13px;">
-                                            <strong style="color: #27ae60;">{$_c['currency_code']} {$r['total_earned']|number_format:2}</strong>
-                                        </div>
-                                        <div style="font-size: 11px; color: #7f8c8d; margin-top: 2px;">
-                                            <span title="Rewards earned by referrer">{$_c['currency_code']} {$r['referrer_earned']|number_format:2}</span>
-                                            <span style="color: #bdc3c7;"> • </span>
-                                            <span title="Rewards earned by referred customer">{$_c['currency_code']} {$r['referred_earned']|number_format:2}</span>
-                                        </div>
-                                    {else}
-                                        <span style="color: #95a5a6;">-</span>
-                                    {/if}
+                                    <b class="ls-strong">{$_c['currency_code']} {$r['total_earned']|number_format:2}</b>
+                                    <small class="ls-dim" style="display:block">{$r['referrer_earned']|number_format:2} &middot; {$r['referred_earned']|number_format:2}</small>
+                                    {else}<span class="ls-dim">-</span>{/if}
                                 </td>
                             </tr>
+                            {foreachelse}
+                            <tr class="ls-none"><td colspan="8"><div class="ls-empty"><b>{Lang::T('No referral relationships found')}</b></div></td></tr>
                             {/foreach}
-                            {else}
-                            <tr>
-                                <td colspan="8" class="text-center text-muted">
-                                    {Lang::T('No referral relationships found')}
-                                </td>
-                            </tr>
-                            {/if}
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer">
-                    {include file="pagination.tpl"}
-                </div>
+                {include file="pagination.tpl"}
             </div>
         </div>
     </div>
