@@ -576,12 +576,13 @@ function copyText(btn, text) {
 function toggleSecret(inputId, btn) {
     var input = document.getElementById(inputId);
     if (!input) return;
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.innerHTML = '<i class="fa fa-eye-slash"></i>';
-    } else {
-        input.type = 'password';
-        btn.innerHTML = '<i class="fa fa-eye"></i>';
+    // swap the icon's class in place (replacing the button's content re-measures the box and the row jumps)
+    var icon = btn.querySelector('i');
+    var hide = input.type === 'password';
+    input.type = hide ? 'text' : 'password';
+    if (icon) {
+        icon.classList.toggle('fa-eye', !hide);
+        icon.classList.toggle('fa-eye-slash', hide);
     }
 }
 </script>

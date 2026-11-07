@@ -1,152 +1,123 @@
 {include file="sections/header.tpl"}
 
-<div class="row">
-    <div class="col-sm-12">
-        <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">
-                {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                <div class="btn-group pull-right">
-                    <a class="btn btn-primary btn-xs" title="save" href="{Text::url('')}plan/sync"
-                        onclick="return ask(this, '{Lang::T(" This will sync dan send Customer active package to
-                        Mikrotik")}?')"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-                        {Lang::T("Sync")}</a>
-                </div>
-                {* <div class="btn-group pull-right">
-                    <a class="btn btn-info btn-xs" title="save" href="{Text::url('plan/csv',$append_url)}"
-                        onclick="return ask(this, '{Lang::T(" This will export to CSV?")}')"><span
-                            class="glyphicon glyphicon-download" aria-hidden="true"></span> CSV</a>
-                </div> *}
-                {/if}
-                &nbsp;
-                {Lang::T('Active Customers')}
-            </div>
-            <form id="site-search" method="post" action="{Text::url('')}plan/list/">
-                <div class="panel-body">
-                    <div class="row row-no-gutters" style="padding: 5px">
-                        <div class="col-lg-2">
-                            <div class="input-group">
-                                <div class="input-group-btn">
-                                    <a class="btn btn-danger" title="Clear Search Query"
-                                        href="{Text::url('')}plan/list"><span
-                                            class="glyphicon glyphicon-remove-circle"></span></a>
-                                </div>
-                                <input type="text" name="search" class="form-control" placeholder="{Lang::T("
-                                    Search")}..." value="{$search}">
-                            </div>
-                        </div>
-                        <div class="col-lg-2 col-xs-4">
-                            <select class="form-control" id="router" name="router">
-                                <option value="">{Lang::T("Location")}</option>
-                                {foreach $routers as $r}
-                                <option value="{$r}" {if $router eq $r }selected{/if}>{$r}
-                                </option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="col-lg-2 col-xs-4">
-                            <select class="form-control" id="plan" name="plan">
-                                <option value="">{Lang::T("Plan Name")}</option>
-                                {foreach $plans as $p}
-                                <option value="{$p['id']}" {if $plan eq $p['id'] }selected{/if}>{$p['name_plan']}
-                                </option>
-                                {/foreach}
-                            </select>
-                        </div>
-                        <div class="col-lg-2 col-xs-4">
-                            <select class="form-control" id="status" name="status">
-                                <option value="-">{Lang::T("Status")}</option>
-                                <option value="on" {if $status eq 'on' }selected{/if}>{Lang::T("Active")}</option>
-                                <option value="off" {if $status eq 'off' }selected{/if}>{Lang::T("Expired")}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 col-xs-6">
-                            <button class="btn btn-success btn-block" type="submit"><span
-                                    class="fa fa-search"></span></button>
-                        </div>
-                        <div class="col-md-2 col-xs-6">
-                            <a href="{Text::url('')}plan/recharge" class="btn btn-primary btn-block"><i
-                                    class="ion ion-android-add">
-                                </i> {Lang::T("Recharge Account")}</a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            <div class="table-responsive">
-                <div style="margin-left: 5px; margin-right: 5px;">&nbsp;
-                    <table id="datatable" class="table table-bordered table-striped table-condensed table-with-loader">
-                        <thead>
-                            <tr>
-                                <th>{Lang::T("Username")}</th>
-                                <th>{Lang::T("Plan Name")}</th>
-                                <th>{Lang::T("Type")}</th>
-                                <th>{Lang::T("Created On")}</th>
-                                <th>{Lang::T("Expires On")}</th>
-                                <th>{Lang::T("Status")}</th>
-                                <th>{Lang::T("Method")}</th>
-                                <th><a href="{Text::url('')}routers/list">{Lang::T("Location")}</a></th>
-                                <th>{Lang::T("Manage")}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {foreach $d as $ds}
-                            <tr>
-                                <td>
-                                    {if $ds['customer_id'] == '0'}
-                                    <a
-                                        href="{Text::url('plan/voucher/&search=')}{$ds['username']}">{$ds['username']}</a>
-                                    {else}
-                                    <a href="{Text::url('customers/viewu/')}{$ds['username']}">{$ds['username']}</a>
-                                    {/if}
-                                </td>
-                                <td>
-                                    {if $ds['type'] == 'Hotspot'}
-                                    <a href="{Text::url('')}services/edit/{$ds['plan_id']}">{$ds['namebp']}</a>
-                                    <span
-                                        api-get-text="{Text::url('')}autoload/customer_is_active/{$ds['username']}/{$ds['plan_id']}"></span>
-                                    {elseif $ds['type'] == 'PPPOE'}
-                                    <a href="{Text::url('')}services/pppoe-edit/{$ds['plan_id']}">{$ds['namebp']}</a>
-                                    <span
-                                        api-get-text="{Text::url('')}autoload/customer_is_active/{$ds['username']}/{$ds['plan_id']}"></span>
-                                    {elseif $ds['type'] == 'VPN'}
-                                    <a href="{Text::url('')}services/vpn-edit/{$ds['plan_id']}">{$ds['namebp']}</a>
-                                    {/if}
-
-                                </td>
-                                <td>{$ds['type']}</td>
-                                <td>{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
-                                <td>{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
-                                <td>
-                                    {if $ds['status']=='off' }
-                                    <span class="label label-danger"><i class="fa fa-cancel" aria-hidden="true"></i> {Lang::T("Expired")}
-                                    </span>
-                                    {else}
-                                    <span class="label label-success"><i class="fa fa-check-circle" aria-hidden="true"></i> {Lang::T("Active")}
-                                    </span>
-                                    {/if}
-                                </td>
-                                <td>{$ds['method']}</td>
-                                <td>{$ds['routers']}</td>
-                                <td>
-                                    <a href="{Text::url('')}plan/edit/{$ds['id']}" class="btn btn-warning btn-xs"
-                                        style="color: black;">{Lang::T("Edit")}</a>
-                                    {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
-                                    <a href="{Text::url('')}plan/delete/{$ds['id']}" id="{$ds['id']}"
-                                        onclick="return ask(this, '{Lang::T(" Delete")}?')"
-                                        class="btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></a>
-                                    {/if}
-                                    {if $ds['status']=='off' && $_c['extend_expired']}
-                                    <a href="javascript:extend('{$ds['id']}')"
-                                        class="btn btn-info btn-xs">{Lang::T("Extend")}</a>
-                                    {/if}
-                                </td>
-                            </tr>
-                            {/foreach}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {include file="pagination.tpl"}
+<div class="cl">
+    <div class="cl-top">
+        <p class="cl-sub">{($counts['on'] + $counts['off'])|number_format} {Lang::T('Active Customers')}{if $counts['off'] > 0}, {$counts['off']|number_format} {Lang::T('Expired')}{/if}</p>
+        <div class="cl-actions">
+            {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+            <a class="cl-btn" title="{Lang::T('Sync')}" href="{Text::url('')}plan/sync"
+                onclick="return ask(this, '{Lang::T('This will sync dan send Customer active package to Mikrotik')}?')"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Sync')}</a>
+            {/if}
+            <a href="{Text::url('')}plan/recharge" class="cl-btn cl-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('Recharge Account')}</a>
         </div>
+    </div>
+
+    <div class="cl-tabs" role="tablist" aria-label="{Lang::T('Status')}">
+        {$tabUrl = "&search={$search|escape:'url'}&router={$router|escape:'url'}&plan={$plan|escape:'url'}&status="}
+        <a class="cl-tab{if $status eq '' || $status eq '-'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, '-')}" role="tab">{Lang::T('All')} <small>{($counts['on'] + $counts['off'])|number_format}</small></a>
+        <a class="cl-tab{if $status eq 'on'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, 'on')}" role="tab">{Lang::T('Active')} <small>{$counts['on']|number_format}</small></a>
+        <a class="cl-tab{if $status eq 'off'} is-on{/if}" href="{Text::url('plan/list', $tabUrl, 'off')}" role="tab">{Lang::T('Expired')} <small>{$counts['off']|number_format}</small></a>
+    </div>
+
+    <div class="cl-card">
+        <form id="site-search" class="cl-bar" method="post" action="{Text::url('')}plan/list/">
+            <input type="hidden" name="status" value="{$status|escape}">
+            <div class="cl-search">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <input type="search" autocomplete="off" name="search" placeholder="{Lang::T('Search')}..." value="{$search|escape}" aria-label="{Lang::T('Search')}">
+            </div>
+            <label class="cl-field"><span>{Lang::T('Location')}</span>
+                <select id="router" name="router" onchange="this.form.submit()">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $routers as $r}
+                    <option value="{$r|escape}" {if $router eq $r}selected{/if}>{$r|escape}</option>
+                    {/foreach}
+                </select>
+            </label>
+            <label class="cl-field"><span>{Lang::T('Plan Name')}</span>
+                <select id="plan" name="plan" onchange="this.form.submit()">
+                    <option value="">{Lang::T('All')}</option>
+                    {foreach $plans as $p}
+                    <option value="{$p['id']}" {if $plan eq $p['id']}selected{/if}>{$p['name_plan']|escape}</option>
+                    {/foreach}
+                </select>
+            </label>
+            <button class="cl-btn cl-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
+            {if $search neq '' || $router neq '' || $plan neq ''}
+            <a class="cl-btn" href="{Text::url('')}plan/list" title="{Lang::T('Clear Search Query')}"><i class="fa fa-times" aria-hidden="true"></i></a>
+            {/if}
+        </form>
+
+        <div class="cl-scroll">
+            <table id="datatable" class="cl-table cl-nocheck table-with-loader">
+                <thead>
+                    <tr>
+                        <th>{Lang::T('Username')}</th>
+                        <th>{Lang::T('Plan Name')}</th>
+                        <th>{Lang::T('Type')}</th>
+                        <th>{Lang::T('Created On')}</th>
+                        <th>{Lang::T('Expires On')}</th>
+                        <th>{Lang::T('Status')}</th>
+                        <th>{Lang::T('Method')}</th>
+                        <th><a href="{Text::url('')}routers/list">{Lang::T('Location')}</a></th>
+                        <th class="cl-end">{Lang::T('Manage')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $d as $ds}
+                    <tr>
+                        <td data-label="{Lang::T('Username')}">
+                            {if $ds['customer_id'] == '0'}
+                            <a class="cl-strong" href="{Text::url('plan/voucher/&search=')}{$ds['username']|escape:'url'}">{$ds['username']|escape}</a>
+                            {else}
+                            <a class="cl-strong" href="{Text::url('customers/viewu/')}{$ds['username']|escape:'url'}">{$ds['username']|escape}</a>
+                            {/if}
+                        </td>
+                        <td data-label="{Lang::T('Plan Name')}">
+                            <span>
+                            {if $ds['type'] == 'Hotspot'}
+                            <a href="{Text::url('')}services/edit/{$ds['plan_id']}">{$ds['namebp']|escape}</a>
+                            <span api-get-text="{Text::url('')}autoload/customer_is_active/{$ds['username']|escape:'url'}/{$ds['plan_id']}"></span>
+                            {elseif $ds['type'] == 'PPPOE'}
+                            <a href="{Text::url('')}services/pppoe-edit/{$ds['plan_id']}">{$ds['namebp']|escape}</a>
+                            <span api-get-text="{Text::url('')}autoload/customer_is_active/{$ds['username']|escape:'url'}/{$ds['plan_id']}"></span>
+                            {elseif $ds['type'] == 'VPN'}
+                            <a href="{Text::url('')}services/vpn-edit/{$ds['plan_id']}">{$ds['namebp']|escape}</a>
+                            {else}{$ds['namebp']|escape}{/if}
+                            </span>
+                        </td>
+                        <td data-label="{Lang::T('Type')}">{$ds['type']|escape}</td>
+                        <td data-label="{Lang::T('Created On')}" class="cl-dim cl-when">{Lang::dateAndTimeFormat($ds['recharged_on'],$ds['recharged_time'])}</td>
+                        <td data-label="{Lang::T('Expires On')}" class="cl-dim cl-when">{Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}</td>
+                        <td data-label="{Lang::T('Status')}">
+                            {if $ds['status'] == 'off'}<span class="cl-pill cl-pill--banned">{Lang::T('Expired')}</span>
+                            {else}<span class="cl-pill cl-pill--active">{Lang::T('Active')}</span>{/if}
+                        </td>
+                        <td data-label="{Lang::T('Method')}" class="cl-dim">{$ds['method']|escape}</td>
+                        <td data-label="{Lang::T('Location')}">{$ds['routers']|escape}</td>
+                        <td class="cl-end">
+                            <div class="cl-row-actions">
+                                <a href="{Text::url('')}plan/edit/{$ds['id']}" class="cl-btn cl-btn--sm">{Lang::T('Edit')}</a>
+                                {if $ds['status']=='off' && $_c['extend_expired']}
+                                <a href="javascript:extend('{$ds['id']}')" class="cl-btn cl-btn--sm cl-btn--primary">{Lang::T('Extend')}</a>
+                                {/if}
+                                {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
+                                <a href="{Text::url('')}plan/delete/{$ds['id']}" id="{$ds['id']}" title="{Lang::T('Delete')}" aria-label="{Lang::T('Delete')}"
+                                    onclick="return ask(this, '{Lang::T('Delete')}?')" class="cl-btn cl-btn--sm cl-btn--icon cl-btn--danger"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                {/if}
+                            </div>
+                        </td>
+                    </tr>
+                    {foreachelse}
+                    <tr class="cl-none"><td colspan="9">
+                        <div class="cl-empty"><b>{Lang::T('No customers found')}</b>
+                            <a href="{Text::url('plan/recharge')}">{Lang::T('Recharge Account')}</a></div>
+                    </td></tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+        {include file="pagination.tpl"}
     </div>
 </div>
 

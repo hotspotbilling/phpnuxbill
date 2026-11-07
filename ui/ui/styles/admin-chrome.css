@@ -465,3 +465,22 @@ body.as-chrome.modern-skin-dark.dark-mode .sidebar-menu .label.bg-light-blue {
     display: none;
   }
 }
+
+/* The search box in the top bar uses the same field surface as the form fields and the search boxes on the customer pages. */
+body.as-chrome #searchOverlay .searchTerm { background-color: var(--cv-bg, #ffffff) !important; border-color: var(--cv-border, #e2e8f0) !important; box-shadow: none !important; }
+body.as-chrome #searchOverlay .searchTerm:focus { background-color: var(--cv-bg, #ffffff) !important; border-color: var(--cv-pri, #4f46e5) !important; box-shadow: 0 0 0 3px var(--cv-pri-soft, rgba(79, 70, 229, .10)) !important; }
+
+/* The results list under the top-bar search: the same surfaces as the cards and fields (--cv-*), instead of the zinc greys. */
+body.as-chrome #searchOverlay .search-results { background: var(--cv-bg, #ffffff) !important; border-color: var(--cv-border, #e2e8f0) !important; border-radius: 12px; }
+body.as-chrome .search-results-footer { background: var(--cv-accent, #f8fafc); border-top-color: var(--cv-border, #e2e8f0); }
+body.as-chrome .search-item:hover, body.as-chrome .search-item.is-selected { background-color: var(--cv-accent, #f8fafc) !important; }
+body.as-chrome .search-item-icon:not(.plan-icon):not(.router-icon):not(.trx-icon), body.as-chrome .search-section-count, body.as-chrome .search-item-badge.badge-neutral { background: var(--cv-accent, #f1f5f9); border-color: var(--cv-border, #e2e8f0); }
+body.as-chrome #searchOverlay .search-kbd { background: var(--cv-accent, #f1f5f9) !important; border-color: var(--cv-border, #e2e8f0) !important; }
+body.as-chrome .search-section { border-bottom-color: var(--cv-border, #e2e8f0); }
+
+/* The page sits on the same background as the menu, the logo cell and the footer (--as-bg), and the top bar follows it, so the whole frame is one colour and the cards stand on it. */
+body.as-chrome.modern-skin-dark .content-wrapper,
+body.as-chrome.modern-skin-dark .content-header,
+body.as-chrome.modern-skin-dark .content,
+body.as-chrome.modern-skin-dark .right-side,
+body.as-chrome.modern-skin-dark .main-header .navbar { background-color: var(--as-bg) !important; }

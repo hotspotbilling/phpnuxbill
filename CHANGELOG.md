@@ -4,9 +4,53 @@
 
 ## Unreleased
 
+- Review fixes: `Migrator::baseline()` refuses to run inside a caller's database transaction (creating the record table would commit it), before any DDL runs; the Community page treats a
+  version answer without a `version` as unavailable instead of showing it; and the updater clears the rollback permission ("Allow an older version") when a run ends or fails, so it does not
+  carry over to the next one.
+- Fixed: the status tabs, header buttons, CSV, pagination and the view page's toolbar buttons had lost their hover state when the cards were made transparent (the resting style was more
+  specific than the hover rule). Hover again gives a soft indigo fill and border (red for Delete) on the customers list, Active Customers and the customer pages.
+- Customers pages (core theme: the list, Active Customers, view, add and edit): the cards now look clean on the dashboard, with no fill of their own (the page shows
+  through), a 1px neutral border and a 12px radius, and the toolbar, table header, tabs, pagination and header buttons follow (lightly tinted or transparent, neutral borders). Fields
+  inside an input group now have the same fill as the plain fields, and the eye, Generate and GPS buttons use the page colours (they were pale in dark mode).
+- Dashboard (core theme, both dashboards): every card now looks uniform, with no fill of its own (the page shows through), a 1px neutral border (`rgba(127,127,127,.28)`)
+  and a 12px radius: the summary cards, the chart and list boxes, the System Status panel with its resource and service tiles, the online-users boxes and the date bar. It replaces the
+  card-coloured fill from the last change.
+- The admin page background is now the menu's background (white in light mode, `#0f141c` in dark; it was `#f6f9fc` and `#151521`), and the top bar follows it, so the menu, top bar, page and footer
+  are one colour and the cards stand on it. The cards are unchanged. Core theme only.
+- Rollback Update: the version search box has the same look and focus as the other search boxes (38px, 8px radius, one accent border and soft ring instead of a browser outline plus a
+  border, readable text in dark mode, no browser autocomplete suggestions).
+- Fixed: on the customer page, showing or hiding the Password and PPPoE Password made the box jump (it grew about 34px and the eye icon changed width). The field and both buttons now have
+  fixed sizes, the two eye icons share one width, and the script swaps the icon's class instead of rebuilding the button.
+- Dashboard (core theme, both dashboards): every card, the four summary cards, the chart boxes, the cron and gateway cards and the date bar, now share the surface, a 1px border
+  and a 14px radius of the cards on the other pages (they had three radii, 10, 12 and 15px, and a grey-purple date bar). The cron warning keeps its red heading.
+- Typed text can no longer turn black on the dark surface: the customers and Active Customers search boxes turn browser autocomplete off, and the search and form fields set their text
+  colour for the autofill and history preview too (the preview paints the suggested value black).
+- The results list under the top-bar search uses the card surfaces too (it was zinc grey beside the navy cards in dark mode), the focused search box no longer turns black, and the pagination
+  under the customers list and Active Customers follows the same colours. Core theme only.
+  - Fixed: the quick actions listed an action twice when two of its keywords matched the typed text (typing "d" showed Add Customer and Redis Cache twice). Each action shows once.
+- The search box in the top bar and the search box and filter selects on the customers list and Active Customers now share one look, the surface of the form fields on the add and edit
+  pages (white, or `#1e1e2d` with a `#2d3748` border in dark mode), at the same 38px height and 8px radius. They were two different shades and shapes. Core theme only.
+  theme keeps its own top bar.
+- Focus states on the customers list, Active Customers, add and edit: one soft indigo ring instead of a browser outline plus a border plus a halo (the list search showed a double
+  ring), and in an input group (username, email, phone, password) the ring goes round the addon and the field together. In dark mode a focused field kept turning white because of a
+  global `input:focus` rule; it now keeps the page surface colour.
+- Customer add, edit and view pages (default theme) now share the look of the new customers list: rounded 14px cards without shadows, one neutral button style with the indigo
+  primary (Login as Customer, Edit, Delete and Sync were four different colours), the same dark-mode surface colours as the list (the cards were slate blue, `#1e293b`, beside the list's `#1e1e2d`), a red-on-hover Delete, 36px rounded form fields with a focus ring, and pill badges. Styles only:
+  no markup or behaviour changed.
+- Active Customers (`plan/list`) now matches the new customers list: Active / Expired tabs with counts, a search bar with location and plan filters, a status pill, Edit and
+  Extend on the row with a delete button, and a card layout on phones; light, dark. The add, edit and view pages already used the newer layout.
+  - Fixed: the search was read from the form post only, so it was lost on the next page and in the tabs, and the location filter was dropped from the page links (it used an
+    undefined variable). Both now travel in the address.
+- Customers list redesigned (default theme): status tabs with counts (All, Active, Banned, ...), a search bar with sort and page-size beside it, one row per customer
+  (avatar, name, username, account type, phone and email, package, service and PPPoE, balance, status pill, created date), View and Recharge on the row with Edit
+  and Sync under a "..." menu, a bar that appears once customers are ticked ("N selected, Send Message"), an empty state, and a card layout on phones. Light and
+  dark; its page still gets the safer query below.
+  - Fixed: the search text was pasted into the SQL (`LIKE '%$search%'`), so a crafted search ran SQL, and `AND status = ...` only bound the last of the OR terms,
+    so the status filter did not apply to a search. The text is now a bound value, the status filter applies to the whole search, and the sort column, direction and
+    status are checked against known values.
+  - Fixed: a customer with no email (stored as `1`) or no phone (stored as `0`) showed a mail and a phone button; they show only for a real address or number.
 - Rollback Update page redesigned: a note on what a rollback does (program files only, the database is not undone), Master and Development tabs with a search box, and one
-  row per version with its message, author, date, a link to the commit and a "Roll back to this" button; the page works on a phone and follows light, dark and the
-  shadcn theme. The Updates card on Community now lays its six buttons out in an even grid that reflows instead of clipping.
+  row per version with its message, author, date, a link to the commit and a "Roll back to this" button; the page works on a phone and follows light, dark. The Updates card on Community now lays its six buttons out in an even grid that reflows instead of clipping.
   - Fixed: commit messages were printed as HTML (a commit message could inject markup into the admin's page); they are escaped now.
   - Fixed: when GitHub refused the request (the anonymous limit is 60 an hour) the page tried to list the error as commits. The list is kept for ten minutes in
     `system/cache/rollback_*.json`, an error answer is ignored, and an empty list says so. The page is SuperAdmin only, like the updater.

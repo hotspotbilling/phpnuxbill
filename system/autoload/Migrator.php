@@ -71,7 +71,12 @@ class Migrator
      */
     public function baseline($upToVersion, array $doneVersions = [])
     {
-        $this->ensureTable(); // DDL commits implicitly, so it stays outside the transaction
+        // Creating the record table is DDL and commits implicitly: inside a transaction of the caller's it would commit their work. Refuse before
+        // any DDL runs.
+        if ($this->db->inTransaction()) {
+            throw new LogicException('Migrator::baseline() cannot be called inside a database transaction, because creating the record table would commit it.');
+        }
+        $this->ensureTable(); // DDL commits implicitly, so it stays outside the transaction below
         // all or nothing: a baseline cut off halfway would leave the record non-empty, so a later call would never complete it
         $own = !$this->db->inTransaction();
         if ($own) {

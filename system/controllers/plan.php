@@ -1274,13 +1274,13 @@ switch ($action) {
         break;
     default:
         $ui->assign('_title', Lang::T('Customer'));
-        $search = _post('search');
+        $search = _req('search'); // the tabs and the pagination links carry it in the address
         $status = _req('status');
         $router = _req('router');
         $plan = _req('plan');
         $append_url = "&search=" . urlencode($search)
             . "&status=" . urlencode($status)
-            . "&router=" . urlencode($type3)
+            . "&router=" . urlencode($router)
             . "&plan=" . urlencode($plan);
         $ui->assign('append_url', $append_url);
         $ui->assign('plan', $plan);
@@ -1310,6 +1310,12 @@ switch ($action) {
         if (!empty($status) && $status != '-') {
             $query->where('status', $status);
         }
+        // how many recharges each tab holds
+        $counts = ['on' => 0, 'off' => 0];
+        foreach (ORM::for_table('tbl_user_recharges')->raw_query('SELECT status, COUNT(*) AS n FROM tbl_user_recharges GROUP BY status')->find_array() as $r) {
+            $counts[$r['status']] = (int) $r['n'];
+        }
+        $ui->assign('counts', $counts);
         $d = Paginator::findMany($query, ['search' => $search], 25, $append_url);
         run_hook('view_list_billing'); #HOOK
         $ui->assign('d', $d);

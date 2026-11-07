@@ -6471,9 +6471,15 @@ body.dark-mode .rb {
 .rb-tabs { display: inline-flex; padding: 3px; border: 1px solid var(--rb-line); border-radius: 11px; background: var(--rb-card); }
 .rb-tab { border: 0; background: transparent; color: var(--rb-muted); padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .rb-tab[aria-selected="true"] { background: var(--rb-accent); color: #fff; }
-.rb-tab:focus-visible, .rb-search:focus-visible { outline: 2px solid var(--rb-accent); outline-offset: 2px; }
+.rb-tab:focus-visible { outline: 2px solid var(--rb-accent); outline-offset: 2px; }
+/* one focus style for the search box: accent border and a soft ring, no outline */
+.rb-search:focus, .rb-search:focus-visible { outline: none !important; border-color: var(--rb-accent); box-shadow: 0 0 0 3px var(--rb-accent-soft); }
+.rb-search::placeholder { -webkit-text-fill-color: var(--rb-muted); }
+.rb-search:-webkit-autofill, .rb-search:-webkit-autofill:focus { -webkit-text-fill-color: var(--rb-ink) !important; -webkit-box-shadow: 0 0 0 1000px var(--rb-card) inset !important; transition: background-color 9999s ease-out; }
+/* the global input:focus rule forces a white background (weight of an id) */
+body.dark-mode .rb-search:not(#filterNavigateMenu):focus { background-color: var(--rb-card) !important; }
 .rb-tab small { opacity: .75; font-weight: 500; margin-left: 4px; }
-.rb-search { flex: 1 1 220px; max-width: 320px; padding: 7px 12px; border: 1px solid var(--rb-line); border-radius: 10px; background: var(--rb-card); color: var(--rb-ink); font-size: 13px; }
+.rb-search { flex: 1 1 220px; max-width: 320px; height: 38px; padding: 0 12px; border: 1px solid var(--rb-line); border-radius: 8px; background: var(--rb-card); color: var(--rb-ink); font-size: 13px; -webkit-text-fill-color: var(--rb-ink); caret-color: var(--rb-ink); }
 
 .rb-list { list-style: none; margin: 0; padding: 0; }
 .rb-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--rb-line); }
@@ -6491,3 +6497,254 @@ body.dark-mode .rb {
 .rb-empty b { display: block; color: var(--rb-ink); font-size: 14.5px; margin-bottom: 4px; }
 .rb-top { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 @media (max-width: 575px) { .rb-row { grid-template-columns: minmax(0, 1fr); } .rb-btn { justify-content: center; } }
+
+/* Customers list and Active Customers (ui/ui/admin/customers/list.tpl, plan/active.tpl). Tokens follow the admin dark mode and the shadcn variables. */
+.cl {
+    --cl-ink: var(--foreground, #1e293b);
+    --cl-muted: var(--muted-foreground, #64748b);
+    --cl-line: var(--border, #e2e8f0);
+    --cl-card: var(--card, #ffffff);
+    --cl-soft: var(--muted, #f8fafc);
+    --cl-accent: #4f46e5;
+    --cl-accent-soft: rgba(79, 70, 229, .10);
+    /* search and select fields: the same surface, border, height and radius as the search box in the top bar */
+    --cl-field: var(--input-bg, #f1f5f9);
+    --cl-field-line: #e2e8f0;
+    color: var(--cl-ink);
+    padding: 4px 0 24px;
+}
+body.dark-mode .cl {
+    --cl-ink: var(--foreground, #e2e8f0);
+    --cl-muted: var(--muted-foreground, #94a3b8);
+    --cl-line: var(--border, #2d3748);
+    --cl-card: var(--card, #1e1e2d);
+    --cl-soft: var(--muted, #252536);
+    --cl-accent: #818cf8;
+    --cl-accent-soft: rgba(129, 140, 248, .16);
+    --cl-field: #27272a;
+    --cl-field-line: #3f3f46;
+}
+.cl * { box-sizing: border-box; }
+.cl a { text-decoration: none; }
+.cl-top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: space-between; margin-bottom: 14px; }
+.cl-sub { margin: 0; font-size: 14px; color: var(--cl-muted); }
+.cl-actions { display: flex; gap: 8px; }
+.cl-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--cl-line); background: var(--cl-card); color: var(--cl-ink) !important; font-size: 13px; font-weight: 600; line-height: 1.2; cursor: pointer; white-space: nowrap; transition: border-color .15s, background .15s; }
+.cl-btn:hover { border-color: var(--cl-accent); background: var(--cl-accent-soft); }
+.cl-btn:focus-visible, .cl-tab:focus-visible { outline: 2px solid var(--cl-accent); outline-offset: 2px; }
+.cl-btn--primary { background: var(--cl-accent); border-color: var(--cl-accent); color: #fff !important; }
+.cl-btn--primary:hover { background: var(--cl-accent); filter: brightness(1.08); }
+.cl-btn--sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
+.cl-btn--icon { padding: 5px 9px; }
+
+.cl-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.cl-tab { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--cl-line); background: var(--cl-card); color: var(--cl-muted) !important; font-size: 13px; font-weight: 600; }
+.cl-tab small { font-size: 11.5px; font-weight: 600; padding: 0 7px; border-radius: 999px; background: var(--cl-soft); color: var(--cl-muted); }
+.cl-tab:hover { border-color: var(--cl-accent); color: var(--cl-accent) !important; }
+.cl-tab.is-on { background: var(--cl-accent); border-color: var(--cl-accent); color: #fff !important; }
+.cl-tab.is-on small { background: rgba(255, 255, 255, .2); color: #fff; }
+
+.cl-card { min-height: 0 !important; background: var(--cl-card); border: 1px solid var(--cl-line); border-radius: 14px; overflow: hidden; }
+.cl-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--cl-line); background: var(--cl-soft); margin: 0; }
+.cl-search { position: relative; flex: 1 1 240px; min-width: 200px; }
+.cl-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--cl-muted); font-size: 13px; }
+.cl-search input { width: 100%; height: 38px; padding: 0 12px 0 34px; border: 1px solid var(--cl-field-line); border-radius: 8px; background: var(--cl-field); color: var(--cl-ink); font-size: 13px; }
+.cl-search input:focus, .cl-search input:focus-visible, .cl-field select:focus, .cl-field select:focus-visible { outline: none !important; border-color: var(--cl-accent); box-shadow: 0 0 0 3px var(--cl-accent-soft); }
+.cl-field { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 500; font-size: 12.5px; color: var(--cl-muted); }
+.cl-field select { height: 38px; padding: 0 8px; border: 1px solid var(--cl-field-line); border-radius: 8px; background: var(--cl-field); color: var(--cl-ink); font-size: 13px; }
+.cl-bar .cl-btn { height: 38px; border-radius: 8px; }
+.cl-bulk { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 14px; background: var(--cl-accent-soft); border-bottom: 1px solid var(--cl-line); font-size: 13px; }
+.cl-bulk[hidden] { display: none; }
+
+.cl-scroll { overflow-x: auto; }
+.cl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cl-table th { padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--cl-muted); white-space: nowrap; border-bottom: 1px solid var(--cl-line); background: var(--cl-card); }
+.cl-table td { padding: 11px 12px; vertical-align: middle; border-bottom: 1px solid var(--cl-line); }
+.cl-table tbody tr:last-child td { border-bottom: 0; }
+.cl-click tbody tr:not(.cl-none) { cursor: pointer; }
+.cl-table tbody tr:not(.cl-none):hover { background: var(--cl-soft); }
+.cl-check { width: 36px; }
+/* the global rule that freezes and tints the first column of every table does not suit this list */
+body .cl-table th:first-child, body .cl-table td:first-child { position: static; background-color: transparent; }
+.cl-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cl-end { text-align: right; }
+.cl-dim { color: var(--cl-muted); }
+.cl-when { white-space: nowrap; }
+.cl-who { display: flex; align-items: center; gap: 10px; color: var(--cl-ink) !important; min-width: 190px; }
+.cl-who img { flex: 0 0 38px; width: 38px !important; height: 38px !important; min-width: 38px !important; max-width: 38px !important; }
+.cl-who b { display: block; font-weight: 600; }
+.cl-who small { display: block; color: var(--cl-muted); font-size: 12px; margin-top: 1px; }
+.cl-chip { font-style: normal; font-size: 11px; padding: 1px 7px; margin-left: 4px; border-radius: 999px; background: var(--cl-soft); border: 1px solid var(--cl-line); }
+.cl-contact a { display: block; color: var(--cl-ink) !important; white-space: nowrap; line-height: 1.7; }
+.cl-contact a:hover { color: var(--cl-accent) !important; }
+.cl-contact i { width: 14px; color: var(--cl-muted); text-align: center; }
+.cl-pkg .label { display: inline-block; margin: 1px 0; }
+.cl-table td small.cl-dim { display: block; font-size: 12px; }
+.cl-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--cl-soft); color: var(--cl-muted); }
+.cl-pill--active { background: rgba(22, 163, 74, .13); color: #15803d; }
+.cl-pill--inactive, .cl-pill--limited { background: rgba(217, 119, 6, .14); color: #b45309; }
+.cl-pill--banned, .cl-pill--suspended { background: rgba(220, 38, 38, .12); color: #b91c1c; }
+body.dark-mode .cl-pill--active { color: #4ade80; }
+body.dark-mode .cl-pill--inactive, body.dark-mode .cl-pill--limited { color: #fbbf24; }
+body.dark-mode .cl-pill--banned, body.dark-mode .cl-pill--suspended { color: #f87171; }
+.cl-row-actions { display: inline-flex; gap: 6px; align-items: center; }
+.cl-strong { font-weight: 600; color: var(--cl-ink) !important; }
+.cl-btn--danger:hover { border-color: #dc2626; background: rgba(220, 38, 38, .10); }
+.cl-table td a:not(.cl-btn):not(.cl-who):not(.cl-strong):hover { color: var(--cl-accent); }
+.cl-menu { border-radius: 10px; min-width: 150px; }
+.cl-menu i { width: 16px; color: var(--cl-muted); }
+.cl-empty { padding: 34px 12px; text-align: center; color: var(--cl-muted); line-height: 1.7; }
+.cl-empty b { display: block; color: var(--cl-ink); font-size: 14.5px; }
+.cl-none td { border-bottom: 0; }
+
+@media (max-width: 767px) {
+    .cl-actions { width: 100%; }
+    .cl-actions .cl-btn { flex: 1; }
+    .cl-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; }
+    .cl-tab { flex: 0 0 auto; }
+    .cl-field { flex: 1 1 140px; }
+    .cl-field select { flex: 1; min-width: 0; }
+    .cl-table thead { display: none; }
+    .cl-table, .cl-table tbody { display: block; }
+    .cl-table tr { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 8px; padding: 12px 14px; border-bottom: 1px solid var(--cl-line); }
+    .cl-table td { grid-column: 2; display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; }
+    .cl-table td[data-label]::before { content: attr(data-label); flex: 0 0 auto; color: var(--cl-muted); font-size: 12px; text-align: left; }
+    .cl-table td.cl-check { grid-column: 1; grid-row: 1; width: auto; padding-top: 10px; display: block; }
+    .cl-click td:nth-child(2) { grid-column: 2; grid-row: 1; text-align: left; }
+    .cl-click td:nth-child(2)::before { content: none; }
+    .cl-nocheck tr { grid-template-columns: minmax(0, 1fr); }
+    .cl-nocheck td { grid-column: 1; }
+    .cl-table td.cl-contact { display: block; text-align: left; }
+    .cl-table td.cl-contact::before { content: none; }
+    .cl-table td > span { text-align: right; }
+    .cl-table td.cl-end { justify-content: flex-start; padding-top: 8px; }
+    .cl-who { min-width: 0; }
+    .cl-none { display: block; }
+    .cl-none td { grid-column: 1 / -1; display: block; text-align: center; }
+}
+
+/* Customer add, edit and view (ui/ui/admin/customers/{add,edit,view}.tpl): the same look as the customers list. Uses the --cv-* tokens above. */
+:root { --cv-radius: 14px; --cv-shadow: none; --cv-pri: #4f46e5; --cv-pri-soft: rgba(79, 70, 229, .10); }
+/* the same surface colours as the customers list (.cl), so the four pages sit on the same background */
+.dark-mode, .dark { --cv-bg: #1e1e2d; --cv-fg: #e2e8f0; --cv-muted: #94a3b8; --cv-border: #2d3748; --cv-accent: #252536; --cv-pri: #818cf8; --cv-pri-soft: rgba(129, 140, 248, .16); }
+.customer-view-header { margin-bottom: 16px; }
+.customer-name-heading { font-size: 20px; letter-spacing: -.01em; }
+.btn-back-round { border-radius: 10px !important; width: 36px; height: 36px; box-shadow: none; }
+.btn-back-round:hover { background: var(--cv-pri-soft) !important; border-color: var(--cv-pri) !important; transform: none; }
+/* the global a.btn-info / a.btn-warning ... rules are !important, so these are too */
+body .customer-action-toolbar .btn { border-radius: 10px !important; padding: 8px 14px; font-size: 13px; font-weight: 600; box-shadow: none; margin: 0; }
+body .customer-action-toolbar .btn:not(.btn-primary) { background-color: var(--cv-bg) !important; border: 1px solid var(--cv-border) !important; color: var(--cv-fg) !important; }
+body .customer-action-toolbar .btn:not(.btn-primary):hover, body .customer-action-toolbar .btn:not(.btn-primary):focus { border-color: var(--cv-pri) !important; background-color: var(--cv-pri-soft) !important; }
+body .customer-action-toolbar .btn:focus-visible { outline: 2px solid var(--cv-pri); outline-offset: 2px; }
+body .customer-action-toolbar .btn.btn-primary { background-color: var(--cv-pri) !important; border: 1px solid var(--cv-pri) !important; color: #fff !important; }
+body .customer-action-toolbar .btn.btn-primary:hover, body .customer-action-toolbar .btn.btn-primary:focus { filter: brightness(1.08); }
+body .customer-action-toolbar .btn.btn-danger:not(.btn-primary) { color: #dc2626 !important; }
+body .customer-action-toolbar .btn.btn-danger:not(.btn-primary):hover, body .customer-action-toolbar .btn.btn-danger:not(.btn-primary):focus { border-color: #dc2626 !important; background-color: rgba(220, 38, 38, .10) !important; }
+body.dark-mode .customer-action-toolbar .btn.btn-danger:not(.btn-primary) { color: #f87171 !important; }
+.cv-card, .edit-form-card { box-shadow: none; }
+.cv-card-title, .edit-card-title { font-size: 14px; font-weight: 700; }
+.edit-form-card .form-control { height: 36px; border-radius: 10px; border-color: var(--cv-border); background: var(--cv-bg); color: var(--cv-fg); box-shadow: none; }
+.edit-form-card textarea.form-control { height: auto; }
+.edit-form-card .form-control:focus, .edit-form-card .form-control:focus-visible { outline: none !important; border-color: var(--cv-pri); box-shadow: 0 0 0 3px var(--cv-pri-soft); }
+/* inside an input group the ring goes round the whole group, so the addon and the field read as one control */
+.edit-form-card .input-group { border-radius: 10px; }
+.edit-form-card .input-group .form-control:focus { box-shadow: none; position: relative; z-index: 3; }
+.edit-form-card .input-group:focus-within { box-shadow: 0 0 0 3px var(--cv-pri-soft); }
+.edit-form-card .input-group:focus-within .input-group-addon { border-color: var(--cv-pri); }
+.edit-form-card .input-group-addon { border-radius: 10px 0 0 10px; border-color: var(--cv-border); background: var(--cv-accent); color: var(--cv-muted); }
+.edit-form-card .input-group .form-control:not(:first-child) { border-radius: 0 10px 10px 0; }
+.edit-form-card .input-group .form-control:first-child:not(:last-child) { border-radius: 10px 0 0 10px; }
+.edit-form-card .input-group-btn .btn { border-radius: 0 10px 10px 0; height: 36px; }
+.edit-form-card .control-label { font-size: 12.5px; font-weight: 600; color: var(--cv-fg); }
+.c-badge { padding: 2px 10px; font-size: 12px; border-radius: 999px; letter-spacing: 0; }
+
+/* the global input:focus rule forces a white background (its :not(#id) gives it the weight of an id, so these carry the same) */
+body.dark-mode .cl-search input:not(#filterNavigateMenu):focus, body.dark-mode .cl-field select:not(#filterNavigateMenu):focus { background-color: var(--cl-field) !important; }
+body.dark-mode .edit-form-card input.form-control:not(#filterNavigateMenu):focus, body.dark-mode .edit-form-card textarea.form-control:not(#filterNavigateMenu):focus, body.dark-mode .edit-form-card select.form-control:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
+
+/* core theme: the search and filter fields use the form-field surface of the add and edit pages (the shadcn theme keeps its own) */
+body:not(.shadcn-body) .cl { --cl-field: var(--cv-bg); --cl-field-line: var(--cv-border); }
+
+/* pagination under the customers list and Active Customers */
+.cl .pagination { margin: 14px 0; }
+.cl .pagination > li > a { background: var(--cl-card); border-color: var(--cl-line); color: var(--cl-ink); padding: 6px 12px; font-size: 13px; }
+.cl .pagination > li:first-child > a { border-radius: 8px 0 0 8px; }
+.cl .pagination > li:last-child > a { border-radius: 0 8px 8px 0; }
+.cl .pagination > li > a:hover { background: var(--cl-accent-soft); border-color: var(--cl-accent); color: var(--cl-ink); }
+.cl .pagination > .active > a, .cl .pagination > .active > a:hover { background: var(--cl-accent); border-color: var(--cl-accent); color: #fff; }
+.cl .pagination > .disabled > a, .cl .pagination > .disabled > a:hover { background: var(--cl-soft); border-color: var(--cl-line); color: var(--cl-muted); }
+
+/* Typed text stays readable: the browser's autofill and history preview paints the suggested value black, which is invisible on the dark surface. */
+.cl-search input, .cl-field select { -webkit-text-fill-color: var(--cl-ink); caret-color: var(--cl-ink); }
+.cl-search input:-webkit-autofill, .cl-search input:-webkit-autofill:hover, .cl-search input:-webkit-autofill:focus { -webkit-text-fill-color: var(--cl-ink) !important; -webkit-box-shadow: 0 0 0 1000px var(--cl-field) inset !important; caret-color: var(--cl-ink); transition: background-color 9999s ease-out; }
+.edit-form-card .form-control { -webkit-text-fill-color: var(--cv-fg); caret-color: var(--cv-fg); }
+.edit-form-card .form-control::placeholder { -webkit-text-fill-color: var(--cv-muted); }
+.edit-form-card .form-control:-webkit-autofill, .edit-form-card .form-control:-webkit-autofill:hover, .edit-form-card .form-control:-webkit-autofill:focus { -webkit-text-fill-color: var(--cv-fg) !important; -webkit-box-shadow: 0 0 0 1000px var(--cv-bg) inset !important; transition: background-color 9999s ease-out; }
+.cl-search input::placeholder { -webkit-text-fill-color: var(--cl-muted); }
+
+/* Dashboard (core theme): every card on both dashboards looks like the Routely card: no fill of its own (the page shows through), a 1px neutral
+   border and a 12px radius. */
+body:not(.shadcn-body) .dash-blocks .panel, body:not(.shadcn-body) .dash-blocks .box, body:not(.shadcn-body) .dash-blocks .summary-card,
+body:not(.shadcn-body) .dash-slot .panel, body:not(.shadcn-body) .dash-slot .box, body:not(.shadcn-body) .dash-slot .summary-card,
+body:not(.shadcn-body) .dash-block .panel, body:not(.shadcn-body) .dash-block .box, body:not(.shadcn-body) .dash-block .summary-card,
+body:not(.shadcn-body) .dash-block .isp-card, body:not(.shadcn-body) .dash-block .isp-stat-card,
+body:not(.shadcn-body) .dash-block .sys-stat-card, body:not(.shadcn-body) .dash-block .sys-service-card,
+body:not(.shadcn-body) .dash-block .online-tech-col, body:not(.shadcn-body) .dash-block .online-tech-stat-box {
+  background-color: transparent !important;
+  border: 1px solid rgba(127, 127, 127, 0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+body:not(.shadcn-body) .dash-blocks .breadcrumb, body:not(.shadcn-body) .dash-slot .breadcrumb, body:not(.shadcn-body) .dash-block .breadcrumb {
+  background: transparent !important;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+  border-radius: 12px;
+  color: var(--cv-fg);
+}
+
+/* the cron warning keeps its own heading colour (--cron-danger) inside the shared card */
+body:not(.shadcn-body) .panel-cron-danger { overflow: hidden; }
+
+/* Show/hide on a credential must not move anything: fixed field and button sizes, and the same icon width for both icons. */
+.cred-input { flex: 0 0 120px; width: 120px; min-width: 0; max-width: 120px; height: 22px; line-height: 22px; letter-spacing: normal; box-sizing: border-box; }
+.btn-cred-action { width: 26px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+.btn-cred-action i { width: 14px; text-align: center; }
+.cv-list-item { min-height: 50px; }
+
+/* Customers pages (core theme): the cards look like the Routely card on the dashboard, with no fill of their own (the page shows through), a 1px neutral border and a 12px radius. */
+body:not(.shadcn-body) .cl-card, body:not(.shadcn-body) .cv-card, body:not(.shadcn-body) .edit-form-card, body:not(.shadcn-body) .subscription-card,
+body:not(.shadcn-body) .metric-tile {
+  background-color: transparent !important;
+  border: 1px solid rgba(127, 127, 127, 0.28) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+/* what sits inside a transparent card is tinted lightly instead of using the old card fill */
+body:not(.shadcn-body) .cl-bar { background: rgba(127, 127, 127, 0.06); border-bottom-color: rgba(127, 127, 127, 0.28); }
+body:not(.shadcn-body) .cl-table th { background: transparent; border-bottom-color: rgba(127, 127, 127, 0.28); }
+body:not(.shadcn-body) .cl-table td, body:not(.shadcn-body) .cl-table tr { border-bottom-color: rgba(127, 127, 127, 0.2); }
+body:not(.shadcn-body) .cl-table tbody tr:not(.cl-none):hover { background: rgba(127, 127, 127, 0.07); }
+body:not(.shadcn-body) .cl-bulk { border-bottom-color: rgba(127, 127, 127, 0.28); }
+body:not(.shadcn-body) .cv-card-header, body:not(.shadcn-body) .edit-card-header, body:not(.shadcn-body) .cv-list-item { border-bottom-color: rgba(127, 127, 127, 0.25); }
+body:not(.shadcn-body) .cl-tab, body:not(.shadcn-body) .cl-btn:not(.cl-btn--primary), body:not(.shadcn-body) .cl .pagination > li > a { background-color: transparent; border-color: rgba(127, 127, 127, 0.35); }
+body:not(.shadcn-body) .cl-tab.is-on { background-color: var(--cl-accent); border-color: var(--cl-accent); }
+body:not(.shadcn-body) .cl .pagination > .active > a { background-color: var(--cl-accent); border-color: var(--cl-accent); }
+body:not(.shadcn-body) .customer-action-toolbar .btn:not(.btn-primary), body:not(.shadcn-body) .btn-back-round { background-color: transparent !important; border-color: rgba(127, 127, 127, 0.35) !important; }
+
+/* fields inside an input group use the same fill as the plain fields, and the buttons beside them follow the page colours */
+body:not(.shadcn-body) .edit-form-card .input-group .form-control { background-color: var(--cv-bg); }
+body:not(.shadcn-body) .edit-form-card .input-group-btn .btn, body:not(.shadcn-body) .edit-form-card .input-group-addon { background-color: var(--cv-accent); border-color: var(--cv-border); color: var(--cv-fg); }
+body:not(.shadcn-body) .edit-form-card .input-group-btn .btn:hover { border-color: var(--cv-pri); background-color: var(--cv-pri-soft); }
+
+/* hover and focus on the controls above (the transparent resting styles are more specific than the plain hover rules, so these restate them) */
+body:not(.shadcn-body) .cl-tab:not(.is-on):hover, body:not(.shadcn-body) .cl-btn:not(.cl-btn--primary):hover, body:not(.shadcn-body) .cl .pagination > li:not(.active):not(.disabled) > a:hover {
+  background-color: var(--cl-accent-soft); border-color: var(--cl-accent); color: var(--cl-ink);
+}
+body:not(.shadcn-body) .cl-tab:not(.is-on):hover { color: var(--cl-accent) !important; }
+body:not(.shadcn-body) .cl-btn.cl-btn--danger:hover { background-color: rgba(220, 38, 38, .10); border-color: #dc2626; }
+body:not(.shadcn-body) .cl-btn--primary:hover { filter: brightness(1.1); }
+body:not(.shadcn-body) .customer-action-toolbar .btn:not(.btn-primary):hover, body:not(.shadcn-body) .customer-action-toolbar .btn:not(.btn-primary):focus,
+body:not(.shadcn-body) .btn-back-round:hover {
+  background-color: var(--cv-pri-soft) !important; border-color: var(--cv-pri) !important;
+}
+body:not(.shadcn-body) .customer-action-toolbar .btn.btn-danger:not(.btn-primary):hover { background-color: rgba(220, 38, 38, .10) !important; border-color: #dc2626 !important; }

@@ -76,9 +76,11 @@ $quickActions = [
 $matchedActions = [];
 foreach ($quickActions as $key => $action) {
     if (stripos($key, $query) !== false || stripos($action['title'], $query) !== false) {
-        $matchedActions[] = $action;
+        // several keywords lead to one action ("add customer", "new customer"): list it once
+        $matchedActions[$action['url']] = $action;
     }
 }
+$matchedActions = array_values($matchedActions);
 
 if (!empty($matchedActions)) {
     $hasResults = true;

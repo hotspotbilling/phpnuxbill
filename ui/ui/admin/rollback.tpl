@@ -22,7 +22,7 @@
                 <button type="button" class="rb-tab" role="tab" id="rbTabMaster" aria-selected="true" data-target="rbMaster">Master<small>{count($masters)}</small></button>
                 <button type="button" class="rb-tab" role="tab" id="rbTabDev" aria-selected="false" data-target="rbDev">Development<small>{count($devs)}</small></button>
             </div>
-            <input type="search" class="rb-search" id="rbSearch" placeholder="{Lang::T('Search')}..." aria-label="{Lang::T('Search')}">
+            <input type="search" autocomplete="off" class="rb-search" id="rbSearch" placeholder="{Lang::T('Search')}..." aria-label="{Lang::T('Search')}">
         </div>
 
         {foreach from=['rbMaster' => $masters, 'rbDev' => $devs] key=listId item=commits}

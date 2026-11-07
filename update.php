@@ -257,7 +257,8 @@ function u_lock_file()
 function u_unlock()
 {
     @unlink(u_lock_file());
-    unset($_SESSION['update_run']);
+    // the run's state, and the rollback permission with it: it belongs to this run only
+    unset($_SESSION['update_run'], $_SESSION['update_older']);
 }
 
 /** A zip is safe to unpack when no entry leaves the folder it is unpacked into and the sizes are sane. */

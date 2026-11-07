@@ -194,12 +194,17 @@ window.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // an answer without a version (an error page, an empty object) is a failure, not a version
+    function versionOf(d) {
+        if (!d || typeof d.version !== 'string' || d.version.trim() === '') { throw new Error('no version in the answer'); }
+        return d.version.trim();
+    }
     fetch('./version.json?' + Date.now()).then(function (r) { return r.json(); }).then(function (d) {
-        current = d.version; setVer(cur, current); decide();
+        current = versionOf(d); setVer(cur, current); decide();
     }).catch(function () { current = false; setVer(cur, '?'); status.querySelector('b').textContent = 'Could not read the installed version'; });
 
     fetch('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?' + Date.now()).then(function (r) { return r.json(); }).then(function (d) {
-        latest = d.version; setVer(lat, latest); decide();
+        latest = versionOf(d); setVer(lat, latest); decide();
     }).catch(function () { latest = false; setVer(lat, '?'); decide(); });
 });
 </script>

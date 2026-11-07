@@ -849,11 +849,21 @@ switch ($action) {
     default:
         run_hook('list_customers'); #HOOK
         $search = _req('search');
+        $statuses = ORM::for_table('tbl_customers')->getEnum("status");
+        // order, direction and status come from the request: only known values reach the query
         $order = _req('order', 'username');
+        if (!in_array($order, ['username', 'fullname', 'lastname', 'created_at', 'balance', 'status'], true)) {
+            $order = 'username';
+        }
+        $orderby = strtolower(_req('orderby', 'asc')) === 'desc' ? 'desc' : 'asc';
         $filter = _req('filter', 'Active');
-        $orderby = _req('orderby', 'asc');
+        if ($filter !== 'All' && !in_array($filter, $statuses, true)) {
+            $filter = 'Active';
+        }
         $order_pos = [
             'username' => 0,
+            'fullname' => 4,
+            'lastname' => 4,
             'created_at' => 8,
             'balance' => 3,
             'status' => 7
@@ -861,13 +871,17 @@ switch ($action) {
 
         $append_url = "&order=" . urlencode($order) . "&filter=" . urlencode($filter) . "&orderby=" . urlencode($orderby);
 
-        if ($search != '') {
-            $query = ORM::for_table('tbl_customers')
-                ->whereRaw("username LIKE '%$search%' OR fullname LIKE '%$search%' OR address LIKE '%$search%' " .
-                    "OR phonenumber LIKE '%$search%' OR email LIKE '%$search%' AND status='$filter'");
-        } else {
-            $query = ORM::for_table('tbl_customers');
+        $query = ORM::for_table('tbl_customers');
+        if ($filter !== 'All') {
             $query->where("status", $filter);
+        }
+        if ($search != '') {
+            // the status filter applies to the whole search, and the search text is a bound value, never part of the SQL
+            $like = '%' . addcslashes($search, '\\%_') . '%';
+            $query->whereRaw(
+                '(username LIKE ? OR fullname LIKE ? OR address LIKE ? OR phonenumber LIKE ? OR email LIKE ?)',
+                [$like, $like, $like, $like, $like]
+            );
         }
         if ($order == 'lastname') {
             $query->order_by_expr("SUBSTR(fullname, INSTR(fullname, ' ')) $orderby");
@@ -948,7 +962,14 @@ switch ($action) {
 
         $d = Paginator::findMany($query, ['search' => $search], $per_page, $append_url);
         $ui->assign('d', $d);
-        $ui->assign('statuses', ORM::for_table('tbl_customers')->getEnum("status"));
+        $ui->assign('statuses', $statuses);
+        // how many customers each status tab holds (the tabs on the default theme's list)
+        $counts = [];
+        foreach (ORM::for_table('tbl_customers')->raw_query('SELECT status, COUNT(*) AS n FROM tbl_customers GROUP BY status')->find_array() as $r) {
+            $counts[$r['status']] = (int) $r['n'];
+        }
+        $ui->assign('status_counts', $counts);
+        $ui->assign('total_customers', array_sum($counts));
         $ui->assign('filter', $filter);
         $ui->assign('search', $search);
         $ui->assign('order', $order);

@@ -4849,5 +4849,14 @@
     "Database_changes_are_not_undone__Back_up_your_database_first_": "Database changes are not undone. Back up your database first.",
     "View_on_GitHub": "View on GitHub",
     "Roll_back_to_this": "Roll back to this",
-    "No_version_matches_your_search": "No version matches your search"
+    "No_version_matches_your_search": "No version matches your search",
+    "customers": "customers",
+    "selected": "selected",
+    "Map": "Map",
+    "No_customers_found": "No customers found",
+    "Nothing_matches_your_search_in_this_status_": "Nothing matches your search in this status.",
+    "Search_all_statuses": "Search all statuses",
+    "all": "all",
+    "Signature": "Signature",
+    "Signed_by_the_developer__updates_must_use_the_same_key": "Signed by the developer; updates must use the same key"
 }
