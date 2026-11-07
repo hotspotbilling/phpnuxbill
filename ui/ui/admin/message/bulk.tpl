@@ -10,6 +10,7 @@
             <div class="panel-body">
                 <form class="form-horizontal" method="get" role="form" id="bulkMessageForm" action="">
                     <input type="hidden" name="page" value="{if $page>0 && $totalCustomers==0}-1{else}{$page}{/if}">
+                    <input type="hidden" id="csrf_token" value="{$csrf_token}">
                     <div class="form-group">
                         <label class="col-md-2 control-label">{Lang::T('Router')}</label>
                         <div class="col-md-6">
@@ -113,6 +114,8 @@
                                 <b>[[phone]]</b> - {Lang::T('Customer Phone')}
                                 <br>
                                 <b>[[company_name]]</b> - {Lang::T('Your Company Name')}
+                                <br>
+                                <b>[[payment_link]]</b> - {Lang::T('A link that opens the customer recharge')}
                             </small>
                         </p>
                     </div>
@@ -159,7 +162,7 @@
         const inboxCheckbox = document.getElementById('inbox');
         const pushCheckbox = document.getElementById('push');
         const subjectDiv = document.getElementById('subject');
-        const subjectInput = document.getElementById('subject-content');
+        const subjectInput = document.getElementById('subjectContent');
 
         function toggleSubjectField() {
             if (emailCheckbox.checked || inboxCheckbox.checked || pushCheckbox.checked) {
@@ -183,6 +186,7 @@
     let page = 0;
     let totalSent = 0;
     let totalFailed = 0;
+    let totalSkipped = 0;
     let hasMore = true;
 
     // Initialize DataTable
@@ -195,6 +199,16 @@
         responsive: true
     });
 
+    // everything that comes back from the server is shown as text: customers type their own names
+    function esc(v) {
+        return String(v === null || v === undefined ? '' : v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function showStatus(kind, icon, text) {
+        $('#status').html('<div class="alert alert-' + kind + '"><i class="fas fa-' + icon + '"></i> ' + esc(text) + '</div>');
+    }
+
     function sendBatch() {
         if (!hasMore) return;
 
@@ -202,6 +216,7 @@
             url: '?_route=message/send_bulk_ajax',
             method: 'POST',
             data: {
+                csrf_token: $('#csrf_token').val(),
                 group: $('#group').val(),
                 message: $('#message').val(),
                 sms: $('#sms').is(':checked') ? '1' : '0',
@@ -218,75 +233,62 @@
             },
             dataType: 'json',
             beforeSend: function () {
-                $('#status').html(`
-                    <div class="alert alert-info">
-                        <i class="fas fa-spinner fa-spin"></i> Sending batch ${page + 1}...
-                    </div>
-                `);
+                showStatus('info', 'spinner fa-spin', 'Sending batch ' + (page + 1) + '...');
             },
             success: function (response) {
-                console.log("Response received:", response);
-
                 if (response && response.status === 'success') {
                     totalSent += response.totalSent || 0;
                     totalFailed += response.totalFailed || 0;
+                    totalSkipped += response.totalSkipped || 0;
                     page = response.page || 0;
                     hasMore = response.hasMore || false;
+                    const progress = (response.processed || 0) + ' / ' + (response.total || 0) + ' customers';
 
-                    $('#status').html(`
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle"></i> Batch ${page} sent! (Total Sent: ${totalSent}, Failed: ${totalFailed})
-                        </div>
-                    `);
-
-                    (response.batchStatus || []).forEach(msg => {
-                        let statusClass = msg.status.includes('Failed') ? 'danger' : 'success';
+                    (response.batchStatus || []).forEach(function (msg) {
+                        const cls = msg.result === 'failed' ? 'danger' : (msg.result === 'sent' ? 'success' : 'muted');
                         historyTable.row.add([
-                            msg.name ? msg.name : 'Unknown Customer',
-                            msg.sent ? msg.sent : 'Unknown Recipient',
-                            msg.channel ? msg.channel : 'Unknown Channel',
-                            `<span class="text-${statusClass}">${msg.status}</span>`,
-                            msg.message ? msg.message : 'No Message',
-                            msg.router ? msg.router : 'All Router',
-                            msg.service == 'all' ? 'All Service' : (msg.service || 'No Service')
-                        ]).draw(false); // Add row without redrawing the table
+                            esc(msg.name || 'Unknown Customer'),
+                            esc(msg.sent || 'Unknown Recipient'),
+                            esc(msg.channel || 'Unknown Channel'),
+                            '<span class="text-' + cls + '">' + esc(msg.status) + '</span>',
+                            esc(msg.message || 'No Message'),
+                            esc(msg.router || 'All Router'),
+                            esc(msg.service == 'all' ? 'All Service' : (msg.service || 'No Service'))
+                        ]).draw(false);
                     });
 
+                    const totals = 'Sent: ' + totalSent + ', Failed: ' + totalFailed + ', Skipped: ' + totalSkipped;
                     if (hasMore) {
+                        showStatus('info', 'spinner fa-spin', 'Batch ' + page + ' done (' + progress + '). ' + totals);
                         sendBatch();
                     } else {
-                        $('#status').html(`
-                            <div class="alert alert-success">
-                                <i class="fas fa-check-circle"></i> All batches sent! Total Sent: ${totalSent}, Failed: ${totalFailed}
-                            </div>
-                        `);
+                        $('#startBulk').prop('disabled', false);
+                        showStatus(totalFailed > 0 ? 'warning' : 'success', 'check-circle', 'All batches done (' + progress + '). ' + totals);
                     }
                 } else {
-                    console.error("Unexpected response format:", response);
-                    $('#status').html(`
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle"></i> Error: ${response.message}
-                        </div>
-                    `);
+                    $('#startBulk').prop('disabled', false);
+                    showStatus('danger', 'exclamation-circle', 'Error: ' + ((response && response.message) || 'unexpected answer'));
                 }
             },
             error: function () {
-                $('#status').html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i> Error: Failed to send batch ${page + 1}.
-                    </div>
-                `);
+                $('#startBulk').prop('disabled', false);
+                showStatus('danger', 'exclamation-circle', 'Error: Failed to send batch ' + (page + 1) + '. Nothing after it was sent.');
             }
         });
     }
 
     // Start sending on button click
     $('#startBulk').on('click', function () {
+        if (!$('#test').is(':checked') && !confirm('This sends the message to real customers. Tick "Testing" first to preview who would get it. Continue?')) {
+            return;
+        }
         page = 0;
         totalSent = 0;
         totalFailed = 0;
+        totalSkipped = 0;
         hasMore = true;
-        $('#status').html('<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Starting bulk message sending...</div>');
+        $(this).prop('disabled', true); // one run at a time
+        showStatus('info', 'spinner fa-spin', 'Starting bulk message sending...');
         historyTable.clear().draw(); // Clear history table before starting
         sendBatch();
     });

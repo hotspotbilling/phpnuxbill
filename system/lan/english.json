@@ -4818,5 +4818,8 @@
     "Please_agree_to_the_Terms_and_Conditions_to_register": "Please agree to the Terms and Conditions to register",
     "Require_Terms_Agreement": "Require Terms Agreement",
     "The_register_page_shows_an__I_agree_to_the_Terms_and_Conditions__box__and_the_Register_button_stays_off_until_it_is_ticked": "The register page shows an \"I agree to the Terms and Conditions\" box, and the Register button stays off until it is ticked",
-    "Maintenance_in_progress": "Maintenance in progress"
+    "Maintenance_in_progress": "Maintenance in progress",
+    "No_phone_number": "No phone number",
+    "Failed_to_send_message": "Failed to send message",
+    "A_link_that_opens_the_customer_recharge": "A link that opens the customer recharge"
 }

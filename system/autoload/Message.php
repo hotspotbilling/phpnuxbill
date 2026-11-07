@@ -33,46 +33,44 @@ class Message
     }
 
 
+    /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. */
     public static function sendSMS($phone, $txt)
     {
         global $config;
         if (empty($txt)) {
-            return "";
+            return false;
         }
         run_hook('send_sms', [$phone, $txt]); #HOOK
-        if (!empty($config['sms_url'])) {
-            if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
-                if (strlen($txt) > 160) {
-                    $txts = str_split($txt, 160);
-                    try {
-                        foreach ($txts as $txt) {
-                            self::sendSMS($phone, $txt);
-                            self::logMessage('SMS', $phone, $txt, 'Success');
-                        }
-                    } catch (Throwable $e) {
-                        // ignore, add to logs
-                        self::logMessage('SMS', $phone, $txt, 'Error', $e->getMessage());
-                    }
-                } else {
-                    try {
-                        self::MikrotikSendSMS($config['sms_url'], $phone, $txt);
-                        self::logMessage('MikroTikSMS', $phone, $txt, 'Success');
-                    } catch (Throwable $e) {
-                        // ignore, add to logs
-                        self::logMessage('MikroTikSMS', $phone, $txt, 'Error', $e->getMessage());
-                    }
+        if (empty($config['sms_url'])) {
+            return false;
+        }
+        if (strlen($config['sms_url']) > 4 && substr($config['sms_url'], 0, 4) != "http") {
+            // a Mikrotik router sends it; long texts go out in parts of 160 characters (each part is logged by its own call)
+            if (strlen($txt) > 160) {
+                $ok = true;
+                foreach (str_split($txt, 160) as $part) {
+                    $ok = (bool) self::sendSMS($phone, $part) && $ok;
                 }
-            } else {
-                $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
-                $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
-                try {
-                    $response = Http::getData($smsurl);
-                    self::logMessage('SMS HTTP Response', $phone, $txt, 'Success', $response);
-                    return $response;
-                } catch (Throwable $e) {
-                    self::logMessage('SMS HTTP Request', $phone, $txt, 'Error', $e->getMessage());
-                }
+                return $ok;
             }
+            try {
+                self::MikrotikSendSMS($config['sms_url'], $phone, $txt);
+                self::logMessage('MikroTikSMS', $phone, $txt, 'Success');
+                return true;
+            } catch (Throwable $e) {
+                self::logMessage('MikroTikSMS', $phone, $txt, 'Error', $e->getMessage());
+                return false;
+            }
+        }
+        $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
+        $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
+        try {
+            $response = Http::getData($smsurl);
+            self::logMessage('SMS HTTP Response', $phone, $txt, 'Success', $response);
+            return ($response !== '' && $response !== false && $response !== null) ? $response : true;
+        } catch (Throwable $e) {
+            self::logMessage('SMS HTTP Request', $phone, $txt, 'Error', $e->getMessage());
+            return false;
         }
     }
 
@@ -97,37 +95,37 @@ class Message
         $client_m->sendSync($smsRequest);
     }
 
+    /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. */
     public static function sendWhatsapp($phone, $txt)
     {
         global $config;
         if (empty($txt)) {
-            return "kosong";
+            return false;
         }
 
         run_hook('send_whatsapp', [$phone, $txt]); // HOOK
 
-        if (!empty($config['wa_url'])) {
-            $waurl = str_replace('[number]', urlencode(Lang::phoneFormat($phone)), $config['wa_url']);
-            $waurl = str_replace('[text]', urlencode($txt), $waurl);
+        if (empty($config['wa_url'])) {
+            return false;
+        }
+        $waurl = str_replace('[number]', urlencode(Lang::phoneFormat($phone)), $config['wa_url']);
+        $waurl = str_replace('[text]', urlencode($txt), $waurl);
 
-            try {
-                $response = Http::getData($waurl);
-                self::logMessage('WhatsApp HTTP Response', $phone, $txt, 'Success', $response);
-                return $response;
-            } catch (Throwable $e) {
-                self::logMessage('WhatsApp HTTP Request', $phone, $txt, 'Error', $e->getMessage());
-            }
+        try {
+            $response = Http::getData($waurl);
+            self::logMessage('WhatsApp HTTP Response', $phone, $txt, 'Success', $response);
+            return ($response !== '' && $response !== false && $response !== null) ? $response : true;
+        } catch (Throwable $e) {
+            self::logMessage('WhatsApp HTTP Request', $phone, $txt, 'Error', $e->getMessage());
+            return false;
         }
     }
 
     public static function sendEmail($to, $subject, $body, $attachmentPath = null)
     {
         global $config, $PAGES_PATH, $debug_mail;
-        if (empty($body)) {
-            return "";
-        }
-        if (empty($to)) {
-            return "";
+        if (empty($body) || empty($to)) {
+            return false;
         }
         run_hook('send_email', [$to, $subject, $body]); #HOOK
         if (empty($config['smtp_host'])) {
@@ -138,9 +136,9 @@ class Message
             if (!empty($config['mail_reply_to'])) {
                 $attr .= "Reply-To: " . $config['mail_reply_to'] . "\r\n";
             }
-            mail($to, $subject, $body, $attr);
-            self::logMessage('Email', $to, $body, 'Success');
-            return true;
+            $sent = mail($to, $subject, $body, $attr);
+            self::logMessage('Email', $to, $body, $sent ? 'Success' : 'Error', $sent ? null : 'mail() refused the message');
+            return (bool) $sent;
         } else {
             $mail = new PHPMailer();
             $mail->isSMTP();

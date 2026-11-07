@@ -56,28 +56,26 @@ EOT;
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('message/send'), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
+        }
 
-        $id_customer = $_POST['id_customer'] ?? '';
-        $message = $_POST['message'] ?? '';
-        $subject = $_POST['subject'] ?? '';
-        $channels = ['email', 'sms', 'wa', 'inbox', 'push'];
+        $id_customer = (int) _post('id_customer');
+        $message = trim((string) ($_POST['message'] ?? ''));
+        $subject = trim((string) ($_POST['subject'] ?? ''));
+        $channels = MessageSender::channelsFrom($_POST);
 
-
-        // Validate subject based on the selected channel
-        if (empty($id_customer)) {
+        if ($id_customer < 1) {
             r2(getUrl('message/send'), 'e', Lang::T('Please select a customer'));
         }
-
-        if (empty($subject) && (isset($_POST['email']) || isset($_POST['inbox']) || isset($_POST['push']))) {
+        if (empty($channels)) {
+            r2(getUrl('message/send'), 'e', Lang::T('Please select at least one channel type'));
+        }
+        if ($subject === '' && MessageSender::needsSubject($channels)) {
             r2(getUrl('message/send'), 'e', Lang::T('Subject is required'));
         }
-
-        if (empty($message)) {
+        if ($message === '') {
             r2(getUrl('message/send'), 'e', Lang::T('Message is required'));
-        }
-
-        if (count(array_intersect_key(array_flip($channels), $_POST)) === 0) {
-            r2(getUrl('message/send'), 'e', Lang::T('Please select at least one channel type'));
         }
 
         $customer = ORM::for_table('tbl_customers')->find_one($id_customer);
@@ -85,63 +83,19 @@ EOT;
             r2(getUrl('message/send'), 'e', Lang::T('Customer not found'));
         }
 
-        // Replace placeholders in message and subject
-        $currentMessage = str_replace(
-            ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
-            [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
-            $message
-        );
-
-        $currentSubject = str_replace(
-            ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
-            [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
-            $subject
-        );
-
-        if (strpos($message, '[[payment_link]]') !== false) {
-            $token = User::generateToken($customer['id'], 1);
-            if (!empty($token['token'])) {
-                $tur = ORM::for_table('tbl_user_recharges')
-                    ->where('customer_id', $customer['id'])
-                    ->find_one();
-                if ($tur) {
-                    $url = '?_route=home&recharge=' . $tur['id'] . '&uid=' . urlencode($token['token']);
-                    $currentMessage = str_replace('[[payment_link]]', $url, $currentMessage);
-                }
+        $entries = MessageSender::deliver($customer->as_array(), $channels, $subject, $message);
+        $sent = $problems = [];
+        foreach ($entries as $e) {
+            if ($e['result'] === 'sent') {
+                $sent[] = $e['channel'];
             } else {
-                $currentMessage = str_replace('[[payment_link]]', '', $currentMessage);
+                $problems[] = $e['status'];
             }
         }
-
-        // Send the message through the selected channels
-        $smsSent = $waSent = $emailSent = $inboxSent = $pushSent = false;
-
-        if (isset($_POST['sms'])) {
-            $smsSent = Message::sendSMS($customer['phonenumber'], $currentMessage);
+        if ($sent) {
+            r2(getUrl('message/send'), $problems ? 'w' : 's', Lang::T('Message Sent Successfully') . ': ' . implode(', ', $sent) . ($problems ? '. ' . implode('; ', $problems) : ''));
         }
-
-        if (isset($_POST['wa'])) {
-            $waSent = Message::sendWhatsapp($customer['phonenumber'], $currentMessage);
-        }
-
-        if (isset($_POST['email'])) {
-            $emailSent = Message::sendEmail($customer['email'], $currentSubject, $currentMessage);
-        }
-
-        if (isset($_POST['inbox'])) {
-            $inboxSent = Message::addToInbox($customer['id'], $currentSubject, $currentMessage, 'Admin');
-        }
-
-        if (isset($_POST['push'])) {
-            $pushSent = Message::sendPush($customer['id'], $currentSubject, $currentMessage, APP_URL);
-        }
-        // Check if any message was sent successfully
-        if ($smsSent || $waSent || $emailSent || $inboxSent || $pushSent) {
-            r2(getUrl('message/send'), 's', Lang::T('Message Sent Successfully'));
-        } else {
-            r2(getUrl('message/send'), 'e', Lang::T('Failed to send message'));
-        }
-
+        r2(getUrl('message/send'), 'e', Lang::T('Failed to send message') . ': ' . implode('; ', $problems));
         break;
 
     case 'send_bulk':
@@ -154,486 +108,169 @@ EOT;
         break;
 
     case 'send_bulk_ajax':
-        // Check user permissions
+        header('Content-Type: application/json');
+        header('Cache-Control: no-store');
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
-            die(json_encode(['status' => 'error', 'message' => 'Permission denied']));
+            die(json_encode(['status' => 'error', 'message' => Lang::T('You do not have permission to access this page')]));
         }
-
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Csrf::check(_post('csrf_token'))) {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Invalid or Expired CSRF Token') . '. ' . Lang::T('Reload the page and try again') . '.']));
+        }
         set_time_limit(0);
+        ignore_user_abort(true);
 
-        // Get request parameters
-        $group = $_REQUEST['group'] ?? '';
-        $message = $_REQUEST['message'] ?? '';
-        $batch = $_REQUEST['batch'] ?? 100;
-        $page = $_REQUEST['page'] ?? 0;
-        $router = $_REQUEST['router'] ?? null;
-        $test = isset($_REQUEST['test']) && $_REQUEST['test'] === 'on';
-        $service = $_REQUEST['service'] ?? '';
-        $subject = $_REQUEST['subject'] ?? '';
-        $channels = ['email', 'sms', 'wa', 'inbox', 'push'];
-        $selectedChannels = [];
-
-        foreach ($channels as $channel) {
-            if (isset($_REQUEST[$channel]) && $_REQUEST[$channel] == '1') {
-                $selectedChannels[] = $channel;
-            }
+        $group = (string) ($_POST['group'] ?? '');
+        $message = trim((string) ($_POST['message'] ?? ''));
+        $subject = trim((string) ($_POST['subject'] ?? ''));
+        $service = (string) ($_POST['service'] ?? '');
+        $router = (string) ($_POST['router'] ?? '');
+        $test = ($_POST['test'] ?? '') === 'on';
+        $batch = (int) ($_POST['batch'] ?? 20);
+        if (!in_array($batch, MessageSender::BATCH_SIZES, true)) {
+            $batch = 20;
         }
+        $page = max(0, (int) ($_POST['page'] ?? 0));
+        $selectedChannels = MessageSender::channelsFrom($_POST);
 
         if (empty($selectedChannels)) {
             die(json_encode(['status' => 'error', 'message' => Lang::T('Please select at least one channel type')]));
         }
-
-        if (empty($group) || empty($message) || empty($service)) {
-            die(json_encode(['status' => 'error', 'message' => LANG::T('All fields are required')]));
+        if (!in_array($group, ['all', 'new', 'expired', 'active'], true) || $message === '' || $service === '') {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('All fields are required')]));
+        }
+        if ($subject === '' && MessageSender::needsSubject($selectedChannels)) {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Subject is required') . '.']));
         }
 
-        if (array_intersect($selectedChannels, ['email', 'inbox', 'push']) && empty($subject)) {
-            die(json_encode(['status' => 'error', 'message' => LANG::T('Subject is required') . '.']));
+        try {
+            [$customers, $totalCustomers, $routerName] = MessageSender::recipients($group, $service, $router, $page * $batch, $batch);
+        } catch (InvalidArgumentException $e) {
+            die(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
         }
 
-        // Get batch of customers based on group
-        $startpoint = $page * $batch;
-        $customers = [];
-        $totalCustomers = 0;
-
-        if (isset($router) && !empty($router)) {
-            switch ($router) {
-                case 'radius':
-                    $routerName = 'Radius';
-                    break;
-                default:
-                    $router = ORM::for_table('tbl_routers')->find_one($router);
-                    if (!$router) {
-                        die(json_encode(['status' => 'error', 'message' => LANG::T('Invalid router')]));
-                    }
-                    $routerName = $router->name;
-                    break;
-            }
-        }
-
-        if (isset($router) && !empty($router)) {
-            $query = ORM::for_table('tbl_user_recharges')
-                ->left_outer_join('tbl_customers', 'tbl_user_recharges.customer_id = tbl_customers.id')
-                ->where('tbl_user_recharges.routers', $routerName);
-
-            switch ($service) {
-                case 'all':
-                    break;
-                default:
-                    $validServices = ['PPPoE', 'Hotspot', 'VPN'];
-                    if (in_array($service, $validServices)) {
-                        $query->where('type', $service);
-                    }
-                    break;
-            }
-
-            $totalCustomers = $query->count();
-
-            $query->offset($startpoint)
-                ->limit($batch);
-
-            switch ($group) {
-                case 'all':
-                    break;
-                case 'new':
-                    $query->where_raw("DATE(recharged_on) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)");
-                    break;
-                case 'expired':
-                    $query->where('tbl_user_recharges.status', 'off');
-                    break;
-                case 'active':
-                    $query->where('tbl_user_recharges.status', 'on');
-                    break;
-            }
-
-            // Fetch the customers
-            $query->selects([
-                ['tbl_customers.phonenumber', 'phonenumber'],
-                ['tbl_user_recharges.customer_id', 'customer_id'],
-                ['tbl_customers.fullname', 'fullname'],
-                ['tbl_customers.username', 'username'],
-                ['tbl_customers.email', 'email'],
-                ['tbl_customers.service_type', 'service_type'],
-            ]);
-            $customers = $query->find_array();
-        } else {
-            switch ($group) {
-                case 'all':
-                    $totalCustomersQuery = ORM::for_table('tbl_customers');
-
-                    switch ($service) {
-                        case 'all':
-                            break;
-                        default:
-                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
-                            if (in_array($service, $validServices)) {
-                                $totalCustomersQuery->where('service_type', $service);
-                            }
-                            break;
-                    }
-                    $totalCustomers = $totalCustomersQuery->count();
-                    $customers = $totalCustomersQuery->offset($startpoint)->limit($batch)->find_array();
-                    break;
-
-                case 'new':
-                    $totalCustomersQuery = ORM::for_table('tbl_customers')
-                        ->where_raw("DATE(created_at) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)");
-
-                    switch ($service) {
-                        case 'all':
-                            break;
-                        default:
-                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
-                            if (in_array($service, $validServices)) {
-                                $totalCustomersQuery->where('service_type', $service);
-                            }
-                            break;
-                    }
-                    $totalCustomers = $totalCustomersQuery->count();
-                    $customers = $totalCustomersQuery->offset($startpoint)->limit($batch)->find_array();
-                    break;
-
-                case 'expired':
-                    $totalCustomersQuery = ORM::for_table('tbl_user_recharges')
-                        ->where('status', 'off');
-
-                    switch ($service) {
-                        case 'all':
-                            break;
-                        default:
-                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
-                            if (in_array($service, $validServices)) {
-                                $totalCustomersQuery->where('type', $service);
-                            }
-                            break;
-                    }
-                    $totalCustomers = $totalCustomersQuery->count();
-                    $customers = $totalCustomersQuery->select('customer_id')->offset($startpoint)->limit($batch)->find_array();
-                    break;
-
-                case 'active':
-                    $totalCustomersQuery = ORM::for_table('tbl_user_recharges')
-                        ->where('status', 'on');
-
-                    switch ($service) {
-                        case 'all':
-                            break;
-                        default:
-                            $validServices = ['PPPoE', 'Hotspot', 'VPN'];
-                            if (in_array($service, $validServices)) {
-                                $totalCustomersQuery->where('type', $service);
-                            }
-                            break;
-                    }
-                    $totalCustomers = $totalCustomersQuery->count();
-                    $customers = $totalCustomersQuery->select('customer_id')->offset($startpoint)->limit($batch)->find_array(); // Get customer data
-                    break;
-            }
-        }
-
-        // Ensure $customers is always an array
-        if (!$customers) {
-            $customers = [];
-        }
-
-        // Send messages
-        $totalSMSSent = 0;
-        $totalSMSFailed = 0;
-        $totalWhatsappSent = 0;
-        $totalWhatsappFailed = 0;
-        $totalEmailSent = 0;
-        $totalEmailFailed = 0;
-        $totalInboxSent = 0;
-        $totalInboxFailed = 0;
-        $totalPushSent = 0;
-        $totalPushFailed = 0;
         $batchStatus = [];
-        //$subject = $config['CompanyName'] . ' ' . Lang::T('Notification Message');
-        $from = 'Admin';
-
+        $count = ['sent' => 0, 'failed' => 0, 'skipped' => 0];
         foreach ($customers as $customer) {
-            $currentMessage = str_replace(
-                ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
-                [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
-                $message
-            );
-
-            $currentSubject = str_replace(
-                ['[[name]]', '[[user_name]]', '[[phone]]', '[[company_name]]'],
-                [$customer['fullname'], $customer['username'], $customer['phonenumber'], $config['CompanyName']],
-                $subject
-            );
-
-            $phoneNumber = preg_replace('/\D/', '', $customer['phonenumber']);
-
-            if (empty($phoneNumber)) {
-                $batchStatus[] = [
-                    'name' => $customer['fullname'],
-                    'phone' => '',
-                    'status' => 'No Phone Number'
-                ];
+            if ($test) {
+                $plain = MessageSender::fill($message, $customer, 'plain');
+                foreach ($selectedChannels as $ch) {
+                    $batchStatus[] = [
+                        'name' => $customer['fullname'],
+                        'sent' => $ch === 'email' ? $customer['email'] : ($ch === 'inbox' || $ch === 'push' ? $customer['username'] : $customer['phonenumber']),
+                        'channel' => MessageSender::LABELS[$ch],
+                        'status' => 'Test Mode',
+                        'result' => 'test',
+                        'message' => $plain,
+                        'service' => $service,
+                        'router' => $routerName,
+                    ];
+                }
                 continue;
             }
-
-            if ($test) {
+            $entries = MessageSender::deliver($customer, $selectedChannels, $subject, $message);
+            foreach ($entries as $e) {
+                $count[$e['result']]++;
                 $batchStatus[] = [
                     'name' => $customer['fullname'],
-                    'sent' => $customer['phonenumber'],
-                    'channel' => implode(', ', array_map('ucfirst', $selectedChannels)),
-                    'status' => 'Test Mode',
-                    'message' => $currentMessage,
+                    'sent' => $e['to'],
+                    'channel' => $e['channel'],
+                    'status' => $e['status'],
+                    'result' => $e['result'],
+                    'message' => $e['message'],
                     'service' => $service,
                     'router' => $routerName,
                 ];
-            } else {
-                if (isset($_REQUEST['sms']) && $_REQUEST['sms'] == '1') {
-                    if (Message::sendSMS($customer['phonenumber'], $currentMessage)) {
-                        $totalSMSSent++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['phonenumber'],
-                            'channel' => 'SMS',
-                            'status' => 'SMS Sent',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    } else {
-                        $totalSMSFailed++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['phonenumber'],
-                            'channel' => 'SMS',
-                            'status' => 'SMS Failed',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    }
-                }
-
-                if (isset($_REQUEST['wa']) && $_REQUEST['wa'] == '1') {
-                    if (Message::sendWhatsapp($customer['phonenumber'], $currentMessage)) {
-                        $totalWhatsappSent++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['phonenumber'],
-                            'channel' => 'WhatsApp',
-                            'status' => 'WhatsApp Sent',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    } else {
-                        $totalWhatsappFailed++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['phonenumber'],
-                            'channel' => 'WhatsApp',
-                            'status' => 'WhatsApp Failed',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    }
-                }
-
-                if (isset($_REQUEST['email']) && $_REQUEST['email'] == '1') {
-                    if (Message::sendEmail($customer['email'], $currentSubject, $currentMessage)) {
-                        $totalEmailSent++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['email'],
-                            'channel' => 'Email',
-                            'status' => 'Email Sent',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    } else {
-                        $totalEmailFailed++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['email'],
-                            'channel' => 'Email',
-                            'status' => 'Email Failed',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    }
-                }
-
-                if (isset($_REQUEST['inbox']) && $_REQUEST['inbox'] == '1') {
-                    if (Message::addToInbox($customer['customer_id'], $currentSubject, $currentMessage, $from)) {
-                        $totalInboxSent++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['username'],
-                            'channel' => 'Inbox',
-                            'status' => 'Inbox Message Sent',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    } else {
-                        $totalInboxFailed++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['username'],
-                            'channel' => 'Inbox',
-                            'status' => 'Inbox Message Failed',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    }
-                }
-
-                if (isset($_REQUEST['push']) && $_REQUEST['push'] == '1') {
-                    if (Message::sendPush($customer['customer_id'], $currentSubject, $currentMessage, APP_URL)) {
-                        $totalPushSent++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['username'],
-                            'channel' => 'Push',
-                            'status' => 'Push Message Sent',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    } else {
-                        $totalPushFailed++;
-                        $batchStatus[] = [
-                            'name' => $customer['fullname'],
-                            'sent' => $customer['username'],
-                            'channel' => 'Push',
-                            'status' => 'Push Message Failed',
-                            'message' => $currentMessage,
-                            'service' => $service,
-                            'router' => $routerName,
-                        ];
-                    }
+                if (in_array($e['channel'], ['SMS', 'WhatsApp'], true)) {
+                    usleep(250000); // gateways block senders that fire without a pause
                 }
             }
         }
 
-        // Calculate if there are more customers to process
-        $hasMore = ($startpoint + $batch) < $totalCustomers;
-
-        // Return JSON response
         echo json_encode([
             'status' => 'success',
             'page' => $page + 1,
             'batchStatus' => $batchStatus,
-            'message' => $currentMessage,
-            'totalSent' => $totalSMSSent + $totalWhatsappSent + $totalEmailSent + $totalInboxSent + $totalPushSent,
-            'totalFailed' => $totalSMSFailed + $totalWhatsappFailed + $totalEmailFailed + $totalInboxFailed + $totalPushFailed,
-            'hasMore' => $hasMore,
+            'total' => $totalCustomers,
+            'processed' => min($totalCustomers, ($page + 1) * $batch),
+            'totalSent' => $count['sent'],
+            'totalFailed' => $count['failed'],
+            'totalSkipped' => $count['skipped'],
+            'hasMore' => (($page + 1) * $batch) < $totalCustomers,
         ]);
         break;
 
     case 'send_bulk_selected':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            header('Content-Type: application/json');
-            header('Cache-Control: no-cache, no-store, must-revalidate');
-
-            // Parse input
-            $customerIds = $_POST['customer_ids'] ?? [];
-            if (is_string($customerIds)) {
-                $customerIds = json_decode($customerIds, true);
-            }
-
-            $subject = trim($_POST['subject'] ?? '');
-            $message = trim($_POST['message'] ?? '');
-            $channels = ['email', 'sms', 'wa', 'inbox', 'push'];
-            $selectedChannels = array_filter($channels, fn($c) => !empty($_POST[$c]));
-
-            if (empty($customerIds) || empty($message) || !is_array($customerIds)) {
-                echo json_encode(['status' => 'error', 'message' => Lang::T('Invalid customer IDs, message, or message type.')]);
-                exit;
-            }
-
-            if (empty($subject) && array_intersect(['email', 'inbox', 'push'], $selectedChannels)) {
-                echo json_encode(['status' => 'error', 'message' => Lang::T('Subject is required.')]);
-                exit;
-            }
-
-            if (empty($selectedChannels)) {
-                echo json_encode(['status' => 'error', 'message' => Lang::T('Please select at least one channel type.')]);
-                exit;
-            }
-
-            $sentCount = 0;
-            $failedCount = 0;
-            $from = 'Admin';
-
-            foreach ($customerIds as $customerId) {
-                if (!is_numeric($customerId)) {
-                    $failedCount++;
-                    continue;
-                }
-
-                $customer = ORM::for_table('tbl_customers')->find_one($customerId);
-                if (!$customer) {
-                    $failedCount++;
-                    continue;
-                }
-
-                $messageSent = false;
-
-                try {
-                    if (!empty($_POST['sms'])) {
-                        Message::sendSMS($customer->phonenumber, $message);
-                        $messageSent = true;
-                    }
-
-                    if (!empty($_POST['wa'])) {
-                        Message::sendWhatsapp($customer->phonenumber, $message);
-                        $messageSent = true;
-                    }
-
-                    if (!empty($_POST['inbox'])) {
-                        Message::addToInbox($customer->id, $subject, $message, $from);
-                        $messageSent = true;
-                    }
-
-                    if (!empty($_POST['push'])) {
-                        Message::sendPush($customer->id, $subject, $message, APP_URL);
-                        $messageSent = true;
-                    }
-
-                    if (!empty($_POST['email'])) {
-                        Message::sendEmail($customer->email, $subject, $message);
-                        $messageSent = true;
-                    }
-
-                } catch (Throwable $e) {
-                    $failedCount++;
-                    $fullname = $customer->fullname ?? 'Unknown';
-                    sendTelegram("Failed to send message to $fullname: " . $e->getMessage());
-                    _log("Failed to send message to $fullname: " . $e->getMessage());
-                    continue;
-                }
-
-                if ($messageSent) {
-                    $sentCount++;
-                } else {
-                    $failedCount++;
-                }
-            }
-
-            echo json_encode([
-                'status' => 'success',
-                'totalSent' => $sentCount,
-                'totalFailed' => $failedCount
-            ]);
-        } else {
-            header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => Lang::T('Invalid request method.')]);
+        header('Content-Type: application/json');
+        header('Cache-Control: no-store');
+        if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('You do not have permission to access this page')]));
         }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Invalid request method.')]));
+        }
+        if (!Csrf::check(_post('csrf_token'))) {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Invalid or Expired CSRF Token') . '. ' . Lang::T('Reload the page and try again') . '.']));
+        }
+        set_time_limit(0);
+        ignore_user_abort(true);
+
+        $customerIds = $_POST['customer_ids'] ?? [];
+        if (is_string($customerIds)) {
+            $customerIds = json_decode($customerIds, true);
+        }
+        $subject = trim((string) ($_POST['subject'] ?? ''));
+        $message = trim((string) ($_POST['message'] ?? ''));
+        $selectedChannels = MessageSender::channelsFrom($_POST);
+
+        if (empty($customerIds) || !is_array($customerIds) || $message === '') {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Invalid customer IDs, message, or message type.')]));
+        }
+        if (empty($selectedChannels)) {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Please select at least one channel type.')]));
+        }
+        if ($subject === '' && MessageSender::needsSubject($selectedChannels)) {
+            die(json_encode(['status' => 'error', 'message' => Lang::T('Subject is required.')]));
+        }
+
+        $sentCount = $failedCount = $skippedCount = 0;
+        $problems = [];
+        foreach (array_unique(array_filter(array_map('intval', $customerIds))) as $customerId) {
+            $customer = ORM::for_table('tbl_customers')->find_one($customerId);
+            if (!$customer) {
+                $failedCount++;
+                continue;
+            }
+            $entries = MessageSender::deliver($customer->as_array(), $selectedChannels, $subject, $message);
+            $n = MessageSender::tally($entries);
+            // a customer counts as sent when at least one channel got through
+            if ($n['sent'] > 0) {
+                $sentCount++;
+            } elseif ($n['failed'] > 0) {
+                $failedCount++;
+            } else {
+                $skippedCount++;
+            }
+            foreach ($entries as $e) {
+                if ($e['result'] === 'failed' && count($problems) < 10) {
+                    $problems[] = $customer->fullname . ': ' . $e['status'];
+                }
+                if (in_array($e['channel'], ['SMS', 'WhatsApp'], true)) {
+                    usleep(250000);
+                }
+            }
+        }
+        if ($problems) {
+            _log('Message to selected customers: ' . implode(' | ', $problems));
+        }
+        echo json_encode([
+            'status' => 'success',
+            'totalSent' => $sentCount,
+            'totalFailed' => $failedCount,
+            'totalSkipped' => $skippedCount,
+            'problems' => $problems,
+        ]);
         break;
 
     default:
-        r2(getUrl('message/send_sms'), 'e', 'action not defined');
+        r2(getUrl('message/send'), 'e', 'action not defined');
 }

@@ -310,7 +310,17 @@
             const inbox = $('#inbox').is(':checked') ? '1' : '0';
             const subject = $('#subject-content').val().trim();
 
-            if ((email || inbox || push) && !subject) {
+            if (sms === '0' && wa === '0' && email === '0' && push === '0' && inbox === '0') {
+                Swal.fire({
+                    title: 'Error!',
+                    text: "{Lang::T('Please select at least one channel type.')}",
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            if ((email === '1' || inbox === '1' || push === '1') && !subject) {
                 Swal.fire({
                     title: 'Error!',
                     text: "{Lang::T('Please enter a subject for the message.')}",
@@ -339,6 +349,7 @@
                 url: '?_route=message/send_bulk_selected',
                 method: 'POST',
                 data: {
+                    csrf_token: '{$csrf_token}',
                     customer_ids: selectedCustomerIds,
                     sms: sms,
                     wa: wa,
@@ -352,10 +363,11 @@
                 success: function (response) {
                     // Handle success response
                     if (response.status === 'success') {
+                        const failed = response.totalFailed || 0, skipped = response.totalSkipped || 0;
                         Swal.fire({
-                            title: 'Success!',
-                            text: "{Lang::T('Message sent successfully.')}",
-                            icon: 'success',
+                            title: failed > 0 ? 'Done, with problems' : 'Success!',
+                            text: "{Lang::T('Message sent successfully.')}" + ' ' + response.totalSent + ' sent, ' + failed + ' failed, ' + skipped + ' skipped.',
+                            icon: failed > 0 ? 'warning' : 'success',
                             confirmButtonText: 'OK'
                         });
                     } else {

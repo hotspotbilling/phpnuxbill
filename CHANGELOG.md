@@ -4,6 +4,19 @@
 
 ## Unreleased
 
+- Send Message and Bulk Messages review:
+  - Fixed: bulk to Active or Expired customers without a router sent nothing (the rows had no phone or name), and inbox and push in bulk went to customer 0
+    for All and New. One query (`MessageSender::recipients()`) now serves every group, returns each customer once in a fixed order, and counts the group
+    before paging, so batches no longer repeat, skip or run empty.
+  - Fixed: failures were reported as sent. SMS, WhatsApp and email now return a real result, a push without subscriptions is "skipped", and every screen
+    shows sent, failed and skipped per channel. A customer with no phone or email is skipped for those channels only, so inbox and push still reach them.
+  - Fixed: the bulk history table inserted customer names and messages as HTML (a name typed at registration could run script in the admin's browser);
+    placeholder values are now escaped for email and inbox, and the table escapes everything it shows.
+  - Fixed: the three send actions had no CSRF check and the bulk sender accepted a GET; the batch size went unchecked into the SQL LIMIT. They now need a POST
+    with the token, and the batch size is one of the dropdown values.
+  - `[[payment_link]]` is now an absolute link to the customer's active recharge (also in "Send to selected", which skipped placeholders altogether).
+  - Added: a pause between SMS and WhatsApp sends, a confirmation before a real bulk send, a progress count and a skipped count, and the subject field of the bulk
+    page works again.
 - New look for the installer and the updater: a dark panel with the five steps as numbered ports with status lights (blue = current, green = done, red = failed,
   all five light up on the last page), a calm form on the right, light and dark colour schemes, and a step strip on phones. The installer gains a "Test the
   connection" button, a show/hide toggle and strength meter for passwords, and a clear confirmation before replacing an existing database. The updater page
