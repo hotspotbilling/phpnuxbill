@@ -101,6 +101,12 @@ try {
     if ($set->rowCount() !== 1) {
         throw new Exception('The administrator account was not created by the setup script.');
     }
+    // the setup script is the current schema: every database change in updates.json is already part of it, so none of them may run again later
+    $dbh->exec('DROP TABLE IF EXISTS tbl_migrations');
+    require_once dirname(__DIR__) . '/system/autoload/Migrator.php';
+    $migrator = new Migrator($dbh, dirname(__DIR__) . '/system/updates.json');
+    $versions = $migrator->versions();
+    $migrator->baseline($versions ? end($versions) : '');
 } catch (Throwable $e) {
     pnb_back('import', $e->getMessage());
 }

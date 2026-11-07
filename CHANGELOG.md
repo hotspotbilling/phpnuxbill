@@ -4,6 +4,30 @@
 
 ## Unreleased
 
+- The updater looks at the database work before any file is replaced (step 2), and `php system/cron/migrate.php --status` shows the same: how many changes will run,
+  the largest tables they touch with rows and size, and it refuses to go on if the database account lacks ALTER/CREATE/DROP/INDEX or the disk where the
+  database lives is too small to rewrite the largest table. The refusal leaves the site exactly as it was.
+- Customers see the maintenance page while the database step runs (web updater and `system/cron/migrate.php`), and it is lifted when the last change is done or
+  not at all if a change failed. A maintenance mode the admin switched on themselves is never turned off. Staff pages keep working.
+- Install and upgrade now produce the same database (checked by building one from `install/phpnuxbill.sql` and another from the 2025 install plus every
+  migration, then comparing columns and indexes):
+  - Fixed: a new install had no `tbl_voucher.batch_name`, which the voucher screens and `plan.php` use. Migration `2026.11.7` adds it to sites that lack it,
+    gives `tbl_customers.referral_code` its NULL default and unique index on upgraded sites, and widens `tbl_referral_relationships.referral_code` to 25.
+  - Fixed in `Migrator`: a guarded change (`SET @s` / `PREPARE` / `EXECUTE`) that resumed halfway failed with "Unknown prepared statement handler", and an
+    `EXECUTE` answering with a result set blocked the next statement. Such a group now runs, and re-runs, as a whole.
+
+- Database updates rebuilt around `Migrator`:
+  - Fixed: which database changes had run was kept in `system/cache/updates.done.json`, written once at the very end. A request that died halfway recorded nothing,
+    clearing the cache folder replayed all 70 versions, and a new install replayed them on its first update (including data fixes such as the widget resets,
+    which do not fail on a second run, they silently change data). The record is now the table `tbl_migrations`, one row per statement, written as each
+    statement finishes.
+  - A new install records every version as applied; a site with no record counts everything up to its installed version as applied (an old `updates.done.json`
+    is honoured too), so only newer changes run.
+  - The run stops at the first real error and reports the statement; nothing after it runs, and "Try this step again" resumes from there. Web runs work in
+    20-second slices at version boundaries so no request outlives a proxy timeout; statements that belong together (`SET @s` / `PREPARE` / `EXECUTE`) are never split.
+  - "Already exists" answers are skipped, but a duplicate-key error on an `ALTER` (duplicate data blocking a unique key) is now a real failure, not hidden.
+  - `php system/cron/migrate.php` applies, `--status` shows pending and failed, `--baseline=VERSION` sets the starting point: use it for large databases,
+    where a table change can run longer than a web request. One run at a time, from any entry point (`GET_LOCK`).
 - Send Message and Bulk Messages review:
   - Fixed: bulk to Active or Expired customers without a router sent nothing (the rows had no phone or name), and inbox and push in bulk went to customer 0
     for All and New. One query (`MessageSender::recipients()`) now serves every group, returns each customer once in a fixed order, and counts the group

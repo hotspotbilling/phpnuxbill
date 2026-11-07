@@ -199,7 +199,7 @@ ORM using Idiorm : `system/orm.php`
 
 ## Pitfalls
 
-- **Schema updates**: Schema changes for new installations belong in `install/phpnuxbill.sql`, and upgrade migrations must be added to `system/updates.json` (executed via `update.php`).
+- **Schema updates**: Schema changes for new installations belong in `install/phpnuxbill.sql`, and upgrade migrations must be added to `system/updates.json` (executed by `Migrator` through `update.php` or `php system/cron/migrate.php`, recorded in `tbl_migrations`). Write each statement so a second run changes nothing, and never reuse a version key that has shipped.
 - **Global state is pervasive** — always declare `global $ui, $config, $admin, $routes, $_L;` inside functions that use them.
 - **`.htaccess` blocks direct PHP access** except `index.php`, `update.php`, `radius.php`. Never create publicly accessible PHP files without `.htaccess` whitelisting.
 - **Payment gateways NOT auto-loaded** — they must be `include`d explicitly. Plugins ARE auto-loaded.

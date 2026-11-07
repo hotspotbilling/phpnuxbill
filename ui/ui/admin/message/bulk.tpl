@@ -278,19 +278,24 @@
     }
 
     // Start sending on button click
-    $('#startBulk').on('click', function () {
-        if (!$('#test').is(':checked') && !confirm('This sends the message to real customers. Tick "Testing" first to preview who would get it. Continue?')) {
-            return;
-        }
+    function startBulkRun() {
         page = 0;
         totalSent = 0;
         totalFailed = 0;
         totalSkipped = 0;
         hasMore = true;
-        $(this).prop('disabled', true); // one run at a time
+        $('#startBulk').prop('disabled', true); // one run at a time
         showStatus('info', 'spinner fa-spin', 'Starting bulk message sending...');
         historyTable.clear().draw(); // Clear history table before starting
         sendBatch();
+    }
+
+    $('#startBulk').on('click', function () {
+        if ($('#test').is(':checked')) {
+            startBulkRun(); // nothing is sent in test mode
+        } else {
+            ask(this, 'This sends the message to real customers. Tick "Testing" first to preview who would get it.', startBulkRun);
+        }
     });
 </script>
 {/literal}

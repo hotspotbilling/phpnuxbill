@@ -63,7 +63,9 @@
     "ALTER TABLE `tbl_plans` ADD `list_expired` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'address list' AFTER `pool_expired`;",
     "ALTER TABLE `tbl_bandwidth` ADD `burst` VARCHAR(128) NOT NULL DEFAULT '' AFTER `rate_up_unit`;"
   ],
-  "2024.2.20.1": ["DROP TABLE IF EXISTS `tbl_customers_meta`;"],
+  "2024.2.20.1": [
+    "DROP TABLE IF EXISTS `tbl_customers_meta`;"
+  ],
   "2024.2.23": [
     "ALTER TABLE `tbl_transactions` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;",
     "ALTER TABLE `tbl_user_recharges` ADD `admin_id` INT NOT NULL DEFAULT '1' AFTER `type`;"
@@ -298,5 +300,18 @@
   "2026.10.23": [
     "UPDATE tbl_voucher v JOIN (SELECT MIN(id) AS keep_id, code FROM tbl_voucher GROUP BY code HAVING COUNT(*) > 1) d ON v.code = d.code AND v.id <> d.keep_id SET v.code = CONCAT(LEFT(v.code, 45), '-dup', v.id)",
     "ALTER TABLE tbl_voucher DROP INDEX idx_voucher_code, ADD UNIQUE KEY idx_voucher_code (code)"
+  ],
+  "2026.11.7": [
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_voucher' AND COLUMN_NAME='batch_name')=0, 'ALTER TABLE `tbl_voucher` ADD `batch_name` VARCHAR(40) NULL AFTER `id_plan`', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "UPDATE tbl_customers SET referral_code = NULL WHERE referral_code = ''",
+    "ALTER TABLE `tbl_customers` MODIFY `referral_code` varchar(25) COLLATE utf8mb4_general_ci DEFAULT NULL",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_customers' AND INDEX_NAME='idx_unique_referral_code')=0, 'ALTER TABLE `tbl_customers` ADD UNIQUE KEY `idx_unique_referral_code` (`referral_code`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "ALTER TABLE `tbl_referral_relationships` MODIFY `referral_code` varchar(25) NOT NULL"
   ]
 }

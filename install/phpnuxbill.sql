@@ -212,6 +212,7 @@ CREATE TABLE `tbl_voucher` (
   `type` enum('Hotspot','PPPOE') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `routers` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `id_plan` int NOT NULL,
+  `batch_name` varchar(40) DEFAULT NULL,
   `code` varchar(55) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -327,7 +328,7 @@ CREATE TABLE `tbl_referral_relationships` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `referrer_id` int(11) NOT NULL COMMENT 'Customer who referred',
   `referred_id` int(11) NOT NULL COMMENT 'Customer who was referred',
-  `referral_code` varchar(20) NOT NULL,
+  `referral_code` varchar(25) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

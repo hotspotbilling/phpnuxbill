@@ -315,11 +315,23 @@ if ($step === 0) {
     if ($busy) {
         $problems[] = 'Another update is running (or stopped less than 30 minutes ago). Try again later.';
     }
+    // changes from an earlier update that stopped halfway run first
+    try {
+        require_once u_path('system/autoload/Migrator.php');
+        $mg = new Migrator(u_db(), u_path('system/updates.json'));
+        $mg->ensureTable();
+        if (!$mg->isEmpty() && ($left = count($mg->pending())) > 0) {
+            $problems_note = '<div class="alert alert-warning">' . $left . ' database change(s) from an earlier update are still waiting and will run first.</div>';
+        }
+    } catch (Throwable $e) {
+        // not important here: the update itself reports database problems
+    }
     $urlNow = $_SESSION['update_url'] ?? $update_url;
     $body = '<p>You are running version <b>' . u_h($self_version) . '</b>. Nothing changes until you press the button.</p>';
     foreach ($problems as $p) {
         $body .= '<div class="alert alert-danger">' . u_h($p) . '</div>';
     }
+    $body .= $problems_note ?? '';
     $body .= '<form method="post" action="update.php">
         <input type="hidden" name="token" value="' . u_h(u_token()) . '"><input type="hidden" name="step" value="1">
         <div class="form-group"><label for="update_url">Download address</label>
@@ -429,10 +441,34 @@ if ($step === 2) {
         u_rmtree($pkg);
         u_fail(2, 'This package (' . $newVersion . ') is older than the installed version (' . $self_version . '). Downgrading can break the database, so it was not installed.');
     }
+    // look at the database work before any file is replaced, so a refusal here leaves the site exactly as it was
+    $look = '';
+    try {
+        require_once u_path('system/autoload/Migrator.php');
+        $pf = (new Migrator(u_db(), u_path('system/updates.json')))->preflight($folder . DIRECTORY_SEPARATOR . 'system' . DIRECTORY_SEPARATOR . 'updates.json', $self_version);
+        if ($pf['problems']) {
+            u_rmtree($pkg);
+            u_fail(2, implode(' ', $pf['problems']) . ' Nothing was changed.');
+        }
+        if ($pf['count'] > 0) {
+            $look = '<p>Database changes to apply: <b>' . (int) $pf['count'] . '</b>.';
+            $big = array_slice($pf['tables'], 0, 3, true);
+            if ($big) {
+                $parts = [];
+                foreach ($big as $t => [$rows, $mb]) {
+                    $parts[] = u_h($t) . ' (about ' . number_format($rows) . ' rows, ' . $mb . ' MB)';
+                }
+                $look .= ' Largest tables touched: ' . implode(', ', $parts) . '.';
+            }
+            $look .= '</p>';
+        }
+    } catch (Throwable $e) {
+        // the look is a courtesy: the database step reports its own problems
+    }
     $run['folder'] = $folder;
     $run['to'] = $newVersion;
     $_SESSION['update_run'] = $run;
-    u_page('Step 2 of 5 - package checked', '<p>Version <b>' . u_h($newVersion) . '</b> is a valid PHPNuxBill package. Backing up and installing next...</p>', 3);
+    u_page('Step 2 of 5 - package checked', '<p>Version <b>' . u_h($newVersion) . '</b> is a valid PHPNuxBill package. Backing up and installing next...</p>' . $look, 3);
 }
 
 if ($step === 3) {
@@ -541,49 +577,50 @@ if ($step === 3) {
 }
 
 if ($step === 4) {
-    $problems = [];
-    $applied = 0;
-    $updatesFile = u_path('system/updates.json');
-    if (is_file($updatesFile)) {
-        try {
-            $db = u_db();
-        } catch (Throwable $e) {
-            u_fail(4, 'The database could not be reached: ' . $e->getMessage());
+    // The database changes. They are recorded in the database as they run (system/autoload/Migrator.php), so a request that is cut off
+    // resumes here, and the run stops at the first real error instead of piling later changes on a broken one.
+    require_once u_path('system/autoload/Migrator.php');
+    try {
+        $db = u_db();
+        $migrator = new Migrator($db, u_path('system/updates.json'));
+        $migrator->ensureTable();
+        if ($migrator->isEmpty()) {
+            // first run on this site: everything up to the version it was on counts as applied (an older record is honoured too)
+            $doneFile = u_path('system/cache/updates.done.json');
+            $dones = is_file($doneFile) ? (json_decode((string) file_get_contents($doneFile), true) ?: []) : [];
+            $migrator->baseline((string) ($run['from'] ?? ''), $dones);
         }
-        $updates = json_decode((string) file_get_contents($updatesFile), true) ?: [];
-        $doneFile = u_path('system/cache/updates.done.json');
-        $dones = is_file($doneFile) ? (json_decode((string) file_get_contents($doneFile), true) ?: []) : [];
-        // MySQL answers these when a change is already there: harmless on a re-run
-        $already = [1050, 1060, 1061, 1062, 1068, 1091];
-        foreach ($updates as $version => $queries) {
-            if (in_array($version, $dones, true)) {
-                continue;
-            }
-            $clean = true;
-            foreach ($queries as $q) {
-                try {
-                    $db->exec($q);
-                    $applied++;
-                } catch (PDOException $e) {
-                    $code = (int) ($e->errorInfo[1] ?? 0);
-                    // the FreeRADIUS tables (nas, rad...) only exist on a site that installed them: a change to one that is not there is skipped
-                    $optional = $code === 1146 && preg_match('/\.(nas|rad[a-z_]*)\b/i', (string) $e->getMessage()) === 1;
-                    if (!in_array($code, $already, true) && !$optional) {
-                        $clean = false;
-                        $problems[] = $version . ': ' . $e->getMessage();
-                    }
-                }
-            }
-            if ($clean) { // a version with a real error is tried again on the next update
-                $dones[] = $version;
-            }
+        if ($migrator->pending()) {
+            $migrator->pause(); // customers see the maintenance page while tables change; staff pages keep working
         }
-        file_put_contents($doneFile, json_encode(array_values($dones)));
+        $result = $migrator->run(20);
+        if (!$result['failed'] && !$result['locked'] && $result['remaining'] === 0) {
+            $migrator->resume();
+        }
+    } catch (Throwable $e) {
+        u_fail(4, 'The database could not be updated: ' . $e->getMessage());
     }
-    $run['db_problems'] = $problems;
-    $run['db_applied'] = $applied;
+    if ($result['locked']) {
+        u_fail(4, 'Another database update is running. Wait for it to finish, then try again.');
+    }
+    $run['db_applied'] = (int) ($run['db_applied'] ?? 0) + $result['applied'];
+    $run['db_skipped'] = (int) ($run['db_skipped'] ?? 0) + $result['skipped'];
     $_SESSION['update_run'] = $run;
-    u_page('Step 4 of 5 - database', '<p>Database changes applied: <b>' . (int) $applied . '</b>' . ($problems ? ', with <b>' . count($problems) . ' problem(s)</b> (shown at the end)' : '') . '.</p>', 5);
+    if ($result['failed']) {
+        [$fv, $fp, $fsql, $ferr] = $result['failed'];
+        $body = '<div class="alert alert-danger"><b>Version ' . u_h($fv) . ', statement ' . ((int) $fp + 1) . '</b><br>' . u_h($ferr) . '<br><code>' . u_h(mb_strimwidth($fsql, 0, 300, '...')) . '</code></div>
+            <p>The database changes were stopped here and nothing after this one was run. The new program files are already installed. Fix the cause
+            (permissions, a full disk, data that blocks a unique key), then run this step again: it carries on from this statement.</p>
+            <p>Customers see the maintenance page until the database is finished. Once it is, it is lifted by itself.</p>
+            <form method="post" action="update.php"><input type="hidden" name="token" value="' . u_h(u_token()) . '"><input type="hidden" name="step" value="4">
+            <button type="submit" class="btn btn-primary">Try this step again</button> <a href="./?_route=dashboard" class="btn">Leave it for now</a></form>
+            <p class="help-block">From the command line: <code>php system/cron/migrate.php</code></p>';
+        u_page('Database update stopped', $body, null, '', ['bad' => 4, 'done' => 3]);
+    }
+    if ($result['remaining'] > 0) {
+        u_page('Step 4 of 5 - database', '<p>Database changes applied so far: <b>' . (int) $run['db_applied'] . '</b>. ' . (int) $result['remaining'] . ' still to go; this page continues by itself.</p>', 4);
+    }
+    u_page('Step 4 of 5 - database', '<p>Database changes applied: <b>' . (int) $run['db_applied'] . '</b>' . ($run['db_skipped'] ? ' (' . (int) $run['db_skipped'] . ' were already in place)' : '') . '.</p>', 5);
 }
 
 // step 5: tidy up and report
@@ -605,12 +642,8 @@ $summary = '<div class="ver">' . u_h($run['from']) . ' <span>to</span> ' . u_h($
 if (!empty($run['backup'])) {
     $summary .= '<p>Backup of the replaced files: <code>' . u_h($run['backup']) . '</code> (restore it by unzipping over the site folder if something is wrong).</p>';
 }
-if (!empty($run['db_problems'])) {
-    $summary .= '<div class="alert alert-warning"><b>Some database changes failed</b> and will be tried again the next time you update:<ul>';
-    foreach (array_slice($run['db_problems'], 0, 10) as $p) {
-        $summary .= '<li>' . u_h($p) . '</li>';
-    }
-    $summary .= '</ul></div>';
+if (!empty($run['db_applied']) || !empty($run['db_skipped'])) {
+    $summary .= '<p>Database changes applied: <b>' . (int) ($run['db_applied'] ?? 0) . '</b>' . (!empty($run['db_skipped']) ? ' (' . (int) $run['db_skipped'] . ' were already in place)' : '') . '.</p>';
 }
 $summary .= '<p><a href="./?_route=dashboard" class="btn btn-primary">Open the dashboard</a></p>';
 u_unlock();

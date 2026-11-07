@@ -185,6 +185,9 @@ class MessageSender
                             $note = (string) ($r['message'] ?? '');
                         } elseif (!empty($r['sent'])) {
                             $result = 'sent';
+                        } elseif (!empty($r['failed'])) {
+                            $result = 'failed';
+                            $note = (string) ($r['errors'][0] ?? Lang::T('Push delivery failed'));
                         } else {
                             $result = 'skipped';
                             $note = Lang::T('No push subscription');

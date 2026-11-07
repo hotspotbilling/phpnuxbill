@@ -390,7 +390,7 @@
         }, 500);
     });
 
-    function ask(field, text) {
+    function ask(field, text, onConfirm) {
         const txt = field.innerHTML;
 
         field.innerHTML = `<span class="loading"></span>`;
@@ -410,7 +410,9 @@
                 field.innerHTML = txt;
                 field.removeAttribute("disabled");
 
-                if (result.isConfirmed) {
+                if (result.isConfirmed && typeof onConfirm === 'function') {
+                    onConfirm(); // the caller does the work (an AJAX button) instead of submitting a form
+                } else if (result.isConfirmed) {
                     const form = field.closest('form');
                     if (form) {
                         form.submit(); // manually submit the form

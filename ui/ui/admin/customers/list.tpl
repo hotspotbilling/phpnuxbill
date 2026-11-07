@@ -384,7 +384,7 @@
                 error: function () {
                     Swal.fire({
                         title: 'Error!',
-                        text: "{Lang::T('Failed to send the message. Please try again.')}",
+                        text: "{Lang::T('The request ended before a result came back. Sending may still be running, so check the message logs before trying again.')}",
                         icon: 'error',
                         confirmButtonText: 'OK'
                     });
