@@ -30,8 +30,8 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css?2026.10.9.14" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.7.18" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.11.7.3" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.7.25" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.11.7.5" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
      {if isset($xheader)}

@@ -4858,5 +4858,6 @@
     "Search_all_statuses": "Search all statuses",
     "all": "all",
     "Signature": "Signature",
-    "Signed_by_the_developer__updates_must_use_the_same_key": "Signed by the developer; updates must use the same key"
+    "Signed_by_the_developer__updates_must_use_the_same_key": "Signed by the developer; updates must use the same key",
+    "64_hexadecimal_characters": "64 hexadecimal characters"
 }

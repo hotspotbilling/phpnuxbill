@@ -46,7 +46,7 @@
             </label>
             <label class="cl-field"><span>{Lang::T('Show')}</span>
                 <select id="per_page" name="per_page" onchange="changePerPage(this)">
-                    {foreach [10, 25, 50, 100, 200, 500, 1000] as $n}
+                    {foreach $per_page_options as $n}
                     <option value="{$n}" {if $cookie eq $n}selected{/if}>{$n}</option>
                     {/foreach}
                 </select>

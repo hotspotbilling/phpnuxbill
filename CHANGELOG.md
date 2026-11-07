@@ -4,6 +4,29 @@
 
 ## Unreleased
 
+- Customers list: the "Show" dropdown now shows the page size in use. The controller falls back to 30 when no size is saved, but the dropdown only matched its fixed list, so it showed 10
+  while 30 rows were listed; a saved size outside the list (for example 30) is added to the dropdown and selected. The saved size is read as a whole number between 1 and 5000, so a
+  damaged cookie can no longer be stored as the setting.
+- Fixed: the search box on Rollback Update did nothing. The script hides rows with the `hidden` attribute, but the rows set `display: grid`, which overrides it, so every row stayed visible. The
+  hidden attribute now wins for the rows, the list and the "no version matches" note.
+- Fixed: the page background had gone back to `#f6f9fc` / `#151521` instead of the menu's colour. The rule that gives the page, content header and top bar the menu background was cut out of
+  `admin-chrome.css` by a later edit of the search-list styles; it is back. Checked on 26 admin pages in light and dark: the menu, page, content header, top bar and footer are one colour.
+- Community and Rollback Update (core theme): the cards now look like the Routely card on the dashboard, with no fill of their own (the page shows through), a 1px neutral border and a 12px radius,
+  instead of `#1e1e2d` fills on the darker page. Their tinted parts (the version tiles, link tiles, status banner, rollback bar and rows) follow, and the rollback search keeps the form-field
+  surface. Done through the pages' colour tokens, so hover and active states are unchanged.
+- Marketplace install panel layout: the package address and its SHA-256 (which had no label and hung under the address) are now two labelled fields side by side on the second row, under
+  the file and GitHub fields, with the Install button at the end of that row; on a phone the fields stack and Install comes last. Panels with only a file field (themes, gateways) keep the
+  file field wide with the button beside it.
+- Marketplace install panel: the SHA-256 field under the package address was an unstyled browser input stuck to the field above it. All fields in the panel (file, GitHub address, package
+  address, SHA-256) are now the same 38px control with a focus ring and a gap between the two stacked ones, the fields line up from the top, the Install button sits level with the first
+  row, and the panel has no fill of its own (it follows the cards) with the dashed indigo border.
+- Marketplace details drawer and licence dialog: fixed, they were see-through (they carry the `.mp-wrap` class, so the transparent card fill from the last change reached them and the page showed
+  through behind the text). They now have the page colour with the neutral border.
+- The top-bar search results list uses the same page colour with the neutral border of the cards (not the card fill), a 1px divider above its footer (it was a thick coloured line), and soft
+  neutral tints for the icon tiles, badges, hover row and key caps. Core theme only.
+- Marketplace (core theme, every tab): the cards, hub cards, panels, empty states, diagnostics bar, filter chips, tabs, sort and small buttons now look like the Routely card on the dashboard, with
+  no fill of their own (the page shows through), a 1px neutral border and a 12px radius (they were `#1e1e2d` and zinc `#27272a` fills on the darker page). It is done through the `--mp-*` tokens
+  so hover, active and focus states keep working; the coloured banners and action buttons are unchanged.
 - Review fixes: `Migrator::baseline()` refuses to run inside a caller's database transaction (creating the record table would commit it), before any DDL runs; the Community page treats a
   version answer without a `version` as unavailable instead of showing it; and the updater clears the rollback permission ("Allow an older version") when a run ends or fails, so it does not
   carry over to the next one.
@@ -30,7 +53,6 @@
   - Fixed: the quick actions listed an action twice when two of its keywords matched the typed text (typing "d" showed Add Customer and Redis Cache twice). Each action shows once.
 - The search box in the top bar and the search box and filter selects on the customers list and Active Customers now share one look, the surface of the form fields on the add and edit
   pages (white, or `#1e1e2d` with a `#2d3748` border in dark mode), at the same 38px height and 8px radius. They were two different shades and shapes. Core theme only.
-  theme keeps its own top bar.
 - Focus states on the customers list, Active Customers, add and edit: one soft indigo ring instead of a browser outline plus a border plus a halo (the list search showed a double
   ring), and in an input group (username, email, phone, password) the ring goes round the addon and the field together. In dark mode a focused field kept turning white because of a
   global `input:focus` rule; it now keeps the page surface colour.

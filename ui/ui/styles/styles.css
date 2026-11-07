@@ -6748,3 +6748,69 @@ body:not(.shadcn-body) .btn-back-round:hover {
   background-color: var(--cv-pri-soft) !important; border-color: var(--cv-pri) !important;
 }
 body:not(.shadcn-body) .customer-action-toolbar .btn.btn-danger:not(.btn-primary):hover { background-color: rgba(220, 38, 38, .10) !important; border-color: #dc2626 !important; }
+
+/* Marketplace (core theme): the cards look like the Routely card on the dashboard: no fill of their own (the page shows through), a 1px neutral border and a 12px radius.
+   It is done through the tokens, so the hover and active states of the controls keep working. */
+body:not(.shadcn-body) .mp-wrap {
+  --mp-card: transparent;
+  --mp-line: rgba(127, 127, 127, 0.28);
+  --mp-footer: rgba(127, 127, 127, 0.06);
+}
+body:not(.shadcn-body) .mp-wrap .mp-card, body:not(.shadcn-body) .mp-wrap .mp-hub-card, body:not(.shadcn-body) .mp-wrap .mp-panel,
+body:not(.shadcn-body) .mp-wrap .mp-empty, body:not(.shadcn-body) .mp-wrap .mp-diag-bar { border-radius: 12px; }
+body:not(.shadcn-body) .mp-wrap .mp-card:not(:hover), body:not(.shadcn-body) .mp-wrap .mp-hub-card:not(:hover) { box-shadow: none; }
+body:not(.shadcn-body) .mp-wrap .mp-act:not([class*="mp-act--"]) { background-color: transparent; border-color: var(--mp-line); }
+body:not(.shadcn-body) .mp-wrap .mp-act:not([class*="mp-act--"]):hover { background-color: rgba(99, 102, 241, 0.12); border-color: var(--mp-accent); }
+
+/* The details drawer and the licence dialog float over the page, so unlike the cards they need a fill of their own: the page colour (the menu background) with the neutral border. */
+body:not(.shadcn-body) .mp-drawer__panel, body:not(.shadcn-body) .mp-modal__panel { background: var(--as-bg, #ffffff); border: 1px solid rgba(127, 127, 127, 0.28); }
+body:not(.shadcn-body) .mp-drawer__panel { border-width: 0 0 0 1px; }
+body:not(.shadcn-body) .mp-drawer__panel .mp-d-readme, body:not(.shadcn-body) .mp-drawer__panel pre, body:not(.shadcn-body) .mp-drawer__panel code { background-color: rgba(127, 127, 127, 0.1); }
+
+/* Install panel (upload, GitHub address, package address + SHA-256): every field is the same control, the fields line up from the top, and the button sits level with the first row. */
+.mp-install form { align-items: flex-start; }
+.mp-install .mp-field input[type=url], .mp-install .mp-field input[type=text], .mp-install .mp-field input[type=file] {
+  display: block; width: 100%; height: 38px; min-height: 38px; box-sizing: border-box; padding: 0 12px; margin: 0;
+  border: 1px solid #c7d2fe; border-radius: 9px; background: var(--cv-bg, #ffffff); color: var(--cv-fg, #1e293b); font-size: 13px; line-height: 36px; outline: none; box-shadow: none;
+}
+.mp-install .mp-field input[type=file] { padding: 0 8px; line-height: 36px; }
+.mp-install .mp-field input[type=file]::file-selector-button { margin: 5px 10px 5px 0; padding: 0 10px; height: 26px; border: 1px solid #c7d2fe; border-radius: 6px; background: transparent; color: inherit; font-size: 12.5px; cursor: pointer; }
+.mp-install .mp-field input + input { margin-top: 8px; }
+.mp-install .mp-field input[type=url]:focus, .mp-install .mp-field input[type=text]:focus { border-color: var(--cv-pri, #4f46e5); box-shadow: 0 0 0 3px var(--cv-pri-soft, rgba(79, 70, 229, .12)); }
+.mp-install .mp-field input::placeholder { color: var(--cv-muted, #94a3b8); }
+.mp-install button.mp-submit { height: 38px; margin-top: 20px; }
+.dark-mode .mp-install .mp-field input[type=url], .dark-mode .mp-install .mp-field input[type=text], .dark-mode .mp-install .mp-field input[type=file] { border-color: var(--cv-border, #2d3748); }
+.dark-mode .mp-install .mp-field input[type=file]::file-selector-button { border-color: var(--cv-border, #2d3748); }
+body.dark-mode .mp-install .mp-field input[type=text]:not(#filterNavigateMenu):focus, body.dark-mode .mp-install .mp-field input[type=url]:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
+/* the panel itself: no fill (like the other cards), a dashed indigo border */
+body:not(.shadcn-body) .mp-wrap { --mp-install-bg: transparent; }
+body:not(.shadcn-body) .mp-install { border-color: rgba(99, 102, 241, 0.45); }
+@media (max-width: 767px) { .mp-install button.mp-submit { margin-top: 0; } }
+.mp-install .mp-field input { text-overflow: ellipsis; }
+
+/* Install panel layout: two fields a row with the Install button at the end of the last row; the package address and its SHA-256 sit side by side, each with its own label. */
+.mp-install form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 14px 16px; align-items: end; }
+.mp-install form .mp-field { min-width: 0; flex: none; }
+.mp-install form .mp-field:only-of-type { grid-column: 1 / 3; }
+.mp-install form button.mp-submit { grid-column: 3; margin-top: 0; justify-self: stretch; }
+.mp-install form.mp-install__grid .mp-field:nth-of-type(3) { grid-column: 1; }
+.mp-install form.mp-install__grid .mp-field:nth-of-type(4) { grid-column: 2; }
+.mp-install form.mp-install__grid button.mp-submit { grid-row: 2; }
+.mp-install .mp-field input + input { margin-top: 0; }
+@media (max-width: 767px) {
+  .mp-install form { grid-template-columns: minmax(0, 1fr); }
+  .mp-install form .mp-field, .mp-install form .mp-field:only-of-type, .mp-install form.mp-install__grid .mp-field:nth-of-type(3), .mp-install form.mp-install__grid .mp-field:nth-of-type(4), .mp-install form button.mp-submit, .mp-install form.mp-install__grid button.mp-submit { grid-column: 1; grid-row: auto; }
+}
+
+/* Community and Rollback Update (core theme): the cards look like the Routely card on the dashboard, with no fill of their own (the page shows through), a 1px neutral border and a 12px radius.
+   Done through the page tokens, so hover and active states keep working. */
+body:not(.shadcn-body) .cp { --cp-card: transparent; --cp-line: rgba(127, 127, 127, 0.28); --cp-soft: rgba(127, 127, 127, 0.06); }
+body:not(.shadcn-body) .rb { --rb-card: transparent; --rb-line: rgba(127, 127, 127, 0.28); --rb-soft: rgba(127, 127, 127, 0.06); }
+body:not(.shadcn-body) .cp-card, body:not(.shadcn-body) .rb-card { border-radius: 12px; }
+/* the version search is a form field: it keeps the field surface */
+body:not(.shadcn-body) .rb-search { background-color: var(--cv-bg); border-color: var(--cv-border); }
+body:not(.shadcn-body) .rb-search:focus { border-color: var(--rb-accent); }
+body.dark-mode:not(.shadcn-body) .rb-search:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
+
+/* the hidden attribute must win over the display set on these (the rollback search and the empty note rely on it) */
+.rb-row[hidden], .rb-empty[hidden], .rb-list[hidden] { display: none !important; }

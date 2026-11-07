@@ -939,26 +939,31 @@ switch ($action) {
             die();
         }
 
-        if (!empty($_COOKIE['customer_per_page']) && $_COOKIE['customer_per_page'] != $config['customer_per_page']) {
+        // the page size: the cookie of this browser, else the saved setting, else 30 (always a whole number between 1 and 5000)
+        $cfgSize = max(0, min(5000, (int) ($config['customer_per_page'] ?? 0)));
+        $cookieSize = max(0, min(5000, (int) ($_COOKIE['customer_per_page'] ?? 0)));
+        if ($cookieSize > 0 && $cookieSize != $cfgSize) {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'customer_per_page')->find_one();
             if ($d) {
-                $d->value = $_COOKIE['customer_per_page'];
+                $d->value = (string) $cookieSize;
                 $d->save();
             } else {
                 $d = ORM::for_table('tbl_appconfig')->create();
                 $d->setting = 'customer_per_page';
-                $d->value = $_COOKIE['customer_per_page'];
+                $d->value = (string) $cookieSize;
                 $d->save();
             }
-        } 
-        if (!empty($config['customer_per_page']) && empty($_COOKIE['customer_per_page'])) {
-            $_COOKIE['customer_per_page'] = $config['customer_per_page'];
-            setcookie('customer_per_page', $config['customer_per_page'], time() + (86400 * 30), "/");
         }
-
-        $ui->assign('cookie', $_COOKIE['customer_per_page']);
-
-        $per_page = !empty($_COOKIE['customer_per_page']) ? $_COOKIE['customer_per_page'] : (!empty($config['customer_per_page']) ? $config['customer_per_page'] : '30');
+        if ($cfgSize > 0 && $cookieSize < 1) {
+            $cookieSize = $cfgSize;
+            setcookie('customer_per_page', (string) $cfgSize, time() + (86400 * 30), "/");
+        }
+        $per_page = $cookieSize > 0 ? $cookieSize : ($cfgSize > 0 ? $cfgSize : 30);
+        // the sizes the dropdown offers, plus the active one when it is not among them, so the page always shows the size in use
+        $sizes = array_values(array_unique(array_merge([10, 25, 50, 100, 200, 500, 1000], [$per_page])));
+        sort($sizes);
+        $ui->assign('cookie', $per_page);
+        $ui->assign('per_page_options', $sizes);
 
         $d = Paginator::findMany($query, ['search' => $search], $per_page, $append_url);
         $ui->assign('d', $d);
