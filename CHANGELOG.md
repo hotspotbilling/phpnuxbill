@@ -4,8 +4,9 @@
 
 ## Unreleased
 
+- Fixed: white text on the primary buttons, the selected tab and the current page in dark mode was about 3:1 on the light indigo. Filled controls now use a deeper indigo in dark mode (4.8:1) through new `--ls-fill`, `--cp-fill`, `--rb-fill`, `--cv-pri-fill` and `--pg-fill` tokens; light mode and accent text are unchanged.
 - Added: `CONTRIBUTING.md`, and a "CSS and UI conventions" page in the documentation (Extending) covering where styles live, the colour tokens, the list kit, dark-mode traps and the stylesheet checklist.
-- Changed: the active item in the admin side menu (and the active child, the collapsed icon rail and its flyouts) is filled with the same indigo as the primary buttons, with white text, in light and dark mode. The menu hover colour and the footer links use the same indigo.
+- Changed: the active item in the admin side menu (and the active child, the collapsed icon rail and its flyouts) is filled with the primary indigo with white text (a slightly deeper indigo in dark mode so the text reads at 4.8:1). The menu hover colour and the footer links use the same indigo.
 - Fixed (list kit review): Port Pool links use full route paths; the PPPoE and VPN status filter says "Disabled" like the row badge; bandwidth option values are escaped in the plan lists; the Referral status labels are escaped and the rewards tooltip is translated.
 - Fixed (list kit review): the phone card layout uses one column unless a row has a checkbox cell; the coupons page no longer starts DataTables on an empty list; the Hotspot, PPPoE and VPN lists keep the searched name; the Activity log search says it searches the description; the payment gateway audit escapes the gateway name in its links; the daily report's Total row lines up under Plan Price.
 - Fixed: the Referral page cards (the four stat cards, charts and tables) had a hard-coded white background; they are now transparent with the neutral border and 12px radius used on the dashboard, in light and dark mode. The coloured left edge on the stat cards stays.

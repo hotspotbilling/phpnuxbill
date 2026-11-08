@@ -6336,6 +6336,7 @@ body.as-chrome .sidebar-menu .pull-right-container > svg.treeview-chevron { disp
     --cp-soft: var(--muted, #f8fafc);
     --cp-accent: #4f46e5;
     --cp-accent-soft: rgba(79, 70, 229, .10);
+    --cp-fill: var(--cp-accent);
     --cp-ok: #16a34a;
     --cp-ok-soft: rgba(22, 163, 74, .12);
     --cp-warn: #d97706;
@@ -6352,6 +6353,7 @@ body.dark-mode .cp {
     --cp-soft: var(--muted, #252536);
     --cp-accent: #818cf8;
     --cp-accent-soft: rgba(129, 140, 248, .16);
+    --cp-fill: #5d5fef; /* white text on it is 4.8:1 */
     --cp-ok: #4ade80;
     --cp-ok-soft: rgba(74, 222, 128, .14);
     --cp-warn: #fbbf24;
@@ -6389,8 +6391,8 @@ body.dark-mode .cp {
 .cp-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--cp-line); background: var(--cp-card); color: var(--cp-ink) !important; font-size: 13px; font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s; }
 .cp-btn:hover { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
 .cp-btn:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 2px; }
-.cp-btn--primary { background: var(--cp-accent); border-color: var(--cp-accent); color: #fff !important; }
-.cp-btn--primary:hover { background: var(--cp-accent); filter: brightness(1.08); }
+.cp-btn--primary { background: var(--cp-fill); border-color: var(--cp-fill); color: #fff !important; }
+.cp-btn--primary:hover { background: var(--cp-fill); filter: brightness(1.08); }
 .cp-actions--grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 .cp-actions--grid .cp-btn { justify-content: center; min-width: 0; padding-left: 10px; padding-right: 10px; white-space: nowrap; }
 .cp-actions--grid .cp-btn { overflow: hidden; text-overflow: ellipsis; }
@@ -6440,6 +6442,7 @@ body.dark-mode .cp-contrib img { background: #fff; padding: 6px; }
     --rb-soft: var(--muted, #f8fafc);
     --rb-accent: #4f46e5;
     --rb-accent-soft: rgba(79, 70, 229, .10);
+    --rb-fill: var(--rb-accent);
     --rb-warn: #b45309;
     --rb-warn-soft: rgba(217, 119, 6, .13);
     color: var(--rb-ink);
@@ -6453,6 +6456,7 @@ body.dark-mode .rb {
     --rb-soft: var(--muted, #252536);
     --rb-accent: #818cf8;
     --rb-accent-soft: rgba(129, 140, 248, .16);
+    --rb-fill: #5d5fef;
     --rb-warn: #fbbf24;
     --rb-warn-soft: rgba(251, 191, 36, .14);
 }
@@ -6470,7 +6474,7 @@ body.dark-mode .rb {
 .rb-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--rb-line); background: var(--rb-soft); }
 .rb-tabs { display: inline-flex; padding: 3px; border: 1px solid var(--rb-line); border-radius: 11px; background: var(--rb-card); }
 .rb-tab { border: 0; background: transparent; color: var(--rb-muted); padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.rb-tab[aria-selected="true"] { background: var(--rb-accent); color: #fff; }
+.rb-tab[aria-selected="true"] { background: var(--rb-fill); color: #fff; }
 .rb-tab:focus-visible { outline: 2px solid var(--rb-accent); outline-offset: 2px; }
 /* one focus style for the search box: accent border and a soft ring, no outline */
 .rb-search:focus, .rb-search:focus-visible { outline: none !important; border-color: var(--rb-accent); box-shadow: 0 0 0 3px var(--rb-accent-soft); }
@@ -6507,6 +6511,7 @@ body.dark-mode .rb-search:not(#filterNavigateMenu):focus { background-color: var
     --ls-soft: var(--muted, #f8fafc);
     --ls-accent: #4f46e5;
     --ls-accent-soft: rgba(79, 70, 229, .10);
+    --ls-fill: var(--ls-accent);
     /* search and select fields: the same surface, border, height and radius as the search box in the top bar */
     --ls-field: var(--input-bg, #f1f5f9);
     --ls-field-line: #e2e8f0;
@@ -6521,6 +6526,7 @@ body.dark-mode .ls {
     --ls-soft: var(--muted, #252536);
     --ls-accent: #818cf8;
     --ls-accent-soft: rgba(129, 140, 248, .16);
+    --ls-fill: #5d5fef;
     --ls-field: #27272a;
     --ls-field-line: #3f3f46;
 }
@@ -6532,8 +6538,8 @@ body.dark-mode .ls {
 .ls-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--ls-line); background: var(--ls-card); color: var(--ls-ink) !important; font-size: 13px; font-weight: 600; line-height: 1.2; cursor: pointer; white-space: nowrap; transition: border-color .15s, background .15s; }
 .ls-btn:hover { border-color: var(--ls-accent); background: var(--ls-accent-soft); }
 .ls-btn:focus-visible, .ls-tab:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
-.ls-btn--primary { background: var(--ls-accent); border-color: var(--ls-accent); color: #fff !important; }
-.ls-btn--primary:hover { background: var(--ls-accent); filter: brightness(1.08); }
+.ls-btn--primary { background: var(--ls-fill); border-color: var(--ls-fill); color: #fff !important; }
+.ls-btn--primary:hover { background: var(--ls-fill); filter: brightness(1.08); }
 .ls-btn--sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
 .ls-btn--icon { padding: 5px 9px; }
 
@@ -6541,7 +6547,7 @@ body.dark-mode .ls {
 .ls-tab { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--ls-line); background: var(--ls-card); color: var(--ls-muted) !important; font-size: 13px; font-weight: 600; }
 .ls-tab small { font-size: 11.5px; font-weight: 600; padding: 0 7px; border-radius: 999px; background: var(--ls-soft); color: var(--ls-muted); }
 .ls-tab:hover { border-color: var(--ls-accent); color: var(--ls-accent) !important; }
-.ls-tab.is-on { background: var(--ls-accent); border-color: var(--ls-accent); color: #fff !important; }
+.ls-tab.is-on { background: var(--ls-fill); border-color: var(--ls-fill); color: #fff !important; }
 .ls-tab.is-on small { background: rgba(255, 255, 255, .2); color: #fff; }
 
 .ls-card { min-height: 0 !important; background: var(--ls-card); border: 1px solid var(--ls-line); border-radius: 14px; overflow: hidden; }
@@ -6627,9 +6633,9 @@ body.dark-mode .ls-pill--banned, body.dark-mode .ls-pill--suspended { color: #f8
 }
 
 /* Customer add, edit and view (ui/ui/admin/customers/{add,edit,view}.tpl): the same look as the customers list. Uses the --cv-* tokens above. */
-:root { --cv-radius: 14px; --cv-shadow: none; --cv-pri: #4f46e5; --cv-pri-soft: rgba(79, 70, 229, .10); }
+:root { --cv-radius: 14px; --cv-shadow: none; --cv-pri: #4f46e5; --cv-pri-fill: #4f46e5; --cv-pri-soft: rgba(79, 70, 229, .10); }
 /* the same surface colours as the customers list (.ls), so the four pages sit on the same background */
-.dark-mode, .dark { --cv-bg: #1e1e2d; --cv-fg: #e2e8f0; --cv-muted: #94a3b8; --cv-border: #2d3748; --cv-accent: #252536; --cv-pri: #818cf8; --cv-pri-soft: rgba(129, 140, 248, .16); }
+.dark-mode, .dark { --cv-bg: #1e1e2d; --cv-fg: #e2e8f0; --cv-muted: #94a3b8; --cv-border: #2d3748; --cv-accent: #252536; --cv-pri: #818cf8; --cv-pri-fill: #5d5fef; --cv-pri-soft: rgba(129, 140, 248, .16); }
 .customer-view-header { margin-bottom: 16px; }
 .customer-name-heading { font-size: 20px; letter-spacing: -.01em; }
 .btn-back-round { border-radius: 10px !important; width: 36px; height: 36px; box-shadow: none; }
@@ -6639,7 +6645,7 @@ body .customer-action-toolbar .btn { border-radius: 10px !important; padding: 8p
 body .customer-action-toolbar .btn:not(.btn-primary) { background-color: var(--cv-bg) !important; border: 1px solid var(--cv-border) !important; color: var(--cv-fg) !important; }
 body .customer-action-toolbar .btn:not(.btn-primary):hover, body .customer-action-toolbar .btn:not(.btn-primary):focus { border-color: var(--cv-pri) !important; background-color: var(--cv-pri-soft) !important; }
 body .customer-action-toolbar .btn:focus-visible { outline: 2px solid var(--cv-pri); outline-offset: 2px; }
-body .customer-action-toolbar .btn.btn-primary { background-color: var(--cv-pri) !important; border: 1px solid var(--cv-pri) !important; color: #fff !important; }
+body .customer-action-toolbar .btn.btn-primary { background-color: var(--cv-pri-fill) !important; border: 1px solid var(--cv-pri-fill) !important; color: #fff !important; }
 body .customer-action-toolbar .btn.btn-primary:hover, body .customer-action-toolbar .btn.btn-primary:focus { filter: brightness(1.08); }
 body .customer-action-toolbar .btn.btn-danger:not(.btn-primary) { color: #dc2626 !important; }
 body .customer-action-toolbar .btn.btn-danger:not(.btn-primary):hover, body .customer-action-toolbar .btn.btn-danger:not(.btn-primary):focus { border-color: #dc2626 !important; background-color: rgba(220, 38, 38, .10) !important; }
@@ -6722,7 +6728,7 @@ body.as-chrome .ls-table tbody tr:not(.ls-none):hover { background: rgba(127, 12
 body.as-chrome .ls-bulk { border-bottom-color: rgba(127, 127, 127, 0.28); }
 body.as-chrome .cv-card-header, body.as-chrome .edit-card-header, body.as-chrome .cv-list-item { border-bottom-color: rgba(127, 127, 127, 0.25); }
 body.as-chrome .ls-tab, body.as-chrome .ls-btn:not(.ls-btn--primary) { background-color: transparent; border-color: rgba(127, 127, 127, 0.35); }
-body.as-chrome .ls-tab.is-on { background-color: var(--ls-accent); border-color: var(--ls-accent); }
+body.as-chrome .ls-tab.is-on { background-color: var(--ls-fill); border-color: var(--ls-fill); }
 body.as-chrome .customer-action-toolbar .btn:not(.btn-primary), body.as-chrome .btn-back-round { background-color: transparent !important; border-color: rgba(127, 127, 127, 0.35) !important; }
 
 /* fields inside an input group use the same fill as the plain fields, and the buttons beside them follow the page colours */
@@ -6824,12 +6830,12 @@ body.dark-mode.as-chrome .rb-search:not(#filterNavigateMenu):focus { background-
 /* Customers list: Send Message modal (ui/ui/admin/customers/list.tpl). The modal is moved to <body>, so it carries its own tokens, which also feed the .ls-btn buttons inside it. */
 .cm-modal {
     --ls-ink: #1e293b; --ls-muted: #64748b; --ls-line: #e2e8f0; --ls-card: #ffffff; --ls-soft: #f8fafc;
-    --ls-accent: #4f46e5; --ls-accent-soft: rgba(79, 70, 229, .10);
+    --ls-accent: #4f46e5; --ls-accent-soft: rgba(79, 70, 229, .10); --ls-fill: #4f46e5;
     --cm-field: #f1f5f9; --cm-field-line: #e2e8f0;
 }
 body.dark-mode .cm-modal {
     --ls-ink: #e2e8f0; --ls-muted: #94a3b8; --ls-line: #2d3748; --ls-card: #1e1e2d; --ls-soft: #252536;
-    --ls-accent: #818cf8; --ls-accent-soft: rgba(129, 140, 248, .16);
+    --ls-accent: #818cf8; --ls-accent-soft: rgba(129, 140, 248, .16); --ls-fill: #5d5fef;
     --cm-field: #27272a; --cm-field-line: #3f3f46;
 }
 .cm-modal .modal-dialog { max-width: 520px; width: calc(100% - 24px); }
@@ -6878,12 +6884,12 @@ body.dark-mode.as-chrome .ls-menu { background: var(--as-bg, #0f141c); }
 
 /* Pager, default skin (every list that includes pagination.tpl): separate rounded buttons, transparent with a neutral border, accent on hover and for the current page.
    The accent follows the page's own token when it has one (--ls-accent on the customers lists, --cv-pri elsewhere). */
-body:is(.as-chrome, .cm-chrome) .pagination { --pg-acc: var(--ls-accent, var(--cv-pri, #4f46e5)); --pg-acc-soft: var(--ls-accent-soft, var(--cv-pri-soft, rgba(79, 70, 229, .12))); }
+body:is(.as-chrome, .cm-chrome) .pagination { --pg-fill: var(--ls-fill, var(--cv-pri-fill, #4f46e5)); --pg-acc: var(--ls-accent, var(--cv-pri, #4f46e5)); --pg-acc-soft: var(--ls-accent-soft, var(--cv-pri-soft, rgba(79, 70, 229, .12))); }
 body:is(.as-chrome, .cm-chrome) .pagination { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 14px 0; }
 body:is(.as-chrome, .cm-chrome) .pagination > li { float: none; display: inline-block; }
 body:is(.as-chrome, .cm-chrome) .pagination > li > a, body:is(.as-chrome, .cm-chrome) .pagination > li > span { float: none; margin: 0; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(127, 127, 127, .35); background: transparent; color: inherit; font-size: 13px; font-weight: 600; }
 body:is(.as-chrome, .cm-chrome) .pagination > li:not(.active):not(.disabled) > a:hover { border-color: var(--pg-acc); background: var(--pg-acc-soft); color: inherit; }
-body:is(.as-chrome, .cm-chrome) .pagination > li.active > a, body:is(.as-chrome, .cm-chrome) .pagination > li.active > a:hover, body:is(.as-chrome, .cm-chrome) .pagination > li.active > span { background: var(--pg-acc); border-color: var(--pg-acc); color: #fff; box-shadow: none; }
+body:is(.as-chrome, .cm-chrome) .pagination > li.active > a, body:is(.as-chrome, .cm-chrome) .pagination > li.active > a:hover, body:is(.as-chrome, .cm-chrome) .pagination > li.active > span { background: var(--pg-fill); border-color: var(--pg-fill); color: #fff; box-shadow: none; }
 body:is(.as-chrome, .cm-chrome) .pagination > li.disabled > a, body:is(.as-chrome, .cm-chrome) .pagination > li.disabled > span { background: transparent; opacity: .5; pointer-events: none; }
 body:is(.as-chrome, .cm-chrome) .mp-pager .pagination { margin: 0; }
 
