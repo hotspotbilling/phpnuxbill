@@ -17,7 +17,7 @@ linter, so a change is checked by using the page it touches.
 - A new table or column goes in `install/phpnuxbill.sql` and in a new version key in `system/updates.json`, written so that
   running it twice does nothing.
 - New PHP files carry the project header comment.
-- Add a line to `CHANGELOG.md` under *Unreleased*.
+- Add a line to `CHANGELOG.md`.
 
 ## Changing how it looks
 
