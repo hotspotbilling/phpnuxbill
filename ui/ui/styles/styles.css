@@ -6606,10 +6606,13 @@ body.dark-mode .ls-pill--banned, body.dark-mode .ls-pill--suspended { color: #f8
     .ls-field select { flex: 1; min-width: 0; }
     .ls-table thead { display: none; }
     .ls-table, .ls-table tbody { display: block; }
-    .ls-table tr { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 8px; padding: 12px 14px; border-bottom: 1px solid var(--ls-line); }
-    .ls-table td { grid-column: 2; display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; }
+    .ls-table tr { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px 8px; padding: 12px 14px; border-bottom: 1px solid var(--ls-line); }
+    .ls-table tr:has(> td.ls-check) { grid-template-columns: 28px minmax(0, 1fr); }
+    .ls-table td { grid-column: 1; display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; }
+    .ls-table tr:has(> td.ls-check) > td { grid-column: 2; }
+    .ls-table td:empty { display: none; }
     .ls-table td[data-label]::before { content: attr(data-label); flex: 0 0 auto; color: var(--ls-muted); font-size: 12px; text-align: left; }
-    .ls-table td.ls-check { grid-column: 1; grid-row: 1; width: auto; padding-top: 10px; display: block; }
+    .ls-table tr:has(> td.ls-check) > td.ls-check { grid-column: 1; grid-row: 1; width: auto; padding-top: 10px; display: block; }
     .ls-click td:nth-child(2) { grid-column: 2; grid-row: 1; text-align: left; }
     .ls-click td:nth-child(2)::before { content: none; }
     .ls-nocheck tr { grid-template-columns: minmax(0, 1fr); }

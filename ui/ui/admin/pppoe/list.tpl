@@ -14,7 +14,7 @@
         <form id="site-search" class="ls-bar" method="post" action="{Text::url('services/pppoe')}">
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
-                <input type="search" autocomplete="off" name="name" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
+                <input type="search" autocomplete="off" name="name" value="{$name|escape}" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
             </div>
             <label class="ls-field"><span>{Lang::T('Prepaid')}</span>
                 <select id="type1" name="type1">
@@ -35,7 +35,7 @@
                 <select id="bandwidth" name="bandwidth">
                     <option value="">{Lang::T('All')}</option>
                     {foreach $bws as $b}
-                    <option value="{$b['id']}" {if $bandwidth eq $b['id'] }selected{/if}>{$b['name_bw']|escape}</option>
+                    <option value="{$b['id']|escape}" {if $bandwidth eq $b['id'] }selected{/if}>{$b['name_bw']|escape}</option>
                     {/foreach}
                 </select>
             </label>
@@ -76,7 +76,7 @@
                 <select id="status" name="status">
                     <option value="-">{Lang::T('All')}</option>
                     <option value="1" {if $status eq '1' }selected{/if}>{Lang::T('Enabled')}</option>
-                    <option value="0" {if $status eq '0' }selected{/if}>{Lang::T('Disable')}</option>
+                    <option value="0" {if $status eq '0' }selected{/if}>{Lang::T('Disabled')}</option>
                 </select>
             </label>
             <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>

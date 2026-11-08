@@ -210,6 +210,7 @@
         }
     </script>
 {/literal}
+{if $coupons}
 <script>
     const $j = jQuery.noConflict();
 
@@ -222,6 +223,7 @@
         });
     });
 </script>
+{/if}
 <script>
     (function () {
         var bar = document.getElementById('lsBulk'), n = document.getElementById('lsBulkN'), all = document.getElementById('select-all');

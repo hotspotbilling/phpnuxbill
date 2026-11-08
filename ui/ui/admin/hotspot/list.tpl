@@ -14,7 +14,7 @@
         <form id="site-search" class="ls-bar" method="post" action="{Text::url('services/hotspot/')}">
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
-                <input type="search" autocomplete="off" name="name" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
+                <input type="search" autocomplete="off" name="name" value="{$name|escape}" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
             </div>
             <label class="ls-field"><span>{Lang::T('Prepaid')}</span>
                 <select id="type1" name="type1">
@@ -35,7 +35,7 @@
                 <select id="bandwidth" name="bandwidth">
                     <option value="">{Lang::T('All')}</option>
                     {foreach $bws as $b}
-                    <option value="{$b['id']}" {if $bandwidth eq $b['id'] }selected{/if}>{$b['name_bw']|escape}</option>
+                    <option value="{$b['id']|escape}" {if $bandwidth eq $b['id'] }selected{/if}>{$b['name_bw']|escape}</option>
                     {/foreach}
                 </select>
             </label>
@@ -114,7 +114,7 @@
                         <td data-label="{Lang::T('Limit')}" class="ls-when">{if $ds['time_limit']}{$ds['time_limit']} {$ds['time_unit']}{/if}{if $ds['time_limit'] && $ds['data_limit']} / {/if}{if $ds['data_limit']}{$ds['data_limit']} {$ds['data_unit']}{/if}{if !$ds['time_limit'] && !$ds['data_limit']}<span class="ls-dim">-</span>{/if}</td>
                         <td data-label="{Lang::T('Location')}">{if $ds['is_radius']}<span class="ls-pill">RADIUS</span>{elseif $ds['routers'] != ''}<a href="{Text::url('routers/edit/0&name=')}{$ds['routers']|escape:'url'}">{$ds['routers']|escape}</a>{/if}</td>
                         <td data-label="{Lang::T('Device')}">{$ds['device']|escape}</td>
-                        <td data-label="{Lang::T('Internet Plan')}">{if $ds['plan_expired']}<a href="{Text::url('services/edit/', $ds['plan_expired'])}">{Lang::T('Yes')}</a>{else}<span class="ls-dim">{Lang::T('No')}</span>{/if}</td>
+                        <td data-label="{Lang::T('Internet Package')}">{if $ds['plan_expired']}<a href="{Text::url('services/edit/', $ds['plan_expired'])}">{Lang::T('Yes')}</a>{else}<span class="ls-dim">{Lang::T('No')}</span>{/if}</td>
                         <td data-label="{Lang::T('Date')}" class="ls-dim ls-when">{if $ds['prepaid'] == 'no'}{$ds['expired_date']}{/if}</td>
                         <td data-label="ID" class="ls-dim">{$ds['id']}</td>
                         <td class="ls-end"><div class="ls-row-actions"><a href="{Text::url('services/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a><a href="{Text::url('services/delete/', $ds['id'])}" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')}?')"><i class="fa fa-trash" aria-hidden="true"></i></a></div></td>

@@ -14,12 +14,14 @@ body.as-chrome.modern-skin-dark {
   --as-text: #1f2937;
   --as-muted: #64748b;
   --as-hover: #f1f5f9;
-  --as-accent: #2563eb;
-  --as-active-bg: #e8f0fe;
-  --as-active-text: #1d4ed8;
+  --as-accent: #4f46e5;
+  --as-active-bg: #eef2ff;
+  --as-active-text: #4338ca;
+  --as-pill-bg: #4f46e5;
+  --as-pill-text: #ffffff;
   --as-flyout-shadow: 0 10px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
   --as-btn-hover: rgba(0, 0, 0, 0.05);
-  --as-btn-hover-text: #2563eb;
+  --as-btn-hover-text: #4f46e5;
 }
 
 body.as-chrome.modern-skin-dark.dark-mode {
@@ -29,12 +31,14 @@ body.as-chrome.modern-skin-dark.dark-mode {
   --as-text: #e2e8f0;
   --as-muted: #94a3b8;
   --as-hover: rgba(255, 255, 255, 0.07);
-  --as-accent: #60a5fa;
-  --as-active-bg: rgba(59, 130, 246, 0.18);
-  --as-active-text: #93c5fd;
+  --as-accent: #818cf8;
+  --as-active-bg: rgba(129, 140, 248, 0.18);
+  --as-active-text: #a5b4fc;
+  --as-pill-bg: #818cf8;
+  --as-pill-text: #ffffff;
   --as-flyout-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
   --as-btn-hover: rgba(255, 255, 255, 0.08);
-  --as-btn-hover-text: #60a5fa;
+  --as-btn-hover-text: #818cf8;
 }
 
 /* ---------- top bar buttons: the same soft hover as the collapse button ---------- */
@@ -117,8 +121,8 @@ body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li > a:ho
 
 body.as-chrome.modern-skin-dark .sidebar-menu > li.active > a,
 body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li.active > a {
-  background-color: var(--as-active-bg) !important;
-  color: var(--as-active-text) !important;
+  background-color: var(--as-pill-bg) !important;
+  color: var(--as-pill-text) !important;
   font-weight: 600;
 }
 
@@ -147,15 +151,15 @@ body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treevie
 
 body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu li .treeview-menu li.active > a,
 body.as-chrome.modern-skin-dark .sidebar-menu .treeview-menu > li.active > a {
-  color: var(--as-active-text) !important;
-  background-color: var(--as-active-bg) !important;
+  color: var(--as-pill-text) !important;
+  background-color: var(--as-pill-bg) !important;
 }
 
 /* ---------- collapsed to the icon rail: active item, hover, and the flyouts that open beside it ---------- */
 body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.active > a,
 body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.active > a {
-  background-color: var(--as-active-bg) !important;
-  color: var(--as-active-text) !important;
+  background-color: var(--as-pill-bg) !important;
+  color: var(--as-pill-text) !important;
 }
 
 body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li > a:hover,
@@ -194,8 +198,8 @@ body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li
 
 body.as-chrome.modern-skin-dark.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li.active > a,
 body.as-chrome.modern-skin-dark.sidebar-mini.sidebar-collapse .sidebar-menu > li.treeview:hover > .treeview-menu > li.active > a {
-  background-color: var(--as-active-bg) !important;
-  color: var(--as-active-text) !important;
+  background-color: var(--as-pill-bg) !important;
+  color: var(--as-pill-text) !important;
 }
 
 /* ---------- footer: a slim bar fixed to the bottom of the screen ---------- */

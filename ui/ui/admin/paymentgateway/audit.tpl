@@ -9,13 +9,13 @@
     </div>
 
     <div class="ls-card">
-        <form id="site-search" class="ls-bar" method="post" action="{Text::url('paymentgateway/audit/')}{$pg}">
+        <form id="site-search" class="ls-bar" method="post" action="{Text::url('paymentgateway/audit/')}{$pg|escape:'url'}">
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
                 <input type="search" autocomplete="off" name="q" value="{$q|escape}" placeholder="{Lang::T('Search')}..." aria-label="{Lang::T('Search')}...">
             </div>
             <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
-            <a class="ls-btn" title="{Lang::T('Clear Search Query')}" href="{Text::url('paymentgateway/audit/')}{$pg}"><i class="fa fa-undo" aria-hidden="true"></i> {Lang::T('Reset')}</a>
+            <a class="ls-btn" title="{Lang::T('Clear Search Query')}" href="{Text::url('paymentgateway/audit/')}{$pg|escape:'url'}"><i class="fa fa-undo" aria-hidden="true"></i> {Lang::T('Reset')}</a>
         </form>
 
         <div class="ls-scroll">

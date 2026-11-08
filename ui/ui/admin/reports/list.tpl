@@ -120,8 +120,8 @@
                         <tr class="ls-none"><td colspan="9"><div class="ls-empty"><b>{Lang::T('No transactions found')}</b></div></td></tr>
                         {/foreach}
                         <tr>
-                            <th>{Lang::T('Total')}</th>
-                            <th class="ls-num" colspan="4">{Lang::moneyFormat($dr)}</th>
+                            <td colspan="4" class="ls-strong">{Lang::T('Total')}</td>
+                            <td data-label="{Lang::T('Plan Price')}" class="ls-num ls-strong">{Lang::moneyFormat($dr)}</td>
                             <td colspan="4"></td>
                         </tr>
                     </tbody>

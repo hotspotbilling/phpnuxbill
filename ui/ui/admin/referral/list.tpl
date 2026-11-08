@@ -341,14 +341,14 @@
                                     <b class="ls-strong">{$r['referrer_name']|escape}</b>
                                     <small class="ls-dim">{$r['referrer_username']|escape}{if $r['referrer_email']} &middot; {$r['referrer_email']|escape}{/if}</small>
                                 </td>
-                                <td data-label="{Lang::T('Referrer Status')}">{if $r['referrer_status'] == 'Active'}<span class="ls-pill ls-pill--active">{Lang::T('Active')}</span>{elseif $r['referrer_status'] == 'Inactive'}<span class="ls-pill ls-pill--inactive">{Lang::T('Inactive')}</span>{else}<span class="ls-pill">{$r['referrer_status']|escape}</span>{/if}</td>
+                                <td data-label="{Lang::T('Referrer Status')}">{if $r['referrer_status'] == 'Active'}<span class="ls-pill ls-pill--active">{Lang::T('Active')|escape}</span>{elseif $r['referrer_status'] == 'Inactive'}<span class="ls-pill ls-pill--inactive">{Lang::T('Inactive')|escape}</span>{else}<span class="ls-pill">{$r['referrer_status']|escape}</span>{/if}</td>
                                 <td data-label="{Lang::T('Referred')}">
                                     <b class="ls-strong">{$r['referred_name']|escape}</b>
                                     <small class="ls-dim">{$r['referred_username']|escape}{if $r['referred_email']} &middot; {$r['referred_email']|escape}{/if}</small>
                                 </td>
-                                <td data-label="{Lang::T('Referred Status')}">{if $r['referred_status'] == 'Active'}<span class="ls-pill ls-pill--active">{Lang::T('Active')}</span>{elseif $r['referred_status'] == 'Inactive'}<span class="ls-pill ls-pill--inactive">{Lang::T('Inactive')}</span>{else}<span class="ls-pill">{$r['referred_status']|escape}</span>{/if}</td>
+                                <td data-label="{Lang::T('Referred Status')}">{if $r['referred_status'] == 'Active'}<span class="ls-pill ls-pill--active">{Lang::T('Active')|escape}</span>{elseif $r['referred_status'] == 'Inactive'}<span class="ls-pill ls-pill--inactive">{Lang::T('Inactive')|escape}</span>{else}<span class="ls-pill">{$r['referred_status']|escape}</span>{/if}</td>
                                 <td data-label="{Lang::T('Referral Code')}"><em class="ls-chip">{$r['referral_code']|escape}</em></td>
-                                <td data-label="{Lang::T('Rewards')}" class="ls-num"><span title="Referrer: {$r['referrer_reward_count']}, Referred: {$r['referred_reward_count']}">{$r['reward_count']|default:0}</span></td>
+                                <td data-label="{Lang::T('Rewards')}" class="ls-num"><span title="{Lang::T('Referrer')|escape}: {$r['referrer_reward_count']|escape}, {Lang::T('Referred')|escape}: {$r['referred_reward_count']|escape}">{$r['reward_count']|default:0}</span></td>
                                 <td data-label="{Lang::T('Earned')}" class="ls-num">
                                     {if $r['total_earned'] > 0}
                                     <b class="ls-strong">{$_c['currency_code']} {$r['total_earned']|number_format:2}</b>

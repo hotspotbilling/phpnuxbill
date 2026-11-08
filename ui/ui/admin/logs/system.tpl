@@ -12,7 +12,7 @@
         <form id="site-search" class="ls-bar" method="post" action="{Text::url('logs/list/')}">
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
-                <input type="search" autocomplete="off" name="q" value="{$q|escape}" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
+                <input type="search" autocomplete="off" name="q" value="{$q|escape}" placeholder="{Lang::T('Search description')}..." aria-label="{Lang::T('Search description')}">
             </div>
             <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-search" aria-hidden="true"></i> {Lang::T('Search')}</button>
             <a class="ls-btn" title="{Lang::T('Clear Search Query')}" href="{Text::url('logs/list/')}"><i class="fa fa-undo" aria-hidden="true"></i> {Lang::T('Reset')}</a>

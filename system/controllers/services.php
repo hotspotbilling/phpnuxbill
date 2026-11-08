@@ -69,6 +69,7 @@ switch ($action) {
         $ui->assign('valid', $valid);
         $ui->assign('device', $device);
         $ui->assign('status', $status);
+        $ui->assign('name', $name);
         $ui->assign('router', $router);
 
         $append_url = "&type1=" . urlencode($type1)
@@ -430,6 +431,7 @@ switch ($action) {
         $ui->assign('valid', $valid);
         $ui->assign('device', $device);
         $ui->assign('status', $status);
+        $ui->assign('name', $name);
         $ui->assign('router', $router);
 
         $append_url = "&type1=" . urlencode($type1)
@@ -909,6 +911,7 @@ switch ($action) {
         $ui->assign('valid', $valid);
         $ui->assign('device', $device);
         $ui->assign('status', $status);
+        $ui->assign('name', $name);
         $ui->assign('router', $router);
 
         $append_url = "&type1=" . urlencode($type1)

@@ -4,8 +4,8 @@
     <div class="ls-top">
         <div></div>
         <div class="ls-actions">
-            <a class="ls-btn" title="{Lang::T('Sync')}" href="{Text::url('')}pool/sync" onclick="return ask(this, '{Lang::T('This will sync/send IP port to Mikrotik')}?')"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Sync')}</a>
-            <a href="{Text::url('')}pool/add-port" class="ls-btn ls-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('New port')}</a>
+            <a class="ls-btn" title="{Lang::T('Sync')}" href="{Text::url('pool/sync')}" onclick="return ask(this, '{Lang::T('This will sync/send IP port to Mikrotik')}?')"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Sync')}</a>
+            <a href="{Text::url('pool/add-port')}" class="ls-btn ls-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('New port')}</a>
         </div>
     </div>
 

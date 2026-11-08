@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- Added: `CONTRIBUTING.md`, and a "CSS and UI conventions" page in the documentation (Extending) covering where styles live, the colour tokens, the list kit, dark-mode traps and the stylesheet checklist.
+- Changed: the active item in the admin side menu (and the active child, the collapsed icon rail and its flyouts) is filled with the same indigo as the primary buttons, with white text, in light and dark mode. The menu hover colour and the footer links use the same indigo.
+- Fixed (list kit review): Port Pool links use full route paths; the PPPoE and VPN status filter says "Disabled" like the row badge; bandwidth option values are escaped in the plan lists; the Referral status labels are escaped and the rewards tooltip is translated.
+- Fixed (list kit review): the phone card layout uses one column unless a row has a checkbox cell; the coupons page no longer starts DataTables on an empty list; the Hotspot, PPPoE and VPN lists keep the searched name; the Activity log search says it searches the description; the payment gateway audit escapes the gateway name in its links; the daily report's Total row lines up under Plan Price.
 - Fixed: the Referral page cards (the four stat cards, charts and tables) had a hard-coded white background; they are now transparent with the neutral border and 12px radius used on the dashboard, in light and dark mode. The coloured left edge on the stat cards stays.
 - Changed: Coupons and the Referral relationships and top-referrers tables use the shared list kit. Coupon codes are blurred until hovered or tapped, and a bulk bar with Delete Selected appears when coupons are ticked (the delete button no longer errors for roles that cannot delete).
 - Fixed: log rows written without a type showed an empty badge. `_log()` now records the type "System" when none is given, and the Activity log shows "System" for older rows with no type. The Keep logs field and the Clean up button no longer wrap or look unstyled, and red buttons in the list kit are red at rest.

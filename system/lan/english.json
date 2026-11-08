@@ -4881,5 +4881,13 @@
     "No_NAS_found": "No NAS found",
     "No_activations_found": "No activations found",
     "No_logs_found": "No logs found",
-    "System": "System"
+    "System": "System",
+    "Add_Port_Pool": "Add Port Pool",
+    "Continue_the_process_of_adding_Ports_": "Continue the process of adding Ports?",
+    "Edit_Pool": "Edit Pool",
+    "For_Radius__you_need_to_add": "For Radius, you need to add",
+    "in_Mikrotik_manually": "in Mikrotik manually",
+    "Continue_the_Port_change_process_": "Continue the Port change process?",
+    "Topup": "Topup",
+    "Continue_the_process_of_changing_the_balance_contents_": "Continue the process of changing the balance contents?"
 }
