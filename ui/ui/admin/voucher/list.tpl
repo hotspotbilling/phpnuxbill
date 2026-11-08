@@ -59,7 +59,7 @@
                 </select>
             </label>
             <label class="ls-field"><span>{Lang::T('Show')}</span>
-                <select id="per_page" name="per_page" onchange="changePerPage(this)">
+                <select id="per_page" name="per_page" data-cookie="voucher_per_page" onchange="changePerPage(this)">
                     {foreach [10, 25, 50, 100, 200, 500, 1000] as $n}
                     <option value="{$n}" {if $cookie eq $n}selected{/if}>{$n}</option>
                     {/foreach}
@@ -220,11 +220,6 @@
                 Swal.fire({ title: 'Error!', text: 'Please select at least one voucher to delete.', icon: 'error', confirmButtonText: 'OK' });
             }
         });
-    }
-
-    function changePerPage(select) {
-        setCookie('voucher_per_page', select.value, 365);
-        location.reload();
     }
 </script>
 {include file="sections/footer.tpl"}

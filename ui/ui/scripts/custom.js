@@ -289,14 +289,18 @@ $(document).ready(function () {
   window.changePerPage = function (select) {
     showTableLoading();
     var val = select.value;
-    var search = window.location.search || "";
-    var cookieName = "customer_per_page";
-    if (search.indexOf("voucher") !== -1) {
-      cookieName = "voucher_per_page";
-    } else if (search.indexOf("hotspot") !== -1) {
-      cookieName = "hotspot_per_page";
-    } else if (search.indexOf("pppoe") !== -1) {
-      cookieName = "pppoe_per_page";
+    // The select can name its cookie (data-cookie). Otherwise it is guessed from the address, which is either
+    // "?_route=plan/voucher/" or, with URL rewriting, "/plan/voucher" (the query string is empty then).
+    var where = ((window.location.search || "") + " " + (window.location.pathname || "")).toLowerCase();
+    var cookieName = select.getAttribute("data-cookie") || "customer_per_page";
+    if (!select.getAttribute("data-cookie")) {
+      if (where.indexOf("voucher") !== -1) {
+        cookieName = "voucher_per_page";
+      } else if (where.indexOf("hotspot") !== -1) {
+        cookieName = "hotspot_per_page";
+      } else if (where.indexOf("pppoe") !== -1) {
+        cookieName = "pppoe_per_page";
+      }
     }
     document.cookie = cookieName + "=" + val + "; path=/; max-age=" + (365 * 24 * 60 * 60);
     setTimeout(function () {
