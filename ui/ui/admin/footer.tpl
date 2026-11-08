@@ -12,7 +12,7 @@
 <script src="{$app_url}/ui/ui/scripts/plugins/select2.min.js"></script>
 <script src="{$app_url}/ui/ui/scripts/pace.min.js"></script>
 <script src="{$app_url}/ui/ui/summernote/summernote.min.js"></script>
-<script src="{$app_url}/ui/ui/scripts/custom.js?2026.11.7.1"></script>
+<script src="{$app_url}/ui/ui/scripts/custom.js?2026.11.7.2"></script>
 <script>
     // the pinned footer can grow on phones: tell the stylesheet its real height so the page always ends above it
     (function () {

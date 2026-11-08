@@ -289,16 +289,28 @@ $(document).ready(function () {
   window.changePerPage = function (select) {
     showTableLoading();
     var val = select.value;
-    // The select can name its cookie (data-cookie). Otherwise it is guessed from the address, which is either
-    // "?_route=plan/voucher/" or, with URL rewriting, "/plan/voucher" (the query string is empty then).
-    var where = ((window.location.search || "") + " " + (window.location.pathname || "")).toLowerCase();
-    var cookieName = select.getAttribute("data-cookie") || "customer_per_page";
-    if (!select.getAttribute("data-cookie")) {
-      if (where.indexOf("voucher") !== -1) {
+    // The select can name its cookie (data-cookie), and that always wins. Otherwise it is chosen from the page's route, matched
+    // by whole segments: "?_route=plan/voucher/" or, with URL rewriting, "/plan/voucher" once the folder the site is
+    // installed in (appUrl) is taken off the front.
+    var cookieName = select.getAttribute("data-cookie");
+    if (!cookieName) {
+      var route = new URLSearchParams(window.location.search).get("_route");
+      if (!route) {
+        route = window.location.pathname || "";
+        try {
+          var base = new URL(appUrl, window.location.origin).pathname.replace(/\/+$/, "");
+          if (base && route.indexOf(base + "/") === 0) {
+            route = route.slice(base.length);
+          }
+        } catch (e) {}
+      }
+      var parts = route.toLowerCase().split("/").filter(Boolean);
+      cookieName = "customer_per_page";
+      if (parts.indexOf("voucher") !== -1) {
         cookieName = "voucher_per_page";
-      } else if (where.indexOf("hotspot") !== -1) {
+      } else if (parts.indexOf("hotspot") !== -1) {
         cookieName = "hotspot_per_page";
-      } else if (where.indexOf("pppoe") !== -1) {
+      } else if (parts.indexOf("pppoe") !== -1) {
         cookieName = "pppoe_per_page";
       }
     }
