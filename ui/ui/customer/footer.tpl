@@ -293,6 +293,9 @@
 
 <script>
     const publicVapidKey = '{$_c['push_public_key']}';
+    // set once the customer presses "Yes": closing the modal after that is not a refusal
+    let pushChoiceMade = false;
+    const pushDeclineMs = 30 * 24 * 60 * 60 * 1000;
 
     async function subscribeUser() {
         try {
@@ -356,6 +359,7 @@
             if (response.ok) {
                 const result = await response.json();
                 localStorage.setItem('push_subscribed', 'yes');
+                localStorage.removeItem('push_subscribed_timestamp');
                 Swal.fire({
                     icon: 'success',
                     title: result.title || 'Subscribed!',
@@ -372,8 +376,12 @@
             }
         } catch (error) {
             console.error('Subscription error:', error);
+            // Permission refused or dismissed: ask again in 30 days. A technical failure (no HTTPS, server error, offline) is not a
+            // refusal, so ask again tomorrow.
+            const refused = ('Notification' in window) && Notification.permission !== 'granted';
+            const stamp = refused ? Date.now() : Date.now() - (pushDeclineMs - 24 * 60 * 60 * 1000);
             localStorage.setItem('push_subscribed', 'no');
-            localStorage.setItem('push_subscribed_timestamp', Date.now().toString());
+            localStorage.setItem('push_subscribed_timestamp', stamp.toString());
 
             Swal.fire({
                 icon: 'error',
@@ -426,12 +434,13 @@
             });
 
             $('#confirmSubscribe').off('click').on('click', () => {
+                pushChoiceMade = true;
                 $('#subscribeModal').modal('hide');
                 subscribeUser();
             });
 
             $('#subscribeModal').off('hidden.bs.modal').on('hidden.bs.modal', () => {
-                if (localStorage.getItem('push_subscribed') !== 'yes') {
+                if (!pushChoiceMade && localStorage.getItem('push_subscribed') !== 'yes') {
                     localStorage.setItem('push_subscribed', 'no');
                     localStorage.setItem('push_subscribed_timestamp', Date.now().toString());
                 }

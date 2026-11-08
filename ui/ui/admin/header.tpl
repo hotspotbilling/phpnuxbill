@@ -30,8 +30,8 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css?2026.10.9.14" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.7.46" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.11.7.8" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.7.47" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.11.7.9" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
      {if isset($xheader)}
@@ -72,7 +72,7 @@
         <header class="main-header">
             <a href="{Text::url('dashboard')}" class="logo">
                 <span class="logo-mini"><b>{$_c['CompanyName']|truncate:1:''|upper|escape}</b></span>
-                <span class="logo-lg">{$_c['CompanyName']}</span>
+                <span class="logo-lg"><span class="logo-name">{$_c['CompanyName']}</span><small class="logo-edition">Ultimate</small></span>
             </a>
             <a href="#" class="as-edge-toggle" data-toggle="push-menu" role="button" aria-label="Toggle menu"
                 onclick="return setKolaps()">

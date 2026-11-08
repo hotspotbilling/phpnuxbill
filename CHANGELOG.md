@@ -4,7 +4,8 @@
 
 ## Unreleased
 
-- Fixed: white text on the primary buttons, the selected tab and the current page in dark mode was about 3:1 on the light indigo. Filled controls now use a deeper indigo in dark mode (4.8:1) through new `--ls-fill`, `--cp-fill`, `--rb-fill`, `--cv-pri-fill` and `--pg-fill` tokens; light mode and accent text are unchanged.
+- Fixed: pressing "Yes, subscribe" on the customer portal's push prompt could leave the browser recording `push_subscribed = no` (a refusal, with a 30 day wait). Closing the prompt wrote the refusal before the subscription finished. Choosing Yes is now remembered, a success clears the refusal time, and a technical failure (no HTTPS, a server error) asks again after one day instead of 30.
+- Fixed: white text on the primary buttons, the selected tab and the current page in dark mode was about 3:1 on the light indigo. Filled controls now use a deeper indigo in dark mode (4.8:1) through new `--ls-fill`, `--cp-fill`, `--rb-fill`, `--cv-pri-fill` and `--pg-fill` tokens; light mode and accent text are unchanged. Their hover now darkens the fill (it used to brighten it, which dropped the text below 4.5:1).
 - Added: `CONTRIBUTING.md`, and a "CSS and UI conventions" page in the documentation (Extending) covering where styles live, the colour tokens, the list kit, dark-mode traps and the stylesheet checklist.
 - Changed: the active item in the admin side menu (and the active child, the collapsed icon rail and its flyouts) is filled with the primary indigo with white text (a slightly deeper indigo in dark mode so the text reads at 4.8:1). The menu hover colour and the footer links use the same indigo.
 - Fixed (list kit review): Port Pool links use full route paths; the PPPoE and VPN status filter says "Disabled" like the row badge; bandwidth option values are escaped in the plan lists; the Referral status labels are escaped and the rewards tooltip is translated.
