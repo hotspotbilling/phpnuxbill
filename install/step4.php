@@ -92,9 +92,24 @@ if ($existing && !$wipe) {
 }
 
 try {
-    pnb_run_sql($dbh, (string) file_get_contents(__DIR__ . '/phpnuxbill.sql'));
+    $setup = (string) file_get_contents(__DIR__ . '/phpnuxbill.sql');
+    $radiusSetup = $radius ? (string) file_get_contents(__DIR__ . '/radius.sql') : '';
+    // a DROP or CREATE waits for any other connection using the table (a request still running, a cron job, an earlier attempt that timed out):
+    // give up after 20 seconds with a clear error instead of hanging until the proxy (Cloudflare allows 100 seconds) answers 524
+    @set_time_limit(0);
+    $dbh->exec('SET SESSION lock_wait_timeout = 20');
+    if ($wipe) {
+        // the setup scripts only drop some of the tables they create, so a fresh start drops every one of them first (and nothing else in the database)
+        preg_match_all('/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([A-Za-z0-9_]+)`?/i', $setup . "\n" . $radiusSetup, $m);
+        $dbh->exec('SET FOREIGN_KEY_CHECKS=0');
+        foreach (array_unique($m[1]) as $table) {
+            $dbh->exec('DROP TABLE IF EXISTS `' . $table . '`');
+        }
+        $dbh->exec('SET FOREIGN_KEY_CHECKS=1');
+    }
+    pnb_run_sql($dbh, $setup);
     if ($radius) {
-        pnb_run_sql($dbh, (string) file_get_contents(__DIR__ . '/radius.sql'));
+        pnb_run_sql($dbh, $radiusSetup);
     }
     $set = $dbh->prepare("UPDATE tbl_users SET password = ? WHERE username = 'admin'");
     $set->execute([password_hash($adminPass, PASSWORD_BCRYPT)]);
@@ -108,7 +123,11 @@ try {
     $versions = $migrator->versions();
     $migrator->baseline($versions ? end($versions) : '');
 } catch (Throwable $e) {
-    pnb_back('import', $e->getMessage());
+    $detail = $e->getMessage();
+    if (stripos($detail, 'lock wait timeout') !== false) {
+        $detail .= ' Another connection is holding one of the tables open. Stop the cron jobs and anything else using this database, or run SHOW PROCESSLIST in MySQL and KILL the stuck connection, then try again.';
+    }
+    pnb_back('import', $detail);
 }
 
 // config.php is written last: when anything above fails there is nothing half-installed to lock the installer

@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+- Fixed: the installer could hang until Cloudflare answered 524 when a replace-existing install had to wait for a table another connection still held open. It now gives up after 20 seconds with an error that says what to do.
+- Fixed: the installer's "Replace the existing PHPNuxBill tables" option still failed with `Table 'tbl_message_logs' already exists`, because the setup script only drops some of the tables it creates. A fresh start now drops every table the setup scripts create (and no other table in the database) before importing.
 - Fixed: the "Show" (entries per page) menu on the Vouchers list did not stick when the site was opened with URL rewriting (`/plan/voucher`): the shared handler guessed the cookie from the query string only and wrote the customers cookie instead, so the old size came back. The select now names its cookie, and the guess also reads the path.
 - Fixed: pressing "Yes, subscribe" on the customer portal's push prompt could leave the browser recording `push_subscribed = no` (a refusal, with a 30 day wait). Closing the prompt wrote the refusal before the subscription finished. Choosing Yes is now remembered, a success clears the refusal time, and a technical failure (no HTTPS, a server error) asks again after one day instead of 30.
 - Fixed: white text on the primary buttons, the selected tab and the current page in dark mode was about 3:1 on the light indigo. Filled controls now use a deeper indigo in dark mode (4.8:1) through new `--ls-fill`, `--cp-fill`, `--rb-fill`, `--cv-pri-fill` and `--pg-fill` tokens; light mode and accent text are unchanged. Their hover now darkens the fill (it used to brighten it, which dropped the text below 4.5:1).
