@@ -508,3 +508,8 @@ body.as-chrome.modern-skin-dark .content-header,
 body.as-chrome.modern-skin-dark .content,
 body.as-chrome.modern-skin-dark .right-side,
 body.as-chrome.modern-skin-dark .main-header .navbar { background-color: var(--as-bg) !important; }
+
+/* Menu badge ("New", "Beta" from register_menu): the name shrinks and ends in an ellipsis instead of running into the
+   badge, and the badge keeps its size with a gap before it. The full name stays in the link's title tooltip. */
+body.as-chrome .sidebar-menu > li > a > span.text { min-width: 0; }
+body.as-chrome .sidebar-menu > li > a > .pull-right-container { flex: none; padding-left: 8px; }

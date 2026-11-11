@@ -1,306 +1,191 @@
 {include file="sections/header.tpl"}
+{* Referral settings. Field names and values are what referrals.php saves; nothing else changed. *}
+{$rf_on = $_c['referral_enabled'] != 'no'}
+{$rf_purchase = $_c['require_purchase'] != 'no'}
 
-<div class="row">
-    <div class="col-sm-12">
-        <div class="panel panel-hovered mb20 panel-primary">
-            <div class="panel-heading">{Lang::T('Referral Settings')}</div>
-            <div class="panel-body">
-                <div class="md-whiteframe-z1 mb20 text-center" style="padding: 15px">
-                    <div class="col-md-8">
-                        <form id="site-settings" class="form-horizontal" method="post">
-                            <input type="hidden" name="csrf_token" value="{$csrf_token}">
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Enable Referral System')}</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="referral_enabled">
-                                        <option value="yes" {if $_c.referral_enabled=='yes' }selected{/if}>
-                                            {Lang::T('Yes')}
-                                        </option>
-                                        <option value="no" {if $_c.referral_enabled=='no' }selected{/if}>{Lang::T('No')}
-                                        </option>
-                                    </select>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Enable or Disable Referral system')}</p>
-                                </small>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Referral Code Length')}</label>
-                                <div class="col-md-6">
-                                    <input type="number" class="form-control" name="referral_code_length" value="{$_c['referral_code_length']|default:'8'}" placeholder="8">
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Length of referral code')}</p>
-                                </small>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Require Service Purchase')}</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="require_purchase">
-                                        <option value="yes" {if $_c.require_purchase=='yes' }selected{/if}>
-                                            {Lang::T('Yes')}
-                                        </option>
-                                        <option value="no" {if $_c.require_purchase=='no' }selected{/if}>{Lang::T('No')}
-                                        </option>
-                                    </select>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('User required to buy package or services before the
-                                        reward can be granted')}</p>
-                                </small>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Referrer Reward Type')}</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="referrer_reward_type">
-                                        <option value="balance" {if $_c.referrer_reward_type=='balance' }selected{/if}>
-                                            {Lang::T('Balance')}</option>
-                                        {* <option value="discount" {if $_c.referrer_reward_type=='discount'
-                                            }selected{/if}>
-                                            {Lang::T('Discount')}</option>
-                                        <option value="plan_extension" {if $_c.referrer_reward_type=='plan_extension'
-                                            }selected{/if}>{Lang::T('Extend Plan (N/A)')}</option> *}
-                                    </select>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Type of reward for referrer (balance, discount,
-                                        plan_extension)')}</p>
-                                </small>
-                            </div>
+<div class="ls mc rf">
+    <form class="mc-grid" method="post" action="{Text::url('referrals/settings')}" id="rfForm">
+        <input type="hidden" name="csrf_token" value="{$csrf_token}">
+        {* a switch that is off sends nothing, so these send "no" first and a checked switch overrides them *}
+        <input type="hidden" name="referral_enabled" value="no">
+        <input type="hidden" name="require_purchase" value="no">
+        <div class="ls-card mc-main">
+            {if $schema_update_required}
+            <div class="rf-note rf-note--warn" role="alert">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                <div><b>{Lang::T('The referral tables need a database update')}</b>
+                    {Lang::T('Percentage rewards and the split between referrer and new customer are not recorded until it runs.')}
+                    <a href="{$app_url}/update.php">{Lang::T('Run the update')}</a></div>
+            </div>
+            {/if}
+            {if $_c['enable_balance'] != 'yes'}
+            <div class="rf-note" role="note">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                <div><b>{Lang::T('Customer balance is turned off')}</b>
+                    {Lang::T('Rewards are paid as balance, and customers only see the Referrals page while balance is on.')}
+                    <a href="{Text::url('settings/app')}">{Lang::T('General Settings')}</a></div>
+            </div>
+            {/if}
 
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Referrer Reward Calculation')}</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="referrer_calculation_type">
-                                        <option value="fixed" {if $_c.referrer_calculation_type=='fixed' || $_c.referrer_calculation_type=='' }selected{/if}>
-                                            {Lang::T('Fixed Amount')}</option>
-                                        <option value="percentage" {if $_c.referrer_calculation_type=='percentage' }selected{/if}>
-                                            {Lang::T('Percentage of Purchase')}</option>
-                                    </select>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Calculate reward as fixed amount or percentage of purchase value')}</p>
-                                </small>
-                            </div>
-
-                            <div class="form-group referrer-fixed-amount">
-                                <label class="col-md-3 control-label">{Lang::T('Referrer Fixed Reward Amount')}</label>
-                                <div class="col-md-6">
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" name="referrer_reward_amount"
-                                            value="{$_c['referrer_reward_amount']}" placeholder="0.00">
-                                        <span class="input-group-addon">{$_c['currency_code']}</span>
-                                    </div>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Fixed amount of reward for referrer (used when calculation type is fixed)')}</p>
-                                </small>
-                            </div>
-
-                            <div class="form-group referrer-percentage">
-                                <label class="col-md-3 control-label">{Lang::T('Referrer Reward Percentage')}</label>
-                                <div class="col-md-6">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" name="referrer_reward_percentage"
-                                            value="{$_c.referrer_reward_percentage|default:'5'}" placeholder="5">
-                                        <span class="input-group-addon">%</span>
-                                    </div>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Percentage of purchase amount to reward the referrer (used when calculation type is percentage)')}</p>
-                                </small>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Referred Reward Type')}</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="referred_reward_type">
-                                        <option value="balance" {if $_c.referred_reward_type=='balance' }selected{/if}>
-                                            {Lang::T('Balance')}</option>
-                                        {* <option value="discount" {if $_c.referred_reward_type=='discount'
-                                            }selected{/if}>{Lang::T('Discount')}</option>
-                                        <option value="plan_extension" {if $_c.referred_reward_type=='plan_extension'
-                                            }selected{/if}>{Lang::T('Extend Plan (N/A)')}
-                                        </option> *}
-                                    </select>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Type of reward for referred user (balance, discount,
-                                        plan_extension)')}</p>
-                                </small>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Referred Reward Calculation')}</label>
-                                <div class="col-md-6">
-                                    <select class="form-control" name="referred_calculation_type">
-                                        <option value="fixed" {if $_c.referred_calculation_type=='fixed' || $_c.referred_calculation_type=='' }selected{/if}>
-                                            {Lang::T('Fixed Amount')}</option>
-                                        <option value="percentage" {if $_c.referred_calculation_type=='percentage' }selected{/if}>
-                                            {Lang::T('Percentage of Purchase')}</option>
-                                    </select>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Calculate reward as fixed amount or percentage of purchase value')}</p>
-                                </small>
-                            </div>
-                            
-                            <div class="form-group referred-fixed-amount">
-                                <label class="col-md-3 control-label">{Lang::T('Referred Fixed Reward Amount')}</label>
-                                <div class="col-md-6">
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" name="referred_reward_amount"
-                                            value="{$_c.referred_reward_amount}" placeholder="0.00">
-                                        <span class="input-group-addon">{$_c['currency_code']}</span>
-                                    </div>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Fixed amount of reward for referred user (used when calculation type is fixed)')}</p>
-                                </small>
-                            </div>
-                            
-                            <div class="form-group referred-percentage">
-                                <label class="col-md-3 control-label">{Lang::T('Referred Reward Percentage')}</label>
-                                <div class="col-md-6">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" name="referred_reward_percentage"
-                                            value="{$_c.referred_reward_percentage|default:'5'}" placeholder="5">
-                                        <span class="input-group-addon">%</span>
-                                    </div>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Percentage of purchase amount to reward the referred user (used when calculation type is percentage)')}</p>
-                                </small>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">{Lang::T('Minimum Purchase Amount')}</label>
-                                <div class="col-md-6">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" name="min_purchase_amount"
-                                            value="{$_c.min_purchase_amount}">
-                                        <span class="input-group-addon">{$_c['currency_code']}</span>
-                                    </div>
-                                </div>
-                                <small>
-                                    <p class="help-block">{Lang::T('Minimum purchase amount to qualify for referral
-                                        rewards')}
-                                    </p>
-                                </small>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-md-offset-3 col-md-6">
-                                    <button class="btn btn-primary" type="submit">{Lang::T('Save Changes')}</button>
-                                </div>
-                            </div>
-                        </form>
+            <fieldset class="mc-block">
+                <legend class="mc-label">{Lang::T('Program')}</legend>
+                <div class="mc-rows">
+                    <label class="mc-row mc-row--switch">
+                        <input type="checkbox" id="rfEnabled" name="referral_enabled" value="yes" {if $rf_on}checked{/if}>
+                        <span class="mc-row__icon"><i class="fa fa-share-alt" aria-hidden="true"></i></span>
+                        <span class="mc-row__text">
+                            <b>{Lang::T('Referral program')}</b>
+                            <small class="mc-on">{Lang::T('On: customers get a link to share, and codes count at sign-up.')}</small>
+                            <small class="mc-off">{Lang::T('Off: no links are shown and codes are ignored at sign-up.')}</small>
+                        </span>
+                        <span class="mc-switch__track" aria-hidden="true"></span>
+                    </label>
+                    <label class="mc-row mc-row--switch rf-row--choice">
+                        <input type="checkbox" id="rfPurchase" name="require_purchase" value="yes" {if $rf_purchase}checked{/if}>
+                        <span class="mc-row__icon"><i class="fa fa-shopping-cart" aria-hidden="true"></i></span>
+                        <span class="mc-row__text">
+                            <b>{Lang::T('Reward on purchase')}</b>
+                            <small class="mc-on">{Lang::T('Rewards are given when the new customer buys a package.')}</small>
+                            <small class="mc-off">{Lang::T('Rewards are given as soon as the new customer signs up.')}</small>
+                        </span>
+                        <span class="mc-switch__track" aria-hidden="true"></span>
+                    </label>
+                    <div class="mc-row" id="rfMinRow">
+                        <span class="mc-row__icon"><i class="fa fa-tag" aria-hidden="true"></i></span>
+                        <div class="mc-row__text">
+                            <label for="rfMin"><b>{Lang::T('Minimum purchase')}</b></label>
+                            <small>{Lang::T('Packages cheaper than this earn no reward. 0 means any package.')}</small>
+                        </div>
+                        <div class="rf-affix rf-affix--row">
+                            <input type="number" class="mc-input" id="rfMin" name="min_purchase_amount" min="0" step="any" inputmode="decimal"
+                                value="{$_c['min_purchase_amount']|default:0|escape}">
+                            <span>{$_c['currency_code']|escape}</span>
+                        </div>
+                    </div>
+                    <div class="mc-row">
+                        <span class="mc-row__icon"><i class="fa fa-key" aria-hidden="true"></i></span>
+                        <div class="mc-row__text">
+                            <label for="rfLen"><b>{Lang::T('Code length')}</b></label>
+                            <small>{Lang::T('3 to 32 characters. Codes that already exist keep their length.')}</small>
+                        </div>
+                        <input type="number" class="mc-input mc-row__control" id="rfLen" name="referral_code_length" min="3" max="32" step="1"
+                            value="{$_c['referral_code_length']|default:8|escape}" required>
                     </div>
                 </div>
+            </fieldset>
+
+            <fieldset class="mc-block">
+                <legend class="mc-label">{Lang::T('Rewards')}</legend>
+                <div class="rf-rewards">
+                    {foreach [
+                        'referrer' => [Lang::T('Referrer'), Lang::T('The customer who shared the link'), 'fa-bullhorn'],
+                        'referred' => [Lang::T('New customer'), Lang::T('The customer who signed up with it'), 'fa-user-plus']
+                    ] as $who => $txt}
+                    {$calc = $_c["{$who}_calculation_type"]|default:'fixed'}
+                    <div class="rf-reward" data-who="{$who}">
+                        <div class="rf-reward__head">
+                            <span class="rf-reward__icon"><i class="fa {$txt[2]}" aria-hidden="true"></i></span>
+                            <div><b>{$txt[0]}</b><small>{$txt[1]}</small></div>
+                        </div>
+                        <input type="hidden" name="{$who}_reward_type" value="balance">
+                        <div class="rf-seg" role="radiogroup" aria-label="{Lang::T('Reward Calculation')}">
+                            <label><input type="radio" name="{$who}_calculation_type" value="fixed" {if $calc != 'percentage'}checked{/if}><span>{Lang::T('Fixed amount')}</span></label>
+                            <label class="rf-seg__pct"><input type="radio" name="{$who}_calculation_type" value="percentage" {if $calc == 'percentage'}checked{/if}><span>{Lang::T('% of purchase')}</span></label>
+                        </div>
+                        <div class="rf-affix rf-amount" data-for="fixed">
+                            <input type="number" class="mc-input" name="{$who}_reward_amount" min="0" step="any" inputmode="decimal"
+                                value="{$_c["{$who}_reward_amount"]|default:0|escape}" aria-label="{$txt[0]}: {Lang::T('Fixed amount')}">
+                            <span>{$_c['currency_code']|escape}</span>
+                        </div>
+                        <div class="rf-affix rf-amount" data-for="percentage">
+                            <input type="number" class="mc-input" name="{$who}_reward_percentage" min="0" max="100" step="any" inputmode="decimal"
+                                value="{$_c["{$who}_reward_percentage"]|default:5|escape}" aria-label="{$txt[0]}: {Lang::T('% of purchase')}">
+                            <span>%</span>
+                        </div>
+                        <small class="rf-reward__foot"><i class="fa fa-credit-card" aria-hidden="true"></i> {Lang::T('Added to the customer balance')}</small>
+                    </div>
+                    {/foreach}
+                </div>
+                <p class="mc-help" id="rfPctHelp">{Lang::T('A percentage needs a purchase to work from, so it is only available with Reward on purchase.')}</p>
+            </fieldset>
+
+            <div class="mc-foot">
+                <a href="{Text::url('referrals/list')}" class="ls-btn"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Cancel')}</a>
+                <button class="ls-btn ls-btn--primary" type="submit"><i class="fa fa-check" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
             </div>
         </div>
-    </div>
+
+        <aside class="mc-side">
+            <div class="ls-card mc-side-card">
+                <div class="mc-side-head"><span><i class="fa fa-magic" aria-hidden="true"></i> {Lang::T('How it works')}</span></div>
+                <div class="rf-summary" id="rfSummary" aria-live="polite"></div>
+            </div>
+            <a class="ls-card rf-link" href="{Text::url('referrals/list')}">
+                <i class="fa fa-list-ul" aria-hidden="true"></i>
+                <span><b>{Lang::T('Referrals')}</b><small>{Lang::T('Who referred whom, and the rewards paid')}</small></span>
+                <i class="fa fa-angle-right" aria-hidden="true"></i>
+            </a>
+        </aside>
+    </form>
 </div>
 
 <script>
-    (function () {
-        'use strict';
+(function () {
+    var form = document.getElementById('rfForm');
+    var T = {
+        off: {Lang::T('The program is off. Customers see no referral link, and codes typed at sign-up are ignored.')|json_encode},
+        signup: {Lang::T('When someone signs up with a referral link')|json_encode},
+        buy: {Lang::T('Each time a referred customer buys a package')|json_encode},
+        min: {Lang::T('of at least')|json_encode},
+        skip: {Lang::T('Vouchers and balance top-ups do not count.')|json_encode},
+        referrer: {Lang::T('the referrer gets')|json_encode},
+        referred: {Lang::T('the new customer gets')|json_encode},
+        price: {Lang::T('of the price')|json_encode},
+        nothing: {Lang::T('nothing')|json_encode}
+    };
+    var cur = {$_c['currency_code']|json_encode};
+    var $ = function (s) { return form.querySelector(s); };
+    var num = function (v) { var n = parseFloat(v); return isNaN(n) ? 0 : n; };
+    var money = function (v) { return cur + ' ' + num(v).toLocaleString(); };
+    function add(parent, tag, text, cls) { var e = document.createElement(tag); e.textContent = text; if (cls) { e.className = cls; } parent.appendChild(e); return e; }
 
-        // Helpers
-        function show(el) { if (!el) return; el.style.display = ''; }
-        function hide(el) { if (!el) return; el.style.display = 'none'; }
+    function refresh() {
+        var on = $('#rfEnabled').checked, purchase = $('#rfPurchase').checked;
+        form.classList.toggle('rf-is-off', !on);
+        $('#rfMinRow').classList.toggle('is-muted', !purchase);
+        $('#rfPctHelp').hidden = purchase;
 
-        // Toggle logic for one pair (selectEl controls fixedEl and percentEl)
-        // Also manages required attribute for the fixed input inside fixedEl
-        function togglePair(selectEl, fixedEl, percentEl) {
-            if (!selectEl) return;
-
-            const val = (selectEl.value || 'fixed').toLowerCase(); // treat empty as 'fixed'
-
-            // find the input inside fixedEl to toggle required
-            let fixedInput = null;
-            if (fixedEl) {
-                fixedInput = fixedEl.querySelector('input, textarea, select');
-            }
-
-            if (val === 'percentage' || val === 'percent') {
-                hide(fixedEl);
-                show(percentEl);
-                if (fixedInput) fixedInput.removeAttribute('required');
-            } else {
-                // default to fixed
-                show(fixedEl);
-                hide(percentEl);
-                if (fixedInput) fixedInput.setAttribute('required', 'required');
-            }
-        }
-
-        // Handle Require Service Purchase logic for both referrer & referred
-        function handleRequirePurchaseChange(requireSelect, referrerSelect, referrerFixed, referrerPercent, referredSelect, referredFixed, referredPercent) {
-            if (!requireSelect) return;
-
-            const requireVal = (requireSelect.value || '').toLowerCase();
-            const forceFixed = (requireVal === 'no');
-
-            if (forceFixed) {
-                // Force both selects to fixed and disable them
-                if (referrerSelect) {
-                    referrerSelect.value = 'fixed';
-                    referrerSelect.setAttribute('disabled', 'disabled');
-                }
-                if (referredSelect) {
-                    referredSelect.value = 'fixed';
-                    referredSelect.setAttribute('disabled', 'disabled');
-                }
-            } else {
-                // Enable selects (restore normal behavior)
-                if (referrerSelect) referrerSelect.removeAttribute('disabled');
-                if (referredSelect) referredSelect.removeAttribute('disabled');
-            }
-
-            // Update visibility & required for both pairs
-            togglePair(referrerSelect, referrerFixed, referrerPercent);
-            togglePair(referredSelect, referredFixed, referredPercent);
-        }
-
-        // Initialize on DOM ready
-        document.addEventListener('DOMContentLoaded', function () {
-            // Referrer controls
-            const referrerSelect = document.querySelector('select[name="referrer_calculation_type"]');
-            const referrerFixed = document.querySelector('.referrer-fixed-amount');
-            const referrerPercent = document.querySelector('.referrer-percentage');
-
-            // Referred controls
-            const referredSelect = document.querySelector('select[name="referred_calculation_type"]');
-            const referredFixed = document.querySelector('.referred-fixed-amount');
-            const referredPercent = document.querySelector('.referred-percentage');
-
-            // Require purchase control
-            const requirePurchaseSelect = document.querySelector('select[name="require_purchase"]');
-
-            // Run once on load to set initial visibility & required attributes
-            togglePair(referrerSelect, referrerFixed, referrerPercent);
-            togglePair(referredSelect, referredFixed, referredPercent);
-            handleRequirePurchaseChange(requirePurchaseSelect, referrerSelect, referrerFixed, referrerPercent, referredSelect, referredFixed, referredPercent);
-
-            // Add change listeners
-            if (referrerSelect) {
-                referrerSelect.addEventListener('change', function () {
-                    togglePair(referrerSelect, referrerFixed, referrerPercent);
-                });
-            }
-
-            if (referredSelect) {
-                referredSelect.addEventListener('change', function () {
-                    togglePair(referredSelect, referredFixed, referredPercent);
-                });
-            }
-
-            if (requirePurchaseSelect) {
-                requirePurchaseSelect.addEventListener('change', function () {
-                    handleRequirePurchaseChange(requirePurchaseSelect, referrerSelect, referrerFixed, referrerPercent, referredSelect, referredFixed, referredPercent);
-                });
-            }
+        var gives = {};
+        form.querySelectorAll('.rf-reward').forEach(function (card) {
+            var who = card.getAttribute('data-who');
+            var pct = card.querySelector('.rf-seg__pct input');
+            pct.disabled = !purchase;
+            if (!purchase && pct.checked) { card.querySelector('input[value="fixed"]').checked = true; }
+            var mode = card.querySelector('.rf-seg input:checked').value;
+            card.querySelectorAll('.rf-amount').forEach(function (a) { a.hidden = a.getAttribute('data-for') !== mode; });
+            var v = card.querySelector('.rf-amount:not([hidden]) input').value;
+            gives[who] = num(v) <= 0 ? T.nothing : (mode === 'percentage' ? num(v) + '% ' + T.price : money(v));
         });
-    })();
+
+        // the plain-language summary
+        var box = document.getElementById('rfSummary');
+        box.innerHTML = '';
+        if (!on) { add(box, 'p', T.off, 'rf-summary__off'); return; }
+        var lead = purchase ? T.buy + (num($('#rfMin').value) > 0 ? ' ' + T.min + ' ' + money($('#rfMin').value) : '') : T.signup;
+        add(box, 'p', lead + ':', 'rf-summary__lead');
+        var ul = add(box, 'ul', '');
+        [['referrer', 'fa-bullhorn'], ['referred', 'fa-user-plus']].forEach(function (x) {
+            var li = add(ul, 'li', '');
+            var i = add(li, 'i', ''); i.className = 'fa ' + x[1]; i.setAttribute('aria-hidden', 'true');
+            add(li, 'span', T[x[0]] + ' ');
+            add(li, 'b', gives[x[0]]);
+        });
+        if (purchase) { add(box, 'p', T.skip, 'rf-summary__note'); }
+    }
+    form.addEventListener('input', refresh);
+    form.addEventListener('change', refresh);
+    refresh();
+})();
 </script>
 
 {include file="sections/footer.tpl"}

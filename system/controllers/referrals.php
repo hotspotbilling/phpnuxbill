@@ -96,6 +96,7 @@ switch ($action) {
 
     case 'list':
         _admin();
+        $search = trim((string) _req('q'));
         $query = ORM::for_table('tbl_referral_relationships')
             ->table_alias('r')
             ->select('r.*')
@@ -110,204 +111,155 @@ switch ($action) {
             ->join('tbl_customers', array('c1.id', '=', 'r.referrer_id'), 'c1')
             ->join('tbl_customers', array('c2.id', '=', 'r.referred_id'), 'c2')
             ->order_by_desc('r.created_at');
-
-        // Enhance referral relationships with reward data
-        // Important: rewards are tracked per relationship, but reward_for indicates WHO received it
-        $referral_rewards_data = ORM::for_table('tbl_referral_rewards')
-            ->select('referrer_id')
-            ->select('referred_id')
-            ->select('reward_for')
-            ->select_expr('COUNT(*)', 'reward_count')
-            ->select_expr('SUM(reward_amount)', 'total_earned')
-            ->group_by('reward_for')
-            ->find_array();
-
-        // Create a lookup map for quick access - key includes reward_for
-        $rewards_lookup = array();
-        foreach ($referral_rewards_data as $rw) {
-            // Store each reward record separately, keyed by relationship + recipient type
-            $reward_for_value = isset($rw['reward_for']) ? trim($rw['reward_for']) : 'NULL';
-            $key = $rw['referrer_id'] . '_' . $rw['referred_id'] . '_' . $reward_for_value;
-
-            _log("DEBUG: Processing reward - referrer_id: {$rw['referrer_id']}, referred_id: {$rw['referred_id']}, reward_for: '$reward_for_value', count: {$rw['reward_count']}, earned: {$rw['total_earned']}");
-
-            $rewards_lookup[$key] = array(
-                'referrer_id' => intval($rw['referrer_id']),
-                'referred_id' => intval($rw['referred_id']),
-                'reward_for' => $reward_for_value,
-                'count' => intval($rw['reward_count']),
-                'earned' => floatval($rw['total_earned'])
+        if ($search !== '') {
+            $like = '%' . $search . '%';
+            $query->where_raw(
+                '(c1.username LIKE ? OR c1.fullname LIKE ? OR c2.username LIKE ? OR c2.fullname LIKE ? OR r.referral_code LIKE ?)',
+                array($like, $like, $like, $like, $like)
             );
         }
+        $referrals = Paginator::findMany($query, $search !== '' ? array('q' => $search) : array(), 20, '', true);
+        if (!is_array($referrals)) {
+            $referrals = array();
+        }
 
-        // Build aggregated lookup by relationship (combining both reward_for types)
+        // Rewards of the relationships on this page, split by who received them
         $relationship_rewards = array();
-        foreach ($rewards_lookup as $key => $reward) {
-            // Use referrer_id and referred_id from the stored data (not parsed from key)
-            $rel_key = $reward['referrer_id'] . '_' . $reward['referred_id'];
-
-            if (!isset($relationship_rewards[$rel_key])) {
-                $relationship_rewards[$rel_key] = array(
-                    'total_count' => 0,
-                    'total_earned' => 0,
-                    'referrer_count' => 0,
-                    'referrer_earned' => 0,
-                    'referred_count' => 0,
-                    'referred_earned' => 0
-                );
-            }
-
-            // Add to totals
-            $relationship_rewards[$rel_key]['total_count'] += $reward['count'];
-            $relationship_rewards[$rel_key]['total_earned'] += $reward['earned'];
-
-            if ($reward['reward_for'] === 'referrer') {
-                $relationship_rewards[$rel_key]['referrer_count'] += $reward['count'];
-                $relationship_rewards[$rel_key]['referrer_earned'] += $reward['earned'];
-            } elseif ($reward['reward_for'] === 'referred') {
-                $relationship_rewards[$rel_key]['referred_count'] += $reward['count'];
-                $relationship_rewards[$rel_key]['referred_earned'] += $reward['earned'];
-            } else {
-                _log("DEBUG: UNMATCHED reward_for value: '{$reward['reward_for']}' - not adding to either category!");
+        $ids = array_map('intval', array_column($referrals, 'id'));
+        if ($ids) {
+            $rows = ORM::for_table('tbl_referral_rewards')
+                ->select('relationship_id')
+                ->select('reward_for')
+                ->select_expr('COUNT(*)', 'reward_count')
+                ->select_expr("SUM(status = 'pending')", 'pending_count')
+                ->select_expr("SUM(CASE WHEN status <> 'pending' THEN reward_amount ELSE 0 END)", 'paid')
+                ->where_in('relationship_id', $ids)
+                ->group_by('relationship_id')
+                ->group_by('reward_for')
+                ->find_array();
+            foreach ($rows as $rw) {
+                $id = intval($rw['relationship_id']);
+                if (!isset($relationship_rewards[$id])) {
+                    $relationship_rewards[$id] = array('count' => 0, 'pending' => 0, 'referrer' => 0.0, 'referred' => 0.0);
+                }
+                $relationship_rewards[$id]['count'] += intval($rw['reward_count']);
+                $relationship_rewards[$id]['pending'] += intval($rw['pending_count']);
+                $for = trim((string) $rw['reward_for']) === 'referred' ? 'referred' : 'referrer';
+                $relationship_rewards[$id][$for] += floatval($rw['paid']);
             }
         }
+        foreach ($referrals as &$ref) {
+            $rw = isset($relationship_rewards[intval($ref['id'])]) ? $relationship_rewards[intval($ref['id'])]
+                : array('count' => 0, 'pending' => 0, 'referrer' => 0.0, 'referred' => 0.0);
+            $ref['reward_count'] = $rw['count'];
+            $ref['pending_count'] = $rw['pending'];
+            $ref['referrer_earned'] = $rw['referrer'];
+            $ref['referred_earned'] = $rw['referred'];
+            $ref['total_earned'] = $rw['referrer'] + $rw['referred'];
+        }
+        unset($ref);
 
-        // Paginate first (before enriching with reward data)
-        $referrals = Paginator::findMany($query, array(), 20, $append_url, true);
-
-        // Enhance paginated results with reward information
-        $enriched_referrals = array();
-        if (is_array($referrals)) {
-            foreach ($referrals as $ref_array) {
-
-            $key = intval($ref_array['referrer_id']) . '_' . intval($ref_array['referred_id']);
-            if (isset($relationship_rewards[$key])) {
-                // Total rewards from this relationship
-                $ref_array['reward_count'] = $relationship_rewards[$key]['total_count'];
-                $ref_array['total_earned'] = $relationship_rewards[$key]['total_earned'];
-                // Breakdown by recipient
-                $ref_array['referrer_reward_count'] = $relationship_rewards[$key]['referrer_count'];
-                $ref_array['referrer_earned'] = $relationship_rewards[$key]['referrer_earned'];
-                $ref_array['referred_reward_count'] = $relationship_rewards[$key]['referred_count'];
-                $ref_array['referred_earned'] = $relationship_rewards[$key]['referred_earned'];
-            } else {
-                $ref_array['reward_count'] = 0;
-                $ref_array['total_earned'] = 0;
-                $ref_array['referrer_reward_count'] = 0;
-                $ref_array['referrer_earned'] = 0;
-                $ref_array['referred_reward_count'] = 0;
-                $ref_array['referred_earned'] = 0;
+        // Overview: referrals, how many earned a reward, money paid out and what is still waiting
+        $total_referrals = ORM::for_table('tbl_referral_relationships')->count();
+        $new_referrals = ORM::for_table('tbl_referral_relationships')
+            ->where_raw('created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)')
+            ->count();
+        $rewarded = ORM::for_table('tbl_referral_rewards')
+            ->select_expr('COUNT(DISTINCT relationship_id)', 'n')
+            ->where_not_equal('status', 'pending')
+            ->find_one();
+        $by_status = array('pending' => array('count' => 0, 'amount' => 0.0), 'processed' => array('count' => 0, 'amount' => 0.0), 'claimed' => array('count' => 0, 'amount' => 0.0));
+        foreach (ORM::for_table('tbl_referral_rewards')
+            ->select('status')
+            ->select_expr('COUNT(*)', 'n')
+            ->select_expr('SUM(reward_amount)', 'amount')
+            ->group_by('status')
+            ->find_array() as $row) {
+            if (isset($by_status[$row['status']])) {
+                $by_status[$row['status']] = array('count' => intval($row['n']), 'amount' => floatval($row['amount']));
             }
-
-            $enriched_referrals[] = $ref_array;
         }
+        $paid_by = array('referrer' => 0.0, 'referred' => 0.0);
+        foreach (ORM::for_table('tbl_referral_rewards')
+            ->select('reward_for')
+            ->select_expr('SUM(reward_amount)', 'amount')
+            ->where_not_equal('status', 'pending')
+            ->group_by('reward_for')
+            ->find_array() as $row) {
+            $paid_by[trim((string) $row['reward_for']) === 'referred' ? 'referred' : 'referrer'] += floatval($row['amount']);
         }
-
-        // Fetch rewards statistics
-        $rewards_pending = ORM::for_table('tbl_referral_rewards')
-            ->where('status', 'pending')
-            ->count();
-
-        $rewards_processed = ORM::for_table('tbl_referral_rewards')
-            ->where('status', 'processed')
-            ->count();
-
-        $rewards_claimed = ORM::for_table('tbl_referral_rewards')
-            ->where('status', 'claimed')
-            ->count();
-
-        $total_rewards_amount = ORM::for_table('tbl_referral_rewards')
-            ->sum('reward_amount');
-
-        // Rewards by type
-        $rewards_by_type = array('balance' => 0, 'discount' => 0, 'plan_extension' => 0);
-        $type_counts = ORM::for_table('tbl_referral_rewards')
-            ->select_many('reward_type')
-            ->select_expr('COUNT(*)', 'count')
-            ->group_by('reward_type')
-            ->find_array();
-
-        foreach ($type_counts as $tc) {
-            $rewards_by_type[$tc['reward_type']] = $tc['count'];
-        }
-
-        // Rewards amount by type
-        $rewards_amount_by_type = array('balance' => 0, 'discount' => 0, 'plan_extension' => 0);
-        $amount_by_type = ORM::for_table('tbl_referral_rewards')
-            ->select_many('reward_type')
-            ->select_expr('SUM(reward_amount)', 'total')
-            ->group_by('reward_type')
-            ->find_array();
-
-        foreach ($amount_by_type as $abt) {
-            $rewards_amount_by_type[$abt['reward_type']] = floatval($abt['total']);
-        }
-
-        // Rewards trend (last 30 days)
-        $rewards_trend = array('labels' => array(), 'data' => array());
-        $trend_data = ORM::for_table('tbl_referral_rewards')
-            ->raw_query('SELECT DATE(created_at) as date, SUM(reward_amount) as total FROM tbl_referral_rewards 
-                         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) 
-                         GROUP BY DATE(created_at) ORDER BY date ASC')
-            ->find_array();
-
-        foreach ($trend_data as $td) {
-            $rewards_trend['labels'][] = $td['date'];
-            $rewards_trend['data'][] = floatval($td['total']);
-        }
-
-        // Top referrers (by total rewards earned)
-        $top_referrers = ORM::for_table('tbl_referral_rewards')
-            ->table_alias('rr')
-            ->select('c.id', 'referrer_id')
-            ->select('c.username', 'username')
-            ->select('c.fullname', 'fullname')
-            ->select_expr('COUNT(*)', 'reward_count')
-            ->select_expr('SUM(rr.reward_amount)', 'total_earned')
-            ->where('rr.reward_for', 'referrer')
-            ->join('tbl_customers', array('c.id', '=', 'rr.referrer_id'), 'c')
-            ->group_by('rr.referrer_id')
-            ->order_by_desc('total_earned')
-            ->limit(10)
-            ->find_array();
-
-        // Top referrers data with proper formatting
-        $top_referrers_data = array();
-        foreach ($top_referrers as $referrer) {
-            $top_referrers_data[] = array(
-                'referrer_id' => $referrer['referrer_id'],
-                'username' => $referrer['username'],
-                'fullname' => $referrer['fullname'],
-                'reward_count' => intval($referrer['reward_count']),
-                'total_earned' => floatval($referrer['total_earned'])
-            );
-        }
-
-        // Total amount earned by all referrers
-        $total_amount_earned = ORM::for_table('tbl_referral_rewards')
-            ->where('reward_for', 'referrer')
-            ->sum('reward_amount');
-
-        // Total amount earned by referred customers
-        $total_amount_referred = ORM::for_table('tbl_referral_rewards')
-            ->where('reward_for', 'referred')
-            ->sum('reward_amount');
-
         $rewards_stats = array(
-            'pending_count' => $rewards_pending,
-            'processed_count' => $rewards_processed,
-            'claimed_count' => $rewards_claimed,
-            'total_rewards' => $total_rewards_amount ? floatval($total_rewards_amount) : 0,
-            'total_referrer_earned' => $total_amount_earned ? floatval($total_amount_earned) : 0,
-            'total_referred_earned' => $total_amount_referred ? floatval($total_amount_referred) : 0
+            'referrals' => intval($total_referrals),
+            'new_referrals' => intval($new_referrals),
+            'rewarded' => $rewarded ? intval($rewarded['n']) : 0,
+            'paid' => $paid_by['referrer'] + $paid_by['referred'],
+            'paid_referrer' => $paid_by['referrer'],
+            'paid_referred' => $paid_by['referred'],
+            'by_status' => $by_status,
         );
 
-        $ui->assign('referrals', $enriched_referrals);
+        // Rewards paid per day over the last 30 days, every day present (a quiet day is 0, not a gap)
+        $trend_rows = ORM::for_table('tbl_referral_rewards')
+            ->select_expr('DATE(COALESCE(processed_at, created_at))', 'day')
+            ->select_expr('SUM(reward_amount)', 'total')
+            ->select_expr('COUNT(*)', 'n')
+            ->where_not_equal('status', 'pending')
+            ->where_raw('COALESCE(processed_at, created_at) >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)')
+            ->group_by_expr('DATE(COALESCE(processed_at, created_at))')
+            ->find_array();
+        $trend_by_day = array();
+        foreach ($trend_rows as $row) {
+            $trend_by_day[$row['day']] = array(floatval($row['total']), intval($row['n']));
+        }
+        $rewards_trend = array('labels' => array(), 'data' => array(), 'counts' => array(), 'total' => 0.0);
+        for ($i = 29; $i >= 0; $i--) {
+            $day = date('Y-m-d', strtotime("-$i day"));
+            $rewards_trend['labels'][] = $day;
+            $rewards_trend['data'][] = isset($trend_by_day[$day]) ? $trend_by_day[$day][0] : 0;
+            $rewards_trend['counts'][] = isset($trend_by_day[$day]) ? $trend_by_day[$day][1] : 0;
+            $rewards_trend['total'] += isset($trend_by_day[$day]) ? $trend_by_day[$day][0] : 0;
+        }
+
+        // Top referrers: most customers brought in, with what they earned
+        $top_referrers = ORM::for_table('tbl_referral_relationships')
+            ->table_alias('r')
+            ->select('r.referrer_id')
+            ->select('c.username')
+            ->select('c.fullname')
+            ->select_expr('COUNT(*)', 'referrals')
+            ->join('tbl_customers', array('c.id', '=', 'r.referrer_id'), 'c')
+            ->group_by('r.referrer_id')
+            ->group_by('c.username')
+            ->group_by('c.fullname')
+            ->order_by_desc('referrals')
+            ->limit(5)
+            ->find_array();
+        $top_ids = array_map('intval', array_column($top_referrers, 'referrer_id'));
+        $earned = array();
+        if ($top_ids) {
+            foreach (ORM::for_table('tbl_referral_rewards')
+                ->select('referrer_id')
+                ->select_expr('SUM(reward_amount)', 'amount')
+                ->where('reward_for', 'referrer')
+                ->where_not_equal('status', 'pending')
+                ->where_in('referrer_id', $top_ids)
+                ->group_by('referrer_id')
+                ->find_array() as $row) {
+                $earned[intval($row['referrer_id'])] = floatval($row['amount']);
+            }
+        }
+        foreach ($top_referrers as &$t) {
+            $t['referrals'] = intval($t['referrals']);
+            $t['earned'] = isset($earned[intval($t['referrer_id'])]) ? $earned[intval($t['referrer_id'])] : 0;
+        }
+        unset($t);
+
+        $ui->assign('search', $search);
+        $ui->assign('referrals', $referrals);
         $ui->assign('rewards_stats', $rewards_stats);
-        $ui->assign('rewards_by_type', $rewards_by_type);
-        $ui->assign('rewards_amount_by_type', $rewards_amount_by_type);
         $ui->assign('rewards_trend', $rewards_trend);
-        $ui->assign('top_referrers', $top_referrers_data);
+        $ui->assign('top_referrers', $top_referrers);
+        $ui->assign('top_max', $top_referrers ? max(array_column($top_referrers, 'referrals')) : 0);
         $ui->display('admin/referral/list.tpl');
         break;
     default:
