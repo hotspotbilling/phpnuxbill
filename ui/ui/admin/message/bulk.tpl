@@ -88,7 +88,12 @@
                 <i class="fa fa-circle-notch" id="mcRunIcon" aria-hidden="true"></i>
                 <div><b id="mcRunTitle">{Lang::T('Sending')}</b><span id="status" role="status" aria-live="polite"></span></div>
             </div>
-            <span class="ls-pill" id="mcRunMode"></span>
+            <div class="mc-run__side">
+                <span class="ls-pill" id="mcRunMode"></span>
+                <button type="button" class="ls-btn ls-btn--sm" id="mcStop" hidden><i class="fa fa-stop" aria-hidden="true"></i> {Lang::T('Stop')}</button>
+                <button type="button" class="ls-btn ls-btn--sm ls-btn--primary" id="mcResume" hidden><i class="fa fa-forward" aria-hidden="true"></i> {Lang::T('Continue')}</button>
+                <button type="button" class="ls-btn ls-btn--sm" id="mcDone" hidden>{Lang::T('Finish here')}</button>
+            </div>
         </div>
         <div class="mc-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="mcBar"><span></span></div>
         <div class="mc-stats">
@@ -133,7 +138,11 @@
         done: '{Lang::T('Finished')|escape:'javascript'}',
         doneTest: '{Lang::T('Test run finished: nothing was sent')|escape:'javascript'}',
         failed: '{Lang::T('Stopped')|escape:'javascript'}',
-        batchFailed: '{Lang::T('A batch could not be sent. Nothing after it was sent.')|escape:'javascript'}',
+        batchFailed: '{Lang::T('Batch %d did not answer, so some of its messages may have been sent. Nothing after it was sent. Continue skips that batch, so nobody gets the message twice.')|escape:'javascript'}',
+        batchFailedTest: '{Lang::T('Batch %d did not answer. Nothing is sent in a test run, so Continue tries it again.')|escape:'javascript'}',
+        stopping: '{Lang::T('Stopping after this batch')|escape:'javascript'}',
+        stopped: '{Lang::T('Stopped')|escape:'javascript'}',
+        stoppedText: '{Lang::T('%s customers were processed before the run stopped. The rest got nothing.')|escape:'javascript'}',
         unexpected: '{Lang::T('Unexpected answer from the server')|escape:'javascript'}',
         noChannel: '{Lang::T('Please select at least one channel type')|escape:'javascript'}',
         confirm: '{Lang::T('This sends the message to real customers. Turn on Test run first to preview who would get it.')|escape:'javascript'}',
@@ -143,6 +152,8 @@
 {literal}
 <script>
     let page = 0, totalSent = 0, totalFailed = 0, totalSkipped = 0, hasMore = true, isTest = true;
+    // running: a batch is in flight or about to be; paused: a batch failed and the run waits for Continue or Finish here
+    let running = false, paused = false, stopAsked = false, lastProcessed = 0, lastTotal = null;
 
     let historyTable = $('#historyTable').DataTable({
         paging: true,
@@ -169,23 +180,38 @@
         document.getElementById('mcRunTitle').textContent = title;
         document.getElementById('status').textContent = text || '';
     }
+    function setButtons(stop, resume) {
+        $('#mcStop').prop('hidden', !stop).prop('disabled', false);
+        $('#mcResume').prop('hidden', !resume);
+        $('#mcDone').prop('hidden', !resume);
+    }
+    // total === null: not known yet (no batch has answered), so the bar stays at 0%; a known total of 0 is a finished, empty run
     function setProgress(done, total) {
-        var pct = total > 0 ? Math.round(done / total * 100) : 100;
+        var pct = total === null ? 0 : (total > 0 ? Math.round(done / total * 100) : 100);
         var bar = document.getElementById('mcBar');
         bar.setAttribute('aria-valuenow', pct);
         bar.firstElementChild.style.width = pct + '%';
-        document.getElementById('mcProcessed').textContent = done + ' / ' + total;
+        document.getElementById('mcProcessed').textContent = done + ' / ' + (total === null ? '—' : total);
         document.getElementById('mcSent').textContent = totalSent;
         document.getElementById('mcFailed').textContent = totalFailed;
         document.getElementById('mcSkipped').textContent = totalSkipped;
     }
     function finish() {
+        running = false; paused = false; stopAsked = false;
+        setButtons(false, false);
         $('#startBulk').prop('disabled', false);
         $('#bulkMessageForm').find('input, select, textarea, button.mc-token').prop('disabled', false);
+    }
+    function stoppedHere() {
+        finish();
+        setRun('warn', MC_T.stopped, MC_T.stoppedText.replace('%s', lastProcessed + ' / ' + (lastTotal === null ? '—' : lastTotal)));
     }
 
     function sendBatch() {
         if (!hasMore) return;
+        if (stopAsked) { stoppedHere(); return; }
+        running = true; paused = false;
+        setButtons(true, false);
         $.ajax({
             url: '?_route=message/send_bulk_ajax',
             method: 'POST',
@@ -207,10 +233,11 @@
             },
             dataType: 'json',
             beforeSend: function () {
-                setRun('busy', MC_T.sending + ' ' + (page + 1), '');
+                setRun('busy', (stopAsked ? MC_T.stopping : MC_T.sending + ' ' + (page + 1)), '');
             },
             success: function (response) {
                 if (!(response && response.status === 'success')) {
+                    // the server refused the batch before sending anything (permission, token, missing field)
                     finish();
                     setRun('bad', MC_T.failed, (response && response.message) || MC_T.unexpected);
                     return;
@@ -220,7 +247,9 @@
                 totalSkipped += response.totalSkipped || 0;
                 page = response.page || 0;
                 hasMore = response.hasMore || false;
-                setProgress(response.processed || 0, response.total || 0);
+                lastProcessed = response.processed || 0;
+                lastTotal = response.total || 0;
+                setProgress(lastProcessed, lastTotal);
 
                 (response.batchStatus || []).forEach(function (msg) {
                     const pill = msg.result === 'failed' ? 'ls-pill--banned' : (msg.result === 'sent' ? 'ls-pill--active' : '');
@@ -232,15 +261,16 @@
                         '<span class="mc-msg">' + esc(msg.message || '') + '</span>',
                         esc(msg.router || 'All Routers'),
                         esc(msg.service == 'all' ? 'All' : (msg.service || ''))
-                    ]).draw(false);
+                    ]);
                 });
+                historyTable.draw(false); // once per batch, not once per row
 
                 if (hasMore) {
                     sendBatch();
                     return;
                 }
                 finish();
-                if ((response.total || 0) === 0) {
+                if (lastTotal === 0) {
                     setRun('warn', MC_T.done, MC_T.nobody);
                 } else if (isTest) {
                     setRun('ok', MC_T.doneTest, '');
@@ -249,25 +279,50 @@
                 }
             },
             error: function () {
-                finish();
-                setRun('bad', MC_T.failed, MC_T.batchFailed);
+                // No answer: the server may have sent part of this batch (it keeps going when the browser gives up).
+                // The run pauses with the form still locked; Continue skips this batch in a live run, so nobody gets it twice.
+                running = false; paused = true;
+                setButtons(false, true);
+                setRun('bad', MC_T.failed, (isTest ? MC_T.batchFailedTest : MC_T.batchFailed).replace('%d', page + 1));
             }
         });
     }
 
     function startBulkRun() {
         page = 0; totalSent = 0; totalFailed = 0; totalSkipped = 0; hasMore = true;
+        lastProcessed = 0; lastTotal = null; stopAsked = false;
         isTest = $('#test').is(':checked');
         $('#startBulk').prop('disabled', true); // one run at a time
         $('#bulkMessageForm').find('input, select, textarea, button.mc-token').prop('disabled', true);
         document.getElementById('mcRunMode').textContent = isTest ? MC_T.testMode : MC_T.liveMode;
         document.getElementById('mcRunMode').className = 'ls-pill ' + (isTest ? '' : 'ls-pill--active');
         historyTable.clear().draw();
-        setProgress(0, 0);
+        setProgress(0, null);
         setRun('busy', MC_T.starting, '');
         document.getElementById('mcRun').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         sendBatch();
     }
+
+    function requestStop() {
+        stopAsked = true; // the batch in flight finishes; no further batch starts
+        $('#mcStop').prop('disabled', true);
+        setRun('busy', MC_T.stopping, '');
+    }
+    $('#mcStop').on('click', requestStop);
+    $('#mcResume').on('click', function () {
+        if (!isTest) { page = page + 1; } // skip the batch whose result is unknown
+        hasMore = true;
+        sendBatch();
+    });
+    $('#mcDone').on('click', stoppedHere);
+    // Cancel leaves the page only when no run is going; during a run it stops it, and when paused it ends it here
+    $('.mc-foot a.ls-btn').on('click', function (e) {
+        if (running) { e.preventDefault(); requestStop(); }
+        else if (paused) { e.preventDefault(); stoppedHere(); }
+    });
+    window.addEventListener('beforeunload', function (e) {
+        if (running || paused) { e.preventDefault(); e.returnValue = ''; }
+    });
 
     function syncStartLabel() {
         $('#startBulk span').text($('#test').is(':checked') ? MC_T.test : MC_T.real);

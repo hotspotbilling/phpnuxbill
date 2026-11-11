@@ -3,7 +3,7 @@
     {assign var="run_time" value=strtotime($run_date)}
     {if $current_time - $run_time > 3600}
         <div class="panel panel-cron-warning panel-hovered mb20 activities">
-            <div class="panel-heading"><i class="fa fa-clock-o"></i> &nbsp; {Lang::T('Cron has not run for over 1 hour. Please
+            <div class="panel-heading"><i class="fa fa-clock"></i> &nbsp; {Lang::T('Cron has not run for over 1 hour. Please
                 check your setup.')}</div>
         </div>
     {else}

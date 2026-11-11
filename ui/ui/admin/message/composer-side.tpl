@@ -66,7 +66,7 @@
             else if (GSM_EXT.indexOf(chars[i]) !== -1) { len += 2; }
             else { uni = true; break; }
         }
-        if (uni) { len = chars.length; }
+        if (uni) { len = text.length; } // UCS-2: counted in UTF-16 units, so an emoji takes two
         var one = uni ? 70 : 160, many = uni ? 67 : 153;
         return { parts: len === 0 ? 0 : (len <= one ? 1 : Math.ceil(len / many)), unicode: uni };
     }

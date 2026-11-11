@@ -320,14 +320,11 @@ $(document).ready(function () {
     }, 250);
   };
 
-  // Trigger loading on page load if any table is present
-  if ($(".table-responsive, .table-with-loader, table.table").length > 0) {
-    handleTableLoading(450);
-  }
-
-  // Dismiss loading state when window load finishes (with slight buffer)
-  $(window).on("load", function () {
-    setTimeout(hideTableLoading, 200);
+  // No loader on page load: the table arrives with the page, so showing one for half a second only made it flicker.
+  // It shows while the next page is being fetched (search, page size, pager) and is cleared when a page is shown again,
+  // including one restored by the Back button, which would otherwise come back with the loader still on.
+  $(window).on("pageshow", function () {
+    hideTableLoading();
   });
 
   // Show loading state on search form submission

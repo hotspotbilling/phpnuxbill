@@ -1537,6 +1537,8 @@ select:not(#filterNavigateMenu),
   vertical-align: middle;
   color: transparent !important;
 }
+/* a table cell keeps its table-cell layout while it loads: inline-block took it out of the row and moved the columns */
+td.api-skeleton, th.api-skeleton { display: table-cell; }
 
 /* Content is server-rendered: show it immediately, fade in gently */
 /* "backwards", not "both": holding the end frame keeps a transform on the element, and any transform makes it the
@@ -6574,6 +6576,10 @@ body.dark-mode .ls {
 body .ls-table th:first-child, body .ls-table td:first-child { position: static; background-color: transparent; }
 .ls-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ls-end { text-align: right; }
+/* headings of number and action columns line up with their values (".ls-table th" sets left with more weight) */
+.ls-table th.ls-num, .ls-table th.ls-end { text-align: right; }
+/* the Package cell is filled after the page loads: reserve room so the other columns do not move when it arrives */
+.ls-table td.ls-pkg { width: 130px; }
 .ls-dim { color: var(--ls-muted); }
 .ls-when { white-space: nowrap; }
 .ls-who { display: flex; align-items: center; gap: 10px; color: var(--ls-ink) !important; min-width: 190px; }
@@ -7271,8 +7277,6 @@ body .rf .rf-seg input:not(#filterNavigateMenu) { min-height: 0; }
 .rf-link > i:last-child { color: var(--ls-muted); font-size: 18px; }
 @media (max-width: 767px) { .rf-rewards { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .rf-affix--row { width: 120px; } }
-/* number columns: ".ls-table th" sets left alignment with more weight than .ls-num */
-.rf .ls-table th.ls-num { text-align: right; }
 .rf .ls-empty .rf-empty-icon { display: block; margin-bottom: 8px; font-size: 26px; opacity: .45; }
 .rf-panel > .ls-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 /* Reward on purchase: off is a choice, not a warning, so its icon stays neutral */
@@ -7283,3 +7287,19 @@ body .rf .rf-seg input:not(#filterNavigateMenu) { min-height: 0; }
     .rf .ls-table td[data-label]::before { margin-right: auto; }
     .rf .ls-table td .ls-pill { margin-left: 0; }
 }
+
+/* Dashboard stat cards (dashboard-new.tpl): the icon circle keeps its size. As a flex item it shrank when the text beside it
+   was long, so circles became ovals of different widths with the icon off centre. Every icon is the same size and centred. */
+.top-stats-grid .isp-stat-card .isp-flex > div:first-child { min-width: 0; }
+.top-stats-grid .isp-stat-card .isp-flex > .isp-rounded-full { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: 12px; }
+.top-stats-grid .isp-stat-card .isp-flex > .isp-rounded-full > i { font-size: 18px !important; line-height: 1; width: 1.25em; text-align: center; }
+/* used by the dashboards' icon circles but never defined, so their icons sat at the left of the circle */
+.isp-justify-center { justify-content: center; }
+/* Online Users circle: the same fill strength as the other stat circles (it had a faint fixed tint of its own) */
+.isp-bg-teal-light { background-color: #e6fffa; }
+.isp-text-teal { color: #319795; }
+body.dark-mode .isp-bg-teal-light { background-color: #285e61; }
+body.dark-mode .isp-text-teal { color: #81e6d9; }
+/* bulk run panel: the mode pill with Stop (during a run) or Continue / Finish here (after a batch failed) */
+.mc-run__side { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.mc-run__side [hidden] { display: none !important; }

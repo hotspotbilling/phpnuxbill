@@ -53,6 +53,15 @@
             <div class="rf-chart">
                 {if $rewards_trend['total'] > 0}
                 <canvas id="rfTrend" role="img" aria-label="{Lang::T('Rewards paid per day, last 30 days')}"></canvas>
+                <table class="sr-only">
+                    <caption>{Lang::T('Rewards paid per day, last 30 days')}</caption>
+                    <thead><tr><th scope="col">{Lang::T('Date')}</th><th scope="col">{Lang::T('Paid')}</th><th scope="col">{Lang::T('Rewards')}</th></tr></thead>
+                    <tbody>
+                        {foreach $rewards_trend['labels'] as $i => $day}
+                        <tr><th scope="row">{Lang::dateFormat($day)}</th><td>{Lang::moneyFormat($rewards_trend['data'][$i])}</td><td>{$rewards_trend['counts'][$i]}</td></tr>
+                        {/foreach}
+                    </tbody>
+                </table>
                 {else}
                 <div class="ls-empty"><i class="fa fa-bar-chart rf-empty-icon" aria-hidden="true"></i><b>{Lang::T('No rewards paid in the last 30 days')}</b>{Lang::T('Paid rewards appear here day by day.')}</div>
                 {/if}

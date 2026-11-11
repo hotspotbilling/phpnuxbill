@@ -18,7 +18,7 @@
     <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 10px;">
         <div class="isp-flex isp-align-center" style="gap: 12px;">
             <div
-                style="width: 40px; height: 40px; border-radius: 50%; background: rgba(245, 101, 101, 0.2); display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 18px;">
+                style="flex: none; width: 40px; height: 40px; border-radius: 50%; background: rgba(245, 101, 101, 0.2); display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 18px;">
                 <i class="fa fa-exclamation-triangle"></i>
             </div>
             <div>
@@ -40,8 +40,8 @@
     <div class="isp-flex isp-align-center isp-justify-between" style="flex-wrap: wrap; gap: 10px;">
         <div class="isp-flex isp-align-center" style="gap: 12px;">
             <div
-                style="width: 40px; height: 40px; border-radius: 50%; background: rgba(237, 137, 54, 0.2); display: flex; align-items: center; justify-content: center; color: #ed8936; font-size: 18px;">
-                <i class="fa fa-clock-o"></i>
+                style="flex: none; width: 40px; height: 40px; border-radius: 50%; background: rgba(237, 137, 54, 0.2); display: flex; align-items: center; justify-content: center; color: #ed8936; font-size: 18px;">
+                <i class="fa fa-clock"></i>
             </div>
             <div>
                 <strong style="color: #dd6b20; font-size: 14px;">{Lang::T('Cron has not run for over 1 hour. Please
@@ -148,9 +148,8 @@
                     {/if}
                 </div>
             </div>
-            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-flex isp-align-center isp-justify-center"
-                style="background: rgba(56, 178, 172, 0.15);">
-                <i class="fa fa-signal" style="color: #319795; font-size: 18px;"></i>
+            <div class="isp-width-12 isp-height-12 isp-rounded-full isp-bg-teal-light isp-flex isp-align-center isp-justify-center">
+                <i class="fa fa-signal isp-text-teal"></i>
             </div>
         </div>
     </div>
@@ -247,7 +246,7 @@
                 <div class="isp-flex isp-align-center isp-justify-between isp-margin-bottom-2">
                     <span class="isp-text-xs isp-font-semibold"
                         style="text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8;">
-                        <i class="fa fa-hdd-o isp-margin-right-1" style="color: #4299e1;"></i>{Lang::T('Disk Storage')}
+                        <i class="fa fa-hard-drive isp-margin-right-1" style="color: #4299e1;"></i>{Lang::T('Disk Storage')}
                     </span>
                     <span id="disk-pct-badge"
                         class="badge {if $system_status.disk.status == 'danger'}badge-danger{elseif $system_status.disk.status == 'warning'}badge-warning{else}badge-success{/if}"

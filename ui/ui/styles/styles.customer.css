@@ -1212,6 +1212,8 @@ select:not(#filterNavigateMenu),
   vertical-align: middle;
   color: transparent !important;
 }
+/* a table cell keeps its table-cell layout while it loads (the plan list's bandwidth cell) */
+td.api-skeleton, th.api-skeleton { display: table-cell; }
 
 /* Content is server-rendered: show it immediately, fade in gently */
 .fade-in {

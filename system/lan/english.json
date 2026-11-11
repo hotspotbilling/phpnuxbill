@@ -4982,5 +4982,14 @@
     "the_referrer_gets": "the referrer gets",
     "the_new_customer_gets": "the new customer gets",
     "of_the_price": "of the price",
-    "nothing": "nothing"
+    "nothing": "nothing",
+    "No_vouchers_found": "No vouchers found",
+    "Nothing_matches_your_filters_": "Nothing matches your filters.",
+    "Stop": "Stop",
+    "Continue": "Continue",
+    "Finish_here": "Finish here",
+    "Batch__d_did_not_answer__so_some_of_its_messages_may_have_been_sent__Nothing_after_it_was_sent__Continue_skips_that_batch__so_nobody_gets_the_message_twice_": "Batch %d did not answer, so some of its messages may have been sent. Nothing after it was sent. Continue skips that batch, so nobody gets the message twice.",
+    "Batch__d_did_not_answer__Nothing_is_sent_in_a_test_run__so_Continue_tries_it_again_": "Batch %d did not answer. Nothing is sent in a test run, so Continue tries it again.",
+    "Stopping_after_this_batch": "Stopping after this batch",
+    "_s_customers_were_processed_before_the_run_stopped__The_rest_got_nothing_": "%s customers were processed before the run stopped. The rest got nothing."
 }

@@ -162,7 +162,16 @@
             pct.disabled = !purchase;
             if (!purchase && pct.checked) { card.querySelector('input[value="fixed"]').checked = true; }
             var mode = card.querySelector('.rf-seg input:checked').value;
-            card.querySelectorAll('.rf-amount').forEach(function (a) { a.hidden = a.getAttribute('data-for') !== mode; });
+            card.querySelectorAll('.rf-amount').forEach(function (a) {
+                var off = a.getAttribute('data-for') !== mode, input = a.querySelector('input');
+                a.hidden = off;
+                // a hidden field cannot show an error, so it is not checked; it still posts its value, which the
+                // settings handler saves (disabling it would post nothing and reset that setting to 0)
+                ['min', 'max'].forEach(function (k) {
+                    if (off && input.hasAttribute(k)) { input.setAttribute('data-' + k, input.getAttribute(k)); input.removeAttribute(k); }
+                    if (!off && input.hasAttribute('data-' + k)) { input.setAttribute(k, input.getAttribute('data-' + k)); input.removeAttribute('data-' + k); }
+                });
+            });
             var v = card.querySelector('.rf-amount:not([hidden]) input').value;
             gives[who] = num(v) <= 0 ? T.nothing : (mode === 'percentage' ? num(v) + '% ' + T.price : money(v));
         });

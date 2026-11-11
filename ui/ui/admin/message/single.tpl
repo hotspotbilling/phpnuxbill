@@ -19,7 +19,7 @@
             <div class="mc-foot">
                 <a href="{Text::url('dashboard')}" class="ls-btn"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Cancel')}</a>
                 <button class="ls-btn ls-btn--primary" type="submit" id="mcSend"
-                    onclick="return document.getElementById('mcForm').reportValidity() && mcConfirm(this, '{Lang::T('Continue the process of sending messages')|escape:'javascript'}?')">
+                    onclick="return mcHasChannel() && document.getElementById('mcForm').reportValidity() && mcConfirm(this, '{Lang::T('Continue the process of sending messages')|escape:'javascript'}?')">
                     <i class="fa fa-paper-plane" aria-hidden="true"></i> {Lang::T('Send Message')}</button>
             </div>
         </div>
@@ -31,6 +31,15 @@
 </div>
 
 <script>
+    // the same check as the bulk page: no confirmation without a channel (the message shows on the first chip)
+    function mcHasChannel() {
+        var chips = document.querySelectorAll('#via input');
+        if (!chips.length || document.querySelector('#via input:checked')) { return true; }
+        chips[0].setCustomValidity('{Lang::T('Please select at least one channel type')|escape:'javascript'}');
+        chips[0].reportValidity();
+        chips.forEach(function (c) { c.addEventListener('change', function () { chips[0].setCustomValidity(''); }, { once: true }); });
+        return false;
+    }
     document.addEventListener('DOMContentLoaded', function () {
         var sel = document.getElementById('personSelect') || document.getElementById('mcCustomer');
         function pick() { if (window.mcSetCustomer && sel.selectedIndex > -1) { window.mcSetCustomer(sel.options[sel.selectedIndex].text); } }

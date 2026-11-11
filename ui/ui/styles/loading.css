@@ -42,10 +42,9 @@ table.table.table-loading-dimmed,
 .table-with-loader.loading,
 table.table.loading {
     opacity: var(--table-dim-opacity);
-    filter: blur(0.4px);
     pointer-events: none;
     user-select: none;
-    transition: opacity 0.25s ease, filter 0.25s ease;
+    transition: opacity 0.25s ease;
 }
 
 /* Hide any legacy skeleton placeholders or secondary pseudo-element spinners */
@@ -79,7 +78,7 @@ table.table-loading-dimmed::after,
     height: 100%;
     min-height: 90px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     z-index: 25;
     pointer-events: none;
@@ -130,6 +129,10 @@ table.table-loading-dimmed::after,
     letter-spacing: 0.01em;
     z-index: 31;
     pointer-events: auto;
+    /* near the top of the table, and on a long table it stays in view under the top bar while the page scrolls (centred, it was off screen) */
+    position: sticky;
+    top: 76px;
+    margin-top: 26px;
     animation: tableBadgePop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
