@@ -594,21 +594,34 @@ class RedisCache
         }
 
         // Payment Methods Breakdown (last 90 days)
+        // A method is stored as "<gateway> - <channel>", and the channel is the voucher code for a voucher (or the admin's name for cash),
+        // so group on the gateway part: all vouchers are one "Voucher" bar instead of one bar per code.
         $paymentMethods = ORM::for_table('tbl_transactions')
-            ->select('method')
+            ->select_expr("TRIM(SUBSTRING_INDEX(method, ' - ', 1))", 'service')
             ->select_expr('SUM(price)', 'total')
             ->select_expr('COUNT(*)', 'count')
             ->where_gte('recharged_on', date('Y-m-d', strtotime('-90 days')))
             ->where_not_equal('method', 'Customer - Balance')
             ->where_not_equal('method', 'Recharge Balance - Administrator')
-            ->group_by('method')
+            ->group_by_expr("TRIM(SUBSTRING_INDEX(method, ' - ', 1))")
             ->order_by_desc('total')
             ->find_array();
         $pmLabels = [];
         $pmTotals = [];
         $trxCounts = [];
-        foreach ($paymentMethods as $pm) {
-            $pmLabels[] = !empty($pm['method']) ? $pm['method'] : 'Direct';
+        $pmLimit = 10; // the rest is summed into one "Other" bar so the chart stays readable
+        foreach ($paymentMethods as $i => $pm) {
+            if ($i >= $pmLimit) {
+                if (count($pmLabels) === $pmLimit) {
+                    $pmLabels[] = Lang::T('Other');
+                    $pmTotals[] = 0.0;
+                    $trxCounts[] = 0;
+                }
+                $pmTotals[$pmLimit] += (float)$pm['total'];
+                $trxCounts[$pmLimit] += (int)$pm['count'];
+                continue;
+            }
+            $pmLabels[] = $pm['service'] !== '' && $pm['service'] !== null ? $pm['service'] : 'Direct';
             $pmTotals[] = (float)$pm['total'];
             $trxCounts[] = (int)$pm['count'];
         }
