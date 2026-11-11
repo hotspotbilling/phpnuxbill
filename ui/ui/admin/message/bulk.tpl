@@ -142,7 +142,8 @@
         batchFailedTest: '{Lang::T('Batch %d did not answer. Nothing is sent in a test run, so Continue tries it again.')|escape:'javascript'}',
         stopping: '{Lang::T('Stopping after this batch')|escape:'javascript'}',
         stopped: '{Lang::T('Stopped')|escape:'javascript'}',
-        stoppedText: '{Lang::T('%s customers were processed before the run stopped. The rest got nothing.')|escape:'javascript'}',
+        stoppedText: '{Lang::T('%s customers were processed before the run stopped. No batch after that was sent.')|escape:'javascript'}',
+        unknownText: '{Lang::T('Batch %b did not answer, so it is not known whether its %n customers got the message. Check the Message log before sending to them again.')|escape:'javascript'}',
         unexpected: '{Lang::T('Unexpected answer from the server')|escape:'javascript'}',
         noChannel: '{Lang::T('Please select at least one channel type')|escape:'javascript'}',
         confirm: '{Lang::T('This sends the message to real customers. Turn on Test run first to preview who would get it.')|escape:'javascript'}',
@@ -154,6 +155,8 @@
     let page = 0, totalSent = 0, totalFailed = 0, totalSkipped = 0, hasMore = true, isTest = true;
     // running: a batch is in flight or about to be; paused: a batch failed and the run waits for Continue or Finish here
     let running = false, paused = false, stopAsked = false, lastProcessed = 0, lastTotal = null;
+    // live batches that did not answer (0-based page numbers): their outcome stays unknown and is never counted as done or not sent
+    let unknownPages = [], batchSize = 20, confirmed = 0;
 
     let historyTable = $('#historyTable').DataTable({
         paging: true,
@@ -202,9 +205,19 @@
         $('#startBulk').prop('disabled', false);
         $('#bulkMessageForm').find('input, select, textarea, button.mc-token').prop('disabled', false);
     }
+    // the batches whose result is unknown, as "Batch 3 ... its 20 customers" (up to the batch size while the total is unknown)
+    function unknownNote() {
+        if (!unknownPages.length) { return ''; }
+        var n = 0;
+        unknownPages.forEach(function (p) {
+            n += lastTotal === null ? batchSize : Math.max(0, Math.min(lastTotal, (p + 1) * batchSize) - p * batchSize);
+        });
+        return ' ' + MC_T.unknownText.replace('%b', unknownPages.map(function (p) { return p + 1; }).join(', ')).replace('%n', n);
+    }
     function stoppedHere() {
+        if (paused && !isTest && unknownPages.indexOf(page) === -1) { unknownPages.push(page); } // Finish here after a batch failed
         finish();
-        setRun('warn', MC_T.stopped, MC_T.stoppedText.replace('%s', lastProcessed + ' / ' + (lastTotal === null ? '—' : lastTotal)));
+        setRun('warn', MC_T.stopped, MC_T.stoppedText.replace('%s', confirmed + ' / ' + (lastTotal === null ? '—' : lastTotal)) + unknownNote());
     }
 
     function sendBatch() {
@@ -245,6 +258,7 @@
                 totalSent += response.totalSent || 0;
                 totalFailed += response.totalFailed || 0;
                 totalSkipped += response.totalSkipped || 0;
+                confirmed += Math.max(0, (response.processed || 0) - page * batchSize); // the customers of this batch only
                 page = response.page || 0;
                 hasMore = response.hasMore || false;
                 lastProcessed = response.processed || 0;
@@ -275,7 +289,7 @@
                 } else if (isTest) {
                     setRun('ok', MC_T.doneTest, '');
                 } else {
-                    setRun(totalFailed > 0 ? 'warn' : 'ok', MC_T.done, '');
+                    setRun(totalFailed > 0 || unknownPages.length ? 'warn' : 'ok', MC_T.done, unknownNote().trim());
                 }
             },
             error: function () {
@@ -291,6 +305,7 @@
     function startBulkRun() {
         page = 0; totalSent = 0; totalFailed = 0; totalSkipped = 0; hasMore = true;
         lastProcessed = 0; lastTotal = null; stopAsked = false;
+        unknownPages = []; confirmed = 0; batchSize = parseInt($('#batch').val(), 10) || 20;
         isTest = $('#test').is(':checked');
         $('#startBulk').prop('disabled', true); // one run at a time
         $('#bulkMessageForm').find('input, select, textarea, button.mc-token').prop('disabled', true);
@@ -310,7 +325,8 @@
     }
     $('#mcStop').on('click', requestStop);
     $('#mcResume').on('click', function () {
-        if (!isTest) { page = page + 1; } // skip the batch whose result is unknown
+        if (!isTest) { unknownPages.push(page); page = page + 1; } // skip the batch whose result is unknown, and remember it
+        stopAsked = false; // a Stop pressed before the batch failed must not end the run the user just resumed
         hasMore = true;
         sendBatch();
     });

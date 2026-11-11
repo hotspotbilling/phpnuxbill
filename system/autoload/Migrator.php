@@ -76,6 +76,10 @@ class Migrator
         if ($this->db->inTransaction()) {
             throw new LogicException('Migrator::baseline() cannot be called inside a database transaction, because creating the record table would commit it.');
         }
+        // a starting point that is not a version number ("the previous version") would cover nothing, so the whole history would run again
+        if ($upToVersion !== '' && !preg_match('/^\d+(\.\d+)*$/', (string) $upToVersion)) {
+            throw new InvalidArgumentException('Migrator::baseline() needs a version number such as 2026.11.7, not "' . $upToVersion . '".');
+        }
         $this->ensureTable(); // DDL commits implicitly, so it stays outside the transaction below
         // all or nothing: a baseline cut off halfway would leave the record non-empty, so a later call would never complete it
         $own = !$this->db->inTransaction();
@@ -113,6 +117,46 @@ class Migrator
             }
             throw $e;
         }
+    }
+
+    /**
+     * The starting point written by an older updater as text ("the previous version") instead of a version number. It covered no version,
+     * so the whole history counts as pending; running it would let old changes undo newer ones. Returns that text, or null when all is well.
+     */
+    public function badBaseline()
+    {
+        $st = $this->db->query("SELECT version FROM tbl_migrations WHERE status = 'baseline' AND position = -1");
+        foreach ($st ? $st->fetchAll(PDO::FETCH_COLUMN) : [] as $v) {
+            if ($v !== 'none' && !preg_match('/^\d+(\.\d+)*$/', (string) $v)) {
+                return (string) $v;
+            }
+        }
+        return null;
+    }
+
+    /** How to repair a bad starting point (the update page has a Repair button that does the same). */
+    public static function badBaselineHelp($filesVersion)
+    {
+        return 'The list of database updates already done is damaged, so old updates look unfinished. Open update.php in the browser and '
+            . 'press "Repair the list", or from the command line run: php system/cron/migrate.php --repair'
+            . ($filesVersion !== '' ? '=' . $filesVersion : '=VERSION') . ' (the version this site was running).';
+    }
+
+    /**
+     * Repair a bad starting point: forget the record and start again from $version (everything up to it counts as done).
+     * Only acts while the starting point is bad, so it can never wipe a good record.
+     */
+    public function repairBaseline($version)
+    {
+        if ($this->badBaseline() === null) {
+            return false;
+        }
+        if (!preg_match('/^\d+(\.\d+)*$/', (string) $version)) {
+            throw new InvalidArgumentException('Enter a version number such as 2026.11.7.');
+        }
+        $this->db->exec('DELETE FROM tbl_migrations');
+        $this->baseline((string) $version);
+        return true;
     }
 
     /** @return array of [version, position, sql] not yet applied, in the order they will run */

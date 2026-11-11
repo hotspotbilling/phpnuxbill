@@ -297,7 +297,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // An update started by the previous version of this page continues here after its files were replaced: only the database step and the
     // tidy-up, which are safe to run again (pending database changes, clearing caches).
     $step = (int) $_GET['step'];
-    $run = $_SESSION['update_run'] = ['url' => '', 'from' => 'the previous version', 'started' => time()];
+    // The version it came from is not known here. That only matters on a site with no migration record yet, and step 4 refuses to guess it.
+    $run = $_SESSION['update_run'] = ['url' => '', 'from' => '', 'started' => time()];
+}
+
+if ($step === 9) {
+    // Repair the list of finished database updates (the Repair button on the first page). Only acts while the list is damaged.
+    require_once u_path('system/autoload/Migrator.php');
+    try {
+        $mg = new Migrator(u_db(), u_path('system/updates.json'));
+        $mg->ensureTable();
+        $repairedTo = trim((string) ($_POST['db_version'] ?? ''));
+        $mg->repairBaseline($repairedTo);
+        $left = count($mg->pending());
+        // the database step and the summary that follow work from this run
+        $_SESSION['update_run'] = ['url' => '', 'from' => $repairedTo, 'started' => time()];
+    } catch (Throwable $e) {
+        u_page('Repair', '<div class="alert alert-danger">' . u_h($e->getMessage()) . '</div><p><a href="update.php" class="btn">Back</a></p>');
+    }
+    $body = '<div class="alert alert-success"><b>The list is repaired.</b></div>';
+    if ($left > 0) {
+        $body .= '<p>' . $left . ' database update(s) for this version still need to run. Finish them now; it takes a moment and customers see
+            the maintenance page only until it is done.</p>
+            <form method="post" action="update.php"><input type="hidden" name="token" value="' . u_h(u_token()) . '"><input type="hidden" name="step" value="4">
+            <button type="submit" class="btn btn-primary">Finish the database update</button> <a href="update.php" class="btn">Not now</a></form>';
+    } else {
+        $body .= '<p>Nothing else needs to run. <a href="./?_route=dashboard" class="btn">Back to the dashboard</a></p>';
+    }
+    u_page('Repair', $body);
 }
 
 if ($step === 0) {
@@ -321,7 +348,17 @@ if ($step === 0) {
         require_once u_path('system/autoload/Migrator.php');
         $mg = new Migrator(u_db(), u_path('system/updates.json'));
         $mg->ensureTable();
-        if (!$mg->isEmpty() && ($left = count($mg->pending())) > 0) {
+        if ($mg->badBaseline() !== null) {
+            $problems[] = 'The update cannot start until the list below is repaired.';
+            $repair_note = '<div class="alert alert-warning"><b>The list of finished database updates needs a repair</b><br>
+                An earlier version of this updater lost track of which database updates this site already has, so it now thinks old updates
+                still need to run. Running them would undo newer changes. Repairing the list fixes this; your data is not touched.</div>
+                <form method="post" action="update.php"><input type="hidden" name="token" value="' . u_h(u_token()) . '"><input type="hidden" name="step" value="9">
+                <div class="form-group"><label for="db_version">This site was running version</label>
+                    <input type="text" class="form-control" id="db_version" name="db_version" value="' . u_h($self_version) . '" required pattern="[0-9]+(\.[0-9]+)*">
+                    <span class="help-block">Leave it as it is unless you know the site was on an older version before the last update.</span></div>
+                <button type="submit" class="btn btn-primary">Repair the list</button></form><hr>';
+        } elseif (!$mg->isEmpty() && ($left = count($mg->pending())) > 0) {
             $problems_note = '<div class="alert alert-warning">' . $left . ' database change(s) from an earlier update are still waiting and will run first.</div>';
         }
     } catch (Throwable $e) {
@@ -339,6 +376,7 @@ if ($step === 0) {
     foreach ($problems as $p) {
         $body .= '<div class="alert alert-danger">' . u_h($p) . '</div>';
     }
+    $body .= $repair_note ?? '';
     $body .= $problems_note ?? '';
     $body .= '<form method="post" action="update.php">
         <input type="hidden" name="token" value="' . u_h(u_token()) . '"><input type="hidden" name="step" value="1">
@@ -600,11 +638,22 @@ if ($step === 4) {
         $db = u_db();
         $migrator = new Migrator($db, u_path('system/updates.json'));
         $migrator->ensureTable();
+        if ($migrator->badBaseline() !== null) {
+            u_fail(4, Migrator::badBaselineHelp($self_version));
+        }
         if ($migrator->isEmpty()) {
             // first run on this site: everything up to the version it was on counts as applied (an older record is honoured too)
             $doneFile = u_path('system/cache/updates.done.json');
             $dones = is_file($doneFile) ? (json_decode((string) file_get_contents($doneFile), true) ?: []) : [];
-            $migrator->baseline((string) ($run['from'] ?? ''), $dones);
+            $from = (string) ($run['from'] ?? '');
+            if (!preg_match('/^\d+(\.\d+)*$/', $from) && !$dones) {
+                // Without the version the database is at, every change since the first one would run again, and old ones undo newer ones
+                // (they shrink lists such as the staff roles and plan types). The same rule as the command line: never guess.
+                u_fail(4, 'It is not known which version this database was last updated to, so the database step was not run. '
+                    . 'From the command line, run: php system/cron/migrate.php --baseline=VERSION (with the version the database is at; '
+                    . 'the files say ' . $self_version . '), then run php system/cron/migrate.php or this step again.');
+            }
+            $migrator->baseline($from, $dones);
         }
         if ($migrator->pending()) {
             $migrator->pause(); // customers see the maintenance page while tables change; staff pages keep working
@@ -654,7 +703,10 @@ if (function_exists('opcache_reset')) {
     @opcache_reset();
 }
 $version = (string) (json_decode((string) @file_get_contents(u_path('version.json')), true)['version'] ?? '');
-$summary = '<div class="ver">' . u_h($run['from']) . ' <span>to</span> ' . u_h($version) . '</div><p>PHPNuxBill is up to date.</p>';
+$from = (string) ($run['from'] ?? '');
+// the version line only when the version changed (finishing the database alone, after a repair, keeps it)
+$summary = ($from !== '' && $from !== $version ? '<div class="ver">' . u_h($from) . ' <span>to</span> ' . u_h($version) . '</div>' : '')
+    . '<p>PHPNuxBill is up to date.</p>';
 if (!empty($run['backup'])) {
     $summary .= '<p>Backup of the replaced files: <code>' . u_h($run['backup']) . '</code> (restore it by unzipping over the site folder if something is wrong).</p>';
 }

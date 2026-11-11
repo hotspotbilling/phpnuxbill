@@ -220,7 +220,7 @@
     "ALTER TABLE `tbl_customers` ADD `referral_code` VARCHAR(25) DEFAULT '' COMMENT 'Referral code' AFTER `email`;",
     "CREATE TABLE IF NOT EXISTS `tbl_referral_relationships` (`id` int(11) NOT NULL AUTO_INCREMENT,`referrer_id` int(11) NOT NULL COMMENT 'Customer who referred', `referred_id` int(11) NOT NULL COMMENT 'Customer who was referred', `referral_code` varchar(25) NOT NULL, `created_at` timestamp NOT NULL DEFAULT current_timestamp(), PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
     "CREATE TABLE IF NOT EXISTS `tbl_referral_rewards` (`id` int(11) NOT NULL AUTO_INCREMENT,`relationship_id` int(11) NOT NULL,`referrer_id` int(11) NOT NULL,`referred_id` int(11) NOT NULL,`reward_type` enum('balance','discount','plan_extension') NOT NULL DEFAULT 'balance',`reward_for` varchar(20) DEFAULT 'referrer' COMMENT 'referrer or referred',`reward_amount` decimal(10,2) NOT NULL DEFAULT 0.00,`status` enum('pending','processed','claimed') NOT NULL DEFAULT 'pending',`created_at` timestamp NOT NULL DEFAULT current_timestamp(),`processed_at` timestamp NULL DEFAULT NULL,`calculation_type` enum('fixed','percentage') DEFAULT 'fixed',`percentage_value` decimal(10,2) DEFAULT NULL,`purchase_amount` decimal(10,2) DEFAULT NULL,`actual_discount_amount` decimal(10,2) DEFAULT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;",
-    "INSERT INTO `tbl_appconfig` (`setting`, `value`) VALUES ('referral_enabled', 'yes'), ('referrer_reward_type', 'balance'), ('referrer_reward_amount', '0.00'), ('referred_reward_type', 'balance'), ('referred_reward_amount', '0.00'), ('min_purchase_amount', '0.00'), ('referral_code_length', '8'), ('require_purchase', 'yes');",
+    "INSERT INTO `tbl_appconfig` (`setting`, `value`) SELECT s.setting, s.value FROM (SELECT 'referral_enabled' AS setting, 'yes' AS value UNION ALL SELECT 'referrer_reward_type', 'balance' UNION ALL SELECT 'referrer_reward_amount', '0.00' UNION ALL SELECT 'referred_reward_type', 'balance' UNION ALL SELECT 'referred_reward_amount', '0.00' UNION ALL SELECT 'min_purchase_amount', '0.00' UNION ALL SELECT 'referral_code_length', '8' UNION ALL SELECT 'require_purchase', 'yes') s WHERE NOT EXISTS (SELECT 1 FROM `tbl_appconfig` c WHERE c.setting = s.setting);",
     "INSERT INTO `tbl_widgets` (`orders`, `position`, `user`, `enabled`, `title`, `widget`, `content`) VALUES (6, 1, 'Customer', 1, 'Referrals', 'referrals', '');",
     "ALTER TABLE `rad_acct` ADD COLUMN `dateUpdated` timestamp NULL DEFAULT NULL;"
   ],
@@ -313,5 +313,10 @@
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;",
     "ALTER TABLE `tbl_referral_relationships` MODIFY `referral_code` varchar(25) NOT NULL"
+  ],
+  "2026.11.11": [
+    "ALTER TABLE `tbl_plans` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
+    "DELETE t1 FROM `tbl_appconfig` t1 JOIN `tbl_appconfig` t2 ON t2.setting = t1.setting AND t2.id < t1.id WHERE t1.setting IN ('referral_enabled', 'referrer_reward_type', 'referrer_reward_amount', 'referred_reward_type', 'referred_reward_amount', 'min_purchase_amount', 'referral_code_length', 'require_purchase')"
   ]
 }

@@ -11,6 +11,9 @@
  *    php system/cron/migrate.php --status     show what is pending and what failed, change nothing
  *    php system/cron/migrate.php --baseline=VERSION
  *                                             on a site with no record yet: mark everything up to VERSION as applied
+ *    php system/cron/migrate.php --repair=VERSION
+ *                                             when the list of finished updates is damaged (an older updater wrote
+ *                                             "the previous version"): start the list again from VERSION
  **/
 
 if (PHP_SAPI !== 'cli') {
@@ -41,7 +44,7 @@ try {
 
 $m = new Migrator($db, $root . '/system/updates.json');
 $m->ensureTable();
-$opts = getopt('', ['status', 'baseline:']);
+$opts = getopt('', ['status', 'baseline:', 'repair:']);
 
 $done = $root . '/system/cache/updates.done.json';
 $doneVersions = is_file($done) ? (json_decode((string) file_get_contents($done), true) ?: []) : [];
@@ -63,6 +66,20 @@ if ($m->isEmpty()) {
     fwrite(STDERR, "This site has no migration record yet, so it is not known which database changes are already in place.\n"
         . 'Run this first with the version the database was last updated to' . ($installed !== '' ? " (the files say $installed)" : '')
         . ":\n  php system/cron/migrate.php --baseline=VERSION\n");
+    exit(isset($opts['status']) ? 0 : 1);
+}
+
+if (isset($opts['repair'])) {
+    // the same as the Repair button on update.php: only acts while the list of finished updates is damaged
+    echo $m->repairBaseline((string) $opts['repair'])
+        ? 'Repaired. ' . count($m->pending()) . " database update(s) still to run: php system/cron/migrate.php\n"
+        : "The list of finished updates is fine; nothing was changed.\n";
+    exit(0);
+}
+
+if ($m->badBaseline() !== null) {
+    $installed = (string) (json_decode((string) @file_get_contents($root . '/version.json'), true)['version'] ?? '');
+    fwrite(STDERR, wordwrap(Migrator::badBaselineHelp($installed), 120) . "\n");
     exit(isset($opts['status']) ? 0 : 1);
 }
 

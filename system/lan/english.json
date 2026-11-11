@@ -4991,5 +4991,8 @@
     "Batch__d_did_not_answer__so_some_of_its_messages_may_have_been_sent__Nothing_after_it_was_sent__Continue_skips_that_batch__so_nobody_gets_the_message_twice_": "Batch %d did not answer, so some of its messages may have been sent. Nothing after it was sent. Continue skips that batch, so nobody gets the message twice.",
     "Batch__d_did_not_answer__Nothing_is_sent_in_a_test_run__so_Continue_tries_it_again_": "Batch %d did not answer. Nothing is sent in a test run, so Continue tries it again.",
     "Stopping_after_this_batch": "Stopping after this batch",
-    "_s_customers_were_processed_before_the_run_stopped__The_rest_got_nothing_": "%s customers were processed before the run stopped. The rest got nothing."
+    "_s_customers_were_processed_before_the_run_stopped__The_rest_got_nothing_": "%s customers were processed before the run stopped. The rest got nothing.",
+    "The_website_is_currently_in_maintenance_mode__this_means_that_some_or_all_functionality_may_be_unavailable_to_regular_users_during_this_time_": "The website is currently in maintenance mode, this means that some or all functionality may be unavailable to regular users during this time.",
+    "Turn_Off": "Turn Off",
+    "Program_is_off": "Program is off"
 }

@@ -52,10 +52,14 @@ switch ($action) {
             );
 
             foreach ($update as $key => $value) {
-                $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
-                if ($d) {
-                    $d->value = $value;
-                    $d->save();
+                // every row of the setting: an older update could add a second copy, and the settings load keeps the last
+                // one, so writing only the first left the old value in force (the program could not be switched off)
+                $rows = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_many();
+                if (count($rows)) {
+                    foreach ($rows as $d) {
+                        $d->value = $value;
+                        $d->save();
+                    }
                 } else {
                     $d = ORM::for_table('tbl_appconfig')->create();
                     $d->setting = $key;
