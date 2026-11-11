@@ -166,8 +166,11 @@
                 var off = a.getAttribute('data-for') !== mode, input = a.querySelector('input');
                 a.hidden = off;
                 // a hidden field cannot show an error, so it is left out of validation: a read-only field is not checked
-                // (range or unreadable text) but still posts its value, which the settings handler saves (a disabled
-                // field would post nothing and reset that setting to 0)
+                // but still posts its value, which the settings handler saves (a disabled field would post nothing and reset
+                // that setting to 0). Half-typed text ("1e") would post as empty, so the last good value comes back first.
+                if (!input.hasAttribute('data-good')) { input.setAttribute('data-good', input.defaultValue); }
+                if (!input.validity.badInput && input.value !== '') { input.setAttribute('data-good', input.value); }
+                if (off && (input.validity.badInput || input.value === '')) { input.value = input.getAttribute('data-good'); }
                 input.readOnly = off;
             });
             var v = card.querySelector('.rf-amount:not([hidden]) input').value;

@@ -144,6 +144,7 @@
         stopped: '{Lang::T('Stopped')|escape:'javascript'}',
         stoppedText: '{Lang::T('%s customers were processed before the run stopped. No batch after that was sent.')|escape:'javascript'}',
         unknownText: '{Lang::T('Batch %b did not answer, so it is not known whether its %n customers got the message. Check the Message log before sending to them again.')|escape:'javascript'}',
+        upTo: '{Lang::T('up to')|escape:'javascript'}',
         unexpected: '{Lang::T('Unexpected answer from the server')|escape:'javascript'}',
         noChannel: '{Lang::T('Please select at least one channel type')|escape:'javascript'}',
         confirm: '{Lang::T('This sends the message to real customers. Turn on Test run first to preview who would get it.')|escape:'javascript'}',
@@ -205,14 +206,16 @@
         $('#startBulk').prop('disabled', false);
         $('#bulkMessageForm').find('input, select, textarea, button.mc-token').prop('disabled', false);
     }
-    // the batches whose result is unknown, as "Batch 3 ... its 20 customers" (up to the batch size while the total is unknown)
+    // the batches whose result is unknown, as "Batch 3 ... its 20 customers"; while the total is unknown only the batch size is known,
+    // so the count is an upper bound ("up to 20")
     function unknownNote() {
         if (!unknownPages.length) { return ''; }
         var n = 0;
         unknownPages.forEach(function (p) {
             n += lastTotal === null ? batchSize : Math.max(0, Math.min(lastTotal, (p + 1) * batchSize) - p * batchSize);
         });
-        return ' ' + MC_T.unknownText.replace('%b', unknownPages.map(function (p) { return p + 1; }).join(', ')).replace('%n', n);
+        var count = lastTotal === null ? MC_T.upTo + ' ' + n : String(n);
+        return ' ' + MC_T.unknownText.replace('%b', unknownPages.map(function (p) { return p + 1; }).join(', ')).replace('%n', count);
     }
     function stoppedHere() {
         if (paused && !isTest && unknownPages.indexOf(page) === -1) { unknownPages.push(page); } // Finish here after a batch failed

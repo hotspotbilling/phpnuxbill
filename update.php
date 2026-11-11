@@ -354,9 +354,11 @@ if ($step === 0) {
                 An earlier version of this updater lost track of which database updates this site already has, so it now thinks old updates
                 still need to run. Running them would undo newer changes. Repairing the list fixes this; your data is not touched.</div>
                 <form method="post" action="update.php"><input type="hidden" name="token" value="' . u_h(u_token()) . '"><input type="hidden" name="step" value="9">
-                <div class="form-group"><label for="db_version">This site was running version</label>
-                    <input type="text" class="form-control" id="db_version" name="db_version" value="' . u_h($self_version) . '" required pattern="[0-9]+(\.[0-9]+)*">
-                    <span class="help-block">Leave it as it is unless you know the site was on an older version before the last update.</span></div>
+                <div class="form-group"><label for="db_version">The version this database was last fully updated to</label>
+                    <input type="text" class="form-control" id="db_version" name="db_version" value="" placeholder="for example 2026.10.23" required pattern="[0-9]+(\.[0-9]+)*">
+                    <span class="help-block">The version the site ran before the update that went wrong. The program files are now ' . u_h($self_version) . ', but
+                    if their database step did not finish, the database is still on the older version: entering ' . u_h($self_version) . ' then would mark
+                    its unfinished changes as done. Updates the list shows as already run are kept either way.</span></div>
                 <button type="submit" class="btn btn-primary">Repair the list</button></form><hr>';
         } elseif (!$mg->isEmpty() && ($left = count($mg->pending())) > 0) {
             $problems_note = '<div class="alert alert-warning">' . $left . ' database change(s) from an earlier update are still waiting and will run first.</div>';

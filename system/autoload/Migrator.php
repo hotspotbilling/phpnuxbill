@@ -135,28 +135,67 @@ class Migrator
     }
 
     /** How to repair a bad starting point (the update page has a Repair button that does the same). */
-    public static function badBaselineHelp($filesVersion)
+    public static function badBaselineHelp($filesVersion = '')
     {
         return 'The list of database updates already done is damaged, so old updates look unfinished. Open update.php in the browser and '
-            . 'press "Repair the list", or from the command line run: php system/cron/migrate.php --repair'
-            . ($filesVersion !== '' ? '=' . $filesVersion : '=VERSION') . ' (the version this site was running).';
+            . 'press "Repair the list", or from the command line run: php system/cron/migrate.php --repair=VERSION, where VERSION is the '
+            . 'version this database was last fully updated to. Find it out first (the version before your last update, or the last one '
+            . 'that finished): a version that is too new marks unfinished database updates as done.';
     }
 
     /**
-     * Repair a bad starting point: forget the record and start again from $version (everything up to it counts as done).
-     * Only acts while the starting point is bad, so it can never wipe a good record.
+     * Repair a bad starting point: replace the marker with $version and count every update up to it as done. Updates the record shows
+     * as run (ok or skipped) stay as they are, so a repair to an earlier version never makes them pending again; a failed one up to
+     * $version is taken as in place. Runs under the migration lock and in one transaction, and only while the starting point is bad, so
+     * it can never touch a good record.
+     *
+     * @return bool false when there was nothing to repair
      */
     public function repairBaseline($version)
     {
-        if ($this->badBaseline() === null) {
-            return false;
-        }
         if (!preg_match('/^\d+(\.\d+)*$/', (string) $version)) {
             throw new InvalidArgumentException('Enter a version number such as 2026.11.7.');
         }
-        $this->db->exec('DELETE FROM tbl_migrations');
-        $this->baseline((string) $version);
-        return true;
+        if ($this->db->inTransaction()) {
+            throw new LogicException('Migrator::repairBaseline() cannot be called inside a database transaction.');
+        }
+        $this->ensureTable(); // DDL commits implicitly, so it stays outside the transaction below
+        if (!$this->lock()) {
+            throw new RuntimeException('Another database update is running. Wait for it to finish, then try again.');
+        }
+        try {
+            if ($this->badBaseline() === null) { // checked again under the lock: another request may have repaired it
+                return false;
+            }
+            $this->db->beginTransaction();
+            try {
+                $this->db->exec("DELETE FROM tbl_migrations WHERE status = 'baseline' AND position = -1");
+                $this->record(substr((string) $version, 0, 32), -1, 'baseline', 'baseline', null);
+                $kept = [];
+                foreach ($this->db->query("SELECT version, position FROM tbl_migrations WHERE status IN ('ok', 'skipped')") as $r) {
+                    $kept[$r['version'] . '#' . $r['position']] = true;
+                }
+                foreach ($this->updates as $v => $queries) {
+                    if (version_compare((string) $v, (string) $version, '>')) {
+                        continue;
+                    }
+                    foreach (array_values($queries) as $pos => $q) {
+                        if (empty($kept[$v . '#' . $pos])) {
+                            $this->record($v, $pos, $q, 'baseline', null); // new, or a failed one taken as in place
+                        }
+                    }
+                }
+                $this->db->commit();
+            } catch (Throwable $e) {
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack(); // the record stays exactly as it was
+                }
+                throw $e;
+            }
+            return true;
+        } finally {
+            $this->unlock();
+        }
     }
 
     /** @return array of [version, position, sql] not yet applied, in the order they will run */
