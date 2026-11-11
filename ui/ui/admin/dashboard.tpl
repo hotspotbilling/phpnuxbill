@@ -45,45 +45,6 @@
 {/if}
 {/foreach}
 
-{if $_c['new_version_notify'] != 'disable'}
-<script>
-    window.addEventListener('DOMContentLoaded', function () {
-        $.getJSON("./version.json?" + Math.random(), function (data) {
-            var localVersion = data.version;
-            $('#version').html('Version: ' + localVersion);
-            $.getJSON(
-                "https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?" +
-                Math
-                    .random(),
-                function (data) {
-                    var latestVersion = data.version;
-                    if (localVersion !== latestVersion) {
-                        $('#version').html('Latest Version: ' + latestVersion);
-                        if (getCookie(latestVersion) != 'done') {
-                            Swal.fire({
-                                icon: 'info',
-                                title: "New Version Available\nVersion: " + latestVersion,
-                                toast: true,
-                                position: 'bottom-right',
-                                showConfirmButton: true,
-                                showCloseButton: true,
-                                timer: 30000,
-                                confirmButtonText: '<a href="{Text::url('community')}#latestVersion" style="color: white;">Update Now</a>',
-                                timerProgressBar: true,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal
-                                        .resumeTimer)
-                                }
-                            });
-                            setCookie(latestVersion, 'done', 7);
-                        }
-                    }
-                });
-        });
-
-    });
-</script>
-{/if}
+{include file="admin/update-notice.tpl"}
 
 {include file="sections/footer.tpl"}

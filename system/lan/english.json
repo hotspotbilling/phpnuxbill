@@ -4889,5 +4889,12 @@
     "in_Mikrotik_manually": "in Mikrotik manually",
     "Continue_the_Port_change_process_": "Continue the Port change process?",
     "Topup": "Topup",
-    "Continue_the_process_of_changing_the_balance_contents_": "Continue the process of changing the balance contents?"
+    "Continue_the_process_of_changing_the_balance_contents_": "Continue the process of changing the balance contents?",
+    "A_new_version_of_PHPNuxBill_is_ready_to_install_": "A new version of PHPNuxBill is ready to install.",
+    "Latest": "Latest",
+    "What_s_new": "What's new",
+    "Later": "Later",
+    "Skip_this_version": "Skip this version",
+    "more_changes_in_the_changelog": "more changes in the changelog",
+    "Read_the_full_changelog": "Read the full changelog"
 }
