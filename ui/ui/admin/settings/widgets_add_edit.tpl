@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form method="post" action="{Text::url('widgets/', $do)}">
+<form method="post" action="{Text::url('widgets/', $do)}" class="form-horizontal st">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-info">
@@ -18,7 +18,6 @@
                                 {/foreach}
                             </select>
                         </div>
-                        <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T("Title")}</label>
@@ -26,7 +25,6 @@
                             <input type="text" class="form-control" required id="title" name="title"
                                 value="{$widget['title']}">
                         </div>
-                        <span class="help-block col-md-4">&nbsp;</span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T("Sequence")}</label>
@@ -34,7 +32,6 @@
                             <input type="number" class="form-control" id="orders" name="orders"
                                 value="{if $widget['orders']>0}{$widget['orders']}{else}99{/if}">
                         </div>
-                        <span class="help-block col-md-4">&nbsp;</span>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T("Position")}</label>
@@ -47,7 +44,6 @@
                                 {/for}
                             </select>
                         </div>
-                        <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T("User")}</label>
@@ -58,14 +54,13 @@
                                 </option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T("Status")}</label>
                         <div class="col-md-5">
                             <select name="enabled" id="enabled" class="form-control">
                                 <option value="1"
-                                    {if isset($widget['enabled']) && $widget['enabled'] neq 1}selected="selected" {/if}>
+                                    {if !isset($widget['enabled']) || $widget['enabled'] neq 0}selected="selected" {/if}>
                                     {Lang::T("Active")}
                                 </option>
                                 <option value="0"
@@ -74,7 +69,6 @@
                                 </option>
                             </select>
                         </div>
-                        <p class="help-block col-md-4">&nbsp;</p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T("Content")}</label>
@@ -87,19 +81,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="panel-footer">
-                    <div class="btn-group btn-group-justified" role="group">
-                        <a href="{Text::url('widgets/', '&user=', $tipeUser)}" class="btn btn-default btn-block">{Lang::T("Back")}</a>
-                        <div class="btn-group" role="group">
-                            <button type="submit" class="btn btn-info btn-block">{Lang::T("Save")}</button>
-                        </div>
-                    </div>
+                <div class="panel-footer st-card-foot">
+                    {if $do == 'edit'}
+                    <a href="{Text::url('widgets/delete/', $widget['id'], '&user=', $tipeUser)}" class="ls-btn ls-btn--danger"
+                        onclick="return ask(this, '{Lang::T("Remove this widget?")}')"><i class="fa fa-trash" aria-hidden="true"></i> {Lang::T("Delete")}</a>
+                    {else}<span></span>{/if}
+                    <span class="st-foot-end">
+                        <a href="{Text::url('widgets/', '&user=', $tipeUser)}" class="ls-btn"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T("Back")}</a>
+                        <button type="submit" class="ls-btn ls-btn--primary"><i class="fa fa-check" aria-hidden="true"></i> {Lang::T("Save")}</button>
+                    </span>
                 </div>
             </div>
-            {if $do == 'edit'}
-                <a href="{Text::url('widgets/delete/', $widget['id'], '&user=', $tipeUser)}" class="btn btn-danger btn-xs"
-                    onclick="return ask(this, '{Lang::T("Remove this widget?")}')">{Lang::T("Delete")}</a>
-            {/if}
         </div>
     </div>
 </form>

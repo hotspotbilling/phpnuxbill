@@ -342,3 +342,117 @@ $(document).ready(function () {
     showTableLoading();
   });
 });
+
+/* Settings pages (.st): Yes/No dropdowns as switches, styled Select2 lists, Copy buttons on command blocks.
+   The dropdown stays in the form (hidden) and keeps its name and values, so what is saved does not change; the switch only
+   sets its value and fires "change", so scripts that watch the dropdown keep working. */
+(function () {
+  function ready(fn) {
+    if (document.readyState !== "loading") { fn(); } else { document.addEventListener("DOMContentLoaded", fn); }
+  }
+  var PAIRS = [["yes", "no"], ["1", "0"], ["true", "false"], ["on", "off"], ["enable", "disable"], ["enabled", "disabled"], ["active", "inactive"]];
+
+  function rowLabel(sel) {
+    var row = sel.closest(".form-group");
+    var lab = row && row.querySelector(".control-label");
+    return lab ? lab.textContent.trim() : "";
+  }
+
+  function toSwitch(sel) {
+    if (sel.multiple || sel.options.length !== 2 || sel.classList.contains("select2") || sel.hasAttribute("data-no-switch")) { return; }
+    var vals = [sel.options[0].value.trim().toLowerCase(), sel.options[1].value.trim().toLowerCase()];
+    var on = -1, off = -1;
+    PAIRS.some(function (p) {
+      if (vals.indexOf(p[0]) !== -1 && vals.indexOf(p[1]) !== -1) { on = vals.indexOf(p[0]); off = vals.indexOf(p[1]); return true; }
+      return false;
+    });
+    if (on === -1) { return; }
+    var onOpt = sel.options[on], offOpt = sel.options[off];
+
+    var wrap = document.createElement("label");
+    wrap.className = "st-sw";
+    var box = document.createElement("input");
+    box.type = "checkbox";
+    box.className = "st-sw__box";
+    box.setAttribute("role", "switch");
+    box.setAttribute("aria-label", rowLabel(sel) || onOpt.text.trim());
+    var track = document.createElement("span");
+    track.className = "st-sw__track";
+    track.setAttribute("aria-hidden", "true");
+    var text = document.createElement("span");
+    text.className = "st-sw__text";
+    wrap.appendChild(box); wrap.appendChild(track); wrap.appendChild(text);
+
+    function fromSelect() {
+      box.checked = sel.value === onOpt.value;
+      box.disabled = sel.disabled;
+      text.textContent = (box.checked ? onOpt : offOpt).text.trim();
+      wrap.classList.toggle("is-on", box.checked);
+    }
+    box.addEventListener("change", function () {
+      sel.value = box.checked ? onOpt.value : offOpt.value;
+      sel.dispatchEvent(new Event("change", { bubbles: true }));
+      fromSelect();
+    });
+    sel.addEventListener("change", fromSelect);
+    sel.classList.add("st-sw-src");
+    sel.setAttribute("tabindex", "-1");
+    sel.setAttribute("aria-hidden", "true");
+    sel.parentNode.insertBefore(wrap, sel.nextSibling);
+    fromSelect();
+  }
+
+  function copyButtons(root) {
+    var form = root.closest("[data-t-copy]") || root;
+    var tCopy = form.getAttribute("data-t-copy") || "Copy";
+    var tCopied = form.getAttribute("data-t-copied") || "Copied";
+    root.querySelectorAll(".bs-callout > p").forEach(function (p) {
+      if (p.querySelector(".st-copy")) { return; }
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "st-copy";
+      btn.innerHTML = '<i class="fa fa-copy" aria-hidden="true"></i> <span></span>';
+      btn.lastChild.textContent = tCopy;
+      btn.addEventListener("click", function () {
+        // the commands only: comment lines (# ...) and the small note are left out
+        var clone = p.cloneNode(true);
+        clone.querySelectorAll(".st-copy, small").forEach(function (n) { n.remove(); });
+        var lines = clone.innerText.split("\n").map(function (l) { return l.trim(); })
+          .filter(function (l) { return l !== "" && l.charAt(0) !== "#"; });
+        var txt = lines.join("\n");
+        var done = function () {
+          btn.lastChild.textContent = tCopied;
+          btn.classList.add("is-done");
+          setTimeout(function () { btn.lastChild.textContent = tCopy; btn.classList.remove("is-done"); }, 1600);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(txt).then(done, function () { fallback(txt); done(); });
+        } else { fallback(txt); done(); }
+      });
+      p.appendChild(btn);
+    });
+  }
+  function fallback(txt) {
+    var ta = document.createElement("textarea");
+    ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+  }
+
+  ready(function () {
+    var roots = document.querySelectorAll(".st");
+    if (!roots.length) { return; }
+    roots.forEach(function (root) {
+      root.querySelectorAll("select.form-control").forEach(toSwitch);
+      copyButtons(root);
+    });
+    // Select2 puts its open list at the end of <body>, outside .st: tag it so it takes the same field styling (.mc-s2)
+    if (window.MutationObserver) {
+      new MutationObserver(function () {
+        if (!document.querySelector(".st .select2-container--open")) { return; }
+        document.querySelectorAll("body > .select2-container--open").forEach(function (d) { d.classList.add("mc-s2"); });
+      }).observe(document.body, { childList: true });
+    }
+  });
+})();

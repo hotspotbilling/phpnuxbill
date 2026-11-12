@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form id="formpages" method="post" role="form" action="{Text::url('')}pages/{$PageFile}-post">
+<form id="formpages" method="post" role="form" action="{Text::url('')}pages/{$PageFile}-post" class="st">
     <div class="row">
         <div class="{if $action=='Voucher'}col-md-8{else}col-md-12{/if}">
             <div class="panel mb20 panel-primary panel-hovered">
@@ -17,26 +17,32 @@
                 </div>
                 <textarea name="html" id="summernote">{$htmls}</textarea>
                 {if $writeable}
-                    <div class="panel-footer">
+                    <div class="panel-footer st-page-foot">
                         {if $action=='Voucher'}
-                            <label>
-                                <input type="checkbox" name="template_save" value="yes"> {Lang::T('Save as template')}
-                            </label>
+                        <div class="st-page-tpl">
+                            <label class="st-all"><input type="checkbox" name="template_save" value="yes"> {Lang::T('Save as template')}</label>
                             <div class="input-group">
                                 <span class="input-group-addon" id="basic-addon3">{Lang::T('Template Name')}</span>
                                 <input type="text" class="form-control" id="template_name" name="template_name">
                             </div>
-                            <br>
+                        </div>
                         {/if}
-                        <button type="submit" class="btn btn-primary btn-block">{Lang::T('Save')}</button>
-                        <br>
-                        <p class="help-block">{Lang::T('Sometimes you need to refresh 3 times until content change')}</p>
-                        <input type="text" class="form-control" onclick="this.select()" readonly
-                            value="{$app_url}/{$PAGES_PATH}/{$PageFile}.html">
+                        <div class="st-page-url">
+                            <label class="mc-label" for="stPageUrl">{Lang::T('Page address')}</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="stPageUrl" onclick="this.select()" readonly
+                                    value="{$app_url}/{$PAGES_PATH}/{$PageFile}.html">
+                                <span class="input-group-btn"><button type="button" class="btn btn-default"
+                                    onclick="var f = document.getElementById('stPageUrl'); f.select(); if (navigator.clipboard) { navigator.clipboard.writeText(f.value); } this.textContent = '{Lang::T('Copied')|escape:'javascript'}';">{Lang::T('Copy')}</button></span>
+                            </div>
+                            <small>{Lang::T('Sometimes you need to refresh 3 times until content change')}</small>
+                        </div>
+                        <button type="submit" class="ls-btn ls-btn--primary st-page-save"><i class="fa fa-check" aria-hidden="true"></i> {Lang::T('Save')}</button>
                     </div>
                 {else}
                     <div class="panel-footer">
-                        {Lang::T("Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>")}
+                        <div class="rf-note rf-note--warn" role="alert"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                            <div>{Lang::T("Failed to save page, make sure i can write to folder pages, <i>chmod 664 pages/*.html<i>")}</div></div>
                     </div>
                 {/if}
                 {if $PageFile=='Voucher'}

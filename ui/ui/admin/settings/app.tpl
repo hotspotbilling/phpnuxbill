@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{Text::url('')}settings/app-post"
+<form class="form-horizontal st" data-t-copy="{Lang::T('Copy')|escape}" data-t-copied="{Lang::T('Copied')|escape}" method="post" role="form" action="{Text::url('')}settings/app-post"
     enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
 
@@ -803,6 +803,14 @@
                         <p class="help-block col-md-4">{Lang::T('Time in minutes of inactivity before considering session stale')}</p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Radius Rest Interim-Update')}</label>
+                        <div class="col-md-5">
+                            <input type="number" min="0" class="form-control" id="frrest_interim_update" name="frrest_interim_update"
+                                value="{if $_c['frrest_interim_update']}{$_c['frrest_interim_update']}{else}0{/if}">
+                        </div>
+                        <p class="help-block col-md-4">{Lang::T('For radius.php (REST): the cron closes a session that sent no update for this many minutes. In minutes, leave 0 to disable this feature.')}</p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('REST Secret')}</label>
                         <div class="col-md-5">
                             <input type="text" class="form-control" id="radius_rest_secret" name="radius_rest_secret"
@@ -950,6 +958,7 @@
                 </div>
 
                 <div role="tabpanel" class="tab-pane" id="sms">
+                    {include file="admin/settings/routely-intro.tpl" rl_for="sms"}
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('SMS Server URL')}</label>
                         <div class="col-md-5">
@@ -992,9 +1001,7 @@
                             </button>
                         </div>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
-                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">{Lang::T('Free
-                            Server')}</a></small>
+                    {include file="admin/settings/free-gateway.tpl" fg_for="sms"}
 
                     <div style="text-align: center; margin: 0 auto;">
                         <button class="btn btn-success" name="general" type="submit">
@@ -1004,6 +1011,7 @@
                 </div>
 
                 <div role="tabpanel" class="tab-pane" id="whatsapp">
+                    {include file="admin/settings/routely-intro.tpl" rl_for="wa"}
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('WhatsApp Server URL')}</label>
                         <div class="col-md-5">
@@ -1021,9 +1029,7 @@
                             </button>
                         </div>
                     </div>
-                    <small id="emailHelp" class="form-text text-muted">{Lang::T('You can use')} WhatsApp
-                        {Lang::T('in here too.')} <a href="https://wa.nux.my.id/login" target="_blank">{Lang::T('Free
-                            Server')}</a></small>
+                    {include file="admin/settings/free-gateway.tpl" fg_for="wa"}
                     <div style="text-align: center; margin: 0 auto;">
                         <button class="btn btn-success" name="general" type="submit">
                             {Lang::T('Save Changes')}
@@ -1514,13 +1520,13 @@
         var timeoutDurationField = document.getElementById('session_timeout_duration');
 
         if (sectionTimeoutCheckbox.checked) {
-            timeoutDurationInput.style.display = 'block';
+            timeoutDurationInput.style.display = ''; // the stylesheet's row layout
             timeoutDurationField.required = true;
         }
 
         sectionTimeoutCheckbox.addEventListener('change', function () {
             if (this.checked) {
-                timeoutDurationInput.style.display = 'block';
+                timeoutDurationInput.style.display = ''; // the stylesheet's row layout
                 timeoutDurationField.required = true;
             } else {
                 timeoutDurationInput.style.display = 'none';
@@ -1547,7 +1553,7 @@
             var customTaxRateInput = document.getElementById("customTaxRate");
 
             if (taxRateSelect.value === "custom") {
-                customTaxRateInput.style.display = "block";
+                customTaxRateInput.style.display = "";
             } else {
                 customTaxRateInput.style.display = "none";
             }
@@ -1566,7 +1572,7 @@
         var customFields = document.getElementById('customFields');
 
         if (selectedValue === 'custom') {
-            customFields.style.display = 'block';
+            customFields.style.display = '';
         } else {
             customFields.style.display = 'none';
         }

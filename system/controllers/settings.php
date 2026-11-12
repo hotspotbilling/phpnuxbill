@@ -181,6 +181,23 @@ switch ($action) {
         $csrf_token = Csrf::generateAndStoreToken();
         $ui->assign('csrf_token', $csrf_token);
         $ui->assign('_title', Lang::T('Settings'));
+        // Routely (an optional plugin, its own repository): the SMS and WhatsApp tabs say whether it is installed and sending
+        $ours = function ($url) {
+            return function_exists('routely_is_ours') && routely_is_ours((string) $url);
+        };
+        // A Routely address left behind without the plugin (its folder deleted by hand, so its uninstall step did not put the old
+        // address back): messages still go out through Routely. The same test as the plugin's uninstall.php.
+        $leftover = function ($url) {
+            $url = (string) $url;
+            return !function_exists('routely') && strpos($url, '/v1/') !== false && stripos($url, 'routely') !== false;
+        };
+        $ui->assign('routely', [
+            'installed' => function_exists('routely'),
+            'sms' => $ours($config['sms_url'] ?? ''),
+            'wa' => $ours($config['wa_url'] ?? ''),
+            'sms_orphan' => $leftover($config['sms_url'] ?? ''),
+            'wa_orphan' => $leftover($config['wa_url'] ?? ''),
+        ]);
         $ui->display('admin/settings/app.tpl');
         break;
 

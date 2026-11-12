@@ -327,7 +327,9 @@ class RedisCache
             'clients' => 0,
             'hits' => 0,
             'misses' => 0,
-            'hit_ratio' => 0
+            'hit_ratio' => 0,
+            'used_bytes' => 0,
+            'peak_bytes' => 0
         ];
 
         if (!$stats['extension_loaded']) {
@@ -353,6 +355,8 @@ class RedisCache
             $stats['used_memory'] = $info['used_memory_human'] ?? '0 B';
             $stats['peak_memory'] = $info['used_memory_peak_human'] ?? '0 B';
             $stats['clients'] = (int) ($info['connected_clients'] ?? 0);
+            $stats['used_bytes'] = (int) ($info['used_memory'] ?? 0); // for the memory bar on the Redis page
+            $stats['peak_bytes'] = (int) ($info['used_memory_peak'] ?? 0);
 
             $hits = (int) ($info['keyspace_hits'] ?? 0);
             $misses = (int) ($info['keyspace_misses'] ?? 0);

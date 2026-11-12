@@ -7161,17 +7161,17 @@ body .mc .mc-input:not(#filterNavigateMenu):focus { background: var(--ls-field) 
 
 /* Send Message: Select2 fields (router, customer) look like the other fields. The global dark-mode rules carry
    :not(#filterNavigateMenu), so these restate the same weight. */
-body .mc .select2-container--bootstrap .select2-selection--single:not(#filterNavigateMenu) {
+body :is(.mc, .st) .select2-container--bootstrap .select2-selection--single:not(#filterNavigateMenu) {
     display: flex; align-items: center; height: 40px; padding: 0 34px 0 12px;
     border: 1px solid var(--ls-field-line); border-radius: 9px; background: var(--ls-field); color: var(--ls-ink); box-shadow: none; font-size: 14px;
 }
-body .mc .select2-container--bootstrap .select2-selection--single .select2-selection__rendered { padding: 0; color: var(--ls-ink); line-height: 1.4; }
-body .mc .select2-container--bootstrap .select2-selection--single .select2-selection__placeholder { color: var(--ls-muted); }
-body .mc .select2-container--bootstrap .select2-selection--single .select2-selection__arrow { top: 0; right: 10px; height: 100%; width: 16px; }
-body .mc .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b { border-color: var(--ls-muted) transparent transparent; }
-body .mc .select2-container--bootstrap.select2-container--open .select2-selection--single .select2-selection__arrow b { border-color: transparent transparent var(--ls-muted); }
-body .mc .select2-container--bootstrap.select2-container--focus .select2-selection--single:not(#filterNavigateMenu),
-body .mc .select2-container--bootstrap.select2-container--open .select2-selection--single:not(#filterNavigateMenu) {
+body :is(.mc, .st) .select2-container--bootstrap .select2-selection--single .select2-selection__rendered { padding: 0; color: var(--ls-ink); line-height: 1.4; }
+body :is(.mc, .st) .select2-container--bootstrap .select2-selection--single .select2-selection__placeholder { color: var(--ls-muted); }
+body :is(.mc, .st) .select2-container--bootstrap .select2-selection--single .select2-selection__arrow { top: 0; right: 10px; height: 100%; width: 16px; }
+body :is(.mc, .st) .select2-container--bootstrap .select2-selection--single .select2-selection__arrow b { border-color: var(--ls-muted) transparent transparent; }
+body :is(.mc, .st) .select2-container--bootstrap.select2-container--open .select2-selection--single .select2-selection__arrow b { border-color: transparent transparent var(--ls-muted); }
+body :is(.mc, .st) .select2-container--bootstrap.select2-container--focus .select2-selection--single:not(#filterNavigateMenu),
+body :is(.mc, .st) .select2-container--bootstrap.select2-container--open .select2-selection--single:not(#filterNavigateMenu) {
     border-color: var(--ls-accent); box-shadow: 0 0 0 3px var(--ls-accent-soft); color: var(--ls-ink); outline: 0;
 }
 /* the open list (moved to <body>, tagged .mc-s2 by composer-side.tpl): carries its own tokens. Option rules name
@@ -7196,14 +7196,14 @@ body .mc-s2.select2-container--bootstrap .select2-results__option--highlighted[a
 body .mc-s2 .select2-results__message { color: var(--s2-muted); }
 /* the global dark-mode field rule animates "all" for .5s, so a focused field flashes from the white focus fill to its own; animate only the border and ring */
 body .mc .mc-input:not(#filterNavigateMenu),
-body .mc .select2-selection:not(#filterNavigateMenu),
+body :is(.mc, .st) .select2-selection:not(#filterNavigateMenu),
 body .mc-s2 .select2-search__field:not(#filterNavigateMenu) { transition: border-color .15s, box-shadow .15s; }
 /* Hidden fields must stay 1px: the min-height: 100% rule in phpnuxbill.min.css stretched Select2's hidden <select> to the
    height of the page, which made the page taller than its content and scroll on a click. Same weight as that rule's :not(#id). */
 body .mc .cm-chip input:not(#filterNavigateMenu),
 body .mc .mc-row--switch input:not(#filterNavigateMenu) { min-height: 0; }
 /* .mc-input's width: 100% also made the router's hidden select as wide as the page */
-body .mc select.select2-hidden-accessible:not(#filterNavigateMenu) { width: 1px !important; height: 1px !important; min-height: 0; padding: 0; border: 0; }
+body :is(.mc, .st) select.select2-hidden-accessible:not(#filterNavigateMenu) { width: 1px !important; height: 1px !important; min-height: 0; padding: 0; border: 0; }
 
 /* Referrals (ui/ui/admin/referral/list.tpl, settings.tpl). Built on the .ls kit; the settings form also uses the .mc form pieces of the Send Message pages. */
 .rf { --rf-bar: #6366f1; --rf-ok: #15803d; --rf-warn: #b45309; }
@@ -7346,3 +7346,359 @@ body.as-chrome .customer-edit-actions { padding: 14px 20px; background: var(--ls
     .customer-edit-actions { flex-direction: column-reverse; align-items: stretch; padding: 12px 16px; }
     .customer-edit-actions .ls-btn { width: 100%; }
 }
+
+/* ==========================================================================
+   Settings pages (.st, on the form or wrapper of ui/ui/admin/settings/*.tpl): the look of the referral settings form.
+   The pages keep their Bootstrap markup (form-group > control-label.col-md-* + div.col-md-* + help-block.col-md-*): this turns every
+   form-group into a setting row (label and help on the left, the control on the right), every tab pane or panel into a card, and the
+   tab list into a side menu. Fields use the shared field rules above (:is(.edit-form-card, .st)). Works in the default and shadcn themes.
+   ========================================================================== */
+.st { color: var(--ls-ink); }
+.st h4, .st h3, .st section, .st aside, .st footer { min-height: 0; }
+/* tabs as a side menu */
+.st .settings-container { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 16px; align-items: start; min-height: 0; background: none; border: 0; border-radius: 0; overflow: visible; }
+.st .settings-sidebar { position: sticky; top: 70px; width: auto; min-width: 0; max-height: calc(100vh - 90px); overflow-y: auto; padding: 8px; background: var(--ls-card); border: 1px solid var(--ls-line); border-radius: 14px; box-shadow: none; transform: none; }
+.st .settings-sidebar .nav-pills { padding: 0; }
+.st .settings-sidebar .nav-pills > li { margin: 0 0 1px; float: none; }
+.st .settings-sidebar .nav-header { padding: 14px 10px 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ls-muted); }
+.st .settings-sidebar .nav-pills > li:first-child.nav-header { padding-top: 6px; }
+.st .settings-sidebar .nav-pills > li > a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 8px; color: var(--ls-ink); font-size: 13.5px; font-weight: 500; line-height: 1.35; background: transparent; transition: background .15s, color .15s; }
+.st .settings-sidebar .nav-pills > li > a > i { width: 16px; margin: 0; text-align: center; color: var(--ls-muted); font-size: 13px; top: 0; }
+.st .settings-sidebar .nav-pills > li > a:hover { background: var(--ls-soft); border: 0; }
+.st .settings-sidebar .nav-pills > li.active > a, .st .settings-sidebar .nav-pills > li.active > a:hover, .st .settings-sidebar .nav-pills > li.active > a:focus { background: var(--ls-accent-soft); color: var(--ls-accent); font-weight: 600; border: 0; }
+.st .settings-sidebar .nav-pills > li.active > a > i { color: var(--ls-accent); }
+.st .settings-sidebar .nav-pills > li > a:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: -2px; }
+.st .settings-content { padding: 0; background: none; overflow: visible; color: var(--ls-ink); }
+.st .settings-menu-toggle, .st .settings-overlay { display: none !important; }
+.st .tab-pane { animation: none; }
+/* a tab pane, a panel: a card */
+.st .tab-pane.active, .st .panel { display: block; margin: 0 0 16px; padding: 0; background: var(--ls-card); border: 1px solid var(--ls-line); border-radius: 14px; box-shadow: none; overflow: hidden; color: var(--ls-ink); }
+.st .tab-pane:not(.active) { display: none; }
+.st .panel > .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 20px; background: transparent; border-bottom: 1px solid var(--ls-line); border-radius: 0; color: var(--ls-ink); font-size: 14.5px; font-weight: 700; }
+.st .panel > .panel-heading .btn { margin: 0; }
+.st .panel-body { padding: 0; background: transparent; }
+.st .panel-footer { padding: 14px 20px; background: var(--ls-soft); border-top: 1px solid var(--ls-line); }
+.st .panel .panel { margin: 0; border-radius: 0; border-width: 0 0 1px; }
+/* a setting row */
+.st .form-group { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); grid-template-areas: "label control" "help control"; align-items: start; column-gap: 28px; row-gap: 3px; margin: 0; padding: 16px 20px; border-bottom: 1px solid var(--ls-line); }
+.st .form-group::before, .st .form-group::after { content: none; }
+.st .form-group:last-child { border-bottom: 0; }
+.st .form-group > [class*="col-"] { width: auto; float: none; padding: 0; min-width: 0; margin: 0; }
+.st .form-group > .control-label { grid-area: label; align-self: start; padding: 0; margin: 0; text-align: left; font-size: 13.5px; font-weight: 600; line-height: 1.4; color: var(--ls-ink); }
+.st .form-group > .control-label i { margin-right: 4px; color: var(--ls-muted); }
+.st .form-group { grid-template-rows: auto 1fr; }
+.st .form-group > div[class*="col-"] { grid-area: control; align-self: start; }
+.st .form-group:not(:has(> .help-block, > small, > p.help-block)) > .control-label { padding-top: 10px; }
+.st .form-group > .help-block, .st .form-group > p.help-block, .st .form-group > small { grid-area: help; align-self: start; margin: 0; font-size: 12px; line-height: 1.5; color: var(--ls-muted); }
+.st .form-group > small > .help-block { margin: 0; font-size: 12px; color: var(--ls-muted); }
+.st .form-group > .help-block img { max-height: 40px; margin-top: 6px; border-radius: 6px; }
+.st .form-group div[class*="col-"] > .help-block, .st .form-group div[class*="col-"] > small { display: block; margin: 6px 0 0; font-size: 12px; color: var(--ls-muted); }
+.st .help-block a, .st .form-group a:not(.btn) { color: var(--ls-accent); font-weight: 600; }
+.st .form-group .checkbox, .st .form-group .radio, .st .form-group .checkbox-inline, .st .form-group .radio-inline, .st .form-group label > input[type=checkbox], .st .form-group label > input[type=radio] { color: var(--ls-ink); font-weight: 500; }
+.st .form-group .checkbox-inline, .st .form-group .radio-inline, .st .form-group div[class*="col-"] > label:not(.control-label) { display: inline-flex; align-items: center; gap: 6px; margin: 4px 16px 4px 0; padding: 0; font-size: 13.5px; font-weight: 500; }
+.st .form-group input[type=checkbox], .st .form-group input[type=radio] { width: 16px; height: 16px; min-height: 0; margin: 0; accent-color: var(--ls-fill); }
+/* a row that only holds the save button (col-*-offset-*): the footer strip of the referral form */
+.st .form-group:has(> [class*="col-"][class*="offset"]:only-child > .btn), .st .form-group:has(> [class*="col-"]:only-child > .btn:only-child) {
+    display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; background: var(--ls-soft); border-top: 1px solid var(--ls-line); border-bottom: 0; margin-top: -1px;
+}
+.st .form-group:has(> [class*="col-"][class*="offset"]:only-child > .btn) > div, .st .form-group:has(> [class*="col-"]:only-child > .btn:only-child) > div { display: flex; justify-content: flex-end; gap: 10px; width: 100%; text-align: right; }
+.st .tab-pane > div:has(> button[type=submit]:only-child), .st .panel-body > div:has(> button[type=submit]:only-child), .st .tab-pane > div:has(> .btn:only-child) {
+    display: flex; justify-content: flex-end; gap: 10px; margin: 0 !important; padding: 14px 20px; background: var(--ls-soft); border-top: 1px solid var(--ls-line); text-align: right !important;
+}
+/* buttons: the list kit's */
+/* phpnuxbill.min.css colours button.btn-* / a.btn-* with !important, so these are too */
+body .st .btn:not(#filterNavigateMenu) { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 0; height: 40px; padding: 0 18px; border-radius: 10px !important; border: 1px solid var(--ls-line) !important; background: var(--ls-card) !important; color: var(--ls-ink) !important; font-size: 13px; font-weight: 600; box-shadow: none !important; text-shadow: none; transition: border-color .15s, background .15s; }
+body .st .btn:not(#filterNavigateMenu):hover { border-color: var(--ls-accent) !important; background: var(--ls-accent-soft) !important; }
+body .st :is(.btn-primary, .btn-success):not(#filterNavigateMenu) { background: var(--ls-fill) !important; border-color: var(--ls-fill) !important; color: #fff !important; }
+body .st :is(.btn-primary, .btn-success):not(#filterNavigateMenu):hover { background: var(--ls-fill) !important; border-color: var(--ls-fill) !important; filter: brightness(.9); }
+body .st .btn-danger:not(#filterNavigateMenu) { color: #dc2626 !important; }
+body .st .btn-danger:not(#filterNavigateMenu):hover { border-color: #dc2626 !important; background: rgba(220, 38, 38, .10) !important; }
+body.dark-mode .st .btn-danger:not(#filterNavigateMenu) { color: #f87171 !important; }
+body .st :is(.btn-xs, .btn-sm):not(#filterNavigateMenu) { height: 32px; padding: 0 12px; border-radius: 8px; font-size: 12px; }
+body .st .input-group-btn > .btn:not(#filterNavigateMenu) { height: 40px; }
+/* headings, notes and code inside a card */
+.st .tab-pane > h4, .st .panel-body > h4, .st .tab-pane > div > h4 { display: flex; align-items: center; gap: 8px; margin: 0; padding: 14px 20px 8px; font-size: 13px !important; font-weight: 700; letter-spacing: .02em; color: var(--ls-ink) !important; border-top: 1px solid var(--ls-line); }
+.st .tab-pane > h4:first-child, .st .panel-body > h4:first-child { border-top: 0; }
+.st .tab-pane > p, .st .panel-body > p, .st .tab-pane > div > p { margin: 0; padding: 4px 20px 10px; font-size: 13px; color: var(--ls-muted); }
+.st pre, .st code { color: var(--ls-ink); background: var(--ls-soft); border: 1px solid var(--ls-line); border-radius: 8px; }
+.st pre { margin: 0 20px 14px; padding: 10px 12px; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+.st code { padding: 1px 6px; font-size: 12px; }
+.st hr { margin: 0; border-color: var(--ls-line); }
+.st .alert { margin: 14px 20px; border-radius: 10px; }
+.st .table { margin: 0; color: var(--ls-ink); }
+.st .table > thead > tr > th, .st .table > tbody > tr > td { padding: 10px 16px; border-color: var(--ls-line); vertical-align: middle; }
+.st .table > thead > tr > th { font-size: 12px; font-weight: 600; color: var(--ls-muted); background: var(--ls-card); }
+.st .table-bordered { border: 0; }
+/* phone: the side menu becomes a row of tabs that scrolls sideways; rows stack */
+@media (max-width: 768px) {
+    .st .settings-container { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .st .settings-sidebar { position: static; transform: none; max-height: none; width: auto; max-width: none; padding: 6px; overflow-x: auto; overflow-y: hidden; box-shadow: none; z-index: auto; }
+    .st .settings-sidebar .nav-pills { display: flex; gap: 4px; width: max-content; }
+    .st .settings-sidebar .nav-pills > li { margin: 0; }
+    .st .settings-sidebar .nav-header { display: none; }
+    .st .settings-sidebar .nav-pills > li > a { white-space: nowrap; padding: 7px 12px; }
+    .st .settings-content { padding: 0; }
+    .st .form-group { grid-template-columns: minmax(0, 1fr); grid-template-areas: "label" "control" "help"; row-gap: 7px; padding: 14px 16px; }
+    .st .form-group > .control-label { align-self: start; }
+    .st .form-group:has(> [class*="col-"][class*="offset"]:only-child) > div .btn, .st .form-group:has(> [class*="col-"]:only-child > .btn:only-child) > div .btn { flex: 1; }
+}
+@media (max-width: 768px) {
+    .st .form-group { grid-template-rows: none; }
+    .st .form-group:not(:has(> .help-block, > small, > p.help-block)) > .control-label { padding-top: 0; }
+    .st .tab-pane > div:has(> button[type=submit]:only-child) > .btn, .st .panel-body > div:has(> button[type=submit]:only-child) > .btn { flex: 1; }
+}
+/* a section header inside a settings card (a col-md-12 with a rule, a heading and a sentence, as Captcha & Bot Protection) */
+.st .tab-pane > [class*="col-md-12"]:not(.form-group), .st .panel-body > [class*="col-md-12"]:not(.form-group) { float: none; width: auto; margin: 0 !important; padding: 18px 20px 8px !important; border-top: 1px solid var(--ls-line); background: var(--ls-soft); }
+.st .tab-pane > [class*="col-md-12"]:not(.form-group) > hr { display: none; }
+.st .tab-pane > [class*="col-md-12"]:not(.form-group) > h4 { margin: 0 0 4px !important; font-size: 14px !important; font-weight: 700 !important; color: var(--ls-ink) !important; }
+.st .tab-pane > [class*="col-md-12"]:not(.form-group) > h4 i { color: var(--ls-accent) !important; }
+.st .tab-pane > [class*="col-md-12"]:not(.form-group) > p { margin: 0 !important; font-size: 12.5px !important; opacity: 1 !important; color: var(--ls-muted) !important; }
+.st .tab-pane > [class*="col-md-12"]:not(.form-group) + .form-group { border-top: 1px solid var(--ls-line); }
+/* command lists (Cron Job): a heading, then the commands in a code block */
+.st .bs-callout { margin: 0; padding: 6px 0 4px; border: 0; border-radius: 0; background: none; }
+.st .bs-callout > br { display: none; }
+.st .bs-callout > h4 { margin: 0; padding: 14px 20px 8px; font-size: 13.5px; font-weight: 700; color: var(--ls-ink); }
+.st .bs-callout > h4 b { font-weight: 700; }
+.st .bs-callout > p { margin: 0 20px 12px; padding: 10px 12px; border: 1px solid var(--ls-line); border-radius: 8px; background: var(--ls-soft); color: var(--ls-ink); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.st .bs-callout > p small { display: block; margin-top: 6px; font-family: inherit; font-size: 11.5px; color: var(--ls-muted); }
+.st .bs-callout a { color: var(--ls-accent); }
+/* the section header's heading carries no rule or indent of its own (the general card-heading rule above is for headings directly in a pane) */
+.st .tab-pane > [class*="col-md-12"]:not(.form-group) > h4 { padding: 0 !important; border-top: 0 !important; }
+/* the code blocks keep their inset (a global .bs-callout p rule sets the margin) */
+.st .bs-callout > p { margin: 0 20px 12px !important; }
+/* the existing on/off switch (.switch .slider): the referral form's switch */
+.st .switch { width: 40px; height: 22px; margin: 9px 0; vertical-align: middle; }
+.st .switch input { position: absolute; }
+.st .switch .slider { border-radius: 999px; background-color: rgba(127, 127, 127, .35); transition: background .15s; }
+.st .switch .slider:before { width: 16px; height: 16px; left: 3px; bottom: 3px; box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform .15s; }
+.st .switch input:checked + .slider { background-color: var(--ls-fill); }
+.st .switch input:checked + .slider:before { transform: translateX(18px); }
+.st .switch input:focus-visible + .slider { outline: 2px solid var(--ls-accent); outline-offset: 2px; box-shadow: none; }
+/* a row of checkboxes written as several control-labels (User Notification channels, Mandatory Fields): the first label is the setting's
+   name in the label column, the rest are chips in the control column */
+.st .form-group:has(> label.control-label + label.control-label) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.st .form-group:has(> label.control-label + label.control-label) > .control-label:first-child { flex: 0 0 calc((100% - 28px) / 2.25); margin-right: 20px; padding: 0; }
+.st .form-group > label.control-label + label.control-label, .st .form-group > label.control-label ~ label.control-label {
+    display: inline-flex; align-items: center; gap: 7px; flex: none; width: auto; margin: 0; padding: 7px 13px; border: 1px solid var(--ls-field-line); border-radius: 999px;
+    background: var(--ls-field); color: var(--ls-ink); font-size: 13px; font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s, color .15s;
+}
+.st .form-group > label.control-label ~ label.control-label:hover { border-color: var(--ls-accent); }
+.st .form-group > label.control-label ~ label.control-label:has(input:checked) { border-color: var(--ls-accent); background: var(--ls-accent-soft); color: var(--ls-accent); }
+.st .form-group > label.control-label ~ label.control-label:has(input:focus-visible) { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+@media (max-width: 768px) {
+    .st .form-group:has(> label.control-label + label.control-label) > .control-label:first-child { flex-basis: 100%; margin: 0 0 2px; }
+}
+.st .form-group:has(> label.control-label + label.control-label) > .control-label:first-child { align-self: center; }
+/* a row holding only a sentence (GitHub Auth), and a note after the last row (Telegram, SMS): plain text inside the card */
+.st .form-group:has(> .control-label:only-child) { display: block; }
+.st .form-group > .control-label:only-child { display: block; padding: 0; font-size: 12.5px; font-weight: 500; color: var(--ls-muted); text-align: left !important; }
+.st .tab-pane > small, .st .tab-pane > .form-text, .st .panel-body > small { display: block; padding: 12px 20px; border-top: 1px solid var(--ls-line); font-size: 12px; color: var(--ls-muted); }
+/* help written as a second column (div.col-md-* after the control, or div.help-block): the help area under the label, not on top of the field */
+.st .form-group > div[class*="col-"] ~ div[class*="col-"], .st .form-group > div.help-block { grid-area: help; align-self: start; margin: 0; font-size: 12px; color: var(--ls-muted); }
+.st .form-group > div[class*="col-"] ~ div[class*="col-"] > .help-block { margin: 0; font-size: 12px; color: var(--ls-muted); }
+/* panel headers: the title first, a floated button group at the end */
+.st .panel > .panel-heading { justify-content: flex-start; }
+.st .panel > .panel-heading > .pull-right, .st .panel > .panel-heading > .btn-group { order: 2; float: none !important; margin-left: auto; }
+.st .panel > .panel-heading > .pull-right .btn, .st .panel > .panel-heading > .btn-group .btn { height: 32px; padding: 0 12px; border-radius: 8px !important; }
+/* a save button on its own (a form-group or panel body holding just the button, often btn-block): the footer strip, button at the end */
+.st .form-group:has(> .btn:only-child), .st .panel-body:has(> .btn:only-child) { display: flex; justify-content: flex-end; padding: 14px 20px; background: var(--ls-soft); border-top: 1px solid var(--ls-line); }
+body .st .form-group > .btn-block:only-child:not(#filterNavigateMenu), body .st .panel-body > .btn-block:only-child:not(#filterNavigateMenu) { width: auto; }
+/* the global ".dark-mode .input-group .input-group-addon" (a light border, no fill) outweighs the shared addon rule: same look, more weight */
+body :is(.edit-form-card, .st) .input-group .input-group-addon { border-color: var(--ls-field-line); background-color: var(--ls-soft); color: var(--ls-muted); }
+body :is(.edit-form-card, .st) .input-group:focus-within .input-group-addon { border-color: var(--ls-accent); color: var(--ls-accent); }
+/* a save block placed right after the card (Miscellaneous): joined to the card as its footer */
+.st .panel:has(+ .panel-body > .form-group > .btn:only-child) { margin-bottom: 0; border-bottom: 0; border-radius: 14px 14px 0 0; }
+.st .panel + .panel-body:has(> .form-group > .btn:only-child) { margin: 0 0 16px; border: 1px solid var(--ls-line); border-radius: 0 0 14px 14px; overflow: hidden; }
+.st .panel + .panel-body > .form-group:has(> .btn:only-child) { border-top: 0; }
+
+/* Settings: card pages (devices.tpl, dbstatus.tpl, widgets, plugin manager, pages): list-kit cards with a header, body and footer strip */
+.st-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.st-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--ls-line); }
+.st-card-head h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14.5px; font-weight: 700; color: var(--ls-ink); }
+.st-card-head h3 i { color: var(--ls-accent); font-size: 14px; }
+.st-card-head small { display: block; margin-top: 2px; font-size: 12px; color: var(--ls-muted); }
+.st-card-body { padding: 16px 18px; }
+.st-card-body > * + * { margin-top: 12px; }
+.st-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--ls-line); background: var(--ls-soft); }
+.st-card-foot small { font-size: 12px; color: var(--ls-muted); }
+.st-card-foot .ls-btn { height: 38px; }
+/* devices */
+.st-dev { display: flex; flex-direction: column; }
+.st-dev__head { display: flex; align-items: center; gap: 12px; padding: 16px 16px 10px; }
+.st-dev__head b { display: block; font-size: 14px; color: var(--ls-ink); }
+.st-dev__head small { display: block; font-size: 12px; color: var(--ls-muted); }
+.st-dev__icon { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: var(--ls-accent-soft); color: var(--ls-accent); font-size: 16px; }
+.st-dev__desc { flex: 1; margin: 0; padding: 0 16px 14px; font-size: 12.5px; line-height: 1.55; color: var(--ls-muted); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.st-dev__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 16px; border-top: 1px solid var(--ls-line); background: var(--ls-soft); }
+.st-chip { padding: 2px 8px; border: 1px solid var(--ls-line); border-radius: 6px; background: var(--ls-card); color: var(--ls-ink); font-size: 11.5px; }
+.st-link { font-size: 12.5px; font-weight: 600; color: var(--ls-accent) !important; }
+.st-link i { font-size: 10px; opacity: .7; }
+/* database */
+.st-db { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.st-db .ls-scroll { max-height: 520px; overflow-y: auto; }
+.st-db .ls-table thead th { position: sticky; top: 0; z-index: 1; }
+.st-all { display: inline-flex; align-items: center; gap: 7px; margin: 0; font-size: 13px; font-weight: 600; color: var(--ls-ink); cursor: pointer; }
+.st-db input[type=checkbox] { width: 16px; height: 16px; min-height: 0; margin: 0; accent-color: var(--ls-fill); }
+.st-tbl { margin: 0; font-weight: 500; color: var(--ls-ink); cursor: pointer; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+.st-db .rf-note { margin: 0; }
+@media (max-width: 991px) { .st-db { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .st-card-foot { flex-direction: column; align-items: stretch; } .st-card-foot .ls-btn { width: 100%; } }
+/* widgets (settings/widgets.tpl) */
+.st-widgets { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
+.st-struct { position: sticky; top: 70px; }
+.st-layout { display: flex; flex-direction: column; gap: 6px; }
+.st-layout__row { display: flex; gap: 6px; }
+.st-layout__cell { display: grid; place-items: center; min-width: 0; height: 40px; border: 1px dashed var(--ls-field-line); border-radius: 8px; background: var(--ls-soft); color: var(--ls-muted) !important; font-size: 13px; font-weight: 700; transition: border-color .15s, color .15s, background .15s; }
+.st-layout__cell:hover { border-style: solid; border-color: var(--ls-accent); background: var(--ls-accent-soft); color: var(--ls-accent) !important; }
+.st-struct__form { display: block; }
+.st-struct__form .mc-label { display: flex; justify-content: space-between; margin: 0 0 8px; font-size: 12.5px; font-weight: 600; color: var(--ls-ink); }
+.st-struct__form .mc-label a { font-weight: 600; color: var(--ls-accent); }
+.st-struct__row { display: flex; gap: 8px; }
+.st-struct__row .form-control { flex: 1; min-width: 0; }
+.st-struct__row .ls-btn { height: 40px; flex: none; }
+.st-areas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.st-areas__col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.st-area__no { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: var(--ls-accent-soft); color: var(--ls-accent); font-size: 12px; font-weight: 700; }
+.st-wlist { margin: 0; padding: 0; list-style: none; }
+.st-w { display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-bottom: 1px solid var(--ls-line); }
+.st-w:last-child { border-bottom: 0; }
+.st-w.is-off .st-w__text { opacity: .6; }
+.st-w--none { justify-content: center; padding: 22px 18px; font-size: 13px; color: var(--ls-muted); }
+.st-w__seq { flex: none; width: 64px; margin: 0; }
+body .st .st-w__seq .form-control:not(#filterNavigateMenu) { height: 34px; min-height: 34px; padding: 0 8px; text-align: center; font-weight: 700; }
+.st-w__text { flex: 1; min-width: 0; }
+.st-w__text b { display: block; font-size: 13.5px; color: var(--ls-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-w__text small { display: block; font-size: 12px; color: var(--ls-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-w__act { flex: none; display: inline-flex; gap: 6px; }
+@media (max-width: 1199px) { .st-areas { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 991px) { .st-widgets { grid-template-columns: minmax(0, 1fr); } .st-struct { position: static; } }
+.st-foot-end { display: inline-flex; gap: 10px; margin-left: auto; }
+.st .panel-footer.st-card-foot { display: flex; padding: 12px 20px; }
+@media (max-width: 640px) { .st-foot-end { flex-direction: column-reverse; width: 100%; } }
+/* the rich text editor inside a settings card */
+.st .note-editor.note-frame { border-color: var(--ls-field-line); border-radius: 10px; overflow: hidden; }
+.st .note-editor .note-toolbar { background: var(--ls-soft); border-bottom: 1px solid var(--ls-field-line); }
+/* plugin manager */
+.st-pane[hidden] { display: none !important; }
+.st .rf-note { margin-bottom: 14px; }
+.st-installer { margin-bottom: 16px; }
+.st-installer__body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 14px; align-items: end; }
+.st-installer__body > * + * { margin-top: 0; }
+.st-installer__body .mc-label { display: block; margin: 0 0 7px; font-size: 13px; font-weight: 600; color: var(--ls-ink); }
+.st-installer__body .ls-btn { height: 40px; }
+.st-dev__head { position: relative; }
+.st-dev__paid { margin-left: auto; align-self: flex-start; }
+.st-dev__foot .st-foot-end { gap: 6px; }
+.st .ls-tabs { margin-bottom: 14px; }
+@media (max-width: 767px) { .st-installer__body { grid-template-columns: minmax(0, 1fr); } }
+.st .ls-btn, .st button.ls-btn { min-height: 0; }
+/* pages editor (settings/page.tpl) */
+.st .panel > .note-editor.note-frame { margin: 0; border-width: 0 0 1px; border-radius: 0; }
+.st-page-foot { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; gap: 14px 16px; align-items: end; }
+.st-page-tpl { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-bottom: 14px; border-bottom: 1px solid var(--ls-line); }
+.st-page-tpl .input-group { flex: 1; min-width: 220px; }
+.st-page-url .mc-label { display: block; margin: 0 0 7px; font-size: 13px; font-weight: 600; color: var(--ls-ink); }
+.st-page-url small { display: block; margin-top: 6px; font-size: 12px; color: var(--ls-muted); }
+.st-page-save { height: 40px; }
+.st .panel-footer .rf-note { margin: 0; }
+@media (max-width: 640px) { .st-page-foot { grid-template-columns: minmax(0, 1fr); } }
+.st-page-save { align-self: center; }
+/* a footer strip written in the template (custom fields) */
+.st-foot-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; background: var(--ls-soft); border-top: 1px solid var(--ls-line); }
+.st-foot-row small { font-size: 12px; color: var(--ls-muted); }
+.st-foot-row--card { border: 1px solid var(--ls-line); border-radius: 14px; }
+/* Redis (settings/redis.tpl) */
+.st-redis .rf-kpis { margin-bottom: 16px; }
+.st-redis .rf-kpi__icon.st-ok { background: rgba(22, 163, 74, .13); color: #16a34a; }
+.st-state { display: flex !important; align-items: center; gap: 8px; font-size: 20px !important; }
+.st-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.st-state--ok { color: #15803d !important; }
+.st-state--ok .st-dot { box-shadow: 0 0 0 4px rgba(22, 163, 74, .18); }
+.st-state--off { color: var(--ls-muted) !important; }
+body.dark-mode .st-state--ok { color: #4ade80 !important; }
+.st-meter { height: 6px; margin: 2px 0 6px; border-radius: 999px; background: var(--ls-soft); border: 1px solid var(--ls-line); overflow: hidden; }
+.st-meter span { display: block; height: 100%; border-radius: inherit; background: var(--rf-bar, #6366f1); }
+body.dark-mode .st-meter span { background: #818cf8; }
+.st-meter--ok span { background: #16a34a !important; }
+.st-meter--mid span { background: #d97706 !important; }
+.st-meter--low span { background: #dc2626 !important; }
+.st-redis__grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.st-redis__side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 70px; }
+.st-redis__sec { margin: 20px 0 8px !important; }
+.st-redis__conn { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, .7fr) minmax(0, 1.4fr); gap: 12px; }
+.st-redis__clear { margin-top: 8px !important; font-weight: 500 !important; font-size: 12.5px !important; }
+.st-redis .mc-sublabel { display: block; margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--ls-muted); }
+.st-text { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ls-ink); }
+.st-text--dim { margin-top: 8px; font-size: 12.5px; color: var(--ls-muted); }
+.st-why { margin: 0; padding: 4px 0; list-style: none; }
+.st-why li { display: flex; gap: 12px; padding: 12px 18px; font-size: 12.5px; line-height: 1.55; color: var(--ls-muted); }
+.st-why li + li { border-top: 1px solid var(--ls-line); }
+.st-why li > i { flex: none; margin-top: 3px; color: var(--ls-accent); }
+.st-why b { display: block; margin-bottom: 2px; font-size: 13px; color: var(--ls-ink); }
+.st-cmd { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: rgba(0, 0, 0, .25); color: inherit; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+.st .ls-btn[disabled] { opacity: .5; cursor: not-allowed; }
+@media (max-width: 1199px) { .st-redis__grid { grid-template-columns: minmax(0, 1fr); } .st-redis__side { position: static; } }
+@media (max-width: 640px) { .st-redis__conn { grid-template-columns: minmax(0, 1fr); } }
+/* checkbox-inline options (Protected Pages): chips, like the notification channels */
+.st .form-group .checkbox-inline { position: relative; display: inline-flex !important; align-items: center; gap: 7px; margin: 0 8px 8px 0 !important; padding: 7px 13px !important; border: 1px solid var(--ls-field-line); border-radius: 999px; background: var(--ls-field); color: var(--ls-ink); font-size: 13px; font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+.st .form-group .checkbox-inline input[type=checkbox] { position: static; margin: 0 !important; }
+.st .form-group .checkbox-inline:hover { border-color: var(--ls-accent); }
+.st .form-group .checkbox-inline:has(input:checked) { border-color: var(--ls-accent); background: var(--ls-accent-soft); color: var(--ls-accent); }
+.st .form-group .checkbox-inline + .checkbox-inline { margin-left: 0; }
+/* Yes/No dropdowns shown as switches (custom.js): the dropdown stays in the form, out of sight */
+.st select.st-sw-src { position: absolute !important; width: 1px !important; height: 1px !important; min-height: 0 !important; padding: 0 !important; margin: -1px !important; overflow: hidden; clip: rect(0 0 0 0); border: 0 !important; opacity: 0; pointer-events: none; }
+.st-sw { position: relative; display: inline-flex; align-items: center; gap: 10px; margin: 9px 0; font-weight: 500; cursor: pointer; user-select: none; }
+.st-sw__box { position: absolute; top: 0; left: 0; width: 40px; height: 22px; margin: 0; opacity: 0; cursor: pointer; }
+body .st .st-sw__box:not(#filterNavigateMenu) { min-height: 0; }
+.st-sw__track { flex: none; position: relative; width: 40px; height: 22px; border-radius: 999px; background: rgba(127, 127, 127, .35); transition: background .15s; }
+.st-sw__track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform .15s; }
+.st-sw__box:checked + .st-sw__track { background: var(--ls-fill); }
+.st-sw__box:checked + .st-sw__track::after { transform: translateX(18px); }
+.st-sw__box:focus-visible + .st-sw__track { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+.st-sw__box:disabled + .st-sw__track { opacity: .5; }
+.st-sw__text { font-size: 13px; font-weight: 600; color: var(--ls-muted); }
+.st-sw.is-on .st-sw__text { color: var(--ls-ink); }
+@media (prefers-reduced-motion: reduce) { .st-sw__track, .st-sw__track::after { transition: none; } }
+/* Copy on a command block (Cron Job) */
+.st .bs-callout > p { position: relative; padding-right: 92px !important; }
+.st-copy { position: absolute; top: 8px; right: 8px; display: inline-flex; align-items: center; gap: 6px; min-height: 0; height: 28px; padding: 0 10px; border: 1px solid var(--ls-line); border-radius: 7px; background: var(--ls-card); color: var(--ls-ink); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: border-color .15s, color .15s; }
+.st-copy:hover { border-color: var(--ls-accent); color: var(--ls-accent); }
+.st-copy.is-done { border-color: #16a34a; color: #16a34a; }
+body .st .st-copy:not(#filterNavigateMenu) { min-height: 0; }
+/* Routely on the SMS / WhatsApp tabs (settings/routely-intro.tpl): Routely's teal */
+.st-rl { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--ls-line); background: linear-gradient(90deg, rgba(15, 118, 110, .10), transparent 70%); }
+.st-rl__mark { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px; background: #0f766e; color: #fff; font-size: 18px; }
+.st-rl__text { flex: 1; min-width: 0; }
+.st-rl__text b { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; color: var(--ls-ink); }
+.st-rl__text b .ls-pill { font-size: 11px; padding: 1px 8px; }
+.st-rl__text > span { display: block; margin-top: 3px; font-size: 12.5px; line-height: 1.5; color: var(--ls-muted); }
+.st-rl__act { flex: none; display: inline-flex; gap: 8px; }
+.st-rl__act .ls-btn { height: 38px; }
+.st-rl__act .ls-btn--primary { background: #0f766e; border-color: #0f766e; }
+body.dark-mode .st-rl { background: linear-gradient(90deg, rgba(45, 212, 191, .10), transparent 70%); }
+@media (max-width: 767px) { .st-rl { flex-wrap: wrap; } .st-rl__act { width: 100%; } .st-rl__act .ls-btn { flex: 1; } }
+.st-redis .mc-row--switch input:not(:checked) ~ .mc-row__icon { background: var(--ls-soft); color: var(--ls-muted); }
+/* the free community WhatsApp gateway on the SMS / WhatsApp tabs (settings/free-gateway.tpl) */
+.st-fg { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-top: 1px solid var(--ls-line); }
+.st-fg__mark { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px; background: rgba(22, 163, 74, .13); color: #16a34a; font-size: 17px; }
+.st-fg__text { flex: 1; min-width: 0; }
+.st-fg__text b { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; color: var(--ls-ink); }
+.st-fg__text b .ls-pill { font-size: 11px; padding: 1px 8px; background: rgba(22, 163, 74, .13); color: #15803d; }
+body.dark-mode .st-fg__text b .ls-pill { color: #4ade80; }
+.st-fg__text > span { display: block; margin-top: 3px; font-size: 12.5px; line-height: 1.5; color: var(--ls-muted); }
+.st-fg__steps { margin: 10px 0 8px; padding-left: 18px; font-size: 12.5px; line-height: 1.6; color: var(--ls-ink); }
+.st-fg__text small { display: block; font-size: 11.5px; color: var(--ls-muted); }
+.st-fg__act { flex: none; }
+.st-fg__act .ls-btn { height: 38px; }
+@media (max-width: 767px) { .st-fg { flex-wrap: wrap; } .st-fg__act { width: 100%; } .st-fg__act .ls-btn { width: 100%; } }
+.st-rl__text b .st-rl__free { background: rgba(15, 118, 110, .14); color: #0f766e; }
+body.dark-mode .st-rl__text b .st-rl__free { background: rgba(45, 212, 191, .16); color: #5eead4; }
+.st-rl__note { display: flex !important; align-items: center; gap: 6px; margin-top: 6px !important; font-size: 12px !important; font-weight: 600; color: #0f766e !important; }
+body.dark-mode .st-rl__note { color: #5eead4 !important; }
+/* a row with two fields (SMTP Host : Port): both share the control cell, the first narrower and the second at its right end, so the
+   fields line up with every other row. The "second column is help" rule above is only for a column without a field. */
+.st .form-group > div[class*="col-"]:has(:is(input, select, textarea)) ~ div[class*="col-"]:has(:is(input, select, textarea)) { grid-area: control; justify-self: end; width: 124px; }
+.st .form-group:has(> div[class*="col-"] ~ div[class*="col-"] :is(input, select, textarea)) > div[class*="col-"]:first-of-type { width: calc(100% - 136px); }
+/* Routely address left without the plugin */
+.st-rl.is-orphan { background: linear-gradient(90deg, rgba(217, 119, 6, .12), transparent 70%); }
+.st-rl.is-orphan .st-rl__mark { background: #d97706; }

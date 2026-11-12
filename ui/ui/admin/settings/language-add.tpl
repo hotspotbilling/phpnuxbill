@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<div class="row">
+<div class="row st">
 	<div class="col-sm-12 col-md-12">
 		<div class="panel panel-primary panel-hovered panel-stacked mb30">
 			<div class="panel-heading">{Lang::T('Translation')}</div>

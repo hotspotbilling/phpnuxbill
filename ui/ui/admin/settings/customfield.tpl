@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{Text::url('')}customfield/save">
+<form class="form-horizontal st" method="post" role="form" action="{Text::url('')}customfield/save">
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-success panel-hovered panel-stacked mb30">
@@ -62,11 +62,9 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="col-md-8 col-md-offset-3">
-                            <button class="btn btn-success btn-sm btn-block" type="submit">{Lang::T('Add')}</button>
-                            <span class="help-block">{Lang::T("To delete, empty the name")}</span>
-                        </div>
+                    <div class="st-foot-row">
+                        <small>{Lang::T("To delete, empty the name")}</small>
+                        <button class="btn btn-success" type="submit"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('Add')}</button>
                     </div>
                 </div>
             </div>
@@ -74,6 +72,7 @@
         <div class="col-md-6">
             {foreach $fields as $field}
                 <div class="panel panel-primary">
+                    <div class="panel-heading">{if $field['name']}{$field['name']|escape}{else}{Lang::T('Field')}{/if}</div>
                     <div class="panel-body">
                         <div class="form-group">
                             <label class="col-md-4 control-label">{Lang::T("Sequence")}</label>
@@ -134,7 +133,12 @@
                     </div>
                 </div>
             {/foreach}
-            <button class="btn btn-success btn-sm btn-block" type="submit">{Lang::T('Save')}</button>
+            {if $fields}
+            <div class="st-foot-row st-foot-row--card">
+                <small>{Lang::T("To delete, empty the name")}</small>
+                <button class="btn btn-success" type="submit"><i class="fa fa-check" aria-hidden="true"></i> {Lang::T('Save')}</button>
+            </div>
+            {/if}
         </div>
     </div>
 </form>

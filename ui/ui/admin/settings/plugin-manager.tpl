@@ -1,169 +1,97 @@
 {include file="sections/header.tpl"}
+{* Plugin manager. Routes and field names are what pluginmanager.php reads: zip_plugin or gh_url (dlinstall), and the
+   install / delete links per item. *}
 
-{if empty($_c['github_token'])}
-    <p class="help-block">{Lang::T('To download from private/paid repository')}, <a
-            href="{Text::url('')}settings/app#GithubAuthentication">
-            {Lang::T('Set your Github Authentication first')}</a></p>
-{/if}
-
-<form method="post" enctype="multipart/form-data"
-    onsubmit="return ask(this, 'Warning, installing unknown source can damage your server, continue?')"
-    action="{Text::url('')}pluginmanager/dlinstall">
-    <div class="panel panel-primary panel-hovered">
-        <div class="panel-heading">
-            {Lang::T('Plugin Installer')}
-            <div class="btn-group pull-right">
-                <a class="btn btn-warning btn-xs" title="info"
-                    href="https://github.com/hotspotbilling/phpnuxbill/wiki/Installing-Plugin-or-Payment-Gateway"
-                    target="_blank"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> info</a>
-                <a class="btn btn-success btn-xs" title="refresh cache"
-                    href="{Text::url('')}pluginmanager/refresh"><span class="glyphicon glyphicon-refresh"
-                        aria-hidden="true"></span> refresh</a>
-            </div>
-        </div>
-        <div class="panel-body row">
-            <div class="form-group col-md-4">
-                <label>{Lang::T('Upload Zip Plugin/Theme/Device')}</label>
-                <input type="file" name="zip_plugin" accept="application/zip" onchange="this.submit()">
-            </div>
-            <div class="form-group col-md-7">
-                <label>Github url</label>
-                <input type="url" class="form-control" name="gh_url"
-                    placeholder="https://github.com/username/repository">
-            </div>
-            <div class="col-md-1">
-                <br>
-                <button type="submit" class="btn btn-primary">{Lang::T('Install')}</button>
-            </div>
-        </div>
+<div class="ls st">
+    {if empty($_c['github_token'])}
+    <div class="rf-note" role="note">
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+        <div>{Lang::T('To download from private/paid repository')},
+            <a href="{Text::url('')}settings/app#GithubAuthentication">{Lang::T('Set your Github Authentication first')}</a></div>
     </div>
-</form>
+    {/if}
 
-<div>
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active"><a href="#plugin" aria-controls="plugin" role="tab"
-                data-toggle="tab">{Lang::T('Plugin')}</a></li>
-        <li role="presentation"><a href="#pg" aria-controls="pg" role="tab"
-                data-toggle="tab">{Lang::T('Payment Gateway')}</a>
-        </li>
-        <li role="presentation"><a href="#device" aria-controls="device" role="tab"
-                data-toggle="tab">{Lang::T('Devices')}</a>
-        </li>
-    </ul>
-    <br>
-    <!-- Tab panes -->
-    <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="plugin">
-            <div class="row">
-                {foreach $plugins as $plugin}
-                    <div class="col-md-4">
-                        <div class="box box-hovered mb20 box-primary">
-                            <div class="box-header">
-                                <h3 class="box-title text1line">{$plugin['name']}</h3>
-                            </div>
-                            <div class="box-body" style="overflow-y: scroll;">
-                                <div style="max-height: 50px; min-height: 50px;">{$plugin['description']}</div>
-                            </div>
-                            <div class="box-footer">
-                                <center><small><i>@{$plugin['author']} Last update: {$plugin['last_update']}</i></small>
-                                </center>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$plugin['url']}" target="_blank" style="color: black;"
-                                        class="btn btn-{if $plugin['ispaid']}warning{else}primary{/if}"><i
-                                            class="glyphicon glyphicon-globe"></i>
-                                        {if $plugin['ispaid']}Buy{else}Web{/if}</a>
-                                    <a href="{$plugin['github']}" target="_blank" style="color: black;"
-                                        class="btn btn-info"><i class="glyphicon glyphicon-align-left"></i> Source</a>
-                                </div>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{Text::url('')}pluginmanager/delete/plugin/{$plugin['id']}"
-                                        onclick="return ask(this, '{Lang::T('Delete')}?')" class="btn btn-danger"><i
-                                            class="glyphicon glyphicon-trash"></i> Delete</a>
-                                    <a {if $zipExt } href="{Text::url('')}pluginmanager/install/plugin/{$plugin['id']}"
-                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                        {else} href="#" onclick="alert('PHP ZIP extension is not installed')"
-                                        {/if}
-                                        style="color: black;" class="btn btn-success"><i
-                                            class="glyphicon glyphicon-circle-arrow-down"></i> Install</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {/foreach}
+    <form method="post" enctype="multipart/form-data" action="{Text::url('')}pluginmanager/dlinstall" class="ls-card st-installer">
+        <header class="st-card-head">
+            <div><h3><i class="fa fa-cloud-download" aria-hidden="true"></i> {Lang::T('Plugin Installer')}</h3>
+                <small>{Lang::T('Upload a zip, or install from a GitHub repository')}</small></div>
+            <span class="st-foot-end">
+                <a class="ls-btn ls-btn--sm" href="https://github.com/hotspotbilling/phpnuxbill/wiki/Installing-Plugin-or-Payment-Gateway" target="_blank" rel="noopener"><i class="fa fa-info-circle" aria-hidden="true"></i> {Lang::T('Info')}</a>
+                <a class="ls-btn ls-btn--sm" href="{Text::url('')}pluginmanager/refresh"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Refresh')}</a>
+            </span>
+        </header>
+        <div class="st-card-body st-installer__body">
+            <div>
+                <label class="mc-label" for="stZip">{Lang::T('Upload Zip Plugin/Theme/Device')}</label>
+                {* choosing a file installs it, through the same warning as the button *}
+                <input type="file" id="stZip" name="zip_plugin" accept="application/zip" class="form-control" onchange="if (this.files.length) { document.getElementById('stInstall').click(); }">
             </div>
-        </div>
-        <div role="tabpanel" class="tab-pane" id="pg">
-            <div class="row">
-                {foreach $pgs as $pg}
-                    <div class="col-md-4">
-                        <div class="box box-hovered mb20 box-primary">
-                            <div class="box-header">
-                                <h3 class="box-title text1line">{$pg['name']}</h3>
-                            </div>
-                            <div class="box-body" style="overflow-y: scroll;">
-                                <div style="max-height: 50px; min-height: 50px;">{$pg['description']}</div>
-                            </div>
-                            <div class="box-footer ">
-                                <center><small><i>@{$pg['author']} Last update: {$pg['last_update']}</i></small>
-                                </center>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$pg['url']}" target="_blank" style="color: black;"
-                                        class="btn btn-{if $pg['ispaid']}warning{else}primary{/if}"><i
-                                            class="glyphicon glyphicon-globe"></i>
-                                        {if $pg['ispaid']}Buy{else}Web{/if}
-                                    </a>
-                                    <a href="{$pg['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
-                                            class="glyphicon glyphicon-align-left"></i> Source</a>
-                                    <a {if $zipExt } href="{Text::url('')}pluginmanager/install/payment/{$pg['id']}"
-                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                        {else} href="#" onclick="alert('PHP ZIP extension is not available')"
-                                        {/if}
-                                        style="color: black;" class="btn btn-success"><i
-                                            class="glyphicon glyphicon-circle-arrow-down"></i> Install</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {/foreach}
+            <div>
+                <label class="mc-label" for="stGh">{Lang::T('Github url')}</label>
+                <input type="url" id="stGh" class="form-control" name="gh_url" placeholder="https://github.com/username/repository">
             </div>
+            <button type="submit" id="stInstall" class="ls-btn ls-btn--primary"
+                onclick="return ask(this, '{Lang::T('Warning, installing unknown source can damage your server, continue?')|escape:'javascript'}')">
+                <i class="fa fa-download" aria-hidden="true"></i> {Lang::T('Install')}</button>
         </div>
-        <div role="tabpanel" class="tab-pane" id="device">
-            <div class="row">
-                {foreach $dvcs as $dvc}
-                    <div class="col-md-4">
-                        <div class="box box-hovered mb20 box-primary">
-                            <div class="box-header">
-                                <h3 class="box-title text1line">{$dvc['name']}</h3>
-                            </div>
-                            <div class="box-body" style="overflow-y: scroll;">
-                                <div style="max-height: 50px; min-height: 50px;">{$dvc['description']}</div>
-                            </div>
-                            <div class="box-footer ">
-                                <center><small><i>@{$dvc['author']} Last update: {$dvc['last_update']}</i></small>
-                                </center>
-                                <div class="btn-group btn-group-justified" role="group" aria-label="...">
-                                    <a href="{$dvc['url']}" target="_blank" style="color: black;"
-                                        class="btn btn-{if $dvc['ispaid']}warning{else}primary{/if}"><i
-                                            class="glyphicon glyphicon-globe"></i>
-                                        {if $dvc['ispaid']}Buy{else}Web{/if}
-                                    </a>
-                                    <a href="{$dvc['github']}" target="_blank" style="color: black;" class="btn btn-info"><i
-                                            class="glyphicon glyphicon-align-left"></i> Source</a>
-                                    <a {if $zipExt } href="{Text::url('')}pluginmanager/install/device/{$dvc['id']}"
-                                            onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
-                                        {else} href="#" onclick="alert('PHP ZIP extension is not available')"
-                                        {/if}
-                                        style="color: black;" class="btn btn-success"><i
-                                            class="glyphicon glyphicon-circle-arrow-down"></i> Install</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {/foreach}
-            </div>
-        </div>
+    </form>
+
+    <div class="ls-tabs" role="tablist" aria-label="{Lang::T('Type')}">
+        <a class="ls-tab is-on" role="tab" href="#plugin" data-st-tab aria-selected="true">{Lang::T('Plugin')} <small>{count($plugins)}</small></a>
+        <a class="ls-tab" role="tab" href="#pg" data-st-tab aria-selected="false">{Lang::T('Payment Gateway')} <small>{count($pgs)}</small></a>
+        <a class="ls-tab" role="tab" href="#device" data-st-tab aria-selected="false">{Lang::T('Devices')} <small>{count($dvcs)}</small></a>
     </div>
 
+    {foreach [['plugin', $plugins, 'plugin'], ['pg', $pgs, 'payment'], ['device', $dvcs, 'device']] as $tab}
+    <div class="st-cards st-pane" id="{$tab[0]}" role="tabpanel" {if $tab[0] != 'plugin'}hidden{/if}>
+        {foreach $tab[1] as $p}
+        <article class="ls-card st-dev">
+            <div class="st-dev__head">
+                <span class="st-dev__icon"><i class="fa {if $tab[0] == 'pg'}fa-credit-card{elseif $tab[0] == 'device'}fa-microchip{else}fa-puzzle-piece{/if}" aria-hidden="true"></i></span>
+                <div>
+                    <b>{$p['name']|escape}</b>
+                    <small>@{$p['author']|escape} &middot; {Lang::T('Last update')} {$p['last_update']|escape}</small>
+                </div>
+                {if $p['ispaid']}<span class="ls-pill ls-pill--inactive st-dev__paid">{Lang::T('Paid')}</span>{/if}
+            </div>
+            <p class="st-dev__desc">{$p['description']|strip_tags}</p>
+            <div class="st-dev__foot">
+                <a href="{$p['url']|escape}" target="_blank" rel="noopener" class="st-link"><i class="fa fa-globe" aria-hidden="true"></i> {if $p['ispaid']}{Lang::T('Buy')}{else}{Lang::T('Web')}{/if}</a>
+                <a href="{$p['github']|escape}" target="_blank" rel="noopener" class="st-link"><i class="fa fa-code" aria-hidden="true"></i> {Lang::T('Source')}</a>
+                <span class="st-foot-end">
+                    {if $tab[0] == 'plugin'}
+                    <a href="{Text::url('')}pluginmanager/delete/plugin/{$p['id']}" onclick="return ask(this, '{Lang::T('Delete')}?')"
+                        class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" title="{Lang::T('Delete')}" aria-label="{Lang::T('Delete')}: {$p['name']|escape}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                    {/if}
+                    <a {if $zipExt}href="{Text::url('')}pluginmanager/install/{$tab[2]}/{$p['id']}"
+                        onclick="return ask(this, 'Installing plugin will take some time to complete, do not close the page while it loading to install the plugin')"
+                        {else}href="#" onclick="alert('PHP ZIP extension is not available'); return false;"{/if}
+                        class="ls-btn ls-btn--sm ls-btn--primary"><i class="fa fa-download" aria-hidden="true"></i> {Lang::T('Install')}</a>
+                </span>
+            </div>
+        </article>
+        {foreachelse}
+        <div class="ls-card"><div class="ls-empty"><b>{Lang::T('Nothing to show')}</b>{Lang::T('Refresh to load the list again.')}</div></div>
+        {/foreach}
+    </div>
+    {/foreach}
 </div>
+
+<script>
+    // the type tabs: show one list at a time
+    (function () {
+        var tabs = document.querySelectorAll('[data-st-tab]');
+        tabs.forEach(function (t) {
+            t.addEventListener('click', function (e) {
+                e.preventDefault();
+                tabs.forEach(function (o) {
+                    var on = o === t;
+                    o.classList.toggle('is-on', on);
+                    o.setAttribute('aria-selected', on ? 'true' : 'false');
+                    document.querySelector(o.getAttribute('href')).hidden = !on;
+                });
+            });
+        });
+    })();
+</script>
 {include file="sections/footer.tpl"}

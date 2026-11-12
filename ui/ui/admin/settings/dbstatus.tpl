@@ -1,61 +1,69 @@
 {include file="sections/header.tpl"}
 
-<div class="row">
-    <div class="col-sm-7">
-        <div class="panel panel-primary">
-            <div class="panel-heading">{Lang::T('Backup Database')}</div>
-            <form method="post" action="{Text::url('')}settings/dbbackup">
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th width="50%">{Lang::T('Table Name')}</th>
-                                <th>{Lang::T('Rows')}</th>
-                                <th>{Lang::T('Choose')}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {foreach $tables as $tbl}
-                                <tr>
-                                    <td>{$tbl['name']}</td>
-                                    <td>{$tbl['rows']}</td>
-                                    <td><input type="checkbox" checked name="tables[]" value="{$tbl['name']}"></td>
-                                </tr>
-                            {/foreach}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-md-6">{Lang::T('Don\'t select logs if it failed')}</div>
-                        <div class="col-md-4 text-right">
-                            <button type="submit" class="btn btn-primary btn-xs btn-block" aria-label="Download Backup Database">
-                                <i class="fa fa-download"></i> {Lang::T('Download Backup Database')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+<div class="ls st st-db">
+    <form method="post" action="{Text::url('')}settings/dbbackup" class="ls-card st-db__backup">
+        <header class="st-card-head">
+            <div><h3><i class="fa fa-download" aria-hidden="true"></i> {Lang::T('Backup Database')}</h3>
+                <small>{count($tables)} {Lang::T('tables')}</small></div>
+            <label class="st-all"><input type="checkbox" id="stAll" checked> {Lang::T('Select all')}</label>
+        </header>
+        <div class="ls-scroll">
+            <table class="ls-table">
+                <thead>
+                    <tr>
+                        <th class="ls-check" aria-label="{Lang::T('Choose')}"></th>
+                        <th>{Lang::T('Table Name')}</th>
+                        <th class="ls-num">{Lang::T('Rows')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $tables as $tbl}
+                    <tr>
+                        <td class="ls-check"><input type="checkbox" checked name="tables[]" value="{$tbl['name']|escape}" id="tb_{$tbl['name']|escape}"></td>
+                        <td data-label="{Lang::T('Table Name')}"><label for="tb_{$tbl['name']|escape}" class="st-tbl">{$tbl['name']|escape}</label></td>
+                        <td data-label="{Lang::T('Rows')}" class="ls-num">{$tbl['rows']|number_format}</td>
+                    </tr>
+                    {/foreach}
+                </tbody>
+            </table>
         </div>
-    </div>
-    <div class="col-sm-5">
-        <div class="panel panel-primary">
-            <div class="panel-heading">{Lang::T('Restore Database')}</div>
-            <form method="post" action="{Text::url('')}settings/dbrestore" enctype="multipart/form-data">
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-md-7"><input type="file" name="json" accept="application/json"></div>
-                        <div class="col-md-5 text-right">
-                            <button type="submit" class="btn btn-primary btn-block btn-xs" aria-label="Restore Database">
-                                <i class="fa fa-upload"></i> {Lang::T('Restore Database')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            <div class="panel-footer">{Lang::T('Restoring the database will clean up data and then restore all the data.')}</div>
+        <footer class="st-card-foot">
+            <small><i class="fa fa-info-circle" aria-hidden="true"></i> {Lang::T('Don\'t select logs if it failed')}</small>
+            <button type="submit" class="ls-btn ls-btn--primary"><i class="fa fa-download" aria-hidden="true"></i> {Lang::T('Download Backup Database')}</button>
+        </footer>
+    </form>
+
+    <form method="post" action="{Text::url('')}settings/dbrestore" enctype="multipart/form-data" class="ls-card st-db__restore">
+        <header class="st-card-head">
+            <div><h3><i class="fa fa-upload" aria-hidden="true"></i> {Lang::T('Restore Database')}</h3>
+                <small>{Lang::T('A backup file downloaded from this page (.json)')}</small></div>
+        </header>
+        <div class="st-card-body">
+            <div class="rf-note rf-note--warn" role="note">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                <div>{Lang::T('Restoring the database will clean up data and then restore all the data.')}</div>
+            </div>
+            <input type="file" name="json" accept="application/json" class="form-control" required>
         </div>
-    </div>
+        <footer class="st-card-foot">
+            <span></span>
+            <button type="submit" class="ls-btn ls-btn--primary" onclick="return this.form.reportValidity() && ask(this, '{Lang::T('Restoring the database will clean up data and then restore all the data.')|escape:'javascript'}')">
+                <i class="fa fa-upload" aria-hidden="true"></i> {Lang::T('Restore Database')}</button>
+        </footer>
+    </form>
 </div>
+
+<script>
+    (function () {
+        var all = document.getElementById('stAll');
+        var boxes = document.querySelectorAll('input[name="tables[]"]');
+        function sync() {
+            var n = 0; boxes.forEach(function (b) { if (b.checked) { n++; } });
+            all.checked = n === boxes.length; all.indeterminate = n > 0 && n < boxes.length;
+        }
+        all.addEventListener('change', function () { boxes.forEach(function (b) { b.checked = all.checked; }); });
+        boxes.forEach(function (b) { b.addEventListener('change', sync); });
+    })();
+</script>
 
 {include file="sections/footer.tpl"}

@@ -58,7 +58,7 @@
     }
 </style>
 
-<form class="form-horizontal" method="post" autocomplete="off" role="form" action="">
+<form class="form-horizontal st" method="post" autocomplete="off" role="form" action="">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-sm-12 col-md-12">

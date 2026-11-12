@@ -1,5 +1,5 @@
 {include file="sections/header.tpl"}
-<form class="form-horizontal" method="post" role="form" action="" enctype="multipart/form-data">
+<form class="form-horizontal st" method="post" role="form" action="" enctype="multipart/form-data">
     <div class="row">
         <div class="col-sm-12 col-md-12">
             <div class="panel panel-primary panel-hovered panel-stacked mb30">
@@ -132,16 +132,6 @@
                                 page.')} <a href="https://github.com/agstrxyz/phpnuxbill-login-hotspot"
                                     target="_blank">Download
                                     phpnuxbill-login-hotspot</a></small>
-                        </p>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Radius Rest Interim-Update')}</label>
-                        <div class="col-md-5">
-                            <input type="number" class="form-control" id="frrest_interim_update" name="frrest_interim_update"
-                                value="{if $_c['frrest_interim_update']}{$_c['frrest_interim_update']}{else}0{/if}">
-                        </div>
-                        <p class="help-block col-md-4"><small>
-                                {Lang::T('in minutes, leave 0 to disable this feature.')}</small>
                         </p>
                     </div>
                     <div class="form-group">

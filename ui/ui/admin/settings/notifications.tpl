@@ -1,6 +1,6 @@
 {include file="sections/header.tpl"}
 
-<form class="form-horizontal" method="post" role="form" action="{Text::url('settings/notifications-post')}">
+<form class="form-horizontal st" method="post" role="form" action="{Text::url('settings/notifications-post')}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
     <div class="row">
         <div class="col-sm-12 col-md-12">
