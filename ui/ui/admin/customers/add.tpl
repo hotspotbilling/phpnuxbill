@@ -306,12 +306,12 @@
 
     <!-- BOTTOM ACTION BAR -->
     <div class="customer-edit-actions">
-        <a href="{Text::url('customers/list')}" class="btn btn-default">
-            {Lang::T('Cancel')}
+        <a href="{Text::url('customers/list')}" class="ls-btn">
+            <i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Cancel')}
         </a>
-        <button class="btn btn-primary" type="submit"
+        <button class="ls-btn ls-btn--primary" type="submit"
             onclick="return ask(this, '{Lang::T("Continue the process of adding Customer Data?")}')">
-            <i class="fa fa-check"></i> {Lang::T('Save Customer')}
+            <i class="fa fa-check" aria-hidden="true"></i> {Lang::T('Save Customer')}
         </button>
     </div>
 </form>

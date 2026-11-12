@@ -6505,7 +6505,7 @@ body.dark-mode .rb-search:not(#filterNavigateMenu):focus { background-color: var
 @media (max-width: 575px) { .rb-row { grid-template-columns: minmax(0, 1fr); } .rb-btn { justify-content: center; } }
 
 /* Customers list and Active Customers (ui/ui/admin/customers/list.tpl, plan/active.tpl). Tokens follow the admin dark mode and the theme's variables when it defines them. */
-.ls {
+.ls, .edit-form-card, .customer-edit-actions, .st {
     --ls-ink: var(--foreground, #1e293b);
     --ls-muted: var(--muted-foreground, #64748b);
     --ls-line: var(--border, #e2e8f0);
@@ -6517,10 +6517,9 @@ body.dark-mode .rb-search:not(#filterNavigateMenu):focus { background-color: var
     /* search and select fields: the same surface, border, height and radius as the search box in the top bar */
     --ls-field: var(--input-bg, #f1f5f9);
     --ls-field-line: #e2e8f0;
-    color: var(--ls-ink);
-    padding: 4px 0 24px;
 }
-body.dark-mode .ls {
+.ls { color: var(--ls-ink); padding: 4px 0 24px; }
+body.dark-mode .ls, body.dark-mode .edit-form-card, body.dark-mode .customer-edit-actions, body.dark-mode .st {
     --ls-ink: var(--foreground, #e2e8f0);
     --ls-muted: var(--muted-foreground, #94a3b8);
     --ls-line: var(--border, #2d3748);
@@ -6658,35 +6657,70 @@ body .customer-action-toolbar .btn.btn-danger:not(.btn-primary):hover, body .cus
 body.dark-mode .customer-action-toolbar .btn.btn-danger:not(.btn-primary) { color: #f87171 !important; }
 .cv-card, .edit-form-card { box-shadow: none; }
 .cv-card-title, .edit-card-title { font-size: 14px; font-weight: 700; }
-.edit-form-card .form-control { height: 36px; border-radius: 10px; border-color: var(--cv-border); background: var(--cv-bg); color: var(--cv-fg); box-shadow: none; }
-.edit-form-card textarea.form-control { height: auto; }
-.edit-form-card .form-control:focus, .edit-form-card .form-control:focus-visible { outline: none !important; border-color: var(--cv-pri); box-shadow: 0 0 0 3px var(--cv-pri-soft); }
-/* inside an input group the ring goes round the whole group, so the addon and the field read as one control */
-.edit-form-card .input-group { border-radius: 10px; }
-.edit-form-card .input-group .form-control:focus { box-shadow: none; position: relative; z-index: 3; }
-.edit-form-card .input-group:focus-within { box-shadow: 0 0 0 3px var(--cv-pri-soft); }
-.edit-form-card .input-group:focus-within .input-group-addon { border-color: var(--cv-pri); }
-.edit-form-card .input-group-addon { border-radius: 10px 0 0 10px; border-color: var(--cv-border); background: var(--cv-accent); color: var(--cv-muted); }
-.edit-form-card .input-group .form-control:not(:first-child) { border-radius: 0 10px 10px 0; }
-.edit-form-card .input-group .form-control:first-child:not(:last-child) { border-radius: 10px 0 0 10px; }
-.edit-form-card .input-group-btn .btn { border-radius: 0 10px 10px 0; height: 36px; }
-.edit-form-card .control-label { font-size: 12.5px; font-weight: 600; color: var(--cv-fg); }
+/* Fields (customer add/edit cards and the settings pages, .st): the same control as the referral settings and Send Message forms (.mc .mc-input): 40px, 9px radius, the --ls field tokens,
+   the accent ring on focus. The min-height: 100% rule in phpnuxbill.min.css names its fields with :not(#filterNavigateMenu), so the
+   size rules carry the same weight. */
+body :is(.edit-form-card, .st) .form-control:not(#filterNavigateMenu) {
+    height: 40px; min-height: 40px; padding: 9px 12px; border: 1px solid var(--ls-field-line); border-radius: 9px;
+    background: var(--ls-field); color: var(--ls-ink); font-size: 14px; line-height: 1.45; box-shadow: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+body :is(.edit-form-card, .st) select.form-control:not(#filterNavigateMenu) { padding: 0 10px; }
+body :is(.edit-form-card, .st) textarea.form-control:not(#filterNavigateMenu) { height: auto; min-height: 90px; resize: vertical; }
+body :is(.edit-form-card, .st) .form-control:not(#filterNavigateMenu):focus { outline: none !important; border-color: var(--ls-accent); box-shadow: 0 0 0 3px var(--ls-accent-soft); }
+:is(.edit-form-card, .st) .form-control::placeholder { color: var(--ls-muted); opacity: 1; }
+/* file picker: the button sits inside the field like the unit on a referral amount */
+body :is(.edit-form-card, .st) input[type=file].form-control:not(#filterNavigateMenu) { padding: 0 12px 0 0; line-height: 38px; color: var(--ls-muted); cursor: pointer; }
+:is(.edit-form-card, .st) input[type=file].form-control::file-selector-button {
+    height: 38px; margin: 0 12px 0 0; padding: 0 14px; border: 0; border-right: 1px solid var(--ls-field-line); border-radius: 8px 0 0 8px;
+    background: var(--ls-soft); color: var(--ls-ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+:is(.edit-form-card, .st) input[type=file].form-control:hover::file-selector-button { color: var(--ls-accent); }
+/* input groups (icon in front, eye / Generate / GPS behind) read as one control: one border, one radius, the ring round the whole group */
+:is(.edit-form-card, .st) .input-group { display: flex; width: 100%; border-radius: 9px; transition: box-shadow .15s; }
+:is(.edit-form-card, .st) .input-group > .form-control { flex: 1 1 auto; width: 1%; position: relative; }
+:is(.edit-form-card, .st) .input-group-addon, :is(.edit-form-card, .st) .input-group-btn { display: flex; width: auto; }
+:is(.edit-form-card, .st) .input-group-addon {
+    align-items: center; justify-content: center; min-width: 42px; padding: 0 12px; border: 1px solid var(--ls-field-line);
+    background: var(--ls-soft); color: var(--ls-muted); font-size: 13px; font-weight: 600;
+}
+:is(.edit-form-card, .st) .input-group-btn { white-space: nowrap; }
+body :is(.edit-form-card, .st) .input-group-btn > .btn:not(#filterNavigateMenu) {
+    display: inline-flex; align-items: center; gap: 6px; height: 40px; min-height: 40px; margin: 0 0 0 -1px; padding: 0 13px;
+    border: 1px solid var(--ls-field-line); border-radius: 0; background: var(--ls-soft); color: var(--ls-ink); box-shadow: none;
+    font-size: 13px; font-weight: 600;
+}
+:is(.edit-form-card, .st) .input-group-btn > .btn:hover { color: var(--ls-accent); background: var(--ls-accent-soft); }
+:is(.edit-form-card, .st) .input-group-btn > .btn:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: -2px; z-index: 4; }
+/* corners: only the outer ends of a group are round */
+body :is(.edit-form-card, .st) .input-group > *:not(#filterNavigateMenu) { border-radius: 0; }
+body :is(.edit-form-card, .st) .input-group > :first-child:not(#filterNavigateMenu),
+body :is(.edit-form-card, .st) .input-group > .input-group-btn:first-child > .btn:first-child:not(#filterNavigateMenu) { border-radius: 9px 0 0 9px; }
+body :is(.edit-form-card, .st) .input-group > :last-child:not(#filterNavigateMenu),
+body :is(.edit-form-card, .st) .input-group > .input-group-btn:last-child > .btn:last-child:not(#filterNavigateMenu) { border-radius: 0 9px 9px 0; }
+:is(.edit-form-card, .st) .input-group > .input-group-addon:first-child { border-right: 0; }
+:is(.edit-form-card, .st) .input-group > .input-group-btn:last-child > .btn:first-child { margin-left: -1px; }
+body :is(.edit-form-card, .st) .input-group .form-control:not(#filterNavigateMenu):focus { box-shadow: none; z-index: 3; }
+:is(.edit-form-card, .st) .input-group:focus-within { box-shadow: 0 0 0 3px var(--ls-accent-soft); }
+:is(.edit-form-card, .st) .input-group:focus-within .input-group-addon { border-color: var(--ls-accent); color: var(--ls-accent); }
+:is(.edit-form-card, .st) .control-label { margin-bottom: 7px; font-size: 13px; font-weight: 600; color: var(--ls-ink); }
+.edit-form-card .help-block { margin-top: 6px; font-size: 12px; color: var(--ls-muted); }
 .c-badge { padding: 2px 10px; font-size: 12px; border-radius: 999px; letter-spacing: 0; }
 
 /* the global input:focus rule forces a white background (its :not(#id) gives it the weight of an id, so these carry the same) */
 body.dark-mode .ls-search input:not(#filterNavigateMenu):focus, body.dark-mode .ls-field select:not(#filterNavigateMenu):focus { background-color: var(--ls-field) !important; }
-body.dark-mode .edit-form-card input.form-control:not(#filterNavigateMenu):focus, body.dark-mode .edit-form-card textarea.form-control:not(#filterNavigateMenu):focus, body.dark-mode .edit-form-card select.form-control:not(#filterNavigateMenu):focus { background-color: var(--cv-bg) !important; }
+body.dark-mode :is(.edit-form-card, .st) input.form-control:not(#filterNavigateMenu):focus, body.dark-mode :is(.edit-form-card, .st) textarea.form-control:not(#filterNavigateMenu):focus, body.dark-mode :is(.edit-form-card, .st) select.form-control:not(#filterNavigateMenu):focus { background-color: var(--ls-field) !important; color: var(--ls-ink); }
 
 /* default admin skin (body.as-chrome): the search and filter fields use the form-field surface of the add and edit pages */
-body.as-chrome .ls { --ls-field: var(--cv-bg); --ls-field-line: var(--cv-border); }
+body.as-chrome .ls, body.as-chrome .edit-form-card, body.as-chrome .customer-edit-actions, body.as-chrome .st { --ls-field: var(--cv-bg); --ls-field-line: var(--cv-border); }
 
 
 /* Typed text stays readable: the browser's autofill and history preview paints the suggested value black, which is invisible on the dark surface. */
 .ls-search input, .ls-field select { -webkit-text-fill-color: var(--ls-ink); caret-color: var(--ls-ink); }
 .ls-search input:-webkit-autofill, .ls-search input:-webkit-autofill:hover, .ls-search input:-webkit-autofill:focus { -webkit-text-fill-color: var(--ls-ink) !important; -webkit-box-shadow: 0 0 0 1000px var(--ls-field) inset !important; caret-color: var(--ls-ink); transition: background-color 9999s ease-out; }
-.edit-form-card .form-control { -webkit-text-fill-color: var(--cv-fg); caret-color: var(--cv-fg); }
-.edit-form-card .form-control::placeholder { -webkit-text-fill-color: var(--cv-muted); }
-.edit-form-card .form-control:-webkit-autofill, .edit-form-card .form-control:-webkit-autofill:hover, .edit-form-card .form-control:-webkit-autofill:focus { -webkit-text-fill-color: var(--cv-fg) !important; -webkit-box-shadow: 0 0 0 1000px var(--cv-bg) inset !important; transition: background-color 9999s ease-out; }
+:is(.edit-form-card, .st) .form-control { -webkit-text-fill-color: var(--ls-ink); caret-color: var(--ls-ink); }
+:is(.edit-form-card, .st) .form-control::placeholder { -webkit-text-fill-color: var(--ls-muted); }
+:is(.edit-form-card, .st) .form-control:-webkit-autofill, :is(.edit-form-card, .st) .form-control:-webkit-autofill:hover, :is(.edit-form-card, .st) .form-control:-webkit-autofill:focus { -webkit-text-fill-color: var(--ls-ink) !important; -webkit-box-shadow: 0 0 0 1000px var(--ls-field) inset !important; transition: background-color 9999s ease-out; }
 .ls-search input::placeholder { -webkit-text-fill-color: var(--ls-muted); }
 
 /* Dashboard (core theme): every card on both dashboards looks like the Routely card: no fill of its own (the page shows through), a 1px neutral
@@ -7303,3 +7337,12 @@ body.dark-mode .isp-text-teal { color: #81e6d9; }
 /* bulk run panel: the mode pill with Stop (during a run) or Continue / Finish here (after a batch failed) */
 .mc-run__side { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
 .mc-run__side [hidden] { display: none !important; }
+
+/* Customer add and edit: the Save / Cancel bar uses the same buttons and footer strip as the referral settings form (.mc-foot) */
+body.as-chrome .customer-edit-actions { padding: 14px 20px; background: var(--ls-soft); border-color: var(--ls-line); }
+.customer-edit-actions .ls-btn { height: 40px; min-height: 0; padding: 0 18px; }
+.customer-edit-actions .ls-btn[disabled] { opacity: .6; cursor: progress; }
+@media (max-width: 640px) {
+    .customer-edit-actions { flex-direction: column-reverse; align-items: stretch; padding: 12px 16px; }
+    .customer-edit-actions .ls-btn { width: 100%; }
+}

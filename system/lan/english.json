@@ -4994,5 +4994,8 @@
     "_s_customers_were_processed_before_the_run_stopped__The_rest_got_nothing_": "%s customers were processed before the run stopped. The rest got nothing.",
     "The_website_is_currently_in_maintenance_mode__this_means_that_some_or_all_functionality_may_be_unavailable_to_regular_users_during_this_time_": "The website is currently in maintenance mode, this means that some or all functionality may be unavailable to regular users during this time.",
     "Turn_Off": "Turn Off",
-    "Program_is_off": "Program is off"
+    "Program_is_off": "Program is off",
+    "_s_customers_were_processed_before_the_run_stopped__No_batch_after_that_was_sent_": "%s customers were processed before the run stopped. No batch after that was sent.",
+    "Batch__b_did_not_answer__so_it_is_not_known_whether_its__n_customers_got_the_message__Check_the_Message_log_before_sending_to_them_again_": "Batch %b did not answer, so it is not known whether its %n customers got the message. Check the Message log before sending to them again.",
+    "up_to": "up to"
 }

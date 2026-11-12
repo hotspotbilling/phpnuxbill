@@ -334,11 +334,11 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="customer-edit-actions">
-                <a href="{Text::url('customers/view/', $d['id'])}" class="btn btn-default">
-                    {Lang::T('Cancel')}
+                <a href="{Text::url('customers/view/', $d['id'])}" class="ls-btn">
+                    <i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Cancel')}
                 </a>
-                <button class="btn btn-primary" onclick="return ask(this, '{Lang::T("Continue the Customer Data change process?")}')" type="submit">
-                    <i class="fa fa-save"></i> {Lang::T('Save Changes')}
+                <button class="ls-btn ls-btn--primary" onclick="return ask(this, '{Lang::T("Continue the Customer Data change process?")}')" type="submit">
+                    <i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}
                 </button>
             </div>
         </div>
