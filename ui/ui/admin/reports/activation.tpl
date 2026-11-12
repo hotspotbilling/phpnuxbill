@@ -54,7 +54,7 @@
                         <td data-label="{Lang::T('Expires On')}" class="ls-when">
                             {Lang::dateAndTimeFormat($ds['expiration'],$ds['time'])}
                             {if $ds['type'] != 'Balance'}
-                            {if $ds['expiration'] >= $today}<span class="ls-pill ls-pill--active">{Lang::T('Active')}</span>{else}<span class="ls-pill">{Lang::T('Expired')}</span>{/if}
+                            {if $ds['is_active']}<span class="ls-pill ls-pill--active">{Lang::T('Active')}</span>{else}<span class="ls-pill">{Lang::T('Expired')}</span>{/if}
                             {/if}
                         </td>
                         <td data-label="{Lang::T('Method')}" class="ls-dim">{$ds['method']|escape}</td>

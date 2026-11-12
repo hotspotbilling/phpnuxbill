@@ -65,7 +65,8 @@ class TransactionReport
         global $config;
         $day = max(1, min(31, (int) ($config['reset_day'] ?? 1)));
         $month = strtotime(date('Y-m-01'));
-        if ((int) date('j') < $day) {
+        // the reset day of this month, a day past its end being its last day
+        if ((int) date('j') < min($day, (int) date('t', $month))) {
             $month = strtotime('-1 month', $month);
         }
         return date('Y-m-', $month) . sprintf('%02d', min($day, (int) date('t', $month)));
@@ -153,7 +154,7 @@ class TransactionReport
         }
         [$w, $p] = self::where($g);
         $pos = array_flip($dates);
-        foreach (self::DIMENSIONS as $expr) {
+        foreach (self::DIMENSIONS as $dim => $expr) {
             $lines = [];
             foreach (self::rows("SELECT `recharged_on` AS d, $expr AS k, COUNT(*) AS c FROM `tbl_transactions` WHERE $w GROUP BY d, k", $p) as $r) {
                 if (!isset($pos[$r['d']])) {
@@ -165,7 +166,8 @@ class TransactionReport
                 $lines[$r['k']][$pos[$r['d']]] = (int) $r['c'];
             }
             foreach ($lines as $k => $data) {
-                $result['datas'][] = ['label' => (string) $k, 'data' => $data];
+                // named with its dimension: a plan and a type (or router) may share a name
+                $result['datas'][] = ['label' => $dim . ': ' . $k, 'data' => $data];
             }
         }
         return $result;

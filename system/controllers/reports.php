@@ -42,7 +42,8 @@ switch ($action) {
         $q = trim((string) (_post('q') ?: _get('q')));
         $typeCounts = TransactionReport::typeCounts();
         $type = (string) _get('type');
-        if (!isset($typeCounts[$type])) {
+        // any type the column allows, also one with no transactions yet
+        if (!in_array($type, ORM::for_table('tbl_transactions')->getEnum('type'), true)) {
             $type = '';
         }
         // newest first by id: the primary key (and the type index, which ends with it), so a page is read straight off an index
@@ -60,12 +61,22 @@ switch ($action) {
             }
             $total = (clone $query)->count(); // a prefix search is counted exactly; it reads only the matching index range
         } else {
-            $total = $type !== '' ? $typeCounts[$type] : array_sum($typeCounts);
+            $total = $type !== '' ? ($typeCounts[$type] ?? 0) : array_sum($typeCounts);
+            if (!$total) {
+                // the counts are kept a minute: a zero may be stale, and counting nothing (or next to nothing) is cheap
+                $total = (clone $query)->count();
+            }
         }
 
         try {
             $d = Paginator::findMany($query, array_filter(['q' => $q, 'type' => $type], 'strlen'), '10', '', true, $total);
             $d = TransactionReport::withNames($d ?: []);
+            // still running: expires later than now (the date and time, as saved, in the app's timezone)
+            $now = date('Y-m-d H:i:s');
+            foreach ($d as &$row) {
+                $row['is_active'] = ($row['expiration'] . ' ' . ($row['time'] ?: '23:59:59')) >= $now;
+            }
+            unset($row);
         } catch (Exception $e) {
             r2(getUrl('reports/activation/'), 'e', 'Database query failed: ' . $e->getMessage());
             $d = [];
@@ -76,7 +87,6 @@ switch ($action) {
         $ui->assign('type', $type);
         $ui->assign('typeCounts', $typeCounts);
         $ui->assign('total', $total);
-        $ui->assign('today', $mdate);
         $ui->assign('_title', Lang::T('Activation History'));
         $ui->display('admin/reports/activation.tpl');
         break;
@@ -171,6 +181,9 @@ switch ($action) {
         $ui->assign('active_filters', count(array_filter([$f['tps'], $f['plns'], $f['mts'], $f['rts']])));
         // what the admin narrowed to (an empty list means every value); the lists above stay as they were for plugins
         $ui->assign('sel', ['tps' => $f['tps'], 'plns' => $f['plns'], 'mts' => $f['mts'], 'rts' => $f['rts']]);
+        // the narrowed lists as a query string, so a quick range keeps them
+        $selQuery = http_build_query(array_filter(['tps' => $f['tps'], 'plns' => $f['plns'], 'mts' => $f['mts'], 'rts' => $f['rts']]));
+        $ui->assign('sel_query', $selQuery === '' ? '' : '&' . $selQuery);
         $ui->assign('full_day', $ts === '00:00:00' && $te === '23:59:59');
         $d = Paginator::findMany(TransactionReport::query($f), [], 100, $urlquery, true, $totals['count']);
         $d = TransactionReport::withNames($d ?: []);

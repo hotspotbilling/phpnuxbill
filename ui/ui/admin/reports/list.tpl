@@ -10,7 +10,7 @@
         <div class="rp-ranges ls-tabs" role="group" aria-label="{Lang::T('Quick ranges')}">
             {foreach $ranges as $r}
             <a class="ls-tab{if $full_day && $r['sd'] == $sd && $r['ed'] == $ed} is-on{/if}"
-                href="{Text::url('reports&sd=', $r['sd'], '&ed=', $r['ed'])}">{$r['label']|escape}</a>
+                href="{Text::url('reports&sd=', $r['sd'], '&ed=', $r['ed'], $sel_query)}">{$r['label']|escape}</a>
             {/foreach}
         </div>
         <div class="rp-fields">
@@ -110,18 +110,27 @@
         <section class="ls-card rf-panel rp-trend">
             <header class="rf-panel__head">
                 <div>
-                    <h3>{Lang::T('Revenue per day')}</h3>
+                    <h3 id="rpTrendTitle" data-revenue="{Lang::T('Revenue per day')|escape}" data-count="{Lang::T('Transactions per day')|escape}">{Lang::T('Revenue per day')}</h3>
                     <small id="rpTrendRange">{Lang::dateFormat($sd)} - {Lang::dateFormat($ed)}</small>
                 </div>
-                <span class="rp-legend" aria-hidden="true">
-                    <span><i class="rp-swatch rp-swatch--bar"></i> {Lang::T('Revenue')}</span>
-                    <span><i class="rp-swatch rp-swatch--line"></i> {Lang::T('Transactions')}</span>
-                </span>
+                <div class="rp-trend__side">
+                    <b class="rf-panel__total" id="rpTrendTotal"></b>
+                    <div class="rp-seg" role="radiogroup" aria-label="{Lang::T('Show')}">
+                        <button type="button" role="radio" aria-checked="true" data-metric="revenue">{Lang::T('Revenue')}</button>
+                        <button type="button" role="radio" aria-checked="false" data-metric="count">{Lang::T('Transactions')}</button>
+                    </div>
+                </div>
             </header>
             <div class="rf-chart">
-                <canvas id="rpTrend" role="img" aria-label="{Lang::T('Revenue per day')}"></canvas>
+                <canvas id="rpTrend" role="img" aria-label="{Lang::T('Revenue per day')|escape}"></canvas>
                 <div class="ls-empty rp-state"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>
             </div>
+            {* the same figures as a table, for screen readers *}
+            <table class="sr-only" id="rpTrendTable">
+                <caption>{Lang::T('Revenue per day')}</caption>
+                <thead><tr><th scope="col">{Lang::T('Date')}</th><th scope="col">{Lang::T('Revenue')}</th><th scope="col">{Lang::T('Transactions')}</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </section>
         <div class="rp-grid">
             {foreach ['type' => 'By type', 'plan' => 'By plan', 'method' => 'By payment method', 'router' => 'By router'] as $dim => $title}
@@ -220,6 +229,9 @@ document.addEventListener('DOMContentLoaded', function () {
         failed: {Lang::T('Could not load the charts. Reload the page to try again.')|json_encode},
         revenue: {Lang::T('Revenue')|json_encode},
         trx: {Lang::T('Transactions')|json_encode},
+        avg: {Lang::T('Avg')|json_encode},
+        avgSale: {Lang::T('Average sale')|json_encode},
+        noSales: {Lang::T('No sales')|json_encode},
         big: {Lang::T('This export holds every transaction of the filter on one page and can take a long time to open. Continue?')|json_encode}
     };
     var cur = {$_c['currency_code']|json_encode};
@@ -237,10 +249,14 @@ document.addEventListener('DOMContentLoaded', function () {
         more.hidden = !open;
         moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-    // From after To: swap them instead of showing nothing
+    // From after To (date and time together): swap the two ends instead of showing nothing
     form.addEventListener('submit', function () {
-        var sd = form.elements.sd, ed = form.elements.ed;
-        if (sd.value && ed.value && sd.value > ed.value) { var t = sd.value; sd.value = ed.value; ed.value = t; }
+        var sd = form.elements.sd, ed = form.elements.ed, ts = form.elements.ts, te = form.elements.te;
+        var hms = function (v, d) { return !v ? d : (v.length === 5 ? v + ':00' : v); };
+        if (sd.value && ed.value && sd.value + ' ' + hms(ts.value, '00:00:00') > ed.value + ' ' + hms(te.value, '23:59:59')) {
+            var t = sd.value; sd.value = ed.value; ed.value = t;
+            t = ts.value; ts.value = te.value; te.value = t;
+        }
     });
     // a large export is one long page: confirm first
     if (COUNT > 5000) {
@@ -309,48 +325,174 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Revenue per day: one measure at a time on one axis (Revenue or Transactions), drawn as the dashboard's Sales Report is (a
+    // smooth line over a fading area), with the daily average as a reference line and the best day marked and labelled;
+    // the tooltip gives the day's revenue, transactions and average sale.
     function trend(d) {
         var wrap = root.querySelector('.rp-trend .rf-chart');
         var el = document.getElementById('rpTrend');
         var spin = wrap.querySelector('.rp-state');
-        if (!d || !d.labels.length || !window.Chart) { state(wrap, T.none); return; }
+        if (!window.Chart) { state(wrap, T.failed); return; }
+        if (!d || !d.labels.length) { state(wrap, T.none); return; }
         if (spin) { spin.remove(); }
+        var titleEl = document.getElementById('rpTrendTitle');
+        var totalEl = document.getElementById('rpTrendTotal');
+        var seg = root.querySelectorAll('.rp-seg button');
+
         // colours come from the page's tokens, so the chart follows light/dark mode and the theme
         var css = getComputedStyle(root);
-        var ink = css.getPropertyValue('--ls-muted').trim() || '#64748b';
+        var muted = css.getPropertyValue('--ls-muted').trim() || '#64748b';
+        var ink = css.getPropertyValue('--ls-ink').trim() || '#1e293b';
         var grid = css.getPropertyValue('--ls-line').trim() || '#e2e8f0';
-        var bar = css.getPropertyValue('--rf-bar').trim() || '#6366f1';
-        var line = css.getPropertyValue('--rp-line').trim() || '#f59e0b';
+        var bar = css.getPropertyValue('--rp-bar').trim() || '#6366f1';
+        var card = css.getPropertyValue('--ls-card').trim() || '#ffffff';
+        // the area under the line fades from the line colour to nothing, as on the dashboard's Sales Report
+        var rgb = (function (h) {
+            var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(h);
+            return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)].join(', ') : '99, 102, 241';
+        })(bar);
+        var fade = function (c) {
+            var a = c.chart.chartArea;
+            if (!a) { return 'rgba(' + rgb + ', .1)'; }
+            var g = c.chart.ctx.createLinearGradient(0, a.top, 0, a.bottom);
+            g.addColorStop(0, 'rgba(' + rgb + ', .35)');
+            g.addColorStop(.7, 'rgba(' + rgb + ', .08)');
+            g.addColorStop(1, 'rgba(' + rgb + ', 0)');
+            return g;
+        };
+        var font = getComputedStyle(document.body).fontFamily;
+
         var dates = d.labels.map(function (x) { return new Date(x + 'T00:00:00'); });
-        var short = function (x) { return x.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); };
-        new Chart(el, {
+        var dayLong = function (x) { return x.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); };
+        var dayShort = function (x) { return x.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); };
+        var compact = function (v) {
+            try { return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(v); } catch (e) { return Number(v).toLocaleString(); }
+        };
+        var fmt = function (m, v) { return m === 'revenue' ? money(v) : Number(v).toLocaleString(); };
+        // a short figure for the labels on the plot: compact from 10,000 (12.9K), whole numbers below; the currency only on the peak
+        var short = function (v, bare) {
+            var n = Math.abs(v) >= 10000 ? compact(v) : Math.round(v).toLocaleString();
+            return metric === 'revenue' && !bare ? cur + ' ' + n : n;
+        };
+        document.getElementById('rpTrendRange').textContent = dayShort(dates[0]) + ' - ' + dates[dates.length - 1].toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // table view
+        var tb = document.querySelector('#rpTrendTable tbody');
+        tb.innerHTML = '';
+        d.labels.forEach(function (x, i) {
+            var tr = document.createElement('tr');
+            [dayLong(dates[i]), money(d.revenue[i]), String(d.count[i])].forEach(function (v) { var td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+            tb.appendChild(tr);
+        });
+
+        var metric = 'revenue';
+        try { if (localStorage.getItem('rp_trend_metric') === 'count') { metric = 'count'; } } catch (e) { }
+        var series = function () { return metric === 'revenue' ? d.revenue : d.count; };
+        var stats = function () {
+            var v = series(), sum = 0, peak = -1;
+            v.forEach(function (x, i) { sum += x; if (x > 0 && (peak < 0 || x > v[peak])) { peak = i; } });
+            return { sum: sum, avg: sum / v.length, peak: peak };
+        };
+
+        // the average line and the best-day label, drawn over the columns
+        var marks = {
+            id: 'rpMarks',
+            afterDatasetsDraw: function (chart) {
+                var st = stats(), ctx = chart.ctx, area = chart.chartArea, y = chart.scales.y;
+                ctx.save();
+                ctx.font = '600 11px ' + font;
+                if (st.avg > 0 && d.labels.length > 1) {
+                    var py = Math.round(y.getPixelForValue(st.avg)) + .5;
+                    // solid, in the muted ink: the gridlines are the dashed ones
+                    ctx.strokeStyle = muted; ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.moveTo(area.left, py); ctx.lineTo(area.right, py); ctx.stroke();
+                    // labelled in the margin right of the plot, where it never sits on a column
+                    ctx.fillStyle = muted; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                    ctx.fillText(T.avg, area.right + 8, py - 7);
+                    ctx.fillStyle = ink;
+                    ctx.fillText(short(st.avg, true), area.right + 8, py + 7);
+                }
+                if (st.peak >= 0) {
+                    var b = chart.getDatasetMeta(0).data[st.peak];
+                    if (b) {
+                        // a dot on the best day (the line has no points of its own), ringed in the card colour
+                        ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+                        ctx.fillStyle = bar; ctx.fill();
+                        ctx.lineWidth = 2; ctx.strokeStyle = card; ctx.stroke();
+                        var label = short(series()[st.peak], false);
+                        var lw = ctx.measureText(label).width;
+                        var lx = Math.min(Math.max(b.x, area.left + lw / 2), area.right - lw / 2);
+                        ctx.fillStyle = ink; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+                        ctx.fillText(label, lx, b.y - 9);
+                    }
+                }
+                ctx.restore();
+            }
+        };
+
+        var chart = new Chart(el, {
+            type: 'line',
             data: {
-                labels: dates.map(short),
-                datasets: [
-                    { type: 'bar', label: T.revenue, data: d.revenue, yAxisID: 'y', backgroundColor: bar, hoverBackgroundColor: bar, borderRadius: 4, maxBarThickness: 22, order: 2 },
-                    { type: 'line', label: T.trx, data: d.count, yAxisID: 'y1', borderColor: line, backgroundColor: line, borderWidth: 2, pointRadius: d.labels.length > 45 ? 0 : 2, tension: .3, order: 1 }
-                ]
+                labels: dates.map(dayShort),
+                datasets: [{
+                    data: series().slice(), borderColor: bar, backgroundColor: fade, fill: true,
+                    borderWidth: 2, borderJoinStyle: 'round', borderCapStyle: 'round',
+                    // smooth like the Sales Report, but monotone: the curve never dips below zero or swells past a day's value
+                    cubicInterpolationMode: 'monotone',
+                    pointRadius: 0, pointHitRadius: 12, pointHoverRadius: 5,
+                    pointHoverBackgroundColor: bar, pointHoverBorderColor: card, pointHoverBorderWidth: 2
+                }]
             },
+            plugins: [marks],
             options: {
                 responsive: true, maintainAspectRatio: false, animation: false,
+                layout: { padding: { top: 20, right: 52 } },
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        padding: 10, cornerRadius: 8,
+                        displayColors: false, padding: 10, cornerRadius: 8, titleMarginBottom: 6,
                         callbacks: {
-                            title: function (i) { return dates[i[0].dataIndex].toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }); },
-                            label: function (i) { return i.dataset.yAxisID === 'y' ? T.revenue + ': ' + money(i.raw) : T.trx + ': ' + Number(i.raw).toLocaleString(); }
+                            title: function (i) { return dayLong(dates[i[0].dataIndex]); },
+                            label: function (i) {
+                                var n = d.count[i.dataIndex], r = d.revenue[i.dataIndex];
+                                if (!n) { return T.noSales; }
+                                return [T.revenue + ': ' + money(r), T.trx + ': ' + Number(n).toLocaleString(), T.avgSale + ': ' + money(Math.round(r / n * 100) / 100)];
+                            }
                         }
                     }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: ink, maxRotation: 0, autoSkip: true, maxTicksLimit: el.clientWidth < 520 ? 4 : 10, font: { size: 11 } } },
-                    y: { beginAtZero: true, grid: { color: grid, drawBorder: false }, ticks: { color: ink, maxTicksLimit: 5, font: { size: 11 }, callback: function (v) { return Number(v).toLocaleString(); } } },
-                    y1: { beginAtZero: true, position: 'right', grid: { display: false, drawBorder: false }, ticks: { color: ink, maxTicksLimit: 5, precision: 0, font: { size: 11 } } }
+                    x: { grid: { display: false, drawBorder: false }, ticks: { color: muted, maxRotation: 0, autoSkip: true, autoSkipPadding: 12, maxTicksLimit: el.clientWidth < 520 ? 4 : 10, font: { size: 11 } } },
+                    y: {
+                        beginAtZero: true, grid: { color: grid, borderDash: [4, 4], drawBorder: false, drawTicks: false },
+                        ticks: {
+                            color: muted, padding: 8, maxTicksLimit: 5, precision: 0, font: { size: 11 },
+                            // one style per axis: every tick compact once the axis reaches 10,000
+                            callback: function (v) { return this.max >= 10000 ? compact(v) : Number(v).toLocaleString(); }
+                        }
+                    }
                 }
             }
         });
+
+        function apply() {
+            var st = stats();
+            titleEl.textContent = titleEl.getAttribute(metric === 'revenue' ? 'data-revenue' : 'data-count');
+            el.setAttribute('aria-label', titleEl.textContent);
+            totalEl.textContent = fmt(metric, st.sum);
+            seg.forEach(function (b) { b.setAttribute('aria-checked', b.getAttribute('data-metric') === metric ? 'true' : 'false'); });
+            chart.data.datasets[0].data = series().slice();
+            chart.update();
+        }
+        seg.forEach(function (b) {
+            b.addEventListener('click', function () {
+                metric = b.getAttribute('data-metric');
+                try { localStorage.setItem('rp_trend_metric', metric); } catch (e) { }
+                apply();
+            });
+        });
+        apply();
     }
 });
 </script>

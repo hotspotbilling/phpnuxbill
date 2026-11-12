@@ -5080,5 +5080,8 @@
     "activations": "activations",
     "Nothing_to_compare_with": "Nothing to compare with",
     "activation": "activation",
-    "Try_a_wider_date_range_or_fewer_filters_": "Try a wider date range or fewer filters."
+    "Try_a_wider_date_range_or_fewer_filters_": "Try a wider date range or fewer filters.",
+    "Transactions_per_day": "Transactions per day",
+    "Avg": "Avg",
+    "No_sales": "No sales"
 }
