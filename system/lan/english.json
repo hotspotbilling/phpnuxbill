@@ -5084,5 +5084,7 @@
     "Transactions_per_day": "Transactions per day",
     "Avg": "Avg",
     "No_sales": "No sales",
-    "Choose_at_least_one_table_to_back_up": "Choose at least one table to back up"
+    "Choose_at_least_one_table_to_back_up": "Choose at least one table to back up",
+    "Search_description": "Search description",
+    "Account_Not_Found": "Account Not Found"
 }

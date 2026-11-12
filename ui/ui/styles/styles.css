@@ -7819,8 +7819,10 @@ body.dark-mode .st-rl__note { color: #5eead4 !important; }
 /* the default skin's field surface is the page colour, so on a transparent card the fields get their own fill */
 body.as-chrome .st { --ls-field: #f1f5f9; }
 body.as-chrome.dark-mode .st { --ls-field: #252536; --ls-field-line: #3f3f46; }
-/* referral settings (.mc.rf), the same way: the cards, the row groups, the reward cards, the summary lines and the footer are transparent,
-   the fields, the amount/percent switch and the toggles keep their fill */
-.mc.rf .ls-card, .mc.rf .mc-rows, .mc.rf .rf-reward, .mc.rf .mc-foot, .mc.rf .rf-summary li { background: transparent; }
-body.as-chrome .mc.rf { --ls-field: #f1f5f9; }
-body.as-chrome.dark-mode .mc.rf { --ls-field: #252536; --ls-field-line: #3f3f46; }
+/* the same on the other form pages: referral settings and Send Message (.mc), customer add/edit (.edit-form-card, .customer-edit-actions).
+   The cards, row groups, reward cards, summary lines, preview area and footers are transparent; fields, switches and buttons keep their fill */
+.mc .ls-card, .mc .mc-rows, .mc .rf-reward, .mc .mc-foot, .mc .rf-summary li, .mc .mc-preview,
+.edit-form-card, body.as-chrome .customer-edit-actions, .customer-edit-actions { background: transparent; }
+body.as-chrome :is(.mc, .edit-form-card) { --ls-field: #f1f5f9; }
+body.as-chrome.dark-mode :is(.mc, .edit-form-card) { --ls-field: #252536; --ls-field-line: #3f3f46; }
+body.as-chrome .edit-form-card .input-group .form-control { background-color: var(--ls-field); }

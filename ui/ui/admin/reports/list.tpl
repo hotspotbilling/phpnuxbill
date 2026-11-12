@@ -253,11 +253,11 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function () {
         var sd = form.elements.sd, ed = form.elements.ed, ts = form.elements.ts, te = form.elements.te;
         var hms = function (v, d) { return !v ? d : (v.length === 5 ? v + ':00' : v); };
-        // an empty time is filled with its own end's default first, so the swapped range is the one compared
-        var st = hms(ts.value, '00:00:00'), et = hms(te.value, '23:59:59');
-        if (sd.value && ed.value && sd.value + ' ' + st > ed.value + ' ' + et) {
+        // compared with an empty time read as its end's default; the inputs are swapped as typed, so an empty time stays empty and
+        // takes the default of the end it moves to (two reversed dates without times become the whole days between them)
+        if (sd.value && ed.value && sd.value + ' ' + hms(ts.value, '00:00:00') > ed.value + ' ' + hms(te.value, '23:59:59')) {
             var t = sd.value; sd.value = ed.value; ed.value = t;
-            ts.value = et; te.value = st;
+            t = ts.value; ts.value = te.value; te.value = t;
         }
     });
     // a large export is one long page: confirm first
