@@ -253,9 +253,11 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function () {
         var sd = form.elements.sd, ed = form.elements.ed, ts = form.elements.ts, te = form.elements.te;
         var hms = function (v, d) { return !v ? d : (v.length === 5 ? v + ':00' : v); };
-        if (sd.value && ed.value && sd.value + ' ' + hms(ts.value, '00:00:00') > ed.value + ' ' + hms(te.value, '23:59:59')) {
+        // an empty time is filled with its own end's default first, so the swapped range is the one compared
+        var st = hms(ts.value, '00:00:00'), et = hms(te.value, '23:59:59');
+        if (sd.value && ed.value && sd.value + ' ' + st > ed.value + ' ' + et) {
             var t = sd.value; sd.value = ed.value; ed.value = t;
-            t = ts.value; ts.value = te.value; te.value = t;
+            ts.value = et; te.value = st;
         }
     });
     // a large export is one long page: confirm first

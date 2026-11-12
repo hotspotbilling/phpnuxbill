@@ -7808,3 +7808,19 @@ body.dark-mode .st-rl__note { color: #5eead4 !important; }
 .st .bs-callout > p.st-copy-none { padding-right: 12px !important; }
 /* a row with no label (a full-width field such as col-md-12): the field takes the whole row, not the control column */
 .st .form-group:not(:has(> .control-label)) > div[class*="col-"] { grid-column: 1 / -1; grid-row: auto; }
+/* settings pages: only the form controls are filled (fields, buttons, chips, switches); the cards, the menu, the section bands, the
+   footers and the code blocks are transparent and keep their borders, so the fields stand out from the page */
+.st .settings-sidebar, .st .tab-pane.active, .st .panel, .st .panel-footer, .st .st-card-foot, .st-dev__foot, .st-foot-row,
+.st .tab-pane > [class*="col-md-12"]:not(.form-group), .st .panel-body > [class*="col-md-12"]:not(.form-group),
+.st .form-group:has(> .btn:only-child), .st .panel-body:has(> .btn:only-child),
+.st .form-group:has(> [class*="col-"][class*="offset"]:only-child > .btn), .st .form-group:has(> [class*="col-"]:only-child > .btn:only-child),
+.st .tab-pane > div:has(> button[type=submit]:only-child), .st .panel-body > div:has(> button[type=submit]:only-child), .st .tab-pane > div:has(> .btn:only-child),
+.st .table > thead > tr > th, .st pre, .st code, .st .bs-callout > p, .st .ls-card, .st .box, .st .mc-rows { background: transparent; }
+/* the default skin's field surface is the page colour, so on a transparent card the fields get their own fill */
+body.as-chrome .st { --ls-field: #f1f5f9; }
+body.as-chrome.dark-mode .st { --ls-field: #252536; --ls-field-line: #3f3f46; }
+/* referral settings (.mc.rf), the same way: the cards, the row groups, the reward cards, the summary lines and the footer are transparent,
+   the fields, the amount/percent switch and the toggles keep their fill */
+.mc.rf .ls-card, .mc.rf .mc-rows, .mc.rf .rf-reward, .mc.rf .mc-foot, .mc.rf .rf-summary li { background: transparent; }
+body.as-chrome .mc.rf { --ls-field: #f1f5f9; }
+body.as-chrome.dark-mode .mc.rf { --ls-field: #252536; --ls-field-line: #3f3f46; }
