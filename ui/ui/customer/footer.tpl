@@ -42,7 +42,7 @@
 <script src="{$app_url}/ui/ui/scripts/adminlte.min.js"></script>
 
 <script src="{$app_url}/ui/ui/scripts/plugins/select2.min.js"></script>
-<script src="{$app_url}/ui/ui/scripts/custom.js?2026.11.12.1"></script>
+<script src="{$app_url}/ui/ui/scripts/custom.js?2026.11.12.2"></script>
 
 {if isset($xfooter)}
 {$xfooter}

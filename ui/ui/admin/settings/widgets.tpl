@@ -34,7 +34,7 @@
                 {if !$w['enabled']}<span class="ls-pill ls-pill--inactive">{Lang::T('Disabled')}</span>{/if}
                 <span class="st-w__act">
                     <a href="{Text::url('widgets/edit/', $w['id'], '&user=', $tipeUser)}" class="ls-btn ls-btn--sm">{Lang::T("Edit")}</a>
-                    <a href="{Text::url('widgets/delete/', $w['id'], '&user=', $tipeUser)}" onclick="return ask(this, '{Lang::T("Delete this widget?")}')"
+                    <a href="{Text::url('widgets/delete/', $w['id'], '&user=', $tipeUser)}" onclick="var a = this; return ask(a, '{Lang::T("Delete this widget?")}', function () { window.location.href = a.href; })"
                         class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" title="{Lang::T('Delete')}" aria-label="{Lang::T('Delete')}: {$w['title']|escape}"><i class="fa fa-trash" aria-hidden="true"></i></a>
                 </span>
             </li>

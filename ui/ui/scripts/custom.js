@@ -406,38 +406,65 @@ $(document).ready(function () {
     var form = root.closest("[data-t-copy]") || root;
     var tCopy = form.getAttribute("data-t-copy") || "Copy";
     var tCopied = form.getAttribute("data-t-copied") || "Copied";
-    root.querySelectorAll(".bs-callout > p").forEach(function (p) {
-      if (p.querySelector(".st-copy")) { return; }
+
+    function makeBtn(cls, getText, label) {
       var btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "st-copy";
-      btn.innerHTML = '<i class="fa fa-copy" aria-hidden="true"></i> <span></span>';
-      btn.lastChild.textContent = tCopy;
+      btn.className = cls;
+      btn.innerHTML = '<i class="fa fa-copy" aria-hidden="true"></i>' + (label ? ' <span></span>' : "");
+      if (label) { btn.lastChild.textContent = tCopy; }
+      btn.title = tCopy;
       btn.addEventListener("click", function () {
-        // the commands only: comment lines (# ...) and the small note are left out
-        var clone = p.cloneNode(true);
-        clone.querySelectorAll(".st-copy, small").forEach(function (n) { n.remove(); });
-        var lines = clone.innerText.split("\n").map(function (l) { return l.trim(); })
-          .filter(function (l) { return l !== "" && l.charAt(0) !== "#"; });
-        var txt = lines.join("\n");
+        var txt = getText();
         var done = function () {
-          btn.lastChild.textContent = tCopied;
           btn.classList.add("is-done");
-          setTimeout(function () { btn.lastChild.textContent = tCopy; btn.classList.remove("is-done"); }, 1600);
+          if (label) { btn.lastChild.textContent = tCopied; }
+          btn.title = tCopied;
+          setTimeout(function () {
+            btn.classList.remove("is-done");
+            if (label) { btn.lastChild.textContent = tCopy; }
+            btn.title = tCopy;
+          }, 1600);
         };
         if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(txt).then(done, function () { fallback(txt); done(); });
-        } else { fallback(txt); done(); }
+          navigator.clipboard.writeText(txt).then(done, function () { if (fallback(txt)) { done(); } });
+        } else if (fallback(txt)) { done(); }
       });
-      p.appendChild(btn);
+      return btn;
+    }
+
+    // the text of a block as lines: <br> become line breaks (a detached copy has no layout, so innerText would join them)
+    function commandLines(p) {
+      var clone = p.cloneNode(true);
+      clone.querySelectorAll(".st-copy, small, a").forEach(function (n) { n.remove(); });
+      clone.querySelectorAll("br").forEach(function (br) { br.replaceWith("\n"); });
+      return clone.textContent.split("\n").map(function (l) { return l.trim(); })
+        .filter(function (l) { return l !== "" && l.charAt(0) !== "#" && !/:$/.test(l); }); // no comments, no "Check:" left by a link
+    }
+
+    root.querySelectorAll(".bs-callout > p").forEach(function (p) {
+      if (p.querySelector(".st-copy")) { return; }
+      // each address has its own button, which copies that address only
+      p.querySelectorAll("a[href]").forEach(function (a) {
+        var url = a.textContent.trim() || a.href;
+        a.insertAdjacentElement("afterend", makeBtn("st-copy st-copy--inline", function () { return url; }, false));
+      });
+      // the block button copies the commands (none when the block only holds addresses)
+      if (commandLines(p).length) {
+        p.appendChild(makeBtn("st-copy", function () { return commandLines(p).join("\n"); }, true));
+      } else {
+        p.classList.add("st-copy-none");
+      }
     });
   }
+  // older browsers / plain http: returns whether the copy went through
   function fallback(txt) {
-    var ta = document.createElement("textarea");
+    var ta = document.createElement("textarea"), ok = false;
     ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
     document.body.appendChild(ta); ta.select();
-    try { document.execCommand("copy"); } catch (e) {}
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
     ta.remove();
+    return ok;
   }
 
   ready(function () {

@@ -256,6 +256,8 @@ switch ($action) {
             $_POST['man_fields_custom'] = isset($_POST['man_fields_custom']) ? 'yes' : 'no';
             $enable_session_timeout = isset($_POST['enable_session_timeout']) ? 1 : 0;
             $_POST['enable_session_timeout'] = $enable_session_timeout;
+            // RADIUS REST interim-update window (minutes, 0 = off), read by cron.php
+            if (isset($_POST['frrest_interim_update'])) $_POST['frrest_interim_update'] = (string) max(0, (int) $_POST['frrest_interim_update']);
             // Captcha: which logins are protected, one check box each
             $_POST['captcha_on_admin'] = isset($_POST['captcha_on_admin']) ? 'yes' : 'no';
             $_POST['captcha_on_customer'] = isset($_POST['captcha_on_customer']) ? 'yes' : 'no';
@@ -1041,7 +1043,13 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
-        $tables = $_POST['tables'];
+        // only names of tables that exist in this database, and at least one
+        $posted = isset($_POST['tables']) && is_array($_POST['tables']) ? array_map('strval', $_POST['tables']) : [];
+        $existing = ORM::get_db()->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
+        $tables = array_values(array_intersect($posted, $existing));
+        if (!$tables) {
+            r2(getUrl('settings/dbstatus'), 'e', Lang::T('Choose at least one table to back up'));
+        }
         set_time_limit(-1);
         header('Pragma: public');
         header('Expires: 0');

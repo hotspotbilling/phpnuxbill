@@ -62,6 +62,17 @@
             all.checked = n === boxes.length; all.indeterminate = n > 0 && n < boxes.length;
         }
         all.addEventListener('change', function () { boxes.forEach(function (b) { b.checked = all.checked; }); });
+        // nothing ticked: no empty download
+        all.form.addEventListener('submit', function (e) {
+            var any = [].some.call(boxes, function (b) { return b.checked; });
+            if (!any) {
+                e.preventDefault();
+                all.setCustomValidity('{Lang::T('Choose at least one table to back up')|escape:'javascript'}');
+                all.reportValidity();
+            }
+        });
+        boxes.forEach(function (b) { b.addEventListener('change', function () { all.setCustomValidity(''); }); });
+        all.addEventListener('change', function () { all.setCustomValidity(''); });
         boxes.forEach(function (b) { b.addEventListener('change', sync); });
     })();
 </script>

@@ -84,7 +84,7 @@
                 <div class="panel-footer st-card-foot">
                     {if $do == 'edit'}
                     <a href="{Text::url('widgets/delete/', $widget['id'], '&user=', $tipeUser)}" class="ls-btn ls-btn--danger"
-                        onclick="return ask(this, '{Lang::T("Remove this widget?")}')"><i class="fa fa-trash" aria-hidden="true"></i> {Lang::T("Delete")}</a>
+                        onclick="var a = this; return ask(a, '{Lang::T("Remove this widget?")}', function () { window.location.href = a.href; })"><i class="fa fa-trash" aria-hidden="true"></i> {Lang::T("Delete")}</a>
                     {else}<span></span>{/if}
                     <span class="st-foot-end">
                         <a href="{Text::url('widgets/', '&user=', $tipeUser)}" class="ls-btn"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T("Back")}</a>

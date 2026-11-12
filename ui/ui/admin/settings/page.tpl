@@ -9,7 +9,7 @@
                         <div class="btn-group pull-right">
                             <a class="btn btn-danger btn-xs" title="Reset File"
                                 href="{Text::url('')}pages/{$PageFile}-reset"
-                                onclick="return ask(this, 'Reset File?')"><span class="glyphicon glyphicon-refresh"
+                                onclick="var a = this; return ask(a, 'Reset File?', function () { window.location.href = a.href; })"><span class="glyphicon glyphicon-refresh"
                                     aria-hidden="true"></span></a>
                         </div>
                     {/if}
@@ -32,10 +32,10 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" id="stPageUrl" onclick="this.select()" readonly
                                     value="{$app_url}/{$PAGES_PATH}/{$PageFile}.html">
-                                <span class="input-group-btn"><button type="button" class="btn btn-default"
-                                    onclick="var f = document.getElementById('stPageUrl'); f.select(); if (navigator.clipboard) { navigator.clipboard.writeText(f.value); } this.textContent = '{Lang::T('Copied')|escape:'javascript'}';">{Lang::T('Copy')}</button></span>
+                                <span class="input-group-btn"><button type="button" class="btn btn-default" id="stPageCopy" data-copied="{Lang::T('Copied')|escape}">{Lang::T('Copy')}</button></span>
                             </div>
                             <small>{Lang::T('Sometimes you need to refresh 3 times until content change')}</small>
+                            <small id="stPageCopyHint" hidden>{Lang::T('Copying is not available here: the address is selected, press Ctrl+C (or Cmd+C) to copy it.')}</small>
                         </div>
                         <button type="submit" class="ls-btn ls-btn--primary st-page-save"><i class="fa fa-check" aria-hidden="true"></i> {Lang::T('Save')}</button>
                     </div>
@@ -76,6 +76,23 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function() {
             $('#summernote').summernote();
+        });
+
+        // "Copied" only once the clipboard took it; without the Clipboard API (or when it refuses) the address stays selected
+        document.addEventListener("DOMContentLoaded", function () {
+            var btn = document.getElementById('stPageCopy'), field = document.getElementById('stPageUrl'), hint = document.getElementById('stPageCopyHint');
+            if (!btn) { return; }
+            var label = btn.textContent;
+            btn.addEventListener('click', function () {
+                field.select();
+                var manual = function () { field.focus(); field.select(); hint.hidden = false; };
+                if (!navigator.clipboard || !window.isSecureContext) { manual(); return; }
+                navigator.clipboard.writeText(field.value).then(function () {
+                    hint.hidden = true;
+                    btn.textContent = btn.getAttribute('data-copied');
+                    setTimeout(function () { btn.textContent = label; }, 1600);
+                }, manual);
+            });
         });
 
         function selectTemplate(f) {

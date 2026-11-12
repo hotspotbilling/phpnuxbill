@@ -7388,6 +7388,8 @@ body.as-chrome .customer-edit-actions { padding: 14px 20px; background: var(--ls
 .st .form-group > .control-label i { margin-right: 4px; color: var(--ls-muted); }
 .st .form-group { grid-template-rows: auto 1fr; }
 .st .form-group > div[class*="col-"] { grid-area: control; align-self: start; }
+/* a full-width field with no label of its own takes the whole row, not just the control column */
+.st .form-group:not(:has(> .control-label)) > div.col-md-12 { grid-column: 1 / -1; grid-row: 1 / -1; }
 .st .form-group:not(:has(> .help-block, > small, > p.help-block)) > .control-label { padding-top: 10px; }
 .st .form-group > .help-block, .st .form-group > p.help-block, .st .form-group > small { grid-area: help; align-self: start; margin: 0; font-size: 12px; line-height: 1.5; color: var(--ls-muted); }
 .st .form-group > small > .help-block { margin: 0; font-size: 12px; color: var(--ls-muted); }
@@ -7702,3 +7704,8 @@ body.dark-mode .st-rl__note { color: #5eead4 !important; }
 /* Routely address left without the plugin */
 .st-rl.is-orphan { background: linear-gradient(90deg, rgba(217, 119, 6, .12), transparent 70%); }
 .st-rl.is-orphan .st-rl__mark { background: #d97706; }
+/* a Copy beside one address in a command block */
+.st-copy.st-copy--inline { position: static; display: inline-flex; vertical-align: middle; height: 22px; margin-left: 6px; padding: 0 7px; font-size: 11px; }
+.st .bs-callout > p.st-copy-none { padding-right: 12px !important; }
+/* a row with no label (a full-width field such as col-md-12): the field takes the whole row, not the control column */
+.st .form-group:not(:has(> .control-label)) > div[class*="col-"] { grid-column: 1 / -1; grid-row: auto; }
