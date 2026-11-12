@@ -26,6 +26,11 @@ switch ($action) {
             }
 
             // Input Validation Function
+            // a percentage of the purchase: the same clamping as the amounts (below 0 becomes 0), and above 100 becomes 100
+            $validatePercentage = function ($value) {
+                return min(100, max(0, floatval($value)));
+            };
+
             $validateNumericPositive = function ($value) {
                 $val = floatval($value);
                 return $val >= 0 ? $val : 0;
@@ -47,8 +52,8 @@ switch ($action) {
                 'min_purchase_amount' => $validateNumericPositive(_post('min_purchase_amount')),
                 'referrer_calculation_type' => in_array(_post('referrer_calculation_type'), ['fixed', 'percentage']) ? _post('referrer_calculation_type') : 'fixed',
                 'referred_calculation_type' => in_array(_post('referred_calculation_type'), ['fixed', 'percentage']) ? _post('referred_calculation_type') : 'fixed',
-                'referrer_reward_percentage' => $validateNumericPositive(_post('referrer_reward_percentage')),
-                'referred_reward_percentage' => $validateNumericPositive(_post('referred_reward_percentage')),
+                'referrer_reward_percentage' => $validatePercentage(_post('referrer_reward_percentage')),
+                'referred_reward_percentage' => $validatePercentage(_post('referred_reward_percentage')),
             );
 
             foreach ($update as $key => $value) {
