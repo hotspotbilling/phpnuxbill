@@ -8,7 +8,8 @@
 
 class Paginator
 {
-    public static function findMany($query, $search = [], $per_page = '10', $append_url = "", $toArray = false)
+    /** $total: the row count when the caller already has it (a large table is costly to count twice); null counts $query. */
+    public static function findMany($query, $search = [], $per_page = '10', $append_url = "", $toArray = false, $total = null)
     {
         global $routes, $ui, $isApi;
         $adjacents = "2";
@@ -20,7 +21,7 @@ class Paginator
         }
         $url .= $append_url.'&p=';
         $url = Text::fixUrl($url);
-        $totalReq = $query->count();
+        $totalReq = $total !== null ? (int) $total : $query->count();
         $lastpage = ceil($totalReq / $per_page);
         $lpm1 = $lastpage - 1;
         $limit = $per_page;

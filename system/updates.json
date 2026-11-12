@@ -319,5 +319,19 @@
     "ALTER TABLE `tbl_transactions` CHANGE `type` `type` ENUM('Hotspot','PPPOE','VPN','Balance') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;",
     "ALTER TABLE `tbl_customers` CHANGE `service_type` `service_type` ENUM('Hotspot','PPPoE','VPN','Others') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'Others' COMMENT 'For selecting user type';",
     "DELETE t1 FROM `tbl_appconfig` t1 JOIN `tbl_appconfig` t2 ON t2.setting = t1.setting AND t2.id > t1.id WHERE t1.setting IN ('referral_enabled', 'referrer_reward_type', 'referrer_reward_amount', 'referred_reward_type', 'referred_reward_amount', 'min_purchase_amount', 'referral_code_length', 'require_purchase')"
+  ],
+  "2026.11.12": [
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_transactions' AND INDEX_NAME='idx_trx_recharged')=0, 'ALTER TABLE `tbl_transactions` ADD INDEX `idx_trx_recharged` (`recharged_on`, `recharged_time`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_transactions' AND COLUMN_NAME='invoice' AND SEQ_IN_INDEX=1)=0, 'ALTER TABLE `tbl_transactions` ADD INDEX `idx_trx_invoice` (`invoice`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_customers' AND COLUMN_NAME='username' AND SEQ_IN_INDEX=1)=0, 'ALTER TABLE `tbl_customers` ADD INDEX `idx_customers_username` (`username`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;"
   ]
 }

@@ -7255,6 +7255,102 @@ body.dark-mode .rf { --rf-bar: #818cf8; --rf-ok: #4ade80; --rf-warn: #fbbf24; }
 @media (max-width: 767px) { .rf-arrow { display: none !important; } }
 @media (max-width: 480px) { .rf-kpis { grid-template-columns: minmax(0, 1fr); } }
 
+/* Reports: Daily Report and Activation History (ui/ui/admin/reports/list.tpl, activation.tpl). Built on the .ls kit and the
+   .rf tiles and panels above. */
+.rp { --rp-line: #d97706; --rp-up: #15803d; --rp-down: #b91c1c; }
+body.dark-mode .rp { --rp-line: #fbbf24; --rp-up: #4ade80; --rp-down: #f87171; }
+.rp [hidden] { display: none !important; }
+.rp h3, .rp section, .rp header { min-height: 0; }
+/* filter */
+.rp-filter { margin-bottom: 16px; overflow: visible; }
+.rp-filter .ls-tabs { margin: 0; padding: 12px 14px 0; }
+.rp-fields { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 12px 14px 14px; }
+.rp-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; margin: 0; font-weight: 500; }
+.rp-field > span:first-child { font-size: 12px; font-weight: 600; color: var(--ls-muted); }
+.rp-field__pair { display: flex; gap: 6px; }
+.rp-field input { height: 38px; padding: 0 10px; border: 1px solid var(--ls-field-line); border-radius: 8px; background: var(--ls-field); color: var(--ls-ink); font-size: 13px; color-scheme: light; }
+body.dark-mode .rp-field input { color-scheme: dark; }
+.rp-field input[type="date"] { min-width: 140px; }
+.rp-field input[type="time"] { width: 112px; }
+.rp-field input:focus { outline: none; border-color: var(--ls-accent); box-shadow: 0 0 0 3px var(--ls-accent-soft); }
+.rp-fields__actions { display: flex; gap: 8px; margin-left: auto; }
+.rp-fields__actions .ls-btn { height: 38px; border-radius: 8px; }
+.rp-more-btn[aria-expanded="true"] { border-color: var(--ls-accent); color: var(--ls-accent); }
+.rp-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--ls-fill); color: #fff; font-size: 11px; font-weight: 700; }
+.rp-more { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0 14px; padding: 14px 0; border-top: 1px dashed var(--ls-line); }
+.rp-more .select2-container { width: 100% !important; }
+/* the filter lists look like the date and time boxes. The global dark-mode Select2 rules carry :not(#filterNavigateMenu), so these
+   restate the same weight (as the Send Message fields do). */
+body .rp .select2-container--bootstrap .select2-selection--multiple:not(#filterNavigateMenu) {
+    display: flex; align-items: center; min-height: 38px; padding: 3px 8px; border: 1px solid var(--ls-field-line); border-radius: 8px;
+    background: var(--ls-field); color: var(--ls-ink); box-shadow: none; font-size: 13px; cursor: text;
+}
+body .rp .select2-container--bootstrap.select2-container--focus .select2-selection--multiple:not(#filterNavigateMenu),
+body .rp .select2-container--bootstrap.select2-container--open .select2-selection--multiple:not(#filterNavigateMenu) {
+    border-color: var(--ls-accent); box-shadow: 0 0 0 3px var(--ls-accent-soft); outline: 0;
+}
+body .rp .select2-container--bootstrap .select2-selection--multiple .select2-selection__rendered { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; width: 100%; margin: 0; padding: 0; line-height: 1.4; }
+body .rp .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice {
+    display: inline-flex; align-items: center; gap: 4px; float: none; margin: 0; padding: 2px 8px; border: 1px solid var(--ls-line); border-radius: 999px;
+    background: var(--ls-card); color: var(--ls-ink); font-size: 12px; line-height: 1.4;
+}
+body .rp .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove { float: none; margin: 0; color: var(--ls-muted); }
+body .rp .select2-container--bootstrap .select2-selection--multiple .select2-selection__choice__remove:hover { color: var(--ls-ink); }
+body .rp .select2-container--bootstrap .select2-selection--multiple .select2-selection__clear { margin: 0 0 0 auto; color: var(--ls-muted); }
+body .rp .select2-container--bootstrap .select2-search--inline { float: none; flex: 1 1 60px; min-width: 60px; }
+body .rp .select2-container--bootstrap .select2-search--inline .select2-search__field:not(#filterNavigateMenu) {
+    width: 100% !important; height: 28px; margin: 0; padding: 0 4px; border: 0; background: transparent !important; color: var(--ls-ink); font-size: 13px; box-shadow: none;
+}
+body .rp .select2-container--bootstrap .select2-search--inline .select2-search__field::placeholder { color: var(--ls-muted); opacity: 1; }
+/* the hidden <select> behind each list must not stretch the panel (see the .mc/.st rule above) */
+body .rp select.select2-hidden-accessible:not(#filterNavigateMenu) { width: 1px !important; height: 1px !important; min-height: 0; padding: 0; border: 0; }
+/* tiles */
+.rp-delta { font-style: normal; font-weight: 700; white-space: nowrap; }
+.rp-delta--up { color: var(--rp-up); }
+.rp-delta--down { color: var(--rp-down); }
+/* insights */
+.rp-insights-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 10px; }
+.rp-insights-head h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--ls-ink); }
+.rp-toggle { margin: 0; font-size: 13px; font-weight: 500; color: var(--ls-muted); cursor: pointer; }
+.rp-toggle input { margin: 0 6px 0 0; vertical-align: -1px; }
+.rp-trend { margin-bottom: 16px; }
+.rp-trend .rf-chart { min-height: 280px; }
+.rp-legend { display: flex; gap: 14px; font-size: 12px; color: var(--ls-muted); white-space: nowrap; }
+.rp-swatch { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 3px; vertical-align: -1px; }
+.rp-swatch--bar { background: var(--rf-bar); }
+.rp-swatch--line { height: 3px; border-radius: 2px; vertical-align: 2px; background: var(--rp-line); }
+.rp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+.rp-breakdown { min-height: 120px; }
+.rp-state { padding: 28px 12px; }
+.rp-breakdown li.rp-state { display: block; }
+/* table */
+.rp-bar { justify-content: space-between; }
+.rp-bar__title { display: flex; flex-direction: column; min-width: 0; }
+.rp-bar__title b { font-size: 14.5px; color: var(--ls-ink); }
+.rp-bar__title small, .rp-bar__count { font-size: 12px; color: var(--ls-muted); }
+.rp-bar__count { margin-left: auto; white-space: nowrap; }
+.rp-cust small { display: block; font-size: 12px; margin-top: 1px; }
+.rp .ls-table td .ls-pill { margin-left: 6px; padding: 0 8px; font-size: 11px; vertical-align: 1px; }
+.rp-total td { background: var(--ls-soft); border-top: 1px solid var(--ls-line); border-bottom: 0; }
+.rp-pager:has(.pagination) { padding: 4px 14px; border-top: 1px solid var(--ls-line); }
+.rp-pager .pagination { margin: 10px 0; }
+.rp-note { margin: 10px 2px 0; font-size: 12.5px; color: var(--ls-muted); }
+@media (max-width: 1199px) { .rp-more { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 991px) { .rp-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 767px) {
+    .rp-fields { align-items: stretch; }
+    .rp-field { flex: 1 1 100%; }
+    .rp-field__pair input[type="date"] { flex: 1; min-width: 0; }
+    .rp-fields__actions { width: 100%; margin-left: 0; }
+    .rp-fields__actions .ls-btn { flex: 1; }
+    .rp-hide-sm { display: none; }
+    .rp-more { grid-template-columns: minmax(0, 1fr); }
+    .rp-legend { display: none; }
+    .rp .ls-table tfoot { display: block; }
+    .rp-cust { flex-wrap: wrap; }
+    .rp-cust small { flex-basis: 100%; }
+}
+
 /* Referral settings */
 .rf-note { display: flex; gap: 12px; margin: 0 0 18px; padding: 12px 14px; border: 1px solid var(--ls-line); border-radius: 10px; background: var(--ls-soft); font-size: 13px; color: var(--ls-muted); line-height: 1.5; }
 .rf-note > i { flex: none; margin-top: 2px; color: var(--ls-accent); font-size: 15px; }

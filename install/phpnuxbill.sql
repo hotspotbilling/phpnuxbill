@@ -373,7 +373,8 @@ ALTER TABLE `tbl_bandwidth`
 ALTER TABLE `tbl_customers`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_customers_created_at` (`created_at`),
-  ADD KEY `idx_customers_status` (`status`);
+  ADD KEY `idx_customers_status` (`status`),
+  ADD KEY `idx_customers_username` (`username`);
 
 ALTER TABLE `tbl_customers_fields`
   ADD PRIMARY KEY (`id`),
@@ -399,7 +400,9 @@ ALTER TABLE `tbl_transactions`
   ADD KEY `idx_trx_date_method` (`recharged_on`, `method`),
   ADD KEY `idx_trx_type` (`type`),
   ADD KEY `idx_trx_plan` (`plan_name`),
-  ADD KEY `idx_trx_routers` (`routers`);
+  ADD KEY `idx_trx_routers` (`routers`),
+  ADD KEY `idx_trx_recharged` (`recharged_on`, `recharged_time`),
+  ADD KEY `idx_trx_invoice` (`invoice`);
 
 ALTER TABLE `tbl_users`
   ADD PRIMARY KEY (`id`);

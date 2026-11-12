@@ -28,51 +28,14 @@ switch ($action) {
 
     case 'print-by-date':
         $mdate = date('Y-m-d');
-        $types = ORM::for_table('tbl_transactions')->getEnum('type');
-        $methods = array_column(ORM::for_table('tbl_transactions')->rawQuery("SELECT DISTINCT SUBSTRING_INDEX(`method`, ' - ', 1) as method FROM tbl_transactions;")->findArray(), 'method');
-        $routers = array_column(ORM::for_table('tbl_transactions')->select('routers')->distinct('routers')->find_array(), 'routers');
-        $plans = array_column(ORM::for_table('tbl_transactions')->select('plan_name')->distinct('plan_name')->find_array(), 'plan_name');
-        $reset_day = $config['reset_day'];
-        if (empty($reset_day)) {
-            $reset_day = 1;
-        }
-        //first day of month
-        if (date("d") >= $reset_day) {
-            $start_date = date('Y-m-' . $reset_day);
-        } else {
-            $start_date = date('Y-m-' . $reset_day, strtotime("-1 MONTH"));
-        }
-        $tps = ($_GET['tps']) ? $_GET['tps'] : $types;
-        $mts = ($_GET['mts']) ? $_GET['mts'] : $methods;
-        $rts = ($_GET['rts']) ? $_GET['rts'] : $routers;
-        $plns = ($_GET['plns']) ? $_GET['plns'] : $plans;
-        $sd = _req('sd', $start_date);
-        $ed = _req('ed', $mdate);
-        $ts = _req('ts', '00:00:00');
-        $te = _req('te', '23:59:59');
-
-        $query = ORM::for_table('tbl_transactions')
-            ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-            ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-            ->order_by_desc('id');
-        if (count($tps) > 0) {
-            $query->where_in('type', $tps);
-        }
-        if (count($mts) > 0) {
-            if (count($mts) != count($methods)) {
-                foreach ($mts as $mt) {
-                    $query->where_like('method', "$mt - %");
-                }
-            }
-        }
-        if (count($rts) > 0) {
-            $query->where_in('routers', $rts);
-        }
-        if (count($plns) > 0) {
-            $query->where_in('plan_name', $plns);
-        }
-        $x = $query->find_array();
-        $xy = $query->sum('price');
+        // same filter and queries as the Daily Report (reports.php), so the export matches the page
+        $f = TransactionReport::filterFromRequest(TransactionReport::filterOptions(), TransactionReport::defaultStart());
+        $sd = $f['sd'];
+        $ed = $f['ed'];
+        $ts = $f['ts'];
+        $te = $f['te'];
+        $x = TransactionReport::query($f)->find_array();
+        $xy = TransactionReport::totals($f)['sum'];
 
         $ui->assign('sd', $sd);
         $ui->assign('ed', $ed);
@@ -88,54 +51,15 @@ switch ($action) {
 
     case 'pdf-by-date':
         $mdate = date('Y-m-d');
-        $types = ORM::for_table('tbl_transactions')->getEnum('type');
-        $methods = array_column(ORM::for_table('tbl_transactions')->rawQuery("SELECT DISTINCT SUBSTRING_INDEX(`method`, ' - ', 1) as method FROM tbl_transactions;")->findArray(), 'method');
-        $routers = array_column(ORM::for_table('tbl_transactions')->select('routers')->distinct('routers')->find_array(), 'routers');
-        $plans = array_column(ORM::for_table('tbl_transactions')->select('plan_name')->distinct('plan_name')->find_array(), 'plan_name');
-        $reset_day = $config['reset_day'];
-        if (empty($reset_day)) {
-            $reset_day = 1;
-        }
-        //first day of month
-        if (date("d") >= $reset_day) {
-            $start_date = date('Y-m-' . $reset_day);
-        } else {
-            $start_date = date('Y-m-' . $reset_day, strtotime("-1 MONTH"));
-        }
-        $tps = ($_GET['tps']) ? $_GET['tps'] : $types;
-        $mts = ($_GET['mts']) ? $_GET['mts'] : $methods;
-        $rts = ($_GET['rts']) ? $_GET['rts'] : $routers;
-        $plns = ($_GET['plns']) ? $_GET['plns'] : $plans;
-        $sd = _req('sd', $start_date);
-        $ed = _req('ed', $mdate);
-        $ts = _req('ts', '00:00:00');
-        $te = _req('te', '23:59:59');
-
-        $query = ORM::for_table('tbl_transactions')
-            ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-            ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-            ->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
-            ->select('tbl_transactions.*')
-            ->select('tbl_customers.fullname', 'fullname')
-            ->order_by_desc('tbl_transactions.id');
-        if (count($tps) > 0) {
-            $query->where_in('type', $tps);
-        }
-        if (count($mts) > 0) {
-            if (count($mts) != count($methods)) {
-                foreach ($mts as $mt) {
-                    $query->where_like('method', "$mt - %");
-                }
-            }
-        }
-        if (count($rts) > 0) {
-            $query->where_in('routers', $rts);
-        }
-        if (count($plns) > 0) {
-            $query->where_in('plan_name', $plns);
-        }
-        $x = $query->find_array();
-        $xy = $query->sum('price');
+        // same filter and queries as the Daily Report (reports.php), so the export matches the page
+        $f = TransactionReport::filterFromRequest(TransactionReport::filterOptions(), TransactionReport::defaultStart());
+        $sd = $f['sd'];
+        $ed = $f['ed'];
+        $ts = $f['ts'];
+        $te = $f['te'];
+        $x = TransactionReport::query($f)->find_array();
+        $x = TransactionReport::withNames($x);
+        $xy = TransactionReport::totals($f)['sum'];
 
         $title = ' Reports [' . $mdate . ']';
         $title = str_replace('-', ' ', $title);

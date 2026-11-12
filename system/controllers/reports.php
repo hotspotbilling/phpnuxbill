@@ -22,262 +22,50 @@ $month_n = date('n');
 
 switch ($action) {
     case 'ajax':
+        // chart data for the Daily Report: one GROUP BY query per chart, whatever the table size
         $data = $routes['2'];
-        $reset_day = $config['reset_day'];
-        if (empty($reset_day)) {
-            $reset_day = 1;
-        }
-        //first day of month
-        if (date("d") >= $reset_day) {
-            $start_date = date('Y-m-' . $reset_day);
+        $f = TransactionReport::filterFromRequest(TransactionReport::filterOptions(), TransactionReport::defaultStart());
+        if ($data === 'summary') {
+            $result = TransactionReport::summary($f);
+        } elseif ($data === 'line') {
+            $result = TransactionReport::line($f);
+        } elseif (isset(TransactionReport::DIMENSIONS[$data])) {
+            $result = TransactionReport::pie($f, $data);
         } else {
-            $start_date = date('Y-m-' . $reset_day, strtotime("-1 MONTH"));
+            $result = ['labels' => [], 'datas' => []];
         }
-        $sd = _req('sd', $start_date);
-        $ed = _req('ed', $mdate);
-        $ts = _req('ts', '00:00:00');
-        $te = _req('te', '23:59:59');
-        $types = ORM::for_table('tbl_transactions')->getEnum('type');
-        $tps = ($_GET['tps']) ? $_GET['tps'] : $types;
-        $plans = array_column(ORM::for_table('tbl_transactions')->select('plan_name')->distinct('plan_name')->find_array(), 'plan_name');
-        $plns = ($_GET['plns']) ? $_GET['plns'] : $plans;
-        $methods = array_column(ORM::for_table('tbl_transactions')->rawQuery("SELECT DISTINCT SUBSTRING_INDEX(`method`, ' - ', 1) as method FROM tbl_transactions;")->findArray(), 'method');
-        $mts = ($_GET['mts']) ? $_GET['mts'] : $methods;
-        $routers = array_column(ORM::for_table('tbl_transactions')->select('routers')->distinct('routers')->find_array(), 'routers');
-        $rts = ($_GET['rts']) ? $_GET['rts'] : $routers;
-        $result = [];
-        switch ($data) {
-            case 'type':
-                foreach ($tps as $tp) {
-                    $query = ORM::for_table('tbl_transactions')
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-                        ->where('type', $tp);
-                    if (count($mts) > 0) {
-                        if (count($mts) != count($methods)) {
-                            $w = [];
-                            $v = [];
-                            foreach ($mts as $mt) {
-                                $w[] = 'method';
-                                $v[] = "$mt - %";
-                            }
-                            $query->where_likes($w, $v);
-                        }
-                    }
-                    if (count($rts) > 0) {
-                        $query->where_in('routers', $rts);
-                    }
-                    if (count($plns) > 0) {
-                        $query->where_in('plan_name', $plns);
-                    }
-                    $count = $query->count();
-                    if ($count > 0) {
-                        $result['datas'][] = $count;
-                        $result['labels'][] = "$tp ($count)";
-                    }
-                }
-                break;
-            case 'plan':
-                foreach ($plns as $pln) {
-                    $query = ORM::for_table('tbl_transactions')
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-                        ->where('plan_name', $pln);
-                    if (count($tps) > 0) {
-                        $query->where_in('type', $tps);
-                    }
-                    if (count($mts) > 0) {
-                        if (count($mts) != count($methods)) {
-                            $w = [];
-                            $v = [];
-                            foreach ($mts as $mt) {
-                                $w[] = 'method';
-                                $v[] = "$mt - %";
-                            }
-                            $query->where_likes($w, $v);
-                        }
-                    }
-                    if (count($rts) > 0) {
-                        $query->where_in('routers', $rts);
-                    }
-                    $count = $query->count();
-                    if ($count > 0) {
-                        $result['datas'][] = $count;
-                        $result['labels'][] = "$pln ($count)";
-                    }
-                }
-                break;
-            case 'method':
-                foreach ($mts as $mt) {
-                    $query = ORM::for_table('tbl_transactions')
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-                        ->where_like('method', "$mt - %");
-                    if (count($tps) > 0) {
-                        $query->where_in('type', $tps);
-                    }
-                    if (count($rts) > 0) {
-                        $query->where_in('routers', $rts);
-                    }
-                    if (count($plns) > 0) {
-                        $query->where_in('plan_name', $plns);
-                    }
-                    $count = $query->count();
-                    if ($count > 0) {
-                        $result['datas'][] = $count;
-                        $result['labels'][] = "$mt ($count)";
-                    }
-                }
-                break;
-            case 'router':
-                foreach ($rts as $rt) {
-                    $query = ORM::for_table('tbl_transactions')
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-                        ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-                        ->where('routers', $rt);
-                    if (count($tps) > 0) {
-                        $query->where_in('type', $tps);
-                    }
-                    if (count($plns) > 0) {
-                        $query->where_in('plan_name', $plns);
-                    }
-                    $count = $query->count();
-                    if ($count > 0) {
-                        $result['datas'][] = $count;
-                        $result['labels'][] = "$rt ($count)";
-                    }
-                }
-                break;
-            case 'line':
-                $query = ORM::for_table('tbl_transactions')
-                    ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-                    ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-                    ->order_by_desc('id');
-                if (count($tps) > 0) {
-                    $query->where_in('type', $tps);
-                }
-                if (count($mts) > 0) {
-                    if (count($mts) != count($methods)) {
-                        $w = [];
-                        $v = [];
-                        foreach ($mts as $mt) {
-                            $w[] = 'method';
-                            $v[] = "$mt - %";
-                        }
-                        $query->where_likes($w, $v);
-                    }
-                }
-                if (count($rts) > 0) {
-                    $query->where_in('routers', $rts);
-                }
-                if (count($plns) > 0) {
-                    $query->where_in('plan_name', $plns);
-                }
-                $datas = $query->find_array();
-                $period = new DatePeriod(
-                    new DateTime($sd),
-                    new DateInterval('P1D'),
-                    new DateTime($ed)
-                );
-                $pos = 0;
-                $dates = [];
-                foreach ($period as $key => $value) {
-                    $dates[] = $value->format('Y-m-d');
-                }
-                $dates = array_reverse($dates);
-                $result = [];
-                $temp;
-                foreach ($dates as $date) {
-                    $result['labels'][] = $date;
-                    // type
-                    foreach ($tps as $key) {
-                        if (!isset($temp[$key][$date])) {
-                            $temp[$key][$date] = 0;
-                        }
-                        foreach ($datas as $data) {
-                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && $data['type'] == $key) {
-                                $temp[$key][$date] += 1;
-                            }
-                        }
-                    }
-                    //plan
-                    foreach ($plns as $key) {
-                        if (!isset($temp[$key][$date])) {
-                            $temp[$key][$date] = 0;
-                        }
-                        foreach ($datas as $data) {
-                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && $data['plan_name'] == $key) {
-                                $temp[$key][$date] += 1;
-                            }
-                        }
-                    }
-                    //method
-                    foreach ($mts as $key) {
-                        if (!isset($temp[$key][$date])) {
-                            $temp[$key][$date] = 0;
-                        }
-                        foreach ($datas as $data) {
-                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && strpos($data['method'], $key) !== false) {
-                                $temp[$key][$date] += 1;
-                            }
-                        }
-                    }
-
-                    foreach ($rts as $key) {
-                        if (!isset($temp[$key][$date])) {
-                            $temp[$key][$date] = 0;
-                        }
-                        foreach ($datas as $data) {
-                            if ($data['recharged_on'] == date('Y-m-d', strtotime($date)) && $data['routers'] == $key) {
-                                $temp[$key][$date] += 1;
-                            }
-                        }
-                    }
-                    $pos++;
-                    if ($pos > 29) {
-                        // only 30days
-                        break;
-                    }
-                }
-                foreach ($temp as $key => $value) {
-                    $array = ['label' => $key];
-                    $total = 0;
-                    foreach ($value as $k => $v) {
-                        $total += $v;
-                        $array['data'][] = $v;
-                    }
-                    if ($total > 0) {
-                        $result['datas'][] = $array;
-                    }
-                }
-                break;
-            default:
-                $result = ['labels' => [], 'datas' => []];
-        }
+        header('Content-Type: application/json');
         echo json_encode($result);
         die();
     case 'by-date':
     case 'activation':
-        $q = trim(_post('q') ?: _get('q'));
-        $keep = _post('keep');
-
-        if (!empty($keep)) {
-            ORM::raw_execute("DELETE FROM tbl_transactions WHERE date < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))", [$keep]);
-            r2(getUrl('reports/activation/'), 's', "Deleted logs older than $keep days");
+        $q = trim((string) (_post('q') ?: _get('q')));
+        $typeCounts = TransactionReport::typeCounts();
+        $type = (string) _get('type');
+        if (!isset($typeCounts[$type])) {
+            $type = '';
         }
-
-        $query = ORM::for_table('tbl_transactions')
-            ->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
-            ->select('tbl_transactions.*')
-            ->select('tbl_customers.fullname', 'fullname')
-            ->order_by_desc('tbl_transactions.id');
-
+        // newest first by id: the primary key (and the type index, which ends with it), so a page is read straight off an index
+        $query = ORM::for_table('tbl_transactions')->order_by_desc('id');
+        if ($type !== '') {
+            $query->where('type', $type);
+        }
         if ($q !== '') {
-            $query->where_like('invoice', "%$q%");
+            // invoice numbers start with "INV-": match from the start (indexed), with or without the prefix typed
+            $like = addcslashes($q, '\\%_') . '%';
+            if (stripos($q, 'INV-') === 0) {
+                $query->where_raw('`invoice` LIKE ?', [$like]);
+            } else {
+                $query->where_raw('(`invoice` LIKE ? OR `invoice` LIKE ?)', [$like, 'INV-' . $like]);
+            }
+            $total = (clone $query)->count(); // a prefix search is counted exactly; it reads only the matching index range
+        } else {
+            $total = $type !== '' ? $typeCounts[$type] : array_sum($typeCounts);
         }
 
         try {
-            $d = Paginator::findMany($query, ['q' => $q]);
+            $d = Paginator::findMany($query, array_filter(['q' => $q, 'type' => $type], 'strlen'), '10', '', true, $total);
+            $d = TransactionReport::withNames($d ?: []);
         } catch (Exception $e) {
             r2(getUrl('reports/activation/'), 'e', 'Database query failed: ' . $e->getMessage());
             $d = [];
@@ -285,6 +73,11 @@ switch ($action) {
 
         $ui->assign('activation', $d);
         $ui->assign('q', $q);
+        $ui->assign('type', $type);
+        $ui->assign('typeCounts', $typeCounts);
+        $ui->assign('total', $total);
+        $ui->assign('today', $mdate);
+        $ui->assign('_title', Lang::T('Activation History'));
         $ui->display('admin/reports/activation.tpl');
         break;
 
@@ -335,58 +128,53 @@ switch ($action) {
 
     case 'daily-report':
     default:
-        $types = ORM::for_table('tbl_transactions')->getEnum('type');
-        $methods = array_column(ORM::for_table('tbl_transactions')->rawQuery("SELECT DISTINCT SUBSTRING_INDEX(`method`, ' - ', 1) as method FROM tbl_transactions;")->findArray(), 'method');
-        $routers = array_column(ORM::for_table('tbl_transactions')->select('routers')->distinct('routers')->find_array(), 'routers');
-        $plans = array_column(ORM::for_table('tbl_transactions')->select('plan_name')->distinct('plan_name')->find_array(), 'plan_name');
-        $reset_day = $config['reset_day'];
-        if (empty($reset_day)) {
-            $reset_day = 1;
-        }
-        //first day of month
-        if (date("d") >= $reset_day) {
-            $start_date = date('Y-m-' . $reset_day);
-        } else {
-            $start_date = date('Y-m-' . $reset_day, strtotime("-1 MONTH"));
-        }
-        $tps = ($_GET['tps']) ? $_GET['tps'] : $types;
-        $mts = ($_GET['mts']) ? $_GET['mts'] : $methods;
-        $rts = ($_GET['rts']) ? $_GET['rts'] : $routers;
-        $plns = ($_GET['plns']) ? $_GET['plns'] : $plans;
-        $sd = _req('sd', $start_date);
-        $ed = _req('ed', $mdate);
-        $ts = _req('ts', '00:00:00');
-        $te = _req('te', '23:59:59');
+        $options = TransactionReport::filterOptions();
+        $types = $options['types'];
+        $methods = $options['methods'];
+        $routers = $options['routers'];
+        $plans = $options['plans'];
+        $f = TransactionReport::filterFromRequest($options, TransactionReport::defaultStart());
+        // a list that narrows nothing shows every choice ticked, as before
+        $tps = $f['tps'] ?: $types;
+        $mts = $f['mts'] ?: $methods;
+        $rts = $f['rts'] ?: $routers;
+        $plns = $f['plns'] ?: $plans;
+        $sd = $f['sd'];
+        $ed = $f['ed'];
+        $ts = $f['ts'];
+        $te = $f['te'];
         $urlquery = str_replace('_route=reports', '', $_SERVER['QUERY_STRING']);
 
-
-        $query = ORM::for_table('tbl_transactions')
-            ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) >= " . strtotime("$sd $ts"))
-            ->whereRaw("UNIX_TIMESTAMP(CONCAT(`recharged_on`,' ',`recharged_time`)) <= " . strtotime("$ed $te"))
-            ->left_outer_join('tbl_customers', 'tbl_transactions.username = tbl_customers.username')
-            ->select('tbl_transactions.*')
-            ->select('tbl_customers.fullname', 'fullname')
-            ->order_by_desc('tbl_transactions.id');
-        if (count($tps) > 0) {
-            $query->where_in('type', $tps);
-        }
-        if (count($mts) > 0) {
-            $w = [];
-            $v = [];
-            foreach ($mts as $mt) {
-                $w[] = 'method';
-                $v[] = "$mt - %";
-            }
-            $query->where_likes($w, $v);
-        }
-        if (count($rts) > 0) {
-            $query->where_in('routers', $rts);
-        }
-        if (count($plns) > 0) {
-            $query->where_in('plan_name', $plns);
-        }
-        $d = Paginator::findMany($query, [], 100, $urlquery);
-        $dr = $query->sum('price');
+        $totals = TransactionReport::totals($f);
+        $prev = TransactionReport::totals(TransactionReport::previous($f));
+        $days = max(1, (int) round((strtotime($ed) - strtotime($sd)) / 86400) + 1);
+        $ui->assign('kpi', [
+            'count' => $totals['count'],
+            'sum' => $totals['sum'],
+            'avg' => $totals['count'] ? $totals['sum'] / $totals['count'] : 0,
+            'per_day' => $totals['sum'] / $days,
+            'days' => $days,
+            'prev_count' => $prev['count'],
+            'prev_sum' => $prev['sum'],
+            // change against the period of the same length just before; null when there is nothing to compare with
+            'sum_change' => $prev['sum'] > 0 ? round(($totals['sum'] - $prev['sum']) / $prev['sum'] * 100, 1) : null,
+            'count_change' => $prev['count'] > 0 ? round(($totals['count'] - $prev['count']) / $prev['count'] * 100, 1) : null,
+        ]);
+        // quick ranges for the filter
+        $ui->assign('ranges', [
+            ['label' => Lang::T('Today'), 'sd' => $mdate, 'ed' => $mdate],
+            ['label' => Lang::T('Yesterday'), 'sd' => date('Y-m-d', strtotime('-1 day')), 'ed' => date('Y-m-d', strtotime('-1 day'))],
+            ['label' => Lang::T('Last 7 days'), 'sd' => date('Y-m-d', strtotime('-6 days')), 'ed' => $mdate],
+            ['label' => Lang::T('Last 30 days'), 'sd' => date('Y-m-d', strtotime('-29 days')), 'ed' => $mdate],
+            ['label' => Lang::T('This billing month'), 'sd' => TransactionReport::defaultStart(), 'ed' => $mdate],
+        ]);
+        $ui->assign('active_filters', count(array_filter([$f['tps'], $f['plns'], $f['mts'], $f['rts']])));
+        // what the admin narrowed to (an empty list means every value); the lists above stay as they were for plugins
+        $ui->assign('sel', ['tps' => $f['tps'], 'plns' => $f['plns'], 'mts' => $f['mts'], 'rts' => $f['rts']]);
+        $ui->assign('full_day', $ts === '00:00:00' && $te === '23:59:59');
+        $d = Paginator::findMany(TransactionReport::query($f), [], 100, $urlquery, true, $totals['count']);
+        $d = TransactionReport::withNames($d ?: []);
+        $dr = $totals['sum'];
 
         $ui->assign('methods', $methods);
         $ui->assign('types', $types);
@@ -408,6 +196,7 @@ switch ($action) {
         $ui->assign('d', $d);
         $ui->assign('dr', $dr);
         $ui->assign('mdate', $mdate);
+        $ui->assign('_title', Lang::T('Daily Reports'));
         run_hook('view_daily_reports'); #HOOK
         $ui->display('admin/reports/list.tpl');
         break;
