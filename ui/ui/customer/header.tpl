@@ -408,7 +408,7 @@
                     // Display SweetAlert toast notification
                     Swal.fire({
                         icon: '{if $notify_t == "s"}success{else}warning{/if}',
-                        title: {$notify|json_encode},
+                        title: {$notify|escape|replace:'&lt;br&gt;':'<br>'|replace:'&lt;b&gt;':'<b>'|replace:'&lt;/b&gt;':'</b>'|json_encode},
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 5000,

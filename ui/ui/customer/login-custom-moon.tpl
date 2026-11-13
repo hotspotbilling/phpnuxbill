@@ -546,7 +546,7 @@
         Swal.fire({
             icon: '{if $notify_t == "s"}success{else}warning{/if}',
             title: '{if $notify_t == "s"}Success{else}Error{/if}',
-            text: '{$notify}',
+            html: {$notify|escape|replace:'&lt;br&gt;':'<br>'|replace:'&lt;b&gt;':'<b>'|replace:'&lt;/b&gt;':'</b>'|json_encode},
             backdrop: 'rgba(0, 0, 0, 0.5)',
         }).then(() => {
             document.body.style.overflow = '';
