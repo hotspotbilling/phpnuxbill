@@ -5086,5 +5086,8 @@
     "No_sales": "No sales",
     "Choose_at_least_one_table_to_back_up": "Choose at least one table to back up",
     "Search_description": "Search description",
-    "Account_Not_Found": "Account Not Found"
+    "Account_Not_Found": "Account Not Found",
+    "SMS_is_sent_through_Routely": "SMS is sent through Routely",
+    "Routely_filled_in_the_address_below__Change_gateways__routing_and_limits_in_Routely__disconnecting_there_puts_your_previous_address_back_": "Routely filled in the address below. Change gateways, routing and limits in Routely; disconnecting there puts your previous address back.",
+    "WhatsApp_is_sent_through_Routely": "WhatsApp is sent through Routely"
 }

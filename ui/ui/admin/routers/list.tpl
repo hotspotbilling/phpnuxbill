@@ -4,7 +4,7 @@
     <div class="ls-top">
         <div></div>
         <div class="ls-actions">
-            <a class="ls-btn" title="{Lang::T('Maps')}" href="{Text::url('')}routers/maps"><i class="fa fa-map-marker" aria-hidden="true"></i> {Lang::T('Maps')}</a>
+            <a class="ls-btn" title="{Lang::T('Maps')}" href="{Text::url('')}maps/routers"><i class="fa fa-map-marker" aria-hidden="true"></i> {Lang::T('Maps')}</a>
             <a href="{Text::url('')}routers/add" class="ls-btn ls-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('New Router')}</a>
         </div>
     </div>
