@@ -353,9 +353,6 @@ ALTER TABLE `tbl_logs`
 ALTER TABLE `tbl_payment_gateway`
   ADD PRIMARY KEY (`id`);
 
-ALTER TABLE `tbl_plans`
-  ADD PRIMARY KEY (`id`);
-
 ALTER TABLE `tbl_pool`
   ADD PRIMARY KEY (`id`);
 
