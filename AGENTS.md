@@ -160,5 +160,4 @@ ORM using Idiorm : `system/orm.php`
 - **`.htaccess` blocks direct PHP access** except `index.php`, `update.php`, `radius.php`. Never create publicly accessible PHP files without `.htaccess` whitelisting.
 - **Payment gateways NOT auto-loaded** — they must be `include`d explicitly. Plugins ARE auto-loaded.
 - **Template changes need BOTH** controller modification AND corresponding `.tpl` file updates.
-- **Docker image uses PHP 7.4** but project requires 8.2+. Update `docker/Dockerfile` if using Docker.
 - **No Composer autoload for app classes** — custom autoloader only; `composer.json` is metadata-only.

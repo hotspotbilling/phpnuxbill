@@ -1,26 +1,26 @@
-# Use the official PHP image with Apache
-FROM php:7.4-apache
-EXPOSE 80
-# Install necessary PHP extensions
-RUN apt-get update && apt-get install -y \
+
+FROM php:8.3-apache
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libpng-dev \
-    zlib1g-dev \
     libzip-dev \
-    zip \
-    unzip \
+    libicu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install pdo pdo_mysql \
-    && docker-php-ext-install zip
+    && docker-php-ext-install -j$(nproc) \
+       bcmath gd intl mysqli pdo_mysql zip \
+    && a2enmod rewrite headers \
+    && rm -rf /var/lib/apt/lists/*
 
-# copy contents into directory
-COPY . /var/www/html
+COPY . /var/www/html/
 
-# Set appropriate permissions
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 755 /var/www/html
+RUN if [ ! -d /var/www/html/pages ] && [ -d /var/www/html/pages_template ]; then \
+        cp -a /var/www/html/pages_template /var/www/html/pages; \
+    fi \
+    && mkdir -p /var/www/html/ui/cache /var/www/html/ui/compiled \
+    && chown -R www-data:www-data /var/www/html
 
-# Set working directory
 WORKDIR /var/www/html
+
+EXPOSE 80
