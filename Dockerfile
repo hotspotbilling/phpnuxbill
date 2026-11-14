@@ -1,3 +1,4 @@
+
 FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
@@ -7,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libicu-dev \
     libcurl4-openssl-dev \
+    libonig-dev \
     unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
@@ -23,4 +25,5 @@ COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html
 
 WORKDIR /var/www/html
+
 EXPOSE 80
