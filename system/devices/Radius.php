@@ -487,7 +487,7 @@ class Radius
             // its IP address stays what RADIUS requests come from
             $target = trim($n['nasname']) . ":$port";
             $coa = trim((string) ($config['radius_coa_' . $n['id']] ?? ''));
-            if ($coa !== '' && preg_match('/^[A-Za-z0-9.-]{1,253}:\d{1,5}$/', $coa)) {
+            if ($coa !== '' && preg_match('/^[A-Za-z0-9.-]{1,253}:(\d{1,5})$/', $coa, $m) && (int) $m[1] >= 1 && (int) $m[1] <= 65535) {
                 $target = $coa;
             }
             $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username,Framed-IP-Address = " . $act['framedipaddress'] . "' | radclient -x " . escapeshellarg($target) . " disconnect '" . $n['secret'] . "'");

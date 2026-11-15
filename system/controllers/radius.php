@@ -41,7 +41,8 @@ $saveCoa = function ($nasId, $coa) {
     $config[$key] = $coa;
 };
 $coaOk = function ($coa) {
-    return $coa === '' || preg_match('/^[A-Za-z0-9.-]{1,253}:\d{1,5}$/', $coa);
+    // host:port, the port 1 to 65535
+    return $coa === '' || (preg_match('/^[A-Za-z0-9.-]{1,253}:(\d{1,5})$/', $coa, $m) && (int) $m[1] >= 1 && (int) $m[1] <= 65535);
 };
 
 switch ($action) {
