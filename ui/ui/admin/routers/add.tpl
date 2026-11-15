@@ -1,6 +1,8 @@
 {include file="sections/header.tpl"}
 <!-- routers-add -->
 
+{include file="admin/routely-vpn-intro.tpl" rl_for="router"}
+
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">

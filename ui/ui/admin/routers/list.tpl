@@ -1,5 +1,7 @@
 {include file="sections/header.tpl"}
 
+{include file="admin/routely-vpn-intro.tpl" rl_for="router"}
+
 <div class="ls">
     <div class="ls-top">
         <div></div>
@@ -37,7 +39,7 @@
                     {foreach $d as $ds}
                     <tr>
                         <td data-label="{Lang::T('Router Name')}">{if $ds['coordinates']}<a href="https://www.google.com/maps/dir//{$ds['coordinates']|escape:'url'}/" target="_blank" rel="noopener" title="{$ds['coordinates']|escape}"><i class="fa fa-map-marker" aria-hidden="true"></i></a> {/if}<b class="ls-strong">{$ds['name']|escape}</b></td>
-                        <td data-label="{Lang::T('IP Address')}"><span class="ls-secret" tabindex="0">{$ds['ip_address']|escape}</span></td>
+                        <td data-label="{Lang::T('IP Address')}"><span class="ls-secret" tabindex="0">{$ds['ip_address']|escape}</span>{if isset($routely_vpn['addresses'][$ds['ip_address']])}{$rv = $routely_vpn['addresses'][$ds['ip_address']]} <a class="ls-pill ls-pill--routely{if $rv['state'] != 'up'} is-down{/if}" href="{Text::url('plugin/routely/vpn')}" title="{Lang::T('Reached through Routely VPN')}: {$rv['device']|escape} ({if $rv['state'] == 'up'}{Lang::T('connected')}{else}{Lang::T('not connected')}{/if})"><i class="fa fa-shield" aria-hidden="true"></i> Routely</a>{/if}</td>
                         <td data-label="{Lang::T('Username')}"><span class="ls-secret" tabindex="0">{$ds['username']|escape}</span></td>
                         <td data-label="{Lang::T('Description')}" class="ls-dim">{$ds['description']|escape}</td>
                         {if $_c['router_check']}<td data-label="{Lang::T('Online Status')}"><span class="ls-pill {if $ds['status'] == 'Online'}ls-pill--active{else}ls-pill--banned{/if}">{if $ds['status'] == 'Online'}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}</span></td><td data-label="{Lang::T('Last Seen')}" class="ls-dim ls-when">{$ds['last_seen']|escape}</td>{/if}

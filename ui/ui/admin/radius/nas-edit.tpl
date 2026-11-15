@@ -1,6 +1,8 @@
 {include file="sections/header.tpl"}
 <!-- routers-add -->
 
+{include file="admin/routely-vpn-intro.tpl" rl_for="nas"}
+
 <div class="row">
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-primary panel-hovered panel-stacked mb30">
@@ -42,6 +44,13 @@
                         <div class="col-md-2">
                             <input type="text" class="form-control" id="type" name="type" value="other"
                                 value="{$d['type']}" required placeholder="other">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-2 control-label">{Lang::T('CoA address')}</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="coa" name="coa" maxlength="260" placeholder="vpn1.example.com:34567" value="{$_c['radius_coa_'|cat:$d['id']]|default:''|escape}">
+                            <p class="help-block">{Lang::T('Optional. For a router with no public IP: where disconnects (CoA) are sent instead of IP address and port, such as a Routely VPN forward to UDP 3799.')}</p>
                         </div>
                     </div>
                     <div class="form-group">

@@ -22,9 +22,15 @@ $leafletpickerHeader = <<<EOT
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
 EOT;
 
+$routelyVpn = function () {
+    // Routely (an optional plugin): the card that offers its VPN for a router with no public IP, and which addresses lead through it
+    return function_exists('routely_vpn_core_info') ? routely_vpn_core_info() : ['installed' => function_exists('routely'), 'devices' => 0, 'addresses' => []];
+};
+
 switch ($action) {
     case 'add':
         run_hook('view_add_routers'); #HOOK
+        $ui->assign('routely_vpn', $routelyVpn());
         $ui->display('admin/routers/add.tpl');
         break;
 
@@ -38,6 +44,7 @@ switch ($action) {
         if ($d) {
             $ui->assign('d', $d);
             run_hook('view_router_edit'); #HOOK
+            $ui->assign('routely_vpn', $routelyVpn());
             $ui->display('admin/routers/edit.tpl');
         } else {
             r2(getUrl('routers/list'), 'e', Lang::T('Account Not Found'));
@@ -198,6 +205,7 @@ switch ($action) {
         }
         $d = Paginator::findMany($query, ['name' => $name]);
         $ui->assign('d', $d);
+        $ui->assign('routely_vpn', $routelyVpn());
         run_hook('view_list_routers'); #HOOK
         $ui->display('admin/routers/list.tpl');
         break;

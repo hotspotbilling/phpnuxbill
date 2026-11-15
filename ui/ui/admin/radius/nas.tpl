@@ -1,5 +1,7 @@
 {include file="sections/header.tpl"}
 
+{include file="admin/routely-vpn-intro.tpl" rl_for="nas"}
+
 <div class="ls">
     <div class="ls-top">
         <div></div>
@@ -39,7 +41,7 @@
                         <td data-label="{Lang::T('Name')}"><b class="ls-strong">{$ds['shortname']|escape}</b></td>
                         <td data-label="IP">{$ds['nasname']|escape}</td>
                         <td data-label="{Lang::T('Type')}">{$ds['type']|escape}</td>
-                        <td data-label="Port">{$ds['ports']|escape}</td>
+                        <td data-label="Port">{$ds['ports']|escape}{$coa = $_c['radius_coa_'|cat:$ds['id']]|default:''}{if $coa} <span class="ls-pill ls-pill--routely{if isset($routely_vpn['addresses'][$coa]) && $routely_vpn['addresses'][$coa]['state'] != 'up'} is-down{/if}" title="{Lang::T('Disconnects (CoA) are sent to')} {$coa|escape}{if isset($routely_vpn['addresses'][$coa])}: Routely VPN, {$routely_vpn['addresses'][$coa]['device']|escape}{/if}"><i class="fa fa-{if isset($routely_vpn['addresses'][$coa])}shield{else}exchange{/if}" aria-hidden="true"></i> CoA {$coa|escape}</span>{/if}</td>
                         <td data-label="Server">{$ds['server']|escape}</td>
                         <td data-label="Community">{$ds['community']|escape}</td>
                         <td data-label="Routers">{$ds['routers']|escape}</td>

@@ -7777,6 +7777,16 @@ body .st .st-copy:not(#filterNavigateMenu) { min-height: 0; }
 .st-rl__act .ls-btn { height: 38px; }
 .st-rl__act .ls-btn--primary { background: #0f766e; border-color: #0f766e; }
 body.dark-mode .st-rl { background: linear-gradient(90deg, rgba(45, 212, 191, .10), transparent 70%); }
+/* Routely VPN on Network, Routers and Radius, NAS (admin/routely-vpn-intro.tpl): the card above the list or form, and the badge
+   on an address that leads through Routely */
+.rl-vpn-intro { margin-bottom: 16px; }
+.rl-vpn-intro .ls-card { overflow: hidden; }
+.rl-vpn-intro .st-rl { border-bottom: 0; }
+.ls-pill--routely { background: rgba(15, 118, 110, .13); color: #0f766e; white-space: nowrap; text-decoration: none; }
+a.ls-pill--routely:hover { color: #0f766e; text-decoration: none; filter: brightness(.95); }
+.ls-pill--routely.is-down { background: rgba(185, 28, 28, .12); color: #b91c1c; }
+body.dark-mode .ls-pill--routely, .dark .ls-pill--routely { color: #5eead4; background: rgba(45, 212, 191, .14); }
+body.dark-mode .ls-pill--routely.is-down, .dark .ls-pill--routely.is-down { color: #fca5a5; background: rgba(248, 113, 113, .14); }
 @media (max-width: 767px) { .st-rl { flex-wrap: wrap; } .st-rl__act { width: 100%; } .st-rl__act .ls-btn { flex: 1; } }
 .st-redis .mc-row--switch input:not(:checked) ~ .mc-row__icon { background: var(--ls-soft); color: var(--ls-muted); }
 /* the free community WhatsApp gateway on the SMS / WhatsApp tabs (settings/free-gateway.tpl) */

@@ -466,7 +466,7 @@ class Radius
 
     public function disconnectCustomer($username)
     {
-        global $_app_stage;
+        global $_app_stage, $config;
         if ($_app_stage == 'demo') {
             return null;
         }
@@ -483,7 +483,14 @@ class Radius
             if (!empty($n['ports'])) {
                 $port = $n['ports'];
             }
-            $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username,Framed-IP-Address = " . $act['framedipaddress'] . "' | radclient -x " . trim($n['nasname']) . ":$port disconnect '" . $n['secret'] . "'");
+            // a NAS with no public IP is reached for CoA at another address (host:port);
+            // its IP address stays what RADIUS requests come from
+            $target = trim($n['nasname']) . ":$port";
+            $coa = trim((string) ($config['radius_coa_' . $n['id']] ?? ''));
+            if ($coa !== '' && preg_match('/^[A-Za-z0-9.-]{1,253}:\d{1,5}$/', $coa)) {
+                $target = $coa;
+            }
+            $result[] = $n['nasname'] . ': ' . @shell_exec("echo 'User-Name = $username,Framed-IP-Address = " . $act['framedipaddress'] . "' | radclient -x " . escapeshellarg($target) . " disconnect '" . $n['secret'] . "'");
         }
         return $result;
     }
