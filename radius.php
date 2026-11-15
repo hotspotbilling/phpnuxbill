@@ -17,7 +17,12 @@ header("Content-Type: application/json");
 
 // Accounting is most of the traffic (every online user, every interim update) and only writes rad_acct: start it
 // without plugins and translations, which are most of the cost of a request and are not used by it.
-$radiusLight = ($_SERVER['HTTP_X_FREERADIUS_SECTION'] ?? ($_GET['action'] ?? '')) === 'accounting';
+// Same choice as the dispatcher below: the header when it is not empty, otherwise ?action= (trimmed like _get()).
+$radiusLight = $_SERVER['HTTP_X_FREERADIUS_SECTION'] ?? '';
+if (empty($radiusLight)) {
+    $radiusLight = trim((string) ($_GET['action'] ?? ''));
+}
+$radiusLight = $radiusLight === 'accounting';
 
 include "init.php";
 
