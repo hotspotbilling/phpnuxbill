@@ -23,7 +23,7 @@
                 <a href="{Text::url('customers/list')}" class="btn btn-default">
                     <i class="fa fa-times"></i> <span class="hidden-xs">{Lang::T('Cancel')}</span>
                 </a>
-                <button type="submit" form="customerAddForm" class="btn btn-primary">
+                <button type="button" class="btn btn-primary" onclick="return saveCustomer(this)">
                     <i class="fa fa-check"></i> <span>{Lang::T('Save Customer')}</span>
                 </button>
             </div>
@@ -252,34 +252,29 @@
                 <div class="edit-card-header">
                     <h4 class="edit-card-title"><i class="fa fa-paper-plane text-warning"></i> {Lang::T('Welcome Notification')}</h4>
                 </div>
-                <div class="edit-card-body">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                        <div>
-                            <strong style="display: block; font-size: 13px;">{Lang::T('Send welcome message')}</strong>
-                            <small class="text-muted">{Lang::T('Notify subscriber with their login credentials')}</small>
-                        </div>
-                        <label class="switch" style="margin: 0;">
+                <div class="edit-card-body cw-welcome">
+                    <div class="mc-rows">
+                        <label class="mc-row mc-row--switch">
                             <input type="checkbox" id="send_welcome_message" value="1" name="send_welcome_message">
-                            <span class="slider"></span>
+                            <span class="mc-row__icon"><i class="fa fa-paper-plane" aria-hidden="true"></i></span>
+                            <span class="mc-row__text">
+                                <b>{Lang::T('Send welcome message')}</b>
+                                <small>{Lang::T('Notify subscriber with their login credentials')}</small>
+                            </span>
+                            <span class="mc-switch__track" aria-hidden="true"></span>
                         </label>
                     </div>
 
-                    <div id="method" style="display: none; padding-top: 10px; border-top: 1px dashed var(--cv-border, #e2e8f0);">
-                        <label class="control-label" style="margin-bottom: 8px;">{Lang::T('Notification via')}:</label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 14px;">
-                            <label class="checkbox-inline" style="margin: 0; font-weight: 500;">
-                                <input type="checkbox" name="sms" value="1"> <i class="fa fa-comment"></i> {Lang::T('SMS')}
-                            </label>
-                            <label class="checkbox-inline" style="margin: 0; font-weight: 500;">
-                                <input type="checkbox" name="wa" value="1"> <i class="fa fa-whatsapp text-success"></i> {Lang::T('WA')}
-                            </label>
-                            <label class="checkbox-inline" style="margin: 0; font-weight: 500;">
-                                <input type="checkbox" name="mail" value="1"> <i class="fa fa-envelope text-primary"></i> {Lang::T('Email')}
-                            </label>
-                            <label class="checkbox-inline" style="margin: 0; font-weight: 500;">
-                                <input type="checkbox" name="inbox" value="1"> <i class="fa fa-inbox text-info"></i> {Lang::T('Inbox')}
-                            </label>
+                    {* the channels the save reads: sms, wa, mail, inbox *}
+                    <div id="method" class="cw-channels" hidden>
+                        <span class="cw-channels__label">{Lang::T('Notification via')}</span>
+                        <div class="cw-chips" role="group" aria-label="{Lang::T('Notification via')}">
+                            <label class="cw-chip"><input type="checkbox" name="sms" value="1"><span><i class="fa fa-comment" aria-hidden="true"></i> {Lang::T('SMS')}</span></label>
+                            <label class="cw-chip"><input type="checkbox" name="wa" value="1"><span><i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp</span></label>
+                            <label class="cw-chip"><input type="checkbox" name="mail" value="1"><span><i class="fa fa-envelope" aria-hidden="true"></i> {Lang::T('Email')}</span></label>
+                            <label class="cw-chip"><input type="checkbox" name="inbox" value="1"><span><i class="fa fa-inbox" aria-hidden="true"></i> {Lang::T('Inbox')}</span></label>
                         </div>
+                        <p class="cw-channels__err" id="methodError" role="alert" hidden><i class="fa fa-exclamation-circle" aria-hidden="true"></i> {Lang::T('Please choose at least one notification channel.')}</p>
                     </div>
                 </div>
             </div>
@@ -288,12 +283,12 @@
             <div class="edit-form-card">
                 <div class="edit-card-header">
                     <h4 class="edit-card-title"><i class="fa fa-tags text-primary"></i> {Lang::T('Attributes')}</h4>
-                    <button class="btn btn-success btn-xs" type="button" id="add-custom-field">
-                        <i class="fa fa-plus"></i> {Lang::T('Add Attribute')}
+                    <button class="ls-btn cw-add" type="button" id="add-custom-field">
+                        <i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('Add Attribute')}
                     </button>
                 </div>
                 <div class="edit-card-body">
-                    <div id="custom-fields-container">
+                    <div id="custom-fields-container" data-t-name="{Lang::T('Attribute Name')|escape}" data-t-value="{Lang::T('Attribute Value')|escape}" data-t-remove="{Lang::T('Remove')|escape}">
                         <!-- Dynamic Custom Fields appended here -->
                     </div>
                     <span class="help-block text-muted" id="no-attributes-hint" style="margin-bottom: 0;">
@@ -309,8 +304,8 @@
         <a href="{Text::url('customers/list')}" class="ls-btn">
             <i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Cancel')}
         </a>
-        <button class="ls-btn ls-btn--primary" type="submit"
-            onclick="return ask(this, '{Lang::T("Continue the process of adding Customer Data?")}')">
+        <button class="ls-btn ls-btn--primary" type="button" onclick="return saveCustomer(this)"
+            data-ask="{Lang::T('Continue the process of adding Customer Data?')|escape}">
             <i class="fa fa-check" aria-hidden="true"></i> {Lang::T('Save Customer')}
         </button>
     </div>
@@ -349,38 +344,41 @@
         }
     }
 
-    // Welcome message toggle handler
+    // Welcome message: the channels show while it is on, and at least one is needed
+    function welcomeChannelsOk() {
+        var on = document.getElementById('send_welcome_message');
+        var box = document.getElementById('method');
+        var err = document.getElementById('methodError');
+        if (!on || !on.checked) { if (err) err.hidden = true; return true; }
+        var ok = Array.prototype.some.call(box.querySelectorAll('input[type="checkbox"]'), function (cb) { return cb.checked; });
+        err.hidden = ok;
+        if (!ok) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return ok;
+    }
+
+    // both Save buttons: the browser's own checks, the channels, then the confirm; ask() calls back to submit, as the top
+    // button sits outside the form
+    function saveCustomer(btn) {
+        var form = document.getElementById('customerAddForm');
+        if (!form.reportValidity() || !welcomeChannelsOk()) return false;
+        var text = document.querySelector('[data-ask]').getAttribute('data-ask');
+        ask(btn, text, function () { form.submit(); });
+        return false;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var sendWelcomeCheckbox = document.getElementById('send_welcome_message');
         var methodSection = document.getElementById('method');
-
-        function toggleMethodSection() {
-            if (sendWelcomeCheckbox && methodSection) {
-                methodSection.style.display = sendWelcomeCheckbox.checked ? 'block' : 'none';
-            }
-        }
-
-        if (sendWelcomeCheckbox) {
-            toggleMethodSection();
-            sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
-        }
-
-        var form = document.getElementById('customerAddForm');
-        if (form) {
-            form.addEventListener('submit', function(event) {
-                if (sendWelcomeCheckbox && sendWelcomeCheckbox.checked) {
-                    var methodCheckboxes = methodSection.querySelectorAll('input[type="checkbox"]');
-                    var oneChecked = Array.from(methodCheckboxes).some(function(cb) {
-                        return cb.checked;
-                    });
-                    if (!oneChecked) {
-                        event.preventDefault();
-                        alert('Please choose at least one notification channel.');
-                        if (methodSection) methodSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }
-            });
-        }
+        if (!sendWelcomeCheckbox || !methodSection) return;
+        var toggleMethodSection = function () {
+            methodSection.hidden = !sendWelcomeCheckbox.checked;
+            if (!sendWelcomeCheckbox.checked) document.getElementById('methodError').hidden = true;
+        };
+        toggleMethodSection();
+        sendWelcomeCheckbox.addEventListener('change', toggleMethodSection);
+        methodSection.addEventListener('change', function () {
+            if (!document.getElementById('methodError').hidden) welcomeChannelsOk();
+        });
     });
 
     // Custom Fields Dynamic Manager
@@ -398,23 +396,22 @@
                 row.style.gap = '8px';
                 row.style.alignItems = 'center';
                 row.style.marginBottom = '10px';
-                row.innerHTML = `
-                    <div style="flex: 2;">
-                        <input type="text" class="form-control input-sm" name="custom_field_name[]" placeholder="Attribute Name" required>
-                    </div>
-                    <div style="flex: 3;">
-                        <input type="text" class="form-control input-sm" name="custom_field_value[]" placeholder="Attribute Value" required>
-                    </div>
-                    <div style="flex: 0 0 auto;">
-                        <button type="button" class="btn btn-danger btn-sm remove-custom-field" title="Remove">&times;</button>
-                    </div>
-                `;
+                var tr = function (k) { return container.getAttribute('data-t-' + k) || ''; };
+                row.innerHTML = '<div style="flex: 2; min-width: 0;"><input type="text" class="form-control" name="custom_field_name[]" required></div>'
+                    + '<div style="flex: 3; min-width: 0;"><input type="text" class="form-control" name="custom_field_value[]" required></div>'
+                    + '<button type="button" class="ls-btn cw-remove remove-custom-field"><i class="fa fa-trash" aria-hidden="true"></i></button>';
+                row.querySelector('[name="custom_field_name[]"]').placeholder = tr('name');
+                row.querySelector('[name="custom_field_value[]"]').placeholder = tr('value');
+                row.querySelector('.remove-custom-field').title = tr('remove');
+                row.querySelector('.remove-custom-field').setAttribute('aria-label', tr('remove'));
                 container.appendChild(row);
+                row.querySelector('input').focus();
             });
 
             container.addEventListener('click', function(e) {
-                if (e.target && e.target.classList.contains('remove-custom-field')) {
-                    var row = e.target.closest('.custom-field-row');
+                var btn = e.target && e.target.closest('.remove-custom-field');
+                if (btn) {
+                    var row = btn.closest('.custom-field-row');
                     if (row) {
                         row.remove();
                         if (container.children.length === 0 && hint) {

@@ -175,6 +175,9 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('plan/recharge'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $id_customer = _post('id_customer');
         $server = _post('server');
         $planId = _post('plan');
@@ -1136,6 +1139,9 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('plan/refill'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $code = Text::alphanumeric(_post('code'), "-_.,");
         $user = ORM::for_table('tbl_customers')->where('id', _post('id_customer'))->find_one();
         $v1 = ORM::for_table('tbl_voucher')->whereRaw("BINARY code = '$code'")->where('status', 0)->find_one();
@@ -1174,6 +1180,9 @@ switch ($action) {
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin', 'Agent', 'Sales'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('plan/deposit'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $user = _post('id_customer');
         $amount = _post('amount');
         $plan = _post('id_plan');
@@ -1201,7 +1210,7 @@ switch ($action) {
                 }
                 $ui->display('admin/plan/invoice.tpl');
             } else {
-                r2(getUrl('plan/refill'), 'e', "Failed to refill account");
+                r2(getUrl('plan/deposit'), 'e', "Failed to refill account");
             }
         } else if (!empty($user) && !empty($plan)) {
             $p = ORM::for_table('tbl_plans')->find_one($plan);
@@ -1214,10 +1223,10 @@ switch ($action) {
                 }
                 $ui->display('admin/plan/invoice.tpl');
             } else {
-                r2(getUrl('plan/refill'), 'e', "Failed to refill account");
+                r2(getUrl('plan/deposit'), 'e', "Failed to refill account");
             }
         } else {
-            r2(getUrl('plan/refill'), 'e', "All field is required");
+            r2(getUrl('plan/deposit'), 'e', "All field is required");
         }
         break;
     case 'extend':

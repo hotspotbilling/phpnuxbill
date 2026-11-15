@@ -41,7 +41,7 @@ switch ($action) {
         $description = _post('description', '');
         $max_usage = _post('max_usage', '0');
         $min_order_amount = _post('min_order_amount', '');
-        $max_discount_amount = intval(_post('max_discount_amount', ''));
+        $max_discount_amount = floatval(_post('max_discount_amount', 0));
         $status = _post('status', 'active');
         $start_date = strtotime(_post('start_date', '0000-00-00'));
         $end_date = strtotime(_post('end_date', '0000-00-00'));
@@ -62,10 +62,11 @@ switch ($action) {
         if ($max_usage < 0) {
             $error[] = Lang::T('Coupon Maximum Usage must be greater than or equal to 0');
         }
-        if (empty($min_order_amount)) {
+        if (!is_numeric($min_order_amount) || $min_order_amount < 0) {
             $error[] = Lang::T('Coupon Minimum Order Amount is required');
         }
-        if (empty($max_discount_amount)) {
+        // the cap only applies to a percent coupon (order.php); a fixed coupon keeps 0
+        if ($type == 'percent' && $max_discount_amount <= 0) {
             $error[] = Lang::T('Coupon Maximum Discount Amount is required');
         }
         if (empty($status)) {
@@ -78,6 +79,18 @@ switch ($action) {
             $error[] = Lang::T('Coupon End Date is required');
         }
 
+        if (!in_array($type, ['fixed', 'percent'], true)) {
+            $error[] = Lang::T('Coupon Type is required');
+        } elseif ($type == 'percent' && $value > 100) {
+            $error[] = Lang::T('A percent discount can be 100 at most');
+        }
+        if ($start_date && $end_date && $end_date < $start_date) {
+            $error[] = Lang::T('The end date cannot be before the start date');
+        }
+        if ($type == 'fixed') {
+            $max_discount_amount = 0;
+        }
+        $max_usage = (int) $max_usage;
         if (!empty($error)) {
             r2(getUrl('coupons/add'), 'e', implode('<br>', $error));
             exit;
@@ -146,13 +159,14 @@ switch ($action) {
             r2($_SERVER['HTTP_REFERER'], 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
 
+        $coupon_id = (int) _post('id');
         $code = Text::alphanumeric(_post('code', ''));
         $type = _post('type', '');
         $value = floatval(_post('value', ''));
         $description = _post('description', '');
         $max_usage = _post('max_usage', '');
         $min_order_amount = _post('min_order_amount', '');
-        $max_discount_amount = intval(_post('max_discount_amount', ''));
+        $max_discount_amount = floatval(_post('max_discount_amount', 0));
         $status = _post('status', 'active');
         $start_date = strtotime(_post('start_date', '0000-00-00'));
         $end_date = strtotime(_post('end_date', '0000-00-00'));
@@ -173,10 +187,11 @@ switch ($action) {
         if ($max_usage < 0) {
             $error[] = Lang::T('Coupon Maximum Usage must be greater than or equal to 0');
         }
-        if (empty($min_order_amount)) {
+        if (!is_numeric($min_order_amount) || $min_order_amount < 0) {
             $error[] = Lang::T('Coupon minimum order amount is required');
         }
-        if (empty($max_discount_amount)) {
+        // the cap only applies to a percent coupon (order.php); a fixed coupon keeps 0
+        if ($type == 'percent' && $max_discount_amount <= 0) {
             $error[] = Lang::T('Coupon maximum discount amount is required');
         }
         if (empty($status)) {
@@ -188,11 +203,27 @@ switch ($action) {
         if (empty($end_date)) {
             $error[] = Lang::T('Coupon end date is required');
         }
+        if (!in_array($type, ['fixed', 'percent'], true)) {
+            $error[] = Lang::T('Coupon Type is required');
+        } elseif ($type == 'percent' && $value > 100) {
+            $error[] = Lang::T('A percent discount can be 100 at most');
+        }
+        if ($start_date && $end_date && $end_date < $start_date) {
+            $error[] = Lang::T('The end date cannot be before the start date');
+        }
+        if ($type == 'fixed') {
+            $max_discount_amount = 0;
+        }
+        $max_usage = (int) $max_usage;
         if (!empty($error)) {
             r2(getUrl('coupons/edit/') . $coupon_id, 'e', implode('<br>', $error));
             exit;
         }
-        $coupon = ORM::for_table('tbl_coupons')->find_one($coupon_id);
+        $coupon = $coupon_id > 0 ? ORM::for_table('tbl_coupons')->find_one($coupon_id) : false;
+        if (!$coupon) {
+            r2(getUrl('coupons'), 'e', Lang::T('Coupon Not Found'));
+            exit;
+        }
         $coupon->code = $code;
         $coupon->type = $type;
         $coupon->value = $value;

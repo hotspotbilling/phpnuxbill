@@ -14907,6 +14907,51 @@ body.as-chrome .edit-form-card .input-group .form-control {
   background-color: var(--ls-field);
 }
 
+/* Recharge, Refill Account, Refill Balance, Add Vouchers and coupon forms (plan/*.tpl, voucher/add.tpl, coupons/form.tpl) */
+.nf-input-btn { display: flex; gap: 8px; }
+.nf-input-btn .form-control { flex: 1; min-width: 0; }
+.nf-input-btn .ls-btn { flex: none; height: 40px; }
+body .nf .nf-code-input.form-control:not(#filterNavigateMenu) { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .04em; }
+/* a segmented choice made of buttons (aria-pressed) instead of radios */
+.nf-seg--btn button { flex: 1; min-width: 0; padding: 7px 4px; border: 0; border-radius: 7px; background: transparent; color: var(--ls-muted); font: 600 13px ui-monospace, SFMono-Regular, Menlo, monospace; cursor: pointer; transition: background .15s, color .15s; }
+.nf-seg--btn button:hover { color: var(--ls-ink); }
+.nf-seg--btn button[aria-pressed="true"] { background: var(--ls-card); color: var(--ls-ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 0 0 1px var(--ls-line); }
+.nf-seg--btn button:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: 1px; }
+.nf-vg__counts { margin-top: 8px; }
+.nf-vg__preview { display: flex; flex-direction: column; gap: 6px; }
+.nf .st-card-body.nf-vg__preview > * + * { margin-top: 0; }
+.nf-vg__code { padding: 12px; border: 1px dashed var(--ls-line); border-radius: 10px; background: var(--ls-soft); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 18px; font-weight: 600; letter-spacing: .06em; text-align: center; color: var(--ls-ink); overflow-wrap: anywhere; }
+.nf-vg__sum { font-size: 12.5px; color: var(--ls-muted); text-align: center; }
+.nf-vg__sum.is-bad { color: #b45309; }
+body.dark-mode .nf-vg__sum.is-bad, .dark .nf-vg__sum.is-bad { color: #fbbf24; }
+.nf__label small[hidden] { display: none; }
+.nf__label small b { color: var(--ls-ink); }
+
+/* A switch row's hidden checkbox keeps its own size: the shared "input:not(#filterNavigateMenu) { min-height: 100% }" rule
+   stretched it past the row, and focusing it (a click on the row) scrolled the row's box and hid the title */
+body .mc-row--switch input:not(#filterNavigateMenu) { min-height: 0; }
+/* Create customer (admin/customers/add.tpl): the welcome switch, its channel chips and the attribute rows */
+.cw-welcome .mc-rows { border-radius: 10px; }
+.cw-channels { margin-top: 14px; }
+.cw-channels[hidden] { display: none; }
+.cw-channels__label { display: block; margin: 0 0 8px; font-size: 12.5px; font-weight: 600; color: var(--ls-ink); }
+.cw-chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; }
+.cw-chip { position: relative; margin: 0; font-weight: 400; cursor: pointer; }
+.cw-chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.cw-chip span { display: flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 10px; border: 1px solid var(--ls-line); border-radius: 9px; background: var(--ls-card); color: var(--ls-muted); font-size: 13px; font-weight: 600; transition: border-color .15s, background .15s, color .15s; }
+.cw-chip span i { font-size: 14px; }
+.cw-chip:hover span { border-color: var(--ls-accent); color: var(--ls-ink); }
+.cw-chip input:checked + span { border-color: var(--ls-fill); background: var(--ls-accent-soft); color: var(--ls-accent); }
+.cw-chip input:checked + span::after { content: "\f00c"; font-family: FontAwesome, "Font Awesome 5 Free", "Font Awesome 6 Free"; font-weight: 900; font-size: 11px; margin-left: 2px; }
+.cw-chip input:focus-visible + span { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+.cw-channels__err { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 12.5px; color: #b91c1c; }
+.cw-channels__err[hidden] { display: none; }
+body.dark-mode .cw-channels__err, .dark .cw-channels__err { color: #fca5a5; }
+.edit-card-header .ls-btn.cw-add { height: 30px; padding: 4px 10px; font-size: 12.5px; }
+.custom-field-row .ls-btn.cw-remove { flex: none; width: 36px; height: 36px; padding: 0; color: #b91c1c !important; }
+.custom-field-row .ls-btn.cw-remove:hover { border-color: #b91c1c; }
+body.dark-mode .custom-field-row .ls-btn.cw-remove, .dark .custom-field-row .ls-btn.cw-remove { color: #fca5a5 !important; }
+
 /* The page loading bar (Pace: plugins/pace.css, shadcn-admin.css). The default theme draws it in the primary button colour
    (the indigo of .ls-btn--primary: #4f46e5 light, #5d5fef dark); the shadcn theme in its own --primary, near-black in light
    mode and near-white in dark. "body" in front outranks the !important rules in pace.css and shadcn-admin.css. */

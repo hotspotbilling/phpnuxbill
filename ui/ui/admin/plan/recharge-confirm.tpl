@@ -171,7 +171,8 @@
                     <input type="hidden" name="id_customer" value="{$cust['id']}">
                     <input type="hidden" name="plan" value="{$plan['id']}">
                     <input type="hidden" name="server" value="{$server}">
-                    <input type="hidden" name="stoken" value="{App::getToken()}">
+                    <input type="hidden" name="svoucher" value="{App::getToken()}">
+                    <input type="hidden" name="csrf_token" value="{$csrf_token}">
                     <center>
                         <button class="btn btn-success" type="submit">{Lang::T('Recharge')}</button><br>
                         <a class="btn btn-link" href="{Text::url('')}plan/recharge">{Lang::T('Cancel')}</a>

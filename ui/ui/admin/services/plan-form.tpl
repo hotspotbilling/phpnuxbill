@@ -382,9 +382,13 @@
         $('#Type').style.display = limited ? '' : 'none';
         $('#TimeLimit').style.display = limited && lt !== 'Data_Limit' ? '' : 'none';
         $('#DataLimit').style.display = limited && lt !== 'Time_Limit' ? '' : 'none';
-        // a limit that is shown must be filled in (the database keeps whole numbers)
-        $('#time_limit').required = limited && lt !== 'Data_Limit';
-        $('#data_limit').required = limited && lt !== 'Time_Limit';
+        // a limit that is shown must be filled in (the database keeps whole numbers); a hidden one is still sent, so an
+        // invalid value left in it (1.5, -1) goes back to 0 instead of silently blocking Save
+        [['#time_limit', limited && lt !== 'Data_Limit'], ['#data_limit', limited && lt !== 'Time_Limit']].forEach(function (x) {
+            var f = $(x[0]);
+            f.required = x[1];
+            if (!x[1] && !f.checkValidity()) f.value = '0';
+        });
     };
     form.querySelectorAll('[data-nf-limit]').forEach(function (r) { r.addEventListener('change', function () { limits(); sum(); }); });
 
