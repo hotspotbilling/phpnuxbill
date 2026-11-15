@@ -7788,6 +7788,73 @@ a.ls-pill--routely:hover { color: #0f766e; text-decoration: none; filter: bright
 body.dark-mode .ls-pill--routely, .dark .ls-pill--routely { color: #5eead4; background: rgba(45, 212, 191, .14); }
 body.dark-mode .ls-pill--routely.is-down, .dark .ls-pill--routely.is-down { color: #fca5a5; background: rgba(248, 113, 113, .14); }
 @media (max-width: 767px) { .st-rl { flex-wrap: wrap; } .st-rl__act { width: 100%; } .st-rl__act .ls-btn { flex: 1; } }
+.rl-vpn-intro.ls { padding-bottom: 0; }
+/* Router and NAS add/edit (admin/routers/form.tpl, admin/radius/nas-form.tpl): the fields on the left, status and Save in a
+   card on the right that stays in view */
+.nf__grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.nf__main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.nf__side { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 70px; min-width: 0; }
+.nf .st-card-body > * + * { margin-top: 16px; }
+.nf .st-card-body > .nf__hint--tight { margin-top: 6px; }
+.nf__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.nf__row--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.nf__row--coa { grid-template-columns: minmax(0, 140px) minmax(0, 1fr); }
+.nf__row--loc { grid-template-columns: minmax(0, 1fr) minmax(0, 200px); }
+.nf__field { min-width: 0; }
+.nf__label { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; font-size: 12.5px; font-weight: 600; color: var(--ls-ink); }
+.nf__label small { font-size: 11.5px; font-weight: 500; color: var(--ls-muted); }
+.nf__label small a { font-weight: 600; color: var(--ls-accent); }
+.nf__hint { margin: 6px 0 0; font-size: 12px; line-height: 1.5; color: var(--ls-muted); }
+.nf__hint b { color: var(--ls-ink); }
+.nf__hint--routely { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.nf__hint--routely .ls-pill { font-size: 11px; padding: 1px 8px; }
+.nf .form-control { height: 38px; border-radius: 9px; }
+.nf textarea.form-control { height: auto; min-height: 76px; resize: vertical; }
+.nf select.form-control { width: 100%; }
+.nf__secret { position: relative; }
+.nf__secret .form-control { padding-right: 42px; }
+.nf__eye { position: absolute; top: 0; right: 0; width: 40px; height: 38px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 0 9px 9px 0; background: transparent; color: var(--ls-muted); cursor: pointer; }
+.nf__eye:hover, .nf__eye:focus-visible { color: var(--ls-accent); }
+.nf__eye:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: -2px; }
+.nf__unit { position: relative; }
+.nf__unit .form-control { padding-right: 70px; }
+.nf__unit span { position: absolute; top: 0; right: 12px; line-height: 38px; font-size: 12px; color: var(--ls-muted); pointer-events: none; }
+.nf__map { position: relative; z-index: 0; height: 260px; border: 1px solid var(--ls-line); border-radius: 10px; overflow: hidden; }
+.nf__switches { border: 0; border-radius: 0; }
+.nf__side .st-card-foot { justify-content: flex-end; gap: 8px; }
+.nf__side .st-card-foot .ls-btn--primary { flex: 1; }
+.nf__aside-note { display: flex; gap: 8px; margin: 0; padding: 0 4px; font-size: 12px; line-height: 1.5; color: var(--ls-muted); }
+.nf__aside-note i { margin-top: 2px; color: var(--ls-accent); }
+.nf__adv > summary { display: flex; align-items: flex-start; gap: 8px; padding: 14px 18px; list-style: none; cursor: pointer; font-size: 14.5px; font-weight: 700; color: var(--ls-ink); }
+.nf__adv > summary::-webkit-details-marker { display: none; }
+.nf__adv > summary > i:first-child { margin-top: 3px; color: var(--ls-accent); font-size: 14px; }
+.nf__adv-text { flex: 1; min-width: 0; }
+.nf__adv-text small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--ls-muted); }
+.nf__adv > summary .fa-chevron-down { flex: none; align-self: center; font-size: 12px; color: var(--ls-muted); transition: transform .15s; }
+.nf__adv[open] > summary { border-bottom: 1px solid var(--ls-line); }
+.nf__adv[open] > summary .fa-chevron-down { transform: rotate(180deg); }
+.nf__adv > summary:hover { background: var(--ls-soft); }
+.nf__adv > summary:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: -2px; }
+.nf .select2-container { width: 100% !important; }
+/* IP pool and port pool forms (admin/pool/form.tpl, admin/port/form.tpl): what the range gives, worked out as it is typed */
+.nf__calc { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 12px; border: 1px solid var(--ls-line); border-radius: 10px; background: var(--ls-soft); font-size: 12.5px; line-height: 1.45; }
+.nf__calc[hidden] { display: none; }
+.nf__calc-main { font-weight: 600; color: var(--ls-ink); }
+.nf__calc-main:empty, .nf__calc-warn:empty { display: none; }
+.nf__calc-warn { color: #b45309; }
+.nf__calc.is-bad { border-color: rgba(217, 119, 6, .45); background: rgba(217, 119, 6, .08); }
+.nf__calc-use[hidden] { display: none !important; }
+.nf__calc-use { height: 30px !important; padding: 4px 10px; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+body.dark-mode .nf__calc-warn, .dark .nf__calc-warn { color: #fbbf24; }
+.nf__facts { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.nf__facts > div { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+.nf__facts dt { font-weight: 500; color: var(--ls-muted); }
+.nf__facts dd { margin: 0; min-width: 0; font-weight: 600; color: var(--ls-ink); text-align: right; overflow-wrap: anywhere; }
+.nf__hint[hidden] { display: none; }
+.nf__hint > .fa-info-circle { color: var(--ls-accent); }
+@media (max-width: 991px) { .nf__grid { grid-template-columns: minmax(0, 1fr); } .nf__side { position: static; } }
+@media (max-width: 575px) { .nf__row, .nf__row--3, .nf__row--coa, .nf__row--loc { grid-template-columns: minmax(0, 1fr); } .nf__map { height: 220px; } }
+@media (prefers-reduced-motion: reduce) { .nf__adv > summary .fa-chevron-down { transition: none; } }
 .st-redis .mc-row--switch input:not(:checked) ~ .mc-row__icon { background: var(--ls-soft); color: var(--ls-muted); }
 /* the free community WhatsApp gateway on the SMS / WhatsApp tabs (settings/free-gateway.tpl) */
 .st-fg { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-top: 1px solid var(--ls-line); }

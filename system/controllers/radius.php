@@ -55,6 +55,9 @@ switch ($action) {
         $ui->display('admin/radius/nas-add.tpl');
         break;
     case 'nas-add-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('radius/nas-add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $shortname = _post('shortname');
         $nasname = _post('nasname');
         $secret = _post('secret');
@@ -123,6 +126,9 @@ switch ($action) {
         break;
     case 'nas-edit-post':
         $id  = $routes['2'];
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('radius/nas-edit/') . (int) $id, 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $shortname = _post('shortname');
         $nasname = _post('nasname');
         $secret = _post('secret');
@@ -162,7 +168,7 @@ switch ($action) {
                 r2(getUrl('radius/nas-add'), 'e', 'NAS NOT Exists');
             }
         } else {
-            r2(getUrl('radius/nas-add'), 'e', $msg);
+            r2(getUrl('radius/nas-edit/') . (int) $id, 'e', $msg); // back to the NAS being edited, not an empty add form
         }
         break;
     case 'nas-delete':
@@ -170,6 +176,7 @@ switch ($action) {
         $d = ORM::for_table('nas', 'radius')->find_one($id);
         if ($d) {
             $d->delete();
+            $saveCoa($id, ''); // its CoA address goes with it
         } else {
             r2(getUrl('radius/nas-list'), 'e', 'NAS Not found');
         }

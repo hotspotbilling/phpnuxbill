@@ -62,6 +62,9 @@ switch ($action) {
         break;
 
     case 'add-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('routers/add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $name = _post('name');
         $ip_address = _post('ip_address');
         $username = _post('username');
@@ -109,6 +112,9 @@ switch ($action) {
 
 
     case 'edit-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('routers/edit/') . (int) _post('id'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $name = _post('name');
         $ip_address = _post('ip_address');
         $username = _post('username');
