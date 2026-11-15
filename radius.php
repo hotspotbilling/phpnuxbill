@@ -15,6 +15,10 @@
 
 header("Content-Type: application/json");
 
+// Accounting is most of the traffic (every online user, every interim update) and only writes rad_acct: start it
+// without plugins and translations, which are most of the cost of a request and are not used by it.
+$radiusLight = ($_SERVER['HTTP_X_FREERADIUS_SECTION'] ?? ($_GET['action'] ?? '')) === 'accounting';
+
 include "init.php";
 
 // Optional shared secret (Settings > FreeRadius > REST secret). When one is set, every request must carry it as

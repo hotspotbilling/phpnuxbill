@@ -13,6 +13,10 @@ class Lang
         global $_L, $lan_file, $config;
 
         $key = preg_replace('/\s+/', ' ', $key);
+        // no language file loaded (a light RADIUS request): never translate or write the empty list over the file
+        if (empty($lan_file)) {
+            return $key;
+        }
         if (!empty($_L[$key])) {
             return $_L[$key];
         }
