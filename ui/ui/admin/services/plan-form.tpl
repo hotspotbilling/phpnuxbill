@@ -155,7 +155,7 @@
                             <div id="TimeLimit" class="nf__field" {if !$nf_limited || $nf_lt == 'Data_Limit'}style="display:none"{/if}>
                                 <label class="nf__label" for="time_limit">{Lang::T('Time Limit')}</label>
                                 <div class="nf-pair">
-                                    <input type="number" class="form-control" id="time_limit" name="time_limit" min="0" step="any"
+                                    <input type="number" class="form-control" id="time_limit" name="time_limit" min="0" step="1"
                                         value="{$d['time_limit']|default:0|escape}" data-nf-sum>
                                     <select class="form-control" id="time_unit" name="time_unit" data-nf-sum>
                                         <option value="Hrs" {if ($d['time_unit']|default:'Hrs') == 'Hrs'}selected{/if}>{Lang::T('Hrs')}</option>
@@ -166,7 +166,7 @@
                             <div id="DataLimit" class="nf__field" {if !$nf_limited || $nf_lt == 'Time_Limit'}style="display:none"{/if}>
                                 <label class="nf__label" for="data_limit">{Lang::T('Data Limit')}</label>
                                 <div class="nf-pair">
-                                    <input type="number" class="form-control" id="data_limit" name="data_limit" min="0" step="any"
+                                    <input type="number" class="form-control" id="data_limit" name="data_limit" min="0" step="1"
                                         value="{$d['data_limit']|default:0|escape}" data-nf-sum>
                                     <select class="form-control" id="data_unit" name="data_unit" data-nf-sum>
                                         <option value="MB" {if ($d['data_unit']|default:'MB') == 'MB'}selected{/if}>MB</option>

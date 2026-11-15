@@ -42,21 +42,28 @@
         });
         updateCoverage();
     }
+    // the map starts where Coordinates says when it holds a valid place (also one typed while the location was looked
+    // up), otherwise at the given place
+    function startMap(lat, lon) {
+        if (map) return;
+        var c = readCoordinates(document.getElementById('coordinates').value);
+        if (c) setupMap(c[0], c[1]); else setupMap(lat, lon);
+    }
     function getLocation() {
         if (window.location.protocol == 'https:' && navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (p) {
-                setupMap(p.coords.latitude, p.coords.longitude);
+                startMap(p.coords.latitude, p.coords.longitude);
             }, function () {
-                setupMap(51.505, -0.09);
+                startMap(51.505, -0.09);
             });
         } else {
-            setupMap(51.505, -0.09);
+            startMap(51.505, -0.09);
         }
     }
     document.getElementById('coverage').addEventListener('input', updateCoverage);
     document.getElementById('coordinates').addEventListener('change', function () {
         var c = readCoordinates(this.value);
-        if (c && map) moveTo(c[0], c[1], true);
+        if (c && map) moveTo(c[0], c[1], true); // before the map exists, startMap() reads the field
     });
     window.addEventListener('load', function () {
         var c = readCoordinates(document.getElementById('coordinates').value);

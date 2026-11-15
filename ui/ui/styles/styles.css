@@ -14906,3 +14906,16 @@ body.as-chrome.dark-mode :is(.mc, .edit-form-card) {
 body.as-chrome .edit-form-card .input-group .form-control {
   background-color: var(--ls-field);
 }
+
+/* The page loading bar (Pace: plugins/pace.css, shadcn-admin.css). The default theme draws it in the primary button colour
+   (the indigo of .ls-btn--primary: #4f46e5 light, #5d5fef dark); the shadcn theme in its own --primary, near-black in light
+   mode and near-white in dark. "body" in front outranks the !important rules in pace.css and shadcn-admin.css. */
+body:not(.shadcn-body) .pace .pace-progress { background: #4f46e5 !important; box-shadow: 0 0 8px rgba(79, 70, 229, .55) !important; }
+body:not(.shadcn-body) .pace .pace-progress-inner { box-shadow: 0 0 10px #4f46e5, 0 0 5px #4f46e5 !important; }
+body:not(.shadcn-body) .pace .pace-activity { border-top-color: #4f46e5 !important; border-left-color: #4f46e5 !important; }
+body.dark-mode:not(.shadcn-body) .pace .pace-progress, html.dark body:not(.shadcn-body) .pace .pace-progress { background: #5d5fef !important; box-shadow: 0 0 8px rgba(93, 95, 239, .55) !important; }
+body.dark-mode:not(.shadcn-body) .pace .pace-progress-inner, html.dark body:not(.shadcn-body) .pace .pace-progress-inner { box-shadow: 0 0 10px #5d5fef, 0 0 5px #5d5fef !important; }
+body.dark-mode:not(.shadcn-body) .pace .pace-activity, html.dark body:not(.shadcn-body) .pace .pace-activity { border-top-color: #5d5fef !important; border-left-color: #5d5fef !important; }
+body.shadcn-body .pace .pace-progress { background: var(--primary) !important; box-shadow: 0 0 10px var(--primary) !important; }
+body.shadcn-body .pace .pace-progress-inner { box-shadow: 0 0 10px var(--primary), 0 0 5px var(--primary) !important; }
+body.shadcn-body .pace .pace-activity { border-top-color: var(--primary) !important; border-left-color: var(--primary) !important; }

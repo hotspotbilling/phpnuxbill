@@ -162,7 +162,12 @@
         // the router accepts lists and prefixes, VPN packages only one range inside a /24: say so, and offer a prefix as first-last
         var single = r && r.length === 1 && v.indexOf('/') < 0 && Math.floor(r[0][0] / 256) === Math.floor(r[0][1] / 256);
         if (r && r.length === 1 && v.indexOf('/') > 0 && r[0][1] - r[0][0] >= 2 && Math.floor(r[0][0] / 256) === Math.floor(r[0][1] / 256)) {
-            sug = txt(r[0][0] + 1) + '-' + txt(r[0][1] - 1);
+            // the usable addresses of the prefix, without the local IP: the bigger side of it when it falls inside
+            var lo = r[0][0] + 1, hi = r[0][1] - 1;
+            if (l !== null && l >= lo && l <= hi) {
+                if (l - lo >= hi - l) hi = l - 1; else lo = l + 1;
+            }
+            sug = lo <= hi ? txt(lo) + '-' + txt(hi) : null;
         }
         if (v && !r) {
             box.classList.add('is-bad');
