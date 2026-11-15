@@ -71,6 +71,9 @@ switch ($action) {
         break;
 
     case 'add-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('bandwidth/add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }
@@ -130,6 +133,9 @@ switch ($action) {
         break;
 
     case 'edit-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('bandwidth/edit/') . (int) _post('id'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
             _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
         }

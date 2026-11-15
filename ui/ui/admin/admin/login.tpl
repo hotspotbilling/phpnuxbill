@@ -42,7 +42,7 @@
             </div>
 
             {if isset($notify)}
-                <div class="alert-message {if strpos($notify, 'alert-success') !== false}alert-success{else}alert-danger{/if}">
+                <div class="alert-message {if ($notify_t|default:'') == 's' || strpos($notify, 'alert-success') !== false}alert-success{else}alert-danger{/if}">
                     <i class="fas fa-info-circle"></i>
                     <div>{$notify|escape|replace:'&lt;br&gt;':'<br>'|replace:'&lt;b&gt;':'<b>'|replace:'&lt;/b&gt;':'</b>'}</div>
                 </div>

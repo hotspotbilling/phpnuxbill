@@ -55,12 +55,13 @@
                                 value="{$d['range_ip']|default:''|escape}" placeholder="192.168.88.2-192.168.88.254" spellcheck="false">
                         </div>
                     </div>
-                    <p class="nf__hint nf__hint--tight">{Lang::T('Local IP: the router\'s own address in the customers\' tunnels; empty uses the pool name. Range IP: first-last, or several separated by commas, such as 10.0.0.2-10.0.0.254 or 10.10.0.0/24.')}</p>
+                    <p class="nf__hint nf__hint--tight">{Lang::T('Local IP: the router\'s own address in the customers\' tunnels; empty uses the pool name. Range IP: first-last, such as 10.0.0.2-10.0.0.254.')}</p>
 
                     <div class="nf__calc" data-nf-calc aria-live="polite"
                         data-t-addresses="{Lang::T('addresses')|escape}" data-t-address="{Lang::T('address')|escape}"
                         data-t-bad="{Lang::T('The router will not accept this range')|escape}"
                         data-t-inside="{Lang::T('The local IP is inside the range: a customer could be given the router\'s own address.')|escape}"
+                        data-t-one="{Lang::T('VPN packages can only give out addresses from one first-last range inside a /24, such as 10.0.0.2-10.0.0.254.')|escape}"
                         data-t-use="{Lang::T('Use')|escape}" hidden>
                         <span class="nf__calc-main"></span>
                         <span class="nf__calc-warn"></span>
@@ -143,15 +144,13 @@
         }
         return out;
     };
-    // a /24 around the local IP, leaving the local IP out. Both sides when they fit the 40 characters the pool keeps,
-    // otherwise the bigger side
+    // one first-last range in the /24 around the local IP, on the bigger side of it: a single range is what every
+    // device can use (MikrotikVpn::checkIpAddr reads one a.b.c.X-a.b.c.Y range)
     var suggest = function (l) {
         var net = l - l % 256, k = l % 256, parts = [];
         if (k > 1) parts.push({ s: txt(net + 1) + '-' + txt(net + k - 1), n: k - 1 });
         if (k < 254) parts.push({ s: txt(net + k + 1) + '-' + txt(net + 254), n: 254 - k });
         if (!parts.length) return null;
-        var both = parts.map(function (p) { return p.s; }).join(',');
-        if (both.length <= 40) return both;
         parts.sort(function (a, b) { return b.n - a.n; });
         return parts[0].s;
     };
@@ -160,6 +159,11 @@
         var l = ip(local.value), v = range.value.trim(), r = v ? parse(v) : null;
         var sug = l !== null ? suggest(l) : null;
         main.textContent = ''; warn.textContent = ''; use.hidden = true; box.classList.remove('is-bad');
+        // the router accepts lists and prefixes, VPN packages only one range inside a /24: say so, and offer a prefix as first-last
+        var single = r && r.length === 1 && v.indexOf('/') < 0 && Math.floor(r[0][0] / 256) === Math.floor(r[0][1] / 256);
+        if (r && r.length === 1 && v.indexOf('/') > 0 && r[0][1] - r[0][0] >= 2 && Math.floor(r[0][0] / 256) === Math.floor(r[0][1] / 256)) {
+            sug = txt(r[0][0] + 1) + '-' + txt(r[0][1] - 1);
+        }
         if (v && !r) {
             box.classList.add('is-bad');
             warn.textContent = t('bad');
@@ -169,9 +173,11 @@
             if (l !== null && r.some(function (x) { return l >= x[0] && l <= x[1]; })) {
                 box.classList.add('is-bad');
                 warn.textContent = t('inside');
+            } else if (!single) {
+                warn.textContent = t('one');
             }
         }
-        if (sug && sug !== v && (!v || box.classList.contains('is-bad'))) {
+        if (sug && sug !== v && (!v || box.classList.contains('is-bad') || !single)) {
             use.hidden = false;
             use.textContent = t('use') + ' ' + sug;
             use.onclick = function () { range.value = sug; update(); range.focus(); };

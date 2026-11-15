@@ -203,18 +203,21 @@ switch ($action) {
         break;
 
     case 'add-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $name = _post('name');
         $plan_type = _post('plan_type'); //Personal / Business
         $radius = _post('radius');
         $typebp = _post('typebp');
         $limit_type = _post('limit_type');
-        $time_limit = _post('time_limit');
+        $time_limit = (int) _post('time_limit'); // integer columns: a strict MySQL refuses ''
         $time_unit = _post('time_unit');
-        $data_limit = _post('data_limit');
+        $data_limit = (int) _post('data_limit');
         $data_unit = _post('data_unit');
         $id_bw = _post('id_bw');
         $price = _post('price');
-        $sharedusers = _post('sharedusers');
+        $sharedusers = max(1, (int) _post('sharedusers', 1)); // 0 would turn every login away
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
         $routers = _post('routers');
@@ -273,7 +276,7 @@ switch ($action) {
             $d->prepaid = $prepaid;
             $d->device = $device;
             if ($prepaid == 'no') {
-                if ($expired_date > 28 && $expired_date < 1) {
+                if ($expired_date > 28 || $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
@@ -299,6 +302,9 @@ switch ($action) {
 
 
     case 'edit-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/edit/') . (int) _post('id'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $id = _post('id');
         $name = _post('name');
         $plan_type = _post('plan_type');
@@ -307,14 +313,14 @@ switch ($action) {
         $price = _post('price');
         $price_old = _post('price_old');
         $limit_type = _post('limit_type');
-        $time_limit = _post('time_limit');
+        $time_limit = (int) _post('time_limit'); // integer columns: a strict MySQL refuses ''
         $time_unit = _post('time_unit');
-        $data_limit = _post('data_limit');
+        $data_limit = (int) _post('data_limit');
         $data_unit = _post('data_unit');
-        $sharedusers = _post('sharedusers');
+        $sharedusers = max(1, (int) _post('sharedusers', 1)); // 0 would turn every login away
         $validity = _post('validity');
         $validity_unit = _post('validity_unit');
-        $plan_expired = _post('plan_expired', '0');
+        $plan_expired = (int) _post('plan_expired', 0);
         $device = _post('device');
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
@@ -386,7 +392,7 @@ switch ($action) {
             $d->on_logout = $on_logout;
             $d->device = $device;
             if ($prepaid == 'no') {
-                if ($expired_date > 28 && $expired_date < 1) {
+                if ($expired_date > 28 || $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
@@ -576,6 +582,9 @@ switch ($action) {
         break;
 
     case 'pppoe-add-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/pppoe-add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $name = _post('name_plan');
         $plan_type = _post('plan_type');
         $radius = _post('radius');
@@ -648,7 +657,7 @@ switch ($action) {
                 $d->routers = $routers;
             }
             if ($prepaid == 'no') {
-                if ($expired_date > 28 && $expired_date < 1) {
+                if ($expired_date > 28 || $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
@@ -676,6 +685,9 @@ switch ($action) {
         break;
 
     case 'edit-pppoe-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/pppoe-edit/') . (int) _post('id'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $id = _post('id');
         $plan_type = _post('plan_type');
         $name = _post('name_plan');
@@ -687,7 +699,7 @@ switch ($action) {
         $routers = _post('routers');
         $device = _post('device');
         $pool = _post('pool_name');
-        $plan_expired = _post('plan_expired');
+        $plan_expired = (int) _post('plan_expired', 0);
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
         $expired_date = _post('expired_date');
@@ -752,7 +764,7 @@ switch ($action) {
             $d->on_login = $on_login;
             $d->on_logout = $on_logout;
             if ($prepaid == 'no') {
-                if ($expired_date > 28 && $expired_date < 1) {
+                if ($expired_date > 28 || $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
@@ -816,6 +828,9 @@ switch ($action) {
         }
         break;
     case 'balance-edit-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/balance-edit/') . (int) _post('id'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $id = _post('id');
         $name = _post('name');
         $price = _post('price');
@@ -855,6 +870,9 @@ switch ($action) {
         }
         break;
     case 'balance-add-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/balance-add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $name = _post('name');
         $price = _post('price');
         $enabled = _post('enabled');
@@ -1056,6 +1074,9 @@ switch ($action) {
         break;
 
     case 'vpn-add-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/vpn-add'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $name = _post('name_plan');
         $plan_type = _post('plan_type');
         $radius = _post('radius');
@@ -1128,7 +1149,7 @@ switch ($action) {
                 $d->routers = $routers;
             }
             if ($prepaid == 'no') {
-                if ($expired_date > 28 && $expired_date < 1) {
+                if ($expired_date > 28 || $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
@@ -1156,6 +1177,9 @@ switch ($action) {
         break;
 
     case 'edit-vpn-post':
+        if (!Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('services/vpn-edit/') . (int) _post('id'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
         $id = _post('id');
         $plan_type = _post('plan_type');
         $name = _post('name_plan');
@@ -1167,7 +1191,7 @@ switch ($action) {
         $routers = _post('routers');
         $device = _post('device');
         $pool = _post('pool_name');
-        $plan_expired = _post('plan_expired');
+        $plan_expired = (int) _post('plan_expired', 0);
         $enabled = _post('enabled');
         $prepaid = _post('prepaid');
         $expired_date = _post('expired_date');
@@ -1232,7 +1256,7 @@ switch ($action) {
             $d->on_login = $on_login;
             $d->on_logout = $on_logout;
             if ($prepaid == 'no') {
-                if ($expired_date > 28 && $expired_date < 1) {
+                if ($expired_date > 28 || $expired_date < 1) {
                     $expired_date = 20;
                 }
                 $d->expired_date = $expired_date;
