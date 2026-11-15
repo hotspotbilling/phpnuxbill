@@ -53,7 +53,7 @@ switch ($action) {
         if (empty($type)) {
             $error[] = Lang::T('Coupon Type is required');
         }
-        if (empty($value)) {
+        if (empty($value) || $value <= 0) {
             $error[] = Lang::T('Coupon Value is required');
         }
         if (empty($description)) {
@@ -178,7 +178,7 @@ switch ($action) {
         if (empty($type)) {
             $error[] = Lang::T('Coupon type is required');
         }
-        if (empty($value)) {
+        if (empty($value) || $value <= 0) {
             $error[] = Lang::T('Coupon value is required');
         }
         if (empty($description)) {

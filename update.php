@@ -648,7 +648,13 @@ if ($step === 4) {
             $doneFile = u_path('system/cache/updates.done.json');
             $dones = is_file($doneFile) ? (json_decode((string) file_get_contents($doneFile), true) ?: []) : [];
             $from = (string) ($run['from'] ?? '');
-            if (!preg_match('/^\d+(\.\d+)*$/', $from) && !$dones) {
+            // An update started by an older copy of this page can leave text here ("the previous version") in the session that
+            // carries over once the files are replaced: that is not a starting point, so it counts as unknown and only the older
+            // record ($dones) is used; with neither, the step stops below instead of guessing.
+            if (!preg_match('/^\d+(\.\d+)*$/', $from)) {
+                $from = '';
+            }
+            if ($from === '' && !$dones) {
                 // Without the version the database is at, every change since the first one would run again, and old ones undo newer ones
                 // (they shrink lists such as the staff roles and plan types). The same rule as the command line: never guess.
                 u_fail(4, 'It is not known which version this database was last updated to, so the database step was not run. '

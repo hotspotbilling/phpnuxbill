@@ -358,13 +358,37 @@
 
     // both Save buttons: the browser's own checks, the channels, then the confirm; ask() calls back to submit, as the top
     // button sits outside the form
+    var customerSaving = false;
     function saveCustomer(btn) {
         var form = document.getElementById('customerAddForm');
+        if (customerSaving || btn.disabled) return false;
         if (!form.reportValidity() || !welcomeChannelsOk()) return false;
         var text = document.querySelector('[data-ask]').getAttribute('data-ask');
-        ask(btn, text, function () { form.submit(); });
+        ask(btn, text, function () {
+            if (customerSaving) return;
+            customerSaving = true; // one submission, whichever button or key started it
+            form.submit();
+        });
         return false;
     }
+
+    // Enter in a one-line field saves like the buttons (same checks and confirm); a real submit (another script) too
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('customerAddForm');
+        var save = document.querySelector('[data-ask]');
+        if (!form || !save) return;
+        form.addEventListener('keydown', function (e) {
+            var el = e.target;
+            if (e.key !== 'Enter' || e.isComposing || !el.matches('input:not([type=checkbox]):not([type=radio]):not([type=button])')) return;
+            e.preventDefault();
+            saveCustomer(save);
+        });
+        form.addEventListener('submit', function (e) {
+            if (customerSaving) return; // the confirmed form.submit() does not fire this; anything else goes through the checks
+            e.preventDefault();
+            saveCustomer(save);
+        });
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         var sendWelcomeCheckbox = document.getElementById('send_welcome_message');

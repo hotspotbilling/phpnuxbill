@@ -5434,5 +5434,6 @@
     "Edit_Coupon": "Edit Coupon",
     "Save_the_changes_to_this_coupon_": "Save the changes to this coupon?",
     "Coupon_has_been_updated_successfully": "Coupon has been updated successfully",
-    "Please_choose_at_least_one_notification_channel_": "Please choose at least one notification channel."
+    "Please_choose_at_least_one_notification_channel_": "Please choose at least one notification channel.",
+    "Coupon_Value_is_required": "Coupon Value is required"
 }

@@ -333,5 +333,23 @@
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;"
+  ],
+  "2026.11.15": [
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_voucher' AND COLUMN_NAME='code' AND SEQ_IN_INDEX=1)=0, 'ALTER TABLE `tbl_voucher` ADD INDEX `idx_voucher_code_lookup` (`code`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_user_recharges' AND COLUMN_NAME='username' AND SEQ_IN_INDEX=1)=0, 'ALTER TABLE `tbl_user_recharges` ADD INDEX `idx_recharges_username` (`username`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_customers' AND COLUMN_NAME='pppoe_username' AND SEQ_IN_INDEX=1)=0, 'ALTER TABLE `tbl_customers` ADD INDEX `idx_customers_pppoe_username` (`pppoe_username`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND COLUMN_NAME='username' AND SEQ_IN_INDEX=1)=0, 'ALTER TABLE `rad_acct` ADD INDEX `username` (`username`)', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;"
   ]
 }

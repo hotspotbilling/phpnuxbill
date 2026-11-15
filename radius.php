@@ -204,7 +204,7 @@ function radius_reject($message = 'Username or Password is wrong')
 function radius_find_recharge($username)
 {
     return ORM::for_table('tbl_user_recharges')
-        ->where_raw("BINARY username = ?", [$username])
+        ->where_raw("username = ? AND BINARY username = ?", [$username, $username]) // the index, then the exact match
         ->where('routers', 'radius')
         ->order_by_expr("status = 'on' DESC")
         ->order_by_desc('id')
@@ -240,7 +240,7 @@ function radius_find_customer($username)
     $useCache = class_exists('RedisCache') && RedisCache::isRadiusCacheEnabled();
     foreach (['username' => 'rad:cust_auth:', 'pppoe_username' => 'rad:cust_pppoe:'] as $column => $prefix) {
         $load = function () use ($column, $username) {
-            $row = ORM::for_table('tbl_customers')->where_raw("BINARY $column = ?", [$username])->where('status', 'Active')->find_one();
+            $row = ORM::for_table('tbl_customers')->where_raw("$column = ? AND BINARY $column = ?", [$username, $username])->where('status', 'Active')->find_one();
             return $row ? $row->as_array() : null;
         };
         $c = $useCache ? RedisCache::remember($prefix . md5($username), RedisCache::getRadiusTTL(), $load) : $load();
@@ -270,7 +270,7 @@ function radius_identify($cred)
         radius_reject();
     }
     $exists = ORM::for_table('tbl_customers')
-        ->where_raw("(BINARY username = ? OR BINARY pppoe_username = ?)", [$username, $username])
+        ->where_raw("((username = ? AND BINARY username = ?) OR (pppoe_username = ? AND BINARY pppoe_username = ?))", [$username, $username, $username, $username])
         ->count();
     if ($exists) {
         radius_reject('Your account is not active, please contact customer support.');
@@ -279,7 +279,7 @@ function radius_identify($cred)
     if ($code !== $username || !radius_voucher_credentials($code, $cred)) {
         radius_reject();
     }
-    $v = ORM::for_table('tbl_voucher')->where_raw("BINARY code = ?", [$code])->where('routers', 'radius')->find_one();
+    $v = ORM::for_table('tbl_voucher')->where_raw("code = ? AND BINARY code = ?", [$code, $code])->where('routers', 'radius')->find_one();
     if (!$v) {
         radius_reject('Invalid Voucher..');
     }
@@ -329,8 +329,8 @@ function process_radiust_rest($tur)
     // Count User Onlines
     $USRon = ORM::for_table('rad_acct')
         ->where_raw(
-            "BINARY username = ? AND (acctStatusType = 'Start' OR acctStatusType = 'Interim-Update' OR acctStatusType IS NULL)",
-            [$tur['username']]
+            "username = ? AND BINARY username = ? AND (acctStatusType = 'Start' OR acctStatusType = 'Interim-Update' OR acctStatusType IS NULL)",
+            [$tur['username'], $tur['username']]
         )
         ->find_array();
 

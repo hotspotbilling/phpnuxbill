@@ -128,7 +128,7 @@
                 <footer class="st-card-foot">
                     <a class="ls-btn" href="{Text::url('coupons')}"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Cancel')}</a>
                     {* type=button: the footer script spins every submit button, which fights the confirm dialog; ask() submits the form *}
-                    <button type="button" class="ls-btn ls-btn--primary"
+                    <button type="button" class="ls-btn ls-btn--primary" data-nf-save
                         onclick="return this.form.reportValidity() && ask(this, '{if $nf_edit}{Lang::T('Save the changes to this coupon?')|escape:'javascript'}{else}{Lang::T('Add this coupon?')|escape:'javascript'}{/if}')">
                         <i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save')}</button>
                 </footer>
@@ -187,6 +187,14 @@
         $('#code').value = out;
     });
     $('#end_date').setAttribute('data-t-bad', form.getAttribute('data-t-end') || 'End date is before the start date');
+    // Enter in a one-line field saves like the button: the browser's checks, then the confirm (ask() submits the form)
+    form.addEventListener('keydown', function (e) {
+        var el = e.target;
+        if (e.key !== 'Enter' || e.isComposing || !el.matches('input:not([type=checkbox]):not([type=radio]):not([type=button])')) return;
+        e.preventDefault();
+        var btn = $('[data-nf-save]');
+        if (!btn.disabled) btn.click();
+    });
     type();
     dates();
 })();

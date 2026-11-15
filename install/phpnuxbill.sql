@@ -374,7 +374,8 @@ ALTER TABLE `tbl_customers`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_customers_created_at` (`created_at`),
   ADD KEY `idx_customers_status` (`status`),
-  ADD KEY `idx_customers_username` (`username`);
+  ADD KEY `idx_customers_username` (`username`),
+  ADD KEY `idx_customers_pppoe_username` (`pppoe_username`);
 
 ALTER TABLE `tbl_customers_fields`
   ADD PRIMARY KEY (`id`),
@@ -411,7 +412,8 @@ ALTER TABLE `tbl_user_recharges`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_recharges_status_exp` (`status`, `expiration`),
   ADD KEY `idx_recharges_customer` (`customer_id`),
-  ADD KEY `idx_recharges_date` (`recharged_on`);
+  ADD KEY `idx_recharges_date` (`recharged_on`),
+  ADD KEY `idx_recharges_username` (`username`);
 
 ALTER TABLE `tbl_voucher`
   ADD PRIMARY KEY (`id`),

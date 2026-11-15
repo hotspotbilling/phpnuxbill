@@ -162,6 +162,7 @@
         var printers = function () {
             document.getElementById('printers').style.display = printNow.checked ? '' : 'none';
             perPage.required = printNow.checked;
+            perPage.disabled = !printNow.checked; // hidden: neither checked nor sent (the save uses 36 then)
         };
         form.addEventListener('input', refresh);
         form.addEventListener('change', refresh);
