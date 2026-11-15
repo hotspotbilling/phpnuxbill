@@ -384,8 +384,10 @@
             saveCustomer(save);
         });
         form.addEventListener('submit', function (e) {
-            if (customerSaving) return; // the confirmed form.submit() does not fire this; anything else goes through the checks
+            // the confirmed form.submit() does not fire this event: any submit seen here is another one, and while a save is
+            // already on its way it is dropped; otherwise it goes through the checks and the confirm
             e.preventDefault();
+            if (customerSaving) return;
             saveCustomer(save);
         });
     });

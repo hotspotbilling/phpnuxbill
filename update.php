@@ -647,6 +647,10 @@ if ($step === 4) {
             // first run on this site: everything up to the version it was on counts as applied (an older record is honoured too)
             $doneFile = u_path('system/cache/updates.done.json');
             $dones = is_file($doneFile) ? (json_decode((string) file_get_contents($doneFile), true) ?: []) : [];
+            // only version numbers count: a damaged list would mark nothing as done and let every change since the first run again
+            $dones = array_values(array_filter(is_array($dones) ? $dones : [], function ($v) {
+                return is_scalar($v) && preg_match('/^\d+(\.\d+)*$/', (string) $v);
+            }));
             $from = (string) ($run['from'] ?? '');
             // An update started by an older copy of this page can leave text here ("the previous version") in the session that
             // carries over once the files are replaced: that is not a starting point, so it counts as unknown and only the older
