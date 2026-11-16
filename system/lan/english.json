@@ -5541,5 +5541,8 @@
     "this_month__within_your_plan_": "this month, within your plan.",
     "See_the_uptime_history": "See the uptime history",
     "uptime__last_30_days": "uptime, last 30 days",
-    "Check_this_port_every_5_minutes__and_alert_me_when_it_stops_answering": "Check this port every 5 minutes, and alert me when it stops answering"
+    "Check_this_port_every_5_minutes__and_alert_me_when_it_stops_answering": "Check this port every 5 minutes, and alert me when it stops answering",
+    "Processing_0_hotspot_system_expired_vouchers__": "Processing 0 hotspot system expired vouchers. ",
+    "0_hotspot_system_expired_vouchers_have_been_deleted_in_this_batch__": "0 hotspot system expired vouchers have been deleted in this batch. ",
+    "Total_0_hotspot_system_expired_vouchers_have_been_deleted__": "Total 0 hotspot system expired vouchers have been deleted. "
 }

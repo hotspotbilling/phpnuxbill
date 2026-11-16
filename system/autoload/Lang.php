@@ -50,9 +50,10 @@ class Lang
 
     public static function getIsoLang()
     {
-        global $isolang;
+        global $isolang, $root_path;
         if (empty($isolang) || count($isolang) == 0) {
-            $isolang = json_decode(file_get_contents(File::pathFixer("system/lan/country.json")), true);
+            // from the install's own folder, not the current one: cron starts in the home folder, system/api.php in system/
+            $isolang = json_decode(file_get_contents($root_path . File::pathFixer("system/lan/country.json")), true);
         }
         return $isolang;
     }
