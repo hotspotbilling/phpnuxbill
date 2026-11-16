@@ -5435,5 +5435,18 @@
     "Save_the_changes_to_this_coupon_": "Save the changes to this coupon?",
     "Coupon_has_been_updated_successfully": "Coupon has been updated successfully",
     "Please_choose_at_least_one_notification_channel_": "Please choose at least one notification channel.",
-    "Coupon_Value_is_required": "Coupon Value is required"
+    "Coupon_Value_is_required": "Coupon Value is required",
+    "Click_to_show": "Click to show",
+    "SMS__WhatsApp__VPN_and_your_plan__at_a_glance": "SMS, WhatsApp, VPN and your plan, at a glance",
+    "Routers_connected": "Routers connected",
+    "Forwarded_ports": "Forwarded ports",
+    "VPN_routers_used_in_your_plan": "VPN routers used in your plan",
+    "routers_in_your_plan": "routers in your plan",
+    "You_are_using_Meta_s_test_number__add_this_person_in_the_Meta_dashboard__or_switch_to_a_live_number_": "You are using Meta's test number: add this person in the Meta dashboard, or switch to a live number.",
+    "MikroTik__any_RouterOS__recommended_": "MikroTik, any RouterOS (recommended)",
+    "One_script_for_RouterOS_6_and_7__it_connects_with_WireGuard_on_RouterOS_7_and_OpenVPN_on_RouterOS_6_": "One script for RouterOS 6 and 7: it connects with WireGuard on RouterOS 7 and OpenVPN on RouterOS 6.",
+    "Open__the_router_answered_on_this_port_": "Open: the router answered on this port.",
+    "Refused__the_router_is_connected_but_turned_the_connection_away__Check_that_the_service_is_on__IP__Services__and_that_no_firewall_rule_or__Available_From__blocks_it_": "Refused: the router is connected but turned the connection away. Check that the service is on (IP, Services) and that no firewall rule or \"Available From\" blocks it.",
+    "No_answer__the_router_did_not_reply__It_may_have_just_gone_offline__or_a_firewall_rule_drops_the_connection_": "No answer: the router did not reply. It may have just gone offline, or a firewall rule drops the connection.",
+    "The_test_could_not_run__Try_again_in_a_moment_": "The test could not run. Try again in a moment."
 }

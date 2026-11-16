@@ -647,9 +647,12 @@ if ($step === 4) {
             // first run on this site: everything up to the version it was on counts as applied (an older record is honoured too)
             $doneFile = u_path('system/cache/updates.done.json');
             $dones = is_file($doneFile) ? (json_decode((string) file_get_contents($doneFile), true) ?: []) : [];
-            // only version numbers count: a damaged list would mark nothing as done and let every change since the first run again
-            $dones = array_values(array_filter(is_array($dones) ? $dones : [], function ($v) {
-                return is_scalar($v) && preg_match('/^\d+(\.\d+)*$/', (string) $v);
+            // Only entries that are real versions count: the older updater wrote the keys of updates.json here, as strings. Anything else
+            // (true, a number, junk) marks nothing as done, yet a non-empty list would skip the stop below and let every change since the
+            // first one run again; with no real entry left, the step stops and asks instead.
+            $known = array_map('strval', array_keys((array) json_decode((string) @file_get_contents(u_path('system/updates.json')), true)));
+            $dones = array_values(array_filter(is_array($dones) ? $dones : [], function ($v) use ($known) {
+                return is_string($v) && in_array($v, $known, true);
             }));
             $from = (string) ($run['from'] ?? '');
             // An update started by an older copy of this page can leave text here ("the previous version") in the session that
