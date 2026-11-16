@@ -211,14 +211,22 @@ function register_hook($action, $function){
     ];
 }
 
+/**
+ * Calls every function registered for $action, in the order they were registered. It used to stop at the first, so a second
+ * plugin on the same hook (several hook cronjob_end) never ran. Returns what the first one returned, false when none ran.
+ */
 function run_hook($action, $args = []){
     global $hook_registered;
-    foreach($hook_registered as $hook){
-        if($hook['action'] == $action){
-            if(function_exists($hook['function'])){
-                return call_user_func($hook['function'], $args);
+    $result = false;
+    $ran = false;
+    foreach((array) $hook_registered as $hook){
+        if($hook['action'] == $action && function_exists($hook['function'])){
+            $out = call_user_func($hook['function'], $args);
+            if(!$ran){
+                $result = $out;
+                $ran = true;
             }
         }
     }
-    return false;
+    return $result;
 }

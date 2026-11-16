@@ -7,7 +7,7 @@
  * 0 7 * * * /usr/bin/php /var/www/system/cron_reminder.php
  **/
 
-include "../init.php";
+include __DIR__ . "/../init.php"; // from any folder: cron starts in the home folder, not here
 
 $isCli = true;
 if (php_sapi_name() !== 'cli') {

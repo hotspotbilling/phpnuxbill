@@ -41,7 +41,7 @@ function sendReminderNotifications($config, $customer, $planName, $price, $messa
 
 session_start();
 
-include "../init.php";
+include __DIR__ . "/../init.php"; // from any folder: cron starts in the home folder, not here
 
 // Determine if running from CLI or web
 $isCli = (php_sapi_name() === 'cli');
