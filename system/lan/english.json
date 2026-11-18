@@ -5593,5 +5593,11 @@
     "Resume": "Resume",
     "CPU_and_memory": "CPU and memory",
     "Traffic": "Traffic",
-    "Measuring__the_graph_starts_with_the_next_readings": "Measuring, the graph starts with the next readings"
+    "Measuring__the_graph_starts_with_the_next_readings": "Measuring, the graph starts with the next readings",
+    "The_router_sent_no_system_details": "The router sent no system details",
+    "The_router_did_not_answer_in_time": "The router did not answer in time",
+    "Site___Group": "Site \/ Group",
+    "All_sites": "All sites",
+    "Online_Status": "Online Status",
+    "Connected__but_this_user_cannot_read_the_system_details_": "Connected, but this user cannot read the system details."
 }

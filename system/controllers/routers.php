@@ -60,14 +60,23 @@ $joinAddress = function ($host, $port) {
     if ($port === '' || $host === '') {
         return $host;
     }
-    if (substr_count($host, ':') === 1) {
+    if (preg_match('/^\[(.+)\](?::\d+)?$/', $host, $m)) {
+        $host = $m[1]; // "[v6]" or "[v6]:port" typed into the address: the port field wins
+    } elseif (substr_count($host, ':') === 1) {
         $host = explode(':', $host)[0]; // a port typed into the address too: the port field wins
     }
-    return (int) $port === 8728 ? $host : $host . ':' . (int) $port;
+    if ((int) $port === 8728) {
+        return $host;
+    }
+    // an IPv6 address has colons of its own, so with a port it is written [address]:port
+    return (strpos($host, ':') !== false ? '[' . $host . ']' : $host) . ':' . (int) $port;
 };
 // "host:port" as the two form fields (an IPv6 address or a plain host keeps everything in the address field)
 $splitAddress = function ($addr) {
     $addr = (string) $addr;
+    if (preg_match('/^\[(.+)\]:(\d+)$/', $addr, $m)) {
+        return [$m[1], $m[2]]; // [IPv6]:port
+    }
     if (substr_count($addr, ':') === 1) {
         [$h, $p] = explode(':', $addr);
         if (ctype_digit($p)) {
@@ -134,17 +143,73 @@ $rosConnect = function ($ip, $user, $pass, $timeout = 5) {
     }
 };
 
+// Send one request and wait for its answer until $deadline (a microtime) at the latest. The library's sendSync() waits with no
+// limit once logged in, so a router that stops answering mid-way would hold the request (and the PHP worker) open. On timeout
+// the connection is closed, so nothing is left half-read, and an exception says so.
+$rosSend = function ($c, $req, $deadline) {
+    static $n = 0;
+    $tag = 'nb' . (++$n);
+    $req->setTag($tag);
+    $c->sendAsync($req);
+    $left = $deadline - microtime(true);
+    if ($left > 0) {
+        $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
+    }
+    // finished means the router's closing reply (!done, or a fatal one) arrived. (isRequestActive() is no test: it stays true
+    // while a finished answer waits to be collected.)
+    $res = $c->extractNewResponses($tag);
+    foreach ($res as $r) {
+        if (in_array($r->getType(), [\PEAR2\Net\RouterOS\Response::TYPE_FINAL, \PEAR2\Net\RouterOS\Response::TYPE_FATAL], true)) {
+            return $res;
+        }
+    }
+    try {
+        $c->close();
+    } catch (Throwable $e) {
+    }
+    throw new Exception(Lang::T('The router did not answer in time'));
+};
+// The first error a router sent back for a request (no permission, unknown command), or null
+$rosError = function ($res) use ($rosText) {
+    foreach ($res as $r) {
+        if ($r->getType() === \PEAR2\Net\RouterOS\Response::TYPE_ERROR) {
+            return (string) $rosText($r->getProperty('message')) ?: Lang::T('The router refused the command');
+        }
+    }
+    return null;
+};
+
 // What a router says about itself: identity, board, RouterOS version, uptime, load, memory, disk, temperature and users online.
 // Each part is asked for separately, so a router without one (no hotspot, no health sensor) still answers the rest.
-$rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime) {
+$rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosSend, $rosError) {
+    $until = microtime(true) + 8; // every part shares one deadline
     $h = ['identity' => '', 'board' => '', 'version' => '', 'uptime' => '', 'cpu' => null, 'cores' => null,
         'mem_used' => null, 'mem_total' => null, 'disk_used' => null, 'disk_total' => null, 'temp' => null,
         'hotspot' => null, 'pppoe' => null];
     try {
-        $h['identity'] = (string) $rosText($c->sendSync(new \PEAR2\Net\RouterOS\Request('/system/identity/print'))->getProperty('name'));
+        foreach ($rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/identity/print'), $until) as $item) {
+            if ($item->getType() === \PEAR2\Net\RouterOS\Response::TYPE_DATA) {
+                $h['identity'] = (string) $rosText($item->getProperty('name'));
+                break;
+            }
+        }
     } catch (Throwable $e) {
     }
-    $r = $c->sendSync(new \PEAR2\Net\RouterOS\Request('/system/resource/print'));
+    // the one part that must answer: a refusal (this user may not read /system) or no data is the "cannot read" error
+    $res = $rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/resource/print'), $until);
+    if (($err = $rosError($res)) !== null) {
+        throw new Exception($err);
+    }
+    $r = null;
+    foreach ($res as $item) {
+        if ($item->getType() === \PEAR2\Net\RouterOS\Response::TYPE_DATA) {
+            $r = $item;
+            break;
+        }
+    }
+    if (!$r) {
+        throw new Exception(Lang::T('The router sent no system details'));
+    }
     $h['board'] = (string) $rosText($r->getProperty('board-name'));
     $h['version'] = (string) $rosText($r->getProperty('version'));
     $h['uptime'] = $rosUptime($rosText($r->getProperty('uptime')));
@@ -162,7 +227,7 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime) {
     $h['disk_used'] = $h['disk_total'] !== null && $diskFree !== null ? $h['disk_total'] - $diskFree : null;
     try {
         // RouterOS 7 lists one sensor per item (name, value); RouterOS 6 gives them as properties of one item
-        foreach ($c->sendSync(new \PEAR2\Net\RouterOS\Request('/system/health/print')) as $s) {
+        foreach ($rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/health/print'), $until) as $s) {
             if ($s->getType() !== \PEAR2\Net\RouterOS\Response::TYPE_DATA) {
                 continue;
             }
@@ -180,7 +245,7 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime) {
         try {
             $q = new \PEAR2\Net\RouterOS\Request($menu);
             $q->setArgument('count-only', '');
-            $n = $rosText($c->sendSync($q)->end()->getProperty('ret'));
+            $n = $rosText($rosSend($c, $q, $until)->end()->getProperty('ret'));
             $h[$k] = is_numeric($n) ? (int) $n : null;
         } catch (Throwable $e) {
         }
@@ -191,7 +256,7 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime) {
         try {
             $q = new \PEAR2\Net\RouterOS\Request('/interface/print');
             $q->setArgument('.proplist', 'name,type,rx-byte,tx-byte,running,disabled');
-            foreach ($c->sendSync($q) as $i) {
+            foreach ($rosSend($c, $q, $until) as $i) {
                 if ($i->getType() !== \PEAR2\Net\RouterOS\Response::TYPE_DATA || $rosText($i->getProperty('running')) !== 'true'
                     || $rosText($i->getProperty('disabled')) === 'true' || count($h['ifaces']) >= 64) {
                     continue;
@@ -296,11 +361,8 @@ switch ($action) {
             echo json_encode(['ok' => false, 'error' => Lang::T('Enter the IP address and username first.')]);
             exit;
         }
-        if ($pass === '' && (int) _post('id') > 0) {
-            // the edit form may be sent with the secret left empty: use the saved one
-            $saved = ORM::for_table('tbl_routers')->find_one((int) _post('id'));
-            $pass = $saved ? (string) $saved['password'] : '';
-        }
+        // the secret is tested as typed: the edit form shows the saved one, and an emptied field is saved empty, so the test
+        // tries exactly what Save would keep
         session_write_close(); // the router may take seconds: do not keep the admin's other pages waiting on the session
         [$c, $err] = $rosConnect($ip, $user, $pass, 8);
         if (!$c) {
@@ -327,13 +389,20 @@ switch ($action) {
             r2(getUrl('routers/list'), 'e', Lang::T('Choose at least one router'));
         }
         $n = 0;
+        $skipped = [];
         foreach (ORM::for_table('tbl_routers')->where_in('id', $ids)->find_many() as $r) {
+            // as on the form: an enabled router needs its address and username
+            if ($op === 'enable' && (trim((string) $r['ip_address']) === '' || trim((string) $r['username']) === '')) {
+                $skipped[] = $r['name'];
+                continue;
+            }
             $r->enabled = $op === 'enable' ? 1 : 0;
             $r->save();
             $n++;
         }
         _log('[' . $admin['username'] . ']: ' . ($op === 'enable' ? 'Routers enabled' : 'Routers disabled') . ': ' . $n, $admin['user_type'], $admin['id']);
-        r2(getUrl('routers/list'), 's', ($op === 'enable' ? Lang::T('Routers enabled') : Lang::T('Routers disabled')) . ': ' . $n);
+        r2(getUrl('routers/list'), $skipped ? 'w' : 's', ($op === 'enable' ? Lang::T('Routers enabled') : Lang::T('Routers disabled')) . ': ' . $n
+            . ($skipped ? '. ' . Lang::T('Not enabled, the IP address or username is missing') . ': ' . htmlspecialchars(implode(', ', $skipped)) : ''));
         break;
 
     case 'action':
@@ -389,10 +458,14 @@ switch ($action) {
         }
         try {
             if ($op === 'reboot') {
+                $refused = null;
                 try {
-                    $c->sendSync(new \PEAR2\Net\RouterOS\Request('/system/reboot'));
+                    $refused = $rosError($rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/reboot'), microtime(true) + 5));
                 } catch (Throwable $e) {
-                    // the router drops the connection as it restarts, often before it answers
+                    // no answer: the router drops the connection as it restarts, often before it replies
+                }
+                if ($refused !== null) {
+                    throw new Exception($refused); // an answer that refuses (no reboot permission) is a failure, not a restart
                 }
                 _log($who . 'Router rebooted: ' . $d['name'], $admin['user_type'], $admin['id']);
                 r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('restarting. It is back in a minute or two.'));
@@ -401,28 +474,43 @@ switch ($action) {
                 $q = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/active/print');
                 $q->setArgument('.proplist', '.id');
                 $ids = [];
-                foreach ($c->sendSync($q) as $a) {
+                $list = $rosSend($c, $q, microtime(true) + 15);
+                if (($err = $rosError($list)) !== null) {
+                    throw new Exception($err);
+                }
+                foreach ($list as $a) {
                     if ($a->getType() === \PEAR2\Net\RouterOS\Response::TYPE_DATA && ($i = $rosText($a->getProperty('.id'))) !== null) {
                         $ids[] = $i;
                     }
                 }
+                // removed in batches; a batch the router refuses (or does not answer) stops there, and only what was removed is counted
+                $removed = 0;
+                $stopped = null;
                 foreach (array_chunk($ids, 50) as $chunk) {
                     $rm = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/active/remove');
                     $rm->setArgument('numbers', implode(',', $chunk));
-                    $c->sendSync($rm);
+                    try {
+                        $stopped = $rosError($rosSend($c, $rm, microtime(true) + 15));
+                    } catch (Throwable $e) {
+                        $stopped = $e->getMessage();
+                    }
+                    if ($stopped !== null) {
+                        break;
+                    }
+                    $removed += count($chunk);
                 }
-                _log($who . 'Hotspot users disconnected on ' . $d['name'] . ': ' . count($ids), $admin['user_type'], $admin['id']);
-                r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('hotspot users disconnected') . ': ' . count($ids) . '. ' . Lang::T('They can sign in again at once.'));
+                _log($who . 'Hotspot users disconnected on ' . $d['name'] . ': ' . $removed . ' of ' . count($ids), $admin['user_type'], $admin['id']);
+                if ($stopped !== null) {
+                    r2($back, 'e', htmlspecialchars($d['name'] . ': ' . Lang::T('hotspot users disconnected') . ': ' . $removed . ' ' . Lang::T('of') . ' ' . count($ids) . '. ' . $stopped));
+                }
+                r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('hotspot users disconnected') . ': ' . $removed . '. ' . Lang::T('They can sign in again at once.'));
             }
             if ($op === 'backup') {
                 $file = 'phpnuxbill-' . date('Ymd-His');
                 $b = new \PEAR2\Net\RouterOS\Request('/system/backup/save');
                 $b->setArgument('name', $file);
-                $res = $c->sendSync($b);
-                foreach ($res as $r) {
-                    if ($r->getType() === \PEAR2\Net\RouterOS\Response::TYPE_ERROR) {
-                        throw new Exception((string) $rosText($r->getProperty('message')));
-                    }
+                if (($err = $rosError($rosSend($c, $b, microtime(true) + 30))) !== null) {
+                    throw new Exception($err);
                 }
                 _log($who . 'Backup saved on ' . $d['name'] . ': ' . $file . '.backup', $admin['user_type'], $admin['id']);
                 r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('backup saved on the router as') . ' ' . $file . '.backup. '

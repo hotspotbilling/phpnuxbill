@@ -296,8 +296,8 @@ class MikrotikVpn
         if ($_app_stage == 'demo') {
             return null;
         }
-        $iport = explode(":", $ip);
-        return new RouterOS\Client($iport[0], $user, $pass, ($iport[1]) ? $iport[1] : null);
+        [$host, $port] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
+        return new RouterOS\Client($host, $user, $pass, $port);
     }
 
     function removeVpnUser($client, $username, $cstid)

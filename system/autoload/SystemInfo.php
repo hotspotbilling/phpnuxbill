@@ -804,6 +804,21 @@ class SystemInfo
      * dashboard load/refresh is slow, so the totals are cached for 30 seconds (Redis when connected, otherwise a file).
      * Mikrotik::getClient($ip, $user, $pass, $port, $timeout) accepts the 1-second timeout used here.
      */
+    /**
+     * The sessions in a print reply. The reply also holds the closing !done (and !trap when the menu is refused), so counting
+     * the whole reply put one extra "user" per router on each list even with nobody connected.
+     */
+    private static function countSessions($responses): int
+    {
+        $n = 0;
+        foreach ($responses as $r) {
+            if ($r->getType() === PEAR2\Net\RouterOS\Response::TYPE_DATA) {
+                $n++;
+            }
+        }
+        return $n;
+    }
+
     private static function getMikrotikOnline(): array
     {
         $compute = function (): array {
@@ -822,13 +837,13 @@ class SystemInfo
                         try {
                             $reqH = new PEAR2\Net\RouterOS\Request('/ip/hotspot/active/print');
                             $reqH->setArgument('.proplist', '.id');
-                            $out['hotspot'] += count($client->sendSync($reqH));
+                            $out['hotspot'] += self::countSessions($client->sendSync($reqH));
                         } catch (Throwable $eH) {
                         }
                         try {
                             $reqP = new PEAR2\Net\RouterOS\Request('/ppp/active/print');
                             $reqP->setArgument('.proplist', '.id');
-                            $out['pppoe'] += count($client->sendSync($reqP));
+                            $out['pppoe'] += self::countSessions($client->sendSync($reqP));
                         } catch (Throwable $eP) {
                         }
                     } catch (Throwable $e) {

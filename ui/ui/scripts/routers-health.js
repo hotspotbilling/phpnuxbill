@@ -172,7 +172,8 @@
         var cross = el.querySelector('.rt-chart__cross');
         var dots = el.querySelectorAll('.rt-chart__dot');
         var tip = plot.querySelector('.rt-chart__tip');
-        var times = series[0].points.map(function (p) { return p[0]; });
+        // the times to snap to: from the series with the most readings (one may be empty, CPU or memory alone)
+        var times = series.reduce(function (a, s) { return s.points.length > a.points.length ? s : a; }).points.map(function (p) { return p[0]; });
         function move(ev) {
             var r = el.getBoundingClientRect();
             if (ev) hover.f = (ev.clientX - r.left) / r.width;
@@ -310,6 +311,12 @@
             .then(function (r) { return r.json(); })
             .catch(function () { return { ok: false, error: t.fail }; })
             .then(function (d) {
+                // answers can come back out of order (the list's first check, Check now, the live readings): an older reading
+                // than the one shown is dropped, so the row and panel never step back in time
+                var cur = data[id];
+                if (d && d.ok && d.at && cur && cur.ok && cur.at && d.at < cur.at) {
+                    return cur;
+                }
                 data[id] = d;
                 remember(id, d);
                 cell(id, d);
@@ -328,29 +335,33 @@
         while (running < 3 && queue.length) fetchQueued(queue.shift());
     }
 
-    function tick(id) {
+    // one reading chain per router: start() begins a new generation, and an answer from an older one (a request still on its
+    // way when the panel was closed and opened again, or paused and resumed) schedules nothing
+    function tick(id, gen) {
         var L = live[id];
-        if (!L || L.paused) return;
+        if (!L || L.paused || L.gen !== gen) return;
         if (Date.now() - L.started > MAX_LIVE) {
             pause(id);
             return;
         }
         if (document.hidden) { // nothing is read for a hidden tab; it carries on when the tab is shown
-            L.timer = setTimeout(function () { tick(id); }, EVERY);
+            L.timer = setTimeout(function () { tick(id, gen); }, EVERY);
             return;
         }
         ask(id, { live: true }).then(function (d) {
             // a router that does not answer is asked every 30 seconds only: each try can wait for the connection time limit
-            if (live[id] && !live[id].paused) live[id].timer = setTimeout(function () { tick(id); }, d && d.ok ? EVERY : EVERY_DOWN);
+            var cur = live[id];
+            if (cur && !cur.paused && cur.gen === gen) cur.timer = setTimeout(function () { tick(id, gen); }, d && d.ok ? EVERY : EVERY_DOWN);
         });
     }
     function start(id) {
-        var L = live[id] || (live[id] = { cpu: [], mem: [], prev: {}, rate: {}, iface: null, hover: { load: { f: null }, traffic: { f: null } } });
+        var L = live[id] || (live[id] = { cpu: [], mem: [], prev: {}, rate: {}, iface: null, gen: 0, hover: { load: { f: null }, traffic: { f: null } } });
         clearTimeout(L.timer);
+        L.gen++;
         L.paused = false;
         L.started = Date.now();
         if (data[id]) panel(id, data[id]);
-        tick(id);
+        tick(id, L.gen);
     }
     function pause(id) {
         var L = live[id];

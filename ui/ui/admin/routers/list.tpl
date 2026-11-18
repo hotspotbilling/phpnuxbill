@@ -63,6 +63,8 @@
                     {foreach $d as $ds}
                     {$rt_use = $usage[$ds['name']]|default:['plans' => 0, 'active' => 0, 'expired' => 0]}
                     {$rt_can = $rt_live && $ds['enabled'] == 1 && $ds['ip_address'] != ''}
+                    {* the SuperAdmin's router actions do not depend on live health: they get the details row even when it is off *}
+                    {$rt_act = $_admin['user_type'] == 'SuperAdmin' && $ds['enabled'] == 1 && $ds['ip_address'] != ''}
                     <tr{if $rt_can} data-rt-id="{$ds['id']}"{/if}>
                         <td class="ls-check"><input type="checkbox" name="ids[]" value="{$ds['id']}" form="rtBulkForm" aria-label="{$ds['name']|escape}"></td>
                         <td data-label="{Lang::T('Router Name')}">{if $ds['coordinates']}<a href="https://www.google.com/maps/dir//{$ds['coordinates']|escape:'url'}/" target="_blank" rel="noopener" title="{$ds['coordinates']|escape}"><i class="fa fa-map-marker" aria-hidden="true"></i></a> {/if}<b class="ls-strong">{$ds['name']|escape}</b>{if $has_site && $ds['site']} <span class="ls-pill rt-site">{$ds['site']|escape}</span>{/if}</td>
@@ -74,11 +76,11 @@
                         <td data-label="{Lang::T('Customers')}" class="rt-cust"><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=on')}" title="{Lang::T('Active customers on this router')}"><b>{$rt_use['active']}</b> {Lang::T('active')}</a><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=off')}" class="ls-dim" title="{Lang::T('Expired customers on this router')}">{$rt_use['expired']|default:0} {Lang::T('expired')}</a></td>
                         <td data-label="{Lang::T('Status')}">{if $ds['enabled'] == 1}<span class="ls-pill ls-pill--active">{Lang::T('Enabled')}</span>{else}<span class="ls-pill ls-pill--banned">{Lang::T('Disabled')}</span>{/if}</td>
                         <td data-label="ID" class="ls-dim">{$ds['id']}</td>
-                        <td class="ls-end"><div class="ls-row-actions">{if $rt_can}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon rt-more" data-rt-more="{$ds['id']}" aria-expanded="false" aria-controls="rt-detail-{$ds['id']}" aria-label="{Lang::T('Health details')}" title="{Lang::T('Health details')}"><i class="fa fa-chevron-down" aria-hidden="true"></i></button>{/if}<a href="{Text::url('routers/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a>{if $rt_use['plans'] > 0 || $rt_use['active'] > 0}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" disabled aria-label="{Lang::T('Delete')}" title="{Lang::T('In use by')} {$rt_use['plans']} {Lang::T('plans')}, {$rt_use['active']} {Lang::T('active customers')}. {Lang::T('Move them to another router first, or disable this router instead.')}"><i class="fa fa-trash" aria-hidden="true"></i></button>{else}<form method="post" action="{Text::url('routers/delete/', $ds['id'])}" class="rt-del"><input type="hidden" name="csrf_token" value="{$csrf_token}"><button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')|escape:'javascript'} {$ds['name']|escape:'javascript'|escape}?')"><i class="fa fa-trash" aria-hidden="true"></i></button></form>{/if}</div></td>
+                        <td class="ls-end"><div class="ls-row-actions">{if $rt_can || $rt_act}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon rt-more" data-rt-more="{$ds['id']}" aria-expanded="false" aria-controls="rt-detail-{$ds['id']}" aria-label="{Lang::T('Health details')}" title="{Lang::T('Health details')}"><i class="fa fa-chevron-down" aria-hidden="true"></i></button>{/if}<a href="{Text::url('routers/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a>{if $rt_use['plans'] > 0 || $rt_use['active'] > 0}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" disabled aria-label="{Lang::T('Delete')}" title="{Lang::T('In use by')} {$rt_use['plans']} {Lang::T('plans')}, {$rt_use['active']} {Lang::T('active customers')}. {Lang::T('Move them to another router first, or disable this router instead.')}"><i class="fa fa-trash" aria-hidden="true"></i></button>{else}<form method="post" action="{Text::url('routers/delete/', $ds['id'])}" class="rt-del"><input type="hidden" name="csrf_token" value="{$csrf_token}"><button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')|escape:'javascript'} {$ds['name']|escape:'javascript'|escape}?')"><i class="fa fa-trash" aria-hidden="true"></i></button></form>{/if}</div></td>
                     </tr>
-                    {if $rt_can}
-                    <tr class="rt-detail" id="rt-detail-{$ds['id']}" hidden><td colspan="{$rt_cols}"><div class="rt-panel" data-rt-panel="{$ds['id']}"></div>
-                        {if $_admin['user_type'] == 'SuperAdmin'}
+                    {if $rt_can || $rt_act}
+                    <tr class="rt-detail" id="rt-detail-{$ds['id']}" hidden><td colspan="{$rt_cols}">{if $rt_can}<div class="rt-panel" data-rt-panel="{$ds['id']}"></div>{/if}
+                        {if $rt_act}
                         <div class="rt-actions">
                             <span class="rt-actions__label">{Lang::T('On this router')}</span>
                             {foreach [
@@ -128,6 +130,16 @@
             sync();
         });
         boxes().forEach(function (b) { b.addEventListener('change', sync); });
+        // with live health off, its script is not loaded: the details row (the SuperAdmin's actions) opens and closes here
+        document.addEventListener('click', function (e) {
+            var more = e.target.closest('[data-rt-more]');
+            if (!more || window.rtHealth) return;
+            var row = document.getElementById('rt-detail-' + more.getAttribute('data-rt-more'));
+            var open = row.hidden;
+            row.hidden = !open;
+            more.setAttribute('aria-expanded', open ? 'true' : 'false');
+            more.classList.toggle('is-open', open);
+        });
         var check = document.getElementById('rtCheckNow');
         if (check) check.addEventListener('click', function () {
             var ids = [];
@@ -172,7 +184,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.18.4"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.18.5"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

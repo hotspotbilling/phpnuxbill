@@ -61,8 +61,11 @@
         }).addTo(map);
 
         routers.forEach(function(router) {
-            var coordinates = String(router.coordinates).split(',').map(Number);
-            if (coordinates.length !== 2 || !isFinite(coordinates[0]) || !isFinite(coordinates[1])) return;
+            // two numbers; an empty or blank part (Number('') is 0) is not a place, while an explicit 0 is
+            var parts = String(router.coordinates).split(',');
+            if (parts.length !== 2 || parts.some(function (p) { return p.trim() === ''; })) return;
+            var coordinates = parts.map(Number);
+            if (!isFinite(coordinates[0]) || !isFinite(coordinates[1])) return;
             // green online, red offline (when Router Check runs), blue enabled (when it does not), grey disabled
             var state = router.enabled != 1 ? 'disabled' : (checked ? (router.status === 'Offline' ? 'offline' : 'online') : 'enabled');
             var color = { online: '#16a34a', offline: '#dc2626', enabled: '#2563eb', disabled: '#94a3b8' }[state];

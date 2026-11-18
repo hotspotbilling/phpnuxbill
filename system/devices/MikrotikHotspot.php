@@ -248,9 +248,9 @@ class MikrotikHotspot
         if ($_app_stage == 'Demo') {
             return null;
         }
-        $iport = explode(":", $ip);
-        $p = ($port) ? $port : (($iport[1] ?? null) ? $iport[1] : null);
-        return new RouterOS\Client($iport[0], $user, $pass, $p, false, $timeout);
+        [$host, $saved] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
+        $p = ($port) ? $port : $saved;
+        return new RouterOS\Client($host, $user, $pass, $p, false, $timeout);
     }
 
     function removeHotspotUser($client, $username)
