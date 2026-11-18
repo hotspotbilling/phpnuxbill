@@ -5544,5 +5544,19 @@
     "Check_this_port_every_5_minutes__and_alert_me_when_it_stops_answering": "Check this port every 5 minutes, and alert me when it stops answering",
     "Processing_0_hotspot_system_expired_vouchers__": "Processing 0 hotspot system expired vouchers. ",
     "0_hotspot_system_expired_vouchers_have_been_deleted_in_this_batch__": "0 hotspot system expired vouchers have been deleted in this batch. ",
-    "Total_0_hotspot_system_expired_vouchers_have_been_deleted__": "Total 0 hotspot system expired vouchers have been deleted. "
+    "Total_0_hotspot_system_expired_vouchers_have_been_deleted__": "Total 0 hotspot system expired vouchers have been deleted. ",
+    "You": "You",
+    "All_conversations": "All conversations",
+    "Conversation": "Conversation",
+    "Goes_back_by": "Goes back by",
+    "through_the_number_they_wrote_to__Each_answer_counts_toward_your_plan_": "through the number they wrote to. Each answer counts toward your plan.",
+    "Beta": "Beta",
+    "Manage_a_router_that_has_no_public_IP_address__paste_one_script_into_it__on_RouterOS_6_or_7_": "Manage a router that has no public IP address: paste one script into it, on RouterOS 6 or 7.",
+    "See_why": "See why",
+    "All_routers__plans_for_any_router_": "All routers (plans for any router)",
+    "RADIUS": "RADIUS",
+    "Saved__A_test_alert_is_on_its_way_to_your_phone_by_SMS_": "Saved. A test alert is on its way to your phone by SMS.",
+    "Saved__A_test_alert_is_on_its_way_to_your_phone_on_WhatsApp_": "Saved. A test alert is on its way to your phone on WhatsApp.",
+    "Wait_a_few_seconds_before_sending_another_test_": "Wait a few seconds before sending another test.",
+    "Routely_is_up_to_date_": "Routely is up to date."
 }

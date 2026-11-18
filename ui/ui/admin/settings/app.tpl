@@ -254,10 +254,8 @@
                         </div>
                         <span class="help-block col-md-4">{Lang::T('rename .htaccess_firewall to .htaccess')}</span>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -351,10 +349,8 @@
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -371,10 +367,8 @@
                         </div>
                         <span class="help-block col-md-4"><small>{Lang::T('Select your dashboard type')}</small></span>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -393,10 +387,8 @@
                             <small>{Lang::T('Enable or disable coupons')}</small>
                         </p>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -536,10 +528,8 @@
                                 }checked{/if}>
                             {Lang::T('Address')}</label>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -711,10 +701,8 @@
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin: 25px auto 0;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -765,10 +753,8 @@
                         </p>
                     </div>
                     {/if}
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -824,10 +810,8 @@
                                 href="https://github.com/hotspotbilling/phpnuxbill/wiki/FreeRadius"
                                 target="_blank">{Lang::T('Radius Instructions')}</a></p>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -857,10 +841,8 @@
                                 placeholder="{Lang::T('i agree to extends and will paid full after this')}">{$_c['extend_confirmation']}</textarea>
                         </div>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -916,10 +898,8 @@
                             </small>
                         </p>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -950,10 +930,8 @@
                     <small id="emailHelp" class="form-text text-muted">
                         {Lang::T('You will get Payment and Error notification')}
                     </small>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1003,10 +981,8 @@
                     </div>
                     {include file="admin/settings/free-gateway.tpl" fg_for="sms"}
 
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1030,10 +1006,8 @@
                         </div>
                     </div>
                     {include file="admin/settings/free-gateway.tpl" fg_for="wa"}
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1106,10 +1080,8 @@
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1197,10 +1169,8 @@
                             {Lang::T('7 Days')}</label>
                     </div>
 
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1220,10 +1190,8 @@
                                 value="{$_c['tawkto_api_key']}" placeholder="39e52264cxxxxxxxxxxxxxdd078af5342e8">
                         </div>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                    <br>
                     <p class="col-md-5 help-block">/ip hotspot walled-garden<br>
@@ -1244,10 +1212,8 @@
                         </div>
                         <p class="col-md-4 help-block">{Lang::T('This Token will act as SuperAdmin/Admin')}</p>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1267,11 +1233,9 @@
                                 onmouseleave="this.type = 'password'" onmouseenter="this.type = 'text'">
                         </div>
                     </div>
-                   <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
-                    </div>
+                   <div class="st-savebar">
+                       <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
+                   </div>
                 </div>
 
                 <div role="tabpanel" class="tab-pane" id="tax">
@@ -1329,10 +1293,8 @@
                         <p class="help-block col-md-4">{Lang::T('Enter the custom tax rate (e.g., 3.75 for 3.75%)')}</p>
                     </div>
 
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1364,10 +1326,8 @@
                             will allow
                             you to download plugin from private/paid repository')}</label>
                     </div>
-                    <div style="text-align: center; margin: 0 auto;">
-                        <button class="btn btn-success" name="general" type="submit">
-                            {Lang::T('Save Changes')}
-                        </button>
+                    <div class="st-savebar">
+                        <button class="btn btn-success" name="general" type="submit"><i class="fa fa-save" aria-hidden="true"></i> {Lang::T('Save Changes')}</button>
                     </div>
                 </div>
 
@@ -1441,6 +1401,22 @@
     <!-- Mobile Overlay -->
     <div class="settings-overlay" id="settingsOverlay"></div>
 </form>
+
+<script>
+    // the floating Save stays above the footer when the theme pins it to the bottom of the screen
+    document.addEventListener('DOMContentLoaded', function () {
+        var footer = document.querySelector('.main-footer');
+        function lift() {
+            var pinned = footer && getComputedStyle(footer).position === 'fixed';
+            document.documentElement.style.setProperty('--st-savebar-bottom', (pinned ? footer.offsetHeight : 0) + 'px');
+        }
+        lift();
+        if (footer && window.ResizeObserver) {
+            new ResizeObserver(lift).observe(footer);
+        }
+        window.addEventListener('resize', lift);
+    });
+</script>
 
 <script>
     // Mobile menu functionality

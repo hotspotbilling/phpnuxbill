@@ -12773,9 +12773,9 @@ body.as-chrome .customer-edit-actions {
   width: 100%;
   text-align: right;
 }
-.st .tab-pane > div:has(> button[type="submit"]:only-child),
+.st .tab-pane > div:not(.st-savebar):has(> button[type="submit"]:only-child),
 .st .panel-body > div:has(> button[type="submit"]:only-child),
-.st .tab-pane > div:has(> .btn:only-child) {
+.st .tab-pane > div:not(.st-savebar):has(> .btn:only-child) {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
@@ -12784,6 +12784,53 @@ body.as-chrome .customer-edit-actions {
   background: var(--ls-soft);
   border-top: 1px solid var(--ls-line);
   text-align: right !important;
+}
+/* App settings: Save and Cancel stay in view at the bottom of the screen while the card is longer than it.
+   overflow: clip keeps the card's rounded corners without making it a scroll box, which would stop the bar sticking */
+.st .tab-pane.active:has(> .st-savebar) {
+  overflow: clip;
+}
+/* the page's own wrappers hide their overflow too (AdminLTE's .wrapper, and shadcn's .wrapper, html and body on phones), which
+   makes them scroll boxes that never scroll, so a sticky bar would stick to them instead of the screen; clip looks the same */
+body:has(.st-savebar) .wrapper {
+  overflow: clip;
+}
+/* body has overflow-x: hidden / overflow-y: auto (phpnuxbill.min.css, and shadcn on phones), so the window must do the scrolling:
+   html clips sideways and body stays visible, or body would become the scroll box (left alone while the phone menu locks it) */
+html:has(.st-savebar) {
+  overflow-x: clip !important;
+}
+body:has(.st-savebar):not(.sidebar-open) {
+  overflow: visible !important;
+}
+/* Save and Cancel float over the form: no bar, just the two buttons with a shadow, kept above a footer that is pinned to the
+   screen (--st-savebar-bottom is that footer's height, set by the page's script; 0 when the footer scrolls with the page) */
+.st .st-savebar {
+  position: sticky;
+  bottom: calc(var(--st-savebar-bottom, 0px) + 16px);
+  z-index: 820;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 16px 20px;
+  background: none;
+  border: 0;
+  pointer-events: none; /* the empty space beside the buttons does not cover the fields under it */
+}
+.st .st-savebar > .btn {
+  pointer-events: auto;
+}
+body .st .st-savebar > .btn:not(#filterNavigateMenu) {
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18), 0 1px 3px rgba(15, 23, 42, 0.12) !important;
+}
+@media (max-width: 768px) {
+  .st .st-savebar {
+    padding: 12px 14px;
+  }
+  .st .st-savebar > .btn {
+    flex: 1;
+  }
 }
 /* buttons: the list kit's */
 /* phpnuxbill.min.css colours button.btn-* / a.btn-* with !important, so these are too */
@@ -12974,7 +13021,7 @@ body .st .input-group-btn > .btn:not(#filterNavigateMenu) {
     > .control-label {
     padding-top: 0;
   }
-  .st .tab-pane > div:has(> button[type="submit"]:only-child) > .btn,
+  .st .tab-pane > div:not(.st-savebar):has(> button[type="submit"]:only-child) > .btn,
   .st .panel-body > div:has(> button[type="submit"]:only-child) > .btn {
     flex: 1;
   }
