@@ -351,5 +351,11 @@
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;"
+  ],
+  "2026.11.18": [
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_routers' AND COLUMN_NAME='site')=0, 'ALTER TABLE `tbl_routers` ADD COLUMN `site` VARCHAR(32) NOT NULL DEFAULT \\'\\' AFTER `description`', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;"
   ]
 }

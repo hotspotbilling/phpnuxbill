@@ -1,6 +1,7 @@
 {*
     The router form, shared by add.tpl ($nf_edit false, $d empty) and edit.tpl ($nf_edit true, $d the router).
-    Field names are what routers.php reads: add-post: enabled (0/1), name, ip_address, username, password, description,
+    Field names are what routers.php reads: add-post: enabled (0/1), name, ip_address + api_port (joined as host:port), username,
+    password, description, site (once the database has it),
     testIt; edit-post: the same plus id, coordinates, coverage. csrf_token is assigned by boot.php.
     $routely_vpn (optional plugin): addresses, address => [device, state, port, proto], offered as suggestions.
 *}
@@ -30,10 +31,19 @@
                     </div>
 
                     <div class="nf__field">
-                        <label class="nf__label" for="ip_address">{Lang::T('IP Address')}</label>
-                        <input type="text" class="form-control" id="ip_address" name="ip_address" maxlength="128"
-                            value="{$d['ip_address']|default:''|escape}" placeholder="192.168.88.1:8728"
-                            {if $routely_vpn['addresses']}list="nfRouterAddr"{/if} spellcheck="false">
+                        <div class="nf__row nf__row--addr">
+                            <div>
+                                <label class="nf__label" for="ip_address">{Lang::T('IP Address')}</label>
+                                <input type="text" class="form-control" id="ip_address" name="ip_address" maxlength="128"
+                                    value="{$nf_host|default:''|escape}" placeholder="192.168.88.1"
+                                    {if $routely_vpn['addresses']}list="nfRouterAddr"{/if} spellcheck="false">
+                            </div>
+                            <div>
+                                <label class="nf__label" for="api_port">{Lang::T('API Port')}</label>
+                                <input type="number" class="form-control" id="api_port" name="api_port" min="1" max="65535" step="1"
+                                    value="{$nf_port|default:''|escape}" placeholder="8728">
+                            </div>
+                        </div>
                         {if $routely_vpn['addresses']}
                         <datalist id="nfRouterAddr">
                             {foreach $routely_vpn['addresses'] as $addr => $a}
@@ -47,7 +57,7 @@
                             {Lang::T('Through Routely VPN to')} <b>{$nf_routely['device']|escape}</b>, {Lang::T('port')} {$nf_routely['port']|escape}
                         </p>
                         {else}
-                        <p class="nf__hint">{Lang::T('The router\'s IP or host name, with the API port when it is not 8728, such as 192.168.88.1 or vpn1.example.com:34567.')}</p>
+                        <p class="nf__hint">{Lang::T('The router\'s IP or host name. Leave the port empty for the usual 8728.')}</p>
                         {/if}
                     </div>
 
@@ -67,11 +77,26 @@
                         </div>
                     </div>
 
+                    <div class="nf__test">
+                        <button type="button" class="ls-btn" id="nfTestNow"><i class="fa fa-plug" aria-hidden="true"></i> {Lang::T('Test now')}</button>
+                        <div class="nf__test-out" id="nfTestOut" role="status" aria-live="polite" hidden></div>
+                    </div>
+
                     <div class="nf__field">
                         <label class="nf__label" for="description">{Lang::T('Description')} <small>{Lang::T('Optional')}</small></label>
                         <textarea class="form-control" id="description" name="description" rows="3">{$d['description']|default:''|escape}</textarea>
                         <p class="nf__hint">{Lang::T('Explain Coverage of router')}</p>
                     </div>
+
+                    {if $has_site}
+                    <div class="nf__field">
+                        <label class="nf__label" for="site">{Lang::T('Site / Group')} <small>{Lang::T('Optional')}</small></label>
+                        <input type="text" class="form-control" id="site" name="site" maxlength="32" list="nfSites"
+                            value="{$d['site']|default:''|escape}" placeholder="{Lang::T('North zone')}">
+                        <datalist id="nfSites">{foreach $sites as $st}<option value="{$st|escape}"></option>{/foreach}</datalist>
+                        <p class="nf__hint">{Lang::T('Group routers by area or branch, then filter the list by it.')}</p>
+                    </div>
+                    {/if}
                 </div>
             </section>
 
@@ -147,6 +172,70 @@
 </form>
 
 <script>
+    // Test now: try the address and login above without saving, and say what answered (or why it did not)
+    (function () {
+        var btn = document.getElementById('nfTestNow');
+        var out = document.getElementById('nfTestOut');
+        if (!btn) return;
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+        function show(ok, html) {
+            out.hidden = false;
+            out.className = 'nf__test-out ' + (ok ? 'is-ok' : 'is-bad');
+            out.innerHTML = html;
+        }
+        btn.addEventListener('click', function () {
+            var form = btn.form;
+            var body = new FormData();
+            ['csrf_token', 'id', 'ip_address', 'api_port', 'username', 'password'].forEach(function (n) {
+                if (form.elements[n]) body.append(n, form.elements[n].value);
+            });
+            var icon = btn.querySelector('i');
+            btn.disabled = true;
+            icon.className = 'fa fa-circle-o-notch fa-spin';
+            show(true, '{Lang::T('Connecting')|escape:'javascript'}&hellip;');
+            out.className = 'nf__test-out';
+            fetch('{Text::url('routers/test')}', { method: 'POST', body: body, credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (!d.ok) {
+                        show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> <b>{Lang::T('Could not connect')|escape:'javascript'}</b><br>' + esc(d.error));
+                        return;
+                    }
+                    var bits = [];
+                    if (d.identity) bits.push('<b>' + esc(d.identity) + '</b>');
+                    if (d.board) bits.push(esc(d.board));
+                    if (d.version) bits.push('RouterOS ' + esc(d.version));
+                    if (d.uptime) bits.push('{Lang::T('up')|escape:'javascript'} ' + esc(d.uptime));
+                    show(true, '<i class="fa fa-check-circle" aria-hidden="true"></i> <b>{Lang::T('Connected')|escape:'javascript'}</b>'
+                        + (bits.length ? '<br>' + bits.join(' &middot; ') : '') + (d.note ? '<br>' + esc(d.note) : ''));
+                })
+                .catch(function () {
+                    show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> {Lang::T('The test could not be run. Reload the page and try again.')|escape:'javascript'}');
+                })
+                .finally(function () {
+                    btn.disabled = false;
+                    icon.className = 'fa fa-plug';
+                });
+        });
+    })();
+
+    // "host:port" typed or picked into the address (the Routely suggestions are like that) moves the port to its own field
+    (function () {
+        var host = document.getElementById('ip_address'), port = document.getElementById('api_port');
+        if (!host || !port) return;
+        host.addEventListener('change', function () {
+            var m = /^([^:]+):(\d+)$/.exec(host.value.trim());
+            if (m) {
+                host.value = m[1];
+                port.value = m[2];
+            }
+        });
+    })();
+
     // show or hide a secret field
     document.querySelectorAll('[data-nf-eye]').forEach(function (btn) {
         btn.addEventListener('click', function () {

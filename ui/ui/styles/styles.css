@@ -10209,6 +10209,533 @@ body.dark-mode .ls-table tr.ls-subrow--error td {
 .ls-table tr.ls-subrow:hover {
   background: transparent;
 }
+
+/* Router form: Test now */
+.nf__test {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px 14px;
+  margin: -4px 0 18px;
+}
+.nf__test-out {
+  flex: 1 1 240px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ls-line);
+  background: var(--ls-soft);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ls-ink);
+  overflow-wrap: anywhere;
+}
+.nf__test-out.is-ok {
+  border-color: rgba(22, 163, 74, 0.35);
+  background: rgba(22, 163, 74, 0.08);
+}
+.nf__test-out.is-ok > i {
+  color: #16a34a;
+}
+.nf__test-out.is-bad {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.07);
+}
+.nf__test-out.is-bad > i {
+  color: #dc2626;
+}
+body.dark-mode .nf__test-out.is-ok > i {
+  color: #4ade80;
+}
+body.dark-mode .nf__test-out.is-bad > i {
+  color: #f87171;
+}
+
+/* Routers list: live health (routers/list.tpl). Meters turn amber from 75% and red from 90% */
+.ls-table tr[hidden] {
+  display: none !important; /* phones lay rows out as grids, which would otherwise show a closed details row */
+}
+.rt-cell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+.rt-meter {
+  --rt-fill: #16a34a;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.rt-meter[data-level="warn"] {
+  --rt-fill: #d97706;
+}
+.rt-meter[data-level="bad"] {
+  --rt-fill: #dc2626;
+}
+body.dark-mode .rt-meter {
+  --rt-fill: #4ade80;
+}
+body.dark-mode .rt-meter[data-level="warn"] {
+  --rt-fill: #fbbf24;
+}
+body.dark-mode .rt-meter[data-level="bad"] {
+  --rt-fill: #f87171;
+}
+.rt-meter__label {
+  color: var(--ls-muted);
+}
+.rt-meter__bar {
+  position: relative;
+  width: 56px;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--ls-line);
+  overflow: hidden;
+}
+.rt-meter__bar > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--rt-fill);
+}
+.rt-meter > b {
+  min-width: 32px;
+  font-weight: 600;
+  color: var(--ls-ink);
+  font-variant-numeric: tabular-nums;
+}
+.rt-meter[data-level="bad"] > b {
+  color: var(--rt-fill);
+}
+.rt-meter small {
+  color: var(--ls-muted);
+}
+.rt-users {
+  font-size: 12px;
+  color: var(--ls-muted);
+  white-space: nowrap;
+}
+.rt-err {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 12px;
+  color: #b91c1c;
+}
+body.dark-mode .rt-err {
+  color: #f87171;
+}
+.rt-skel {
+  display: inline-block;
+  width: 150px;
+  max-width: 100%;
+  height: 10px;
+  border-radius: 99px;
+  vertical-align: middle;
+  background: linear-gradient(90deg, var(--ls-line) 25%, var(--ls-soft) 50%, var(--ls-line) 75%);
+  background-size: 200% 100%;
+  animation: rt-shimmer 1.4s linear infinite;
+}
+.rt-skel--wide {
+  width: 100%;
+  height: 14px;
+}
+@keyframes rt-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rt-skel {
+    animation: none;
+  }
+}
+.rt-more > i {
+  transition: transform 0.15s ease;
+}
+.rt-more.is-open > i {
+  transform: rotate(180deg);
+}
+.rt-del {
+  display: inline-flex;
+  margin: 0;
+}
+/* a router still in use cannot be deleted: the button stays, faded, and its title says why */
+.ls-row-actions .ls-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+.ls-table tr.rt-detail:hover {
+  background: transparent;
+}
+.ls-table tr.rt-detail > td {
+  padding: 12px 16px 16px; /* a gap between the router's row and its details */
+}
+.rt-panel {
+  padding: 14px 16px;
+  border: 1px solid var(--ls-line);
+  border-radius: 12px;
+  background: var(--ls-soft);
+}
+.rt-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.rt-panel__head > b {
+  color: var(--ls-ink);
+}
+.rt-panel__when {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ls-muted);
+}
+.rt-panel .rt-err {
+  max-width: none;
+  white-space: normal;
+  margin: 0;
+}
+.rt-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 20px;
+  margin: 0 0 14px;
+}
+.rt-facts dt {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ls-muted);
+}
+.rt-facts dd {
+  margin: 2px 0 0;
+  color: var(--ls-ink);
+  font-weight: 600;
+}
+.rt-meters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px 24px;
+}
+.rt-meter--wide {
+  font-size: 13px;
+}
+.rt-meter--wide .rt-meter__label {
+  min-width: 58px;
+}
+.rt-meter--wide .rt-meter__bar {
+  flex: 1;
+  width: auto;
+  min-width: 60px;
+  height: 8px;
+}
+.rt-bulk-btns {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* customers per router: active and expired, each a link to that list */
+.rt-cust {
+  white-space: nowrap;
+}
+.rt-cust > a {
+  display: inline-block;
+  font-size: 12.5px;
+}
+.rt-cust > a + a {
+  margin-left: 10px;
+}
+.rt-cust > a > b {
+  color: var(--ls-ink);
+}
+.rt-site {
+  margin-left: 6px;
+  background: var(--ls-accent-soft);
+  color: var(--ls-accent);
+  font-size: 11px;
+}
+/* router map legend (maps/routers.tpl) */
+.rt-map-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 13px;
+  color: var(--ls-muted, #64748b);
+}
+.rt-map-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.25);
+  vertical-align: -1px;
+}
+/* SuperAdmin actions under the details panel */
+.rt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px dashed var(--ls-line);
+  border-radius: 12px;
+}
+.rt-actions__label {
+  margin-right: 4px;
+  font-size: 12px;
+  color: var(--ls-muted);
+}
+@media (max-width: 767px) {
+  .rt-cust {
+    white-space: normal;
+  }
+  .rt-actions > form,
+  .rt-actions > form > .ls-btn {
+    flex: 1 1 auto;
+  }
+}
+
+/* live graphs in the details panel: two series per chart (validated pair, light and dark), one y axis */
+.rt-panel {
+  --rt-s1: #2a78d6;
+  --rt-s2: #eb6834;
+}
+body.dark-mode .rt-panel {
+  --rt-s1: #3987e5;
+  --rt-s2: #d95926;
+}
+.rt-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ls-muted);
+}
+.rt-live > i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: rt-pulse 1.6s ease-in-out infinite;
+}
+@keyframes rt-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rt-live > i {
+    animation: none;
+  }
+}
+.rt-hint {
+  display: block;
+  margin-top: 4px;
+  color: var(--ls-muted);
+  font-size: 12px;
+}
+.rt-err--block {
+  display: block;
+}
+.rt-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+.rt-chart,
+.rt-chart__head {
+  min-height: 0; /* a legacy rule gives figure and figcaption min-height: 100% */
+}
+.rt-chart {
+  margin: 0;
+  padding: 12px 14px 10px;
+  border: 1px solid var(--ls-line);
+  border-radius: 10px;
+  background: var(--ls-card);
+  min-width: 0;
+}
+.rt-chart[hidden] {
+  display: none;
+}
+.rt-chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--ls-ink);
+}
+.rt-chart__pick {
+  height: 28px;
+  max-width: 180px;
+  padding: 0 6px;
+  border: 1px solid var(--ls-field-line);
+  border-radius: 7px;
+  background: var(--ls-field);
+  color: var(--ls-ink);
+  font-size: 12px;
+}
+.rt-legend {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--ls-muted);
+}
+.rt-legend__item b {
+  color: var(--ls-ink);
+  font-variant-numeric: tabular-nums;
+}
+.rt-key {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  margin-right: 6px;
+  border-radius: 2px;
+  vertical-align: middle;
+  background: var(--rt-s1);
+}
+.rt-key.rt-s2 {
+  background: var(--rt-s2);
+}
+.rt-chart__plot {
+  position: relative;
+  height: 150px;
+  touch-action: pan-y;
+}
+.rt-chart__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.rt-chart__grid {
+  stroke: var(--ls-line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.rt-chart__line {
+  fill: none;
+  stroke: var(--rt-s1);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.rt-chart__line.rt-s2 {
+  stroke: var(--rt-s2);
+}
+.rt-chart__cross[hidden],
+.rt-chart__dot[hidden] {
+  display: none;
+}
+.rt-chart__cross {
+  stroke: var(--ls-muted);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.rt-chart__dot {
+  fill: var(--rt-s1);
+  stroke: var(--ls-card);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.rt-chart__dot.rt-s2 {
+  fill: var(--rt-s2);
+}
+.rt-chart__y,
+.rt-chart__x {
+  position: absolute;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ls-muted);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rt-chart__y {
+  left: 0;
+  transform: translateY(-50%);
+}
+.rt-chart__x {
+  bottom: 0;
+}
+.rt-chart__x--end {
+  right: 0;
+}
+.rt-chart__wait {
+  position: absolute;
+  inset: 0 0 22px 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--ls-muted);
+  text-align: center;
+}
+.rt-chart__tip {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 9px;
+  border: 1px solid var(--ls-line);
+  border-radius: 8px;
+  background: var(--ls-card);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+  font-size: 12px;
+  color: var(--ls-muted);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.rt-chart__tip[hidden] {
+  display: none;
+}
+.rt-chart__tip b {
+  color: var(--ls-ink);
+  font-variant-numeric: tabular-nums;
+}
+.rt-online {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--ls-ink);
+}
+@media (max-width: 767px) {
+  .ls-table td.rt-health {
+    flex-wrap: wrap;
+  }
+  .rt-cell {
+    justify-content: flex-end;
+  }
+  .ls-table tr.rt-detail {
+    padding: 10px 14px 12px;
+  }
+  .ls-table tr.rt-detail > td {
+    display: block;
+    padding: 0;
+    text-align: left;
+  }
+  .rt-panel__head {
+    flex-wrap: wrap;
+  }
+}
 .ls-field input {
   height: 38px;
   padding: 0 8px;
@@ -14249,6 +14776,9 @@ body.dark-mode .ls-pill--routely.is-down,
 }
 .nf__row--3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.nf__row--addr {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 120px);
 }
 .nf__row--coa {
   grid-template-columns: minmax(0, 140px) minmax(0, 1fr);

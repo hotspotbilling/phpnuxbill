@@ -52,6 +52,23 @@
                         </p>
                     </div>
                     <div class="form-group">
+                        <label class="col-md-3 control-label">{Lang::T('Router Live Health')}</label>
+                        <div class="col-md-5">
+                            <select name="router_health" id="router_health" class="form-control">
+                                <option value="1" {if $_c['router_health']|default:'1' != '0' }selected="selected" {/if}>
+                                    {Lang::T('Enabled')}
+                                </option>
+                                <option value="0" {if $_c['router_health']|default:'1' == '0' }selected="selected" {/if}>
+                                    {Lang::T('Disabled')}
+                                </option>
+                            </select>
+                        </div>
+                        <p class="help-block col-md-4"><small>
+                                {Lang::T('Shows CPU, memory and users online for each router on the Routers page, asked from the router when the page opens. Turn off if you have many routers or slow links.')}
+                            </small>
+                        </p>
+                    </div>
+                    <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Phone OTP Required')}</label>
                         <div class="col-md-5">
                             <select name="allow_phone_otp" id="allow_phone_otp" class="form-control">
