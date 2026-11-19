@@ -27,20 +27,35 @@ class Lang
         } else if (isset($_L[$key])) {
             return $_L[$key];
         } else {
-            $iso = Lang::getIsoLang()[$config['language']];
+            $iso = Lang::getIsoLang()[$config['language']] ?? '';
             if (empty($iso)) {
                 return $val;
             }
-            if (!empty($iso) && !empty($val) && $iso != 'en') {
+            if ($iso != 'en' && !empty($val)) {
                 $temp = Lang::translate($val, $iso);
-                if (!empty($temp)) {
-                    $val = $temp;
+                if ($temp === null) {
+                    // not translated now (no answer, or the service refused): shown in English and not saved, so it is
+                    // translated on a later visit instead of staying English for good
+                    return $val;
                 }
+                $val = $temp;
             }
             $_L[$key] = $val;
-            file_put_contents($lan_file, json_encode($_L, JSON_PRETTY_PRINT));
+            // readable text (not ا-style codes), so a change to a tracked language file shows as one line in git
+            file_put_contents($lan_file, json_encode($_L, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
             return $val;
         }
+    }
+
+    /**
+     * Whether a language chosen by a visitor (the language menu, its cookie, the session, the customer's saved choice) can be
+     * used: a plain name with a file in system/lan. The name becomes a file path that is read and written, so nothing else is.
+     */
+    public static function valid($name)
+    {
+        global $root_path;
+        return is_string($name) && preg_match('/^[a-z][a-z0-9_]{0,31}$/', $name) === 1 && $name !== 'country'
+            && is_file($root_path . File::pathFixer('system/lan/' . $name . '.json'));
     }
 
     public static function sanitize($str)
@@ -225,10 +240,20 @@ class Lang
         return $textLeft . str_pad($textRight, $cols - strlen($textLeft), $pad_string, 0);
     }
 
+    /**
+     * The text translated online, or null when it could not be. After a failure (Google answers "too many requests" to a
+     * server that asks a lot), nothing more is asked for 15 minutes, so pages are not slowed by one wait per missing text.
+     */
     public static function translate($txt, $to = 'id')
     {
+        global $CACHE_PATH;
+        static $down = false;
+        $pause = ($CACHE_PATH ?: sys_get_temp_dir()) . DIRECTORY_SEPARATOR . 'lang_translate_pause';
+        if ($down || (is_file($pause) && time() - filemtime($pause) < 900)) {
+            return null;
+        }
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://translate.google.com/m?hl=en&sl=en&tl=$to&ie=UTF-8&prev=_m&q=" . urlencode($txt));
+        curl_setopt($ch, CURLOPT_URL, "https://translate.google.com/m?hl=en&sl=en&tl=" . urlencode($to) . "&ie=UTF-8&prev=_m&q=" . urlencode($txt));
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (iPhone; CPU OS 13_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/28.1 Mobile/15E148 Safari/605.1.15");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -236,15 +261,18 @@ class Lang
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         $hasil = curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        $temp = explode('<div class="result-container">', $hasil);
-        if (count($temp) > 0) {
-            $temp =  explode("</div", $temp[1]);
-            if (!empty($temp[0])) {
-                return $temp[0];
+        if (is_string($hasil) && $code === 200 && ($p = strpos($hasil, '<div class="result-container">')) !== false) {
+            $rest = substr($hasil, $p + strlen('<div class="result-container">'));
+            $out = trim(html_entity_decode(strip_tags(substr($rest, 0, (int) strpos($rest, '</div'))), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if ($out !== '') {
+                return $out;
             }
         }
-        return $txt;
+        $down = true;
+        @touch($pause);
+        return null;
     }
 
     public static function maskText($text)

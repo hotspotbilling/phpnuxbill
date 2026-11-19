@@ -4,6 +4,7 @@ config.php
 ui/ui/compiled
 ui/compiled/*.php
 ui/cache/*.php
+ui/cache/rtl/
 test.php
 sms.php
 pages/
@@ -38,6 +39,7 @@ system/lan/**
 !system/lan/indonesia.json
 !system/lan/spanish.json
 !system/lan/turkish.json
+!system/lan/arabic.json
 !system/lan/english.json
 !system/lan/country.json
 *.zip
