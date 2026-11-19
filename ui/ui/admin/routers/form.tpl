@@ -187,9 +187,25 @@
             out.className = 'nf__test-out ' + (ok ? 'is-ok' : 'is-bad');
             out.innerHTML = html;
         }
+        var fields = ['ip_address', 'api_port', 'username', 'password'];
+        // what a result was for: shown only while the fields still hold those values
+        function snapshot() {
+            return fields.map(function (n) { return btn.form.elements[n] ? btn.form.elements[n].value : ''; }).join('\n');
+        }
+        var tested = null;
+        fields.forEach(function (n) {
+            var f = btn.form.elements[n];
+            if (f) f.addEventListener('input', function () {
+                if (tested !== null && snapshot() !== tested) {
+                    out.hidden = true; // the result was for other details
+                    out.innerHTML = '';
+                }
+            });
+        });
         btn.addEventListener('click', function () {
             var form = btn.form;
             var body = new FormData();
+            var sent = tested = snapshot();
             ['csrf_token', 'id', 'ip_address', 'api_port', 'username', 'password'].forEach(function (n) {
                 if (form.elements[n]) body.append(n, form.elements[n].value);
             });
@@ -201,6 +217,9 @@
             fetch('{Text::url('routers/test')}', { method: 'POST', body: body, credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
                 .then(function (r) { return r.json(); })
                 .then(function (d) {
+                    if (snapshot() !== sent || tested !== sent) {
+                        return; // the details were changed (or tested again) while this one was running
+                    }
                     if (!d.ok) {
                         show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> <b>{Lang::T('Could not connect')|escape:'javascript'}</b><br>' + esc(d.error));
                         return;
@@ -214,6 +233,7 @@
                         + (bits.length ? '<br>' + bits.join(' &middot; ') : '') + (d.note ? '<br>' + esc(d.note) : ''));
                 })
                 .catch(function () {
+                    if (snapshot() !== sent || tested !== sent) return;
                     show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> {Lang::T('The test could not be run. Reload the page and try again.')|escape:'javascript'}');
                 })
                 .finally(function () {

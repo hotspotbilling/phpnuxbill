@@ -39,15 +39,28 @@ $routerUsage = function (array $names) {
     }
     $in = implode(',', array_fill(0, count($names), '?'));
     $db = ORM::getDb();
+    // MySQL matches names without regard to case or trailing spaces, so a plan saved as "main office" belongs to "Main Office":
+    // each count is added to the router's own name, whatever spelling the plan used
+    $canon = [];
+    foreach ($names as $n) {
+        $canon[mb_strtolower(rtrim($n))] = $n;
+    }
+    $owner = function ($v) use ($canon) {
+        return $canon[mb_strtolower(rtrim((string) $v))] ?? null;
+    };
     $st = $db->prepare("SELECT routers, COUNT(*) FROM tbl_plans WHERE routers IN ($in) GROUP BY routers");
     $st->execute($names);
     foreach ($st->fetchAll(PDO::FETCH_NUM) as $r) {
-        $use[$r[0]]['plans'] = (int) $r[1];
+        if (($n = $owner($r[0])) !== null) {
+            $use[$n]['plans'] += (int) $r[1];
+        }
     }
     $st = $db->prepare("SELECT routers, status, COUNT(*) FROM tbl_user_recharges WHERE status IN ('on', 'off') AND routers IN ($in) GROUP BY routers, status");
     $st->execute($names);
     foreach ($st->fetchAll(PDO::FETCH_NUM) as $r) {
-        $use[$r[0]][$r[1] === 'on' ? 'active' : 'expired'] = (int) $r[2];
+        if (($n = $owner($r[0])) !== null) {
+            $use[$n][$r[1] === 'on' ? 'active' : 'expired'] += (int) $r[2];
+        }
     }
     return $use;
 };
@@ -75,12 +88,12 @@ $joinAddress = function ($host, $port) {
 $splitAddress = function ($addr) {
     $addr = (string) $addr;
     if (preg_match('/^\[(.+)\]:(\d+)$/', $addr, $m)) {
-        return [$m[1], $m[2]]; // [IPv6]:port
+        return [$m[1], (int) $m[2] > 0 ? $m[2] : '']; // [IPv6]:port
     }
     if (substr_count($addr, ':') === 1) {
         [$h, $p] = explode(':', $addr);
         if (ctype_digit($p)) {
-            return [$h, $p];
+            return [$h, (int) $p > 0 ? $p : '']; // a stored ":0" is no port
         }
     }
     return [$addr, ''];
@@ -126,9 +139,14 @@ $rosUptime = function ($u) {
 
 // Connect to a router; returns [client, null] or [null, the reason it failed]
 $rosConnect = function ($ip, $user, $pass, $timeout = 5) {
+    global $_app_stage;
     try {
-        $c = (new MikrotikHotspot())->getClient($ip, $user, $pass, null, $timeout);
-        return $c ? [$c, null] : [null, Lang::T('Not available in Demo mode')];
+        if ($_app_stage == 'Demo') {
+            return [null, Lang::T('Not available in Demo mode')];
+        }
+        // as MikrotikHotspot::getClient(), but a client that can drop a stalled connection without waiting (RouterClient)
+        [$host, $port] = RouterAddress::split($ip);
+        return [new RouterClient($host, $user, $pass, $port, false, $timeout), null];
     } catch (Throwable $e) {
         // the library wraps the reason (refused, timed out, wrong login) in a general message: show both
         $parts = [];
@@ -163,11 +181,9 @@ $rosSend = function ($c, $req, $deadline) {
             return $res;
         }
     }
-    try {
-        $c->close();
-    } catch (Throwable $e) {
-    }
-    throw new Exception(Lang::T('The router did not answer in time'));
+    // drop the connection without the library's goodbye, which would wait for a reply that is not coming
+    method_exists($c, 'abort') ? $c->abort() : $c->close();
+    throw new Exception(Lang::T('The router did not answer in time'), 408);
 };
 // The first error a router sent back for a request (no permission, unknown command), or null
 $rosError = function ($res) use ($rosText) {
@@ -186,15 +202,6 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosS
     $h = ['identity' => '', 'board' => '', 'version' => '', 'uptime' => '', 'cpu' => null, 'cores' => null,
         'mem_used' => null, 'mem_total' => null, 'disk_used' => null, 'disk_total' => null, 'temp' => null,
         'hotspot' => null, 'pppoe' => null];
-    try {
-        foreach ($rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/identity/print'), $until) as $item) {
-            if ($item->getType() === \PEAR2\Net\RouterOS\Response::TYPE_DATA) {
-                $h['identity'] = (string) $rosText($item->getProperty('name'));
-                break;
-            }
-        }
-    } catch (Throwable $e) {
-    }
     // the one part that must answer: a refusal (this user may not read /system) or no data is the "cannot read" error
     $res = $rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/resource/print'), $until);
     if (($err = $rosError($res)) !== null) {
@@ -225,6 +232,17 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosS
     $diskFree = $num('free-hdd-space');
     $h['disk_total'] = $num('total-hdd-space');
     $h['disk_used'] = $h['disk_total'] !== null && $diskFree !== null ? $h['disk_total'] - $diskFree : null;
+    // the rest is optional and asked after the figures that matter: if one of them times out (and so drops the connection),
+    // the readings already taken are still returned
+    try {
+        foreach ($rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/identity/print'), $until) as $item) {
+            if ($item->getType() === \PEAR2\Net\RouterOS\Response::TYPE_DATA) {
+                $h['identity'] = (string) $rosText($item->getProperty('name'));
+                break;
+            }
+        }
+    } catch (Throwable $e) {
+    }
     try {
         // RouterOS 7 lists one sensor per item (name, value); RouterOS 6 gives them as properties of one item
         foreach ($rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/health/print'), $until) as $s) {
@@ -354,6 +372,10 @@ switch ($action) {
             echo json_encode(['ok' => false, 'error' => Lang::T('Invalid or Expired CSRF Token') . '. ' . Lang::T('Reload the page and try again.')]);
             exit;
         }
+        if (!$validPort(_post('api_port'))) {
+            echo json_encode(['ok' => false, 'error' => Lang::T('The API port must be a number from 1 to 65535')]);
+            exit;
+        }
         $ip = $joinAddress(_post('ip_address'), _post('api_port'));
         $user = _post('username');
         $pass = _post('password');
@@ -371,7 +393,8 @@ switch ($action) {
         }
         try {
             $h = $rosHealth($c);
-            echo json_encode(['ok' => true, 'identity' => $h['identity'], 'board' => $h['board'], 'version' => $h['version'], 'uptime' => $h['uptime']]);
+            // a router name in an old encoding is not valid UTF-8: replaced character by character instead of failing the answer
+            echo json_encode(['ok' => true, 'identity' => $h['identity'], 'board' => $h['board'], 'version' => $h['version'], 'uptime' => $h['uptime']], JSON_INVALID_UTF8_SUBSTITUTE);
         } catch (Throwable $e) {
             // logged in, but this user may not read /system: still a working connection
             echo json_encode(['ok' => true, 'identity' => '', 'board' => '', 'version' => '', 'uptime' => '', 'note' => Lang::T('Connected, but this user cannot read the system details.')]);
@@ -431,7 +454,8 @@ switch ($action) {
             foreach (ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $d['name'])->find_many() as $tur) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 $c = ORM::for_table('tbl_customers')->find_one($tur['customer_id']);
-                if (!$p || !$c) {
+                // the device sends a customer to its plan's router: a plan now on another router is not this router's to sync
+                if (!$p || !$c || strcasecmp(rtrim((string) $p['routers']), rtrim((string) $d['name'])) !== 0) {
                     $failed[] = $tur['username'];
                     continue;
                 }
@@ -458,14 +482,28 @@ switch ($action) {
         }
         try {
             if ($op === 'reboot') {
-                $refused = null;
+                // three outcomes: the command could not be sent (an error), the router answered (done, or refused: no permission),
+                // or it was sent and the connection went quiet, which is what a restarting router does but cannot be confirmed
+                $req = new \PEAR2\Net\RouterOS\Request('/system/reboot');
+                $req->setTag('reboot');
+                $c->sendAsync($req); // a failure here is thrown to the error below: nothing was sent
+                $confirmed = false;
                 try {
-                    $refused = $rosError($rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/reboot'), microtime(true) + 5));
-                } catch (Throwable $e) {
-                    // no answer: the router drops the connection as it restarts, often before it replies
+                    $c->loop(5);
+                    $res = $c->extractNewResponses('reboot');
+                    if (($refused = $rosError($res)) !== null) {
+                        throw new Exception($refused);
+                    }
+                    foreach ($res as $r) {
+                        $confirmed = $confirmed || $r->getType() === \PEAR2\Net\RouterOS\Response::TYPE_FINAL;
+                    }
+                } catch (\PEAR2\Net\Transmitter\SocketException $e) {
+                    // the connection dropped after the command went out: the usual sign of a restart
                 }
-                if ($refused !== null) {
-                    throw new Exception($refused); // an answer that refuses (no reboot permission) is a failure, not a restart
+                if (!$confirmed) {
+                    method_exists($c, 'abort') ? $c->abort() : null;
+                    _log($who . 'Router reboot sent, not confirmed: ' . $d['name'], $admin['user_type'], $admin['id']);
+                    r2($back, 'w', htmlspecialchars($d['name']) . ': ' . Lang::T('the restart was sent, but the router did not confirm it. If it is restarting, it is back in a minute or two.'));
                 }
                 _log($who . 'Router rebooted: ' . $d['name'], $admin['user_type'], $admin['id']);
                 r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('restarting. It is back in a minute or two.'));
@@ -570,9 +608,26 @@ switch ($action) {
         if (!is_dir($dir)) {
             @mkdir($dir, 0755, true);
         }
-        @file_put_contents($file, json_encode($out + ['key' => $key]), LOCK_EX);
+        // text from an old router can be in a legacy encoding: replaced rather than failing the whole answer
+        $json = json_encode($out + ['key' => $key], JSON_INVALID_UTF8_SUBSTITUTE);
+        $fh = $json !== false ? @fopen($file, 'c+') : false;
+        if ($fh) {
+            // read and write under one lock: when two readings of the same router finish together, the newer one stays
+            if (flock($fh, LOCK_EX)) {
+                $old = json_decode((string) stream_get_contents($fh), true);
+                $newer = is_array($old) && ($old['key'] ?? '') === $key && isset($old['at'], $out['at']) && (float) $old['at'] > (float) $out['at'];
+                if (!$newer) {
+                    ftruncate($fh, 0);
+                    rewind($fh);
+                    fwrite($fh, $json);
+                    fflush($fh);
+                }
+                flock($fh, LOCK_UN);
+            }
+            fclose($fh);
+        }
         $out['age'] = 0;
-        echo json_encode($out);
+        echo json_encode($out, JSON_INVALID_UTF8_SUBSTITUTE);
         exit;
 
     case 'add-post':
@@ -731,8 +786,7 @@ switch ($action) {
 
     default:
 
-        $name = _post('name');
-        $name = _post('name');
+        $name = _req('name'); // the search box posts it, the page links carry it: read from either, as the site filter is
         $site = $hasSite() ? _req('site') : '';
         $query = ORM::for_table('tbl_routers')->order_by_desc('id');
         if ($name != '') {
@@ -741,7 +795,7 @@ switch ($action) {
         if ($site !== '') {
             $query->where('site', $site);
         }
-        $d = Paginator::findMany($query, ['name' => $name, 'site' => $site]);
+        $d = Paginator::findMany($query, ['name' => $name, 'site' => $site]) ?: [];
         $ui->assign('site', $site);
         $ui->assign('sites', $siteNames());
         $ui->assign('d', $d);

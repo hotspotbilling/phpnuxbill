@@ -23,6 +23,9 @@
     var live = {};           // id => { cpu: [[at, v]], mem: [[at, v]], prev: {name: {rx, tx, at}}, rate: {name: [[at, down, up]]}, iface, timer, paused, started }
     var queue = [];
     var running = 0;
+    var asked = {};          // id => number of the newest request sent
+    var applied = {};        // id => number of the newest request whose answer is shown
+    var LIMIT = 20000;       // ms a request (and reading its answer) may take before it counts as failed
 
     function esc(s) {
         return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -94,6 +97,13 @@
         if (d.cpu != null) push(L.cpu, [d.at, d.cpu]);
         var m = pct(d.mem_used, d.mem_total);
         if (m != null) push(L.mem, [d.at, m]);
+        // the interfaces running now: one that has gone (unplugged, disabled) leaves the picker; its graph history stays in
+        // L.rate, so it is there again if the interface comes back
+        if (d.ifaces) {
+            var now = {};
+            d.ifaces.forEach(function (i) { now[i.name] = true; });
+            Object.keys(L.prev).forEach(function (n) { if (!now[n]) delete L.prev[n]; });
+        }
         (d.ifaces || []).forEach(function (i) {
             var p = L.prev[i.name];
             if (p && d.at > p.at) {
@@ -307,16 +317,23 @@
         if (opts.fresh) q.push('fresh=1');
         if (opts.live) q.push('live=1');
         var u = cfg.url + id + (q.length ? (cfg.url.indexOf('?') < 0 ? '?' : '&') + q.join('&') : '');
-        return fetch(u, { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+        var seq = asked[id] = (asked[id] || 0) + 1;
+        // a deadline for the whole request, reading the answer included: a stuck one fails, so its queue place is freed and the
+        // live readings carry on
+        var ctl = window.AbortController ? new AbortController() : null;
+        var timer = ctl ? setTimeout(function () { ctl.abort(); }, LIMIT) : null;
+        return fetch(u, { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined })
             .then(function (r) { return r.json(); })
             .catch(function () { return { ok: false, error: t.fail }; })
             .then(function (d) {
-                // answers can come back out of order (the list's first check, Check now, the live readings): an older reading
-                // than the one shown is dropped, so the row and panel never step back in time
+                clearTimeout(timer);
                 var cur = data[id];
-                if (d && d.ok && d.at && cur && cur.ok && cur.at && d.at < cur.at) {
-                    return cur;
+                // answers can come back out of order (the list's first check, Check now, the live readings): one from a request
+                // older than the answer already shown is dropped, failures too, and so is an older reading served from the store
+                if (seq < (applied[id] || 0) || (d && d.ok && d.at && cur && cur.ok && cur.at && d.at < cur.at)) {
+                    return cur || d;
                 }
+                applied[id] = seq;
                 data[id] = d;
                 remember(id, d);
                 cell(id, d);

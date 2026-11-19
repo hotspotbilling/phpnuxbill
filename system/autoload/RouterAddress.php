@@ -17,12 +17,13 @@ class RouterAddress
     {
         $address = trim((string) $address);
         if (preg_match('/^\[([^\]]+)\](?::(\d+))?$/', $address, $m)) {
-            return [$m[1], isset($m[2]) && $m[2] !== '' ? $m[2] : null];
+            return [$m[1], isset($m[2]) && (int) $m[2] > 0 ? $m[2] : null];
         }
         if (substr_count($address, ':') > 1) {
             return [$address, null]; // a bare IPv6 address, no port
         }
         $parts = explode(':', $address);
-        return [$parts[0], isset($parts[1]) && $parts[1] !== '' ? $parts[1] : null];
+        // ":0" (or no number) is no port at all: the default API port is used
+        return [$parts[0], isset($parts[1]) && (int) $parts[1] > 0 ? $parts[1] : null];
     }
 }
