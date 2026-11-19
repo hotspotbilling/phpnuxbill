@@ -61,13 +61,17 @@ class RouterApi
         $left = $deadline - microtime(true);
         if ($left > 0) {
             // every read inside the reply (not only the wait for it to start) ends by the deadline
-            if (method_exists($c, 'readTimeout')) {
-                $c->readTimeout($left);
+            if (method_exists($c, 'readDeadline')) {
+                $c->readDeadline($deadline);
             }
             try {
                 $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
-            } catch (\PEAR2\Net\Transmitter\SocketException $e) {
+            } catch (\PEAR2\Net\Transmitter\Exception $e) {
                 // a read that ran out of time mid-reply: the reply is incomplete, handled as not answered below
+            } finally {
+                if (method_exists($c, 'readDeadline')) {
+                    $c->readDeadline(null);
+                }
             }
         }
         // (isRequestActive() is no test of being finished: it stays true while a finished answer waits to be collected)
@@ -142,32 +146,45 @@ class RouterApi
     /**
      * Nightly backups, from the cron: once a day, each enabled router saves "phpnuxbill-auto-<date>.backup" on itself, and only
      * the newest few of those are kept (older ones are removed from the router). Backups made by hand are never removed.
+     * A router that fails is tried again on the next runs that day (up to 3 times); one that is done is not touched again. A
+     * retry first looks for today's file, so a save that worked but answered late is not made twice, and the clean-up still runs.
      * Never throws; returns lines for the cron's output.
      */
     public static function nightlyBackups()
     {
-        global $config;
-        if (($config['router_backup'] ?? '0') !== '1') {
-            return [];
-        }
-        $today = date('Y-m-d');
-        if (($config['router_backup_last'] ?? '') === $today) {
-            return [];
-        }
-        $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
+        global $config, $CACHE_PATH;
         $log = [];
-        foreach (ORM::for_table('tbl_routers')->where('enabled', 1)->find_many() as $r) {
-            if (trim((string) $r['ip_address']) === '' || strcasecmp($r['name'], 'radius') === 0) {
-                continue;
+        $lock = null;
+        try {
+            if (($config['router_backup'] ?? '0') !== '1') {
+                return [];
             }
-            [$c, $err] = self::connect($r['ip_address'], $r['username'], $r['password'], 8);
-            if (!$c) {
-                $log[] = $r['name'] . ': ' . $err;
-                continue;
+            $today = date('Y-m-d');
+            $state = json_decode((string) ($config['router_backup_state'] ?? ''), true);
+            if (!is_array($state) || ($state['date'] ?? '') !== $today || !is_array($state['routers'] ?? null)) {
+                $state = ['date' => $today, 'routers' => []];
             }
-            try {
-                $name = 'phpnuxbill-auto-' . date('Ymd');
-                self::run($c, '/system/backup/save', ['name' => $name], microtime(true) + 60);
+            $pending = function ($id) use (&$state) {
+                $s = $state['routers'][$id] ?? 0;
+                return $s !== 'ok' && (int) $s < 3;
+            };
+            $routers = [];
+            foreach (ORM::for_table('tbl_routers')->where('enabled', 1)->find_many() as $r) {
+                if (trim((string) $r['ip_address']) !== '' && strcasecmp($r['name'], 'radius') !== 0 && $pending((string) $r['id'])) {
+                    $routers[] = $r;
+                }
+            }
+            if (!$routers) {
+                return [];
+            }
+            // one run at a time: a second cron started meanwhile leaves the work to the one already doing it
+            $lock = @fopen($CACHE_PATH . DIRECTORY_SEPARATOR . 'router_backup.lock', 'c');
+            if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
+                return [];
+            }
+            $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
+            $name = 'phpnuxbill-auto-' . date('Ymd');
+            $autoFiles = function ($c) {
                 $files = self::rows($c, '/file/print', ['.id', 'name'], microtime(true) + 15);
                 $auto = array_values(array_filter($files, function ($f) {
                     return preg_match('/(^|\/)phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name']);
@@ -175,21 +192,62 @@ class RouterApi
                 usort($auto, function ($a, $b) {
                     return strcmp(basename($b['name']), basename($a['name'])); // newest first (the date is in the name)
                 });
-                foreach (array_slice($auto, $keep) as $old) {
-                    self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
+                return $auto;
+            };
+            foreach ($routers as $r) {
+                $id = (string) $r['id'];
+                @set_time_limit(120); // each router gets its own time, so a slow one does not stop the rest
+                [$c, $err] = self::connect($r['ip_address'], $r['username'], $r['password'], 8);
+                if (!$c) {
+                    $state['routers'][$id] = (int) ($state['routers'][$id] ?? 0) + 1;
+                    $log[] = $r['name'] . ': ' . $err;
+                    self::saveBackupState($state);
+                    continue;
                 }
-                $log[] = $r['name'] . ': ' . $name . '.backup';
-            } catch (Throwable $e) {
-                $log[] = $r['name'] . ': ' . $e->getMessage();
-            } finally {
-                // done with this router either way: drop the connection without the library's goodbye, which can wait for ever
-                method_exists($c, 'abort') ? $c->abort() : null;
+                try {
+                    $auto = $autoFiles($c);
+                    $made = false;
+                    foreach ($auto as $f) {
+                        $made = $made || basename($f['name']) === $name . '.backup';
+                    }
+                    if (!$made) {
+                        self::run($c, '/system/backup/save', ['name' => $name], microtime(true) + 60);
+                        $auto = $autoFiles($c);
+                    }
+                    foreach (array_slice($auto, $keep) as $old) {
+                        self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
+                    }
+                    $state['routers'][$id] = 'ok';
+                    $log[] = $r['name'] . ': ' . $name . '.backup' . ($made ? ' (' . Lang::T('already saved') . ')' : '');
+                } catch (Throwable $e) {
+                    $state['routers'][$id] = (int) ($state['routers'][$id] ?? 0) + 1;
+                    $log[] = $r['name'] . ': ' . $e->getMessage();
+                } finally {
+                    // done with this router either way: drop the connection without the library's goodbye, which can wait for ever
+                    method_exists($c, 'abort') ? $c->abort() : null;
+                }
+                self::saveBackupState($state);
+            }
+        } catch (Throwable $e) {
+            $log[] = Lang::T('Backups stopped') . ': ' . $e->getMessage();
+        } finally {
+            if ($lock) {
+                flock($lock, LOCK_UN);
+                fclose($lock);
             }
         }
-        $d = ORM::for_table('tbl_appconfig')->where('setting', 'router_backup_last')->find_one() ?: ORM::for_table('tbl_appconfig')->create();
-        $d->setting = 'router_backup_last';
-        $d->value = $today;
-        $d->save();
         return $log;
+    }
+
+    /** Remember which routers are done today (or how many times each has failed), saved after every router. */
+    private static function saveBackupState(array $state)
+    {
+        global $config;
+        $json = json_encode($state);
+        $d = ORM::for_table('tbl_appconfig')->where('setting', 'router_backup_state')->find_one() ?: ORM::for_table('tbl_appconfig')->create();
+        $d->setting = 'router_backup_state';
+        $d->value = $json;
+        $d->save();
+        $config['router_backup_state'] = $json;
     }
 }

@@ -204,6 +204,14 @@
         });
         btn.addEventListener('click', function () {
             var form = btn.form;
+            // the browser's own checks first (a port that is not a number reads as empty, and would test the default port);
+            // an empty port is fine
+            var bad = ['ip_address', 'api_port'].map(function (n) { return form.elements[n]; })
+                .filter(function (f) { return f && f.checkValidity && !f.checkValidity(); })[0];
+            if (bad) {
+                bad.reportValidity();
+                return;
+            }
             var body = new FormData();
             var sent = tested = snapshot();
             ['csrf_token', 'id', 'ip_address', 'api_port', 'username', 'password'].forEach(function (n) {
@@ -214,8 +222,16 @@
             icon.className = 'fa fa-spinner fa-spin';
             show(true, '{Lang::T('Connecting')|escape:'javascript'}&hellip;');
             out.className = 'nf__test-out';
-            fetch('{Text::url('routers/test')}', { method: 'POST', body: body, credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+            // a deadline for the answer and its body, so the button always comes back (the server gives up well before it)
+            var ctl = window.AbortController ? new AbortController() : null;
+            var timedOut = false;
+            var timer = setTimeout(function () { timedOut = true; if (ctl) ctl.abort(); }, 45000);
+            fetch('{Text::url('routers/test')}', { method: 'POST', body: body, credentials: 'same-origin', headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined })
                 .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (timedOut) throw new Error('timeout');
+                    return d;
+                })
                 .then(function (d) {
                     if (snapshot() !== sent || tested !== sent) {
                         return; // the details were changed (or tested again) while this one was running
@@ -234,9 +250,12 @@
                 })
                 .catch(function () {
                     if (snapshot() !== sent || tested !== sent) return;
-                    show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> {Lang::T('The test could not be run. Reload the page and try again.')|escape:'javascript'}');
+                    show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> ' + (timedOut
+                        ? '{Lang::T('The test took too long. Try again.')|escape:'javascript'}'
+                        : '{Lang::T('The test could not be run. Reload the page and try again.')|escape:'javascript'}'));
                 })
                 .finally(function () {
+                    clearTimeout(timer);
                     btn.disabled = false;
                     icon.className = 'fa fa-plug';
                 });

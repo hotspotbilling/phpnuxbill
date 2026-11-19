@@ -91,6 +91,13 @@ class Stream
     protected $isBlocking = true;
 
     /**
+     * PHPNuxBill: the moment after which nothing more is read, or NULL. See setDeadline().
+     *
+     * @var float|null
+     */
+    protected $deadline = null;
+
+    /**
      * An associative array with the chunk size of each direction.
      *
      * Key is the direction, value is the size in bytes as integer.
@@ -221,6 +228,55 @@ class Stream
     public function setTimeout($seconds, $microseconds = 0)
     {
         return stream_set_timeout($this->stream, $seconds, $microseconds);
+    }
+
+    /**
+     * PHPNuxBill: an optional moment (microtime(true)) after which no more is read. The socket's own time limit starts again
+     * with every read, so a reply that keeps trickling in could run far past it; with a deadline, each read only waits for
+     * the time left. NULL removes it.
+     *
+     * @param float|null $deadline
+     *
+     * @return void
+     */
+    public function setDeadline($deadline)
+    {
+        $this->deadline = null === $deadline ? null : (float) $deadline;
+    }
+
+    /**
+     * PHPNuxBill: before a read, limit the socket to the time left before the deadline. FALSE (and the connection closed)
+     * when the deadline has passed.
+     *
+     * @return bool
+     */
+    protected function limitToDeadline()
+    {
+        if (null === $this->deadline) {
+            return true;
+        }
+        $left = $this->deadline - microtime(true);
+        if ($left <= 0) {
+            $this->close();
+            return false;
+        }
+        stream_set_timeout($this->stream, (int) floor($left), (int) (($left - floor($left)) * 1000000));
+        return true;
+    }
+
+    /**
+     * PHPNuxBill: whether the last read ran out of time; the connection is closed when it did.
+     *
+     * @return bool
+     */
+    protected function readTimedOut()
+    {
+        $meta = self::isStream($this->stream) ? stream_get_meta_data($this->stream) : array('timed_out' => true);
+        if (empty($meta['timed_out'])) {
+            return false;
+        }
+        $this->close();
+        return true;
     }
 
     /**
@@ -404,6 +460,9 @@ class Stream
         $chunkSize = $this->chunkSize[self::DIRECTION_RECEIVE];
         while ($length > 0) {
             while ($this->isAvailable()) {
+                if (!$this->limitToDeadline()) {
+                    break;
+                }
                 $fragment = fread($this->stream, min($length, $chunkSize));
                 if ('' != $fragment) {
                     $length -= strlen($fragment);
@@ -414,9 +473,10 @@ class Stream
                     continue 2;
                 }
                 // PHPNuxBill: a read that ran out of the socket's time limit stops here (the "failed while receiving" below)
-                // instead of trying again for ever while the other end stays connected but silent
-                $meta = stream_get_meta_data($this->stream);
-                if (!empty($meta['timed_out'])) {
+                // instead of trying again for ever while the other end stays connected but silent. The connection is closed
+                // too: half a reply is still on the way, so nothing more can be read from it, and the goodbye a client sends
+                // when it is closed or destroyed must fail at once instead of waiting for an answer.
+                if ($this->readTimedOut()) {
                     break;
                 }
             }
@@ -465,6 +525,9 @@ class Stream
         $chunkSize = $this->chunkSize[self::DIRECTION_RECEIVE];
         while ($length > 0) {
             while ($this->isAvailable()) {
+                if (!$this->limitToDeadline()) {
+                    break;
+                }
                 $fragment = fread($this->stream, min($length, $chunkSize));
                 if ('' != $fragment) {
                     $length -= strlen($fragment);
@@ -475,9 +538,10 @@ class Stream
                     continue 2;
                 }
                 // PHPNuxBill: a read that ran out of the socket's time limit stops here (the "failed while receiving" below)
-                // instead of trying again for ever while the other end stays connected but silent
-                $meta = stream_get_meta_data($this->stream);
-                if (!empty($meta['timed_out'])) {
+                // instead of trying again for ever while the other end stays connected but silent. The connection is closed
+                // too: half a reply is still on the way, so nothing more can be read from it, and the goodbye a client sends
+                // when it is closed or destroyed must fail at once instead of waiting for an answer.
+                if ($this->readTimedOut()) {
                     break;
                 }
             }

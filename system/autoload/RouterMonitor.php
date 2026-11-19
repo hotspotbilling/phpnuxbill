@@ -47,6 +47,10 @@ class RouterMonitor
     {
         global $CACHE_PATH;
         if (!self::enabled()) {
+            // collection is off: no router is read, but what was kept still ages out
+            if (self::ready()) {
+                self::prune();
+            }
             return [];
         }
         // one run at a time, and not more often than every EVERY seconds, whatever the cron's own schedule
@@ -70,6 +74,9 @@ class RouterMonitor
             if (trim((string) $r['ip_address']) === '' || strcasecmp((string) $r['name'], 'radius') === 0) {
                 continue;
             }
+            // each router gets its own time (a reading is at most about 15 seconds), so a slow one does not use up what the
+            // rest of the cron run (the other routers, the nightly backups) needs; set_time_limit() starts the count again
+            @set_time_limit(60);
             try {
                 $log[] = $r['name'] . ': ' . self::check($r);
             } catch (Throwable $e) {
@@ -118,17 +125,19 @@ class RouterMonitor
                 $s['disk'] = $pct($x['free-hdd-space'] ?? null, $x['total-hdd-space'] ?? null);
                 $s['uptime'] = self::seconds($x['uptime'] ?? '');
             } catch (Throwable $e) {
-                // logged in but could not read: it answers, so it counts as online
-                $s['online'] = $e->getCode() === 408 ? 0 : 1;
+                // the router refused the read (RouterApi::rows throws a plain Exception with its message): it answers, so it
+                // counts as online. No answer in time (408) or a connection that broke (the library's own exceptions) is offline.
+                $s['online'] = get_class($e) === 'Exception' && $e->getCode() !== 408 ? 1 : 0;
                 $why = $e->getMessage();
             }
             if ($s['online']) {
                 // users online: hotspot plus PPPoE, kept only when both are known. A menu the router does not have (no hotspot
                 // package) counts as 0; a refusal or no answer makes the total unknown rather than half of it.
                 $users = 0;
-                foreach (['/ip/hotspot/active/print', '/ppp/active/print'] as $menu) {
+                // (PPP sessions are PPPoE only: L2TP, SSTP and the other tunnels are not customers)
+                foreach (['/ip/hotspot/active/print' => null, '/ppp/active/print' => 'pppoe'] as $menu => $service) {
                     try {
-                        $q = new PEAR2\Net\RouterOS\Request($menu);
+                        $q = new PEAR2\Net\RouterOS\Request($menu, $service ? PEAR2\Net\RouterOS\Query::where('service', $service) : null);
                         $q->setArgument('count-only', '');
                         $res = RouterApi::send($c, $q, $until);
                         $err = RouterApi::error($res);
@@ -188,11 +197,11 @@ class RouterMonitor
         return ORM::for_table('tbl_router_events')->where('router_id', $id)->where_in('type', $types)->order_by_desc('id')->find_one();
     }
 
-    private static function event($r, $type, $detail, $alert)
+    private static function event($r, $type, $detail, $alert, $at = null)
     {
         $e = ORM::for_table('tbl_router_events')->create();
         $e->router_id = (int) $r['id'];
-        $e->at = date('Y-m-d H:i:s');
+        $e->at = $at ?: date('Y-m-d H:i:s');
         $e->type = $type;
         $e->detail = mb_substr($detail, 0, 255);
         $e->save();
@@ -207,19 +216,16 @@ class RouterMonitor
         $state = self::lastOf($id, ['offline', 'online']);
         $isDown = $state && $state['type'] === 'offline';
         if (!$s['online']) {
-            // offline only after the second failed reading in a row
+            // offline only after the second failed reading in a row, dated from the first one: that is when the outage began, and
+            // the event keeps it (readings are pruned sooner than events) for the duration at recovery
             if (!$isDown && $prev && !(int) $prev['online']) {
-                self::event($r, 'offline', $why, Lang::T('router is offline') . ' (' . Lang::T('no answer since') . ' ' . date('H:i', strtotime($prev['at'])) . ')');
+                self::event($r, 'offline', $why, Lang::T('router is offline') . ' (' . Lang::T('no answer since') . ' ' . date('H:i', strtotime($prev['at'])) . ')', $prev['at']);
             }
             return;
         }
         if ($isDown) {
-            // the outage began at the first missed reading, not when it was confirmed (the second): the reading after the last good one
-            $db = ORM::getDb();
-            $st = $db->prepare('SELECT MIN(at) FROM tbl_router_samples WHERE router_id = ? AND online = 0 AND id < ? AND at > COALESCE((SELECT MAX(at) FROM tbl_router_samples WHERE router_id = ? AND online = 1 AND id < ?), \'1970-01-01\')');
-            $st->execute([$id, $sampleId, $id, $sampleId]);
-            $began = $st->fetchColumn() ?: $state['at'];
-            $mins = max(1, (int) round((time() - strtotime($began)) / 60));
+            // the offline event is dated from the first missed reading
+            $mins = max(1, (int) round((time() - strtotime($state['at'])) / 60));
             self::event($r, 'online', '', Lang::T('router is back online after about') . ' ' . self::duration($mins));
         }
         // a restart: the uptime is lower than at the last reading that had one (failed readings in between have none)

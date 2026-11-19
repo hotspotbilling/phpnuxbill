@@ -83,6 +83,8 @@
     }
     function listRender(pane) {
         var st = pane._lv, o = st.opts, q = st.q.trim().toLowerCase();
+        // a page button that had the keyboard keeps it (the buttons are drawn again below)
+        var fe = document.activeElement, focusPage = fe && pane.contains(fe) && fe.getAttribute('data-rt-page');
         var filter = o.filters ? o.filters.filter(function (f) { return f.key === st.f; })[0] : null;
         var rows = o.rows.filter(function (r) {
             return (!filter || filter.test(r)) && (!o.toggle || st.all || !o.toggle.test(r)) && (!q || o.match(r, q));
@@ -99,6 +101,10 @@
                 + '<button type="button" class="ls-btn ls-btn--sm" data-rt-page="-1"' + (st.page ? '' : ' disabled') + '><i class="fa fa-chevron-left" aria-hidden="true"></i> ' + esc(t.prev) + '</button>'
                 + '<button type="button" class="ls-btn ls-btn--sm" data-rt-page="1"' + (st.page < pages - 1 ? '' : ' disabled') + '>' + esc(t.next) + ' <i class="fa fa-chevron-right" aria-hidden="true"></i></button>'
             : (rows.length ? '<span class="ls-dim">' + rows.length + ' ' + esc(t.shown) + '</span>' : '');
+        if (focusPage) {
+            var same = pane.querySelector('[data-rt-page="' + focusPage + '"]:not([disabled])'), other = pane.querySelector('[data-rt-page]:not([disabled])');
+            if (same || other) (same || other).focus();
+        }
     }
     function has(v, q) {
         return v != null && String(v).toLowerCase().indexOf(q) !== -1;
@@ -109,10 +115,13 @@
         return request('sessions', id).then(function (d) {
             if (!d.ok) { pane.innerHTML = head(t.user) + fail(d); return; }
             var rows = d.hotspot.map(function (r) { r.kind = 'hotspot'; return r; }).concat(d.pppoe.map(function (r) { r.kind = 'pppoe'; return r; }));
+            // a session disconnected here stays marked, even in a list read from the router before the disconnect went through
+            rows.forEach(function (r) { if (pane._gone && pane._gone[r.kind + ' ' + r.sid]) r.gone = true; });
             var curl = d.customer_url;
             var total = (d.total_hotspot || d.hotspot.length) + (d.total_pppoe || d.pppoe.length);
             listView(pane, total + ' ' + t.online, {
                 rows: rows,
+                cfg: d.cfg, // which router settings the list was read with: a disconnect is refused once they change
                 capped: rows.length < total ? t.capped.replace('%s', rows.length) : '',
                 // a menu the router refused (no permission) is said, so an empty list is not taken for nobody online
                 notice: (d.read_errors || []).length ? t.readErr + ': ' + d.read_errors.join('; ') : '',
@@ -132,7 +141,8 @@
                         + '<td class="ls-dim">' + (r.kind === 'hotspot' ? '&darr; ' + esc(size(r.out)) + ' &middot; &uarr; ' + esc(size(r['in'])) : '') + '</td>'
                         + '<td class="rt-mini__end">' + (r.gone ? '<span class="ls-dim">' + esc(t.dropped) + '</span>'
                             : '<button type="button" class="ls-btn ls-btn--sm ls-btn--danger" data-rt-drop="' + esc(r.kind) + '" data-sid="' + esc(r.sid) + '" data-user="' + esc(r.user)
-                            + '"><i class="fa fa-sign-out" aria-hidden="true"></i> ' + esc(t.drop) + '</button>') + '</td></tr>';
+                            + '"' + (r.pending ? ' disabled' : '') + '><i class="fa ' + (r.pending ? 'fa-spinner fa-spin' : 'fa-sign-out') + '" aria-hidden="true"></i> ' + esc(t.drop) + '</button>'
+                            + (r.err ? '<small class="rt-err">' + esc(r.err) + '</small>' : '')) + '</td></tr>';
                 }
             });
         });
@@ -268,7 +278,8 @@
         return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
     }
     // one y axis, 2px lines, a crosshair and tooltip; series: [{ label, cls, points: [[at, v]] }]; gaps (null) break the line
-    function lineChart(series, fmt, max, from, to, long) {
+    // empty: the text shown when no series has a value
+    function lineChart(series, fmt, max, from, to, long, empty) {
         var W = 600, H = 150, padL = 56, padR = 12, padT = 10, padB = 22;
         var vals = [];
         series.forEach(function (s) { s.points.forEach(function (p) { if (p[1] != null) vals.push(p[1]); }); });
@@ -297,7 +308,7 @@
             + '<span class="rt-chart__y" style="top:' + (Y(0) / H * 100) + '%">' + esc(fmt(0)) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--start" style="left:' + (padL / W * 100) + '%">' + esc(stamp(from, long)) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--end">' + esc(stamp(to, long)) + '</span>'
-            + (vals.length ? '' : '<span class="rt-chart__wait">' + esc(t.noHistory) + '</span>')
+            + (vals.length ? '' : '<span class="rt-chart__wait">' + esc(empty || t.noHistory) + '</span>')
             + '<div class="rt-chart__tip" hidden></div></div>';
         return { html: html, wire: function (plot) {
             if (!vals.length) return;
@@ -364,7 +375,9 @@
                 + '<div class="rt-strip" title="' + esc(t.uptimePct) + '">' + strip + '</div><div class="rt-charts">';
             var wires = [];
             charts.forEach(function (c, i) {
-                var ch = lineChart(c.series, c.fmt, c.max, d.from, d.to, long);
+                // with readings but none for this graph (no uplink found, users not countable) it says so, rather than asking
+                // for history to be turned on
+                var ch = lineChart(c.series, c.fmt, c.max, d.from, d.to, long, pts.length ? t.noMetric : '');
                 wires.push(ch.wire);
                 html += '<figure class="rt-chart" data-rt-hchart="' + i + '"><figcaption class="rt-chart__head"><b>' + esc(c.title) + '</b><span class="rt-legend">'
                     + (c.series.length > 1 ? legend(c.series) : '') + '</span></figcaption><div class="rt-chart__box">' + ch.html + '</div></figure>';
@@ -394,6 +407,7 @@
         var pane = document.querySelector('[data-rt-tabs="' + id + '"]') && document.querySelector('#rt-detail-' + id + ' [data-rt-pane="' + tab + '"]');
         if (!pane || !loaders[tab]) return;
         pane.setAttribute('data-loaded', '1');
+        pane._lv = null; // the list being replaced: an answer for it (a disconnect) no longer draws into the pane
         pane.innerHTML = '<span class="rt-skel rt-skel--wide" aria-label="' + esc(t.loading) + '"></span>';
         loaders[tab](id, pane, extra);
     }
@@ -434,7 +448,8 @@
             setTimeout(function () {
                 var row = document.getElementById('rt-detail-' + id);
                 if (row && !row.hidden && !row.querySelector('.rt-tab.is-on')) {
-                    var first = row.querySelector('[data-rt-tab]');
+                    // the Live tab needs the live-health script: without it, the first of the others
+                    var first = row.querySelector(window.rtHealthReady ? '[data-rt-tab]' : '[data-rt-tab]:not([data-rt-tab="live"])');
                     if (first) show(id, first.getAttribute('data-rt-tab'));
                 }
             }, 0);
@@ -489,21 +504,28 @@
         var drop = e.target.closest('[data-rt-drop]');
         if (drop) {
             var rid = drop.closest('.rt-detail').id.replace('rt-detail-', '');
-            // which session, in which list: taken now, as paging or searching can redraw the row while the request is out
+            // which session, in which list: taken now, as paging, searching or Refresh can redraw the row while the request is
+            // out. Its state (waiting, failed) is kept on the row itself, so every redraw shows it and it cannot be sent twice.
             var dPane = drop.closest('[data-rt-pane]'), dModel = dPane._lv;
             var dKind = drop.getAttribute('data-rt-drop'), dSid = drop.getAttribute('data-sid'), dUser = drop.getAttribute('data-user');
+            var dRow = dModel ? dModel.opts.rows.filter(function (r) { return r.sid === dSid && r.kind === dKind; })[0] : null;
+            if (!dRow || dRow.pending || dRow.gone) return;
+            var redraw = function () { if (dPane._lv === dModel) listRender(dPane); };
             ask(drop, dUser + ': ' + t.dropAsk, function () {
-                drop.disabled = true;
-                request('drop', rid, { kind: dKind, sid: dSid, user: dUser }).then(function (d) {
+                if (dRow.pending || dRow.gone) return;
+                dRow.pending = true;
+                dRow.err = null;
+                redraw();
+                request('drop', rid, { kind: dKind, sid: dSid, user: dUser, cfg: dModel.opts.cfg || '' }).then(function (d) {
+                    dRow.pending = false;
                     if (d.ok) {
-                        if (dModel) dModel.opts.rows.forEach(function (r) { if (r.sid === dSid && r.kind === dKind) r.gone = true; });
-                        // the same list (perhaps on another page by now) is drawn again with the row marked; a reloaded list
-                        // already comes from the router without the session
-                        if (dPane._lv === dModel) listRender(dPane);
-                    } else if (drop.isConnected) {
-                        drop.disabled = false;
-                        drop.insertAdjacentHTML('afterend', '<small class="rt-err">' + esc(d.error || t.fail) + '</small>');
+                        dRow.gone = true;
+                        (dPane._gone = dPane._gone || {})[dKind + ' ' + dSid] = true;
+                    } else {
+                        dRow.err = d.error || t.fail;
                     }
+                    // drawn again only while the same list is shown; a list being refreshed comes back with the row marked
+                    redraw();
                 });
             });
             return;

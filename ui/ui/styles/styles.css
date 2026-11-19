@@ -10794,6 +10794,12 @@ body.dark-mode .rt-detail {
   gap: 14px;
   margin-top: 16px;
 }
+@media (max-width: 400px) {
+  /* one column that can be narrower than 300px, so a chart never overflows a phone */
+  .rt-charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .rt-chart,
 .rt-chart__head {
   min-height: 0; /* a legacy rule gives figure and figcaption min-height: 100% */

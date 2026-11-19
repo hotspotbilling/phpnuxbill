@@ -94,8 +94,8 @@
     function remember(id, d) {
         var L = live[id];
         if (!L || !d.ok || !d.at) return;
-        var last = L.cpu.length ? L.cpu[L.cpu.length - 1][0] : 0;
-        if (d.at <= last) return; // the same (cached) reading again
+        if (d.at <= (L.lastAt || 0)) return; // the same (cached) reading again, whether or not it had a CPU figure
+        L.lastAt = d.at;
         var cut = d.at - WINDOW;
         function push(arr, row) {
             arr.push(row);
@@ -107,7 +107,7 @@
         // the interfaces running now: one that has gone (unplugged, disabled) leaves the picker; its graph history stays in
         // L.rate, so it is there again if the interface comes back
         if (d.ifaces) {
-            var now = {};
+            var now = Object.create(null); // (an interface may be called "constructor": no inherited names here)
             d.ifaces.forEach(function (i) { now[i.name] = true; });
             Object.keys(L.prev).forEach(function (n) { if (!now[n]) delete L.prev[n]; });
         }
@@ -292,8 +292,8 @@
         var now = d.at || Date.now() / 1000;
         var load = box.querySelector('[data-rt-chart="load"]');
         var sLoad = [
-            { label: t.cpu, cls: 'rt-s1', points: L.cpu },
-            { label: t.memory, cls: 'rt-s2', points: L.mem }
+            { label: t.cpu, cls: 'rt-s1', points: L.cpu.filter(function (p) { return p[0] >= now - WINDOW; }) },
+            { label: t.memory, cls: 'rt-s2', points: L.mem.filter(function (p) { return p[0] >= now - WINDOW; }) }
         ];
         chart(load.querySelector('.rt-chart__box'), sLoad, function (v) { return Math.round(v) + '%'; }, 100, now, L.hover.load);
         load.querySelector('.rt-legend').innerHTML = legend(sLoad, [d.cpu != null ? d.cpu + '%' : null, pct(d.mem_used, d.mem_total) != null ? pct(d.mem_used, d.mem_total) + '%' : null]);
@@ -388,9 +388,13 @@
         });
     }
     function start(id) {
-        var L = live[id] || (live[id] = { cpu: [], mem: [], prev: {}, rate: {}, iface: null, gen: 0, hover: { load: { f: null }, traffic: { f: null } } });
+        // prev and rate are keyed by interface name: maps without inherited names, so "constructor" is an interface like any other
+        var L = live[id] || (live[id] = { cpu: [], mem: [], prev: Object.create(null), rate: Object.create(null), iface: null, gen: 0, hover: { load: { f: null }, traffic: { f: null } } });
         clearTimeout(L.timer);
         L.gen++;
+        // the counters read before the pause are no baseline for the next reading (the speed would average over the pause);
+        // the graphs so far stay
+        L.prev = Object.create(null);
         L.paused = false;
         L.started = Date.now();
         if (data[id]) panel(id, data[id]);
@@ -438,6 +442,9 @@
             pause(id);
         }
     });
+
+    // the list's fallback opener and routers-tools.js check this: set only once this script's handlers are in place
+    window.rtHealthReady = true;
 
     document.addEventListener('click', function (e) {
         var more = e.target.closest('[data-rt-more]');

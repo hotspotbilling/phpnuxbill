@@ -156,10 +156,10 @@
             sync();
         });
         boxes().forEach(function (b) { b.addEventListener('change', sync); });
-        // with live health off, its script is not loaded: the details row (the SuperAdmin's actions) opens and closes here
+        // with live health off (or its script failed to load), the details row opens and closes here
         document.addEventListener('click', function (e) {
             var more = e.target.closest('[data-rt-more]');
-            if (!more || window.rtHealth) return;
+            if (!more || window.rtHealthReady) return;
             var row = document.getElementById('rt-detail-' + more.getAttribute('data-rt-more'));
             var open = row.hidden;
             row.hidden = !open;
@@ -202,6 +202,7 @@
             uplink: '{Lang::T('Uplink traffic')|escape:'javascript'}', dl: '{Lang::T('Download')|escape:'javascript'}', ul: '{Lang::T('Upload')|escape:'javascript'}',
             events: '{Lang::T('Events')|escape:'javascript'}', noEvents: '{Lang::T('Nothing happened in this period')|escape:'javascript'}',
             noHistory: '{Lang::T('No readings yet. The cron reads each router about every 5 minutes; turn Router history on in Routers > Settings.')|escape:'javascript'}',
+            noMetric: '{Lang::T('No readings for this graph in this period')|escape:'javascript'}',
             notCollecting: '{Lang::T('Router history is off in Routers > Settings, so no new readings are kept.')|escape:'javascript'}',
             ev_offline: '{Lang::T('Went offline')|escape:'javascript'}', ev_online: '{Lang::T('Back online')|escape:'javascript'}', ev_reboot: '{Lang::T('Restarted')|escape:'javascript'}',
             ev_cpu_high: '{Lang::T('CPU high')|escape:'javascript'}', ev_cpu_ok: '{Lang::T('CPU normal')|escape:'javascript'}', ev_mem_high: '{Lang::T('Memory high')|escape:'javascript'}',
@@ -215,7 +216,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.6"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.7"></script>
 
 {if $health_on}
 <script>
@@ -252,12 +253,12 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.2"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.3"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">
         <h4>{Lang::T('Check if Router Online?')}</h4>
-        <p>{Lang::T('To check whether the Router is online or not, please visit the following page')} <a href="{Text::url('routers/settings')}" class="btn btn-link">{Lang::T('Router Settings')}</a></p>
+        <p>{Lang::T('Turn on Router Check in')} <a href="{Text::url('routers/settings')}">{Lang::T('Router Settings')}</a>. {Lang::T('Once the cron has run, this list shows the Online Status and Last Seen of each router.')}</p>
     </div>
 </div>
 

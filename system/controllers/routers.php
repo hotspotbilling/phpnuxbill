@@ -204,9 +204,10 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosS
         }
     } catch (Throwable $e) {
     }
+    // (PPP sessions are PPPoE only: L2TP, SSTP and the other tunnels are not customers)
     foreach (['hotspot' => '/ip/hotspot/active/print', 'pppoe' => '/ppp/active/print'] as $k => $menu) {
         try {
-            $q = new \PEAR2\Net\RouterOS\Request($menu);
+            $q = new \PEAR2\Net\RouterOS\Request($menu, $k === 'pppoe' ? \PEAR2\Net\RouterOS\Query::where('service', 'pppoe') : null);
             $q->setArgument('count-only', '');
             $n = $rosText($rosSend($c, $q, $until)->end()->getProperty('ret'));
             $h[$k] = is_numeric($n) ? (int) $n : null;
@@ -283,11 +284,22 @@ switch ($action) {
             }
             $values['router_alert_phone'] = $phone;
             $values['router_backup_keep'] = (string) max(1, min(30, (int) _post('router_backup_keep', '7')));
-            foreach ($values as $k => $v) {
-                $row = ORM::for_table('tbl_appconfig')->where('setting', $k)->find_one() ?: ORM::for_table('tbl_appconfig')->create();
-                $row->setting = $k;
-                $row->value = $v;
-                $row->save();
+            // all or nothing: a write that fails leaves the settings as they were
+            $db = ORM::get_db();
+            try {
+                $db->beginTransaction();
+                foreach ($values as $k => $v) {
+                    $row = ORM::for_table('tbl_appconfig')->where('setting', $k)->find_one() ?: ORM::for_table('tbl_appconfig')->create();
+                    $row->setting = $k;
+                    $row->value = $v;
+                    $row->save();
+                }
+                $db->commit();
+            } catch (Throwable $e) {
+                if ($db->inTransaction()) {
+                    $db->rollBack();
+                }
+                r2(getUrl('routers/settings'), 'e', Lang::T('The settings could not be saved') . ': ' . $e->getMessage());
             }
             _log('[' . $admin['username'] . ']: Router settings saved', $admin['user_type'], $admin['id']);
             r2(getUrl('routers/settings'), 's', Lang::T('Settings Saved Successfully'));
@@ -568,6 +580,12 @@ switch ($action) {
         if (!$d || (int) $d['enabled'] !== 1 || trim((string) $d['ip_address']) === '') {
             $say(['ok' => false, 'error' => Lang::T('Data Not Found')]);
         }
+        // a session ID belongs to one router: the list says which router it came from, and a disconnect is refused when the
+        // router's address or user has changed since (the ID could now name someone else's session on another router)
+        $listedFrom = substr(hash('sha256', 'routers/sessions|' . $d['id'] . '|' . $d['ip_address'] . '|' . $d['username']), 0, 32);
+        if ($action === 'drop' && !hash_equals($listedFrom, (string) _post('cfg'))) {
+            $say(['ok' => false, 'stale' => true, 'error' => Lang::T('The router settings changed since this list was loaded. Refresh the list and try again.')]);
+        }
         [$c, $err] = RouterApi::connect($d['ip_address'], $d['username'], $d['password'], 6);
         if (!$c) {
             $say(['ok' => false, 'error' => $err, 'hint' => $rosHint($err)]);
@@ -592,7 +610,8 @@ switch ($action) {
                     }
                 }
                 try {
-                    $pp = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'caller-id', 'address', 'uptime'], $until);
+                    // PPPoE only: L2TP, SSTP and the other tunnels are not customers
+                    $pp = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'caller-id', 'address', 'uptime'], $until, [], ['service' => 'pppoe']);
                 } catch (Throwable $e) {
                     if ($e->getCode() === 408) {
                         throw $e;
@@ -621,7 +640,7 @@ switch ($action) {
                     }
                 }
                 $out = ['ok' => true, 'hotspot' => [], 'pppoe' => [], 'total_hotspot' => $totalHs, 'total_pppoe' => $totalPp, 'customer_url' => getUrl('customers/view/'),
-                    'read_errors' => $readErrors];
+                    'read_errors' => $readErrors, 'cfg' => $listedFrom];
                 foreach ($hs as $h) {
                     $out['hotspot'][] = ['sid' => $h['.id'], 'user' => $h['user'], 'address' => $h['address'], 'mac' => $h['mac-address'], 'uptime' => $rosUptime($h['uptime']),
                         'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $who[$h['user']] ?? null];
@@ -694,14 +713,18 @@ switch ($action) {
                     }
                     $add('warn', Lang::T('The API user\'s rights could not be read'), $e->getMessage());
                 }
-                // 2. hotspot and PPPoE servers
+                // 2. hotspot and PPPoE servers; a router without the hotspot package has none, any other failed read leaves it unknown
                 $hsServers = [];
                 $ppServers = [];
+                $serverErrors = [];
                 try {
                     $hsServers = RouterApi::rows($c, '/ip/hotspot/print', ['name', 'interface', 'disabled'], $until);
                 } catch (Throwable $e) {
                     if ($e->getCode() === 408) {
                         throw $e;
+                    }
+                    if (stripos($e->getMessage(), 'no such command') === false) {
+                        $serverErrors[] = Lang::T('Hotspot') . ': ' . $e->getMessage();
                     }
                 }
                 try {
@@ -710,29 +733,78 @@ switch ($action) {
                     if ($e->getCode() === 408) {
                         throw $e;
                     }
+                    if (stripos($e->getMessage(), 'no such command') === false) {
+                        $serverErrors[] = 'PPPoE: ' . $e->getMessage();
+                    }
                 }
                 $onHs = array_filter($hsServers, function ($x) { return $x['disabled'] !== 'true'; });
                 $onPp = array_filter($ppServers, function ($x) { return $x['disabled'] !== 'true'; });
-                if (!$onHs && !$onPp) {
-                    $add('warn', Lang::T('No hotspot or PPPoE server is running'), Lang::T('Customers connect through one of them: set one up in Winbox, IP > Hotspot or PPP > PPPoE Servers.'));
-                } else {
+                if ($onHs || $onPp) {
                     $add('ok', Lang::T('Servers running'), trim((count($onHs) ? Lang::T('Hotspot') . ': ' . implode(', ', array_column($onHs, 'name')) . ' ' : '') . (count($onPp) ? 'PPPoE: ' . implode(', ', array_column($onPp, 'service-name')) : '')));
+                } elseif ($serverErrors) {
+                    $add('warn', Lang::T('Could not tell whether a hotspot or PPPoE server is running'), implode('; ', $serverErrors));
+                } else {
+                    $add('warn', Lang::T('No hotspot or PPPoE server is running'), Lang::T('Customers connect through one of them: set one up in Winbox, IP > Hotspot or PPP > PPPoE Servers.'));
                 }
                 // 3. the billing site in the hotspot walled garden (the login page must reach it before sign-in)
                 if ($onHs) {
                     $host = strtolower((string) parse_url(APP_URL, PHP_URL_HOST));
-                    $found = false;
+                    $port = (int) (parse_url(APP_URL, PHP_URL_PORT) ?: (strtolower((string) parse_url(APP_URL, PHP_URL_SCHEME)) === 'https' ? 443 : 80));
+                    // a rule's ports: empty is any, otherwise a list of ports and ranges ("80,443,8000-8100"); null when unreadable
+                    $portIn = function ($spec) use ($port) {
+                        $spec = trim((string) $spec);
+                        if ($spec === '') {
+                            return true;
+                        }
+                        $neg = $spec[0] === '!';
+                        $hit = false;
+                        foreach (explode(',', ltrim($spec, '!')) as $part) {
+                            if (!preg_match('/^\s*(\d+)\s*(?:-\s*(\d+)\s*)?$/', $part, $m)) {
+                                return null;
+                            }
+                            $hit = $hit || ($port >= (int) $m[1] && $port <= (int) ($m[2] ?? $m[1]));
+                        }
+                        return $neg ? !$hit : $hit;
+                    };
+                    $found = false; // true allowed, false not, null cannot tell
                     try {
-                        // the rules are tried in order and the first that matches decides: a matching "deny" is no access
-                        foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/print', ['dst-host', 'disabled', 'action'], $until) as $w) {
+                        // the rules are tried in order and the first that matches decides: a matching "deny" is no access. A rule
+                        // that may match but has a condition this check cannot judge (a path, a method, addresses, a server, a
+                        // regular expression) leaves the answer unknown rather than a guess.
+                        foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/print', ['dst-host', 'dst-port', 'path', 'method', 'src-address', 'dst-address', 'server', 'disabled', 'action'], $until) as $w) {
+                            if ($w['disabled'] === 'true') {
+                                continue;
+                            }
                             $pat = strtolower((string) $w['dst-host']);
-                            if ($w['disabled'] !== 'true' && $pat !== '' && ($pat === $host || fnmatch($pat, $host) || ($pat[0] === '*' && substr($host, -strlen(ltrim($pat, '*'))) === ltrim($pat, '*')))) {
-                                $found = strtolower((string) $w['action']) !== 'deny';
+                            if ($pat !== '' && $pat[0] === ':') {
+                                $found = null;
                                 break;
                             }
+                            if ($pat !== '' && !($pat === $host || fnmatch($pat, $host) || ($pat[0] === '*' && substr($host, -strlen(ltrim($pat, '*'))) === ltrim($pat, '*')))) {
+                                continue;
+                            }
+                            $inPort = $portIn($w['dst-port']);
+                            if ($inPort === false) {
+                                continue;
+                            }
+                            $other = false;
+                            foreach (['path', 'method', 'src-address', 'dst-address', 'server'] as $k) {
+                                $other = $other || trim((string) $w[$k]) !== '';
+                            }
+                            if ($inPort === null || $other) {
+                                $found = null;
+                                break;
+                            }
+                            $found = strtolower((string) $w['action']) !== 'deny';
+                            break;
                         }
-                        $add($found ? 'ok' : 'bad', $found ? Lang::T('The billing site is in the walled garden') : Lang::T('The billing site is not in the walled garden'),
-                            $found ? $host : Lang::T('Customers cannot open') . ' ' . $host . ' ' . Lang::T('before they sign in. Add it in Winbox, IP > Hotspot > Walled Garden, as') . ' ' . $host);
+                        $site = $host . ':' . $port;
+                        if ($found === null) {
+                            $add('warn', Lang::T('Could not tell whether the billing site is in the walled garden'), Lang::T('A walled garden rule for') . ' ' . $site . ' ' . Lang::T('has conditions this check cannot judge. Check it in Winbox, IP > Hotspot > Walled Garden.'));
+                        } else {
+                            $add($found ? 'ok' : 'bad', $found ? Lang::T('The billing site is in the walled garden') : Lang::T('The billing site is not in the walled garden'),
+                                $found ? $site : Lang::T('Customers cannot open') . ' ' . $site . ' ' . Lang::T('before they sign in. Add it in Winbox, IP > Hotspot > Walled Garden, as') . ' ' . $host);
+                        }
                     } catch (Throwable $e) {
                         if ($e->getCode() === 408) {
                             throw $e;

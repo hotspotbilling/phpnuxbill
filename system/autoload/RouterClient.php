@@ -27,14 +27,14 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
     }
 
     /**
-     * Limit every read from the router to $seconds. The library checks for an answer only before each reply starts; the words
-     * after it are read with the socket's own time limit, so the caller sets that to the time left before its deadline.
+     * Stop reading from the router at $deadline (a microtime), or never again limit it with NULL. The socket's own time limit
+     * starts again with every read, so a reply that keeps trickling in could otherwise run past the caller's deadline; with
+     * this, each read waits only for the time left, and a read that runs out closes the connection.
      */
-    public function readTimeout($seconds)
+    public function readDeadline($deadline)
     {
-        $seconds = max(0.2, (float) $seconds);
         try {
-            $this->com->getTransmitter()->setTimeout((int) floor($seconds), (int) (($seconds - floor($seconds)) * 1000000));
+            $this->com->getTransmitter()->setDeadline($deadline);
         } catch (Throwable $e) {
         }
     }
