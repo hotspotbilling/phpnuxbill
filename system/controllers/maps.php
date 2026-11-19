@@ -49,7 +49,7 @@ switch ($action) {
         $ui->display('admin/maps/customers.tpl');
         break;
     case 'routers':
-            $name = _post('name');
+            $name = _req('name'); // the search posts it, the page links carry it in the address
             $query = ORM::for_table('tbl_routers')->where_not_equal('coordinates', '')->order_by_desc('id');
             $query->selects(['id', 'name', 'coordinates', 'description', 'coverage', 'enabled', 'status', 'last_seen']);
             if ($name != '') {

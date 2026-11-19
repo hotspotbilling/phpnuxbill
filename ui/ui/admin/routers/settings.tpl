@@ -58,7 +58,7 @@
                         <div class="nf__field">
                             <label class="nf__label" for="router_alert_phone">{Lang::T('Also to this phone')} <small>{Lang::T('Optional')}</small></label>
                             <input type="tel" class="form-control" id="router_alert_phone" name="router_alert_phone" maxlength="20" inputmode="tel"
-                                pattern="\+?[0-9 ]{literal}{7,18}{/literal}" value="{$_c['router_alert_phone']|default:''|escape}" placeholder="+234 800 000 0000">
+                                pattern="\+?[0-9 \(\)\-]{literal}{7,24}{/literal}" value="{$_c['router_alert_phone']|default:''|escape}" placeholder="+234 800 000 0000">
                         </div>
                         <div class="nf__field">
                             <label class="nf__label" for="router_alert_via">{Lang::T('Send by')}</label>
@@ -89,6 +89,14 @@
                         <input type="number" class="form-control" id="router_backup_keep" name="router_backup_keep" min="1" max="30" step="1"
                             value="{$_c['router_backup_keep']|default:'7'|escape}">
                         <p class="nf__hint">{Lang::T('Older nightly backups are removed from the router. To keep a copy elsewhere, download it from Files in Winbox or WebFig.')}</p>
+                    </div>
+                    <div class="nf__field">
+                        <label class="nf__label" for="router_backup_password">{Lang::T('Backup password')}</label>
+                        {* never sent back to the page: empty keeps the saved one *}
+                        <input type="password" class="form-control" id="router_backup_password" name="router_backup_password" autocomplete="new-password"
+                            minlength="8" maxlength="128" spellcheck="false"
+                            placeholder="{if $_c['router_backup_password']|default:'' != ''}{Lang::T('Saved. Type a new one to change it.')}{else}{Lang::T('At least 8 characters')}{/if}">
+                        <p class="nf__hint">{Lang::T('Backups are encrypted with this password, nightly and Save a backup alike, and none is made without it: a backup without a password holds every login on the router in readable form. You need it to restore a backup, so keep it somewhere safe.')}</p>
                     </div>
                 </div>
             </section>

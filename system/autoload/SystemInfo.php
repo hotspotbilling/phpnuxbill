@@ -841,7 +841,8 @@ class SystemInfo
                         } catch (Throwable $eH) {
                         }
                         try {
-                            $reqP = new PEAR2\Net\RouterOS\Request('/ppp/active/print');
+                            // PPPoE only: L2TP, SSTP and the other tunnels are not customers
+                            $reqP = new PEAR2\Net\RouterOS\Request('/ppp/active/print', PEAR2\Net\RouterOS\Query::where('service', 'pppoe'));
                             $reqP->setArgument('.proplist', '.id');
                             $out['pppoe'] += self::countSessions($client->sendSync($reqP));
                         } catch (Throwable $eP) {

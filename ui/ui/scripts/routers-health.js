@@ -93,7 +93,13 @@
     /* ---------- history kept while a panel is open ---------- */
     function remember(id, d) {
         var L = live[id];
-        if (!L || !d.ok || !d.at) return;
+        if (L && !d.ok) {
+            // a failed reading: the counters before it are no baseline for the next (the speed would average over the gap);
+            // the graphs so far stay, and a speed shows again after two good readings in a row
+            L.prev = Object.create(null);
+            return;
+        }
+        if (!L || !d.at) return;
         if (d.at <= (L.lastAt || 0)) return; // the same (cached) reading again, whether or not it had a CPU figure
         L.lastAt = d.at;
         var cut = d.at - WINDOW;
@@ -116,10 +122,10 @@
             if (p && d.at > p.at) {
                 var s = d.at - p.at;
                 var down = (i.rx - p.rx) * 8 / s, up = (i.tx - p.tx) * 8 / s;
-                if (down >= 0 && up >= 0) { // a counter that went back (reset, reboot) gives no speed this time
-                    if (!L.rate[i.name]) L.rate[i.name] = [];
-                    push(L.rate[i.name], [d.at, down, up]);
-                }
+                if (!L.rate[i.name]) L.rate[i.name] = [];
+                // a counter that went back (reset, reboot) gives no speed: a gap, so the line is not drawn across it, and no
+                // current speed until the next pair of readings
+                push(L.rate[i.name], down >= 0 && up >= 0 ? [d.at, down, up] : [d.at, null, null]);
             }
             L.prev[i.name] = { rx: i.rx, tx: i.tx, at: d.at, type: i.type, total: i.rx + i.tx };
         });
@@ -164,9 +170,14 @@
             svg += '<line class="rt-chart__grid" x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '"></line>';
         });
         series.forEach(function (s) {
-            if (s.points.length < 2) return;
-            var d = s.points.map(function (p, i) { return (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1); }).join(' ');
-            svg += '<path class="rt-chart__line ' + s.cls + '" d="' + d + '"></path>';
+            // a missing value (null) breaks the line there
+            var d = '', pen = false;
+            s.points.forEach(function (p) {
+                if (p[1] == null) { pen = false; return; }
+                d += (pen ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1) + ' ';
+                pen = true;
+            });
+            if (d) svg += '<path class="rt-chart__line ' + s.cls + '" d="' + d + '"></path>';
         });
         svg += '<line class="rt-chart__cross" x1="0" x2="0" y1="' + padT + '" y2="' + (H - padB) + '" hidden></line>';
         series.forEach(function (s) {
@@ -179,7 +190,7 @@
             + '<span class="rt-chart__y" style="top:' + (Y(0) / H * 100) + '%">' + esc(fmt(0)) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--start" style="left:' + (padL / W * 100) + '%">' + esc(t.minutes5) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--end">' + esc(t.now) + '</span>';
-        var empty = series.every(function (s) { return s.points.length < 2; });
+        var empty = series.every(function (s) { return s.points.filter(function (p) { return p[1] != null; }).length < 2; });
         box.innerHTML = '<div class="rt-chart__plot">' + svg + axis
             + (empty ? '<span class="rt-chart__wait">' + esc(t.measuring) + '</span>' : '')
             + '<div class="rt-chart__tip" hidden></div></div>';
@@ -204,7 +215,7 @@
             var rows = '';
             series.forEach(function (s, i) {
                 var p = s.points.filter(function (q) { return q[0] === tm; })[0];
-                if (!p) { dots[i].setAttribute('hidden', ''); return; }
+                if (!p || p[1] == null) { dots[i].setAttribute('hidden', ''); return; }
                 dots[i].setAttribute('cx', x); dots[i].setAttribute('cy', Y(p[1])); dots[i].removeAttribute('hidden');
                 rows += '<span><i class="rt-key ' + s.cls + '"></i>' + esc(s.label) + ' <b>' + esc(fmt(p[1])) + '</b></span>';
             });
@@ -317,7 +328,9 @@
         ];
         chart(traffic.querySelector('.rt-chart__box'), sNet, bps, null, now, L.hover.traffic);
         var lastRow = rows[rows.length - 1];
-        traffic.querySelector('.rt-legend').innerHTML = legend(sNet, lastRow ? [bps(lastRow[1]), bps(lastRow[2])] : [null, null]);
+        // the current speed only from the newest reading: after a pause or a failed reading there is none until a new pair
+        var current = lastRow && lastRow[1] != null && lastRow[0] === L.lastAt && L.prev[L.iface];
+        traffic.querySelector('.rt-legend').innerHTML = legend(sNet, current ? [bps(lastRow[1]), bps(lastRow[2])] : [null, null]);
     }
 
     /* ---------- asking the server ---------- */
@@ -404,7 +417,7 @@
         var L = live[id];
         if (!L) return;
         clearTimeout(L.timer);
-        L.paused = true;
+        L.paused = true; // (the baseline is cleared when it starts again: start())
         if (data[id]) panel(id, data[id]);
     }
     function stop(id) {
@@ -426,7 +439,12 @@
             if (!td || forcing[String(id)]) return; // a disabled router is not asked, and one already being checked is not asked twice
             forcing[String(id)] = true;
             td.innerHTML = '<span class="rt-skel"></span>';
-            queue.push({ id: String(id), fresh: true });
+            // its first check, if still waiting, becomes this one (not a second request), and goes before the first checks still
+            // waiting for other routers; the three-at-a-time limit is next()'s, unchanged
+            queue = queue.filter(function (q) { return q.id !== String(id); });
+            var at = 0;
+            while (at < queue.length && queue[at].fresh) at++;
+            queue.splice(at, 0, { id: String(id), fresh: true });
         });
         next();
     };
@@ -443,8 +461,14 @@
         }
     });
 
-    // the list's fallback opener and routers-tools.js check this: set only once this script's handlers are in place
+    // the list's fallback opener and routers-tools.js check this: set only once this script's handlers are in place. The Live
+    // tabs and Check now start disabled in the page and are switched on here
     window.rtHealthReady = true;
+    document.querySelectorAll('[data-rt-tab="live"]').forEach(function (b) { b.disabled = false; });
+    (function () {
+        var check = document.getElementById('rtCheckNow');
+        if (check) check.disabled = !document.querySelector('input[name="ids[]"][form="rtBulkForm"]:checked');
+    })();
 
     document.addEventListener('click', function (e) {
         var more = e.target.closest('[data-rt-more]');

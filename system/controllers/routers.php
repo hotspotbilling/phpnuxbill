@@ -88,6 +88,21 @@ $splitAddress = function ($addr) {
     }
     return [$addr, ''];
 };
+// whether another router already uses this API endpoint: the same host (letter case aside) and the same port, an address
+// without a port being on 8728, so "10.0.0.1" and "10.0.0.1:8728" are one router while "10.0.0.1:8729" is another
+$endpointTaken = function ($address, $exceptId = 0) {
+    $key = function ($a) {
+        [$h, $p] = RouterAddress::split($a);
+        return strtolower((string) $h) . '|' . ((int) $p ?: 8728);
+    };
+    $want = $key($address);
+    foreach (ORM::for_table('tbl_routers')->select_many('id', 'ip_address')->find_array() as $r) {
+        if ((int) $r['id'] !== (int) $exceptId && trim((string) $r['ip_address']) !== '' && $key($r['ip_address']) === $want) {
+            return true;
+        }
+    }
+    return false;
+};
 $validPort = function ($port) {
     $port = trim((string) $port);
     return $port === '' || (ctype_digit($port) && (int) $port >= 1 && (int) $port <= 65535);
@@ -124,18 +139,29 @@ $hasSite = function () {
 $rosText = Closure::fromCallable([RouterApi::class, 'text']);
 
 // "1w2d03:04:05" or "12d4h31m5s" (RouterOS uptime) as "9d 3h 4m"
+// an uptime as "2d 3h 4m" (the same reading of RouterOS uptimes as the monitor's, units added up in any order)
 $rosUptime = function ($u) {
-    $u = (string) $u;
-    if (!preg_match('/^(?:(\d+)w)?(?:(\d+)d)?(?:(\d+):(\d+):(\d+)|(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?)$/', $u, $m) || $u === '') {
-        return $u;
+    $sec = RouterMonitor::seconds($u);
+    if ($sec === null) {
+        return (string) $u;
     }
-    $days = (int) ($m[1] ?? 0) * 7 + (int) ($m[2] ?? 0);
-    $hours = (int) (($m[3] ?? '') !== '' ? $m[3] : ($m[6] ?? 0));
-    $mins = (int) (($m[4] ?? '') !== '' ? $m[4] : ($m[7] ?? 0));
+    $days = intdiv($sec, 86400);
+    $hours = intdiv($sec % 86400, 3600);
+    $mins = intdiv($sec % 3600, 60);
     return trim(($days ? $days . 'd ' : '') . ($days || $hours ? $hours . 'h ' : '') . $mins . 'm');
 };
 
-$rosConnect = Closure::fromCallable([RouterApi::class, 'connect']);
+// a connection for this page: dropped when the page ends, however it ends (an answer, a redirect, an error), without the
+// library's goodbye, which waits for the router to reply and would hold the page on a router that stopped answering
+$rosConnect = function ($ip, $user, $pass, $timeout = 5) {
+    [$c, $err] = RouterApi::connect($ip, $user, $pass, $timeout);
+    if ($c) {
+        register_shutdown_function(function () use ($c) {
+            method_exists($c, 'abort') ? $c->abort() : null;
+        });
+    }
+    return [$c, $err];
+};
 
 $rosSend = Closure::fromCallable([RouterApi::class, 'send']);
 $rosError = Closure::fromCallable([RouterApi::class, 'error']);
@@ -150,7 +176,7 @@ $rosHealth = function ($c, $withIfaces = false) use ($rosText, $rosUptime, $rosS
     // the one part that must answer: a refusal (this user may not read /system) or no data is the "cannot read" error
     $res = $rosSend($c, new \PEAR2\Net\RouterOS\Request('/system/resource/print'), $until);
     if (($err = $rosError($res)) !== null) {
-        throw new Exception($err);
+        throw new Exception($err, 403); // refused (no permission): told apart from no answer (408)
     }
     $r = null;
     foreach ($res as $item) {
@@ -284,6 +310,14 @@ switch ($action) {
             }
             $values['router_alert_phone'] = $phone;
             $values['router_backup_keep'] = (string) max(1, min(30, (int) _post('router_backup_keep', '7')));
+            // the backup password: kept as typed (not trimmed: spaces count), never shown again; empty keeps the saved one
+            $backupPass = (string) ($_POST['router_backup_password'] ?? '');
+            if ($backupPass !== '') {
+                if (strlen($backupPass) < 8 || strlen($backupPass) > 128) {
+                    r2(getUrl('routers/settings'), 'e', Lang::T('The backup password must be 8 to 128 characters.'));
+                }
+                $values['router_backup_password'] = $backupPass;
+            }
             // all or nothing: a write that fails leaves the settings as they were
             $db = ORM::get_db();
             try {
@@ -392,8 +426,13 @@ switch ($action) {
             // a router name in an old encoding is not valid UTF-8: replaced character by character instead of failing the answer
             echo json_encode(['ok' => true, 'identity' => $h['identity'], 'board' => $h['board'], 'version' => $h['version'], 'uptime' => $h['uptime']], JSON_INVALID_UTF8_SUBSTITUTE);
         } catch (Throwable $e) {
-            // logged in, but this user may not read /system: still a working connection
-            echo json_encode(['ok' => true, 'identity' => '', 'board' => '', 'version' => '', 'uptime' => '', 'note' => Lang::T('Connected, but this user cannot read the system details.')]);
+            if ($e->getCode() === 403) {
+                // logged in, but this user may not read /system: the router refused, so the connection works
+                echo json_encode(['ok' => true, 'identity' => '', 'board' => '', 'version' => '', 'uptime' => '', 'note' => Lang::T('Connected, but this user cannot read the system details.')]);
+            } else {
+                // no answer in time, or the connection broke: the test failed
+                echo json_encode(['ok' => false, 'error' => $e->getMessage(), 'hint' => $rosHint($e->getMessage())], JSON_INVALID_UTF8_SUBSTITUTE);
+            }
         }
         exit;
 
@@ -443,8 +482,11 @@ switch ($action) {
         $back = getUrl('routers/list');
         $who = '[' . $admin['username'] . ']: ';
         if ($op === 'sync') {
-            // send every active customer of this router to it again, as Plans > Sync does for all routers
+            // send every active customer of this router to it again, as Plans > Sync does for all routers. The session is let
+            // go meanwhile (every read from the router is time-limited, but there can be many), so the admin's other pages do not
+            // wait; it is taken again for the result message.
             set_time_limit(0);
+            session_write_close();
             $done = 0;
             $failed = [];
             foreach (ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $d['name'])->find_many() as $tur) {
@@ -468,6 +510,7 @@ switch ($action) {
                     $failed[] = $tur['username'];
                 }
             }
+            @session_start();
             _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($failed) . ' failed', $admin['user_type'], $admin['id']);
             r2($back, $failed ? 'w' : 's', Lang::T('Customers sent to the router') . ': ' . $done
                 . ($failed ? '. ' . Lang::T('Not sent') . ': ' . htmlspecialchars(implode(', ', array_slice($failed, 0, 20))) . (count($failed) > 20 ? ' …' : '') : ''));
@@ -542,14 +585,23 @@ switch ($action) {
                 r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('hotspot users disconnected') . ': ' . $removed . '. ' . Lang::T('They can sign in again at once.'));
             }
             if ($op === 'backup') {
-                $file = 'phpnuxbill-' . date('Ymd-His');
+                // encrypted with the backup password, or not made at all (an unencrypted backup is every login on the router in
+                // readable form); the password is never logged or shown
+                $password = RouterApi::backupPassword();
+                if ($password === '') {
+                    method_exists($c, 'abort') ? $c->abort() : null;
+                    r2(getUrl('routers/settings'), 'e', Lang::T('Set a backup password in Router Settings first: backups are encrypted with it.'));
+                }
+                // on boards whose root folder is emptied by a restart, saved in flash/ so it survives one
+                $file = RouterApi::backupFolder(RouterApi::rows($c, '/file/print', ['name', 'type'], microtime(true) + 15)) . 'phpnuxbill-' . date('Ymd-His');
                 $b = new \PEAR2\Net\RouterOS\Request('/system/backup/save');
                 $b->setArgument('name', $file);
+                $b->setArgument('password', $password);
                 if (($err = $rosError($rosSend($c, $b, microtime(true) + 30))) !== null) {
                     throw new Exception($err);
                 }
                 _log($who . 'Backup saved on ' . $d['name'] . ': ' . $file . '.backup', $admin['user_type'], $admin['id']);
-                r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('backup saved on the router as') . ' ' . $file . '.backup. '
+                r2($back, 's', htmlspecialchars($d['name']) . ': ' . Lang::T('backup saved on the router as') . ' ' . htmlspecialchars($file) . '.backup. '
                     . Lang::T('Download it from Files in Winbox or WebFig.'));
             }
         } catch (Throwable $e) {
@@ -586,7 +638,7 @@ switch ($action) {
         if ($action === 'drop' && !hash_equals($listedFrom, (string) _post('cfg'))) {
             $say(['ok' => false, 'stale' => true, 'error' => Lang::T('The router settings changed since this list was loaded. Refresh the list and try again.')]);
         }
-        [$c, $err] = RouterApi::connect($d['ip_address'], $d['username'], $d['password'], 6);
+        [$c, $err] = $rosConnect($d['ip_address'], $d['username'], $d['password'], 6);
         if (!$c) {
             $say(['ok' => false, 'error' => $err, 'hint' => $rosHint($err)]);
         }
@@ -626,16 +678,23 @@ switch ($action) {
                 $hs = array_slice($hs, 0, 5000);
                 $pp = array_slice($pp, 0, 5000);
                 $names = array_values(array_unique(array_filter(array_merge(array_column($hs, 'user'), array_column($pp, 'name')), 'strlen')));
-                $who = [];
+                // each session is matched by the name it signs in with: a hotspot user by the customer's username, a PPPoE one by
+                // the PPPoE username when the customer has one and by the username otherwise (as the PPPoE device sets it up), so a
+                // PPPoE name that equals another customer's username cannot pick the wrong customer
+                $whoHs = [];
+                $whoPp = [];
                 if ($names) {
                     $in = implode(',', array_fill(0, count($names), '?'));
-                    $st = ORM::getDb()->prepare("SELECT id, username, pppoe_username, fullname FROM tbl_customers WHERE username IN ($in) OR pppoe_username IN ($in)");
+                    $st = ORM::getDb()->prepare("SELECT id, username, pppoe_username, fullname FROM tbl_customers WHERE username IN ($in) OR pppoe_username IN ($in) ORDER BY id");
                     $st->execute(array_merge($names, $names));
                     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $cu) {
-                        foreach ([$cu['username'], $cu['pppoe_username']] as $n) {
-                            if ($n !== null && $n !== '' && !isset($who[$n])) {
-                                $who[$n] = ['id' => (int) $cu['id'], 'name' => $cu['fullname']];
-                            }
+                        $one = ['id' => (int) $cu['id'], 'name' => $cu['fullname']];
+                        if ((string) $cu['username'] !== '' && !isset($whoHs[$cu['username']])) {
+                            $whoHs[$cu['username']] = $one;
+                        }
+                        $ppName = (string) $cu['pppoe_username'] !== '' ? $cu['pppoe_username'] : (string) $cu['username'];
+                        if ($ppName !== '' && !isset($whoPp[$ppName])) {
+                            $whoPp[$ppName] = $one;
                         }
                     }
                 }
@@ -643,11 +702,11 @@ switch ($action) {
                     'read_errors' => $readErrors, 'cfg' => $listedFrom];
                 foreach ($hs as $h) {
                     $out['hotspot'][] = ['sid' => $h['.id'], 'user' => $h['user'], 'address' => $h['address'], 'mac' => $h['mac-address'], 'uptime' => $rosUptime($h['uptime']),
-                        'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $who[$h['user']] ?? null];
+                        'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $whoHs[$h['user']] ?? null];
                 }
                 foreach ($pp as $h) {
                     $out['pppoe'][] = ['sid' => $h['.id'], 'user' => $h['name'], 'address' => $h['address'], 'mac' => $h['caller-id'], 'uptime' => $rosUptime($h['uptime']),
-                        'service' => $h['service'], 'customer' => $who[$h['name']] ?? null];
+                        'service' => $h['service'], 'customer' => $whoPp[$h['name']] ?? null];
                 }
                 $say($out);
             }
@@ -658,6 +717,14 @@ switch ($action) {
                 $sid = _post('sid');
                 if (!in_array($kind, ['hotspot', 'pppoe'], true) || !preg_match('/^\*[0-9A-Fa-f]+$/', $sid)) {
                     $say(['ok' => false, 'error' => Lang::T('Data Not Found')]);
+                }
+                if ($kind === 'pppoe') {
+                    // a session ID can be reused once that session ends: the live session must still be the one listed (same
+                    // name, and a PPPoE one), or it is not removed
+                    $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service'], $until, [], ['.id' => $sid]);
+                    if (!$live || (string) $live[0]['name'] !== (string) _post('user') || (string) $live[0]['service'] !== 'pppoe') {
+                        $say(['ok' => false, 'stale' => true, 'error' => Lang::T('That session has ended or changed. Refresh the list and try again.')]);
+                    }
                 }
                 RouterApi::run($c, $kind === 'hotspot' ? '/ip/hotspot/active/remove' : '/ppp/active/remove', ['numbers' => $sid], $until);
                 _log('[' . $admin['username'] . ']: ' . 'Disconnected ' . $kind . ' session ' . mb_substr(_post('user'), 0, 64) . ' on ' . $d['name'], $admin['user_type'], $admin['id']);
@@ -700,11 +767,11 @@ switch ($action) {
                     } elseif (!$has('api') || !$has('read') || !$has('write')) {
                         $add('bad', Lang::T('The API user cannot change the router'), Lang::T('Its group') . ' "' . $g[0]['name'] . '" ' . Lang::T('needs the api, read and write policies, or customers cannot be added or removed.'));
                     } else {
-                        $missing = array_values(array_filter(['reboot', 'ftp', 'sensitive'], function ($p) use ($has) {
+                        $missing = array_values(array_filter(['reboot', 'sensitive'], function ($p) use ($has) {
                             return !$has($p);
                         }));
                         $add($missing ? 'warn' : 'ok', Lang::T('The API user can manage customers'), $missing
-                            ? Lang::T('Group') . ' "' . $g[0]['name'] . '" ' . Lang::T('also lacks') . ': ' . implode(', ', $missing) . '. ' . Lang::T('reboot is needed for Reboot, ftp for downloading backups.')
+                            ? Lang::T('Group') . ' "' . $g[0]['name'] . '" ' . Lang::T('also lacks') . ': ' . implode(', ', $missing) . '. ' . Lang::T('reboot is needed for Reboot, sensitive for backups that include passwords. Backup files are downloaded from Files in Winbox or WebFig.')
                             : Lang::T('Group') . ' "' . $g[0]['name'] . '"');
                     }
                 } catch (Throwable $e) {
@@ -718,7 +785,7 @@ switch ($action) {
                 $ppServers = [];
                 $serverErrors = [];
                 try {
-                    $hsServers = RouterApi::rows($c, '/ip/hotspot/print', ['name', 'interface', 'disabled'], $until);
+                    $hsServers = RouterApi::rows($c, '/ip/hotspot/print', ['name', 'interface', 'disabled', 'profile'], $until);
                 } catch (Throwable $e) {
                     if ($e->getCode() === 408) {
                         throw $e;
@@ -816,13 +883,58 @@ switch ($action) {
                 if (!empty($config['radius_enable'])) {
                     try {
                         $rad = array_filter(RouterApi::rows($c, '/radius/print', ['address', 'service', 'disabled'], $until), function ($x) { return $x['disabled'] !== 'true'; });
-                        $add($rad ? 'ok' : 'bad', $rad ? Lang::T('RADIUS is set up') : Lang::T('No RADIUS server is set on the router'),
-                            $rad ? implode(', ', array_map(function ($x) { return $x['address'] . ' (' . $x['service'] . ')'; }, $rad))
-                                : Lang::T('PHPNuxBill uses RADIUS: add the RADIUS server in Winbox, RADIUS, for hotspot and ppp.'));
+                        // the services this router bills through (a running hotspot server, a running PPPoE server) must each be in
+                        // an enabled RADIUS entry's service list; with neither running, both are expected
+                        $need = array_merge($onHs ? ['hotspot'] : [], $onPp ? ['ppp'] : []) ?: ['hotspot', 'ppp'];
+                        $covered = [];
+                        foreach ($rad as $x) {
+                            $covered = array_merge($covered, array_map('trim', explode(',', strtolower((string) $x['service']))));
+                        }
+                        $lacking = array_values(array_diff($need, $covered));
+                        $list = implode(', ', array_map(function ($x) { return $x['address'] . ' (' . $x['service'] . ')'; }, $rad));
+                        if (!$rad) {
+                            $add('bad', Lang::T('No RADIUS server is set on the router'), Lang::T('PHPNuxBill uses RADIUS: add the RADIUS server in Winbox, RADIUS, for') . ' ' . implode(' ' . Lang::T('and') . ' ', $need) . '.');
+                        } elseif ($lacking) {
+                            $add('bad', Lang::T('RADIUS does not cover every service'), Lang::T('Missing') . ': ' . implode(', ', $lacking) . '. '
+                                . Lang::T('Tick it in the RADIUS server Service list in Winbox, RADIUS.') . ' ' . $list);
+                        } else {
+                            // the entries are there; the hotspot profile of each running server, and PPP's AAA, must also use them
+                            $off = [];
+                            try {
+                                if ($onHs) {
+                                    $useRadius = [];
+                                    foreach (RouterApi::rows($c, '/ip/hotspot/profile/print', ['name', 'use-radius'], $until) as $pf) {
+                                        $useRadius[$pf['name']] = $pf['use-radius'] === 'true';
+                                    }
+                                    foreach ($onHs as $srv) {
+                                        if (empty($useRadius[(string) $srv['profile']])) {
+                                            $off[] = Lang::T('hotspot profile') . ' "' . $srv['profile'] . '"';
+                                        }
+                                    }
+                                }
+                                if ($onPp) {
+                                    $aaa = RouterApi::rows($c, '/ppp/aaa/print', ['use-radius'], $until);
+                                    if (($aaa[0]['use-radius'] ?? '') !== 'true') {
+                                        $off[] = 'PPP > AAA';
+                                    }
+                                }
+                                if ($off) {
+                                    $add('bad', Lang::T('RADIUS is set but not used'), Lang::T('Turn on Use RADIUS in') . ': ' . implode(', ', array_unique($off)) . '. ' . $list);
+                                } else {
+                                    $add('ok', Lang::T('RADIUS is set up'), $list);
+                                }
+                            } catch (Throwable $e) {
+                                if ($e->getCode() === 408) {
+                                    throw $e;
+                                }
+                                $add('warn', Lang::T('Could not tell whether the profiles use RADIUS'), $e->getMessage());
+                            }
+                        }
                     } catch (Throwable $e) {
                         if ($e->getCode() === 408) {
                             throw $e;
                         }
+                        $add('warn', Lang::T('The RADIUS settings could not be read'), $e->getMessage());
                     }
                 }
                 // 5. the router's clock (expiry and sessions are timed by it)
@@ -894,11 +1006,13 @@ switch ($action) {
 
             if ($action === 'backups') {
                 // the backup files on the router, newest first
-                $files = RouterApi::rows($c, '/file/print', ['name', 'type', 'size', 'creation-time'], $until);
+                // RouterOS 7.16 and later have last-modified instead of creation-time: both are asked for, the first one present is used
+                $files = RouterApi::rows($c, '/file/print', ['name', 'type', 'size', 'last-modified', 'creation-time'], $until);
                 $items = [];
                 foreach ($files as $f) {
                     if (substr((string) $f['name'], -7) === '.backup' || $f['type'] === 'backup') {
-                        $items[] = ['name' => $f['name'], 'size' => is_numeric($f['size']) ? (float) $f['size'] : null, 'created' => $f['creation-time'],
+                        $stamp = (string) ($f['last-modified'] ?? '') !== '' ? $f['last-modified'] : $f['creation-time'];
+                        $items[] = ['name' => $f['name'], 'size' => is_numeric($f['size']) ? (float) $f['size'] : null, 'created' => $stamp,
                             'auto' => (bool) preg_match('/(^|\/)phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name'])];
                     }
                 }
@@ -969,7 +1083,17 @@ switch ($action) {
         // the cache belongs to these details: a changed address or login is asked again at once
         $key = hash('sha256', $d['ip_address'] . "\n" . $d['username'] . "\n" . $d['password']);
         if (!_get('fresh') && is_file($file) && time() - filemtime($file) < ($live ? 2 : 60)) {
-            $cached = json_decode((string) @file_get_contents($file), true);
+            $raw = '';
+            if ($rfh = @fopen($file, 'r')) {
+                // read under a shared lock: the writer rewrites the file in place under an exclusive one, so a half-written
+                // file is never read (a file that cannot be read whole counts as missing)
+                if (flock($rfh, LOCK_SH)) {
+                    $raw = (string) stream_get_contents($rfh);
+                    flock($rfh, LOCK_UN);
+                }
+                fclose($rfh);
+            }
+            $cached = json_decode($raw, true);
             // a live reading is shared for under a second (several admins on one router), timed by when it was read, since the
             // file time only counts whole seconds
             $fresh = !$live || (isset($cached['done']) && microtime(true) - (float) $cached['done'] < 0.9);
@@ -988,13 +1112,14 @@ switch ($action) {
             try {
                 $out = ['ok' => true] + $rosHealth($c, $live);
             } catch (Throwable $e) {
-                $out = ['ok' => false, 'error' => Lang::T('Connected, but this user cannot read the system details.')];
+                // refused (403): connected, but not allowed to read; anything else (no answer, a broken connection) is said as it is
+                $out = ['ok' => false, 'error' => $e->getCode() === 403 ? Lang::T('Connected, but this user cannot read the system details.') : $e->getMessage()];
             }
         } else {
             $out = ['ok' => false, 'error' => $err, 'hint' => $rosHint($err)];
         }
         $out['checked'] = date('Y-m-d H:i:s');
-        $out['observed'] = round($observed, 3);
+        $out['observed'] = $observed; // full precision: the store below compares it with the next reading's start
         $out['done'] = round(microtime(true), 3); // when this answer was ready, failures included: what the live sharing is timed by
         if (!is_dir($dir)) {
             @mkdir($dir, 0755, true);
@@ -1047,8 +1172,7 @@ switch ($action) {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
 
-            $d = ORM::for_table('tbl_routers')->where('ip_address', $ip_address)->find_one();
-            if ($d) {
+            if ($endpointTaken($ip_address)) {
                 $msg .= Lang::T('IP Router Already Exist') . '<br>';
             }
         }
@@ -1123,8 +1247,7 @@ switch ($action) {
 
         if($enabled || _post("testIt")){
             if ($d['ip_address'] != $ip_address) {
-                $c = ORM::for_table('tbl_routers')->where('ip_address', $ip_address)->where_not_equal('id', $id)->find_one();
-                if ($c) {
+                if ($endpointTaken($ip_address, $id)) {
                     $msg .= 'IP Already Exists<br>';
                 }
             }
@@ -1189,6 +1312,7 @@ switch ($action) {
             $query->where('site', $site);
         }
         $d = Paginator::findMany($query, ['name' => $name, 'site' => $site]) ?: [];
+        $ui->assign('name', $name);
         $ui->assign('site', $site);
         $ui->assign('sites', $siteNames());
         $ui->assign('d', $d);

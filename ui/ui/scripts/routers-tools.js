@@ -120,9 +120,16 @@
             var rows = d.hotspot.map(function (r) { r.kind = 'hotspot'; return r; }).concat(d.pppoe.map(function (r) { r.kind = 'pppoe'; return r; }));
             // a disconnect sent from here (still on its way, or done) stays shown on its row, even in a list read from the router
             // before it went through; kept per router settings, as a session ID only means something on the router it came from
-            rows.forEach(function (r) {
-                var s = pane._drops && pane._drops[dropKey(d.cfg, r.kind, r.sid)];
-                if (s === 'gone') r.gone = true; else if (s === 'pending') r.pending = true;
+            // (a failed one keeps its message until it is tried again; one whose session is no longer listed is said above the list)
+            var orphans = [];
+            Object.keys(pane._drops || {}).forEach(function (k) {
+                var s = pane._drops[k];
+                var r = rows.filter(function (x) { return dropKey(d.cfg, x.kind, x.sid) === k; })[0];
+                if (r) {
+                    if (s === 'gone') r.gone = true; else if (s === 'pending') r.pending = true; else if (s && s.err) r.err = s.err;
+                } else if (s && s.err && k.indexOf((d.cfg || '') + ' ') === 0) {
+                    orphans.push(s.user + ': ' + s.err);
+                }
             });
             var curl = d.customer_url;
             var total = (d.total_hotspot || d.hotspot.length) + (d.total_pppoe || d.pppoe.length);
@@ -131,7 +138,7 @@
                 cfg: d.cfg, // which router settings the list was read with: a disconnect is refused once they change
                 capped: rows.length < total ? t.capped.replace('%s', rows.length) : '',
                 // a menu the router refused (no permission) is said, so an empty list is not taken for nobody online
-                notice: (d.read_errors || []).length ? t.readErr + ': ' + d.read_errors.join('; ') : '',
+                notice: [(d.read_errors || []).length ? t.readErr + ': ' + d.read_errors.join('; ') : ''].concat(orphans).filter(Boolean).join(' · '),
                 empty: t.none,
                 cols: [t.user, t.type, t.address, t.mac, t.uptime, t.data, ''],
                 filters: [{ key: 'all', label: t.all, test: function () { return true; } },
@@ -305,6 +312,13 @@
                 pen = true;
             });
             if (d) svg += '<path class="rt-chart__line ' + s.cls + '" d="' + d + '"></path>';
+            // a reading with no reading next to it on either side has no line to be part of: a dot shows it
+            s.points.forEach(function (p, i) {
+                var before = s.points[i - 1], after = s.points[i + 1];
+                if (p[1] != null && !(before && before[1] != null) && !(after && after[1] != null)) {
+                    svg += '<circle class="rt-chart__pt ' + s.cls + '" r="2.5" cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '"></circle>';
+                }
+            });
         });
         svg += '<line class="rt-chart__cross" x1="0" x2="0" y1="' + padT + '" y2="' + (H - padB) + '" hidden></line>';
         series.forEach(function (s) { svg += '<circle class="rt-chart__dot ' + s.cls + '" r="4" cx="0" cy="0" hidden></circle>'; });
@@ -439,7 +453,7 @@
     document.addEventListener('keydown', function (e) {
         var tabBtn = e.target.closest && e.target.closest('[data-rt-tab]');
         if (!tabBtn || ['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(e.key) === -1) return;
-        var list = Array.prototype.slice.call(tabBtn.closest('[data-rt-tabs]').querySelectorAll('[data-rt-tab]'));
+        var list = Array.prototype.slice.call(tabBtn.closest('[data-rt-tabs]').querySelectorAll('[data-rt-tab]:not([disabled])'));
         var i = list.indexOf(tabBtn);
         var to = e.key === 'Home' ? 0 : e.key === 'End' ? list.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
         e.preventDefault();
@@ -520,16 +534,21 @@
                 return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) { return r.sid === dSid && r.kind === dKind; })[0] : null;
             };
             var dRow = find(dModel);
-            if (!dRow || dRow.pending || dRow.gone || (dPane._drops && dPane._drops[dKey])) return;
+            var busy = function () { // waiting for an answer, or done; a failed one can be tried again
+                var s = dPane._drops && dPane._drops[dKey];
+                return s === 'pending' || s === 'gone';
+            };
+            if (!dRow || dRow.pending || dRow.gone || busy()) return;
             ask(drop, dUser + ': ' + t.dropAsk, function () {
                 dPane._drops = dPane._drops || {};
-                if (dPane._drops[dKey]) return;
-                dPane._drops[dKey] = 'pending';
+                if (busy()) return;
+                dPane._drops[dKey] = 'pending'; // (replaces an earlier failure: trying again clears it)
                 dRow.pending = true;
                 dRow.err = null;
                 if (dPane._lv === dModel) listRender(dPane);
                 request('drop', rid, { kind: dKind, sid: dSid, user: dUser, cfg: dCfg }).then(function (d) {
-                    if (d.ok) dPane._drops[dKey] = 'gone'; else delete dPane._drops[dKey];
+                    // kept on the pane, not only on the row: a Refresh meanwhile replaces the rows, and the result must survive it
+                    dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
                     // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may
                     // have replaced it); a list from other router settings is left alone
                     var cur = find(dPane._lv);
@@ -538,7 +557,12 @@
                         r.pending = false;
                         if (d.ok) r.gone = true; else r.err = d.error || t.fail;
                     });
-                    if (cur) listRender(dPane);
+                    if (cur) {
+                        listRender(dPane);
+                    } else if (!d.ok && dPane._lv && dPane.querySelector('[data-rt-list]')) {
+                        // the session is not in the list shown now: the failure is said above it
+                        dPane.querySelector('[data-rt-list]').insertAdjacentHTML('beforebegin', '<p class="rt-err rt-err--block">' + esc(dUser + ': ' + (d.error || t.fail)) + '</p>');
+                    }
                 });
             });
             return;

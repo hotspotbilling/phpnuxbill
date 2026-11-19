@@ -14,6 +14,36 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
 {
     private $aborted = false;
 
+    /**
+     * As the library's constructor, with the login under a deadline: the connection time limit holds for the whole login, so a
+     * router that answers it slowly, a little at a time, is given up on as well as one that never answers. A failed login closes
+     * the connection. (Persistent connections are not used here; they are left to the library as they are.)
+     */
+    public function __construct($host, $username, $password = '', $port = 8728, $persist = false, $timeout = null, $crypto = PEAR2\Net\Transmitter\NetworkStream::CRYPTO_OFF, $context = null)
+    {
+        if ($persist) {
+            parent::__construct($host, $username, $password, $port, $persist, $timeout, $crypto, $context);
+            return;
+        }
+        $this->com = new PEAR2\Net\RouterOS\Communicator($host, $port, false, $timeout, $username . '/' . $password, $crypto, $context);
+        $limit = null == $timeout ? (int) ini_get('default_socket_timeout') : (int) $timeout;
+        $this->readDeadline(microtime(true) + max(1, $limit));
+        try {
+            if (!static::login($this->com, $username, $password, $limit)) {
+                throw new PEAR2\Net\RouterOS\DataFlowException('Invalid username or password supplied.', PEAR2\Net\RouterOS\DataFlowException::CODE_INVALID_CREDENTIALS);
+            }
+        } catch (Throwable $e) {
+            $this->aborted = true; // no goodbye on a connection that never logged in
+            try {
+                $this->com->close();
+            } catch (Throwable $x) {
+            }
+            throw $e;
+        } finally {
+            $this->readDeadline(null);
+        }
+    }
+
     public function abort()
     {
         $this->aborted = true;

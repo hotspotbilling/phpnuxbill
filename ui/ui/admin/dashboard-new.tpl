@@ -1533,7 +1533,7 @@
                                     return ' ' + ctx.label + ': ' + ctx.parsed + (ctx.parsed === 1 ? ' Node' : ' Nodes');
                                 },
                                 afterLabel: function (ctx) {
-                                    if (ctx.label === 'Online' && dData.network.radius_enabled) {
+                                    if (ctx.dataIndex === 0 && dData.network.radius_enabled) { // the first slice is Online (its label is translated)
                                         const rOn = dData.network.routers_online || 0;
                                         const rTot = dData.network.routers_total || 0;
                                         const radOn = dData.network.radius_online ? 'Online' : 'Offline';

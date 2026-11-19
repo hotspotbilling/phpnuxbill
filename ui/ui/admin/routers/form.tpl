@@ -223,21 +223,25 @@
             show(true, '{Lang::T('Connecting')|escape:'javascript'}&hellip;');
             out.className = 'nf__test-out';
             // a deadline for the answer and its body, so the button always comes back (the server gives up well before it)
+            // (raced against the request and the reading of its answer, so it settles even where requests cannot be cancelled)
             var ctl = window.AbortController ? new AbortController() : null;
             var timedOut = false;
-            var timer = setTimeout(function () { timedOut = true; if (ctl) ctl.abort(); }, 45000);
-            fetch('{Text::url('routers/test')}', { method: 'POST', body: body, credentials: 'same-origin', headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined })
-                .then(function (r) { return r.json(); })
-                .then(function (d) {
-                    if (timedOut) throw new Error('timeout');
-                    return d;
-                })
+            var timer;
+            var deadline = new Promise(function (resolve, reject) {
+                timer = setTimeout(function () { timedOut = true; if (ctl) ctl.abort(); reject(new Error('timeout')); }, 45000);
+            });
+            Promise.race([
+                fetch('{Text::url('routers/test')}', { method: 'POST', body: body, credentials: 'same-origin', headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined })
+                    .then(function (r) { return r.json(); }),
+                deadline
+            ])
                 .then(function (d) {
                     if (snapshot() !== sent || tested !== sent) {
                         return; // the details were changed (or tested again) while this one was running
                     }
                     if (!d.ok) {
-                        show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> <b>{Lang::T('Could not connect')|escape:'javascript'}</b><br>' + esc(d.error));
+                        show(false, '<i class="fa fa-times-circle" aria-hidden="true"></i> <b>{Lang::T('Could not connect')|escape:'javascript'}</b><br>' + esc(d.error)
+                            + (d.hint ? '<br><small>' + esc(d.hint) + '</small>' : ''));
                         return;
                     }
                     var bits = [];
@@ -262,7 +266,8 @@
         });
     })();
 
-    // "host:port" typed or picked into the address (the Routely suggestions are like that) moves the port to its own field
+    // "host:port" typed or picked into the address (the Routely suggestions are like that) moves the port to its own field, unless
+    // a port is already there: the port field wins, as it does when saving
     (function () {
         var host = document.getElementById('ip_address'), port = document.getElementById('api_port');
         if (!host || !port) return;
@@ -273,7 +278,7 @@
             var m = /^\[([^\]]+)\]:(\d+)$/.exec(v) || /^([^:\[\]]+):(\d+)$/.exec(v);
             if (m) {
                 host.value = m[1];
-                port.value = m[2];
+                if (port.value.trim() === '') port.value = m[2];
             }
         });
     })();

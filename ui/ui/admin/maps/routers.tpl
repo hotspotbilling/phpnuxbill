@@ -19,6 +19,7 @@
     {if $_c['router_check']}
     <span><i class="rt-map-dot" style="background:#16a34a"></i> {Lang::T('Online')}</span>
     <span><i class="rt-map-dot" style="background:#dc2626"></i> {Lang::T('Offline')}</span>
+    <span><i class="rt-map-dot" style="background:#d97706"></i> {Lang::T('Not checked yet')}</span>
     {else}
     <span><i class="rt-map-dot" style="background:#2563eb"></i> {Lang::T('Enabled')}</span>
     {/if}
@@ -46,9 +47,9 @@
             var group = L.featureGroup().addTo(map);
 
             // JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT: a closing script tag in a name cannot end this script
-            var routers = {/literal}{$d|json_encode:15}{literal};
+            var routers = {/literal}{($d|default:[])|json_encode:15}{literal};
             var checked = {/literal}{if $_c['router_check']}true{else}false{/if}{literal};
-            var words = {/literal}{ldelim}online: '{Lang::T('Online')|escape:'javascript'}', offline: '{Lang::T('Offline')|escape:'javascript'}', disabled: '{Lang::T('Disabled')|escape:'javascript'}', seen: '{Lang::T('Last Seen')|escape:'javascript'}', name: '{Lang::T('Name')|escape:'javascript'}', info: '{Lang::T('Info')|escape:'javascript'}', more: '{Lang::T('More Info')|escape:'javascript'}', way: '{Lang::T('Get Direction')|escape:'javascript'}'{rdelim}{literal};
+            var words = {/literal}{ldelim}online: '{Lang::T('Online')|escape:'javascript'}', offline: '{Lang::T('Offline')|escape:'javascript'}', disabled: '{Lang::T('Disabled')|escape:'javascript'}', unknown: '{Lang::T('Not checked yet')|escape:'javascript'}', seen: '{Lang::T('Last Seen')|escape:'javascript'}', name: '{Lang::T('Name')|escape:'javascript'}', info: '{Lang::T('Info')|escape:'javascript'}', more: '{Lang::T('More Info')|escape:'javascript'}', way: '{Lang::T('Get Direction')|escape:'javascript'}'{rdelim}{literal};
             function esc(s) {
                 return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
                     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -66,9 +67,10 @@
             if (parts.length !== 2 || parts.some(function (p) { return p.trim() === ''; })) return;
             var coordinates = parts.map(Number);
             if (!isFinite(coordinates[0]) || !isFinite(coordinates[1])) return;
-            // green online, red offline (when Router Check runs), blue enabled (when it does not), grey disabled
-            var state = router.enabled != 1 ? 'disabled' : (checked ? (router.status === 'Offline' ? 'offline' : 'online') : 'enabled');
-            var color = { online: '#16a34a', offline: '#dc2626', enabled: '#2563eb', disabled: '#94a3b8' }[state];
+            // green online, red offline (when Router Check runs), amber not checked yet (never seen, and not marked offline: the
+            // status column starts as Online), blue enabled (when Router Check does not run), grey disabled
+            var state = router.enabled != 1 ? 'disabled' : (!checked ? 'enabled' : router.status === 'Offline' ? 'offline' : !router.last_seen ? 'unknown' : 'online');
+            var color = { online: '#16a34a', offline: '#dc2626', unknown: '#d97706', enabled: '#2563eb', disabled: '#94a3b8' }[state];
             var popupContent = '<strong>' + esc(words.name) + '</strong>: ' + esc(router.name) + '<br>'
                 + (state !== 'enabled' ? '<strong>' + esc(words[state]) + '</strong>' + (router.last_seen ? ' &middot; ' + esc(words.seen) + ': ' + esc(router.last_seen) : '') + '<br>' : '')
                 + (router.description ? '<strong>' + esc(words.info) + '</strong>: ' + esc(router.description) + '<br>' : '')

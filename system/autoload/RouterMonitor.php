@@ -21,6 +21,26 @@ class RouterMonitor
     const EVERY = 270;          // seconds between readings (the cron usually runs every 5 minutes)
     const KEEP_SAMPLES = 30;    // days
     const KEEP_EVENTS = 90;     // days
+    const GAP = 600;            // seconds: a reading further apart than this from the last one does not follow on from it
+    const BOOT_SLACK = 120;     // seconds a router's start time can seem to move between readings without it having restarted
+
+    /** Two readings follow on from each other (no gap in the collection between them, a late cron allowed for) */
+    private static function follows($prev, $at)
+    {
+        return $prev && $at - strtotime($prev['at']) <= self::GAP;
+    }
+
+    /**
+     * Whether the router restarted between two readings: its start time (when read, less the uptime) moved later. Uptime alone
+     * misses a restart when the router has been up longer since than it was before.
+     */
+    public static function restarted($prevAt, $prevUptime, $at, $uptime)
+    {
+        if ($prevUptime === null || $uptime === null) {
+            return false;
+        }
+        return ($at - (int) $uptime) - ($prevAt - (int) $prevUptime) > self::BOOT_SLACK;
+    }
 
     public static function ready()
     {
@@ -89,16 +109,26 @@ class RouterMonitor
         return $log;
     }
 
-    /** "1w2d03:04:05" or "12d4h31m5s" as seconds */
+    /**
+     * An uptime as seconds: "1w2d03:04:05" (weeks and days, then a clock), or units in any order, each counted however often it
+     * appears ("12d4h31m5s", "1m1m" is 2 minutes). Null for anything else.
+     */
     public static function seconds($u)
     {
-        if (!preg_match('/^(?:(\d+)w)?(?:(\d+)d)?(?:(\d+):(\d+):(\d+)|(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?)$/', (string) $u, $m) || (string) $u === '') {
+        $u = trim((string) $u);
+        if (preg_match('/^(?:(\d+)w)?(?:(\d+)d)?(\d+):(\d+):(\d+)$/', $u, $m)) {
+            return (((int) $m[1] * 7 + (int) $m[2]) * 24 + (int) $m[3]) * 3600 + (int) $m[4] * 60 + (int) $m[5];
+        }
+        if (!preg_match('/^(\d+[wdhms])+$/i', $u)) {
             return null;
         }
-        $h = ($m[3] ?? '') !== '' ? (int) $m[3] : (int) ($m[6] ?? 0);
-        $i = ($m[4] ?? '') !== '' ? (int) $m[4] : (int) ($m[7] ?? 0);
-        $s = ($m[5] ?? '') !== '' ? (int) $m[5] : (int) ($m[8] ?? 0);
-        return (((int) ($m[1] ?? 0) * 7 + (int) ($m[2] ?? 0)) * 24 + $h) * 3600 + $i * 60 + $s;
+        $per = ['w' => 604800, 'd' => 86400, 'h' => 3600, 'm' => 60, 's' => 1];
+        $total = 0;
+        preg_match_all('/(\d+)([wdhms])/i', $u, $all, PREG_SET_ORDER);
+        foreach ($all as $p) {
+            $total += (int) $p[1] * $per[strtolower($p[2])];
+        }
+        return $total;
     }
 
     /** Read one router, keep the reading, and turn changes into events (and alerts). */
@@ -125,9 +155,9 @@ class RouterMonitor
                 $s['disk'] = $pct($x['free-hdd-space'] ?? null, $x['total-hdd-space'] ?? null);
                 $s['uptime'] = self::seconds($x['uptime'] ?? '');
             } catch (Throwable $e) {
-                // the router refused the read (RouterApi::rows throws a plain Exception with its message): it answers, so it
-                // counts as online. No answer in time (408) or a connection that broke (the library's own exceptions) is offline.
-                $s['online'] = get_class($e) === 'Exception' && $e->getCode() !== 408 ? 1 : 0;
+                // the router refused the read (RouterApi marks a refusal with code 403): it answers, so it counts as online. No
+                // answer in time (408), a connection that broke (the library's own exceptions) or anything else is offline.
+                $s['online'] = $e->getCode() === 403 ? 1 : 0;
                 $why = $e->getMessage();
             }
             if ($s['online']) {
@@ -216,9 +246,10 @@ class RouterMonitor
         $state = self::lastOf($id, ['offline', 'online']);
         $isDown = $state && $state['type'] === 'offline';
         if (!$s['online']) {
-            // offline only after the second failed reading in a row, dated from the first one: that is when the outage began, and
-            // the event keeps it (readings are pruned sooner than events) for the duration at recovery
-            if (!$isDown && $prev && !(int) $prev['online']) {
+            // offline only after the second failed reading in a row (two readings far apart, the cron having stopped meanwhile,
+            // are not in a row), dated from the first one: that is when the outage began, and the event keeps it (readings are
+            // pruned sooner than events) for the duration at recovery. An outage already confirmed stays so across any gap.
+            if (!$isDown && self::follows($prev, time()) && !(int) $prev['online']) {
                 self::event($r, 'offline', $why, Lang::T('router is offline') . ' (' . Lang::T('no answer since') . ' ' . date('H:i', strtotime($prev['at'])) . ')', $prev['at']);
             }
             return;
@@ -228,10 +259,10 @@ class RouterMonitor
             $mins = max(1, (int) round((time() - strtotime($state['at'])) / 60));
             self::event($r, 'online', '', Lang::T('router is back online after about') . ' ' . self::duration($mins));
         }
-        // a restart: the uptime is lower than at the last reading that had one (failed readings in between have none)
+        // a restart: the router's start time moved on since the last reading that had an uptime (failed readings in between have none)
         $lastUp = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where('online', 1)->where_not_null('uptime')
             ->where_lt('id', $sampleId)->order_by_desc('id')->find_one();
-        if ($lastUp && $s['uptime'] !== null && (int) $s['uptime'] + 60 < (int) $lastUp['uptime']) {
+        if ($lastUp && self::restarted(strtotime($lastUp['at']), $lastUp['uptime'], time(), $s['uptime'])) {
             self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')');
         }
         // high load: two readings in a row over the line to alert, and well under it to say it is fine again
@@ -241,7 +272,7 @@ class RouterMonitor
             }
             $last = self::lastOf($id, [$hi, $ok]);
             $high = $last && $last['type'] === $hi;
-            $twice = $k === 'disk' || ($prev && $prev[$k] !== null && (int) $prev[$k] >= $over);
+            $twice = $k === 'disk' || (self::follows($prev, time()) && $prev[$k] !== null && (int) $prev[$k] >= $over);
             if (!$high && $s[$k] >= $over && $twice) {
                 self::event($r, $hi, $s[$k] . '%', $label . ' ' . Lang::T('at') . ' ' . $s[$k] . '%');
             } elseif ($high && $s[$k] < $under) {
@@ -305,10 +336,13 @@ class RouterMonitor
         try {
             $db = ORM::getDb();
             $db->prepare('DELETE FROM tbl_router_samples WHERE at < ?')->execute([date('Y-m-d H:i:s', time() - self::KEEP_SAMPLES * 86400)]);
-            // old events go, but never the newest of each kind for a router (offline/online, CPU, memory, disk): that one is the
-            // state that stops a repeated alert and sends the "back to normal" one, however long ago it began
-            $db->prepare("DELETE FROM tbl_router_events WHERE at < ? AND id NOT IN (SELECT id FROM (SELECT MAX(id) AS id FROM tbl_router_events
-                GROUP BY router_id, CASE WHEN type IN ('offline', 'online') THEN 'state' ELSE SUBSTRING_INDEX(type, '_', 1) END) AS keep_newest)")
+            // old events go, but never the newest state of a router that still exists (online/offline, CPU, memory, disk): that one
+            // stops a repeated alert and sends the "back to normal" one, however long ago it began. Restarts and the events of a
+            // deleted router age out like the rest.
+            $db->prepare("DELETE FROM tbl_router_events WHERE at < ? AND id NOT IN (SELECT id FROM (SELECT MAX(e.id) AS id FROM tbl_router_events e
+                JOIN tbl_routers r ON r.id = e.router_id
+                WHERE e.type IN ('offline', 'online', 'cpu_high', 'cpu_ok', 'mem_high', 'mem_ok', 'disk_high', 'disk_ok')
+                GROUP BY e.router_id, CASE WHEN e.type IN ('offline', 'online') THEN 'state' ELSE SUBSTRING_INDEX(e.type, '_', 1) END) AS keep_newest)")
                 ->execute([date('Y-m-d H:i:s', time() - self::KEEP_EVENTS * 86400)]);
             @touch($mark); // only once both are done: a failure is tried again on the next run
         } catch (Throwable $e) {
@@ -334,8 +368,8 @@ class RouterMonitor
             $t = strtotime($r['at']);
             $online += (int) $r['online'];
             $down = $up = null;
-            // a restart between the two readings (the uptime went back) resets the counters: no speed across it
-            $restarted = $prev && $prev['uptime'] !== null && $r['uptime'] !== null && (int) $r['uptime'] < (int) $prev['uptime'];
+            // a restart between the two readings resets the counters: no speed across it (the same test as the restart event)
+            $restarted = $prev && self::restarted($prev['t'], $prev['uptime'], $t, $r['uptime']);
             if ($prev && !$restarted && $prev['iface'] === $r['iface'] && $r['rx'] !== null && $prev['rx'] !== null && $t > $prev['t']) {
                 $sec = $t - $prev['t'];
                 $dRx = (float) $r['rx'] - (float) $prev['rx'];

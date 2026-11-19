@@ -275,6 +275,12 @@ class Stream
             $this->close();
             return false;
         }
+        // the shorter of the time left and the stream's ordinary timeout: a deadline never makes one read wait longer than usual
+        $t = $this->ordinaryTimeout ?: array((int) ini_get('default_socket_timeout'), 0);
+        $ordinary = $t[0] + $t[1] / 1000000;
+        if ($ordinary > 0 && $ordinary < $left) {
+            $left = $ordinary;
+        }
         stream_set_timeout($this->stream, (int) floor($left), (int) (($left - floor($left)) * 1000000));
         return true;
     }

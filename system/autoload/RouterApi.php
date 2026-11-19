@@ -33,7 +33,16 @@ class RouterApi
                 return [null, Lang::T('Not available in Demo mode')];
             }
             [$host, $port] = RouterAddress::split($ip);
-            return [new RouterClient($host, $user, $pass, $port, false, $timeout), null];
+            // the login is read before any deadline can be set on the client, with the socket's time limit, which the connection
+            // takes from default_socket_timeout when it opens (60 seconds unless set): for this connection it is the connect time
+            // limit, so a router that accepts the connection and then stays silent is given up on in seconds
+            $old = ini_get('default_socket_timeout');
+            ini_set('default_socket_timeout', (string) max(1, (int) ceil($timeout)));
+            try {
+                return [new RouterClient($host, $user, $pass, $port, false, $timeout), null];
+            } finally {
+                ini_set('default_socket_timeout', (string) $old);
+            }
         } catch (Throwable $e) {
             // the library wraps the reason (refused, timed out, wrong login) in a general message: show both
             $parts = [];
@@ -55,6 +64,11 @@ class RouterApi
     public static function send($c, $req, $deadline)
     {
         static $n = 0;
+        // a deadline shared by several requests that has already passed: nothing more is sent (a command that changes something
+        // must not go out once the time for the whole operation is up)
+        if ($deadline - microtime(true) <= 0) {
+            throw new Exception(Lang::T('The router did not answer in time'), 408);
+        }
         $tag = 'nb' . (++$n);
         $req->setTag($tag);
         $c->sendAsync($req);
@@ -115,7 +129,7 @@ class RouterApi
         }
         $res = self::send($c, $req, $deadline);
         if (($err = self::error($res)) !== null) {
-            throw new Exception($err);
+            throw new Exception($err, 403); // the router answered and refused: 403 tells it from no answer (408) and a broken connection
         }
         $out = [];
         foreach ($res as $r) {
@@ -139,8 +153,32 @@ class RouterApi
             $req->setArgument($k, $v);
         }
         if (($err = self::error(self::send($c, $req, $deadline))) !== null) {
-            throw new Exception($err);
+            throw new Exception($err, 403);
         }
+    }
+
+    /**
+     * Where a backup is saved on this router: "flash/" on boards whose root folder is in memory (it is emptied on every restart,
+     * and the board keeps its files in a "flash" folder), the root folder otherwise. From a /file/print list with name and type.
+     */
+    public static function backupFolder(array $files)
+    {
+        foreach ($files as $f) {
+            if ((string) ($f['name'] ?? '') === 'flash' && in_array((string) ($f['type'] ?? ''), ['disk', 'directory'], true)) {
+                return 'flash/';
+            }
+        }
+        return '';
+    }
+
+    /**
+     * The password backups are encrypted with (Network > Routers > Settings). RouterOS saves a backup without a password
+     * unencrypted, with every login and key on the router readable by anyone who gets the file, so no backup is made without one.
+     */
+    public static function backupPassword()
+    {
+        global $config;
+        return (string) ($config['router_backup_password'] ?? '');
     }
 
     /**
@@ -155,9 +193,15 @@ class RouterApi
         global $config, $CACHE_PATH;
         $log = [];
         $lock = null;
+        // a time budget of its own, not what the monitoring pass before it left over (each router gets its own again below)
+        @set_time_limit(120);
         try {
             if (($config['router_backup'] ?? '0') !== '1') {
                 return [];
+            }
+            $password = self::backupPassword();
+            if ($password === '') {
+                return [Lang::T('No backup password is set in Network > Routers > Settings, so no backup was made.')];
             }
             // one run at a time: a second cron started meanwhile leaves the work to the one already doing it
             $lock = @fopen($CACHE_PATH . DIRECTORY_SEPARATOR . 'router_backup.lock', 'c');
@@ -187,8 +231,10 @@ class RouterApi
             }
             $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
             $name = 'phpnuxbill-auto-' . date('Ymd');
-            $autoFiles = function ($c) {
-                $files = self::rows($c, '/file/print', ['.id', 'name'], microtime(true) + 15);
+            $autoFiles = function ($c, &$folder = null) {
+                $files = self::rows($c, '/file/print', ['.id', 'name', 'type'], microtime(true) + 15);
+                $folder = self::backupFolder($files);
+                // in the root folder or in flash/: both are this router's automatic backups
                 $auto = array_values(array_filter($files, function ($f) {
                     return preg_match('/(^|\/)phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name']);
                 }));
@@ -208,20 +254,22 @@ class RouterApi
                     continue;
                 }
                 try {
-                    $auto = $autoFiles($c);
+                    $folder = '';
+                    $auto = $autoFiles($c, $folder);
                     $made = false;
                     foreach ($auto as $f) {
                         $made = $made || basename($f['name']) === $name . '.backup';
                     }
                     if (!$made) {
-                        self::run($c, '/system/backup/save', ['name' => $name], microtime(true) + 60);
+                        // encrypted with the backup password (never written to the log or the output)
+                        self::run($c, '/system/backup/save', ['name' => $folder . $name, 'password' => $password], microtime(true) + 60);
                         $auto = $autoFiles($c);
                     }
                     foreach (array_slice($auto, $keep) as $old) {
                         self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
                     }
                     $state['routers'][$id] = 'ok';
-                    $log[] = $r['name'] . ': ' . $name . '.backup' . ($made ? ' (' . Lang::T('already saved') . ')' : '');
+                    $log[] = $r['name'] . ': ' . $folder . $name . '.backup' . ($made ? ' (' . Lang::T('already saved') . ')' : '');
                 } catch (Throwable $e) {
                     $state['routers'][$id] = (int) ($state['routers'][$id] ?? 0) + 1;
                     $log[] = $r['name'] . ': ' . $e->getMessage();

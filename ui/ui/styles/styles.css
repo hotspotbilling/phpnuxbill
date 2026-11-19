@@ -9073,6 +9073,39 @@ body.dark-mode .ls-pill--suspended {
   .ls-table td.ls-contact::before {
     content: none;
   }
+  /* a router's details row: one wide cell holding the tabs, not a card of label/value pairs */
+  .ls-table tr.rt-detail > td {
+    display: block;
+    text-align: left;
+  }
+  /* the small tables inside it (users online, interfaces, backups) stay tables, with their headers */
+  .ls-table .rt-mini {
+    display: table;
+  }
+  .ls-table .rt-mini thead {
+    display: table-header-group;
+  }
+  .ls-table .rt-mini tbody {
+    display: table-row-group;
+  }
+  .ls-table .rt-mini tr {
+    display: table-row;
+    padding: 0;
+    border-bottom: 0;
+  }
+  .ls-table .rt-mini th,
+  .ls-table .rt-mini td {
+    display: table-cell;
+    padding: 7px 8px;
+    border-bottom: 1px solid var(--ls-line);
+    text-align: left;
+  }
+  .ls-table .rt-mini td::before {
+    content: none;
+  }
+  .ls-table .rt-mini .rt-mini__end {
+    text-align: right;
+  }
   .ls-table td > span {
     text-align: right;
   }
@@ -10374,6 +10407,20 @@ body.dark-mode .rt-err {
   cursor: not-allowed;
   pointer-events: auto;
 }
+/* ...and the reason next to it, reachable with the keyboard and read out by screen readers (the button is disabled, so it
+   cannot take focus itself) */
+.rt-why {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 2px;
+  color: var(--ls-muted);
+  cursor: help;
+  border-radius: 6px;
+}
+.rt-why:focus-visible {
+  outline: 2px solid var(--ls-accent);
+  outline-offset: 2px;
+}
 .ls-table tr.rt-detail:hover {
   background: transparent;
 }
@@ -10834,6 +10881,15 @@ body.dark-mode .rt-detail {
   color: var(--ls-ink);
   font-size: 12px;
 }
+/* (the dark theme's general select:focus rule turns the text dark on this dark field, and removes the outline) */
+.rt-chart__pick:focus,
+.dark-mode .rt-chart__pick:focus:not(#filterNavigateMenu) {
+  color: var(--ls-ink);
+  background: var(--ls-field);
+  border-color: var(--ls-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ls-accent-soft);
+}
 .rt-legend {
   display: inline-flex;
   flex-wrap: wrap;
@@ -10901,6 +10957,13 @@ body.dark-mode .rt-detail {
   vector-effect: non-scaling-stroke;
 }
 .rt-chart__dot.rt-s2 {
+  fill: var(--rt-s2);
+}
+/* a reading with no neighbour to draw a line to (History) */
+.rt-chart__pt {
+  fill: var(--rt-s1);
+}
+.rt-chart__pt.rt-s2 {
   fill: var(--rt-s2);
 }
 .rt-chart__y,

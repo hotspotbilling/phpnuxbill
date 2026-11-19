@@ -16,11 +16,11 @@
         <form id="site-search" class="ls-bar" method="post" action="{Text::url('routers/list/')}">
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
-                <input type="search" autocomplete="off" name="name" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
+                <input type="search" autocomplete="off" name="name" value="{$name|default:''|escape}" placeholder="{Lang::T('Search by Name')}..." aria-label="{Lang::T('Search by Name')}">
             </div>
             {if $has_site && $sites}
             <label class="ls-field">
-                <select name="site" aria-label="{Lang::T('Site / Group')}" onchange="this.form.submit()">
+                <select name="site" aria-label="{Lang::T('Site / Group')}">
                     <option value="">{Lang::T('All sites')}</option>
                     {foreach $sites as $st}<option value="{$st|escape}" {if (string) $site === (string) $st}selected{/if}>{$st|escape}</option>{/foreach}
                 </select>
@@ -37,7 +37,7 @@
             <span class="rt-bulk-btns">
             <button type="button" class="ls-btn" data-rt-bulk="enable" onclick="this.form.op.value = 'enable'; return ask(this, '{Lang::T('Enable the selected routers?')|escape:'javascript'}')"><i class="fa fa-toggle-on" aria-hidden="true"></i> {Lang::T('Enable')}</button>
             <button type="button" class="ls-btn" data-rt-bulk="disable" onclick="this.form.op.value = 'disable'; return ask(this, '{Lang::T('Disable the selected routers? PHPNuxBill stops using them until they are enabled again.')|escape:'javascript'}')"><i class="fa fa-toggle-off" aria-hidden="true"></i> {Lang::T('Disable')}</button>
-            {if $health_on}<button type="button" class="ls-btn" id="rtCheckNow"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Check now')}</button>{/if}
+            {if $health_on}<button type="button" class="ls-btn" id="rtCheckNow" disabled><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Check now')}</button>{/if}
             </span>
         </form>
 
@@ -79,12 +79,12 @@
                         <td data-label="{Lang::T('Customers')}" class="rt-cust"><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=on')}" title="{Lang::T('Active customers on this router')}"><b>{$rt_use['active']}</b> {Lang::T('active')}</a><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=off')}" class="ls-dim" title="{Lang::T('Expired customers on this router')}">{$rt_use['expired']|default:0} {Lang::T('expired')}</a></td>
                         <td data-label="{Lang::T('Status')}">{if $ds['enabled'] == 1}<span class="ls-pill ls-pill--active">{Lang::T('Enabled')}</span>{else}<span class="ls-pill ls-pill--banned">{Lang::T('Disabled')}</span>{/if}</td>
                         <td data-label="ID" class="ls-dim">{$ds['id']}</td>
-                        <td class="ls-end"><div class="ls-row-actions">{if $rt_tools}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon rt-more" data-rt-more="{$ds['id']}" aria-expanded="false" aria-controls="rt-detail-{$ds['id']}" aria-label="{Lang::T('Health details')}" title="{Lang::T('Health details')}"><i class="fa fa-chevron-down" aria-hidden="true"></i></button>{/if}<a href="{Text::url('routers/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a>{if $rt_use['plans'] > 0 || $rt_use['active'] > 0}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" disabled aria-label="{Lang::T('Delete')}" title="{Lang::T('In use by')} {$rt_use['plans']} {Lang::T('plans')}, {$rt_use['active']} {Lang::T('active customers')}. {Lang::T('Move them to another router first, or disable this router instead.')}"><i class="fa fa-trash" aria-hidden="true"></i></button>{else}<form method="post" action="{Text::url('routers/delete/', $ds['id'])}" class="rt-del"><input type="hidden" name="csrf_token" value="{$csrf_token}"><button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')|escape:'javascript'} {$ds['name']|escape:'javascript'|escape}?')"><i class="fa fa-trash" aria-hidden="true"></i></button></form>{/if}</div></td>
+                        <td class="ls-end"><div class="ls-row-actions">{if $rt_tools}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon rt-more" data-rt-more="{$ds['id']}" aria-expanded="false" aria-controls="rt-detail-{$ds['id']}" aria-label="{Lang::T('Health details')}" title="{Lang::T('Health details')}"><i class="fa fa-chevron-down" aria-hidden="true"></i></button>{/if}<a href="{Text::url('routers/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a>{if $rt_use['plans'] > 0 || $rt_use['active'] > 0}{$rt_why = "{Lang::T('In use by')} {$rt_use['plans']} {Lang::T('plans')}, {$rt_use['active']} {Lang::T('active customers')}. {Lang::T('Move them to another router first, or disable this router instead.')}"}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" disabled aria-label="{Lang::T('Delete')}" aria-describedby="rt-why-{$ds['id']}" title="{$rt_why|escape}"><i class="fa fa-trash" aria-hidden="true"></i></button><span class="rt-why" id="rt-why-{$ds['id']}" tabindex="0" role="note" title="{$rt_why|escape}"><i class="fa fa-info-circle" aria-hidden="true"></i><span class="sr-only">{$rt_why|escape}</span></span>{else}<form method="post" action="{Text::url('routers/delete/', $ds['id'])}" class="rt-del"><input type="hidden" name="csrf_token" value="{$csrf_token}"><button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')|escape:'javascript'} {$ds['name']|escape:'javascript'|escape}?')"><i class="fa fa-trash" aria-hidden="true"></i></button></form>{/if}</div></td>
                     </tr>
                     {if $rt_tools}
                     <tr class="rt-detail" id="rt-detail-{$ds['id']}" hidden><td colspan="{$rt_cols}">
                         <div class="rt-tabs" role="tablist" aria-label="{$ds['name']|escape}" data-rt-tabs="{$ds['id']}">
-                            {if $rt_can}<button type="button" role="tab" class="rt-tab" data-rt-tab="live" id="rt-tab-{$ds['id']}-live" aria-controls="rt-pane-{$ds['id']}-live" aria-selected="false" tabindex="-1"><i class="fa fa-line-chart" aria-hidden="true"></i> {Lang::T('Live')}</button>{/if}
+                            {if $rt_can}<button type="button" role="tab" class="rt-tab" data-rt-tab="live" id="rt-tab-{$ds['id']}-live" aria-controls="rt-pane-{$ds['id']}-live" aria-selected="false" tabindex="-1" disabled><i class="fa fa-line-chart" aria-hidden="true"></i> {Lang::T('Live')}</button>{/if}
                             <button type="button" role="tab" class="rt-tab" data-rt-tab="history" id="rt-tab-{$ds['id']}-history" aria-controls="rt-pane-{$ds['id']}-history" aria-selected="false" tabindex="-1"><i class="fa fa-history" aria-hidden="true"></i> {Lang::T('History')}</button>
                             <button type="button" role="tab" class="rt-tab" data-rt-tab="users" id="rt-tab-{$ds['id']}-users" aria-controls="rt-pane-{$ds['id']}-users" aria-selected="false" tabindex="-1"><i class="fa fa-users" aria-hidden="true"></i> {Lang::T('Users online')}</button>
                             <button type="button" role="tab" class="rt-tab" data-rt-tab="ifaces" id="rt-tab-{$ds['id']}-ifaces" aria-controls="rt-pane-{$ds['id']}-ifaces" aria-selected="false" tabindex="-1"><i class="fa fa-plug" aria-hidden="true"></i> {Lang::T('Interfaces')}</button>
@@ -145,7 +145,8 @@
             if (check) {
                 var can = 0;
                 boxes().forEach(function (b) { if (b.checked && document.querySelector('tr[data-rt-id="' + b.value + '"]')) can++; });
-                check.disabled = can === 0;
+                // and only once the live-health script is running (it enables the button itself when it starts)
+                check.disabled = can === 0 || !window.rtHealthReady;
                 check.title = can ? '' : '{Lang::T('None of the selected routers can be checked: they are disabled or have no address.')|escape:'javascript'}';
             }
             all.checked = total > 0 && c === total;
@@ -216,7 +217,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.9"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.10"></script>
 
 {if $health_on}
 <script>
@@ -252,8 +253,15 @@
             measuring: '{Lang::T('Measuring, the graph starts with the next readings')|escape:'javascript'}'
         }
     };
+    // the live-health script did not load: the Health cells say so, and the Live tab and Check now stay off (History and the
+    // other tabs do not need it)
+    window.rtHealthFailed = function () {
+        document.querySelectorAll('.rt-health .rt-skel').forEach(function (s) {
+            s.outerHTML = '<span class="ls-dim">{Lang::T('Unavailable')|escape:'javascript'}</span>';
+        });
+    };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.3"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.5" onerror="window.rtHealthFailed()"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

@@ -29,7 +29,7 @@ class Rtl
     const OWN_RTL = ['sweetalert2', 'select2'];
 
     /** Bumped when the mirroring changes, so the copies already made are made again */
-    const VERSION = 3;
+    const VERSION = 4;
 
     /** The language code (ar, en, ...) of the language in use, from system/lan/country.json */
     public static function iso()
@@ -154,7 +154,7 @@ class Rtl
         $out = $dir . '/' . $name;
         $mtime = filemtime($path);
         $stamp = $mtime . '.' . self::VERSION;
-        if (!is_file($out) || filemtime($out) < $mtime || @file_get_contents($out, false, null, 0, 64) !== self::stampLine($stamp)) {
+        if (!is_file($out) || filemtime($out) < $mtime || @file_get_contents($out, false, null, 0, strlen(self::stampLine($stamp))) !== self::stampLine($stamp)) {
             if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
                 return null;
             }
@@ -437,16 +437,38 @@ class Rtl
             }
             return $value;
         }
-        return preg_replace_callback('/\b(translate|translateX|translate3d)\(\s*([^,)]+)/i', function ($m) {
-            return $m[1] . '(' . self::negate(trim($m[2]));
-        }, $value);
+        // the first argument of each translate function, read with its brackets balanced (it can be a calc() of its own)
+        $out = '';
+        $pos = 0;
+        while (preg_match('/\b(translate|translateX|translate3d)\(\s*/i', $value, $m, PREG_OFFSET_CAPTURE, $pos)) {
+            $start = $m[0][1] + strlen($m[0][0]);
+            $depth = 0;
+            $end = $start;
+            for ($len = strlen($value); $end < $len; $end++) {
+                $ch = $value[$end];
+                if ($ch === '(') {
+                    $depth++;
+                } elseif ($ch === ')' || $ch === ',') {
+                    if ($depth === 0) {
+                        break;
+                    }
+                    if ($ch === ')') {
+                        $depth--;
+                    }
+                }
+            }
+            $arg = substr($value, $start, $end - $start);
+            $out .= substr($value, $pos, $start - $pos) . self::negate($arg) . (preg_match('/\s+$/', $arg, $ws) ? $ws[0] : '');
+            $pos = $end;
+        }
+        return $out . substr($value, $pos);
     }
 
     private static function negate($v)
     {
         $v = trim($v);
-        if (preg_match('/^calc\(/i', $v)) {
-            return 'calc(-1 * ' . substr($v, 5);
+        if (preg_match('/^calc\((.*)\)$/is', $v, $m)) {
+            return 'calc(-1 * (' . $m[1] . '))'; // the whole expression, its own grouping kept
         }
         if (preg_match('/^-?0+(\.0+)?([a-z%]*)$/i', $v)) {
             return $v;
