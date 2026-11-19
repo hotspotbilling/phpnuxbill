@@ -413,6 +413,12 @@ class Stream
                     usleep(3000);
                     continue 2;
                 }
+                // PHPNuxBill: a read that ran out of the socket's time limit stops here (the "failed while receiving" below)
+                // instead of trying again for ever while the other end stays connected but silent
+                $meta = stream_get_meta_data($this->stream);
+                if (!empty($meta['timed_out'])) {
+                    break;
+                }
             }
             throw $this->createException(
                 "Failed while receiving {$what}",
@@ -467,6 +473,12 @@ class Stream
                 } elseif (!$this->isBlocking && !(false === $fragment)) {
                     usleep(3000);
                     continue 2;
+                }
+                // PHPNuxBill: a read that ran out of the socket's time limit stops here (the "failed while receiving" below)
+                // instead of trying again for ever while the other end stays connected but silent
+                $meta = stream_get_meta_data($this->stream);
+                if (!empty($meta['timed_out'])) {
+                    break;
                 }
             }
 

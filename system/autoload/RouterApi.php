@@ -60,7 +60,15 @@ class RouterApi
         $c->sendAsync($req);
         $left = $deadline - microtime(true);
         if ($left > 0) {
-            $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
+            // every read inside the reply (not only the wait for it to start) ends by the deadline
+            if (method_exists($c, 'readTimeout')) {
+                $c->readTimeout($left);
+            }
+            try {
+                $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
+            } catch (\PEAR2\Net\Transmitter\SocketException $e) {
+                // a read that ran out of time mid-reply: the reply is incomplete, handled as not answered below
+            }
         }
         // (isRequestActive() is no test of being finished: it stays true while a finished answer waits to be collected)
         $res = $c->extractNewResponses($tag);
@@ -173,6 +181,9 @@ class RouterApi
                 $log[] = $r['name'] . ': ' . $name . '.backup';
             } catch (Throwable $e) {
                 $log[] = $r['name'] . ': ' . $e->getMessage();
+            } finally {
+                // done with this router either way: drop the connection without the library's goodbye, which can wait for ever
+                method_exists($c, 'abort') ? $c->abort() : null;
             }
         }
         $d = ORM::for_table('tbl_appconfig')->where('setting', 'router_backup_last')->find_one() ?: ORM::for_table('tbl_appconfig')->create();

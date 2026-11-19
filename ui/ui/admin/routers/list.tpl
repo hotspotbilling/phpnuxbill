@@ -22,7 +22,7 @@
             <label class="ls-field">
                 <select name="site" aria-label="{Lang::T('Site / Group')}" onchange="this.form.submit()">
                     <option value="">{Lang::T('All sites')}</option>
-                    {foreach $sites as $st}<option value="{$st|escape}" {if $site == $st}selected{/if}>{$st|escape}</option>{/foreach}
+                    {foreach $sites as $st}<option value="{$st|escape}" {if (string) $site === (string) $st}selected{/if}>{$st|escape}</option>{/foreach}
                 </select>
             </label>
             {/if}
@@ -62,7 +62,7 @@
                 {$rt_live = $health_on}
                 <tbody>
                     {foreach $d as $ds}
-                    {$rt_use = $usage[$ds['name']]|default:['plans' => 0, 'active' => 0, 'expired' => 0]}
+                    {$rt_use = $usage[$ds['id']]|default:['plans' => 0, 'active' => 0, 'expired' => 0]}
                     {$rt_can = $rt_live && $ds['enabled'] == 1 && $ds['ip_address'] != ''}
                     {* the SuperAdmin's router actions do not depend on live health: they get the details row even when it is off *}
                     {$rt_act = $_admin['user_type'] == 'SuperAdmin' && $ds['enabled'] == 1 && $ds['ip_address'] != ''}
@@ -84,19 +84,19 @@
                     {if $rt_tools}
                     <tr class="rt-detail" id="rt-detail-{$ds['id']}" hidden><td colspan="{$rt_cols}">
                         <div class="rt-tabs" role="tablist" aria-label="{$ds['name']|escape}" data-rt-tabs="{$ds['id']}">
-                            {if $rt_can}<button type="button" role="tab" class="rt-tab" data-rt-tab="live"><i class="fa fa-line-chart" aria-hidden="true"></i> {Lang::T('Live')}</button>{/if}
-                            <button type="button" role="tab" class="rt-tab" data-rt-tab="history"><i class="fa fa-history" aria-hidden="true"></i> {Lang::T('History')}</button>
-                            <button type="button" role="tab" class="rt-tab" data-rt-tab="users"><i class="fa fa-users" aria-hidden="true"></i> {Lang::T('Users online')}</button>
-                            <button type="button" role="tab" class="rt-tab" data-rt-tab="ifaces"><i class="fa fa-plug" aria-hidden="true"></i> {Lang::T('Interfaces')}</button>
-                            <button type="button" role="tab" class="rt-tab" data-rt-tab="check"><i class="fa fa-stethoscope" aria-hidden="true"></i> {Lang::T('Setup check')}</button>
-                            <button type="button" role="tab" class="rt-tab" data-rt-tab="updates"><i class="fa fa-cloud-download" aria-hidden="true"></i> {Lang::T('Updates & backups')}</button>
+                            {if $rt_can}<button type="button" role="tab" class="rt-tab" data-rt-tab="live" id="rt-tab-{$ds['id']}-live" aria-controls="rt-pane-{$ds['id']}-live" aria-selected="false" tabindex="-1"><i class="fa fa-line-chart" aria-hidden="true"></i> {Lang::T('Live')}</button>{/if}
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="history" id="rt-tab-{$ds['id']}-history" aria-controls="rt-pane-{$ds['id']}-history" aria-selected="false" tabindex="-1"><i class="fa fa-history" aria-hidden="true"></i> {Lang::T('History')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="users" id="rt-tab-{$ds['id']}-users" aria-controls="rt-pane-{$ds['id']}-users" aria-selected="false" tabindex="-1"><i class="fa fa-users" aria-hidden="true"></i> {Lang::T('Users online')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="ifaces" id="rt-tab-{$ds['id']}-ifaces" aria-controls="rt-pane-{$ds['id']}-ifaces" aria-selected="false" tabindex="-1"><i class="fa fa-plug" aria-hidden="true"></i> {Lang::T('Interfaces')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="check" id="rt-tab-{$ds['id']}-check" aria-controls="rt-pane-{$ds['id']}-check" aria-selected="false" tabindex="-1"><i class="fa fa-stethoscope" aria-hidden="true"></i> {Lang::T('Setup check')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="updates" id="rt-tab-{$ds['id']}-updates" aria-controls="rt-pane-{$ds['id']}-updates" aria-selected="false" tabindex="-1"><i class="fa fa-cloud-download" aria-hidden="true"></i> {Lang::T('Updates & backups')}</button>
                         </div>
-                        {if $rt_can}<div class="rt-pane" role="tabpanel" data-rt-pane="live"><div class="rt-panel" data-rt-panel="{$ds['id']}"></div></div>{/if}
-                        <div class="rt-pane" role="tabpanel" data-rt-pane="history" hidden></div>
-                        <div class="rt-pane" role="tabpanel" data-rt-pane="users" hidden></div>
-                        <div class="rt-pane" role="tabpanel" data-rt-pane="ifaces" hidden></div>
-                        <div class="rt-pane" role="tabpanel" data-rt-pane="check" hidden></div>
-                        <div class="rt-pane" role="tabpanel" data-rt-pane="updates" hidden></div>
+                        {if $rt_can}<div class="rt-pane" role="tabpanel" data-rt-pane="live" id="rt-pane-{$ds['id']}-live" aria-labelledby="rt-tab-{$ds['id']}-live" tabindex="0"><div class="rt-panel" data-rt-panel="{$ds['id']}"></div></div>{/if}
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="history" id="rt-pane-{$ds['id']}-history" aria-labelledby="rt-tab-{$ds['id']}-history" tabindex="0" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="users" id="rt-pane-{$ds['id']}-users" aria-labelledby="rt-tab-{$ds['id']}-users" tabindex="0" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="ifaces" id="rt-pane-{$ds['id']}-ifaces" aria-labelledby="rt-tab-{$ds['id']}-ifaces" tabindex="0" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="check" id="rt-pane-{$ds['id']}-check" aria-labelledby="rt-tab-{$ds['id']}-check" tabindex="0" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="updates" id="rt-pane-{$ds['id']}-updates" aria-labelledby="rt-tab-{$ds['id']}-updates" tabindex="0" hidden></div>
                         {if $rt_act}
                         <div class="rt-actions">
                             <span class="rt-actions__label">{Lang::T('On this router')}</span>
@@ -139,6 +139,15 @@
             boxes().forEach(function (b) { total++; if (b.checked) c++; });
             n.textContent = c;
             bar.hidden = c === 0;
+            // Check now reads live health, which a disabled router (or one without an address) does not have: off when none of
+            // the ticked ones can be checked (they can still be enabled)
+            var check = document.getElementById('rtCheckNow');
+            if (check) {
+                var can = 0;
+                boxes().forEach(function (b) { if (b.checked && document.querySelector('tr[data-rt-id="' + b.value + '"]')) can++; });
+                check.disabled = can === 0;
+                check.title = can ? '' : '{Lang::T('None of the selected routers can be checked: they are disabled or have no address.')|escape:'javascript'}';
+            }
             all.checked = total > 0 && c === total;
             all.indeterminate = c > 0 && c < total;
         }
@@ -200,12 +209,13 @@
             search: '{Lang::T('Search')|escape:'javascript'}', noMatch: '{Lang::T('Nothing matches')|escape:'javascript'}', of: '{Lang::T('of')|escape:'javascript'}',
             prev: '{Lang::T('Prev')|escape:'javascript'}', next: '{Lang::T('Next')|escape:'javascript'}', shown: '{Lang::T('shown')|escape:'javascript'}',
             online: '{Lang::T('online')|escape:'javascript'}', all: '{Lang::T('All')|escape:'javascript'}', interfaces: '{Lang::T('interfaces')|escape:'javascript'}',
+            noIfaces: '{Lang::T('No interfaces found')|escape:'javascript'}', readErr: '{Lang::T('Could not read')|escape:'javascript'}',
             showDynamic: '{Lang::T('Show dynamic')|escape:'javascript'}', capped: '{Lang::T('Only the first %s are listed.')|escape:'javascript'}',
-                        downloadHow: '{Lang::T('Downloads use the FTP service of the router. Without it, take the file from Files in Winbox.')|escape:'javascript'}'
+            downloadHow: '{Lang::T('To keep a copy elsewhere, download it from Files in Winbox or WebFig.')|escape:'javascript'}'
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.5"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.6"></script>
 
 {if $health_on}
 <script>
@@ -242,7 +252,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.1"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.2"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

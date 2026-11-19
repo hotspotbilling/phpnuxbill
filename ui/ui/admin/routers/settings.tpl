@@ -81,15 +81,14 @@
                 </header>
                 <div class="mc-rows nf__switches">
                     {rt_switch key='router_backup' def='0' icon='fa-clock' title=Lang::T('Nightly backups')
-                        hint=Lang::T('The cron saves phpnuxbill-auto-date.backup on each enabled router. Backups you make yourself are never removed.')}
+                        hint=Lang::T('The cron saves phpnuxbill-auto-YYYYMMDD.backup on each enabled router. Files named that way count as nightly backups and are removed when older than the number below, so do not use the name for your own; other backups are never removed.')}
                 </div>
                 <div class="st-card-body">
                     <div class="nf__field">
                         <label class="nf__label" for="router_backup_keep">{Lang::T('Nightly backups to keep on each router')}</label>
                         <input type="number" class="form-control" id="router_backup_keep" name="router_backup_keep" min="1" max="30" step="1"
                             value="{$_c['router_backup_keep']|default:'7'|escape}">
-                        <p class="nf__hint">{Lang::T('Older nightly backups are removed from the router.')}
-                            {if $ftp_ok}{Lang::T('A SuperAdmin can download them from the Updates & backups tab when the router allows FTP.')}{else}{Lang::T('Downloading them needs the PHP ftp extension, which this server does not have: take them from Files in Winbox.')}{/if}</p>
+                        <p class="nf__hint">{Lang::T('Older nightly backups are removed from the router. To keep a copy elsewhere, download it from Files in Winbox or WebFig.')}</p>
                     </div>
                 </div>
             </section>

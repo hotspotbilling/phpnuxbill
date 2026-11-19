@@ -27,40 +27,30 @@ $routelyVpn = function () {
     return function_exists('routely_vpn_core_info') ? routely_vpn_core_info() : ['installed' => function_exists('routely'), 'devices' => 0, 'addresses' => []];
 };
 
-// How many plans and active customers use each router (by name): delete refuses a router that is still in use, and the list says so
-$routerUsage = function (array $names) {
+// How many plans and active customers use each router: delete refuses a router that is still in use, and the list says so.
+// Counted by the database itself against each router's row (plans and recharges name their router), so the comparison follows
+// its own rules for names (case, trailing spaces, accents), and the result is keyed by router id.
+$routerUsage = function (array $ids) {
     $use = [];
-    $names = array_values(array_unique(array_filter(array_map('strval', $names), 'strlen')));
-    foreach ($names as $n) {
-        $use[$n] = ['plans' => 0, 'active' => 0, 'expired' => 0];
+    $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+    foreach ($ids as $id) {
+        $use[$id] = ['plans' => 0, 'active' => 0, 'expired' => 0];
     }
-    if (!$names) {
+    if (!$ids) {
         return $use;
     }
-    $in = implode(',', array_fill(0, count($names), '?'));
+    $in = implode(',', array_fill(0, count($ids), '?'));
     $db = ORM::getDb();
-    // MySQL matches names without regard to case or trailing spaces, so a plan saved as "main office" belongs to "Main Office":
-    // each count is added to the router's own name, whatever spelling the plan used
-    $canon = [];
-    foreach ($names as $n) {
-        $canon[mb_strtolower(rtrim($n))] = $n;
-    }
-    $owner = function ($v) use ($canon) {
-        return $canon[mb_strtolower(rtrim((string) $v))] ?? null;
-    };
-    $st = $db->prepare("SELECT routers, COUNT(*) FROM tbl_plans WHERE routers IN ($in) GROUP BY routers");
-    $st->execute($names);
+    $st = $db->prepare("SELECT r.id, COUNT(p.id) FROM tbl_routers r JOIN tbl_plans p ON p.routers = r.name WHERE r.id IN ($in) GROUP BY r.id");
+    $st->execute($ids);
     foreach ($st->fetchAll(PDO::FETCH_NUM) as $r) {
-        if (($n = $owner($r[0])) !== null) {
-            $use[$n]['plans'] += (int) $r[1];
-        }
+        $use[(int) $r[0]]['plans'] = (int) $r[1];
     }
-    $st = $db->prepare("SELECT routers, status, COUNT(*) FROM tbl_user_recharges WHERE status IN ('on', 'off') AND routers IN ($in) GROUP BY routers, status");
-    $st->execute($names);
+    $st = $db->prepare("SELECT r.id, u.status, COUNT(u.id) FROM tbl_routers r JOIN tbl_user_recharges u ON u.routers = r.name AND u.status IN ('on', 'off')
+        WHERE r.id IN ($in) GROUP BY r.id, u.status");
+    $st->execute($ids);
     foreach ($st->fetchAll(PDO::FETCH_NUM) as $r) {
-        if (($n = $owner($r[0])) !== null) {
-            $use[$n][$r[1] === 'on' ? 'active' : 'expired'] += (int) $r[2];
-        }
+        $use[(int) $r[0]][$r[1] === 'on' ? 'active' : 'expired'] = (int) $r[2];
     }
     return $use;
 };
@@ -101,6 +91,19 @@ $splitAddress = function ($addr) {
 $validPort = function ($port) {
     $port = trim((string) $port);
     return $port === '' || (ctype_digit($port) && (int) $port >= 1 && (int) $port <= 65535);
+};
+// the port that will be used, after the port field has replaced any typed into the address: one written into the address
+// ("host:99999", "host:abc", "[v6]:0") must be valid too. A host name or IPv6 address without a port is fine.
+$validAddressPort = function ($address) use ($validPort) {
+    $address = trim((string) $address);
+    if (preg_match('/^\[[^\]]+\](?::(.*))?$/', $address, $m)) {
+        return !isset($m[1]) || ($m[1] !== '' && $validPort($m[1]));
+    }
+    if (substr_count($address, ':') === 1) {
+        $p = explode(':', $address)[1];
+        return $p !== '' && $validPort($p);
+    }
+    return true;
 };
 
 // The "site" column (a group for filtering many routers) arrives with the 2026.11.18 update: until the database has it, the field
@@ -291,7 +294,6 @@ switch ($action) {
         }
         $ui->assign('_title', Lang::T('Router Settings'));
         $ui->assign('history_ready', RouterMonitor::ready());
-        $ui->assign('ftp_ok', function_exists('ftp_connect'));
         $ui->display('admin/routers/settings.tpl');
         break;
 
@@ -336,7 +338,7 @@ switch ($action) {
             r2(getUrl('routers/list'), 'e', Lang::T('Data Not Found'));
         }
         // plans and active customers point at a router by its name; deleting it would leave them pointing at nothing
-        $use = $routerUsage([$d['name']])[$d['name']] ?? ['plans' => 0, 'active' => 0];
+        $use = $routerUsage([$d['id']])[(int) $d['id']] ?? ['plans' => 0, 'active' => 0];
         if ($use['plans'] > 0 || $use['active'] > 0) {
             r2(getUrl('routers/list'), 'e', Lang::T('This router is still in use') . ': ' . htmlspecialchars($d['name']) . ' (' . $use['plans'] . ' ' . Lang::T('plans') . ', '
                 . $use['active'] . ' ' . Lang::T('active customers') . '). ' . Lang::T('Move them to another router first, or disable this router instead.'));
@@ -354,11 +356,11 @@ switch ($action) {
             echo json_encode(['ok' => false, 'error' => Lang::T('Invalid or Expired CSRF Token') . '. ' . Lang::T('Reload the page and try again.')]);
             exit;
         }
-        if (!$validPort(_post('api_port'))) {
+        $ip = $joinAddress(_post('ip_address'), _post('api_port'));
+        if (!$validPort(_post('api_port')) || !$validAddressPort($ip)) {
             echo json_encode(['ok' => false, 'error' => Lang::T('The API port must be a number from 1 to 65535')]);
             exit;
         }
-        $ip = $joinAddress(_post('ip_address'), _post('api_port'));
         $user = _post('username');
         $pass = _post('password');
         if ($ip === '' || $user === '') {
@@ -574,13 +576,19 @@ switch ($action) {
         try {
             if ($action === 'sessions') {
                 // who is connected now, hotspot and PPPoE, each matched to a customer when the name is one
+                // a router without the hotspot (or PPP) package has nobody there; any other refusal (no permission) is said, so
+                // it is not mistaken for nobody being online
                 $hs = [];
                 $pp = [];
+                $readErrors = [];
                 try {
                     $hs = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime', 'bytes-in', 'bytes-out', 'server'], $until);
                 } catch (Throwable $e) {
                     if ($e->getCode() === 408) {
                         throw $e;
+                    }
+                    if (stripos($e->getMessage(), 'no such command') === false) {
+                        $readErrors[] = 'Hotspot: ' . $e->getMessage();
                     }
                 }
                 try {
@@ -588,6 +596,9 @@ switch ($action) {
                 } catch (Throwable $e) {
                     if ($e->getCode() === 408) {
                         throw $e;
+                    }
+                    if (stripos($e->getMessage(), 'no such command') === false) {
+                        $readErrors[] = 'PPPoE: ' . $e->getMessage();
                     }
                 }
                 // up to 5,000 of each, searched and paged in the page; the totals say when a list was cut
@@ -609,7 +620,8 @@ switch ($action) {
                         }
                     }
                 }
-                $out = ['ok' => true, 'hotspot' => [], 'pppoe' => [], 'total_hotspot' => $totalHs, 'total_pppoe' => $totalPp, 'customer_url' => getUrl('customers/view/')];
+                $out = ['ok' => true, 'hotspot' => [], 'pppoe' => [], 'total_hotspot' => $totalHs, 'total_pppoe' => $totalPp, 'customer_url' => getUrl('customers/view/'),
+                    'read_errors' => $readErrors];
                 foreach ($hs as $h) {
                     $out['hotspot'][] = ['sid' => $h['.id'], 'user' => $h['user'], 'address' => $h['address'], 'mac' => $h['mac-address'], 'uptime' => $rosUptime($h['uptime']),
                         'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $who[$h['user']] ?? null];
@@ -711,10 +723,11 @@ switch ($action) {
                     $host = strtolower((string) parse_url(APP_URL, PHP_URL_HOST));
                     $found = false;
                     try {
-                        foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/print', ['dst-host', 'disabled'], $until) as $w) {
+                        // the rules are tried in order and the first that matches decides: a matching "deny" is no access
+                        foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/print', ['dst-host', 'disabled', 'action'], $until) as $w) {
                             $pat = strtolower((string) $w['dst-host']);
                             if ($w['disabled'] !== 'true' && $pat !== '' && ($pat === $host || fnmatch($pat, $host) || ($pat[0] === '*' && substr($host, -strlen(ltrim($pat, '*'))) === ltrim($pat, '*')))) {
-                                $found = true;
+                                $found = strtolower((string) $w['action']) !== 'deny';
                                 break;
                             }
                         }
@@ -778,13 +791,14 @@ switch ($action) {
                 // RouterOS and firmware versions. "Check for updates" (POST) asks MikroTik's server first; nothing is installed.
                 if ($posting) {
                     try {
-                        RouterApi::run($c, '/system/package/update/check-for-updates', [], microtime(true) + 25);
+                        RouterApi::run($c, '/system/package/update/check-for-updates', [], microtime(true) + 20);
                     } catch (Throwable $e) {
                         if ($e->getCode() === 408) {
                             throw $e;
                         }
                         $checkErr = $e->getMessage();
                     }
+                    $until = microtime(true) + 5; // the check used its own time: the versions are read after it, within the budget
                 }
                 $u = RouterApi::rows($c, '/system/package/update/print', ['channel', 'installed-version', 'latest-version', 'status'], $until);
                 $fw = [];
@@ -816,11 +830,19 @@ switch ($action) {
                             'auto' => (bool) preg_match('/(^|\/)phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name'])];
                     }
                 }
-                usort($items, function ($a, $b) {
-                    return strcmp((string) $b['name'], (string) $a['name']);
+                // newest first by creation time ("2026-11-19 03:00:01" on RouterOS 7, "nov/19/2026 03:00:01" on 6), then by name
+                $when = function ($t) {
+                    $t = (string) $t;
+                    if (preg_match('/^([a-z]{3})\/(\d{2})\/(\d{4}) (\d{2}:\d{2}:\d{2})$/i', $t, $m)) {
+                        $t = $m[3] . '-' . $m[1] . '-' . $m[2] . ' ' . $m[4];
+                    }
+                    $ts = strtotime($t);
+                    return $ts === false ? 0 : $ts;
+                };
+                usort($items, function ($a, $b) use ($when) {
+                    return [$when($b['created']), (string) $b['name']] <=> [$when($a['created']), (string) $a['name']];
                 });
-                $say(['ok' => true, 'items' => array_slice($items, 0, 100), 'can_download' => $admin['user_type'] === 'SuperAdmin' && function_exists('ftp_connect'),
-                    'nightly' => ($config['router_backup'] ?? '0') === '1']);
+                $say(['ok' => true, 'items' => array_slice($items, 0, 100), 'nightly' => ($config['router_backup'] ?? '0') === '1']);
             }
         } catch (Throwable $e) {
             $say(['ok' => false, 'error' => $e->getMessage()]);
@@ -846,46 +868,10 @@ switch ($action) {
         exit;
 
     case 'backup-download':
-        // a backup file from the router, through its FTP service (the RouterOS API cannot hand files over), SuperAdmin only
-        if ($admin['user_type'] !== 'SuperAdmin') {
-            r2(getUrl('routers/list'), 'e', Lang::T('Only a SuperAdmin can do this'));
-        }
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Csrf::check(_post('csrf_token'))) {
-            r2(getUrl('routers/list'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
-        }
-        $d = ORM::for_table('tbl_routers')->find_one((int) ($routes['2'] ?? 0));
-        $fname = _post('name');
-        if (!$d || !preg_match('/^[A-Za-z0-9._\/-]{1,120}\.backup$/', $fname) || strpos($fname, '..') !== false) {
-            r2(getUrl('routers/list'), 'e', Lang::T('Data Not Found'));
-        }
-        if (!function_exists('ftp_connect')) {
-            r2(getUrl('routers/list'), 'e', Lang::T('Downloading needs the PHP ftp extension. Ask your host to enable it, or download the file from Files in Winbox.'));
-        }
-        [$host] = RouterAddress::split($d['ip_address']);
-        $ftp = @ftp_connect($host, 21, 10);
-        if (!$ftp || !@ftp_login($ftp, $d['username'], $d['password'])) {
-            $ftp && @ftp_close($ftp);
-            r2(getUrl('routers/list'), 'e', htmlspecialchars($d['name']) . ': ' . Lang::T('could not sign in to the router\'s FTP service. Turn it on in IP > Services (ftp, port 21) and give the user\'s group the ftp policy. A router reached through a VPN port forward cannot be used this way: download it from Files in Winbox.'));
-        }
-        @ftp_set_option($ftp, FTP_TIMEOUT_SEC, 30);
-        ftp_pasv($ftp, true);
-        $tmp = tmpfile();
-        $okDl = @ftp_fget($ftp, $tmp, $fname, FTP_BINARY);
-        @ftp_close($ftp);
-        if (!$okDl) {
-            fclose($tmp);
-            r2(getUrl('routers/list'), 'e', htmlspecialchars($d['name'] . ': ' . Lang::T('the file could not be fetched') . ' (' . $fname . ')'));
-        }
-        _log('[' . $admin['username'] . ']: Router backup downloaded from ' . $d['name'] . ': ' . $fname, $admin['user_type'], $admin['id']);
-        $size = ftell($tmp);
-        rewind($tmp);
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . preg_replace('/[^A-Za-z0-9._-]/', '_', $d['name'] . '-' . basename($fname)) . '"');
-        header('Content-Length: ' . $size);
-        header('Cache-Control: no-store');
-        fpassthru($tmp);
-        fclose($tmp);
-        exit;
+        // removed: the router's FTP service sends its login and the backup unencrypted, and no encrypted way (SFTP) is
+        // available here. Backups are taken from the router itself (Files in Winbox or WebFig).
+        r2(getUrl('routers/list'), 'e', Lang::T('Download backups from Files in Winbox or WebFig.'));
+        break;
 
     case 'health':
         // the live figures for one router on the list, kept for 60 seconds so reloading or several admins do not ask it again.
@@ -914,7 +900,7 @@ switch ($action) {
             $cached = json_decode((string) @file_get_contents($file), true);
             // a live reading is shared for under a second (several admins on one router), timed by when it was read, since the
             // file time only counts whole seconds
-            $fresh = !$live || (isset($cached['at']) && microtime(true) - (float) $cached['at'] < 0.9);
+            $fresh = !$live || (isset($cached['done']) && microtime(true) - (float) $cached['done'] < 0.9);
             if (is_array($cached) && ($cached['key'] ?? '') === $key && $fresh) {
                 unset($cached['key']);
                 $cached['age'] = time() - filemtime($file);
@@ -937,6 +923,7 @@ switch ($action) {
         }
         $out['checked'] = date('Y-m-d H:i:s');
         $out['observed'] = round($observed, 3);
+        $out['done'] = round(microtime(true), 3); // when this answer was ready, failures included: what the live sharing is timed by
         if (!is_dir($dir)) {
             @mkdir($dir, 0755, true);
         }
@@ -947,7 +934,9 @@ switch ($action) {
             // read and write under one lock: when two readings of the same router finish together, the newer one stays
             if (flock($fh, LOCK_EX)) {
                 $old = json_decode((string) stream_get_contents($fh), true);
-                $newer = is_array($old) && ($old['key'] ?? '') === $key && isset($old['observed']) && (float) $old['observed'] > $observed;
+                // whichever began last stays, whatever login it used: a slow check with old details cannot replace a newer one
+                // (an entry for other details is still never served, as the key is checked when reading)
+                $newer = is_array($old) && isset($old['observed']) && (float) $old['observed'] > $observed;
                 if (!$newer) {
                     ftruncate($fh, 0);
                     rewind($fh);
@@ -975,7 +964,7 @@ switch ($action) {
         $site = mb_substr(_post('site'), 0, 32);
 
         $msg = '';
-        if (!$validPort(_post('api_port'))) {
+        if (!$validPort(_post('api_port')) || !$validAddressPort($ip_address)) {
             $msg .= Lang::T('The API port must be a number from 1 to 65535') . '<br>';
         }
         if (Validator::Length($name, 30, 1) == false) {
@@ -1033,7 +1022,7 @@ switch ($action) {
         $enabled = $_POST['enabled'];
         $site = mb_substr(_post('site'), 0, 32);
         $msg = '';
-        if (!$validPort(_post('api_port'))) {
+        if (!$validPort(_post('api_port')) || !$validAddressPort($ip_address)) {
             $msg .= Lang::T('The API port must be a number from 1 to 65535') . '<br>';
         }
         if (Validator::Length($name, 30, 4) == false) {
@@ -1131,11 +1120,11 @@ switch ($action) {
         $ui->assign('site', $site);
         $ui->assign('sites', $siteNames());
         $ui->assign('d', $d);
-        $names = [];
+        $ids = [];
         foreach ($d as $r) {
-            $names[] = $r['name'];
+            $ids[] = $r['id'];
         }
-        $ui->assign('usage', $routerUsage($names));
+        $ui->assign('usage', $routerUsage($ids));
         $ui->assign('health_on', $healthOn);
         $ui->assign('routely_vpn', $routelyVpn());
         run_hook('view_list_routers'); #HOOK

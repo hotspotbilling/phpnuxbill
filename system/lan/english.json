@@ -5696,5 +5696,16 @@
     "Nothing_matches": "Nothing matches",
     "interfaces": "interfaces",
     "Show_dynamic": "Show dynamic",
-    "Only_the_first__s_are_listed_": "Only the first %s are listed."
+    "Only_the_first__s_are_listed_": "Only the first %s are listed.",
+    "API_Port": "API Port",
+    "The_router_s_IP_or_host_name__Leave_the_port_empty_for_the_usual_8728_": "The router's IP or host name. Leave the port empty for the usual 8728.",
+    "Test_now": "Test now",
+    "Connecting": "Connecting",
+    "Could_not_connect": "Could not connect",
+    "up": "up",
+    "The_test_could_not_be_run__Reload_the_page_and_try_again_": "The test could not be run. Reload the page and try again.",
+    "None_of_the_selected_routers_can_be_checked__they_are_disabled_or_have_no_address_": "None of the selected routers can be checked: they are disabled or have no address.",
+    "No_interfaces_found": "No interfaces found",
+    "Could_not_read": "Could not read",
+    "To_keep_a_copy_elsewhere__download_it_from_Files_in_Winbox_or_WebFig_": "To keep a copy elsewhere, download it from Files in Winbox or WebFig."
 }

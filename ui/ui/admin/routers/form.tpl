@@ -247,8 +247,11 @@
     (function () {
         var host = document.getElementById('ip_address'), port = document.getElementById('api_port');
         if (!host || !port) return;
+        // the same reading as the server's: "[IPv6]:port" or "host:port" (one colon); a bare IPv6 address has more than one
+        // colon and no brackets, so it stays whole with the port field as typed
         host.addEventListener('change', function () {
-            var m = /^([^:]+):(\d+)$/.exec(host.value.trim());
+            var v = host.value.trim();
+            var m = /^\[([^\]]+)\]:(\d+)$/.exec(v) || /^([^:\[\]]+):(\d+)$/.exec(v);
             if (m) {
                 host.value = m[1];
                 port.value = m[2];

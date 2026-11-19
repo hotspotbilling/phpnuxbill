@@ -10661,19 +10661,23 @@ body.dark-mode .rt-check--bad > i {
   height: 8px;
   margin: 4px 0 6px;
   border-radius: 99px;
-  background: #16a34a;
+  background: var(--ls-line); /* no readings: neither online nor offline */
   overflow: hidden;
-}
-body.dark-mode .rt-strip {
-  background: #22863f;
 }
 .rt-strip > i {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 3px;
-  margin-left: -1px;
+  min-width: 2px;
+}
+.rt-strip > i.is-on {
+  background: #16a34a;
+}
+.rt-strip > i.is-off {
   background: #dc2626;
+}
+body.dark-mode .rt-strip > i.is-on {
+  background: #22863f;
 }
 .rt-ranges {
   display: inline-flex;
@@ -10777,8 +10781,12 @@ body.dark-mode .rt-detail {
   color: var(--ls-muted);
   font-size: 12px;
 }
-.rt-err--block {
+.rt-err.rt-err--block {
   display: block;
+  max-width: none; /* a whole message in the details and tabs; the Health cell keeps its short, cut version */
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
 }
 .rt-charts {
   display: grid;

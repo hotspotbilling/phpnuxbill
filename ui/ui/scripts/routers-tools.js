@@ -77,6 +77,7 @@
             tools += '<label class="rt-lv__toggle"><input type="checkbox" data-rt-all' + (opts.toggle.on ? ' checked' : '') + '> ' + esc(opts.toggle.label) + '</label>';
         }
         pane.innerHTML = head(title) + tools + '</div>' + (opts.capped ? '<p class="rt-err rt-err--block">' + esc(opts.capped) + '</p>' : '')
+            + (opts.notice ? '<p class="rt-err rt-err--block">' + esc(opts.notice) + '</p>' : '')
             + '<div data-rt-list></div><div class="rt-lv__pager" data-rt-pager></div>';
         listRender(pane);
     }
@@ -113,6 +114,8 @@
             listView(pane, total + ' ' + t.online, {
                 rows: rows,
                 capped: rows.length < total ? t.capped.replace('%s', rows.length) : '',
+                // a menu the router refused (no permission) is said, so an empty list is not taken for nobody online
+                notice: (d.read_errors || []).length ? t.readErr + ': ' + d.read_errors.join('; ') : '',
                 empty: t.none,
                 cols: [t.user, t.type, t.address, t.mac, t.uptime, t.data, ''],
                 filters: [{ key: 'all', label: t.all, test: function () { return true; } },
@@ -143,7 +146,7 @@
             listView(pane, (d.total || d.items.length) + ' ' + t.interfaces, {
                 rows: d.items,
                 capped: d.total > d.items.length ? t.capped.replace('%s', d.items.length) : '',
-                empty: t.none,
+                empty: t.noIfaces,
                 cols: [t.name, t.type, t.state, t.traffic, t.errors, t.linkDowns, t.lastUp],
                 // each PPPoE customer gets a dynamic interface of its own: hidden unless asked for, so the real ports are not lost
                 toggle: dyn ? { label: t.showDynamic + ' (' + dyn + ')', test: function (i) { return i.dynamic; }, on: false } : null,
@@ -198,7 +201,14 @@
 
     /* ---------- updates and backups ---------- */
     function loadUpdates(id, pane, check) {
+        // while "Check for updates" runs, Refresh waits: a plain read finishing after it would put back the old versions
+        if (check) {
+            pane._busy = true;
+            pane.querySelectorAll('[data-rt-reload]').forEach(function (b) { b.disabled = true; });
+        }
         return Promise.all([request('updates', id, check ? {} : null), request('backups', id)]).then(function (res) {
+            if (pane._busy && !check) return;
+            pane._busy = false;
             var u = res[0], b = res[1];
             var html = head(t.routeros);
             if (!u.ok) {
@@ -222,17 +232,15 @@
             if (!b.ok) {
                 html += fail(b);
             } else {
-                html += '<p class="ls-dim rt-pane__row">' + esc(t.nightly) + ': <b>' + esc(b.nightly ? t.on : t.off) + '</b> (' + esc(t.nightlyWhere) + ')'
-                    + (b.can_download ? '' : (cfg.superadmin ? ' &middot; ' + esc(t.downloadHow) : '')) + '</p>';
+                html += '<p class="ls-dim rt-pane__row">' + esc(t.nightly) + ': <b>' + esc(b.nightly ? t.on : t.off) + '</b> (' + esc(t.nightlyWhere) + ') &middot; '
+                    + esc(t.downloadHow) + '</p>';
                 if (!b.items.length) {
                     html += '<p class="ls-dim">' + esc(t.noBackups) + '</p>';
                 } else {
                     html += '<div class="ls-scroll"><table class="rt-mini"><tbody>';
                     b.items.forEach(function (f) {
                         html += '<tr><td><b>' + esc(f.name) + '</b>' + (f.auto ? ' <span class="ls-pill">' + esc(t.auto) + '</span>' : '') + '</td><td class="ls-dim">' + esc(f.created || '')
-                            + '</td><td class="ls-dim">' + esc(size(f.size)) + '</td><td class="rt-mini__end">'
-                            + (b.can_download ? '<button type="button" class="ls-btn ls-btn--sm" data-rt-download="' + esc(f.name) + '"><i class="fa fa-download" aria-hidden="true"></i> ' + esc(t.download) + '</button>' : '')
-                            + '</td></tr>';
+                            + '</td><td class="ls-dim rt-mini__end">' + esc(size(f.size)) + '</td></tr>';
                     });
                     html += '</tbody></table></div>';
                 }
@@ -326,7 +334,9 @@
     function loadHistory(id, pane, range) {
         range = range || pane.getAttribute('data-range') || '24h';
         pane.setAttribute('data-range', range);
+        var seq = pane._hseq = (pane._hseq || 0) + 1; // only the latest range asked for is drawn
         return request('history', id + '?range=' + encodeURIComponent(range)).then(function (d) {
+            if (seq !== pane._hseq) return;
             var picker = '<span class="rt-ranges" role="group">' + ['24h', '7d', '30d'].map(function (r) {
                 return '<button type="button" class="ls-btn ls-btn--sm' + (r === range ? ' is-on' : '') + '" data-rt-range="' + r + '" aria-pressed="' + (r === range) + '">' + r + '</button>';
             }).join('') + '</span>';
@@ -340,10 +350,12 @@
                 { title: t.uplink, series: [{ label: t.dl, cls: 'rt-s1', points: pts.map(function (p) { return [p.at, p.down]; }) },
                     { label: t.ul, cls: 'rt-s2', points: pts.map(function (p) { return [p.at, p.up]; }) }], fmt: bps, max: null }
             ];
-            // online and offline along the period: a thin strip, red where it was offline
+            // online and offline along the period: green or red only where there are readings, neutral where there are none.
+            // Each point stands for one stretch of time, as wide as the server's averaging step.
             var span = d.to - d.from, strip = '';
+            var step = Math.max(300, Math.ceil(span / 300)), w = Math.max(0.15, step / span * 100);
             pts.forEach(function (p) {
-                if (!p.online) strip += '<i style="left:' + ((p.at - d.from) / span * 100).toFixed(2) + '%"></i>';
+                strip += '<i class="' + (p.online ? 'is-on' : 'is-off') + '" style="left:' + ((p.at - step / 2 - d.from) / span * 100).toFixed(3) + '%;width:' + w.toFixed(3) + '%"></i>';
             });
             var html = head(t.history, picker)
                 + (d.collecting ? '' : '<p class="rt-err rt-err--block">' + esc(t.notCollecting) + '</p>')
@@ -392,6 +404,7 @@
             var on = b.getAttribute('data-rt-tab') === tab;
             b.classList.toggle('is-on', on);
             b.setAttribute('aria-selected', on ? 'true' : 'false');
+            b.tabIndex = on ? 0 : -1; // one tab stop for the tab list: the selected tab
         });
         row.querySelectorAll('[data-rt-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-rt-pane') !== tab; });
         var pane = row.querySelector('[data-rt-pane="' + tab + '"]');
@@ -399,6 +412,19 @@
         // the live graphs read only while their tab is shown
         document.dispatchEvent(new CustomEvent('rt:tab', { detail: { id: String(id), tab: tab } }));
     }
+
+    // the tab list from the keyboard: left and right arrows (and Home, End) move between tabs and open the one reached; Enter and
+    // Space work as on any button
+    document.addEventListener('keydown', function (e) {
+        var tabBtn = e.target.closest && e.target.closest('[data-rt-tab]');
+        if (!tabBtn || ['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(e.key) === -1) return;
+        var list = Array.prototype.slice.call(tabBtn.closest('[data-rt-tabs]').querySelectorAll('[data-rt-tab]'));
+        var i = list.indexOf(tabBtn);
+        var to = e.key === 'Home' ? 0 : e.key === 'End' ? list.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
+        e.preventDefault();
+        list[to].focus();
+        show(tabBtn.closest('[data-rt-tabs]').getAttribute('data-rt-tabs'), list[to].getAttribute('data-rt-tab'));
+    });
 
     document.addEventListener('click', function (e) {
         var more = e.target.closest('[data-rt-more]');
@@ -442,6 +468,7 @@
         var reload = e.target.closest('[data-rt-reload]');
         if (reload) {
             var pane = reload.closest('[data-rt-pane]');
+            if (pane._busy) return;
             load(pane.closest('.rt-detail').id.replace('rt-detail-', ''), pane.getAttribute('data-rt-pane'));
             return;
         }
@@ -462,40 +489,24 @@
         var drop = e.target.closest('[data-rt-drop]');
         if (drop) {
             var rid = drop.closest('.rt-detail').id.replace('rt-detail-', '');
-            ask(drop, drop.getAttribute('data-user') + ': ' + t.dropAsk, function () {
+            // which session, in which list: taken now, as paging or searching can redraw the row while the request is out
+            var dPane = drop.closest('[data-rt-pane]'), dModel = dPane._lv;
+            var dKind = drop.getAttribute('data-rt-drop'), dSid = drop.getAttribute('data-sid'), dUser = drop.getAttribute('data-user');
+            ask(drop, dUser + ': ' + t.dropAsk, function () {
                 drop.disabled = true;
-                request('drop', rid, { kind: drop.getAttribute('data-rt-drop'), sid: drop.getAttribute('data-sid'), user: drop.getAttribute('data-user') }).then(function (d) {
+                request('drop', rid, { kind: dKind, sid: dSid, user: dUser }).then(function (d) {
                     if (d.ok) {
-                        var tr = drop.closest('tr');
-                        var lv = drop.closest('[data-rt-pane]')._lv;
-                        if (lv) lv.opts.rows.forEach(function (r) { if (r.sid === drop.getAttribute('data-sid') && r.kind === drop.getAttribute('data-rt-drop')) r.gone = true; });
-                        tr.classList.add('is-gone');
-                        drop.outerHTML = '<span class="ls-dim">' + esc(t.dropped) + '</span>';
-                    } else {
+                        if (dModel) dModel.opts.rows.forEach(function (r) { if (r.sid === dSid && r.kind === dKind) r.gone = true; });
+                        // the same list (perhaps on another page by now) is drawn again with the row marked; a reloaded list
+                        // already comes from the router without the session
+                        if (dPane._lv === dModel) listRender(dPane);
+                    } else if (drop.isConnected) {
                         drop.disabled = false;
                         drop.insertAdjacentHTML('afterend', '<small class="rt-err">' + esc(d.error || t.fail) + '</small>');
                     }
                 });
             });
             return;
-        }
-        var dl = e.target.closest('[data-rt-download]');
-        if (dl) {
-            // a real form post: the file comes back as a download, and the server checks the role and the token
-            var did = dl.closest('.rt-detail').id.replace('rt-detail-', '');
-            var f = document.createElement('form');
-            f.method = 'post';
-            f.action = url('backup-download', did);
-            [['csrf_token', cfg.csrf], ['name', dl.getAttribute('data-rt-download')]].forEach(function (kv) {
-                var i = document.createElement('input');
-                i.type = 'hidden';
-                i.name = kv[0];
-                i.value = kv[1];
-                f.appendChild(i);
-            });
-            document.body.appendChild(f);
-            f.submit();
-            f.remove();
         }
     });
 })();

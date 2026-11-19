@@ -50,7 +50,8 @@ class RouterMonitor
             return [];
         }
         // one run at a time, and not more often than every EVERY seconds, whatever the cron's own schedule
-        $lock = @fopen($CACHE_PATH . DIRECTORY_SEPARATOR . 'router_monitor.lock', 'c+');
+        // (its own file: the cron's lock is called router_monitor.lock and is deleted at the end of every cron run)
+        $lock = @fopen($CACHE_PATH . DIRECTORY_SEPARATOR . 'router_history.lock', 'c+');
         if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
             return [];
         }
@@ -98,6 +99,8 @@ class RouterMonitor
     {
         $id = (int) $r['id'];
         $prev = ORM::for_table('tbl_router_samples')->where('router_id', $id)->order_by_desc('at')->find_one();
+        // the uplink chosen before: from the last reading that had one (a failed reading has none, and must not switch it)
+        $lastIf = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where_not_null('iface')->order_by_desc('at')->find_one();
         $s = ['online' => 0, 'cpu' => null, 'mem' => null, 'disk' => null, 'users' => null, 'uptime' => null, 'iface' => null, 'rx' => null, 'tx' => null];
         $why = '';
         [$c, $err] = RouterApi::connect($r['ip_address'], $r['username'], $r['password'], 5);
@@ -120,16 +123,27 @@ class RouterMonitor
                 $why = $e->getMessage();
             }
             if ($s['online']) {
-                $users = null;
+                // users online: hotspot plus PPPoE, kept only when both are known. A menu the router does not have (no hotspot
+                // package) counts as 0; a refusal or no answer makes the total unknown rather than half of it.
+                $users = 0;
                 foreach (['/ip/hotspot/active/print', '/ppp/active/print'] as $menu) {
                     try {
                         $q = new PEAR2\Net\RouterOS\Request($menu);
                         $q->setArgument('count-only', '');
-                        $n = RouterApi::text(RouterApi::send($c, $q, $until)->end()->getProperty('ret'));
-                        if (is_numeric($n)) {
-                            $users = (int) $users + (int) $n;
+                        $res = RouterApi::send($c, $q, $until);
+                        $err = RouterApi::error($res);
+                        $n = RouterApi::text($res->end()->getProperty('ret'));
+                        if ($err !== null) {
+                            if (stripos($err, 'no such command') === false) {
+                                $users = null;
+                            }
+                        } elseif (is_numeric($n)) {
+                            $users = $users === null ? null : $users + (int) $n;
+                        } else {
+                            $users = null;
                         }
                     } catch (Throwable $e) {
+                        $users = null;
                     }
                 }
                 $s['users'] = $users;
@@ -138,7 +152,7 @@ class RouterMonitor
                     $ifs = RouterApi::rows($c, '/interface/print', ['name', 'rx-byte', 'tx-byte', 'running'], $until);
                     $pick = null;
                     foreach ($ifs as $i) {
-                        if ($prev && $i['name'] === $prev['iface']) {
+                        if ($lastIf && $i['name'] === $lastIf['iface']) {
                             $pick = $i;
                             break;
                         }
@@ -164,7 +178,7 @@ class RouterMonitor
             $row->$k = $v;
         }
         $row->save();
-        self::events($r, $s, $prev, $why);
+        self::events($r, $s, $prev, $why, (int) $row->id());
         return $s['online'] ? 'online' . ($s['cpu'] !== null ? ', CPU ' . $s['cpu'] . '%' : '') : 'offline (' . $why . ')';
     }
 
@@ -187,7 +201,7 @@ class RouterMonitor
         }
     }
 
-    private static function events($r, array $s, $prev, $why)
+    private static function events($r, array $s, $prev, $why, $sampleId)
     {
         $id = (int) $r['id'];
         $state = self::lastOf($id, ['offline', 'online']);
@@ -200,10 +214,18 @@ class RouterMonitor
             return;
         }
         if ($isDown) {
-            $mins = max(1, (int) round((time() - strtotime($state['at'])) / 60));
+            // the outage began at the first missed reading, not when it was confirmed (the second): the reading after the last good one
+            $db = ORM::getDb();
+            $st = $db->prepare('SELECT MIN(at) FROM tbl_router_samples WHERE router_id = ? AND online = 0 AND id < ? AND at > COALESCE((SELECT MAX(at) FROM tbl_router_samples WHERE router_id = ? AND online = 1 AND id < ?), \'1970-01-01\')');
+            $st->execute([$id, $sampleId, $id, $sampleId]);
+            $began = $st->fetchColumn() ?: $state['at'];
+            $mins = max(1, (int) round((time() - strtotime($began)) / 60));
             self::event($r, 'online', '', Lang::T('router is back online after about') . ' ' . self::duration($mins));
         }
-        if ($prev && (int) $prev['online'] && $prev['uptime'] !== null && $s['uptime'] !== null && (int) $s['uptime'] + 60 < (int) $prev['uptime']) {
+        // a restart: the uptime is lower than at the last reading that had one (failed readings in between have none)
+        $lastUp = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where('online', 1)->where_not_null('uptime')
+            ->where_lt('id', $sampleId)->order_by_desc('id')->find_one();
+        if ($lastUp && $s['uptime'] !== null && (int) $s['uptime'] + 60 < (int) $lastUp['uptime']) {
             self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')');
         }
         // high load: two readings in a row over the line to alert, and well under it to say it is fine again
@@ -274,11 +296,15 @@ class RouterMonitor
         if (is_file($mark) && time() - filemtime($mark) < 86400) {
             return;
         }
-        @touch($mark);
         try {
             $db = ORM::getDb();
             $db->prepare('DELETE FROM tbl_router_samples WHERE at < ?')->execute([date('Y-m-d H:i:s', time() - self::KEEP_SAMPLES * 86400)]);
-            $db->prepare('DELETE FROM tbl_router_events WHERE at < ?')->execute([date('Y-m-d H:i:s', time() - self::KEEP_EVENTS * 86400)]);
+            // old events go, but never the newest of each kind for a router (offline/online, CPU, memory, disk): that one is the
+            // state that stops a repeated alert and sends the "back to normal" one, however long ago it began
+            $db->prepare("DELETE FROM tbl_router_events WHERE at < ? AND id NOT IN (SELECT id FROM (SELECT MAX(id) AS id FROM tbl_router_events
+                GROUP BY router_id, CASE WHEN type IN ('offline', 'online') THEN 'state' ELSE SUBSTRING_INDEX(type, '_', 1) END) AS keep_newest)")
+                ->execute([date('Y-m-d H:i:s', time() - self::KEEP_EVENTS * 86400)]);
+            @touch($mark); // only once both are done: a failure is tried again on the next run
         } catch (Throwable $e) {
         }
     }
@@ -302,7 +328,9 @@ class RouterMonitor
             $t = strtotime($r['at']);
             $online += (int) $r['online'];
             $down = $up = null;
-            if ($prev && $prev['iface'] === $r['iface'] && $r['rx'] !== null && $prev['rx'] !== null && $t > $prev['t']) {
+            // a restart between the two readings (the uptime went back) resets the counters: no speed across it
+            $restarted = $prev && $prev['uptime'] !== null && $r['uptime'] !== null && (int) $r['uptime'] < (int) $prev['uptime'];
+            if ($prev && !$restarted && $prev['iface'] === $r['iface'] && $r['rx'] !== null && $prev['rx'] !== null && $t > $prev['t']) {
                 $sec = $t - $prev['t'];
                 $dRx = (float) $r['rx'] - (float) $prev['rx'];
                 $dTx = (float) $r['tx'] - (float) $prev['tx'];
@@ -311,7 +339,7 @@ class RouterMonitor
                     $up = $dTx * 8 / $sec;
                 }
             }
-            $prev = ['t' => $t, 'iface' => $r['iface'], 'rx' => $r['rx'], 'tx' => $r['tx']];
+            $prev = ['t' => $t, 'iface' => $r['iface'], 'rx' => $r['rx'], 'tx' => $r['tx'], 'uptime' => $r['uptime']];
             $b = (int) floor($t / $bucket) * $bucket;
             if (!isset($points[$b])) {
                 $points[$b] = ['n' => 0, 'on' => 0, 'cpu' => [], 'mem' => [], 'users' => [], 'down' => [], 'up' => []];

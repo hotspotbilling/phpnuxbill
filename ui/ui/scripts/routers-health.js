@@ -59,11 +59,18 @@
         return '<span class="rt-meter' + (wide ? ' rt-meter--wide' : '') + '" data-level="' + level(p) + '">'
             + '<span class="rt-meter__label">' + esc(label) + '</span>'
             + '<span class="rt-meter__bar"><i style="width:' + Math.max(2, Math.min(100, p)) + '%"></i></span>'
-            + '<b>' + p + '%</b>' + (extra ? '<small>' + esc(extra) + '</small>' : '') + '</span>';
+            + '<b>' + esc(p) + '%</b>' + (extra ? '<small>' + esc(extra) + '</small>' : '') + '</span>';
+    }
+    // a figure from the server as a number, or null when it is missing or not a number (never a string to add up)
+    function num(v) {
+        if (v === null || v === undefined || v === '') return null;
+        v = Number(v);
+        return isFinite(v) ? v : null;
     }
     function users(d) {
-        if (d.hotspot == null && d.pppoe == null) return null;
-        return (d.hotspot || 0) + (d.pppoe || 0);
+        var h = num(d.hotspot), p = num(d.pppoe);
+        if (h === null && p === null) return null;
+        return (h || 0) + (p || 0);
     }
     function failText(d) {
         return '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> ' + esc(d.error || t.fail)
@@ -79,8 +86,8 @@
             return;
         }
         var n = users(d);
-        td.innerHTML = '<span class="rt-cell">' + meter(t.cpu, d.cpu) + meter(t.ram, pct(d.mem_used, d.mem_total))
-            + (n != null ? '<span class="rt-users" title="' + esc(t.users) + '"><i class="fa fa-users" aria-hidden="true"></i> ' + n + '</span>' : '') + '</span>';
+        td.innerHTML = '<span class="rt-cell">' + meter(t.cpu, num(d.cpu)) + meter(t.ram, pct(num(d.mem_used), num(d.mem_total)))
+            + (n != null ? '<span class="rt-users" title="' + esc(t.users) + '"><i class="fa fa-users" aria-hidden="true"></i> ' + esc(n) + '</span>' : '') + '</span>';
     }
 
     /* ---------- history kept while a panel is open ---------- */
@@ -273,8 +280,9 @@
             + meter(t.memory, pct(d.mem_used, d.mem_total), true, d.mem_total ? t.of + ' ' + size(d.mem_total) : '')
             + meter(t.disk, pct(d.disk_used, d.disk_total), true, d.disk_total ? t.of + ' ' + size(d.disk_total) : '');
         var n = users(d);
-        body.querySelector('.rt-online').innerHTML = n == null ? '' : '<i class="fa fa-users" aria-hidden="true"></i> ' + esc(t.online) + ': <b>' + n + '</b>'
-            + ' <span class="ls-dim">(' + [d.hotspot != null ? t.hotspot + ' ' + d.hotspot : '', d.pppoe != null ? t.pppoe + ' ' + d.pppoe : ''].filter(Boolean).join(', ') + ')</span>';
+        var nh = num(d.hotspot), np = num(d.pppoe);
+        body.querySelector('.rt-online').innerHTML = n == null ? '' : '<i class="fa fa-users" aria-hidden="true"></i> ' + esc(t.online) + ': <b>' + esc(n) + '</b>'
+            + ' <span class="ls-dim">(' + esc([nh !== null ? t.hotspot + ' ' + nh : '', np !== null ? t.pppoe + ' ' + np : ''].filter(Boolean).join(', ')) + ')</span>';
         draw(id);
     }
     function draw(id) {
@@ -301,7 +309,8 @@
         }
         if (L.iface) pick.value = L.iface;
         traffic.hidden = !names.length;
-        var rows = (L.iface && L.rate[L.iface]) || [];
+        // only the last five minutes: an interface that came back keeps older speeds in L.rate, which are not drawn or shown
+        var rows = ((L.iface && L.rate[L.iface]) || []).filter(function (r) { return r[0] >= now - WINDOW; });
         var sNet = [
             { label: t.down, cls: 'rt-s1', points: rows.map(function (r) { return [r[0], r[1]]; }) },
             { label: t.up, cls: 'rt-s2', points: rows.map(function (r) { return [r[0], r[2]]; }) }
@@ -312,6 +321,8 @@
     }
 
     /* ---------- asking the server ---------- */
+    // opts.gen: the reading chain a live request belongs to; its answer is dropped once that chain is over (the panel closed,
+    // paused or opened again)
     function ask(id, opts) {
         var q = [];
         if (opts.fresh) q.push('fresh=1');
@@ -327,6 +338,9 @@
             .catch(function () { return { ok: false, error: t.fail }; })
             .then(function (d) {
                 clearTimeout(timer);
+                if (opts.gen !== undefined && (!live[id] || live[id].gen !== opts.gen || live[id].paused)) {
+                    return data[id] || d;
+                }
                 var cur = data[id];
                 // answers can come back out of order (the list's first check, Check now, the live readings): one from a request
                 // older than the answer already shown is dropped, failures too, and so is an older reading served from the store
@@ -341,9 +355,11 @@
                 return d;
             });
     }
+    var forcing = {}; // id => a Check now for it is queued or on its way
     function fetchQueued(item) {
         running++;
         ask(item.id, { fresh: item.fresh }).finally(function () {
+            if (item.fresh) delete forcing[item.id];
             running--;
             next();
         });
@@ -365,7 +381,7 @@
             L.timer = setTimeout(function () { tick(id, gen); }, EVERY);
             return;
         }
-        ask(id, { live: true }).then(function (d) {
+        ask(id, { live: true, gen: gen }).then(function (d) {
             // a router that does not answer is asked every 30 seconds only: each try can wait for the connection time limit
             var cur = live[id];
             if (cur && !cur.paused && cur.gen === gen) cur.timer = setTimeout(function () { tick(id, gen); }, d && d.ok ? EVERY : EVERY_DOWN);
@@ -403,7 +419,8 @@
     window.rtHealthRefresh = function (ids) {
         ids.forEach(function (id) {
             var td = document.querySelector('tr[data-rt-id="' + id + '"] .rt-health');
-            if (!td) return; // a disabled router is not asked
+            if (!td || forcing[String(id)]) return; // a disabled router is not asked, and one already being checked is not asked twice
+            forcing[String(id)] = true;
             td.innerHTML = '<span class="rt-skel"></span>';
             queue.push({ id: String(id), fresh: true });
         });
@@ -433,8 +450,11 @@
             more.classList.toggle('is-open', open);
             if (open) {
                 var box = document.querySelector('[data-rt-panel="' + id + '"]');
-                if (!box.innerHTML) box.innerHTML = '<span class="rt-skel rt-skel--wide"></span>';
-                start(id);
+                if (box && !box.innerHTML) box.innerHTML = '<span class="rt-skel rt-skel--wide"></span>';
+                // reopened on the Live tab: read again. The first opening (no tab chosen yet) and other tabs wait for the tab
+                // to be shown, which says so through rt:tab
+                var sel = row.querySelector('.rt-tab.is-on');
+                if (box && sel && sel.getAttribute('data-rt-tab') === 'live') start(id);
             } else {
                 stop(id);
             }
