@@ -13,6 +13,8 @@
 class RouterClient extends PEAR2\Net\RouterOS\Client
 {
     private $aborted = false;
+    /** The !fatal reply the router sent before it closed the connection, if it did (it carries no tag, so no request gets it) */
+    private $fatal = null;
 
     /**
      * As the library's constructor, with the login under a deadline: the connection time limit holds for the whole login, so a
@@ -42,6 +44,26 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
         } finally {
             $this->readDeadline(null);
         }
+    }
+
+    protected function dispatchNextResponse($sTimeout = 0, $usTimeout = 0)
+    {
+        $response = parent::dispatchNextResponse($sTimeout, $usTimeout);
+        if ($response->getType() === PEAR2\Net\RouterOS\Response::TYPE_FATAL) {
+            $this->fatal = $response;
+            $this->aborted = true; // the library has closed the connection: no goodbye on it
+        }
+        return $response;
+    }
+
+    /** Why the router closed the connection (its !fatal reply), or null when it did not */
+    public function fatalReason()
+    {
+        if (!$this->fatal) {
+            return null;
+        }
+        $words = array_filter(array_map('trim', array_map('strval', $this->fatal->getUnrecognizedWords())), 'strlen');
+        return $words ? implode(' ', $words) : 'closed';
     }
 
     public function abort()

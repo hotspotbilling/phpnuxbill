@@ -10919,6 +10919,12 @@ body.dark-mode .rt-detail {
   height: 150px;
   touch-action: pan-y;
 }
+/* a History chart read from the keyboard (arrow keys) */
+.rt-chart__plot:focus-visible {
+  outline: 2px solid var(--ls-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
 .rt-chart__svg {
   display: block;
   width: 100%;

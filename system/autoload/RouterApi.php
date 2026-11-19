@@ -29,7 +29,8 @@ class RouterApi
     {
         global $_app_stage;
         try {
-            if ($_app_stage == 'Demo') {
+            // the stage is written "Demo" in some places and "demo" in others: either one keeps real routers untouched
+            if (strcasecmp(trim((string) $_app_stage), 'demo') === 0) {
                 return [null, Lang::T('Not available in Demo mode')];
             }
             [$host, $port] = RouterAddress::split($ip);
@@ -95,7 +96,13 @@ class RouterApi
                 return $res;
             }
         }
+        // the router ended the connection itself (a !fatal reply, which belongs to no request): a broken connection, not a
+        // router that went quiet
+        $fatal = method_exists($c, 'fatalReason') ? $c->fatalReason() : null;
         method_exists($c, 'abort') ? $c->abort() : $c->close();
+        if ($fatal !== null) {
+            throw new Exception(Lang::T('The router closed the connection') . ($fatal !== 'closed' ? ': ' . mb_substr($fatal, 0, 120) : ''), 503);
+        }
         throw new Exception(Lang::T('The router did not answer in time'), 408);
     }
 
@@ -230,13 +237,15 @@ class RouterApi
                 return [];
             }
             $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
-            $name = 'phpnuxbill-auto-' . date('Ymd');
+            $name = 'phpnuxbill-auto-' . str_replace('-', '', $today); // the same day as the progress kept above, across midnight too
             $autoFiles = function ($c, &$folder = null) {
                 $files = self::rows($c, '/file/print', ['.id', 'name', 'type'], microtime(true) + 15);
                 $folder = self::backupFolder($files);
-                // in the root folder or in flash/: both are this router's automatic backups
-                $auto = array_values(array_filter($files, function ($f) {
-                    return preg_match('/(^|\/)phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name']);
+                // only in the folder nightly backups are saved to on this router (flash/ or the root folder): a file of the same
+                // name anywhere else (a USB disk, a folder of copies) was not made here and is never removed
+                $own = '/^' . preg_quote($folder, '/') . 'phpnuxbill-auto-\d{8}\.backup$/';
+                $auto = array_values(array_filter($files, function ($f) use ($own) {
+                    return preg_match($own, (string) $f['name']);
                 }));
                 usort($auto, function ($a, $b) {
                     return strcmp(basename($b['name']), basename($a['name'])); // newest first (the date is in the name)

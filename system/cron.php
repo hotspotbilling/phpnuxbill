@@ -223,19 +223,16 @@ if ($config['router_check']) {
     $errors = [];
 
     foreach ($routers as $router) {
-        // check if custom port
-        if (strpos($router->ip_address, ':') === false) {
-            $ip = $router->ip_address;
-            $port = 8728;
-        } else {
-            [$ip, $port] = explode(':', $router->ip_address);
-        }
+        // "host", "host:port", "[IPv6]" or "[IPv6]:port", read as the router pages and devices read it
+        [$ip, $port] = RouterAddress::split($router->ip_address);
+        $port = (int) ($port ?: 8728);
+        $sockHost = strpos($ip, ':') !== false ? '[' . $ip . ']' : $ip; // an IPv6 address is written in brackets to connect
         $isOnline = false;
 
         try {
             $timeout = 5;
             if (is_callable('fsockopen') && false === stripos(ini_get('disable_functions'), 'fsockopen')) {
-                $fsock = @fsockopen($ip, $port, $errno, $errstr, $timeout);
+                $fsock = @fsockopen($sockHost, $port, $errno, $errstr, $timeout);
                 if ($fsock) {
                     fclose($fsock);
                     $isOnline = true;
@@ -243,7 +240,7 @@ if ($config['router_check']) {
                     throw new Exception("Unable to connect to $ip on port $port using fsockopen: $errstr ($errno)");
                 }
             } elseif (is_callable('stream_socket_client') && false === stripos(ini_get('disable_functions'), 'stream_socket_client')) {
-                $connection = @stream_socket_client("$ip:$port", $errno, $errstr, $timeout);
+                $connection = @stream_socket_client("tcp://$sockHost:$port", $errno, $errstr, $timeout);
                 if ($connection) {
                     fclose($connection);
                     $isOnline = true;
@@ -317,20 +314,21 @@ if (class_exists('RedisCache') && RedisCache::isDashboardCacheEnabled()) {
 
 // router history and alerts (Network > Routers > Settings), a reading of each router about every 5 minutes
 try {
+    // the lines hold what routers answered: shown as text, not markup, when the cron is opened in a browser
     foreach (RouterMonitor::run() as $line) {
-        echo "Router monitor: $line\n";
+        echo "Router monitor: " . ($isCli ? $line : htmlspecialchars($line, ENT_QUOTES)) . "\n";
     }
 } catch (Throwable $e) {
-    echo "Router monitor note: " . $e->getMessage() . "\n";
+    echo "Router monitor note: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
 }
 
 // nightly router backups (Network > Routers > Settings), once a day; saved on each router itself
 try {
     foreach (RouterApi::nightlyBackups() as $line) {
-        echo "Router backup: $line\n";
+        echo "Router backup: " . ($isCli ? $line : htmlspecialchars($line, ENT_QUOTES)) . "\n";
     }
 } catch (Throwable $e) {
-    echo "Router backup note: " . $e->getMessage() . "\n";
+    echo "Router backup note: " . ($isCli ? $e->getMessage() : htmlspecialchars($e->getMessage(), ENT_QUOTES)) . "\n";
 }
 
 run_hook('cronjob_end'); #HOOK

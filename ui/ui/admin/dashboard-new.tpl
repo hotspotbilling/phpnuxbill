@@ -1264,11 +1264,18 @@
             }
             return o;
         };
+        // only the series labelled by dates (sales, customer growth, logins by weekday): the others are router, plan and
+        // payment names, which stay as they were named ("Mon Repos" is not a Monday)
+        var DATES = ['sales', 'customerGrowth', 'portalLogins'];
+        var dates = function (data) {
+            if (data && typeof data === 'object') DATES.forEach(function (k) { if (data[k]) data[k] = walk(data[k]); });
+            return data;
+        };
         var el = document.getElementById('dashboard-raw-data');
         try {
-            if (el && el.textContent.trim()) el.textContent = JSON.stringify(walk(JSON.parse(el.textContent)));
+            if (el && el.textContent.trim()) el.textContent = JSON.stringify(dates(JSON.parse(el.textContent)));
         } catch (e) {}
-        if (window.dashboardData) walk(window.dashboardData);
+        if (window.dashboardData) dates(window.dashboardData);
     })();
 </script>
 

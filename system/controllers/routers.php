@@ -89,15 +89,17 @@ $splitAddress = function ($addr) {
     return [$addr, ''];
 };
 // whether another router already uses this API endpoint: the same host (letter case aside) and the same port, an address
-// without a port being on 8728, so "10.0.0.1" and "10.0.0.1:8728" are one router while "10.0.0.1:8729" is another
-$endpointTaken = function ($address, $exceptId = 0) {
+// without a port being on 8728, so "10.0.0.1" and "10.0.0.1:8728" are one router while "10.0.0.1:8729" is another.
+// $enabledOnly: only an enabled router counts (enabling one: a disabled draft with the same address is no conflict)
+$endpointTaken = function ($address, $exceptId = 0, $enabledOnly = false) {
     $key = function ($a) {
         [$h, $p] = RouterAddress::split($a);
         return strtolower((string) $h) . '|' . ((int) $p ?: 8728);
     };
     $want = $key($address);
-    foreach (ORM::for_table('tbl_routers')->select_many('id', 'ip_address')->find_array() as $r) {
-        if ((int) $r['id'] !== (int) $exceptId && trim((string) $r['ip_address']) !== '' && $key($r['ip_address']) === $want) {
+    foreach (ORM::for_table('tbl_routers')->select_many('id', 'ip_address', 'enabled')->find_array() as $r) {
+        if ((int) $r['id'] !== (int) $exceptId && trim((string) $r['ip_address']) !== '' && (!$enabledOnly || (int) $r['enabled'] === 1)
+            && $key($r['ip_address']) === $want) {
             return true;
         }
     }
@@ -448,10 +450,17 @@ switch ($action) {
         }
         $n = 0;
         $skipped = [];
+        $taken = [];
         foreach (ORM::for_table('tbl_routers')->where_in('id', $ids)->find_many() as $r) {
             // as on the form: an enabled router needs its address and username
             if ($op === 'enable' && (trim((string) $r['ip_address']) === '' || trim((string) $r['username']) === '')) {
                 $skipped[] = $r['name'];
+                continue;
+            }
+            // nor is a router enabled on the address of another enabled one (checked one by one, so of two ticked routers on
+            // one address only the first is enabled)
+            if ($op === 'enable' && (int) $r['enabled'] !== 1 && $endpointTaken($r['ip_address'], $r['id'], true)) {
+                $taken[] = $r['name'];
                 continue;
             }
             $r->enabled = $op === 'enable' ? 1 : 0;
@@ -459,8 +468,9 @@ switch ($action) {
             $n++;
         }
         _log('[' . $admin['username'] . ']: ' . ($op === 'enable' ? 'Routers enabled' : 'Routers disabled') . ': ' . $n, $admin['user_type'], $admin['id']);
-        r2(getUrl('routers/list'), $skipped ? 'w' : 's', ($op === 'enable' ? Lang::T('Routers enabled') : Lang::T('Routers disabled')) . ': ' . $n
-            . ($skipped ? '. ' . Lang::T('Not enabled, the IP address or username is missing') . ': ' . htmlspecialchars(implode(', ', $skipped)) : ''));
+        r2(getUrl('routers/list'), $skipped || $taken ? 'w' : 's', ($op === 'enable' ? Lang::T('Routers enabled') : Lang::T('Routers disabled')) . ': ' . $n
+            . ($skipped ? '. ' . Lang::T('Not enabled, the IP address or username is missing') . ': ' . htmlspecialchars(implode(', ', $skipped)) : '')
+            . ($taken ? '. ' . Lang::T('Not enabled, another enabled router has the same address') . ': ' . htmlspecialchars(implode(', ', $taken)) : ''));
         break;
 
     case 'action':
@@ -784,6 +794,7 @@ switch ($action) {
                 $hsServers = [];
                 $ppServers = [];
                 $serverErrors = [];
+                $unread = []; // the services whose servers could not be read: whether RADIUS must cover them is not known
                 try {
                     $hsServers = RouterApi::rows($c, '/ip/hotspot/print', ['name', 'interface', 'disabled', 'profile'], $until);
                 } catch (Throwable $e) {
@@ -792,6 +803,7 @@ switch ($action) {
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
                         $serverErrors[] = Lang::T('Hotspot') . ': ' . $e->getMessage();
+                        $unread[] = 'hotspot';
                     }
                 }
                 try {
@@ -802,6 +814,7 @@ switch ($action) {
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
                         $serverErrors[] = 'PPPoE: ' . $e->getMessage();
+                        $unread[] = 'ppp';
                     }
                 }
                 $onHs = array_filter($hsServers, function ($x) { return $x['disabled'] !== 'true'; });
@@ -869,8 +882,9 @@ switch ($action) {
                         if ($found === null) {
                             $add('warn', Lang::T('Could not tell whether the billing site is in the walled garden'), Lang::T('A walled garden rule for') . ' ' . $site . ' ' . Lang::T('has conditions this check cannot judge. Check it in Winbox, IP > Hotspot > Walled Garden.'));
                         } else {
-                            $add($found ? 'ok' : 'bad', $found ? Lang::T('The billing site is in the walled garden') : Lang::T('The billing site is not in the walled garden'),
-                                $found ? $site : Lang::T('Customers cannot open') . ' ' . $site . ' ' . Lang::T('before they sign in. Add it in Winbox, IP > Hotspot > Walled Garden, as') . ' ' . $host);
+                            // only the web walled garden is read: an IP walled garden rule may still let the site through
+                            $add($found ? 'ok' : 'warn', $found ? Lang::T('The billing site is in the walled garden') : Lang::T('No walled garden rule for the billing site was found'),
+                                $found ? $site : Lang::T('Unless an IP walled garden rule allows it, customers cannot open') . ' ' . $site . ' ' . Lang::T('before they sign in. Add it in Winbox, IP > Hotspot > Walled Garden, as') . ' ' . $host);
                         }
                     } catch (Throwable $e) {
                         if ($e->getCode() === 408) {
@@ -918,8 +932,12 @@ switch ($action) {
                                         $off[] = 'PPP > AAA';
                                     }
                                 }
+                                // a service whose servers could not be read, and that no entry covers, may still need RADIUS
+                                $unknown = array_values(array_diff($unread, $need, $covered));
                                 if ($off) {
                                     $add('bad', Lang::T('RADIUS is set but not used'), Lang::T('Turn on Use RADIUS in') . ': ' . implode(', ', array_unique($off)) . '. ' . $list);
+                                } elseif ($unknown) {
+                                    $add('warn', Lang::T('RADIUS is set up for the servers that could be read'), Lang::T('Could not tell whether these need it too') . ': ' . implode(', ', $unknown) . '. ' . $list);
                                 } else {
                                     $add('ok', Lang::T('RADIUS is set up'), $list);
                                 }
@@ -1013,7 +1031,7 @@ switch ($action) {
                     if (substr((string) $f['name'], -7) === '.backup' || $f['type'] === 'backup') {
                         $stamp = (string) ($f['last-modified'] ?? '') !== '' ? $f['last-modified'] : $f['creation-time'];
                         $items[] = ['name' => $f['name'], 'size' => is_numeric($f['size']) ? (float) $f['size'] : null, 'created' => $stamp,
-                            'auto' => (bool) preg_match('/(^|\/)phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name'])];
+                            'auto' => (bool) preg_match('/^(flash\/)?phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name'])]; // where the cron keeps them
                     }
                 }
                 // newest first by creation time ("2026-11-19 03:00:01" on RouterOS 7, "nov/19/2026 03:00:01" on 6), then by name
@@ -1121,6 +1139,9 @@ switch ($action) {
         $out['checked'] = date('Y-m-d H:i:s');
         $out['observed'] = $observed; // full precision: the store below compares it with the next reading's start
         $out['done'] = round(microtime(true), 3); // when this answer was ready, failures included: what the live sharing is timed by
+        // which address the readings came from, without the login: the live graphs start their speeds again when it changes, so
+        // byte counters of two different routers are never compared
+        $out['rev'] = substr(hash('sha256', 'routers/rev|' . $d['id'] . '|' . $d['ip_address']), 0, 12);
         if (!is_dir($dir)) {
             @mkdir($dir, 0755, true);
         }
@@ -1246,10 +1267,9 @@ switch ($action) {
         $oldname = $d['name'];
 
         if($enabled || _post("testIt")){
-            if ($d['ip_address'] != $ip_address) {
-                if ($endpointTaken($ip_address, $id)) {
-                    $msg .= 'IP Already Exists<br>';
-                }
+            // a new address must be free; enabling (even with the address unchanged) needs no other enabled router on it
+            if (($d['ip_address'] != $ip_address && $endpointTaken($ip_address, $id)) || ($enabled && $endpointTaken($ip_address, $id, true))) {
+                $msg .= 'IP Already Exists<br>';
             }
         }
 
@@ -1261,6 +1281,15 @@ switch ($action) {
             run_hook('router_edit'); #HOOK
             if (_post("testIt")) {
                 (new MikrotikHotspot())->getClient($ip_address, $username, $password);
+            }
+            // another router answers at a new address: what the last check said (Online, last seen) was about the old one
+            $endpoint = function ($a) {
+                [$h, $p] = RouterAddress::split($a);
+                return strtolower((string) $h) . '|' . ((int) $p ?: 8728);
+            };
+            if ($endpoint($d['ip_address']) !== $endpoint($ip_address)) {
+                $d->status = null;
+                $d->last_seen = null;
             }
             $d->name = $name;
             $d->ip_address = $ip_address;

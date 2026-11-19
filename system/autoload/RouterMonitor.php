@@ -142,82 +142,89 @@ class RouterMonitor
         $why = '';
         [$c, $err] = RouterApi::connect($r['ip_address'], $r['username'], $r['password'], 5);
         if ($c) {
-            $until = microtime(true) + 10;
+            // done with the router either way: the connection is dropped (no goodbye, which can wait for ever) before the reading is kept
             try {
-                $res = RouterApi::rows($c, '/system/resource/print', ['cpu-load', 'free-memory', 'total-memory', 'free-hdd-space', 'total-hdd-space', 'uptime'], $until);
-                $x = $res[0] ?? [];
-                $pct = function ($free, $total) {
-                    return is_numeric($free) && is_numeric($total) && (float) $total > 0 ? (int) round((1 - (float) $free / (float) $total) * 100) : null;
-                };
-                $s['online'] = 1;
-                $s['cpu'] = is_numeric($x['cpu-load'] ?? null) ? (int) $x['cpu-load'] : null;
-                $s['mem'] = $pct($x['free-memory'] ?? null, $x['total-memory'] ?? null);
-                $s['disk'] = $pct($x['free-hdd-space'] ?? null, $x['total-hdd-space'] ?? null);
-                $s['uptime'] = self::seconds($x['uptime'] ?? '');
-            } catch (Throwable $e) {
-                // the router refused the read (RouterApi marks a refusal with code 403): it answers, so it counts as online. No
-                // answer in time (408), a connection that broke (the library's own exceptions) or anything else is offline.
-                $s['online'] = $e->getCode() === 403 ? 1 : 0;
-                $why = $e->getMessage();
-            }
-            if ($s['online']) {
-                // users online: hotspot plus PPPoE, kept only when both are known. A menu the router does not have (no hotspot
-                // package) counts as 0; a refusal or no answer makes the total unknown rather than half of it.
-                $users = 0;
-                // (PPP sessions are PPPoE only: L2TP, SSTP and the other tunnels are not customers)
-                foreach (['/ip/hotspot/active/print' => null, '/ppp/active/print' => 'pppoe'] as $menu => $service) {
-                    try {
-                        $q = new PEAR2\Net\RouterOS\Request($menu, $service ? PEAR2\Net\RouterOS\Query::where('service', $service) : null);
-                        $q->setArgument('count-only', '');
-                        $res = RouterApi::send($c, $q, $until);
-                        $err = RouterApi::error($res);
-                        $n = RouterApi::text($res->end()->getProperty('ret'));
-                        if ($err !== null) {
-                            if (stripos($err, 'no such command') === false) {
+                $until = microtime(true) + 10;
+                try {
+                    $res = RouterApi::rows($c, '/system/resource/print', ['cpu-load', 'free-memory', 'total-memory', 'free-hdd-space', 'total-hdd-space', 'uptime'], $until);
+                    $x = $res[0] ?? [];
+                    $pct = function ($free, $total) {
+                        return is_numeric($free) && is_numeric($total) && (float) $total > 0 ? (int) round((1 - (float) $free / (float) $total) * 100) : null;
+                    };
+                    $s['online'] = 1;
+                    $s['cpu'] = is_numeric($x['cpu-load'] ?? null) ? (int) $x['cpu-load'] : null;
+                    $s['mem'] = $pct($x['free-memory'] ?? null, $x['total-memory'] ?? null);
+                    $s['disk'] = $pct($x['free-hdd-space'] ?? null, $x['total-hdd-space'] ?? null);
+                    $s['uptime'] = self::seconds($x['uptime'] ?? '');
+                } catch (Throwable $e) {
+                    // the router refused the read (RouterApi marks a refusal with code 403): it answers, so it counts as online. No
+                    // answer in time (408), a connection that broke (the library's own exceptions) or anything else is offline.
+                    $s['online'] = $e->getCode() === 403 ? 1 : 0;
+                    $why = $e->getMessage();
+                }
+                if ($s['online']) {
+                    // users online: hotspot plus PPPoE, kept only when both are known. A menu the router does not have (no hotspot
+                    // package) counts as 0; a refusal or no answer makes the total unknown rather than half of it.
+                    $users = 0;
+                    // (PPP sessions are PPPoE only: L2TP, SSTP and the other tunnels are not customers)
+                    foreach (['/ip/hotspot/active/print' => null, '/ppp/active/print' => 'pppoe'] as $menu => $service) {
+                        try {
+                            $q = new PEAR2\Net\RouterOS\Request($menu, $service ? PEAR2\Net\RouterOS\Query::where('service', $service) : null);
+                            $q->setArgument('count-only', '');
+                            $res = RouterApi::send($c, $q, $until);
+                            $err = RouterApi::error($res);
+                            $n = RouterApi::text($res->end()->getProperty('ret'));
+                            if ($err !== null) {
+                                if (stripos($err, 'no such command') === false) {
+                                    $users = null;
+                                }
+                            } elseif (is_numeric($n)) {
+                                $users = $users === null ? null : $users + (int) $n;
+                            } else {
                                 $users = null;
                             }
-                        } elseif (is_numeric($n)) {
-                            $users = $users === null ? null : $users + (int) $n;
-                        } else {
+                        } catch (Throwable $e) {
                             $users = null;
                         }
+                    }
+                    $s['users'] = $users;
+                    try {
+                        // the uplink: the interface used before if it is still there, otherwise the busiest one
+                        $ifs = RouterApi::rows($c, '/interface/print', ['name', 'rx-byte', 'tx-byte', 'running'], $until);
+                        $pick = null;
+                        foreach ($ifs as $i) {
+                            if ($lastIf && $i['name'] === $lastIf['iface']) {
+                                $pick = $i;
+                                break;
+                            }
+                            if ($i['running'] === 'true' && is_numeric($i['rx-byte']) && (!$pick || (float) $i['rx-byte'] + (float) $i['tx-byte'] > (float) $pick['rx-byte'] + (float) $pick['tx-byte'])) {
+                                $pick = $i;
+                            }
+                        }
+                        if ($pick && is_numeric($pick['rx-byte']) && is_numeric($pick['tx-byte'])) {
+                            $s['iface'] = mb_substr((string) $pick['name'], 0, 64);
+                            $s['rx'] = $pick['rx-byte'];
+                            $s['tx'] = $pick['tx-byte'];
+                        }
                     } catch (Throwable $e) {
-                        $users = null;
                     }
                 }
-                $s['users'] = $users;
-                try {
-                    // the uplink: the interface used before if it is still there, otherwise the busiest one
-                    $ifs = RouterApi::rows($c, '/interface/print', ['name', 'rx-byte', 'tx-byte', 'running'], $until);
-                    $pick = null;
-                    foreach ($ifs as $i) {
-                        if ($lastIf && $i['name'] === $lastIf['iface']) {
-                            $pick = $i;
-                            break;
-                        }
-                        if ($i['running'] === 'true' && is_numeric($i['rx-byte']) && (!$pick || (float) $i['rx-byte'] + (float) $i['tx-byte'] > (float) $pick['rx-byte'] + (float) $pick['tx-byte'])) {
-                            $pick = $i;
-                        }
-                    }
-                    if ($pick && is_numeric($pick['rx-byte']) && is_numeric($pick['tx-byte'])) {
-                        $s['iface'] = mb_substr((string) $pick['name'], 0, 64);
-                        $s['rx'] = $pick['rx-byte'];
-                        $s['tx'] = $pick['tx-byte'];
-                    }
-                } catch (Throwable $e) {
-                }
+            } finally {
+                method_exists($c, 'abort') ? $c->abort() : null;
             }
         } else {
             $why = $err;
         }
+        // one time for the reading: kept with the row and used for the restart test against it
+        $at = time();
         $row = ORM::for_table('tbl_router_samples')->create();
         $row->router_id = $id;
-        $row->at = date('Y-m-d H:i:s');
+        $row->at = date('Y-m-d H:i:s', $at);
         foreach ($s as $k => $v) {
             $row->$k = $v;
         }
         $row->save();
-        self::events($r, $s, $prev, $why, (int) $row->id());
+        self::events($r, $s, $prev, $why, (int) $row->id(), $at);
         return $s['online'] ? 'online' . ($s['cpu'] !== null ? ', CPU ' . $s['cpu'] . '%' : '') : 'offline (' . $why . ')';
     }
 
@@ -240,7 +247,7 @@ class RouterMonitor
         }
     }
 
-    private static function events($r, array $s, $prev, $why, $sampleId)
+    private static function events($r, array $s, $prev, $why, $sampleId, $now)
     {
         $id = (int) $r['id'];
         $state = self::lastOf($id, ['offline', 'online']);
@@ -249,20 +256,20 @@ class RouterMonitor
             // offline only after the second failed reading in a row (two readings far apart, the cron having stopped meanwhile,
             // are not in a row), dated from the first one: that is when the outage began, and the event keeps it (readings are
             // pruned sooner than events) for the duration at recovery. An outage already confirmed stays so across any gap.
-            if (!$isDown && self::follows($prev, time()) && !(int) $prev['online']) {
+            if (!$isDown && self::follows($prev, $now) && !(int) $prev['online']) {
                 self::event($r, 'offline', $why, Lang::T('router is offline') . ' (' . Lang::T('no answer since') . ' ' . date('H:i', strtotime($prev['at'])) . ')', $prev['at']);
             }
             return;
         }
         if ($isDown) {
             // the offline event is dated from the first missed reading
-            $mins = max(1, (int) round((time() - strtotime($state['at'])) / 60));
+            $mins = max(1, (int) round(($now - strtotime($state['at'])) / 60));
             self::event($r, 'online', '', Lang::T('router is back online after about') . ' ' . self::duration($mins));
         }
         // a restart: the router's start time moved on since the last reading that had an uptime (failed readings in between have none)
         $lastUp = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where('online', 1)->where_not_null('uptime')
             ->where_lt('id', $sampleId)->order_by_desc('id')->find_one();
-        if ($lastUp && self::restarted(strtotime($lastUp['at']), $lastUp['uptime'], time(), $s['uptime'])) {
+        if ($lastUp && self::restarted(strtotime($lastUp['at']), $lastUp['uptime'], $now, $s['uptime'])) {
             self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')');
         }
         // high load: two readings in a row over the line to alert, and well under it to say it is fine again
@@ -272,7 +279,7 @@ class RouterMonitor
             }
             $last = self::lastOf($id, [$hi, $ok]);
             $high = $last && $last['type'] === $hi;
-            $twice = $k === 'disk' || (self::follows($prev, time()) && $prev[$k] !== null && (int) $prev[$k] >= $over);
+            $twice = $k === 'disk' || (self::follows($prev, $now) && $prev[$k] !== null && (int) $prev[$k] >= $over);
             if (!$high && $s[$k] >= $over && $twice) {
                 self::event($r, $hi, $s[$k] . '%', $label . ' ' . Lang::T('at') . ' ' . $s[$k] . '%');
             } elseif ($high && $s[$k] < $under) {
@@ -302,7 +309,8 @@ class RouterMonitor
         $text = '[' . ($config['CompanyName'] ?? 'PHPNuxBill') . '] ' . $text;
         try {
             if (($config['router_alert_telegram'] ?? '1') === '1') {
-                Message::sendTelegram($text);
+                // a short time limit (the default is minutes): a stalled Telegram must not hold up the other routers and the backups
+                Message::sendTelegram($text, null, '', 15);
             }
         } catch (Throwable $e) {
         }

@@ -1469,5 +1469,14 @@
     "Check_the_database_name_there_": "تحقق من اسم قاعدة البيانات هناك.",
     "Check_the_host_there__and_that_the_database_server_is_running_": "تحقق من عنوان الخادم هناك، ومن أن خادم قاعدة البيانات يعمل.",
     "Turn_RADIUS_on": "فعّل RADIUS",
-    "Settings___General_Settings__Radius_tab__set_Enable_Radius_to_Yes_and_save_": "الإعدادات > الإعدادات العامة، تبويب Radius: اجعل Enable Radius على Yes ثم احفظ."
+    "Settings___General_Settings__Radius_tab__set_Enable_Radius_to_Yes_and_save_": "الإعدادات > الإعدادات العامة، تبويب Radius: اجعل Enable Radius على Yes ثم احفظ.",
+    "The_router_closed_the_connection": "أغلق الراوتر الاتصال",
+    "Not_enabled__another_enabled_router_has_the_same_address": "لم يتم التفعيل، فهناك راوتر آخر مفعّل بنفس العنوان",
+    "No_walled_garden_rule_for_the_billing_site_was_found": "لم يتم العثور على قاعدة في Walled Garden لموقع الفوترة",
+    "Unless_an_IP_walled_garden_rule_allows_it__customers_cannot_open": "ما لم تسمح به قاعدة IP في Walled Garden، لن يتمكن العملاء من فتح",
+    "RADIUS_is_set_up_for_the_servers_that_could_be_read": "تم إعداد RADIUS للخوادم التي أمكن قراءتها",
+    "Could_not_tell_whether_these_need_it_too": "تعذّر معرفة ما إذا كانت هذه تحتاجه أيضًا",
+    "Use_the_left_and_right_arrow_keys_to_read_each_value__Home_and_End_for_the_first_and_last_": "استخدم مفتاحي السهمين الأيسر والأيمن لقراءة كل قيمة، ومفتاحي Home وEnd للأولى والأخيرة.",
+    "You_can_create_at_most": "يمكنك إنشاء ما يصل إلى",
+    "vouchers_at_a_time": "قسيمة في المرة الواحدة"
 }

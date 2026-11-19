@@ -17,7 +17,8 @@ require "{$root_path}system/autoload/mail/SMTP.php";
 class Message
 {
 
-    public static function sendTelegram($txt, $chat_id = null, $topik = '')
+    /** $timeout: seconds to connect and to wait for Telegram's answer (the default is the long one Http uses everywhere) */
+    public static function sendTelegram($txt, $chat_id = null, $topik = '', $timeout = 3000)
     {
         global $config;
         run_hook('send_telegram', [$txt, $chat_id, $topik]); #HOOK
@@ -28,7 +29,7 @@ class Message
             if (!empty($topik)) {
                 $topik = "message_thread_id=$topik&";
             }
-            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?' . $topik . 'chat_id=' . $chat_id . '&text=' . urlencode($txt));
+            return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?' . $topik . 'chat_id=' . $chat_id . '&text=' . urlencode($txt), [], $timeout, $timeout);
         }
     }
 

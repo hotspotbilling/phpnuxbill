@@ -74,7 +74,7 @@
                         <td data-label="{Lang::T('IP Address')}"><span class="ls-secret" tabindex="0">{$ds['ip_address']|escape}</span>{if isset($routely_vpn['addresses'][$ds['ip_address']])}{$rv = $routely_vpn['addresses'][$ds['ip_address']]} <a class="ls-pill ls-pill--routely{if $rv['state'] != 'up'} is-down{/if}" href="{Text::url('plugin/routely/vpn')}" title="{Lang::T('Reached through Routely VPN')}: {$rv['device']|escape} ({if $rv['state'] == 'up'}{Lang::T('connected')}{else}{Lang::T('not connected')}{/if})"><i class="fa fa-shield" aria-hidden="true"></i> Routely</a>{/if}</td>
                         <td data-label="{Lang::T('Username')}"><span class="ls-secret" tabindex="0">{$ds['username']|escape}</span></td>
                         <td data-label="{Lang::T('Description')}" class="ls-dim">{$ds['description']|escape}</td>
-                        {if $_c['router_check']}<td data-label="{Lang::T('Online Status')}"><span class="ls-pill {if $ds['status'] == 'Online'}ls-pill--active{else}ls-pill--banned{/if}">{if $ds['status'] == 'Online'}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}</span></td><td data-label="{Lang::T('Last Seen')}" class="ls-dim ls-when">{$ds['last_seen']|escape}</td>{/if}
+                        {if $_c['router_check']}<td data-label="{Lang::T('Online Status')}">{if $ds['status'] == ''}<span class="ls-pill">{Lang::T('Not checked yet')}</span>{else}<span class="ls-pill {if $ds['status'] == 'Online'}ls-pill--active{else}ls-pill--banned{/if}">{if $ds['status'] == 'Online'}{Lang::T('Online')}{else}{Lang::T('Offline')}{/if}</span>{/if}</td><td data-label="{Lang::T('Last Seen')}" class="ls-dim ls-when">{$ds['last_seen']|escape}</td>{/if}
                         {if $health_on}<td data-label="{Lang::T('Health')}" class="rt-health">{if $rt_can}<span class="rt-skel" aria-label="{Lang::T('Loading')}"></span>{else}<span class="ls-dim">&mdash;</span>{/if}</td>{/if}
                         <td data-label="{Lang::T('Customers')}" class="rt-cust"><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=on')}" title="{Lang::T('Active customers on this router')}"><b>{$rt_use['active']}</b> {Lang::T('active')}</a><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=off')}" class="ls-dim" title="{Lang::T('Expired customers on this router')}">{$rt_use['expired']|default:0} {Lang::T('expired')}</a></td>
                         <td data-label="{Lang::T('Status')}">{if $ds['enabled'] == 1}<span class="ls-pill ls-pill--active">{Lang::T('Enabled')}</span>{else}<span class="ls-pill ls-pill--banned">{Lang::T('Disabled')}</span>{/if}</td>
@@ -204,6 +204,7 @@
             events: '{Lang::T('Events')|escape:'javascript'}', noEvents: '{Lang::T('Nothing happened in this period')|escape:'javascript'}',
             noHistory: '{Lang::T('No readings yet. The cron reads each router about every 5 minutes; turn Router history on in Routers > Settings.')|escape:'javascript'}',
             noMetric: '{Lang::T('No readings for this graph in this period')|escape:'javascript'}',
+            chartKeys: '{Lang::T('Use the left and right arrow keys to read each value, Home and End for the first and last.')|escape:'javascript'}',
             notCollecting: '{Lang::T('Router history is off in Routers > Settings, so no new readings are kept.')|escape:'javascript'}',
             ev_offline: '{Lang::T('Went offline')|escape:'javascript'}', ev_online: '{Lang::T('Back online')|escape:'javascript'}', ev_reboot: '{Lang::T('Restarted')|escape:'javascript'}',
             ev_cpu_high: '{Lang::T('CPU high')|escape:'javascript'}', ev_cpu_ok: '{Lang::T('CPU normal')|escape:'javascript'}', ev_mem_high: '{Lang::T('Memory high')|escape:'javascript'}',
@@ -217,7 +218,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.10"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.11"></script>
 
 {if $health_on}
 <script>
@@ -261,7 +262,7 @@
         });
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.6" onerror="window.rtHealthFailed()"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.7" onerror="window.rtHealthFailed()"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

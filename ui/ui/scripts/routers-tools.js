@@ -292,8 +292,8 @@
         return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
     }
     // one y axis, 2px lines, a crosshair and tooltip; series: [{ label, cls, points: [[at, v]] }]; gaps (null) break the line
-    // empty: the text shown when no series has a value
-    function lineChart(series, fmt, max, from, to, long, empty) {
+    // empty: the text shown when no series has a value; title: the chart's name, for the keyboard and screen readers
+    function lineChart(series, fmt, max, from, to, long, empty, title) {
         var W = 600, H = 150, padL = 56, padR = 12, padT = 10, padB = 22;
         var vals = [];
         series.forEach(function (s) { s.points.forEach(function (p) { if (p[1] != null) vals.push(p[1]); }); });
@@ -323,41 +323,77 @@
         svg += '<line class="rt-chart__cross" x1="0" x2="0" y1="' + padT + '" y2="' + (H - padB) + '" hidden></line>';
         series.forEach(function (s) { svg += '<circle class="rt-chart__dot ' + s.cls + '" r="4" cx="0" cy="0" hidden></circle>'; });
         svg += '</svg>';
-        var html = '<div class="rt-chart__plot" data-from="' + from + '" data-to="' + to + '">' + svg
+        // with readings, the plot takes the keyboard focus: the arrow keys move the crosshair from reading to reading, and each
+        // one is also said in a hidden live region for screen readers (the drawing itself is hidden from them)
+        var html = '<div class="rt-chart__plot" data-from="' + from + '" data-to="' + to + '"'
+            + (vals.length ? ' tabindex="0" role="group" aria-label="' + esc((title ? title + '. ' : '') + t.chartKeys) + '"' : '') + '>' + svg
             + '<span class="rt-chart__y" style="top:' + (Y(top) / H * 100) + '%">' + esc(fmt(top)) + '</span>'
             + '<span class="rt-chart__y" style="top:' + (Y(top / 2) / H * 100) + '%">' + esc(fmt(top / 2)) + '</span>'
             + '<span class="rt-chart__y" style="top:' + (Y(0) / H * 100) + '%">' + esc(fmt(0)) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--start" style="left:' + (padL / W * 100) + '%">' + esc(stamp(from, long)) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--end">' + esc(stamp(to, long)) + '</span>'
             + (vals.length ? '' : '<span class="rt-chart__wait">' + esc(empty || t.noHistory) + '</span>')
-            + '<div class="rt-chart__tip" hidden></div></div>';
+            + '<div class="rt-chart__tip" hidden></div><span class="sr-only" aria-live="polite" data-rt-said></span></div>';
         return { html: html, wire: function (plot) {
             if (!vals.length) return;
             var el = plot.querySelector('svg'), cross = el.querySelector('.rt-chart__cross'), dots = el.querySelectorAll('.rt-chart__dot'), tip = plot.querySelector('.rt-chart__tip');
             var times = series[0].points.map(function (p) { return p[0]; });
-            plot.addEventListener('pointermove', function (ev) {
+            var said = plot.querySelector('[data-rt-said]');
+            var at0 = null; // the reading shown, by its place in times
+            // the readings that have a value in some series: the keys step through these only
+            var withValue = times.map(function (tm, i) { return i; }).filter(function (i) {
+                return series.some(function (s) { return s.points[i] && s.points[i][1] != null; });
+            });
+            function showAt(best, speak) {
                 var r = el.getBoundingClientRect();
-                var at = from + (((ev.clientX - r.left) / r.width) * W - padL) / (W - padL - padR) * (to - from);
-                var best = 0;
-                times.forEach(function (tm, i) { if (Math.abs(tm - at) < Math.abs(times[best] - at)) best = i; });
-                var tm = times[best], x = X(tm), rows = '';
+                at0 = best;
+                var tm = times[best], x = X(tm), rows = '', words = [];
                 cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.removeAttribute('hidden');
                 series.forEach(function (s, i) {
                     var p = s.points[best];
                     if (!p || p[1] == null) { dots[i].setAttribute('hidden', ''); return; }
                     dots[i].setAttribute('cx', x); dots[i].setAttribute('cy', Y(p[1])); dots[i].removeAttribute('hidden');
                     rows += '<span><i class="rt-key ' + s.cls + '"></i>' + esc(s.label) + ' <b>' + esc(fmt(p[1])) + '</b></span>';
+                    words.push(s.label + ' ' + fmt(p[1]));
                 });
                 tip.innerHTML = '<small>' + esc(stamp(tm, true)) + '</small>' + rows;
                 tip.hidden = false;
                 var left = x / W * r.width, flip = left > r.width / 2;
                 tip.style.left = (flip ? left - 10 : left + 10) + 'px';
                 tip.style.transform = flip ? 'translateX(-100%)' : 'none';
-            });
-            plot.addEventListener('pointerleave', function () {
+                if (speak) said.textContent = stamp(tm, true) + ': ' + (words.length ? words.join(', ') : '—');
+            }
+            function hide() {
                 cross.setAttribute('hidden', ''); tip.hidden = true;
                 dots.forEach(function (d) { d.setAttribute('hidden', ''); });
+            }
+            plot.addEventListener('pointermove', function (ev) {
+                var r = el.getBoundingClientRect();
+                var at = from + (((ev.clientX - r.left) / r.width) * W - padL) / (W - padL - padR) * (to - from);
+                var best = 0;
+                times.forEach(function (tm, i) { if (Math.abs(tm - at) < Math.abs(times[best] - at)) best = i; });
+                showAt(best, false);
             });
+            plot.addEventListener('pointerleave', function () {
+                if (document.activeElement !== plot) hide(); // the keyboard's reading stays while the plot has the focus
+            });
+            plot.addEventListener('keydown', function (e) {
+                if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(e.key) === -1 || !withValue.length) return;
+                e.preventDefault();
+                if (at0 == null) { // the first key: the newest reading (the oldest for Home)
+                    showAt(withValue[e.key === 'Home' ? 0 : withValue.length - 1], true);
+                    return;
+                }
+                var k = withValue.indexOf(at0);
+                if (k === -1) { // from a pointer position: the nearest reading that has a value
+                    k = 0;
+                    withValue.forEach(function (i, j) { if (Math.abs(i - at0) < Math.abs(withValue[k] - at0)) k = j; });
+                }
+                // (left and right follow the drawing, whose time runs left to right in every language)
+                k = e.key === 'Home' ? 0 : e.key === 'End' ? withValue.length - 1 : Math.max(0, Math.min(withValue.length - 1, k + (e.key === 'ArrowRight' ? 1 : -1)));
+                showAt(withValue[k], true);
+            });
+            plot.addEventListener('blur', function () { hide(); at0 = null; });
         } };
     }
     function legend(series) {
@@ -398,7 +434,7 @@
             charts.forEach(function (c, i) {
                 // with readings but none for this graph (no uplink found, users not countable) it says so, rather than asking
                 // for history to be turned on
-                var ch = lineChart(c.series, c.fmt, c.max, d.from, d.to, long, pts.length ? t.noMetric : '');
+                var ch = lineChart(c.series, c.fmt, c.max, d.from, d.to, long, pts.length ? t.noMetric : '', c.title);
                 wires.push(ch.wire);
                 html += '<figure class="rt-chart" data-rt-hchart="' + i + '"><figcaption class="rt-chart__head"><b>' + esc(c.title) + '</b><span class="rt-legend">'
                     + (c.series.length > 1 ? legend(c.series) : '') + '</span></figcaption><div class="rt-chart__box">' + ch.html + '</div></figure>';

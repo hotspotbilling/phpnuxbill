@@ -5755,5 +5755,7 @@
     "In_config_php__in_the_PHPNuxBill_folder__add_these_lines_with_your_own_values_": "In config.php, in the PHPNuxBill folder, add these lines with your own values:",
     "Found_in_config_php": "Found in config.php",
     "Turn_RADIUS_on": "Turn RADIUS on",
-    "Settings___General_Settings__Radius_tab__set_Enable_Radius_to_Yes_and_save_": "Settings > General Settings, Radius tab: set Enable Radius to Yes and save."
+    "Settings___General_Settings__Radius_tab__set_Enable_Radius_to_Yes_and_save_": "Settings > General Settings, Radius tab: set Enable Radius to Yes and save.",
+    "The_router_closed_the_connection": "The router closed the connection",
+    "Not_available_in_Demo_mode": "Not available in Demo mode"
 }

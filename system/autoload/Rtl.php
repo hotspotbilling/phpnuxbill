@@ -29,7 +29,14 @@ class Rtl
     const OWN_RTL = ['sweetalert2', 'select2'];
 
     /** Bumped when the mirroring changes, so the copies already made are made again */
-    const VERSION = 4;
+    const VERSION = 5;
+
+    /**
+     * Put on what has been mirrored already. Smarty runs the filter on fetch() as well as display(), so a part fetched and then
+     * shown inside a page (a dashboard widget) goes through twice: what carries the mark is left alone the second time, as
+     * mirroring it again would turn it back.
+     */
+    const MARK = '/*rtl*/';
 
     /** The language code (ar, en, ...) of the language in use, from system/lan/country.json */
     public static function iso()
@@ -70,14 +77,19 @@ class Rtl
                     return self::link($m[0]);
                 }, $part);
                 $part = preg_replace_callback('/(<style\b[^>]*>)(.*?)(<\/style\s*>)/is', function ($m) {
-                    return $m[1] . self::flip($m[2]) . $m[3];
+                    return strpos($m[2], self::MARK) !== false ? $m[0] : $m[1] . self::MARK . self::flip($m[2]) . $m[3];
                 }, $part);
                 // (an entity such as &quot; holds a semicolon: it splits into a part with no colon, which is kept as it is)
                 $part = preg_replace_callback('/(\sstyle\s*=\s*)(?:"([^"]*)"|\'([^\']*)\')/i', function ($m) {
                     $q = isset($m[3]) && $m[3] !== '' ? "'" : '"';
-                    return $m[1] . $q . self::declarations($q === "'" ? $m[3] : $m[2]) . $q;
+                    $v = $q === "'" ? $m[3] : $m[2];
+                    if (trim($v) === '' || strpos($v, self::MARK) !== false) {
+                        return $m[0];
+                    }
+                    $v = self::declarations($v);
+                    return $m[1] . $q . $v . (substr(rtrim($v), -1) === ';' ? '' : ';') . self::MARK . $q;
                 }, $part);
-                if (!$extra && stripos($part, '</head>') !== false) {
+                if (!$extra && stripos($part, '</head>') !== false && stripos($part, '/ui/ui/styles/rtl.css') === false) {
                     $part = preg_replace('/<\/head>/i', self::extraLink() . '</head>', $part, 1);
                     $extra = true;
                 }
@@ -116,7 +128,9 @@ class Rtl
         if ($url === null) {
             return $tag;
         }
-        return substr_replace($tag, '"' . htmlspecialchars($url, ENT_QUOTES) . '"', $h[1][1], strlen($h[1][0]));
+        $tag = substr_replace($tag, '"' . htmlspecialchars($url, ENT_QUOTES) . '"', $h[1][1], strlen($h[1][0]));
+        // an integrity hash is for the original file: the browser would refuse the mirrored copy with it
+        return preg_replace('/\sintegrity\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $tag);
     }
 
     private static function extraLink()
@@ -138,8 +152,9 @@ class Rtl
     public static function mirrored($href)
     {
         global $root_path, $UI_PATH;
+        static $busy = []; // the stylesheets being mirrored now: an @import that leads back to one of them is not followed
         $path = self::localPath($href);
-        if ($path === null) {
+        if ($path === null || isset($busy[$path])) {
             return null;
         }
         foreach (self::OWN_RTL as $own) {
@@ -149,33 +164,100 @@ class Rtl
         }
         $rel = substr($path, strlen(rtrim(realpath($root_path), DIRECTORY_SEPARATOR)) + 1);
         $rel = str_replace(DIRECTORY_SEPARATOR, '/', $rel);
-        $dir = $root_path . ($UI_PATH ?: 'ui') . '/cache/rtl';
+        $cache = ($UI_PATH ?: 'ui') . '/cache/rtl';
+        if (strpos($rel, $cache . '/') === 0 || $rel === ($UI_PATH ?: 'ui') . '/ui/styles/rtl.css') {
+            return null; // a mirrored copy already (a page that went through the filter twice), or rtl.css, written right to left
+        }
+        $dir = $root_path . $cache;
         $name = substr(sha1($rel), 0, 12) . '-' . preg_replace('/[^A-Za-z0-9_.-]/', '_', basename($rel));
         $out = $dir . '/' . $name;
         $mtime = filemtime($path);
-        $stamp = $mtime . '.' . self::VERSION;
-        if (!is_file($out) || filemtime($out) < $mtime || @file_get_contents($out, false, null, 0, strlen(self::stampLine($stamp))) !== self::stampLine($stamp)) {
-            if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
-                return null;
+        $busy[$path] = true;
+        try {
+            // the copy's first line names its stamp and the local stylesheets it imports: those are checked too, and a change
+            // to one of them makes this copy again, with the new address of the import's own copy
+            $head = self::readStamp($out);
+            $stamp = $head ? self::stamp($mtime, self::depUrls($head['deps'])) : null;
+            if (!$head || filemtime($out) < $mtime || $head['stamp'] !== $stamp) {
+                if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+                    return null;
+                }
+                $css = @file_get_contents($path);
+                if ($css === false) {
+                    return null;
+                }
+                // a local stylesheet it imports is mirrored as well, and imported from its copy
+                $deps = [];
+                $urls = [];
+                $css = preg_replace_callback('/@import\s+(?:url\(\s*(["\']?)([^"\')]+)\1\s*\)|(["\'])([^"\']+)\3)/i', function ($m) use ($rel, &$deps, &$urls) {
+                    $target = trim(isset($m[4]) && $m[4] !== '' ? $m[4] : $m[2]);
+                    if ($target === '' || preg_match('#^([a-z][a-z0-9+.-]*:|//)#i', $target)) {
+                        return $m[0]; // another site (or data:): left as it is
+                    }
+                    $site = $target[0] === '/' ? $target : APP_URL . '/' . (dirname($rel) === '.' ? '' : dirname($rel) . '/') . $target;
+                    $url = self::mirrored($site);
+                    $file = $url === null ? null : self::localPath($site);
+                    $dep = $file === null ? '' : str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen(rtrim(realpath($GLOBALS['root_path']), DIRECTORY_SEPARATOR)) + 1));
+                    if ($dep === '' || preg_match('/[\s,*]/', $dep)) {
+                        return $m[0]; // (a name the first line of the copy cannot list: imported unmirrored)
+                    }
+                    $deps[] = $dep;
+                    $urls[] = $url;
+                    return '@import url("' . $url . '")';
+                }, $css);
+                $stamp = self::stamp($mtime, $urls);
+                // the copy lives in ui/cache/rtl/: links to fonts and images are pointed back to the stylesheet's own folder
+                $css = self::rebase($css, self::relative($cache, dirname($rel)));
+                $tmp = $out . '.' . getmypid() . '.tmp';
+                if (@file_put_contents($tmp, self::stampLine($stamp, $deps) . self::flip($css)) === false || !@rename($tmp, $out)) {
+                    @unlink($tmp);
+                    return null;
+                }
             }
-            $css = @file_get_contents($path);
-            if ($css === false) {
-                return null;
-            }
-            // the copy lives in ui/cache/rtl/: links to fonts and images are pointed back to the stylesheet's own folder
-            $css = self::rebase($css, self::relative('ui/cache/rtl', dirname($rel)));
-            $tmp = $out . '.' . getmypid() . '.tmp';
-            if (@file_put_contents($tmp, self::stampLine($stamp) . self::flip($css)) === false || !@rename($tmp, $out)) {
-                @unlink($tmp);
-                return null;
-            }
+        } finally {
+            unset($busy[$path]);
         }
-        return APP_URL . '/' . ($UI_PATH ?: 'ui') . '/cache/rtl/' . $name . '?' . $stamp;
+        return APP_URL . '/' . $cache . '/' . $name . '?' . $stamp;
     }
 
-    private static function stampLine($stamp)
+    /** The stamp of a copy: the source's time and the mirroring version, and the addresses of the copies it imports */
+    private static function stamp($mtime, array $importUrls)
     {
-        return '/* rtl ' . $stamp . " */\n";
+        return $mtime . '.' . self::VERSION . ($importUrls ? '.' . substr(sha1(implode('|', $importUrls)), 0, 10) : '');
+    }
+
+    /** The addresses of the mirrored copies of these stylesheets (paths in the install), made again where they are out of date */
+    private static function depUrls(array $deps)
+    {
+        $urls = [];
+        foreach ($deps as $d) {
+            $u = self::mirrored(APP_URL . '/' . $d);
+            if ($u === null) {
+                return ['-']; // no copy now: the stamp cannot match, so the importing copy is made again
+            }
+            $urls[] = $u;
+        }
+        return $urls;
+    }
+
+    /** The stamp and imports written on a copy's first line, or null when the copy is missing or from before this format */
+    private static function readStamp($file)
+    {
+        $fh = @fopen($file, 'r');
+        if (!$fh) {
+            return null;
+        }
+        $line = (string) fgets($fh, 8192);
+        fclose($fh);
+        if (!preg_match('#^/\* rtl (\S+)(?: deps:(\S+))? \*/$#', rtrim($line, "\r\n"), $m)) {
+            return null;
+        }
+        return ['stamp' => $m[1], 'deps' => isset($m[2]) && $m[2] !== '' ? explode(',', $m[2]) : []];
+    }
+
+    private static function stampLine($stamp, array $deps = [])
+    {
+        return '/* rtl ' . $stamp . ($deps ? ' deps:' . implode(',', $deps) : '') . " */\n";
     }
 
     /** The file on disk for a stylesheet URL of this site (or a path relative to it); null for anything else */

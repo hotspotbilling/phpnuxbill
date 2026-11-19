@@ -12,6 +12,9 @@ use PEAR2\Net\RouterOS;
 
 class MikrotikPppoe
 {
+    // set while sync_customer() runs: a change the router refuses is thrown, so the sync counts that customer as not sent
+    private $strict = false;
+
     // show Description
     function description()
     {
@@ -58,13 +61,13 @@ class MikrotikPppoe
 			}
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-            $client->sendSync($setRequest);
+            $this->checked($client->sendSync($setRequest));
 
             if($unsetIP){
                 $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
                 $unsetRequest->setArgument('.id', $cid);
                 $unsetRequest->setArgument('value-name','remote-address');
-                $client->sendSync($unsetRequest);
+                $this->checked($client->sendSync($unsetRequest));
             }
 
 
@@ -80,7 +83,21 @@ class MikrotikPppoe
 
 	function sync_customer($customer, $plan)
     {
-        $this->add_customer($customer, $plan);
+        $this->strict = true;
+        try {
+            $this->add_customer($customer, $plan);
+        } finally {
+            $this->strict = false;
+        }
+    }
+
+    /** A command's replies; during a sync, the router's refusal (a !trap) is thrown instead of passing unnoticed */
+    private function checked($res)
+    {
+        if ($this->strict && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        return $res;
     }
 
     function remove_customer($customer, $plan)
@@ -370,7 +387,7 @@ class MikrotikPppoe
         if (!empty($customer['pppoe_ip']) && !$isExp) {
             $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
         }
-        $client->sendSync($setRequest);
+        $this->checked($client->sendSync($setRequest));
     }
 
     function removePpoeActive($client, $username)

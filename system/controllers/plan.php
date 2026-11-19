@@ -13,6 +13,8 @@ $action = $routes['1'];
 $ui->assign('_admin', $admin);
 
 $appUrl = APP_URL;
+// the most vouchers made in one go (the form says so, and voucher-post refuses more)
+$voucherMax = 5000;
 
 $select2_customer = <<<EOT
 <script>
@@ -672,7 +674,7 @@ switch ($action) {
         $r = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
         $ui->assign('r', $r);
         $ui->assign('csrf_token', Csrf::generateAndStoreToken());
-        $ui->assign('voucher_max', 1000);
+        $ui->assign('voucher_max', $voucherMax);
         run_hook('view_add_voucher'); #HOOK
         $ui->display('admin/voucher/add.tpl');
         break;
@@ -858,8 +860,8 @@ switch ($action) {
         }
         if (!Validator::UnsignedNumber($numbervoucher)) {
             $msg .= 'The Number of Vouchers must be a number' . '<br>';
-        } elseif ($numbervoucher > 1000) {
-            $msg .= Lang::T('You can create at most 1000 vouchers at a time') . '<br>';
+        } elseif ($numbervoucher > $voucherMax) {
+            $msg .= Lang::T('You can create at most') . ' ' . $voucherMax . ' ' . Lang::T('vouchers at a time') . '<br>';
         }
         if (!Validator::UnsignedNumber($lengthcode)) {
             $msg .= "The Length Code must be a number<br>";
@@ -938,6 +940,10 @@ switch ($action) {
                 r2(getUrl('plan/add-voucher/'), 'e', Lang::T('Not enough unused codes at this length, use a longer Length Code'));
             }
             $inBatch = array_flip(array_map($key, $vouchers));
+            // thousands of rows (and their print page) can take longer than the usual 30 seconds
+            if ($numbervoucher > 1000) {
+                @set_time_limit(300);
+            }
 
             ORM::raw_execute('START TRANSACTION');
             try {

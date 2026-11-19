@@ -23,8 +23,10 @@
     var live = {};           // id => { cpu: [[at, v]], mem: [[at, v]], prev: {name: {rx, tx, at}}, rate: {name: [[at, down, up]]}, iface, timer, paused, started }
     var queue = [];
     var running = 0;
-    var asked = {};          // id => number of the newest request sent
-    var applied = {};        // id => number of the newest request whose answer is shown
+    // per kind of request (the list's checks, the Live readings), id => number of the newest request sent / shown: kept apart, so
+    // a Check now cannot make a Live reading on its way look out of date (and the other way round)
+    var asked = { list: {}, live: {} };
+    var applied = { list: {}, live: {} };
     var LIMIT = 20000;       // ms a request (and reading its answer) may take before it counts as failed
 
     function esc(s) {
@@ -102,6 +104,9 @@
         if (!L || !d.at) return;
         if (d.at <= (L.lastAt || 0)) return; // the same (cached) reading again, whether or not it had a CPU figure
         L.lastAt = d.at;
+        // the router's address was changed since the last reading: its counters are another router's, so no speed across them
+        if (d.rev && L.rev && d.rev !== L.rev) L.prev = Object.create(null);
+        if (d.rev) L.rev = d.rev;
         var cut = d.at - WINDOW;
         function push(arr, row) {
             arr.push(row);
@@ -346,26 +351,40 @@
         if (opts.fresh) q.push('fresh=1');
         if (opts.live) q.push('live=1');
         var u = cfg.url + id + (q.length ? (cfg.url.indexOf('?') < 0 ? '?' : '&') + q.join('&') : '');
-        var seq = asked[id] = (asked[id] || 0) + 1;
+        var kind = opts.live ? 'live' : 'list';
+        var seq = asked[kind][id] = (asked[kind][id] || 0) + 1;
         // a deadline for the whole request, reading the answer included: a stuck one fails, so its queue place is freed and the
-        // live readings carry on
+        // live readings carry on. It is raced against the request, so it holds where requests cannot be cancelled as well.
         var ctl = window.AbortController ? new AbortController() : null;
-        var timer = ctl ? setTimeout(function () { ctl.abort(); }, LIMIT) : null;
-        return fetch(u, { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined })
-            .then(function (r) { return r.json(); })
+        var timer;
+        var deadline = new Promise(function (resolve) {
+            timer = setTimeout(function () { if (ctl) ctl.abort(); resolve({ ok: false, error: t.fail }); }, LIMIT);
+        });
+        return Promise.race([
+            fetch(u, { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined })
+                .then(function (r) { return r.json(); }),
+            deadline
+        ])
             .catch(function () { return { ok: false, error: t.fail }; })
             .then(function (d) {
                 clearTimeout(timer);
+                d = d || { ok: false, error: t.fail };
                 if (opts.gen !== undefined && (!live[id] || live[id].gen !== opts.gen || live[id].paused)) {
                     return data[id] || d;
                 }
                 var cur = data[id];
-                // answers can come back out of order (the list's first check, Check now, the live readings): one from a request
-                // older than the answer already shown is dropped, failures too, and so is an older reading served from the store
-                if (seq < (applied[id] || 0) || (d && d.ok && d.at && cur && cur.ok && cur.at && d.at < cur.at)) {
+                // answers of one kind can come back out of order: one from a request older than the answer already shown is
+                // dropped, failures too, and so is an older reading served from the store
+                if (seq < (applied[kind][id] || 0) || (d.ok && d.at && cur && cur.ok && cur.at && d.at < cur.at)) {
                     return cur || d;
                 }
-                applied[id] = seq;
+                applied[kind][id] = seq;
+                if (!opts.live && live[id] && !live[id].paused) {
+                    // a list check while the Live panel reads: the row's cell shows it; the panel, its graphs and how often it
+                    // reads are the Live readings' own
+                    cell(id, d);
+                    return d;
+                }
                 data[id] = d;
                 remember(id, d);
                 cell(id, d);
@@ -396,6 +415,9 @@
             return;
         }
         if (document.hidden) { // nothing is read for a hidden tab; it carries on when the tab is shown
+            // as after a pause (start()): the counters from before are no baseline, so the first reading back starts the speeds
+            // again and only the one after it gives a speed
+            L.prev = Object.create(null);
             L.timer = setTimeout(function () { tick(id, gen); }, EVERY);
             return;
         }

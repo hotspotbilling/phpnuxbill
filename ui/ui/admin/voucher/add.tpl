@@ -48,7 +48,7 @@
                             <label class="nf__label" for="numbervoucher">{Lang::T('Number of Vouchers')} <small>{Lang::T('Up to')} {$voucher_max}</small></label>
                             <input type="number" class="form-control" name="numbervoucher" id="numbervoucher" value="1" min="1" max="{$voucher_max}" step="1" required>
                             <div class="nf-presets__list nf-vg__counts">
-                                {foreach [10, 50, 100, 500, 1000] as $n}
+                                {foreach [10, 50, 100, 500, 1000, 5000] as $n}
                                     {if $n <= $voucher_max}<button type="button" class="nf-chip vg-count" data-n="{$n}">{$n}</button>{/if}
                                 {/foreach}
                             </div>
@@ -136,7 +136,7 @@
     // a sample code and a one-line summary that follow the form; jQuery and custom.js come with the footer, so this waits
     window.addEventListener('load', function () {
         var form = document.getElementById('voucherForm'), $ = window.jQuery;
-        var max = parseInt(form.getAttribute('data-max'), 10) || 1000;
+        var max = parseInt(form.getAttribute('data-max'), 10) || 5000;
         var printNow = document.getElementById('print_now'), perPage = document.getElementById('voucher-print');
         var sample = function (format, len) {
             var pool = format === 'numbers' ? '0123456789' : format === 'low' ? '0123456789abcdef' : '0123456789ABCDEF', out = '';

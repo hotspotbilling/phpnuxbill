@@ -266,8 +266,8 @@
         });
     })();
 
-    // "host:port" typed or picked into the address (the Routely suggestions are like that) moves the port to its own field, unless
-    // a port is already there: the port field wins, as it does when saving
+    // "host:port" typed or picked into the address (the Routely suggestions are like that) moves the port to its own field,
+    // replacing the one there: the address was just chosen with that port. The port can still be changed afterwards.
     (function () {
         var host = document.getElementById('ip_address'), port = document.getElementById('api_port');
         if (!host || !port) return;
@@ -278,7 +278,7 @@
             var m = /^\[([^\]]+)\]:(\d+)$/.exec(v) || /^([^:\[\]]+):(\d+)$/.exec(v);
             if (m) {
                 host.value = m[1];
-                if (port.value.trim() === '') port.value = m[2];
+                port.value = m[2];
             }
         });
     })();
