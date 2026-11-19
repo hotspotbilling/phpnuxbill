@@ -20,6 +20,8 @@ function _notify($msg, $type = 'e')
 }
 
 $ui = new Smarty();
+// right-to-left languages (Arabic, Urdu, ...): each page is mirrored as it is sent; other languages pass through unchanged
+$ui->registerFilter('output', ['Rtl', 'filter']);
 $ui->assign('_kolaps', (!empty($_COOKIE['kolaps']) && $_COOKIE['kolaps'] === 'true'));
 // Theme system — Phase 4
 $themeMeta = [];

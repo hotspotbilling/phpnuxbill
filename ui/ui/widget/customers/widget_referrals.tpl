@@ -94,9 +94,9 @@
             </div>
             <hr>
             {if $referrer}
-            <p>Referred by: <strong>{$referrer->referrer_name|escape:'html'}</strong></p>
+            <p>{Lang::T('Referred by')}: <strong>{$referrer->referrer_name|escape:'html'}</strong></p>
             {else}
-            <p>Not referred by anyone</p>
+            <p>{Lang::T('Not referred by anyone')}</p>
             {/if}
         </div>
     </div>

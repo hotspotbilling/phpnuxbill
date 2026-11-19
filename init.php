@@ -165,18 +165,19 @@ if ((!empty($radius_user) && $config['radius_enable']) || _post('radius_enable')
 // Check if the user has selected a language (not loaded for a light RADIUS request: $_L stays empty, $lan_file unset)
 if ($radiusLight) {
     $_L = [];
-} else if (!empty($_SESSION['user_language'])) {
+} else if (!empty($_SESSION['user_language']) && Lang::valid($_SESSION['user_language'])) {
     $config['language'] = $_SESSION['user_language'];
-} else if (!empty($_COOKIE['user_language'])) {
+} else if (!empty($_COOKIE['user_language']) && Lang::valid($_COOKIE['user_language'])) {
+    // (the cookie is the visitor's own: only a language that has a file is taken, as the name becomes a file path)
     $config['language'] = $_COOKIE['user_language'];
 } else if (User::getID() > 0) {
     $lang = User::getAttribute("Language");
-    if (!empty($lang)) {
+    if (!empty($lang) && Lang::valid($lang)) {
         $config['language'] = $lang;
     }
 }
 
-if (empty($config['language'])) {
+if (empty($config['language']) || !preg_match('/^[a-z][a-z0-9_]{0,31}$/', (string) $config['language'])) {
     $config['language'] = 'english';
 }
 if (!$radiusLight) {

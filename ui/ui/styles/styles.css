@@ -10913,6 +10913,7 @@ body.dark-mode .rt-detail {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+/* @noflip */ /* the charts are drawn left to right in every language: their labels stay where the drawing puts them */
 .rt-chart__y {
   left: 0;
   transform: translateY(-50%);
@@ -10920,9 +10921,11 @@ body.dark-mode .rt-detail {
 .rt-chart__x {
   bottom: 0;
 }
+/* @noflip */
 .rt-chart__x--end {
   right: 0;
 }
+/* @noflip */
 .rt-chart__wait {
   position: absolute;
   inset: 0 0 22px 56px;

@@ -189,7 +189,7 @@
             name: '{Lang::T('Name')|escape:'javascript'}', type: '{Lang::T('Type')|escape:'javascript'}', state: '{Lang::T('State')|escape:'javascript'}',
             up: '{Lang::T('Up')|escape:'javascript'}', down: '{Lang::T('Down')|escape:'javascript'}', disabled: '{Lang::T('Disabled')|escape:'javascript'}',
             traffic: '{Lang::T('Traffic')|escape:'javascript'}', errors: '{Lang::T('Errors / drops')|escape:'javascript'}', linkDowns: '{Lang::T('Link downs')|escape:'javascript'}',
-            lastUp: '{Lang::T('Last up')|escape:'javascript'}', runAgain: '{Lang::T('Check again')|escape:'javascript'}', allGood: '{Lang::T('Nothing to fix')|escape:'javascript'}',
+            lastUp: '{Lang::T('Last up')|escape:'javascript'}', runAgain: '{Lang::T('Check again')|escape:'javascript'}', allGood: '{Lang::T('Nothing to fix')|escape:'javascript'}', oneProblem: '{Lang::T('thing to look at')|escape:'javascript'}', problems: '{Lang::T('things to look at')|escape:'javascript'}',
             routeros: 'RouterOS', firmware: '{Lang::T('Firmware')|escape:'javascript'}', channel: '{Lang::T('Channel')|escape:'javascript'}',
             installed: '{Lang::T('Installed')|escape:'javascript'}', latest: '{Lang::T('Latest')|escape:'javascript'}', notChecked: '{Lang::T('not checked yet')|escape:'javascript'}',
             checkUpdates: '{Lang::T('Check for updates')|escape:'javascript'}', newer: '{Lang::T('Update available')|escape:'javascript'}', current: '{Lang::T('Up to date')|escape:'javascript'}',
@@ -216,7 +216,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.8"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.9"></script>
 
 {if $health_on}
 <script>

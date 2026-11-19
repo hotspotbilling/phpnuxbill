@@ -407,6 +407,9 @@ switch ($action) {
     case 'language-update-post':
         global $root_path;
         $selected_language = _req('lang', 'english');
+        if (!Lang::valid($selected_language)) {
+            r2(getUrl('home'), 'e', Lang::T('Language not found'));
+        }
 
         $_SESSION['user_language'] = $selected_language;
 

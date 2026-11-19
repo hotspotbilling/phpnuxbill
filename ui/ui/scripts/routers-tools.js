@@ -207,7 +207,7 @@
             if (!d.ok) { pane.innerHTML = head(t.runAgain) + fail(d); return; }
             var problems = d.items.filter(function (i) { return i.state !== 'ok'; }).length;
             var icon = { ok: 'fa-check-circle', warn: 'fa-exclamation-circle', bad: 'fa-times-circle' };
-            var html = head(problems ? problems + ' ' + (problems === 1 ? 'thing to look at' : 'things to look at') : t.allGood) + '<ul class="rt-checks">';
+            var html = head(problems ? problems + ' ' + (problems === 1 ? t.oneProblem : t.problems) : t.allGood) + '<ul class="rt-checks">';
             d.items.forEach(function (i) {
                 html += '<li class="rt-check rt-check--' + esc(i.state) + '"><i class="fa ' + icon[i.state] + '" aria-hidden="true"></i><div><b>' + esc(i.title) + '</b>'
                     + (i.detail ? '<small>' + esc(i.detail) + '</small>' : '') + '</div></li>';

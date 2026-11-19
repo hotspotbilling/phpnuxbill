@@ -20,7 +20,7 @@
             </div>
             <div class="mp-stats">
                 <div class="mp-stat"><b>{$stats.total + 1}</b><span>{Lang::T('Themes')}</span></div>
-                <div class="mp-stat"><b>{if $active_theme eq 'default'}Default{else}{$active_theme|escape}{/if}</b><span>{Lang::T('Active')}</span></div>
+                <div class="mp-stat"><b>{if $active_theme eq 'default'}{Lang::T('Default')}{else}{$active_theme|escape}{/if}</b><span>{Lang::T('Active')}</span></div>
                 <div class="mp-stat"><b>{$stats.updates}</b><span>{Lang::T('Updates')}</span></div>
                 <div class="mp-stat"><b>{$stats.child}</b><span>{Lang::T('Child')}</span></div>
             </div>

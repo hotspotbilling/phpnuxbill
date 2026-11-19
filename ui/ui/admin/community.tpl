@@ -154,9 +154,25 @@
     </div>
 </div>
 
+<script>
+    // the version check's messages, in the language in use ([current] and [latest] are filled in by the script)
+    window.cpTexts = {
+        noCheck: '{Lang::T('Could not check for updates')|escape:'javascript'}',
+        noLatest: '{Lang::T('The latest version could not be read from GitHub. Try again later.')|escape:'javascript'}',
+        update: '{Lang::T('An update is available')|escape:'javascript'}',
+        updateFrom: '{Lang::T('[current] to [latest]')|escape:'javascript'}',
+        upToDate: '{Lang::T('PHPNuxBill is up to date')|escape:'javascript'}',
+        running: '{Lang::T('You are running [current].')|escape:'javascript'}',
+        ahead: '{Lang::T('You are ahead of the public release')|escape:'javascript'}',
+        newer: '{Lang::T('This build ([current]) is newer than [latest].')|escape:'javascript'}',
+        noCurrent: '{Lang::T('Could not read the installed version')|escape:'javascript'}'
+    };
+</script>
 {literal}
 <script>
 window.addEventListener('DOMContentLoaded', function () {
+    var T = window.cpTexts;
+    function fill(s) { return s.replace('[current]', current).replace('[latest]', latest); }
     var status = document.getElementById('cpStatus');
     var cur = document.getElementById('currentVersion');
     var lat = document.getElementById('latestVersion');
@@ -181,16 +197,16 @@ window.addEventListener('DOMContentLoaded', function () {
         if (current === null || latest === null) { return; }
         if (current === false) { return; }
         if (latest === false) {
-            show('', 'fa-question-circle', 'Could not check for updates', 'The latest version could not be read from GitHub. Try again later.');
+            show('', 'fa-question-circle', T.noCheck, T.noLatest);
             return;
         }
         var c = cmp(current, latest);
         if (c < 0) {
-            show('new', 'fa-arrow-circle-up', 'An update is available', current + ' to ' + latest);
+            show('new', 'fa-arrow-circle-up', T.update, fill(T.updateFrom));
         } else if (c === 0) {
-            show('ok', 'fa-check-circle', 'PHPNuxBill is up to date', 'You are running ' + current + '.');
+            show('ok', 'fa-check-circle', T.upToDate, fill(T.running));
         } else {
-            show('ok', 'fa-check-circle', 'You are ahead of the public release', 'This build (' + current + ') is newer than ' + latest + '.');
+            show('ok', 'fa-check-circle', T.ahead, fill(T.newer));
         }
     }
 
@@ -201,7 +217,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
     fetch('./version.json?' + Date.now()).then(function (r) { return r.json(); }).then(function (d) {
         current = versionOf(d); setVer(cur, current); decide();
-    }).catch(function () { current = false; setVer(cur, '?'); status.querySelector('b').textContent = 'Could not read the installed version'; });
+    }).catch(function () { current = false; setVer(cur, '?'); status.querySelector('b').textContent = T.noCurrent; });
 
     fetch('https://raw.githubusercontent.com/hotspotbilling/phpnuxbill/master/version.json?' + Date.now()).then(function (r) { return r.json(); }).then(function (d) {
         latest = versionOf(d); setVer(lat, latest); decide();

@@ -1,13 +1,13 @@
 {if $_c['disable_voucher'] != 'yes' && $stocks['unused']>0 || $stocks['used']>0}
     <div class="panel panel-primary mb20 panel-hovered project-stats table-responsive">
-        <div class="panel-heading">Vouchers Stock</div>
+        <div class="panel-heading">{Lang::T('Vouchers Stock')}</div>
         <div class="table-responsive">
             <table class="table table-condensed">
                 <thead>
                     <tr>
                         <th>{Lang::T('Package Name')}</th>
-                        <th>unused</th>
-                        <th>used</th>
+                        <th>{Lang::T('Unused')}</th>
+                        <th>{Lang::T('Used')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -20,7 +20,7 @@
                     </tbody>
                 {/foreach}
                 <tr>
-                    <td>Total</td>
+                    <td>{Lang::T('Total')}</td>
                     <td>{$stocks['unused']}</td>
                     <td>{$stocks['used']}</td>
                 </tr>

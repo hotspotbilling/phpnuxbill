@@ -1206,6 +1206,72 @@
     window.dashboardCurrencyCode = "{$_c['currency_code']}";
 </script>
 
+<script>
+    // the dashboard's words drawn by its scripts (chart labels, legends), in the language in use
+    window.dashTexts = {
+        'Jan': '{Lang::T('Jan')|escape:'javascript'}',
+        'Feb': '{Lang::T('Feb')|escape:'javascript'}',
+        'Mar': '{Lang::T('Mar')|escape:'javascript'}',
+        'Apr': '{Lang::T('Apr')|escape:'javascript'}',
+        'May': '{Lang::T('May')|escape:'javascript'}',
+        'Jun': '{Lang::T('Jun')|escape:'javascript'}',
+        'Jul': '{Lang::T('Jul')|escape:'javascript'}',
+        'Aug': '{Lang::T('Aug')|escape:'javascript'}',
+        'Sep': '{Lang::T('Sep')|escape:'javascript'}',
+        'Oct': '{Lang::T('Oct')|escape:'javascript'}',
+        'Nov': '{Lang::T('Nov')|escape:'javascript'}',
+        'Dec': '{Lang::T('Dec')|escape:'javascript'}',
+        'Sun': '{Lang::T('Sun')|escape:'javascript'}',
+        'Mon': '{Lang::T('Mon')|escape:'javascript'}',
+        'Tue': '{Lang::T('Tue')|escape:'javascript'}',
+        'Wed': '{Lang::T('Wed')|escape:'javascript'}',
+        'Thu': '{Lang::T('Thu')|escape:'javascript'}',
+        'Fri': '{Lang::T('Fri')|escape:'javascript'}',
+        'Sat': '{Lang::T('Sat')|escape:'javascript'}',
+        'Sales Revenue': '{Lang::T('Sales Revenue')|escape:'javascript'}',
+        'New Customers': '{Lang::T('New Customers')|escape:'javascript'}',
+        'Expired / Churned': '{Lang::T('Expired / Churned')|escape:'javascript'}',
+        'Online': '{Lang::T('Online')|escape:'javascript'}',
+        'Offline': '{Lang::T('Offline')|escape:'javascript'}',
+        'No Nodes': '{Lang::T('No Nodes')|escape:'javascript'}',
+        'None configured': '{Lang::T('None configured')|escape:'javascript'}',
+        'No Nodes Configured': '{Lang::T('No Nodes Configured')|escape:'javascript'}',
+        'Revenue': '{Lang::T('Revenue')|escape:'javascript'}',
+        'Transactions': '{Lang::T('Transactions')|escape:'javascript'}',
+        'Activity': '{Lang::T('Activity')|escape:'javascript'}',
+        'Sold Count': '{Lang::T('Sold Count')|escape:'javascript'}',
+        'Used': '{Lang::T('Used')|escape:'javascript'}',
+        'Free': '{Lang::T('Free')|escape:'javascript'}',
+        'Load': '{Lang::T('Load')|escape:'javascript'}',
+        'Idle': '{Lang::T('Idle')|escape:'javascript'}',
+        'Count': '{Lang::T('Count')|escape:'javascript'}',
+        'Manage Radius NAS': '{Lang::T('Manage Radius NAS')|escape:'javascript'}',
+        'View Customers': '{Lang::T('View Customers')|escape:'javascript'}',
+        'Manage Routers': '{Lang::T('Manage Routers')|escape:'javascript'}'
+    };
+    window.dashT = function (s) { return (window.dashTexts && window.dashTexts[s]) || s; };
+    // the month and day names in the chart labels come from the server in English (and are cached for every language)
+    (function () {
+        var tr = function (v) {
+            return typeof v !== 'string' ? v : v.replace(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Sun|Mon|Tue|Wed|Thu|Fri|Sat)\b/g, window.dashT);
+        };
+        var walk = function (o) {
+            if (Array.isArray(o)) return o.map(walk);
+            if (o && typeof o === 'object') {
+                Object.keys(o).forEach(function (k) {
+                    o[k] = k === 'labels' && Array.isArray(o[k]) ? o[k].map(tr) : k === 'label' ? tr(o[k]) : walk(o[k]);
+                });
+            }
+            return o;
+        };
+        var el = document.getElementById('dashboard-raw-data');
+        try {
+            if (el && el.textContent.trim()) el.textContent = JSON.stringify(walk(JSON.parse(el.textContent)));
+        } catch (e) {}
+        if (window.dashboardData) walk(window.dashboardData);
+    })();
+</script>
+
 {literal}
 <script>
     // Initialize chart variables
@@ -1269,7 +1335,7 @@
                 data: {
                     labels: dData.sales.day.labels,
                     datasets: [{
-                        label: 'Sales Revenue',
+                        label: dashT('Sales Revenue'),
                         data: dData.sales.day.values,
                         borderColor: colors.blue,
                         backgroundColor: salesGrad,
@@ -1327,13 +1393,13 @@
                     labels: dData.customerGrowth.labels,
                     datasets: [
                         {
-                            label: 'New Customers',
+                            label: dashT('New Customers'),
                             data: dData.customerGrowth.new,
                             backgroundColor: colors.green,
                             borderRadius: 6
                         },
                         {
-                            label: 'Expired / Churned',
+                            label: dashT('Expired / Churned'),
                             data: dData.customerGrowth.churned,
                             backgroundColor: colors.red,
                             borderRadius: 6
@@ -1376,7 +1442,7 @@
 
             const chartData = totalNodes > 0 ? [onlineCount, offlineCount] : [1];
             const chartColors = totalNodes > 0 ? [colors.green, colors.red] : [isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'];
-            const chartLabels = totalNodes > 0 ? ['Online', 'Offline'] : ['No Nodes'];
+            const chartLabels = totalNodes > 0 ? [dashT('Online'), dashT('Offline')] : [dashT('No Nodes')];
 
             const centerPlugin = {
                 id: 'networkCenterText',
@@ -1403,7 +1469,7 @@
                         ctx.fillText('0 Nodes', centerX, centerY - 6);
 
                         ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-                        ctx.fillText('None configured', centerX, centerY + 14);
+                        ctx.fillText(dashT('None configured'), centerX, centerY + 14);
                     }
                     ctx.restore();
                 }
@@ -1434,7 +1500,7 @@
                                 generateLabels: function (chart) {
                                     if (totalNodes === 0) {
                                         return [{
-                                            text: 'No Nodes Configured',
+                                            text: dashT('No Nodes Configured'),
                                             fillStyle: isDark ? '#4a5568' : '#cbd5e0',
                                             strokeStyle: isDark ? '#4a5568' : '#cbd5e0',
                                             lineWidth: 0,
@@ -1492,7 +1558,7 @@
                 data: {
                     labels: dData.transactions.labels,
                     datasets: [{
-                        label: 'Revenue',
+                        label: dashT('Revenue'),
                         data: dData.transactions.totals,
                         backgroundColor: colors.blue,
                         borderRadius: 6
@@ -1548,7 +1614,7 @@
                 data: {
                     labels: dData.routerUsage.labels,
                     datasets: [{
-                        label: 'Transactions',
+                        label: dashT('Transactions'),
                         data: dData.routerUsage.values,
                         backgroundColor: hsColors.slice(0, dData.routerUsage.labels.length),
                         borderRadius: 6
@@ -1582,7 +1648,7 @@
                 data: {
                     labels: dData.portalLogins.labels,
                     datasets: [{
-                        label: 'Activity',
+                        label: dashT('Activity'),
                         data: dData.portalLogins.values,
                         backgroundColor: 'rgba(102, 126, 234, 0.25)',
                         borderColor: colors.indigo,
@@ -1657,7 +1723,7 @@
                 data: {
                     labels: dData.topPlans.labels,
                     datasets: [{
-                        label: 'Sold Count',
+                        label: dashT('Sold Count'),
                         data: dData.topPlans.counts,
                         backgroundColor: colors.purple,
                         borderRadius: 6
@@ -1845,7 +1911,7 @@
             diskChart = new Chart(diskCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Used', 'Free'],
+                    labels: [dashT('Used'), dashT('Free')],
                     datasets: [{
                         data: [diskUsed, diskFree],
                         backgroundColor: [diskColor, isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'],
@@ -1970,7 +2036,7 @@
             cpuChart = new Chart(cpuCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Load', 'Idle'],
+                    labels: [dashT('Load'), dashT('Idle')],
                     datasets: [{
                         data: [cpuPct, idlePct],
                         backgroundColor: [cpuColor, isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'],
@@ -2064,7 +2130,7 @@
 
                     const metric = this.getAttribute('data-metric');
                     if (ticketsChart) {
-                        ticketsChart.data.datasets[0].label = metric === 'totals' ? 'Revenue' : 'Count';
+                        ticketsChart.data.datasets[0].label = metric === 'totals' ? dashT('Revenue') : dashT('Count');
                         ticketsChart.data.datasets[0].data = dData.transactions[metric];
                         ticketsChart.options.plugins.tooltip.callbacks.label = function (ctx) {
                             return metric === 'totals' ? formatMoney(ctx.parsed.y) : ctx.parsed.y + ' transactions';
@@ -2124,13 +2190,13 @@
 
                     if (netManageLink) {
                         if (tab === 'radius') {
-                            netManageLink.innerHTML = 'Manage Radius NAS';
+                            netManageLink.textContent = dashT('Manage Radius NAS');
                             netManageLink.href = netManageLink.getAttribute('data-radius-url');
                         } else if (tab === 'online') {
-                            netManageLink.innerHTML = 'View Customers';
+                            netManageLink.textContent = dashT('View Customers');
                             netManageLink.href = netManageLink.getAttribute('data-online-url');
                         } else {
-                            netManageLink.innerHTML = 'Manage Routers';
+                            netManageLink.textContent = dashT('Manage Routers');
                             netManageLink.href = netManageLink.getAttribute('data-routers-url');
                         }
                     }
