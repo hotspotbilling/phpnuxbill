@@ -1,0 +1,66 @@
+{include file="sections/header.tpl"}
+{*
+    Shown by radius.php instead of the NAS pages while the RADIUS database cannot be used. $problem: why (config, enabled,
+    database, tables, login, connect), config / enabled (whether those steps are done), host, name, detail (the database's
+    own message, when there is one).
+*}
+{$why = $problem['why']}
+<div class="ls st">
+    <section class="ls-card">
+        <header class="st-card-head">
+            <div>
+                <h3><i class="fa fa-database" aria-hidden="true"></i>
+                    {if $why == 'config'}{Lang::T('The RADIUS database is not set up yet')}
+                    {elseif $why == 'enabled'}{Lang::T('RADIUS is turned off')}
+                    {elseif $why == 'database'}{Lang::T('The RADIUS database does not exist')}
+                    {elseif $why == 'tables'}{Lang::T('The RADIUS database has no tables yet')}
+                    {elseif $why == 'login'}{Lang::T('PHPNuxBill cannot sign in to the RADIUS database')}
+                    {else}{Lang::T('The RADIUS database cannot be reached')}{/if}
+                </h3>
+                <small>{Lang::T('Network Access Servers (NAS) are kept in the FreeRADIUS database, separate from the PHPNuxBill one. Set it up once with the steps below, then open this page again.')}</small>
+            </div>
+        </header>
+        <div class="st-card-body">
+            {if $problem['detail']|default:'' != ''}
+            <p class="rt-err rt-err--block"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {$problem['detail']|escape}</p>
+            {/if}
+
+            <ul class="rt-checks">
+                {* known to be missing only once the database was reached (or the server said it has no such database) *}
+                <li class="rt-check rt-check--{if $why == 'database' || $why == 'tables'}bad{else}warn{/if}">
+                    <i class="fa {if $why == 'database' || $why == 'tables'}fa-times-circle{else}fa-exclamation-circle{/if}" aria-hidden="true"></i>
+                    <div>
+                        <b>1. {Lang::T('Create the RADIUS database and its tables')}</b>
+                        <small>{Lang::T('In your hosting panel (cPanel: MySQL Databases) create a database and a user for it, then import install/radius.sql from the PHPNuxBill folder into it (phpMyAdmin: Import). From a terminal:')}</small>
+                        <pre class="nf__code">mysql -u RADIUS_USER -p RADIUS_DATABASE &lt; install/radius.sql</pre>
+                        {if $why == 'tables'}<small>{Lang::T('The database exists, but the tables are missing: import install/radius.sql into it.')}</small>{/if}
+                    </div>
+                </li>
+                <li class="rt-check rt-check--{if $problem['config']}ok{else}bad{/if}">
+                    <i class="fa {if $problem['config']}fa-check-circle{else}fa-times-circle{/if}" aria-hidden="true"></i>
+                    <div>
+                        <b>2. {Lang::T('Add its login to config.php')}</b>
+                        <small>{Lang::T('In config.php, in the PHPNuxBill folder, add these lines with your own values:')}</small>
+<pre class="nf__code">$radius_host = 'localhost';
+$radius_user = 'RADIUS_USER';
+$radius_pass = 'RADIUS_PASSWORD';
+$radius_name = 'RADIUS_DATABASE';</pre>
+                        {if $problem['config']}<small>{Lang::T('Found in config.php')}: {$problem['name']|escape}{if $problem['host'] != ''} @ {$problem['host']|escape}{/if}. {if $why == 'login'}{Lang::T('Check the user name and password there.')}{elseif $why == 'database'}{Lang::T('Check the database name there.')}{elseif $why == 'connect'}{Lang::T('Check the host there, and that the database server is running.')}{/if}</small>{/if}
+                    </div>
+                </li>
+                <li class="rt-check rt-check--{if $problem['enabled']}ok{else}bad{/if}">
+                    <i class="fa {if $problem['enabled']}fa-check-circle{else}fa-times-circle{/if}" aria-hidden="true"></i>
+                    <div>
+                        <b>3. {Lang::T('Turn RADIUS on')}</b>
+                        <small>{Lang::T('Settings > General Settings, Radius tab: set Enable Radius to Yes and save.')}</small>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <footer class="st-card-foot">
+            <a class="ls-btn" href="{Text::url('settings/app')}"><i class="fa fa-cog" aria-hidden="true"></i> {Lang::T('General Settings')}</a>
+            <a class="ls-btn ls-btn--primary" href="{Text::url('radius/nas-list')}"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Check again')}</a>
+        </footer>
+    </section>
+</div>
+{include file="sections/footer.tpl"}

@@ -10959,6 +10959,19 @@ body.dark-mode .rt-detail {
 .rt-chart__dot.rt-s2 {
   fill: var(--rt-s2);
 }
+/* a command or a few lines of config to copy (RADIUS database steps); .ls so the settings-page pre margins (.st pre) do not apply */
+.ls pre.nf__code {
+  margin: 6px 0 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--ls-line);
+  border-radius: 8px;
+  background: var(--ls-field);
+  color: var(--ls-ink);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
 /* a reading with no neighbour to draw a line to (History) */
 .rt-chart__pt {
   fill: var(--rt-s1);

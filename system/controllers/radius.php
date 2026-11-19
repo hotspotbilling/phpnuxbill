@@ -16,6 +16,50 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
+// The NAS pages keep their list in the separate RADIUS database. When it is not set up (no RADIUS login in config.php, or
+// RADIUS turned off in the settings), cannot be reached, or has no tables yet, a page says what is missing and how to set it
+// up, instead of the database error. The connection is only made when config.php has the login and RADIUS is on (init.php);
+// without it the database library falls back to a default that is not a real database.
+$radiusProblem = function () {
+    global $config, $radius_user, $radius_host, $radius_name;
+    $state = [
+        'config' => !empty($radius_user) && !empty($radius_name),
+        'enabled' => !empty($config['radius_enable']),
+        'host' => (string) ($radius_host ?? ''),
+        'name' => (string) ($radius_name ?? ''),
+    ];
+    if (!$state['config']) {
+        return ['why' => 'config'] + $state;
+    }
+    if (!$state['enabled'] || !SystemInfo::radiusConnectionConfigured()) {
+        return ['why' => 'enabled'] + $state;
+    }
+    try {
+        ORM::for_table('nas', 'radius')->limit(1)->find_array();
+        return null;
+    } catch (Throwable $e) {
+        $msg = $e->getMessage();
+        if (stripos($msg, 'Unknown database') !== false) {
+            $why = 'database';
+        } elseif (stripos($msg, "doesn't exist") !== false || stripos($msg, '42S02') !== false) {
+            $why = 'tables';
+        } elseif (stripos($msg, 'Access denied') !== false) {
+            $why = 'login';
+        } else {
+            $why = 'connect';
+        }
+        // the database's own words for the admin (they never hold the password), shortened
+        return ['why' => $why, 'detail' => mb_substr(trim(preg_replace('/\s+/', ' ', $msg)), 0, 300)] + $state;
+    }
+};
+if (($problem = $radiusProblem()) !== null) {
+    $ui->assign('_system_menu', 'radius');
+    $ui->assign('_title', Lang::T('RADIUS database'));
+    $ui->assign('problem', $problem);
+    $ui->display('admin/radius/not-ready.tpl');
+    exit;
+}
+
 $routelyVpn = function () {
     // Routely (an optional plugin): the card that offers its VPN for a router with no public IP, and which addresses lead through it
     return function_exists('routely_vpn_core_info') ? routely_vpn_core_info() : ['installed' => function_exists('routely'), 'devices' => 0, 'addresses' => []];
