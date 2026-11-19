@@ -10463,6 +10463,236 @@ body.dark-mode .rt-err {
   color: var(--ls-accent);
   font-size: 11px;
 }
+/* tabs under a router's details: Live, Users online, Interfaces, Setup check, Updates & backups */
+.rt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--ls-line);
+}
+.rt-tab {
+  margin-bottom: -1px;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ls-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.rt-tab:hover {
+  color: var(--ls-ink);
+}
+.rt-tab.is-on {
+  color: var(--ls-accent);
+  border-bottom-color: var(--ls-accent);
+}
+.rt-tab:focus-visible {
+  outline: 2px solid var(--ls-accent);
+  outline-offset: -2px;
+}
+.rt-pane[hidden] {
+  display: none;
+}
+.rt-pane:not([data-rt-pane="live"]) {
+  padding: 14px 16px;
+  border: 1px solid var(--ls-line);
+  border-radius: 12px;
+  background: var(--ls-soft);
+}
+.rt-pane__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--ls-ink);
+}
+.rt-pane__head > .ls-btn {
+  margin-left: auto;
+}
+.rt-pane__row {
+  margin: 8px 0 12px;
+}
+.rt-mini__title {
+  margin: 14px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ls-ink);
+}
+.rt-mini__title small {
+  color: var(--ls-muted);
+  font-weight: 500;
+}
+.rt-mini {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.rt-mini th {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--ls-line);
+  color: var(--ls-muted);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+.rt-mini td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--ls-line);
+  color: var(--ls-ink);
+  vertical-align: middle;
+}
+.rt-mini tr:last-child td {
+  border-bottom: 0;
+}
+.rt-mini__end {
+  text-align: right;
+  white-space: nowrap;
+}
+.rt-mini tr.is-gone td {
+  opacity: 0.5;
+}
+.rt-warn {
+  color: #b45309;
+  font-weight: 600;
+}
+body.dark-mode .rt-warn {
+  color: #fbbf24;
+}
+.rt-checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rt-check {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ls-line);
+}
+.rt-check:last-child {
+  border-bottom: 0;
+}
+.rt-check > i {
+  margin-top: 2px;
+  font-size: 15px;
+}
+.rt-check b {
+  display: block;
+  color: var(--ls-ink);
+  font-weight: 600;
+}
+.rt-check small {
+  display: block;
+  margin-top: 2px;
+  color: var(--ls-muted);
+}
+.rt-check--ok > i {
+  color: #16a34a;
+}
+.rt-check--warn > i {
+  color: #d97706;
+}
+.rt-check--bad > i {
+  color: #dc2626;
+}
+body.dark-mode .rt-check--ok > i {
+  color: #4ade80;
+}
+body.dark-mode .rt-check--warn > i {
+  color: #fbbf24;
+}
+body.dark-mode .rt-check--bad > i {
+  color: #f87171;
+}
+@media (max-width: 767px) {
+  .rt-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .rt-tab {
+    white-space: nowrap;
+  }
+}
+/* lists in the router tabs: search, filters and paging */
+.rt-lv__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+.ls-search.rt-lv__q {
+  flex: 0 1 320px;
+  min-width: 180px;
+}
+.ls-search.rt-lv__q input {
+  height: 34px;
+}
+.rt-lv__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ls-muted);
+  cursor: pointer;
+}
+.rt-lv__pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 12.5px;
+}
+.rt-lv__pager:empty {
+  display: none;
+}
+.rt-lv__pager > span {
+  margin-right: auto;
+}
+/* History tab: online/offline strip (red where offline) and the range buttons */
+.rt-strip {
+  position: relative;
+  height: 8px;
+  margin: 4px 0 6px;
+  border-radius: 99px;
+  background: #16a34a;
+  overflow: hidden;
+}
+body.dark-mode .rt-strip {
+  background: #22863f;
+}
+.rt-strip > i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1px;
+  background: #dc2626;
+}
+.rt-ranges {
+  display: inline-flex;
+  gap: 4px;
+}
+.rt-ranges .ls-btn.is-on {
+  border-color: var(--ls-accent) !important;
+  color: var(--ls-accent) !important;
+}
+/* a warning line at the foot of a settings card (Router Settings: history needs the database update) */
+.nf__hint.nf__hint--warn {
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--ls-line);
+  color: #b45309;
+}
+body.dark-mode .nf__hint.nf__hint--warn {
+  color: #fbbf24;
+}
 /* router map legend (maps/routers.tpl) */
 .rt-map-key {
   display: flex;
@@ -10508,11 +10738,12 @@ body.dark-mode .rt-err {
 }
 
 /* live graphs in the details panel: two series per chart (validated pair, light and dark), one y axis */
-.rt-panel {
+/* on the whole details row: the Live panel and the History tab use them */
+.rt-detail {
   --rt-s1: #2a78d6;
   --rt-s2: #eb6834;
 }
-body.dark-mode .rt-panel {
+body.dark-mode .rt-detail {
   --rt-s1: #3987e5;
   --rt-s2: #d95926;
 }

@@ -315,5 +315,23 @@ if (class_exists('RedisCache') && RedisCache::isDashboardCacheEnabled()) {
     }
 }
 
+// router history and alerts (Network > Routers > Settings), a reading of each router about every 5 minutes
+try {
+    foreach (RouterMonitor::run() as $line) {
+        echo "Router monitor: $line\n";
+    }
+} catch (Throwable $e) {
+    echo "Router monitor note: " . $e->getMessage() . "\n";
+}
+
+// nightly router backups (Network > Routers > Settings), once a day; saved on each router itself
+try {
+    foreach (RouterApi::nightlyBackups() as $line) {
+        echo "Router backup: $line\n";
+    }
+} catch (Throwable $e) {
+    echo "Router backup note: " . $e->getMessage() . "\n";
+}
+
 run_hook('cronjob_end'); #HOOK
 echo "Cron job finished and completed successfully.\n";

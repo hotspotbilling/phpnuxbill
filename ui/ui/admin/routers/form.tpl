@@ -211,7 +211,7 @@
             });
             var icon = btn.querySelector('i');
             btn.disabled = true;
-            icon.className = 'fa fa-circle-o-notch fa-spin';
+            icon.className = 'fa fa-spinner fa-spin';
             show(true, '{Lang::T('Connecting')|escape:'javascript'}&hellip;');
             out.className = 'nf__test-out';
             fetch('{Text::url('routers/test')}', { method: 'POST', body: body, credentials: 'same-origin', headers: { 'Accept': 'application/json' } })

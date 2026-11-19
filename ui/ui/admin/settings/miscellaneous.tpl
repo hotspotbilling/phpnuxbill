@@ -32,41 +32,11 @@
                         </p>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Router Check')}</label>
+                        <label class="col-md-3 control-label">{Lang::T('Routers')}</label>
                         <div class="col-md-5">
-                            <select name="router_check" id="router_check" class="form-control">
-                                <option value="0" {if $_c['router_check']=='0' }selected="selected" {/if}>
-                                    {Lang::T('Disabled')}
-                                </option>
-                                <option value="1" {if $_c['router_check']=='1' }selected="selected" {/if}>
-                                    {Lang::T('Enabled')}
-                                </option>
-                            </select>
+                            <a class="btn btn-default" href="{Text::url('routers/settings')}"><i class="fa fa-server" aria-hidden="true"></i> {Lang::T('Router Settings')}</a>
                         </div>
-                        <p class="help-block col-md-4"><small>
-                                {Lang::T('If enabled, the system will notify Admin when router goes Offline,
-                                If admin
-                                have 10 or more router and many customers, it will get overlapping, you can
-                                disabled')}
-                            </small>
-                        </p>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-md-3 control-label">{Lang::T('Router Live Health')}</label>
-                        <div class="col-md-5">
-                            <select name="router_health" id="router_health" class="form-control">
-                                <option value="1" {if $_c['router_health']|default:'1' != '0' }selected="selected" {/if}>
-                                    {Lang::T('Enabled')}
-                                </option>
-                                <option value="0" {if $_c['router_health']|default:'1' == '0' }selected="selected" {/if}>
-                                    {Lang::T('Disabled')}
-                                </option>
-                            </select>
-                        </div>
-                        <p class="help-block col-md-4"><small>
-                                {Lang::T('Shows CPU, memory and users online for each router on the Routers page, asked from the router when the page opens. Turn off if you have many routers or slow links.')}
-                            </small>
-                        </p>
+                        <p class="help-block col-md-4"><small>{Lang::T('Router Check, live health, history, alerts and nightly backups are now in Network > Routers > Settings.')}</small></p>
                     </div>
                     <div class="form-group">
                         <label class="col-md-3 control-label">{Lang::T('Phone OTP Required')}</label>

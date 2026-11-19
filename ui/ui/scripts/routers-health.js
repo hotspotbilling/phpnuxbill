@@ -410,6 +410,18 @@
         next();
     };
 
+    // the details row has tabs: the live readings run only while the Live tab is shown (routers-tools.js says which is)
+    document.addEventListener('rt:tab', function (e) {
+        var id = e.detail.id;
+        var row = document.getElementById('rt-detail-' + id);
+        if (!row || row.hidden || !document.querySelector('[data-rt-panel="' + id + '"]')) return;
+        if (e.detail.tab === 'live') {
+            if (!live[id] || live[id].paused) start(id);
+        } else if (live[id] && !live[id].paused) {
+            pause(id);
+        }
+    });
+
     document.addEventListener('click', function (e) {
         var more = e.target.closest('[data-rt-more]');
         if (more) {

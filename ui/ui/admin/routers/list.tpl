@@ -7,6 +7,7 @@
         <div></div>
         <div class="ls-actions">
             <a class="ls-btn" title="{Lang::T('Maps')}" href="{Text::url('')}maps/routers"><i class="fa fa-map-marker" aria-hidden="true"></i> {Lang::T('Maps')}</a>
+            <a class="ls-btn" href="{Text::url('routers/settings')}"><i class="fa fa-cog" aria-hidden="true"></i> {Lang::T('Settings')}</a>
             <a href="{Text::url('')}routers/add" class="ls-btn ls-btn--primary"><i class="fa fa-plus" aria-hidden="true"></i> {Lang::T('New Router')}</a>
         </div>
     </div>
@@ -65,6 +66,8 @@
                     {$rt_can = $rt_live && $ds['enabled'] == 1 && $ds['ip_address'] != ''}
                     {* the SuperAdmin's router actions do not depend on live health: they get the details row even when it is off *}
                     {$rt_act = $_admin['user_type'] == 'SuperAdmin' && $ds['enabled'] == 1 && $ds['ip_address'] != ''}
+                    {* the tabs (users online, interfaces, setup check, updates and backups) are for every enabled router with an address *}
+                    {$rt_tools = $ds['enabled'] == 1 && $ds['ip_address'] != ''}
                     <tr{if $rt_can} data-rt-id="{$ds['id']}"{/if}>
                         <td class="ls-check"><input type="checkbox" name="ids[]" value="{$ds['id']}" form="rtBulkForm" aria-label="{$ds['name']|escape}"></td>
                         <td data-label="{Lang::T('Router Name')}">{if $ds['coordinates']}<a href="https://www.google.com/maps/dir//{$ds['coordinates']|escape:'url'}/" target="_blank" rel="noopener" title="{$ds['coordinates']|escape}"><i class="fa fa-map-marker" aria-hidden="true"></i></a> {/if}<b class="ls-strong">{$ds['name']|escape}</b>{if $has_site && $ds['site']} <span class="ls-pill rt-site">{$ds['site']|escape}</span>{/if}</td>
@@ -76,16 +79,30 @@
                         <td data-label="{Lang::T('Customers')}" class="rt-cust"><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=on')}" title="{Lang::T('Active customers on this router')}"><b>{$rt_use['active']}</b> {Lang::T('active')}</a><a href="{Text::url('plan/list&router=', $ds['name']|escape:'url', '&status=off')}" class="ls-dim" title="{Lang::T('Expired customers on this router')}">{$rt_use['expired']|default:0} {Lang::T('expired')}</a></td>
                         <td data-label="{Lang::T('Status')}">{if $ds['enabled'] == 1}<span class="ls-pill ls-pill--active">{Lang::T('Enabled')}</span>{else}<span class="ls-pill ls-pill--banned">{Lang::T('Disabled')}</span>{/if}</td>
                         <td data-label="ID" class="ls-dim">{$ds['id']}</td>
-                        <td class="ls-end"><div class="ls-row-actions">{if $rt_can || $rt_act}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon rt-more" data-rt-more="{$ds['id']}" aria-expanded="false" aria-controls="rt-detail-{$ds['id']}" aria-label="{Lang::T('Health details')}" title="{Lang::T('Health details')}"><i class="fa fa-chevron-down" aria-hidden="true"></i></button>{/if}<a href="{Text::url('routers/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a>{if $rt_use['plans'] > 0 || $rt_use['active'] > 0}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" disabled aria-label="{Lang::T('Delete')}" title="{Lang::T('In use by')} {$rt_use['plans']} {Lang::T('plans')}, {$rt_use['active']} {Lang::T('active customers')}. {Lang::T('Move them to another router first, or disable this router instead.')}"><i class="fa fa-trash" aria-hidden="true"></i></button>{else}<form method="post" action="{Text::url('routers/delete/', $ds['id'])}" class="rt-del"><input type="hidden" name="csrf_token" value="{$csrf_token}"><button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')|escape:'javascript'} {$ds['name']|escape:'javascript'|escape}?')"><i class="fa fa-trash" aria-hidden="true"></i></button></form>{/if}</div></td>
+                        <td class="ls-end"><div class="ls-row-actions">{if $rt_tools}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon rt-more" data-rt-more="{$ds['id']}" aria-expanded="false" aria-controls="rt-detail-{$ds['id']}" aria-label="{Lang::T('Health details')}" title="{Lang::T('Health details')}"><i class="fa fa-chevron-down" aria-hidden="true"></i></button>{/if}<a href="{Text::url('routers/edit/', $ds['id'])}" class="ls-btn ls-btn--sm">{Lang::T('Edit')}</a>{if $rt_use['plans'] > 0 || $rt_use['active'] > 0}<button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" disabled aria-label="{Lang::T('Delete')}" title="{Lang::T('In use by')} {$rt_use['plans']} {Lang::T('plans')}, {$rt_use['active']} {Lang::T('active customers')}. {Lang::T('Move them to another router first, or disable this router instead.')}"><i class="fa fa-trash" aria-hidden="true"></i></button>{else}<form method="post" action="{Text::url('routers/delete/', $ds['id'])}" class="rt-del"><input type="hidden" name="csrf_token" value="{$csrf_token}"><button type="button" class="ls-btn ls-btn--sm ls-btn--icon ls-btn--danger" aria-label="{Lang::T('Delete')}" onclick="return ask(this, '{Lang::T('Delete')|escape:'javascript'} {$ds['name']|escape:'javascript'|escape}?')"><i class="fa fa-trash" aria-hidden="true"></i></button></form>{/if}</div></td>
                     </tr>
-                    {if $rt_can || $rt_act}
-                    <tr class="rt-detail" id="rt-detail-{$ds['id']}" hidden><td colspan="{$rt_cols}">{if $rt_can}<div class="rt-panel" data-rt-panel="{$ds['id']}"></div>{/if}
+                    {if $rt_tools}
+                    <tr class="rt-detail" id="rt-detail-{$ds['id']}" hidden><td colspan="{$rt_cols}">
+                        <div class="rt-tabs" role="tablist" aria-label="{$ds['name']|escape}" data-rt-tabs="{$ds['id']}">
+                            {if $rt_can}<button type="button" role="tab" class="rt-tab" data-rt-tab="live"><i class="fa fa-line-chart" aria-hidden="true"></i> {Lang::T('Live')}</button>{/if}
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="history"><i class="fa fa-history" aria-hidden="true"></i> {Lang::T('History')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="users"><i class="fa fa-users" aria-hidden="true"></i> {Lang::T('Users online')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="ifaces"><i class="fa fa-plug" aria-hidden="true"></i> {Lang::T('Interfaces')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="check"><i class="fa fa-stethoscope" aria-hidden="true"></i> {Lang::T('Setup check')}</button>
+                            <button type="button" role="tab" class="rt-tab" data-rt-tab="updates"><i class="fa fa-cloud-download" aria-hidden="true"></i> {Lang::T('Updates & backups')}</button>
+                        </div>
+                        {if $rt_can}<div class="rt-pane" role="tabpanel" data-rt-pane="live"><div class="rt-panel" data-rt-panel="{$ds['id']}"></div></div>{/if}
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="history" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="users" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="ifaces" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="check" hidden></div>
+                        <div class="rt-pane" role="tabpanel" data-rt-pane="updates" hidden></div>
                         {if $rt_act}
                         <div class="rt-actions">
                             <span class="rt-actions__label">{Lang::T('On this router')}</span>
                             {foreach [
                                 ['sync', 'fa-exchange', Lang::T('Sync customers'), Lang::T('Send every active customer of this router to it again?'), ''],
-                                ['backup', 'fa-floppy-o', Lang::T('Save a backup'), Lang::T('Save a backup file on the router? It is kept in Files on the router.'), ''],
+                                ['backup', 'fa-save', Lang::T('Save a backup'), Lang::T('Save a backup file on the router? It is kept in Files on the router.'), ''],
                                 ['kick', 'fa-sign-out', Lang::T('Disconnect hotspot users'), Lang::T('Disconnect everyone signed in to the hotspot? They can sign in again at once.'), ''],
                                 ['reboot', 'fa-power-off', Lang::T('Reboot'), Lang::T('Restart the router? Everyone on it loses the connection for a minute or two.'), 'ls-btn--danger']
                             ] as $act}
@@ -149,6 +166,47 @@
     })();
 </script>
 
+<script>
+    window.rtTools = {
+        url: '{Text::url('routers/')}',
+        csrf: '{$csrf_token|escape:'javascript'}',
+        superadmin: {if $_admin['user_type'] == 'SuperAdmin'}true{else}false{/if},
+        t: {
+            loading: '{Lang::T('Loading')|escape:'javascript'}', refresh: '{Lang::T('Refresh')|escape:'javascript'}', fail: '{Lang::T('Could not reach the router')|escape:'javascript'}',
+            user: '{Lang::T('User')|escape:'javascript'}', address: '{Lang::T('Address')|escape:'javascript'}', mac: '{Lang::T('MAC / Caller ID')|escape:'javascript'}',
+            uptime: '{Lang::T('Uptime')|escape:'javascript'}', data: '{Lang::T('Data')|escape:'javascript'}', none: '{Lang::T('Nobody is connected')|escape:'javascript'}',
+            notCustomer: '{Lang::T('not a customer')|escape:'javascript'}', drop: '{Lang::T('Disconnect')|escape:'javascript'}',
+            dropAsk: '{Lang::T('Disconnect this user? They can sign in again at once.')|escape:'javascript'}', dropped: '{Lang::T('Disconnected')|escape:'javascript'}',
+            name: '{Lang::T('Name')|escape:'javascript'}', type: '{Lang::T('Type')|escape:'javascript'}', state: '{Lang::T('State')|escape:'javascript'}',
+            up: '{Lang::T('Up')|escape:'javascript'}', down: '{Lang::T('Down')|escape:'javascript'}', disabled: '{Lang::T('Disabled')|escape:'javascript'}',
+            traffic: '{Lang::T('Traffic')|escape:'javascript'}', errors: '{Lang::T('Errors / drops')|escape:'javascript'}', linkDowns: '{Lang::T('Link downs')|escape:'javascript'}',
+            lastUp: '{Lang::T('Last up')|escape:'javascript'}', runAgain: '{Lang::T('Check again')|escape:'javascript'}', allGood: '{Lang::T('Nothing to fix')|escape:'javascript'}',
+            routeros: 'RouterOS', firmware: '{Lang::T('Firmware')|escape:'javascript'}', channel: '{Lang::T('Channel')|escape:'javascript'}',
+            installed: '{Lang::T('Installed')|escape:'javascript'}', latest: '{Lang::T('Latest')|escape:'javascript'}', notChecked: '{Lang::T('not checked yet')|escape:'javascript'}',
+            checkUpdates: '{Lang::T('Check for updates')|escape:'javascript'}', newer: '{Lang::T('Update available')|escape:'javascript'}', current: '{Lang::T('Up to date')|escape:'javascript'}',
+            updateHow: '{Lang::T('PHPNuxBill never installs updates. Update from Winbox, System > Packages, when it suits you.')|escape:'javascript'}',
+            backups: '{Lang::T('Backups on the router')|escape:'javascript'}', noBackups: '{Lang::T('No backup files on the router')|escape:'javascript'}',
+            download: '{Lang::T('Download')|escape:'javascript'}', nightly: '{Lang::T('Nightly backups')|escape:'javascript'}', on: '{Lang::T('on')|escape:'javascript'}', off: '{Lang::T('off')|escape:'javascript'}',
+            nightlyWhere: '{Lang::T('Routers > Settings')|escape:'javascript'}', auto: '{Lang::T('nightly')|escape:'javascript'}',
+            history: '{Lang::T('History')|escape:'javascript'}', uptimePct: '{Lang::T('Online')|escape:'javascript'}', samples: '{Lang::T('readings')|escape:'javascript'}',
+            cpuMem: '{Lang::T('CPU and memory')|escape:'javascript'}', cpu: 'CPU', memory: '{Lang::T('Memory')|escape:'javascript'}', usersOnline: '{Lang::T('Users online')|escape:'javascript'}',
+            uplink: '{Lang::T('Uplink traffic')|escape:'javascript'}', dl: '{Lang::T('Download')|escape:'javascript'}', ul: '{Lang::T('Upload')|escape:'javascript'}',
+            events: '{Lang::T('Events')|escape:'javascript'}', noEvents: '{Lang::T('Nothing happened in this period')|escape:'javascript'}',
+            noHistory: '{Lang::T('No readings yet. The cron reads each router about every 5 minutes; turn Router history on in Routers > Settings.')|escape:'javascript'}',
+            notCollecting: '{Lang::T('Router history is off in Routers > Settings, so no new readings are kept.')|escape:'javascript'}',
+            ev_offline: '{Lang::T('Went offline')|escape:'javascript'}', ev_online: '{Lang::T('Back online')|escape:'javascript'}', ev_reboot: '{Lang::T('Restarted')|escape:'javascript'}',
+            ev_cpu_high: '{Lang::T('CPU high')|escape:'javascript'}', ev_cpu_ok: '{Lang::T('CPU normal')|escape:'javascript'}', ev_mem_high: '{Lang::T('Memory high')|escape:'javascript'}',
+            ev_mem_ok: '{Lang::T('Memory normal')|escape:'javascript'}', ev_disk_high: '{Lang::T('Disk nearly full')|escape:'javascript'}', ev_disk_ok: '{Lang::T('Disk normal')|escape:'javascript'}',
+            search: '{Lang::T('Search')|escape:'javascript'}', noMatch: '{Lang::T('Nothing matches')|escape:'javascript'}', of: '{Lang::T('of')|escape:'javascript'}',
+            prev: '{Lang::T('Prev')|escape:'javascript'}', next: '{Lang::T('Next')|escape:'javascript'}', shown: '{Lang::T('shown')|escape:'javascript'}',
+            online: '{Lang::T('online')|escape:'javascript'}', all: '{Lang::T('All')|escape:'javascript'}', interfaces: '{Lang::T('interfaces')|escape:'javascript'}',
+            showDynamic: '{Lang::T('Show dynamic')|escape:'javascript'}', capped: '{Lang::T('Only the first %s are listed.')|escape:'javascript'}',
+                        downloadHow: '{Lang::T('Downloads use the FTP service of the router. Without it, take the file from Files in Winbox.')|escape:'javascript'}'
+        }
+    };
+</script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.5"></script>
+
 {if $health_on}
 <script>
     window.rtHealth = {
@@ -184,12 +242,12 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.18.6"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.1"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">
         <h4>{Lang::T('Check if Router Online?')}</h4>
-        <p>{Lang::T('To check whether the Router is online or not, please visit the following page')} <a href="{Text::url('')}settings/miscellaneous#router_check" target="_blank" class="btn btn-link">{Lang::T('Cek Now')}</a></p>
+        <p>{Lang::T('To check whether the Router is online or not, please visit the following page')} <a href="{Text::url('routers/settings')}" class="btn btn-link">{Lang::T('Router Settings')}</a></p>
     </div>
 </div>
 

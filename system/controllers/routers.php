@@ -117,13 +117,8 @@ $hasSite = function () {
     return $has;
 };
 
-// One answer from the router as plain text (a long value can arrive as a stream)
-$rosText = function ($v) {
-    if (is_resource($v)) {
-        $v = stream_get_contents($v);
-    }
-    return $v === null ? null : (string) $v;
-};
+// The RouterOS helpers live in RouterApi (the cron's nightly backups use them too)
+$rosText = Closure::fromCallable([RouterApi::class, 'text']);
 
 // "1w2d03:04:05" or "12d4h31m5s" (RouterOS uptime) as "9d 3h 4m"
 $rosUptime = function ($u) {
@@ -137,63 +132,10 @@ $rosUptime = function ($u) {
     return trim(($days ? $days . 'd ' : '') . ($days || $hours ? $hours . 'h ' : '') . $mins . 'm');
 };
 
-// Connect to a router; returns [client, null] or [null, the reason it failed]
-$rosConnect = function ($ip, $user, $pass, $timeout = 5) {
-    global $_app_stage;
-    try {
-        if ($_app_stage == 'Demo') {
-            return [null, Lang::T('Not available in Demo mode')];
-        }
-        // as MikrotikHotspot::getClient(), but a client that can drop a stalled connection without waiting (RouterClient)
-        [$host, $port] = RouterAddress::split($ip);
-        return [new RouterClient($host, $user, $pass, $port, false, $timeout), null];
-    } catch (Throwable $e) {
-        // the library wraps the reason (refused, timed out, wrong login) in a general message: show both
-        $parts = [];
-        for ($x = $e; $x && count($parts) < 3; $x = $x->getPrevious()) {
-            $m = trim(preg_replace('/\s+/', ' ', strip_tags($x->getMessage())));
-            if ($m !== '' && !in_array($m, $parts, true)) {
-                $parts[] = $m;
-            }
-        }
-        $msg = implode(': ', $parts);
-        return [null, $msg !== '' ? mb_substr($msg, 0, 160) : Lang::T('Could not connect to the router')];
-    }
-};
+$rosConnect = Closure::fromCallable([RouterApi::class, 'connect']);
 
-// Send one request and wait for its answer until $deadline (a microtime) at the latest. The library's sendSync() waits with no
-// limit once logged in, so a router that stops answering mid-way would hold the request (and the PHP worker) open. On timeout
-// the connection is closed, so nothing is left half-read, and an exception says so.
-$rosSend = function ($c, $req, $deadline) {
-    static $n = 0;
-    $tag = 'nb' . (++$n);
-    $req->setTag($tag);
-    $c->sendAsync($req);
-    $left = $deadline - microtime(true);
-    if ($left > 0) {
-        $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
-    }
-    // finished means the router's closing reply (!done, or a fatal one) arrived. (isRequestActive() is no test: it stays true
-    // while a finished answer waits to be collected.)
-    $res = $c->extractNewResponses($tag);
-    foreach ($res as $r) {
-        if (in_array($r->getType(), [\PEAR2\Net\RouterOS\Response::TYPE_FINAL, \PEAR2\Net\RouterOS\Response::TYPE_FATAL], true)) {
-            return $res;
-        }
-    }
-    // drop the connection without the library's goodbye, which would wait for a reply that is not coming
-    method_exists($c, 'abort') ? $c->abort() : $c->close();
-    throw new Exception(Lang::T('The router did not answer in time'), 408);
-};
-// The first error a router sent back for a request (no permission, unknown command), or null
-$rosError = function ($res) use ($rosText) {
-    foreach ($res as $r) {
-        if ($r->getType() === \PEAR2\Net\RouterOS\Response::TYPE_ERROR) {
-            return (string) $rosText($r->getProperty('message')) ?: Lang::T('The router refused the command');
-        }
-    }
-    return null;
-};
+$rosSend = Closure::fromCallable([RouterApi::class, 'send']);
+$rosError = Closure::fromCallable([RouterApi::class, 'error']);
 
 // What a router says about itself: identity, board, RouterOS version, uptime, load, memory, disk, temperature and users online.
 // Each part is asked for separately, so a router without one (no hotspot, no health sensor) still answers the rest.
@@ -300,7 +242,7 @@ $rosHint = function ($err) {
     return '';
 };
 
-// Live health is on unless turned off in Settings > Miscellaneous
+// Live health is on unless turned off in Network > Routers > Settings
 $healthOn = ($config['router_health'] ?? '1') !== '0';
 
 // the sites already in use, offered as suggestions on the form and as the filter on the list
@@ -313,6 +255,46 @@ $siteNames = function () use ($hasSite) {
 $ui->assign('has_site', $hasSite());
 
 switch ($action) {
+    case 'settings':
+        // everything about routers in one place: Router Check, live health, history, alerts and nightly backups. Only these
+        // settings can be saved here, each checked before it is kept.
+        $fields = [
+            'router_check' => ['0', '1'], 'router_health' => ['1', '0'], 'router_monitor' => ['1', '0'], 'router_alerts' => ['0', '1'],
+            'router_alert_telegram' => ['1', '0'], 'router_alert_email' => ['0', '1'], 'router_alert_via' => ['wa', 'sms'], 'router_backup' => ['0', '1'],
+        ];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($_app_stage == 'Demo') {
+                r2(getUrl('routers/settings'), 'e', 'You cannot perform this action in Demo mode');
+            }
+            if (!Csrf::check(_post('csrf_token'))) {
+                r2(getUrl('routers/settings'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+            }
+            $values = [];
+            foreach ($fields as $k => $allowed) {
+                $v = _post($k, $allowed[0]);
+                $values[$k] = in_array($v, $allowed, true) ? $v : $allowed[0];
+            }
+            $phone = preg_replace('/[^0-9+]/', '', _post('router_alert_phone'));
+            if ($phone !== '' && !preg_match('/^\+?[0-9]{7,15}$/', $phone)) {
+                r2(getUrl('routers/settings'), 'e', Lang::T('The alert phone number must be 7 to 15 digits, with an optional + in front.'));
+            }
+            $values['router_alert_phone'] = $phone;
+            $values['router_backup_keep'] = (string) max(1, min(30, (int) _post('router_backup_keep', '7')));
+            foreach ($values as $k => $v) {
+                $row = ORM::for_table('tbl_appconfig')->where('setting', $k)->find_one() ?: ORM::for_table('tbl_appconfig')->create();
+                $row->setting = $k;
+                $row->value = $v;
+                $row->save();
+            }
+            _log('[' . $admin['username'] . ']: Router settings saved', $admin['user_type'], $admin['id']);
+            r2(getUrl('routers/settings'), 's', Lang::T('Settings Saved Successfully'));
+        }
+        $ui->assign('_title', Lang::T('Router Settings'));
+        $ui->assign('history_ready', RouterMonitor::ready());
+        $ui->assign('ftp_ok', function_exists('ftp_connect'));
+        $ui->display('admin/routers/settings.tpl');
+        break;
+
     case 'add':
         run_hook('view_add_routers'); #HOOK
         $ui->assign('routely_vpn', $routelyVpn());
@@ -500,8 +482,10 @@ switch ($action) {
                 } catch (\PEAR2\Net\Transmitter\SocketException $e) {
                     // the connection dropped after the command went out: the usual sign of a restart
                 }
+                // confirmed or not, the router is going down: drop the connection now, so the client's goodbye (sent when it is
+                // destroyed, waiting for a reply) does not hang on it. A refusal was thrown above and keeps the normal close.
+                method_exists($c, 'abort') ? $c->abort() : null;
                 if (!$confirmed) {
-                    method_exists($c, 'abort') ? $c->abort() : null;
                     _log($who . 'Router reboot sent, not confirmed: ' . $d['name'], $admin['user_type'], $admin['id']);
                     r2($back, 'w', htmlspecialchars($d['name']) . ': ' . Lang::T('the restart was sent, but the router did not confirm it. If it is restarting, it is back in a minute or two.'));
                 }
@@ -559,6 +543,350 @@ switch ($action) {
         }
         break;
 
+    case 'sessions':
+    case 'interfaces':
+    case 'check':
+    case 'updates':
+    case 'backups':
+    case 'drop':
+        // the tabs under a router's details: read (GET) or, for drop and "check for updates", change (POST with the CSRF token).
+        // Each answers JSON and asks the router with a time limit; the session is released first so other pages do not wait.
+        header('Content-Type: application/json');
+        header('Cache-Control: no-store');
+        $say = function ($a) {
+            echo json_encode($a, JSON_INVALID_UTF8_SUBSTITUTE);
+            exit;
+        };
+        $posting = $_SERVER['REQUEST_METHOD'] === 'POST';
+        if (($action === 'drop' || ($action === 'updates' && $posting)) && (!$posting || !Csrf::check(_post('csrf_token')))) {
+            $say(['ok' => false, 'error' => Lang::T('Invalid or Expired CSRF Token') . '. ' . Lang::T('Reload the page and try again.')]);
+        }
+        session_write_close();
+        $d = ORM::for_table('tbl_routers')->find_one((int) ($routes['2'] ?? 0));
+        if (!$d || (int) $d['enabled'] !== 1 || trim((string) $d['ip_address']) === '') {
+            $say(['ok' => false, 'error' => Lang::T('Data Not Found')]);
+        }
+        [$c, $err] = RouterApi::connect($d['ip_address'], $d['username'], $d['password'], 6);
+        if (!$c) {
+            $say(['ok' => false, 'error' => $err, 'hint' => $rosHint($err)]);
+        }
+        $until = microtime(true) + 15;
+        try {
+            if ($action === 'sessions') {
+                // who is connected now, hotspot and PPPoE, each matched to a customer when the name is one
+                $hs = [];
+                $pp = [];
+                try {
+                    $hs = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime', 'bytes-in', 'bytes-out', 'server'], $until);
+                } catch (Throwable $e) {
+                    if ($e->getCode() === 408) {
+                        throw $e;
+                    }
+                }
+                try {
+                    $pp = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'caller-id', 'address', 'uptime'], $until);
+                } catch (Throwable $e) {
+                    if ($e->getCode() === 408) {
+                        throw $e;
+                    }
+                }
+                // up to 5,000 of each, searched and paged in the page; the totals say when a list was cut
+                $totalHs = count($hs);
+                $totalPp = count($pp);
+                $hs = array_slice($hs, 0, 5000);
+                $pp = array_slice($pp, 0, 5000);
+                $names = array_values(array_unique(array_filter(array_merge(array_column($hs, 'user'), array_column($pp, 'name')), 'strlen')));
+                $who = [];
+                if ($names) {
+                    $in = implode(',', array_fill(0, count($names), '?'));
+                    $st = ORM::getDb()->prepare("SELECT id, username, pppoe_username, fullname FROM tbl_customers WHERE username IN ($in) OR pppoe_username IN ($in)");
+                    $st->execute(array_merge($names, $names));
+                    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $cu) {
+                        foreach ([$cu['username'], $cu['pppoe_username']] as $n) {
+                            if ($n !== null && $n !== '' && !isset($who[$n])) {
+                                $who[$n] = ['id' => (int) $cu['id'], 'name' => $cu['fullname']];
+                            }
+                        }
+                    }
+                }
+                $out = ['ok' => true, 'hotspot' => [], 'pppoe' => [], 'total_hotspot' => $totalHs, 'total_pppoe' => $totalPp, 'customer_url' => getUrl('customers/view/')];
+                foreach ($hs as $h) {
+                    $out['hotspot'][] = ['sid' => $h['.id'], 'user' => $h['user'], 'address' => $h['address'], 'mac' => $h['mac-address'], 'uptime' => $rosUptime($h['uptime']),
+                        'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $who[$h['user']] ?? null];
+                }
+                foreach ($pp as $h) {
+                    $out['pppoe'][] = ['sid' => $h['.id'], 'user' => $h['name'], 'address' => $h['address'], 'mac' => $h['caller-id'], 'uptime' => $rosUptime($h['uptime']),
+                        'service' => $h['service'], 'customer' => $who[$h['name']] ?? null];
+                }
+                $say($out);
+            }
+
+            if ($action === 'drop') {
+                // disconnect one session; they can sign in again at once
+                $kind = _post('kind');
+                $sid = _post('sid');
+                if (!in_array($kind, ['hotspot', 'pppoe'], true) || !preg_match('/^\*[0-9A-Fa-f]+$/', $sid)) {
+                    $say(['ok' => false, 'error' => Lang::T('Data Not Found')]);
+                }
+                RouterApi::run($c, $kind === 'hotspot' ? '/ip/hotspot/active/remove' : '/ppp/active/remove', ['numbers' => $sid], $until);
+                _log('[' . $admin['username'] . ']: ' . 'Disconnected ' . $kind . ' session ' . mb_substr(_post('user'), 0, 64) . ' on ' . $d['name'], $admin['user_type'], $admin['id']);
+                $say(['ok' => true]);
+            }
+
+            if ($action === 'interfaces') {
+                $rows = RouterApi::rows($c, '/interface/print', ['name', 'type', 'running', 'disabled', 'dynamic', 'comment', 'mac-address', 'mtu', 'rx-byte', 'tx-byte',
+                    'rx-error', 'tx-error', 'rx-drop', 'tx-drop', 'link-downs', 'last-link-up-time', 'last-link-down-time'], $until);
+                // every PPPoE customer adds a dynamic interface: up to 2,000, searched and paged in the page
+                $num = function ($v) {
+                    return is_numeric($v) ? (float) $v : null;
+                };
+                $items = [];
+                foreach (array_slice($rows, 0, 2000) as $r) {
+                    $items[] = ['name' => $r['name'], 'type' => $r['type'], 'running' => $r['running'] === 'true', 'disabled' => $r['disabled'] === 'true', 'dynamic' => $r['dynamic'] === 'true',
+                        'comment' => $r['comment'], 'mac' => $r['mac-address'], 'mtu' => $r['mtu'], 'rx' => $num($r['rx-byte']), 'tx' => $num($r['tx-byte']),
+                        'rx_error' => $num($r['rx-error']), 'tx_error' => $num($r['tx-error']), 'rx_drop' => $num($r['rx-drop']), 'tx_drop' => $num($r['tx-drop']),
+                        'link_downs' => $num($r['link-downs']), 'last_up' => $r['last-link-up-time'], 'last_down' => $r['last-link-down-time']];
+                }
+                $say(['ok' => true, 'items' => $items, 'total' => count($rows)]);
+            }
+
+            if ($action === 'check') {
+                // what usually stops a router working with PHPNuxBill, each with what to do about it
+                $items = [];
+                $add = function ($state, $title, $detail = '') use (&$items) {
+                    $items[] = ['state' => $state, 'title' => $title, 'detail' => $detail];
+                };
+                // 1. the API user's rights
+                try {
+                    $u = RouterApi::rows($c, '/user/print', ['name', 'group'], $until, [], ['name' => $d['username']]);
+                    $g = $u ? RouterApi::rows($c, '/user/group/print', ['name', 'policy'], $until, [], ['name' => (string) $u[0]['group']]) : [];
+                    $policy = $g ? array_map('trim', explode(',', (string) $g[0]['policy'])) : [];
+                    $has = function ($p) use ($policy) {
+                        return in_array($p, $policy, true);
+                    };
+                    if (!$g) {
+                        $add('warn', Lang::T('The API user\'s rights could not be read'), Lang::T('Check in Winbox, System > Users, that the user is in a group with the api, read and write policies.'));
+                    } elseif (!$has('api') || !$has('read') || !$has('write')) {
+                        $add('bad', Lang::T('The API user cannot change the router'), Lang::T('Its group') . ' "' . $g[0]['name'] . '" ' . Lang::T('needs the api, read and write policies, or customers cannot be added or removed.'));
+                    } else {
+                        $missing = array_values(array_filter(['reboot', 'ftp', 'sensitive'], function ($p) use ($has) {
+                            return !$has($p);
+                        }));
+                        $add($missing ? 'warn' : 'ok', Lang::T('The API user can manage customers'), $missing
+                            ? Lang::T('Group') . ' "' . $g[0]['name'] . '" ' . Lang::T('also lacks') . ': ' . implode(', ', $missing) . '. ' . Lang::T('reboot is needed for Reboot, ftp for downloading backups.')
+                            : Lang::T('Group') . ' "' . $g[0]['name'] . '"');
+                    }
+                } catch (Throwable $e) {
+                    if ($e->getCode() === 408) {
+                        throw $e;
+                    }
+                    $add('warn', Lang::T('The API user\'s rights could not be read'), $e->getMessage());
+                }
+                // 2. hotspot and PPPoE servers
+                $hsServers = [];
+                $ppServers = [];
+                try {
+                    $hsServers = RouterApi::rows($c, '/ip/hotspot/print', ['name', 'interface', 'disabled'], $until);
+                } catch (Throwable $e) {
+                    if ($e->getCode() === 408) {
+                        throw $e;
+                    }
+                }
+                try {
+                    $ppServers = RouterApi::rows($c, '/interface/pppoe-server/server/print', ['service-name', 'interface', 'disabled'], $until);
+                } catch (Throwable $e) {
+                    if ($e->getCode() === 408) {
+                        throw $e;
+                    }
+                }
+                $onHs = array_filter($hsServers, function ($x) { return $x['disabled'] !== 'true'; });
+                $onPp = array_filter($ppServers, function ($x) { return $x['disabled'] !== 'true'; });
+                if (!$onHs && !$onPp) {
+                    $add('warn', Lang::T('No hotspot or PPPoE server is running'), Lang::T('Customers connect through one of them: set one up in Winbox, IP > Hotspot or PPP > PPPoE Servers.'));
+                } else {
+                    $add('ok', Lang::T('Servers running'), trim((count($onHs) ? Lang::T('Hotspot') . ': ' . implode(', ', array_column($onHs, 'name')) . ' ' : '') . (count($onPp) ? 'PPPoE: ' . implode(', ', array_column($onPp, 'service-name')) : '')));
+                }
+                // 3. the billing site in the hotspot walled garden (the login page must reach it before sign-in)
+                if ($onHs) {
+                    $host = strtolower((string) parse_url(APP_URL, PHP_URL_HOST));
+                    $found = false;
+                    try {
+                        foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/print', ['dst-host', 'disabled'], $until) as $w) {
+                            $pat = strtolower((string) $w['dst-host']);
+                            if ($w['disabled'] !== 'true' && $pat !== '' && ($pat === $host || fnmatch($pat, $host) || ($pat[0] === '*' && substr($host, -strlen(ltrim($pat, '*'))) === ltrim($pat, '*')))) {
+                                $found = true;
+                                break;
+                            }
+                        }
+                        $add($found ? 'ok' : 'bad', $found ? Lang::T('The billing site is in the walled garden') : Lang::T('The billing site is not in the walled garden'),
+                            $found ? $host : Lang::T('Customers cannot open') . ' ' . $host . ' ' . Lang::T('before they sign in. Add it in Winbox, IP > Hotspot > Walled Garden, as') . ' ' . $host);
+                    } catch (Throwable $e) {
+                        if ($e->getCode() === 408) {
+                            throw $e;
+                        }
+                        $add('warn', Lang::T('The walled garden could not be read'), $e->getMessage());
+                    }
+                }
+                // 4. RADIUS, when PHPNuxBill uses it
+                if (!empty($config['radius_enable'])) {
+                    try {
+                        $rad = array_filter(RouterApi::rows($c, '/radius/print', ['address', 'service', 'disabled'], $until), function ($x) { return $x['disabled'] !== 'true'; });
+                        $add($rad ? 'ok' : 'bad', $rad ? Lang::T('RADIUS is set up') : Lang::T('No RADIUS server is set on the router'),
+                            $rad ? implode(', ', array_map(function ($x) { return $x['address'] . ' (' . $x['service'] . ')'; }, $rad))
+                                : Lang::T('PHPNuxBill uses RADIUS: add the RADIUS server in Winbox, RADIUS, for hotspot and ppp.'));
+                    } catch (Throwable $e) {
+                        if ($e->getCode() === 408) {
+                            throw $e;
+                        }
+                    }
+                }
+                // 5. the router's clock (expiry and sessions are timed by it)
+                try {
+                    $clk = RouterApi::rows($c, '/system/clock/print', ['date', 'time', 'gmt-offset'], $until);
+                    $routerTs = null;
+                    if ($clk) {
+                        $date = (string) $clk[0]['date'];
+                        if (preg_match('/^([a-z]{3})\/(\d{2})\/(\d{4})$/i', $date, $m)) { // RouterOS 6 and early 7: nov/19/2026
+                            $date = $m[3] . '-' . str_pad((string) (array_search(strtolower($m[1]), ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']) + 1), 2, '0', STR_PAD_LEFT) . '-' . $m[2];
+                        }
+                        $off = 0;
+                        if (preg_match('/^([+-])(\d{1,2}):(\d{2})$/', (string) $clk[0]['gmt-offset'], $m)) {
+                            $off = ($m[1] === '-' ? -1 : 1) * ((int) $m[2] * 3600 + (int) $m[3] * 60);
+                        } elseif (is_numeric($clk[0]['gmt-offset'])) {
+                            $off = (int) $clk[0]['gmt-offset'];
+                        }
+                        $local = strtotime($date . ' ' . $clk[0]['time'] . ' UTC');
+                        $routerTs = $local !== false ? $local - $off : null;
+                    }
+                    if ($routerTs === null) {
+                        $add('warn', Lang::T('The router\'s clock could not be read'));
+                    } else {
+                        $diff = abs(time() - $routerTs);
+                        $add($diff > 300 ? 'bad' : 'ok', $diff > 300 ? Lang::T('The router\'s clock is off by') . ' ' . round($diff / 60) . ' ' . Lang::T('minutes') : Lang::T('The router\'s clock is right'),
+                            $diff > 300 ? Lang::T('Times on the router (sessions, expiry) will be wrong. Turn on System > NTP Client, or set System > Clock.') : '');
+                    }
+                } catch (Throwable $e) {
+                    if ($e->getCode() === 408) {
+                        throw $e;
+                    }
+                    $add('warn', Lang::T('The router\'s clock could not be read'), $e->getMessage());
+                }
+                $say(['ok' => true, 'items' => $items, 'host' => parse_url(APP_URL, PHP_URL_HOST)]);
+            }
+
+            if ($action === 'updates') {
+                // RouterOS and firmware versions. "Check for updates" (POST) asks MikroTik's server first; nothing is installed.
+                if ($posting) {
+                    try {
+                        RouterApi::run($c, '/system/package/update/check-for-updates', [], microtime(true) + 25);
+                    } catch (Throwable $e) {
+                        if ($e->getCode() === 408) {
+                            throw $e;
+                        }
+                        $checkErr = $e->getMessage();
+                    }
+                }
+                $u = RouterApi::rows($c, '/system/package/update/print', ['channel', 'installed-version', 'latest-version', 'status'], $until);
+                $fw = [];
+                try {
+                    $fw = RouterApi::rows($c, '/system/routerboard/print', ['routerboard', 'model', 'current-firmware', 'upgrade-firmware'], $until);
+                } catch (Throwable $e) {
+                    if ($e->getCode() === 408) {
+                        throw $e;
+                    }
+                }
+                $u = $u[0] ?? [];
+                $fw = $fw[0] ?? [];
+                $installed = (string) ($u['installed-version'] ?? '');
+                $latest = (string) ($u['latest-version'] ?? '');
+                $say(['ok' => true, 'channel' => $u['channel'] ?? '', 'installed' => $installed, 'latest' => $latest, 'status' => $u['status'] ?? '',
+                    'newer' => $latest !== '' && $installed !== '' && version_compare($latest, $installed, '>'),
+                    'fw_current' => $fw['current-firmware'] ?? '', 'fw_upgrade' => $fw['upgrade-firmware'] ?? '',
+                    'fw_newer' => ($fw['upgrade-firmware'] ?? '') !== '' && ($fw['current-firmware'] ?? '') !== '' && version_compare($fw['upgrade-firmware'], $fw['current-firmware'], '>'),
+                    'check_error' => $checkErr ?? null]);
+            }
+
+            if ($action === 'backups') {
+                // the backup files on the router, newest first
+                $files = RouterApi::rows($c, '/file/print', ['name', 'type', 'size', 'creation-time'], $until);
+                $items = [];
+                foreach ($files as $f) {
+                    if (substr((string) $f['name'], -7) === '.backup' || $f['type'] === 'backup') {
+                        $items[] = ['name' => $f['name'], 'size' => is_numeric($f['size']) ? (float) $f['size'] : null, 'created' => $f['creation-time'],
+                            'auto' => (bool) preg_match('/(^|\/)phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name'])];
+                    }
+                }
+                usort($items, function ($a, $b) {
+                    return strcmp((string) $b['name'], (string) $a['name']);
+                });
+                $say(['ok' => true, 'items' => array_slice($items, 0, 100), 'can_download' => $admin['user_type'] === 'SuperAdmin' && function_exists('ftp_connect'),
+                    'nightly' => ($config['router_backup'] ?? '0') === '1']);
+            }
+        } catch (Throwable $e) {
+            $say(['ok' => false, 'error' => $e->getMessage()]);
+        }
+        break;
+
+    case 'history':
+        // the History tab: readings kept by the cron (RouterMonitor), nothing asked of the router itself
+        header('Content-Type: application/json');
+        header('Cache-Control: no-store');
+        session_write_close();
+        $d = ORM::for_table('tbl_routers')->find_one((int) ($routes['2'] ?? 0));
+        if (!$d) {
+            echo json_encode(['ok' => false, 'error' => Lang::T('Data Not Found')]);
+            exit;
+        }
+        if (!RouterMonitor::ready()) {
+            echo json_encode(['ok' => false, 'error' => Lang::T('History needs the database update: run update.php (or php system/cron/migrate.php).')]);
+            exit;
+        }
+        $range = in_array(_get('range'), ['24h', '7d', '30d'], true) ? _get('range') : '24h';
+        echo json_encode(['ok' => true, 'range' => $range, 'collecting' => RouterMonitor::enabled()] + RouterMonitor::history((int) $d['id'], $range), JSON_INVALID_UTF8_SUBSTITUTE);
+        exit;
+
+    case 'backup-download':
+        // a backup file from the router, through its FTP service (the RouterOS API cannot hand files over), SuperAdmin only
+        if ($admin['user_type'] !== 'SuperAdmin') {
+            r2(getUrl('routers/list'), 'e', Lang::T('Only a SuperAdmin can do this'));
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Csrf::check(_post('csrf_token'))) {
+            r2(getUrl('routers/list'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
+        }
+        $d = ORM::for_table('tbl_routers')->find_one((int) ($routes['2'] ?? 0));
+        $fname = _post('name');
+        if (!$d || !preg_match('/^[A-Za-z0-9._\/-]{1,120}\.backup$/', $fname) || strpos($fname, '..') !== false) {
+            r2(getUrl('routers/list'), 'e', Lang::T('Data Not Found'));
+        }
+        if (!function_exists('ftp_connect')) {
+            r2(getUrl('routers/list'), 'e', Lang::T('Downloading needs the PHP ftp extension. Ask your host to enable it, or download the file from Files in Winbox.'));
+        }
+        [$host] = RouterAddress::split($d['ip_address']);
+        $ftp = @ftp_connect($host, 21, 10);
+        if (!$ftp || !@ftp_login($ftp, $d['username'], $d['password'])) {
+            $ftp && @ftp_close($ftp);
+            r2(getUrl('routers/list'), 'e', htmlspecialchars($d['name']) . ': ' . Lang::T('could not sign in to the router\'s FTP service. Turn it on in IP > Services (ftp, port 21) and give the user\'s group the ftp policy. A router reached through a VPN port forward cannot be used this way: download it from Files in Winbox.'));
+        }
+        @ftp_set_option($ftp, FTP_TIMEOUT_SEC, 30);
+        ftp_pasv($ftp, true);
+        $tmp = tmpfile();
+        $okDl = @ftp_fget($ftp, $tmp, $fname, FTP_BINARY);
+        @ftp_close($ftp);
+        if (!$okDl) {
+            fclose($tmp);
+            r2(getUrl('routers/list'), 'e', htmlspecialchars($d['name'] . ': ' . Lang::T('the file could not be fetched') . ' (' . $fname . ')'));
+        }
+        _log('[' . $admin['username'] . ']: Router backup downloaded from ' . $d['name'] . ': ' . $fname, $admin['user_type'], $admin['id']);
+        $size = ftell($tmp);
+        rewind($tmp);
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . preg_replace('/[^A-Za-z0-9._-]/', '_', $d['name'] . '-' . basename($fname)) . '"');
+        header('Content-Length: ' . $size);
+        header('Cache-Control: no-store');
+        fpassthru($tmp);
+        fclose($tmp);
+        exit;
+
     case 'health':
         // the live figures for one router on the list, kept for 60 seconds so reloading or several admins do not ask it again.
         // live=1 (the open details panel, every second) also reads the interface counters and is shared for under a second.
@@ -594,6 +922,9 @@ switch ($action) {
                 exit;
             }
         }
+        // when this reading began: the order of readings, for the store below ("at" is when the interface counters were read,
+        // which the speeds need, and a slow reading that began earlier can finish later)
+        $observed = microtime(true);
         [$c, $err] = $rosConnect($d['ip_address'], $d['username'], $d['password'], 5);
         if ($c) {
             try {
@@ -605,6 +936,7 @@ switch ($action) {
             $out = ['ok' => false, 'error' => $err, 'hint' => $rosHint($err)];
         }
         $out['checked'] = date('Y-m-d H:i:s');
+        $out['observed'] = round($observed, 3);
         if (!is_dir($dir)) {
             @mkdir($dir, 0755, true);
         }
@@ -615,7 +947,7 @@ switch ($action) {
             // read and write under one lock: when two readings of the same router finish together, the newer one stays
             if (flock($fh, LOCK_EX)) {
                 $old = json_decode((string) stream_get_contents($fh), true);
-                $newer = is_array($old) && ($old['key'] ?? '') === $key && isset($old['at'], $out['at']) && (float) $old['at'] > (float) $out['at'];
+                $newer = is_array($old) && ($old['key'] ?? '') === $key && isset($old['observed']) && (float) $old['observed'] > $observed;
                 if (!$newer) {
                     ftruncate($fh, 0);
                     rewind($fh);
