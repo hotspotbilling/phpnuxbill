@@ -57,7 +57,7 @@
                     <div class="nf__row">
                         <div class="nf__field">
                             <label class="nf__label" for="router_alert_phone">{Lang::T('Also to this phone')} <small>{Lang::T('Optional')}</small></label>
-                            <input type="tel" class="form-control" id="router_alert_phone" name="router_alert_phone" maxlength="20" inputmode="tel"
+                            <input type="tel" class="form-control" id="router_alert_phone" name="router_alert_phone" maxlength="25" inputmode="tel"
                                 pattern="\+?[0-9 \(\)\-]{literal}{7,24}{/literal}" value="{$_c['router_alert_phone']|default:''|escape}" placeholder="+234 800 000 0000">
                         </div>
                         <div class="nf__field">

@@ -313,7 +313,7 @@ switch ($action) {
             // the backup password: kept as typed (not trimmed: spaces count), never shown again; empty keeps the saved one
             $backupPass = (string) ($_POST['router_backup_password'] ?? '');
             if ($backupPass !== '') {
-                if (strlen($backupPass) < 8 || strlen($backupPass) > 128) {
+                if (mb_strlen($backupPass, 'UTF-8') < 8 || mb_strlen($backupPass, 'UTF-8') > 128) { // characters, not bytes
                     r2(getUrl('routers/settings'), 'e', Lang::T('The backup password must be 8 to 128 characters.'));
                 }
                 $values['router_backup_password'] = $backupPass;

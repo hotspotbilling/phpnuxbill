@@ -119,6 +119,11 @@
         }
         (d.ifaces || []).forEach(function (i) {
             var p = L.prev[i.name];
+            if (!p && L.rate[i.name] && L.rate[i.name].length) {
+                // a new baseline after a failed reading or a pause: a gap in the graph, so the next speed is not joined to the
+                // last one from before
+                push(L.rate[i.name], [d.at, null, null]);
+            }
             if (p && d.at > p.at) {
                 var s = d.at - p.at;
                 var down = (i.rx - p.rx) * 8 / s, up = (i.tx - p.tx) * 8 / s;
