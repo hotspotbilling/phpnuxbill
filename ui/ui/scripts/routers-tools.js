@@ -111,12 +111,19 @@
     }
 
     /* ---------- users online ---------- */
+    function dropKey(cfg, kind, sid) {
+        return (cfg || '') + ' ' + kind + ' ' + sid;
+    }
     function loadUsers(id, pane) {
         return request('sessions', id).then(function (d) {
             if (!d.ok) { pane.innerHTML = head(t.user) + fail(d); return; }
             var rows = d.hotspot.map(function (r) { r.kind = 'hotspot'; return r; }).concat(d.pppoe.map(function (r) { r.kind = 'pppoe'; return r; }));
-            // a session disconnected here stays marked, even in a list read from the router before the disconnect went through
-            rows.forEach(function (r) { if (pane._gone && pane._gone[r.kind + ' ' + r.sid]) r.gone = true; });
+            // a disconnect sent from here (still on its way, or done) stays shown on its row, even in a list read from the router
+            // before it went through; kept per router settings, as a session ID only means something on the router it came from
+            rows.forEach(function (r) {
+                var s = pane._drops && pane._drops[dropKey(d.cfg, r.kind, r.sid)];
+                if (s === 'gone') r.gone = true; else if (s === 'pending') r.pending = true;
+            });
             var curl = d.customer_url;
             var total = (d.total_hotspot || d.hotspot.length) + (d.total_pppoe || d.pppoe.length);
             listView(pane, total + ' ' + t.online, {
@@ -508,24 +515,30 @@
             // out. Its state (waiting, failed) is kept on the row itself, so every redraw shows it and it cannot be sent twice.
             var dPane = drop.closest('[data-rt-pane]'), dModel = dPane._lv;
             var dKind = drop.getAttribute('data-rt-drop'), dSid = drop.getAttribute('data-sid'), dUser = drop.getAttribute('data-user');
-            var dRow = dModel ? dModel.opts.rows.filter(function (r) { return r.sid === dSid && r.kind === dKind; })[0] : null;
-            if (!dRow || dRow.pending || dRow.gone) return;
-            var redraw = function () { if (dPane._lv === dModel) listRender(dPane); };
+            var dCfg = dModel ? dModel.opts.cfg || '' : '', dKey = dropKey(dCfg, dKind, dSid);
+            var find = function (model) { // the row for this session in a list read with the same router settings
+                return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) { return r.sid === dSid && r.kind === dKind; })[0] : null;
+            };
+            var dRow = find(dModel);
+            if (!dRow || dRow.pending || dRow.gone || (dPane._drops && dPane._drops[dKey])) return;
             ask(drop, dUser + ': ' + t.dropAsk, function () {
-                if (dRow.pending || dRow.gone) return;
+                dPane._drops = dPane._drops || {};
+                if (dPane._drops[dKey]) return;
+                dPane._drops[dKey] = 'pending';
                 dRow.pending = true;
                 dRow.err = null;
-                redraw();
-                request('drop', rid, { kind: dKind, sid: dSid, user: dUser, cfg: dModel.opts.cfg || '' }).then(function (d) {
-                    dRow.pending = false;
-                    if (d.ok) {
-                        dRow.gone = true;
-                        (dPane._gone = dPane._gone || {})[dKind + ' ' + dSid] = true;
-                    } else {
-                        dRow.err = d.error || t.fail;
-                    }
-                    // drawn again only while the same list is shown; a list being refreshed comes back with the row marked
-                    redraw();
+                if (dPane._lv === dModel) listRender(dPane);
+                request('drop', rid, { kind: dKind, sid: dSid, user: dUser, cfg: dCfg }).then(function (d) {
+                    if (d.ok) dPane._drops[dKey] = 'gone'; else delete dPane._drops[dKey];
+                    // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may
+                    // have replaced it); a list from other router settings is left alone
+                    var cur = find(dPane._lv);
+                    [dRow, cur].forEach(function (r) {
+                        if (!r) return;
+                        r.pending = false;
+                        if (d.ok) r.gone = true; else r.err = d.error || t.fail;
+                    });
+                    if (cur) listRender(dPane);
                 });
             });
             return;

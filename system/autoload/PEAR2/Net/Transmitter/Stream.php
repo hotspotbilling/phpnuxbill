@@ -98,6 +98,14 @@ class Stream
     protected $deadline = null;
 
     /**
+     * PHPNuxBill: the stream's ordinary read timeout as [seconds, microseconds], or NULL for PHP's default_socket_timeout
+     * (what a stream starts with). A deadline narrows the timeout for each read; this is put back when it is cleared.
+     *
+     * @var array<int,int>|null
+     */
+    protected $ordinaryTimeout = null;
+
+    /**
      * An associative array with the chunk size of each direction.
      *
      * Key is the direction, value is the size in bytes as integer.
@@ -227,6 +235,7 @@ class Stream
      */
     public function setTimeout($seconds, $microseconds = 0)
     {
+        $this->ordinaryTimeout = array((int) $seconds, (int) $microseconds);
         return stream_set_timeout($this->stream, $seconds, $microseconds);
     }
 
@@ -241,7 +250,13 @@ class Stream
      */
     public function setDeadline($deadline)
     {
+        $had = null !== $this->deadline;
         $this->deadline = null === $deadline ? null : (float) $deadline;
+        if ($had && null === $this->deadline && self::isStream($this->stream)) {
+            // the reads under the deadline narrowed the timeout: back to the ordinary one
+            $t = $this->ordinaryTimeout ?: array((int) ini_get('default_socket_timeout'), 0);
+            stream_set_timeout($this->stream, $t[0], $t[1]);
+        }
     }
 
     /**

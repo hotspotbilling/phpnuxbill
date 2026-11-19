@@ -216,7 +216,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.7"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.8"></script>
 
 {if $health_on}
 <script>

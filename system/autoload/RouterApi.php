@@ -159,8 +159,16 @@ class RouterApi
             if (($config['router_backup'] ?? '0') !== '1') {
                 return [];
             }
+            // one run at a time: a second cron started meanwhile leaves the work to the one already doing it
+            $lock = @fopen($CACHE_PATH . DIRECTORY_SEPARATOR . 'router_backup.lock', 'c');
+            if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
+                return [];
+            }
+            // today's progress read again under the lock: $config was loaded when this cron started, and a run that finished
+            // since may have done routers (or used up their tries) that the snapshot does not know about
             $today = date('Y-m-d');
-            $state = json_decode((string) ($config['router_backup_state'] ?? ''), true);
+            $saved = ORM::for_table('tbl_appconfig')->where('setting', 'router_backup_state')->find_one();
+            $state = json_decode($saved ? (string) $saved['value'] : '', true);
             if (!is_array($state) || ($state['date'] ?? '') !== $today || !is_array($state['routers'] ?? null)) {
                 $state = ['date' => $today, 'routers' => []];
             }
@@ -175,11 +183,6 @@ class RouterApi
                 }
             }
             if (!$routers) {
-                return [];
-            }
-            // one run at a time: a second cron started meanwhile leaves the work to the one already doing it
-            $lock = @fopen($CACHE_PATH . DIRECTORY_SEPARATOR . 'router_backup.lock', 'c');
-            if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
                 return [];
             }
             $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
