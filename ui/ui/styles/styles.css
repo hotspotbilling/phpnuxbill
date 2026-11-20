@@ -8934,6 +8934,7 @@ body .ls-table td:first-child {
 }
 .ls-pill {
   display: inline-block;
+  white-space: nowrap; /* a short label: never broken over lines in a narrow column */
   padding: 2px 10px;
   border-radius: 999px;
   font-size: 12px;
@@ -10512,6 +10513,9 @@ body.dark-mode .rt-err {
   gap: 8px;
 }
 /* customers per router: active and expired, each a link to that list */
+.ls-table td.rt-desc {
+  min-width: 160px; /* the router's description: a readable line, not a word per line */
+}
 .rt-cust {
   white-space: nowrap;
 }

@@ -5774,5 +5774,7 @@
     "Backup_password": "Backup password",
     "Backups_are_encrypted_with_this_password__nightly_and_Save_a_backup_alike__and_none_is_made_without_it__a_backup_without_a_password_holds_every_login_on_the_router_in_readable_form__You_need_it_to_restore_a_backup__so_keep_it_somewhere_safe_": "Backups are encrypted with this password, nightly and Save a backup alike, and none is made without it: a backup without a password holds every login on the router in readable form. You need it to restore a backup, so keep it somewhere safe.",
     "Changing_it_does_not_change_the_backups_already_made__each_one_still_opens_only_with_the_password_it_was_made_with__so_keep_that_password_for_as_long_as_you_keep_those_backups__New_backups_use_the_new_one_": "Changing it does not change the backups already made: each one still opens only with the password it was made with, so keep that password for as long as you keep those backups. New backups use the new one.",
-    "Run_it_at_least_every_15_minutes__readings_further_apart_are_not_compared__so_alerts_and_traffic_speeds_need_it_": "Run it at least every 15 minutes: readings further apart are not compared, so alerts and traffic speeds need it."
+    "Run_it_at_least_every_15_minutes__readings_further_apart_are_not_compared__so_alerts_and_traffic_speeds_need_it_": "Run it at least every 15 minutes: readings further apart are not compared, so alerts and traffic speeds need it.",
+    "Not_checked_yet": "Not checked yet",
+    "No_backup_password_is_set_in_Network___Routers___Settings__so_no_backup_was_made_": "No backup password is set in Network > Routers > Settings, so no backup was made."
 }
