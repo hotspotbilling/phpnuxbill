@@ -62,24 +62,17 @@ class MikrotikVpn
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $this->checked($client->sendSync($setRequest));
+            $addr = !empty($customer['pppoe_ip']) ? (string) $customer['pppoe_ip'] : $resume;
             if ($resume !== '') {
-                // only the forwards not on the router yet (by their comment), then the address is saved as addVpnUser() does
-                $natRequest = new RouterOS\Request('/ip/firewall/nat/print');
-                $natRequest->setQuery(RouterOS\Query::where('to-addresses', $resume));
-                $have = [];
-                foreach ($client->sendSync($natRequest) as $nat) {
-                    if ($nat->getType() === RouterOS\Response::TYPE_DATA) {
-                        $have[] = (string) $nat->getProperty('comment');
-                    }
-                }
-                if ($this->addNat($client, $plan, $customer, $resume, $have)) {
-                    $customer->service_type = 'VPN';
-                    $customer->pppoe_ip = $resume;
-                    $customer->save();
-                } elseif ($this->strict) {
-                    // a forward the router refused: the address stays unsaved, so the next run finishes the forwards again
-                    throw new Exception(Lang::T('The router refused a port forward for this customer'));
-                }
+                // the address the router gave this secret is kept for this customer, so it is not handed to another one
+                $customer->service_type = 'VPN';
+                $customer->pppoe_ip = $resume;
+                $customer->save();
+            }
+            // the forwards are checked against the router each time, not inferred from the saved address: one refused before is
+            // added now, and one already there (by its comment) is not added again
+            if ($addr !== '' && !$this->addNat($client, $plan, $customer, $addr, $this->natComments($client, $addr)) && $this->strict) {
+                throw new Exception(Lang::T('The router refused a port forward for this customer'));
             }
             if (isset($isChangePlan) && $isChangePlan) {
                 $this->removeVpnActive($client, $customer['username']);
@@ -387,17 +380,33 @@ class MikrotikVpn
         }
         // the secret first: the port forwards (and the ports reserved for them) are made only for a customer the router took,
         // so a refused secret leaves no rules pointing at an address that was never given out
-        $this->checked($client->sendSync($setRequest));
-        if (!$this->addNat($client, $plan, $customer, $ips)) {
-            // the address is saved only once every forward is on the router: unsaved, the next run (add_customer) finishes them
-            if ($this->strict) {
-                throw new Exception(Lang::T('The router refused a port forward for this customer'));
-            }
+        $res = $this->checked($client->sendSync($setRequest));
+        if (RouterApi::error($res) !== null) {
             return;
         }
+        // the address is saved as soon as the router has given it to this secret, before the forwards: checkIpAddr() then
+        // never hands it to another customer, even when a forward fails. Forwards are not tracked by it: each later
+        // add_customer() checks them on the router and adds the missing ones.
         $customer->service_type = 'VPN';
         $customer->pppoe_ip = $ips;
         $customer->save();
+        if (!$this->addNat($client, $plan, $customer, $ips, $this->natComments($client, $ips)) && $this->strict) {
+            throw new Exception(Lang::T('The router refused a port forward for this customer'));
+        }
+    }
+
+    /** The comments of the port forwards on the router that point to this address */
+    private function natComments($client, $addr)
+    {
+        $natRequest = new RouterOS\Request('/ip/firewall/nat/print');
+        $natRequest->setQuery(RouterOS\Query::where('to-addresses', $addr));
+        $have = [];
+        foreach ($client->sendSync($natRequest) as $nat) {
+            if ($nat->getType() === RouterOS\Response::TYPE_DATA) {
+                $have[] = (string) $nat->getProperty('comment');
+            }
+        }
+        return $have;
     }
 
     function removeVpnActive($client, $username)

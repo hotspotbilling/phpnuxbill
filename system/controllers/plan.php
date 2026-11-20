@@ -859,6 +859,20 @@ switch ($action) {
         $svoucher = _post('svoucher');
         $made = App::getTokenValue($svoucher);
         $claim = null;
+        // the session as stored now, with this request's own values laid over it: with a session store that does not lock
+        // (the default file store does), what other requests recorded since this one started (another form's "batch saved") is
+        // kept rather than replaced by this request's older copy. Without a way to read it back, this request's copy stays.
+        $sessionMerge = function () {
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                return;
+            }
+            $local = $_SESSION;
+            if (@session_reset()) {
+                $_SESSION = array_replace($_SESSION, $local);
+            } else {
+                $_SESSION = $local;
+            }
+        };
         if (empty($made) && $svoucher !== '') {
             // claimed for this request with a database lock, so it holds whatever stores the sessions: the same form sent again
             // while this one is still creating its batch is answered as a repeat, not given a second batch. Released once the
@@ -878,17 +892,9 @@ switch ($action) {
             }
             // the session as stored now: this request read it when it started, and a request that finished the same form since
             // then (with a session store that does not lock) has recorded its batch there before letting the claim go. Read
-            // back without writing this request's older copy over it; this request's own changes are kept.
-            if (session_status() === PHP_SESSION_ACTIVE) {
-                $local = $_SESSION;
-                if (@session_reset()) {
-                    $made = App::getTokenValue($svoucher);
-                }
-                $_SESSION = $local;
-                if (!empty($made)) {
-                    $_SESSION[$svoucher] = $made;
-                }
-            }
+            // back without writing this request's older copy over it (it has no value for this form: $made was empty).
+            $sessionMerge();
+            $made = App::getTokenValue($svoucher);
         }
         if (!empty($made)) {
             $madeBatch = is_array($made) ? (string) ($made['batch'] ?? '') : '';
@@ -1020,6 +1026,7 @@ switch ($action) {
                 }
                 ORM::raw_execute('COMMIT');
                 if ($svoucher !== '') {
+                    $sessionMerge();
                     App::setToken($svoucher, ['batch' => $batch_name, 'n' => count($newVoucherIds)]);
                     // saved now rather than when the request ends, so a repeat that gets the claim next finds the token used
                     session_write_close();
