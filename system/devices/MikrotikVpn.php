@@ -72,10 +72,14 @@ class MikrotikVpn
                         $have[] = (string) $nat->getProperty('comment');
                     }
                 }
-                $this->addNat($client, $plan, $customer, $resume, $have);
-                $customer->service_type = 'VPN';
-                $customer->pppoe_ip = $resume;
-                $customer->save();
+                if ($this->addNat($client, $plan, $customer, $resume, $have)) {
+                    $customer->service_type = 'VPN';
+                    $customer->pppoe_ip = $resume;
+                    $customer->save();
+                } elseif ($this->strict) {
+                    // a forward the router refused: the address stays unsaved, so the next run finishes the forwards again
+                    throw new Exception(Lang::T('The router refused a port forward for this customer'));
+                }
             }
             if (isset($isChangePlan) && $isChangePlan) {
                 $this->removeVpnActive($client, $customer['username']);
@@ -384,7 +388,13 @@ class MikrotikVpn
         // the secret first: the port forwards (and the ports reserved for them) are made only for a customer the router took,
         // so a refused secret leaves no rules pointing at an address that was never given out
         $this->checked($client->sendSync($setRequest));
-        $this->addNat($client, $plan, $customer, $ips);
+        if (!$this->addNat($client, $plan, $customer, $ips)) {
+            // the address is saved only once every forward is on the router: unsaved, the next run (add_customer) finishes them
+            if ($this->strict) {
+                throw new Exception(Lang::T('The router refused a port forward for this customer'));
+            }
+            return;
+        }
         $customer->service_type = 'VPN';
         $customer->pppoe_ip = $ips;
         $customer->save();
@@ -440,13 +450,17 @@ class MikrotikVpn
         );
     }
 
-    /** $have: the comments of forwards already on the router for this address, which are not added again */
+    /**
+     * $have: the comments of forwards already on the router for this address, which are not added again. Returns whether the
+     * router took every forward it was sent (a refusal comes back as a !trap reply, not as an exception).
+     */
     function addNat($client, $plan, $cust, $ips, $have = [])
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
-            return null;
+            return true;
         }
+        $ok = true;
         $this->checkPort($cust['id'], 'Winbox', $plan['routers']);
         $this->checkPort($cust['id'], 'Api', $plan['routers']);
         $this->checkPort($cust['id'], 'Web', $plan['routers']);
@@ -470,7 +484,7 @@ class MikrotikVpn
             }
             if (($cmnt == 'Winbox' || $cmnt == 'Web' || $cmnt == 'Api') && !in_array($cmnt . ' || ' . $cust['username'], $have, true)) {
                 $addRequest = new RouterOS\Request('/ip/firewall/nat/add');
-                $client->sendSync(
+                $res = $client->sendSync(
                     $addRequest
                         ->setArgument('chain', 'dstnat')
                         ->setArgument('protocol', 'tcp')
@@ -481,8 +495,12 @@ class MikrotikVpn
                         ->setArgument('dst-address', $ip['public_ip'])
                         ->setArgument('comment', $cmnt . ' || ' . $cust['username'])
                 );
+                if (RouterApi::error($res) !== null) {
+                    $ok = false;
+                }
             }
         }
+        return $ok;
     }
 
     function rmNat($client, $cstid)

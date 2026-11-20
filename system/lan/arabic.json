@@ -1503,5 +1503,7 @@
     "Saved__but_the_fixed_IP_address_could_not_be_cleared": "تم الحفظ، لكن تعذر مسح عنوان IP الثابت",
     "These_vouchers_are_still_being_created__Wait_a_minute_and_look_for_them_in_this_list_before_sending_the_form_again_": "لا يزال إنشاء هذه القسائم جارياً. انتظر دقيقة وابحث عنها في هذه القائمة قبل إرسال النموذج مرة أخرى.",
     "has_the_action_deny__but_an_IP_walled_garden_rule_may_still_let_customers_open": "إجراؤها deny، لكن قاعدة IP في Walled Garden قد تسمح للعملاء مع ذلك بفتح",
-    "Check_both_in_Winbox__IP___Hotspot___Walled_Garden_": "تحقق من كليهما في Winbox، IP > Hotspot > Walled Garden."
+    "Check_both_in_Winbox__IP___Hotspot___Walled_Garden_": "تحقق من كليهما في Winbox، IP > Hotspot > Walled Garden.",
+    "The_vouchers_could_not_be_created_now__Try_again_in_a_moment_": "تعذر إنشاء القسائم الآن. حاول مرة أخرى بعد قليل.",
+    "The_router_refused_a_port_forward_for_this_customer": "رفض الراوتر إعادة توجيه منفذ لهذا العميل"
 }

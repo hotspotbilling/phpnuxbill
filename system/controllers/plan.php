@@ -867,8 +867,9 @@ switch ($action) {
             try {
                 $got = (int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($claim) . ', 0)')->fetchColumn() === 1;
             } catch (Throwable $e) {
-                $got = true;
-                $claim = null; // no lock to be had: the session's own lock still keeps one form from running twice at once
+                // no claim to be had: nothing else is sure to keep two sends of this form apart (a session store may not lock),
+                // so no batch is made rather than perhaps two
+                r2(getUrl('plan/add-voucher/'), 'e', Lang::T('The vouchers could not be created now. Try again in a moment.'));
             }
             if (!$got) {
                 // the same form is being handled right now: its batch is not made yet, and may still fail
@@ -876,11 +877,17 @@ switch ($action) {
                     Lang::T('These vouchers are still being created. Wait a minute and look for them in this list before sending the form again.'));
             }
             // the session as stored now: this request read it when it started, and a request that finished the same form since
-            // then (with a session store that does not lock) has recorded its batch there before letting the claim go
-            if ($claim !== null && session_status() === PHP_SESSION_ACTIVE) {
-                session_write_close();
-                @session_start();
-                $made = App::getTokenValue($svoucher);
+            // then (with a session store that does not lock) has recorded its batch there before letting the claim go. Read
+            // back without writing this request's older copy over it; this request's own changes are kept.
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                $local = $_SESSION;
+                if (@session_reset()) {
+                    $made = App::getTokenValue($svoucher);
+                }
+                $_SESSION = $local;
+                if (!empty($made)) {
+                    $_SESSION[$svoucher] = $made;
+                }
             }
         }
         if (!empty($made)) {
