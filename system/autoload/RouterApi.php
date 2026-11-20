@@ -59,6 +59,24 @@ class RouterApi
     }
 
     /**
+     * A client for the device drivers (PPPoE, Hotspot, VPN, Static). Each command waits at most $readTimeout seconds for its
+     * answer (the library's own wait has no end), so a router that goes silent fails the command with an exception (code 408)
+     * instead of holding the request for ever; the connection is then dropped without the goodbye that would wait too.
+     * $connectTimeout: for the connection and the login (null: the same $readTimeout).
+     */
+    public static function deviceClient($host, $user, $pass, $port = null, $connectTimeout = null, $readTimeout = 30)
+    {
+        $old = ini_get('default_socket_timeout');
+        // the stream takes its read time limit from this when it opens, whatever it is set to (even "never")
+        ini_set('default_socket_timeout', (string) $readTimeout);
+        try {
+            return (new RouterClient($host, $user, $pass, $port, false, $connectTimeout))->limitSync($readTimeout);
+        } finally {
+            ini_set('default_socket_timeout', (string) $old);
+        }
+    }
+
+    /**
      * Send one request and wait for its answer until $deadline (a microtime). Finished means the closing reply (!done, or a
      * fatal one) arrived; otherwise the connection is dropped and an exception (code 408) says the router did not answer.
      */

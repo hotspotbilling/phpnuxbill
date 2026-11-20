@@ -858,6 +858,20 @@ switch ($action) {
         // page), it goes to the batch already made instead of making a second one
         $svoucher = _post('svoucher');
         $made = App::getTokenValue($svoucher);
+        $claim = null;
+        if (empty($made) && $svoucher !== '') {
+            // claimed for this request with a database lock, so it holds whatever stores the sessions: the same form sent again
+            // while this one is still creating its batch is answered as a repeat, not given a second batch. Released once the
+            // batch is saved, and by the database when the request ends in any other way.
+            $claim = 'phpnuxbill_voucher_' . substr(hash('sha256', $svoucher), 0, 40);
+            try {
+                if ((int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($claim) . ', 0)')->fetchColumn() !== 1) {
+                    $made = ['batch' => $batch_name];
+                }
+            } catch (Throwable $e) {
+                $claim = null; // no lock to be had: the session's own lock still keeps one form from running twice at once
+            }
+        }
         if (!empty($made)) {
             $madeBatch = is_array($made) ? (string) ($made['batch'] ?? '') : '';
             r2(getUrl('plan/voucher') . ($madeBatch !== '' ? '&batch_name=' . urlencode($madeBatch) : ''), 'w',
@@ -989,6 +1003,15 @@ switch ($action) {
                 ORM::raw_execute('COMMIT');
                 if ($svoucher !== '') {
                     App::setToken($svoucher, ['batch' => $batch_name, 'n' => count($newVoucherIds)]);
+                    // saved now rather than when the request ends, so a repeat that gets the claim next finds the token used
+                    session_write_close();
+                    @session_start();
+                }
+                if ($claim !== null) {
+                    try {
+                        ORM::getDb()->query('SELECT RELEASE_LOCK(' . ORM::getDb()->quote($claim) . ')');
+                    } catch (Throwable $e) {
+                    }
                 }
             } catch (Throwable $e) {
                 ORM::raw_execute('ROLLBACK');

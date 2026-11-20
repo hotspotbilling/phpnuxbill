@@ -4,6 +4,27 @@ use PEAR2\Net\RouterOS;
 
 class MikrotikStatic
 {
+    // set while sync_customer() runs: a change the router refuses is thrown, so the sync counts that customer as not sent
+    private $strict = false;
+
+    public function sync_customer($customer, $plan)
+    {
+        $this->strict = true;
+        try {
+            $this->add_customer($customer, $plan);
+        } finally {
+            $this->strict = false;
+        }
+    }
+
+    /** A command's replies; during a sync, the router's refusal (a !trap) is thrown instead of passing unnoticed */
+    private function checked($res)
+    {
+        if ($this->strict && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        return $res;
+    }
     // show Description
     public function description()
     {
@@ -48,7 +69,7 @@ class MikrotikStatic
             $setRequest->setArgument('target', $customer['pppoe_ip']);
             $setRequest->setArgument('max-limit', $rate);
             $setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-            $client->sendSync($setRequest);
+            $this->checked($client->sendSync($setRequest));
             if (!$isExp) {
                 $this->removeIpFromAddressList($client, $customer['pppoe_ip']);
             }
@@ -207,7 +228,7 @@ class MikrotikStatic
             return null;
         }
         [$host, $port] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
-        return new RouterOS\Client($host, $user, $pass, $port);
+        return RouterApi::deviceClient($host, $user, $pass, $port); // every read time-limited
     }
 
     public function removeStaticUser($client, $username)
@@ -246,7 +267,7 @@ class MikrotikStatic
         $setRequest->setArgument('target', $customer['pppoe_ip']);
         $setRequest->setArgument('max-limit', $rate);
         $setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-        $client->sendSync($setRequest);
+        $this->checked($client->sendSync($setRequest));
     }
 
     public function removeStaticActive($client, $username)

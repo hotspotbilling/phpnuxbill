@@ -29,7 +29,7 @@ class Rtl
     const OWN_RTL = ['sweetalert2', 'select2'];
 
     /** Bumped when the mirroring changes, so the copies already made are made again */
-    const VERSION = 6;
+    const VERSION = 7;
 
     /**
      * Put on what has been mirrored already. Smarty runs the filter on fetch() as well as display(), so a part fetched and then
@@ -80,16 +80,7 @@ class Rtl
                 $part = preg_replace_callback('/(<style\b[^>]*>)(.*?)(<\/style\s*>)/is', function ($m) {
                     return strpos($m[2], self::MARK) !== false ? $m[0] : $m[1] . self::MARK . self::flip($m[2]) . $m[3];
                 }, $part);
-                // (an entity such as &quot; holds a semicolon: it splits into a part with no colon, which is kept as it is)
-                $part = preg_replace_callback('/(\sstyle\s*=\s*)(?:"([^"]*)"|\'([^\']*)\')/i', function ($m) {
-                    $q = isset($m[3]) && $m[3] !== '' ? "'" : '"';
-                    $v = $q === "'" ? $m[3] : $m[2];
-                    if (trim($v) === '' || strpos($v, self::MARK) !== false) {
-                        return $m[0];
-                    }
-                    $v = self::declarations($v);
-                    return $m[1] . $q . $v . (substr(rtrim($v), -1) === ';' ? '' : ';') . self::MARK . $q;
-                }, $part);
+                $part = self::styleAttributes($part);
                 if (!$extra && stripos($part, '</head>') !== false && stripos($part, '/ui/ui/styles/rtl.css') === false) {
                     $part = preg_replace('/<\/head>/i', self::extraLink() . '</head>', $part, 1);
                     $extra = true;
@@ -100,6 +91,34 @@ class Rtl
         } catch (Throwable $e) {
             return $html; // a page shown left to right is better than no page
         }
+    }
+
+    /**
+     * The style="" attributes of the start tags, mirrored. Each tag is read attribute by attribute, so text that only looks like
+     * one (in a title="", or in the page's text) is left as it is. A tag that cannot be read is left as it is too.
+     * (an entity such as &quot; holds a semicolon: it splits into a part with no colon, which is kept as it is)
+     */
+    private static function styleAttributes($part)
+    {
+        $attr = '(?:\s+[^\s"\'>\/=]+(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'>]+))?)';
+        return preg_replace_callback('/<([a-zA-Z][\w:-]*)(' . $attr . '*)(\s*\/?>)/', function ($t) {
+            if (stripos($t[2], 'style') === false) {
+                return $t[0];
+            }
+            $attrs = preg_replace_callback('/(\s+)([^\s"\'>\/=]+)(?:(\s*=\s*)("[^"]*"|\'[^\']*\'|[^\s"\'>]+))?/', function ($a) {
+                if (strtolower($a[2]) !== 'style' || !isset($a[4]) || $a[4] === '' || ($a[4][0] !== '"' && $a[4][0] !== "'")) {
+                    return $a[0];
+                }
+                $q = $a[4][0];
+                $v = substr($a[4], 1, -1);
+                if (trim($v) === '' || strpos($v, self::MARK) !== false) {
+                    return $a[0];
+                }
+                $v = self::declarations($v);
+                return $a[1] . $a[2] . $a[3] . $q . $v . (substr(rtrim($v), -1) === ';' ? '' : ';') . self::MARK . $q;
+            }, $t[2]);
+            return '<' . $t[1] . $attrs . $t[3];
+        }, $part);
     }
 
     /** dir="rtl" and the language code on <html>, unless the template set a direction itself */
@@ -150,30 +169,38 @@ class Rtl
      * The URL of the mirrored copy of a stylesheet of this site, made now if missing or older than the file; null for a
      * stylesheet on another site or one that cannot be read (the page then keeps the original).
      */
+    /** The stylesheets being mirrored now (real paths): an @import that leads back to one of them is not followed */
+    private static $busy = [];
+
+    /** A stylesheet that is never mirrored: a component that turns itself, a mirrored copy already, or rtl.css */
+    private static function excluded($path)
+    {
+        global $root_path, $UI_PATH;
+        foreach (self::OWN_RTL as $own) {
+            if (stripos(basename($path), $own) === 0) {
+                return true;
+            }
+        }
+        $rel = str_replace(DIRECTORY_SEPARATOR, '/', substr($path, strlen(rtrim(realpath($root_path), DIRECTORY_SEPARATOR)) + 1));
+        // (a page that went through the filter twice links the copies; rtl.css is written right to left)
+        return strpos($rel, ($UI_PATH ?: 'ui') . '/cache/rtl/') === 0 || $rel === ($UI_PATH ?: 'ui') . '/ui/styles/rtl.css';
+    }
+
     public static function mirrored($href)
     {
         global $root_path, $UI_PATH;
-        static $busy = []; // the stylesheets being mirrored now: an @import that leads back to one of them is not followed
         $path = self::localPath($href);
-        if ($path === null || isset($busy[$path])) {
+        if ($path === null || isset(self::$busy[$path]) || self::excluded($path)) {
             return null;
-        }
-        foreach (self::OWN_RTL as $own) {
-            if (stripos(basename($path), $own) === 0) {
-                return null;
-            }
         }
         $rel = substr($path, strlen(rtrim(realpath($root_path), DIRECTORY_SEPARATOR)) + 1);
         $rel = str_replace(DIRECTORY_SEPARATOR, '/', $rel);
         $cache = ($UI_PATH ?: 'ui') . '/cache/rtl';
-        if (strpos($rel, $cache . '/') === 0 || $rel === ($UI_PATH ?: 'ui') . '/ui/styles/rtl.css') {
-            return null; // a mirrored copy already (a page that went through the filter twice), or rtl.css, written right to left
-        }
         $dir = $root_path . $cache;
         $name = substr(sha1($rel), 0, 12) . '-' . preg_replace('/[^A-Za-z0-9_.-]/', '_', basename($rel));
         $out = $dir . '/' . $name;
         $mtime = filemtime($path);
-        $busy[$path] = true;
+        self::$busy[$path] = true;
         try {
             // the copy's first line names its stamp and the local stylesheets it imports: those are checked too, and a change
             // to one of them makes this copy again, with the new address of the import's own copy
@@ -197,10 +224,20 @@ class Rtl
                     }
                     $site = $target[0] === '/' ? $target : APP_URL . '/' . (dirname($rel) === '.' ? '' : dirname($rel) . '/') . $target;
                     $url = self::mirrored($site);
-                    $file = $url === null ? null : self::localPath($site);
+                    $file = self::localPath($site);
                     $dep = $file === null ? '' : str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen(rtrim(realpath($GLOBALS['root_path']), DIRECTORY_SEPARATOR)) + 1));
                     if ($dep === '' || preg_match('/[\s,*]/', $dep)) {
                         return $m[0]; // (a name the first line of the copy cannot list: imported unmirrored)
+                    }
+                    if ($url === null) {
+                        if (isset(self::$busy[$file]) || self::excluded($file)) {
+                            return $m[0]; // never mirrored (an import loop, or a stylesheet left as it is)
+                        }
+                        // its copy could not be made now (the cache not writable, the file unreadable): imported as it is, and
+                        // listed, so this copy is made again once that one can be
+                        $deps[] = $dep;
+                        $urls[] = '-';
+                        return $m[0];
                     }
                     $deps[] = $dep;
                     $urls[] = $url;
@@ -216,7 +253,7 @@ class Rtl
                 }
             }
         } finally {
-            unset($busy[$path]);
+            unset(self::$busy[$path]);
         }
         return APP_URL . '/' . $cache . '/' . $name . '?' . $stamp;
     }
@@ -227,16 +264,16 @@ class Rtl
         return $mtime . '.' . self::VERSION . ($importUrls ? '.' . substr(sha1(implode('|', $importUrls)), 0, 10) : '');
     }
 
-    /** The addresses of the mirrored copies of these stylesheets (paths in the install), made again where they are out of date */
+    /**
+     * The addresses of the mirrored copies of these stylesheets (paths in the install), made again where they are out of date;
+     * "-" for one that has no copy now. A change either way (a copy made at last, or one no longer possible) changes the stamp.
+     */
     private static function depUrls(array $deps)
     {
         $urls = [];
         foreach ($deps as $d) {
             $u = self::mirrored(APP_URL . '/' . $d);
-            if ($u === null) {
-                return ['-']; // no copy now: the stamp cannot match, so the importing copy is made again
-            }
-            $urls[] = $u;
+            $urls[] = $u === null ? '-' : $u;
         }
         return $urls;
     }
@@ -318,12 +355,17 @@ class Rtl
         $fix = function ($u) use ($prefix) {
             return preg_match('#^([a-z][a-z0-9+.-]*:|/|\#)#i', $u) || $u === '' ? $u : $prefix . $u;
         };
-        $css = preg_replace_callback('/url\(\s*(["\']?)([^"\')]*)\1\s*\)/i', function ($m) use ($fix) {
-            return 'url(' . $m[1] . $fix(trim($m[2])) . $m[1] . ')';
-        }, $css);
-        return preg_replace_callback('/@import\s+(["\'])([^"\']+)\1/i', function ($m) use ($fix) {
-            return '@import ' . $m[1] . $fix($m[2]) . $m[1];
-        }, $css);
+        // one pass, left to right: comments and quoted strings are skipped whole, so text such as content: "url(a.png)" is
+        // left as it is, while url(...) and @import "..." outside them are rebased
+        return preg_replace_callback('/(\/\*.*?\*\/)|url\(\s*(["\']?)([^"\')]*)\2\s*\)|@import\s+(["\'])([^"\']+)\4|("(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\')/is', function ($m) use ($fix) {
+            if ($m[1] !== null || $m[6] !== null) {
+                return $m[0];
+            }
+            if ($m[5] !== null) {
+                return '@import ' . $m[4] . $fix($m[5]) . $m[4];
+            }
+            return 'url(' . $m[2] . $fix(trim((string) $m[3])) . $m[2] . ')';
+        }, $css, -1, $count, PREG_UNMATCHED_AS_NULL);
     }
 
     /* ---------- mirroring CSS ---------- */
@@ -331,18 +373,35 @@ class Rtl
     /** A stylesheet (or the inside of a <style> block), mirrored */
     public static function flip($css)
     {
-        // comments are kept aside while the rules are read; "@noflip" in one keeps the next rule or declaration as it is
+        // comments and strings are kept aside while the rules are read, in one pass from left to right, so "/*" inside a string
+        // is not a comment and a quote inside a comment is not a string. "@noflip" in a comment keeps the next rule or
+        // declaration as it is; a brace or a semicolon inside a string is not taken for the end of a rule
         $comments = [];
-        $css = preg_replace_callback('/\/\*.*?\*\//s', function ($m) use (&$comments) {
-            $comments[] = $m[0];
-            return "\x01" . (count($comments) - 1) . (stripos($m[0], '@noflip') !== false ? 'n' : 'c') . "\x01";
-        }, $css);
-        // strings are kept aside too, so a brace or a semicolon inside one is not taken for the end of a rule
         $strings = [];
-        $css = preg_replace_callback('/"(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\'/s', function ($m) use (&$strings) {
+        $css = preg_replace_callback('/\/\*.*?\*\/|"(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\'/s', function ($m) use (&$comments, &$strings) {
+            if ($m[0][0] === '/') {
+                $comments[] = $m[0];
+                return "\x01" . (count($comments) - 1) . (stripos($m[0], '@noflip') !== false ? 'n' : 'c') . "\x01";
+            }
             $strings[] = $m[0];
             return "\x02" . (count($strings) - 1) . "\x02";
         }, $css);
+        // a grouping rule marked @noflip (@media, @supports, ...) keeps every rule inside it as it is: the whole block is put
+        // aside, its braces counted, before the innermost rules are read
+        $kept = [];
+        $out = '';
+        $pos = 0;
+        while (preg_match('/\x01\d+n\x01(?:\s|\x01\d+c\x01)*@[a-z-]+[^{};]*\{/i', $css, $g, PREG_OFFSET_CAPTURE, $pos)) {
+            $start = $g[0][1];
+            $i = $start + strlen($g[0][0]);
+            for ($depth = 1, $len = strlen($css); $i < $len && $depth > 0; $i++) {
+                $depth += $css[$i] === '{' ? 1 : ($css[$i] === '}' ? -1 : 0);
+            }
+            $kept[] = substr($css, $start, $i - $start);
+            $out .= substr($css, $pos, $start - $pos) . "\x04" . (count($kept) - 1) . "\x04";
+            $pos = $i;
+        }
+        $css = $out . substr($css, $pos);
         // the innermost blocks hold the declarations; what comes before the brace is the selector
         $css = preg_replace_callback('/([^{}]*)\{([^{}]*)\}/', function ($m) {
             $selector = $m[1];
@@ -358,6 +417,9 @@ class Rtl
                 return $m[0];
             }
             return $selector . '{' . self::declarations($m[2]) . '}';
+        }, $css);
+        $css = preg_replace_callback('/\x04(\d+)\x04/', function ($m) use ($kept) {
+            return $kept[(int) $m[1]];
         }, $css);
         $css = preg_replace_callback('/\x02(\d+)\x02/', function ($m) use ($strings) {
             return $strings[(int) $m[1]];
@@ -494,18 +556,26 @@ class Rtl
         return implode(',', $layers);
     }
 
-    /** The horizontal offset of each shadow, the other way */
+    /**
+     * The horizontal offset of each shadow, the other way. It is the first value that is neither "inset" nor a colour; when that
+     * value is a number (or calc()) it is negated, and when it is anything else (var(), env()) the shadow is left as it is,
+     * rather than turning a later value (the vertical offset) the other way.
+     */
     private static function shadow($value)
     {
         $layers = self::split($value, ',');
         foreach ($layers as $i => $layer) {
             $t = self::tokens($layer);
             foreach ($t as $k => $tok) {
-                if (preg_match('/^-?(\d*\.)?\d+([a-z%]*)$/i', $tok)) {
+                if (strtolower($tok) === 'inset' || $tok[0] === '#' || preg_match('/^[a-z][a-z-]*$/i', $tok)
+                    || preg_match('/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|light-dark)\(/i', $tok)) {
+                    continue; // a keyword or a colour, which can come before the offsets
+                }
+                if (preg_match('/^-?(\d*\.)?\d+([a-z%]*)$/i', $tok) || preg_match('/^calc\(/i', $tok)) {
                     $t[$k] = self::negate($tok);
                     $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);
-                    break;
                 }
+                break;
             }
         }
         return implode(',', $layers);

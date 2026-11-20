@@ -66,6 +66,24 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
         return $words ? implode(' ', $words) : 'closed';
     }
 
+    /** Seconds sendSync() may wait for a command's answer, or null for the library's own wait (which has no end) */
+    private $syncLimit = null;
+
+    /** Every sendSync() from now on gives up after $seconds: the connection is dropped and an exception (code 408) thrown */
+    public function limitSync($seconds)
+    {
+        $this->syncLimit = $seconds;
+        return $this;
+    }
+
+    public function sendSync(PEAR2\Net\RouterOS\Request $request)
+    {
+        if ($this->syncLimit === null) {
+            return parent::sendSync($request);
+        }
+        return RouterApi::send($this, $request, microtime(true) + $this->syncLimit);
+    }
+
     public function abort()
     {
         $this->aborted = true;

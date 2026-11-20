@@ -313,7 +313,7 @@ class MikrotikVpn
             return null;
         }
         [$host, $port] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
-        return new RouterOS\Client($host, $user, $pass, $port);
+        return RouterApi::deviceClient($host, $user, $pass, $port); // every read time-limited
     }
 
     function removeVpnUser($client, $username, $cstid)
@@ -355,8 +355,10 @@ class MikrotikVpn
             $ips = $this->checkIpAddr($plan['pool'], $customer['id']);
             $setRequest->setArgument('remote-address', $ips);
         }
-        $this->addNat($client, $plan, $customer, $ips);
+        // the secret first: the port forwards (and the ports reserved for them) are made only for a customer the router took,
+        // so a refused secret leaves no rules pointing at an address that was never given out
         $this->checked($client->sendSync($setRequest));
+        $this->addNat($client, $plan, $customer, $ips);
         $customer->service_type = 'VPN';
         $customer->pppoe_ip = $ips;
         $customer->save();

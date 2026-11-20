@@ -17,13 +17,13 @@
 <div id="map" class="well" style="width: 100%; height: 70vh; margin: 20px auto 8px"></div>
 <p class="rt-map-key">
     {if $_c['router_check']}
-    <span><i class="rt-map-dot" style="background:#16a34a"></i> {Lang::T('Online')}</span>
-    <span><i class="rt-map-dot" style="background:#dc2626"></i> {Lang::T('Offline')}</span>
-    <span><i class="rt-map-dot" style="background:#d97706"></i> {Lang::T('Not checked yet')}</span>
+    <span><i class="rt-map-dot" style="background:#16a34a"></i> {Lang::T('Online')|escape}</span>
+    <span><i class="rt-map-dot" style="background:#dc2626"></i> {Lang::T('Offline')|escape}</span>
+    <span><i class="rt-map-dot" style="background:#d97706"></i> {Lang::T('Not checked yet')|escape}</span>
     {else}
-    <span><i class="rt-map-dot" style="background:#2563eb"></i> {Lang::T('Enabled')}</span>
+    <span><i class="rt-map-dot" style="background:#2563eb"></i> {Lang::T('Enabled')|escape}</span>
     {/if}
-    <span><i class="rt-map-dot" style="background:#94a3b8"></i> {Lang::T('Disabled')}</span>
+    <span><i class="rt-map-dot" style="background:#94a3b8"></i> {Lang::T('Disabled')|escape}</span>
 </p>
 
 {include file="pagination.tpl"}
@@ -66,7 +66,8 @@
             var parts = String(router.coordinates).split(',');
             if (parts.length !== 2 || parts.some(function (p) { return p.trim() === ''; })) return;
             var coordinates = parts.map(Number);
-            if (!isFinite(coordinates[0]) || !isFinite(coordinates[1])) return;
+            // a latitude past the poles or a longitude past the date line is a typing mistake, not a place to draw or route to
+            if (!isFinite(coordinates[0]) || !isFinite(coordinates[1]) || Math.abs(coordinates[0]) > 90 || Math.abs(coordinates[1]) > 180) return;
             // green online, red offline (when Router Check runs), amber not checked yet (never seen, and not marked offline: the
             // status column starts as Online), blue enabled (when Router Check does not run), grey disabled
             var state = router.enabled != 1 ? 'disabled' : (!checked ? 'enabled' : router.status === 'Offline' ? 'offline' : !router.last_seen ? 'unknown' : 'online');
@@ -77,8 +78,12 @@
                 + '<a href="{/literal}{Text::url('routers/edit/')}{literal}' + encodeURIComponent(router.id) + '">' + esc(words.more) + '</a> &bull; '
                 + '<a href="https://www.google.com/maps/dir//' + encodeURIComponent(router.coordinates) + '" target="maps" rel="noopener">' + esc(words.way) + '</a><br>';
             L.circle(coordinates, (Number(router.coverage) || 0), { color: color, weight: 1, fillOpacity: 0.08 }).addTo(map);
-            L.circleMarker(coordinates, { radius: 9, color: '#ffffff', weight: 2, fillColor: color, fillOpacity: 1 }).addTo(group)
-                .bindTooltip(esc(router.name), { permanent: true, direction: 'top', offset: [0, -8] }).bindPopup(popupContent);
+            // a marker (not a drawn circle) takes the keyboard focus: Tab reaches each router, and Enter opens its popup
+            L.marker(coordinates, {
+                keyboard: true, title: router.name, alt: router.name,
+                icon: L.divIcon({ className: 'rt-map-pin', html: '<span style="background:' + color + '"></span>', iconSize: [18, 18], iconAnchor: [9, 9], popupAnchor: [0, -8], tooltipAnchor: [0, -8] })
+            }).addTo(group)
+                .bindTooltip(esc(router.name), { permanent: true, direction: 'top' }).bindPopup(popupContent);
         });
 
         if (group.getLayers().length) {

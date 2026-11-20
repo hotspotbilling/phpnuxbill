@@ -108,7 +108,7 @@
                     <div><h3><i class="fa fa-server" aria-hidden="true"></i> {Lang::T('Router Settings')}</h3></div>
                 </header>
                 <div class="st-card-body">
-                    <p class="nf__hint">{Lang::T('These apply to every router. The cron must run (every 5 minutes is best) for Router Check, History, alerts and backups.')}</p>
+                    <p class="nf__hint">{Lang::T('These apply to every router. The cron must run (every 5 minutes is best) for Router Check, History, alerts and backups.')} {Lang::T('Run it at least every 15 minutes: readings further apart are not compared, so alerts and traffic speeds need it.')}</p>
                 </div>
                 <footer class="st-card-foot">
                     <a class="ls-btn" href="{Text::url('routers/list')}"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Cancel')}</a>

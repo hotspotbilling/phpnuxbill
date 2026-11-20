@@ -21,7 +21,9 @@ class RouterMonitor
     const EVERY = 270;          // seconds between readings (the cron usually runs every 5 minutes)
     const KEEP_SAMPLES = 30;    // days
     const KEEP_EVENTS = 90;     // days
-    const GAP = 600;            // seconds: a reading further apart than this from the last one does not follow on from it
+    // seconds: a reading further apart than this from the last one does not follow on from it. The cron may run every 5 to 15
+    // minutes (Routers > Settings says so); this allows a 15-minute cron and a minute of lateness. A longer gap is a break.
+    const GAP = 960;
     const BOOT_SLACK = 120;     // seconds a router's start time can seem to move between readings without it having restarted
 
     /** Two readings follow on from each other (no gap in the collection between them, a late cron allowed for) */
@@ -249,6 +251,12 @@ class RouterMonitor
         } else {
             $why = $err;
         }
+        // the router's address was changed while it was being read (routers.php, edit): the reading is the old device's, and is
+        // neither kept nor turned into events for the new one
+        $now = ORM::for_table('tbl_routers')->select('ip_address')->find_one($id);
+        if (!$now || (string) $now['ip_address'] !== (string) $r['ip_address'] || self::movedAt($id) !== $since) {
+            return Lang::T('address changed during the reading, not kept');
+        }
         // one time for the reading: kept with the row and used for the restart test against it
         $at = time();
         $row = ORM::for_table('tbl_router_samples')->create();
@@ -427,7 +435,7 @@ class RouterMonitor
                 $sec = $t - $prev['t'];
                 $dRx = (float) $r['rx'] - (float) $prev['rx'];
                 $dTx = (float) $r['tx'] - (float) $prev['tx'];
-                if ($dRx >= 0 && $dTx >= 0 && $sec <= 3 * self::EVERY) { // a reset counter or a long gap gives no speed
+                if ($dRx >= 0 && $dTx >= 0 && $sec <= self::GAP) { // a reset counter or a break in the readings gives no speed
                     $down = $dRx * 8 / $sec;
                     $up = $dTx * 8 / $sec;
                 }

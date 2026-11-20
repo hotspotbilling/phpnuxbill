@@ -162,7 +162,7 @@
                         + '<td class="ls-dim">' + (r.kind === 'hotspot' ? '&darr; ' + esc(size(r.out)) + ' &middot; &uarr; ' + esc(size(r['in'])) : '') + '</td>'
                         + '<td class="rt-mini__end">' + (r.gone ? '<span class="ls-dim">' + esc(t.dropped) + '</span>'
                             : '<button type="button" class="ls-btn ls-btn--sm ls-btn--danger" data-rt-drop="' + esc(r.kind) + '" data-sid="' + esc(r.sid) + '" data-user="' + esc(r.user)
-                            + '"' + (r.pending ? ' disabled' : '') + '><i class="fa ' + (r.pending ? 'fa-spinner fa-spin' : 'fa-sign-out') + '" aria-hidden="true"></i> ' + esc(t.drop) + '</button>'
+                            + '" data-address="' + esc(r.address) + '" data-mac="' + esc(r.mac) + '"' + (r.pending ? ' disabled' : '') + '><i class="fa ' + (r.pending ? 'fa-spinner fa-spin' : 'fa-sign-out') + '" aria-hidden="true"></i> ' + esc(t.drop) + '</button>'
                             + (r.err ? '<small class="rt-err">' + esc(r.err) + '</small>' : '')) + '</td></tr>';
                 }
             });
@@ -580,6 +580,8 @@
             // out. Its state (waiting, failed) is kept on the row itself, so every redraw shows it and it cannot be sent twice.
             var dPane = drop.closest('[data-rt-pane]'), dModel = dPane._lv;
             var dKind = drop.getAttribute('data-rt-drop'), dSid = drop.getAttribute('data-sid'), dUser = drop.getAttribute('data-user');
+            // the session as listed: the server disconnects it only while its address and MAC / caller ID are still these
+            var dAddr = drop.getAttribute('data-address') || '', dMac = drop.getAttribute('data-mac') || '';
             var dCfg = dModel ? dModel.opts.cfg || '' : '', dKey = dropKey(dCfg, dKind, dSid);
             var find = function (model) { // the row for this session in a list read with the same router settings
                 return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) { return r.sid === dSid && r.kind === dKind; })[0] : null;
@@ -597,7 +599,7 @@
                 dRow.pending = true;
                 dRow.err = null;
                 if (dPane._lv === dModel) listRender(dPane);
-                request('drop', rid, { kind: dKind, sid: dSid, user: dUser, cfg: dCfg }).then(function (d) {
+                request('drop', rid, { kind: dKind, sid: dSid, user: dUser, address: dAddr, mac: dMac, cfg: dCfg }).then(function (d) {
                     // kept on the pane, not only on the row: a Refresh meanwhile replaces the rows, and the result must survive it
                     dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
                     // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may

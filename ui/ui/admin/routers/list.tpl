@@ -164,6 +164,10 @@
             });
         });
         boxes().forEach(function (b) { b.addEventListener('change', sync); });
+        // the browser can bring ticks back (Back, or a reload that keeps the form): the bar and Select all follow them, now and
+        // when the page is shown again from its cache
+        sync();
+        window.addEventListener('pageshow', sync);
         // with live health off (or its script failed to load), the details row opens and closes here
         document.addEventListener('click', function (e) {
             var more = e.target.closest('[data-rt-more]');
@@ -230,7 +234,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.12"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.13"></script>
 
 {if $health_on}
 <script>

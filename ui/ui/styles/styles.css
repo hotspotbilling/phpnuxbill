@@ -10766,6 +10766,22 @@ body.dark-mode .nf__hint.nf__hint--warn {
   color: #fbbf24;
 }
 /* router map legend (maps/routers.tpl) */
+/* a router on the map: a coloured dot that can take the keyboard focus (Tab, then Enter for its popup) */
+.rt-map-pin span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.3);
+}
+.rt-map-pin:focus {
+  outline: none;
+}
+.rt-map-pin:focus-visible span {
+  outline: 3px solid var(--ls-accent, #2563eb);
+  outline-offset: 2px;
+}
 .rt-map-key {
   display: flex;
   flex-wrap: wrap;

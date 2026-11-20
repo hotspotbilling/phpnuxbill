@@ -5757,5 +5757,21 @@
     "Turn_RADIUS_on": "Turn RADIUS on",
     "Settings___General_Settings__Radius_tab__set_Enable_Radius_to_Yes_and_save_": "Settings > General Settings, Radius tab: set Enable Radius to Yes and save.",
     "The_router_closed_the_connection": "The router closed the connection",
-    "Not_available_in_Demo_mode": "Not available in Demo mode"
+    "Not_available_in_Demo_mode": "Not available in Demo mode",
+    "The_details_could_not_be_loaded__Reload_the_page_and_try_again_": "The details could not be loaded. Reload the page and try again.",
+    "Use_the_left_and_right_arrow_keys_to_read_each_value__Home_and_End_for_the_first_and_last_": "Use the left and right arrow keys to read each value, Home and End for the first and last.",
+    "partial_list": "partial list",
+    "Address_changed": "Address changed",
+    "Through_Routely_VPN_to": "Through Routely VPN to",
+    "port": "port",
+    "North_zone": "North zone",
+    "Group_routers_by_area_or_branch__then_filter_the_list_by_it_": "Group routers by area or branch, then filter the list by it.",
+    "The_test_took_too_long__Try_again_": "The test took too long. Try again.",
+    "No_walled_garden_rule_for_the_billing_site_was_found": "No walled garden rule for the billing site was found",
+    "Unless_an_IP_walled_garden_rule_allows_it__customers_cannot_open": "Unless an IP walled garden rule allows it, customers cannot open",
+    "The_cron_saves_phpnuxbill_auto_YYYYMMDD_backup_on_each_enabled_router__Files_named_that_way_count_as_nightly_backups_and_are_removed_when_older_than_the_number_below__so_do_not_use_the_name_for_your_own__other_backups_are_never_removed_": "The cron saves phpnuxbill-auto-YYYYMMDD.backup on each enabled router. Files named that way count as nightly backups and are removed when older than the number below, so do not use the name for your own; other backups are never removed.",
+    "Older_nightly_backups_are_removed_from_the_router__To_keep_a_copy_elsewhere__download_it_from_Files_in_Winbox_or_WebFig_": "Older nightly backups are removed from the router. To keep a copy elsewhere, download it from Files in Winbox or WebFig.",
+    "Backup_password": "Backup password",
+    "Backups_are_encrypted_with_this_password__nightly_and_Save_a_backup_alike__and_none_is_made_without_it__a_backup_without_a_password_holds_every_login_on_the_router_in_readable_form__You_need_it_to_restore_a_backup__so_keep_it_somewhere_safe_": "Backups are encrypted with this password, nightly and Save a backup alike, and none is made without it: a backup without a password holds every login on the router in readable form. You need it to restore a backup, so keep it somewhere safe.",
+    "Changing_it_does_not_change_the_backups_already_made__each_one_still_opens_only_with_the_password_it_was_made_with__so_keep_that_password_for_as_long_as_you_keep_those_backups__New_backups_use_the_new_one_": "Changing it does not change the backups already made: each one still opens only with the password it was made with, so keep that password for as long as you keep those backups. New backups use the new one."
 }

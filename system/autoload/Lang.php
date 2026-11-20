@@ -265,7 +265,8 @@ class Lang
         curl_close($ch);
         if (is_string($hasil) && $code === 200 && ($p = strpos($hasil, '<div class="result-container">')) !== false) {
             $rest = substr($hasil, $p + strlen('<div class="result-container">'));
-            $out = trim(html_entity_decode(strip_tags(substr($rest, 0, (int) strpos($rest, '</div'))), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            // decoded first, then stripped: a translation that comes back entity-encoded ("&lt;b&gt;") must not become markup
+            $out = trim(strip_tags(html_entity_decode(substr($rest, 0, (int) strpos($rest, '</div')), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
             if ($out !== '') {
                 return $out;
             }

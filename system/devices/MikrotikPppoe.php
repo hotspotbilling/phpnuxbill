@@ -67,7 +67,12 @@ class MikrotikPppoe
                 $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
                 $unsetRequest->setArgument('.id', $cid);
                 $unsetRequest->setArgument('value-name','remote-address');
-                $this->checked($client->sendSync($unsetRequest));
+                try {
+                    $this->checked($client->sendSync($unsetRequest));
+                } catch (Exception $e) {
+                    // the secret itself was saved just above: said as a partial update, with the router's reason
+                    throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $e->getMessage(), 0, $e);
+                }
             }
 
 
@@ -350,7 +355,7 @@ class MikrotikPppoe
             return null;
         }
         [$host, $port] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
-        return new RouterOS\Client($host, $user, $pass, $port);
+        return RouterApi::deviceClient($host, $user, $pass, $port); // every read time-limited
     }
 
     function removePpoeUser($client, $username)

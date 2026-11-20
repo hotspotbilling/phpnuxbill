@@ -93,7 +93,12 @@ $splitAddress = function ($addr) {
 // $enabledOnly: only an enabled router counts (enabling one: a disabled draft with the same address is no conflict)
 $endpointKey = function ($a) {
     [$h, $p] = RouterAddress::split($a);
-    return strtolower((string) $h) . '|' . ((int) $p ?: 8728);
+    $h = strtolower(trim((string) $h));
+    // an IPv6 address has many spellings ("2001:db8::1", "2001:0db8:0:0::1"): compared in one form
+    if (filter_var($h, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) && ($bin = @inet_pton($h)) !== false) {
+        $h = inet_ntop($bin);
+    }
+    return $h . '|' . ((int) $p ?: 8728);
 };
 $endpointTaken = function ($address, $exceptId = 0, $enabledOnly = false) use ($endpointKey) {
     $key = $endpointKey;
@@ -106,13 +111,32 @@ $endpointTaken = function ($address, $exceptId = 0, $enabledOnly = false) use ($
     }
     return false;
 };
-// Add, edit and bulk enable each check that an address is free and then save: one at a time (a database lock, so on every PHP
-// worker), or two requests could each find the address free and both save it. Released when the request ends at the latest.
+// Add, edit, delete and bulk enable each check and then write (an address is free, a router is not in use, a rename and the
+// plans that follow it): one at a time (a database lock, so on every PHP worker), or two requests could each find the way clear
+// and both write. Taking it returns whether it was got (false after 15 seconds of waiting, or on an error: the caller stops and
+// asks to try again). Released when the request ends at the latest.
 $endpointLock = function ($on = true) {
     try {
-        ORM::getDb()->query($on ? "SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)" : "SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+        if (!$on) {
+            ORM::getDb()->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+            return true;
+        }
+        return (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)")->fetchColumn() === 1;
     } catch (Throwable $e) {
+        return !$on;
     }
+};
+$busyText = function () {
+    return Lang::T('Another change to the routers is being saved. Try again in a moment.');
+};
+// an address that has a port but no host (":8729", "[]:8729"): not an address. An empty one is allowed (a disabled draft).
+$hostMissing = function ($address) {
+    $address = trim((string) $address);
+    if ($address === '') {
+        return false;
+    }
+    [$h] = RouterAddress::split($address);
+    return trim((string) $h, "[] \t") === '';
 };
 $validPort = function ($port) {
     $port = trim((string) $port);
@@ -390,6 +414,10 @@ switch ($action) {
             r2(getUrl('routers/list'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
         }
         $id  = $routes['2'];
+        // one at a time with the edits: a rename moving the plans to the new name cannot run between the check and the delete
+        if (!$endpointLock()) {
+            r2(getUrl('routers/list'), 'e', $busyText());
+        }
         $d = ORM::for_table('tbl_routers')->find_one($id);
         if (!$d) {
             r2(getUrl('routers/list'), 'e', Lang::T('Data Not Found'));
@@ -428,7 +456,7 @@ switch ($action) {
         }
         $user = _post('username');
         $pass = _post('password');
-        if ($ip === '' || $user === '') {
+        if ($ip === '' || $user === '' || $hostMissing($ip)) {
             echo json_encode(['ok' => false, 'error' => Lang::T('Enter the IP address and username first.')]);
             exit;
         }
@@ -468,13 +496,19 @@ switch ($action) {
         $n = 0;
         $skipped = [];
         $taken = [];
-        if ($op === 'enable') {
-            $endpointLock();
+        $badAddr = [];
+        if ($op === 'enable' && !$endpointLock()) {
+            r2(getUrl('routers/list'), 'e', $busyText());
         }
         foreach (ORM::for_table('tbl_routers')->where_in('id', $ids)->find_many() as $r) {
             // as on the form: an enabled router needs its address and username
             if ($op === 'enable' && (trim((string) $r['ip_address']) === '' || trim((string) $r['username']) === '')) {
                 $skipped[] = $r['name'];
+                continue;
+            }
+            // and an address the form would accept: a host, and a valid API port when one is written into it
+            if ($op === 'enable' && ($hostMissing($r['ip_address']) || !$validAddressPort($r['ip_address']))) {
+                $badAddr[] = $r['name'];
                 continue;
             }
             // nor is a router enabled on the address of another enabled one (checked one by one, so of two ticked routers on
@@ -489,7 +523,8 @@ switch ($action) {
         }
         $endpointLock(false);
         _log('[' . $admin['username'] . ']: ' . ($op === 'enable' ? 'Routers enabled' : 'Routers disabled') . ': ' . $n, $admin['user_type'], $admin['id']);
-        r2(getUrl('routers/list'), $skipped || $taken ? 'w' : 's', ($op === 'enable' ? Lang::T('Routers enabled') : Lang::T('Routers disabled')) . ': ' . $n
+        r2(getUrl('routers/list'), $skipped || $taken || $badAddr ? 'w' : 's', ($op === 'enable' ? Lang::T('Routers enabled') : Lang::T('Routers disabled')) . ': ' . $n
+            . ($badAddr ? '. ' . Lang::T('Not enabled, the address or its API port is not valid') . ': ' . htmlspecialchars(implode(', ', $badAddr)) : '')
             . ($skipped ? '. ' . Lang::T('Not enabled, the IP address or username is missing') . ': ' . htmlspecialchars(implode(', ', $skipped)) : '')
             . ($taken ? '. ' . Lang::T('Not enabled, another enabled router has the same address') . ': ' . htmlspecialchars(implode(', ', $taken)) : ''));
         break;
@@ -520,6 +555,7 @@ switch ($action) {
             session_write_close();
             $done = 0;
             $failed = [];
+            $unsure = []; // sent by a device that cannot say whether the router took it (no sync_customer of its own)
             foreach (ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $d['name'])->find_many() as $tur) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 $c = ORM::for_table('tbl_customers')->find_one($tur['customer_id']);
@@ -535,16 +571,22 @@ switch ($action) {
                     }
                     require_once $dvc;
                     $dev = new $p['device'];
-                    method_exists($dev, 'sync_customer') ? $dev->sync_customer($c, $p) : $dev->add_customer($c, $p);
-                    $done++;
+                    if (method_exists($dev, 'sync_customer')) {
+                        $dev->sync_customer($c, $p); // a change the router refuses is thrown (caught below)
+                        $done++;
+                    } else {
+                        $dev->add_customer($c, $p);
+                        $unsure[] = $tur['username'];
+                    }
                 } catch (Throwable $e) {
                     $failed[] = $tur['username'];
                 }
             }
             @session_start();
-            _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($failed) . ' failed', $admin['user_type'], $admin['id']);
-            r2($back, $failed ? 'w' : 's', Lang::T('Customers sent to the router') . ': ' . $done
-                . ($failed ? '. ' . Lang::T('Not sent') . ': ' . htmlspecialchars(implode(', ', array_slice($failed, 0, 20))) . (count($failed) > 20 ? ' …' : '') : ''));
+            _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($failed) . ' failed, ' . count($unsure) . ' not confirmed', $admin['user_type'], $admin['id']);
+            r2($back, $failed || $unsure ? 'w' : 's', Lang::T('Customers sent to the router') . ': ' . $done
+                . ($failed ? '. ' . Lang::T('Not sent') . ': ' . htmlspecialchars(implode(', ', array_slice($failed, 0, 20))) . (count($failed) > 20 ? ' …' : '') : '')
+                . ($unsure ? '. ' . Lang::T('Sent, but the router did not confirm them') . ': ' . htmlspecialchars(implode(', ', array_slice($unsure, 0, 20))) . (count($unsure) > 20 ? ' …' : '') : ''));
         }
         [$c, $err] = $rosConnect($d['ip_address'], $d['username'], $d['password'], 8);
         if (!$c) {
@@ -778,12 +820,19 @@ switch ($action) {
                 }
                 // a session ID can be reused once that session ends (and they start again after a restart): the live session must
                 // still be the one listed (the same user; for PPPoE, a PPPoE one), or it is not removed
+                // the same user can sign in again under a reused ID (another device, after a restart): the address and the
+                // MAC / caller ID listed must match too, when the list had them
+                $match = function ($got, $listed) {
+                    return (string) $listed === '' || strcasecmp((string) $got, (string) $listed) === 0;
+                };
                 if ($kind === 'pppoe') {
-                    $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service'], $until, [], ['.id' => $sid]);
-                    $same = $live && (string) $live[0]['name'] === (string) _post('user') && (string) $live[0]['service'] === 'pppoe';
+                    $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'address', 'caller-id'], $until, [], ['.id' => $sid]);
+                    $same = $live && (string) $live[0]['name'] === (string) _post('user') && (string) $live[0]['service'] === 'pppoe'
+                        && $match($live[0]['address'], _post('address')) && $match($live[0]['caller-id'], _post('mac'));
                 } else {
-                    $live = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user'], $until, [], ['.id' => $sid]);
-                    $same = $live && (string) $live[0]['user'] === (string) _post('user');
+                    $live = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address'], $until, [], ['.id' => $sid]);
+                    $same = $live && (string) $live[0]['user'] === (string) _post('user')
+                        && $match($live[0]['address'], _post('address')) && $match($live[0]['mac-address'], _post('mac'));
                 }
                 if (!$same) {
                     $say(['ok' => false, 'stale' => true, 'error' => Lang::T('That session has ended or changed. Refresh the list and try again.')]);
@@ -898,7 +947,8 @@ switch ($action) {
                         }
                         return $neg ? !$hit : $hit;
                     };
-                    $found = false; // true allowed, false not, null cannot tell
+                    $found = false; // true allowed, false not, null cannot tell, 'deny' a rule that blocks it
+                    $denyRule = '';
                     try {
                         // the rules are tried in order and the first that matches decides: a matching "deny" is no access. A rule
                         // that may match but has a condition this check cannot judge (a path, a method, addresses, a server, a
@@ -927,11 +977,16 @@ switch ($action) {
                                 $found = null;
                                 break;
                             }
-                            $found = strtolower((string) $w['action']) !== 'deny';
+                            // a rule that matches and denies is told apart from no rule at all: it is what to look at
+                            $found = strtolower((string) $w['action']) !== 'deny' ? true : 'deny';
+                            $denyRule = (string) $w['dst-host'];
                             break;
                         }
                         $site = $host . ':' . $port;
-                        if ($found === null) {
+                        if ($found === 'deny') {
+                            $add('bad', Lang::T('A walled garden rule blocks the billing site'), Lang::T('The rule for') . ' ' . $denyRule . ' ' . Lang::T('has the action deny, so customers cannot open') . ' ' . $site
+                                . ' ' . Lang::T('before they sign in. Change it in Winbox, IP > Hotspot > Walled Garden.'));
+                        } elseif ($found === null) {
                             $add('warn', Lang::T('Could not tell whether the billing site is in the walled garden'), Lang::T('A walled garden rule for') . ' ' . $site . ' ' . Lang::T('has conditions this check cannot judge. Check it in Winbox, IP > Hotspot > Walled Garden.'));
                         } else {
                             // only the web walled garden is read: an IP walled garden rule may still let the site through
@@ -986,7 +1041,7 @@ switch ($action) {
                                 }
                                 // a service whose servers could not be read is not known to be set up, even when a RADIUS entry
                                 // lists it: whether its servers (and their profiles) use RADIUS was never seen
-                                $unknown = array_values(array_diff($unread, $need));
+                                $unknown = array_values(array_unique($unread));
                                 if ($off) {
                                     $add('bad', Lang::T('RADIUS is set but not used'), Lang::T('Turn on Use RADIUS in') . ': ' . implode(', ', array_unique($off)) . '. ' . $list);
                                 } elseif ($unknown) {
@@ -1170,6 +1225,12 @@ switch ($action) {
             $fresh = !$live || (isset($cached['done']) && microtime(true) - (float) $cached['done'] < 0.9);
             if (is_array($cached) && ($cached['key'] ?? '') === $key && $fresh) {
                 unset($cached['key']);
+                // the stored answer is shared by every admin: its words are put in this admin's language here
+                if (($cached['code'] ?? '') === 'no_read') {
+                    $cached['error'] = Lang::T('Connected, but this user cannot read the system details.');
+                } elseif (empty($cached['ok']) && isset($cached['error'])) {
+                    $cached['hint'] = $rosHint($cached['error']);
+                }
                 $cached['age'] = time() - filemtime($file);
                 echo json_encode($cached);
                 exit;
@@ -1184,7 +1245,8 @@ switch ($action) {
                 $out = ['ok' => true] + $rosHealth($c, $live);
             } catch (Throwable $e) {
                 // refused (403): connected, but not allowed to read; anything else (no answer, a broken connection) is said as it is
-                $out = ['ok' => false, 'error' => $e->getCode() === 403 ? Lang::T('Connected, but this user cannot read the system details.') : $e->getMessage()];
+                $out = $e->getCode() === 403 ? ['ok' => false, 'code' => 'no_read', 'error' => Lang::T('Connected, but this user cannot read the system details.')]
+                    : ['ok' => false, 'error' => $e->getMessage()];
             }
         } else {
             $out = ['ok' => false, 'error' => $err, 'hint' => $rosHint($err)];
@@ -1205,10 +1267,13 @@ switch ($action) {
             // read and write under one lock: when two readings of the same router finish together, the newer one stays
             if (flock($fh, LOCK_EX)) {
                 $old = json_decode((string) stream_get_contents($fh), true);
-                // whichever began last stays, whatever login it used: a slow check with old details cannot replace a newer one
-                // (an entry for other details is still never served, as the key is checked when reading)
-                $newer = is_array($old) && isset($old['observed']) && (float) $old['observed'] > $observed;
-                if (!$newer) {
+                // kept only for the router's details as they are now: a reading made with details changed since (another address
+                // or login) is not stored over the entry for the present ones. Among readings of the present details, whichever
+                // began last stays.
+                $now = ORM::for_table('tbl_routers')->find_one($id);
+                $current = $now && hash('sha256', $now['ip_address'] . "\n" . $now['username'] . "\n" . $now['password']) === $key;
+                $newer = is_array($old) && ($old['key'] ?? '') === $key && isset($old['observed']) && (float) $old['observed'] > $observed;
+                if ($current && !$newer) {
                     ftruncate($fh, 0);
                     rewind($fh);
                     fwrite($fh, $json);
@@ -1238,6 +1303,9 @@ switch ($action) {
         if (!$validPort(_post('api_port')) || !$validAddressPort($ip_address)) {
             $msg .= Lang::T('The API port must be a number from 1 to 65535') . '<br>';
         }
+        if ($hostMissing($ip_address)) {
+            $msg .= Lang::T('Enter the router\'s IP address or host name') . '<br>';
+        }
         if (Validator::Length($name, 30, 1) == false) {
             $msg .= 'Name should be between 1 to 30 characters' . '<br>';
         }
@@ -1246,7 +1314,9 @@ switch ($action) {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
 
-            $endpointLock(); // held until the router is saved (or the request ends with the error)
+            if (!$endpointLock()) { // held until the router is saved (or the request ends with the error)
+                r2(getUrl('routers/add'), 'e', $busyText());
+            }
             if ($endpointTaken($ip_address)) {
                 $msg .= Lang::T('IP Router Already Exist') . '<br>';
             }
@@ -1297,6 +1367,9 @@ switch ($action) {
         if (!$validPort(_post('api_port')) || !$validAddressPort($ip_address)) {
             $msg .= Lang::T('The API port must be a number from 1 to 65535') . '<br>';
         }
+        if ($hostMissing($ip_address)) {
+            $msg .= Lang::T('Enter the router\'s IP address or host name') . '<br>';
+        }
         if (Validator::Length($name, 30, 4) == false) {
             $msg .= 'Name should be between 5 to 30 characters' . '<br>';
         }
@@ -1307,6 +1380,10 @@ switch ($action) {
         }
 
         $id = _post('id');
+        // held until the change is saved (or the request ends with the error): one at a time with other edits, adds and deletes
+        if (!$endpointLock()) {
+            r2(getUrl('routers/edit/') . (int) $id, 'e', $busyText());
+        }
         $d = ORM::for_table('tbl_routers')->find_one($id);
         if ($d) {
         } else {
@@ -1324,7 +1401,6 @@ switch ($action) {
         if($enabled || _post("testIt")){
             // a new address must be free; enabling (even with the address unchanged) needs no other enabled router on it. "New"
             // as an endpoint: the same host and port written another way (":8728" added or dropped, letter case) is not new
-            $endpointLock(); // held until the router is saved (or the request ends with the error)
             if (($endpointKey($d['ip_address']) !== $endpointKey($ip_address) && $endpointTaken($ip_address, $id)) || ($enabled && $endpointTaken($ip_address, $id, true))) {
                 $msg .= 'IP Already Exists<br>';
             }
@@ -1357,31 +1433,41 @@ switch ($action) {
             if ($hasSite()) {
                 $d->site = $site;
             }
-            $d->save();
-            $endpointLock(false);
+            // the router and, on a rename, everything that names it are saved together: no other request sees the new name
+            // with plans still on the old one
+            $db = ORM::getDb();
+            $db->beginTransaction();
+            try {
+                $d->save();
+                if ($name != $oldname) {
+                    $p = ORM::for_table('tbl_plans')->where('routers', $oldname)->find_result_set();
+                    $p->set('routers', $name);
+                    $p->save();
+                    $p = ORM::for_table('tbl_payment_gateway')->where('routers', $oldname)->find_result_set();
+                    $p->set('routers', $name);
+                    $p->save();
+                    $p = ORM::for_table('tbl_pool')->where('routers', $oldname)->find_result_set();
+                    $p->set('routers', $name);
+                    $p->save();
+                    $p = ORM::for_table('tbl_transactions')->where('routers', $oldname)->find_result_set();
+                    $p->set('routers', $name);
+                    $p->save();
+                    $p = ORM::for_table('tbl_user_recharges')->where('routers', $oldname)->find_result_set();
+                    $p->set('routers', $name);
+                    $p->save();
+                    $p = ORM::for_table('tbl_voucher')->where('routers', $oldname)->find_result_set();
+                    $p->set('routers', $name);
+                    $p->save();
+                }
+                $db->commit();
+            } catch (Throwable $e) {
+                $db->rollBack();
+                throw $e;
+            }
             if ($moved) {
                 RouterMonitor::moved($d['id']);
             }
-            if ($name != $oldname) {
-                $p = ORM::for_table('tbl_plans')->where('routers', $oldname)->find_result_set();
-                $p->set('routers', $name);
-                $p->save();
-                $p = ORM::for_table('tbl_payment_gateway')->where('routers', $oldname)->find_result_set();
-                $p->set('routers', $name);
-                $p->save();
-                $p = ORM::for_table('tbl_pool')->where('routers', $oldname)->find_result_set();
-                $p->set('routers', $name);
-                $p->save();
-                $p = ORM::for_table('tbl_transactions')->where('routers', $oldname)->find_result_set();
-                $p->set('routers', $name);
-                $p->save();
-                $p = ORM::for_table('tbl_user_recharges')->where('routers', $oldname)->find_result_set();
-                $p->set('routers', $name);
-                $p->save();
-                $p = ORM::for_table('tbl_voucher')->where('routers', $oldname)->find_result_set();
-                $p->set('routers', $name);
-                $p->save();
-            }
+            $endpointLock(false);
             r2(getUrl('routers/list'), 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(getUrl('routers/edit/') . $id, 'e', $msg);

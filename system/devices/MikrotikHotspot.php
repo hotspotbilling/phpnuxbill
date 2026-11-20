@@ -271,7 +271,7 @@ class MikrotikHotspot
         }
         [$host, $saved] = RouterAddress::split($ip); // "host:port", or "[IPv6]:port"
         $p = ($port) ? $port : $saved;
-        return new RouterOS\Client($host, $user, $pass, $p, false, $timeout);
+        return RouterApi::deviceClient($host, $user, $pass, $p, $timeout); // every read time-limited
     }
 
     function removeHotspotUser($client, $username)
