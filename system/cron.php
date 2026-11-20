@@ -255,15 +255,34 @@ if ($config['router_check']) {
             $errors[] = "Error with router $ip: " . $e->getMessage();
         }
 
-        if ($isOnline) {
-            $router->last_seen = date('Y-m-d H:i:s');
-            $router->status = 'Online';
-        } else {
-            $router->status = 'Offline';
-            $offlineRouters[] = $router;
+        // the result is kept only for the address that was checked: under the lock routers.php holds while it saves an edit, the
+        // router is read again, and a result for an address changed meanwhile is dropped (the edit has cleared the status)
+        $locked = false;
+        try {
+            $locked = (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 20)")->fetchColumn() === 1;
+        } catch (Throwable $e) {
         }
-
-        $router->save();
+        try {
+            $cur = $locked ? ORM::for_table('tbl_routers')->select('ip_address')->find_one($router->id) : null;
+            if (!$cur || (string) $cur['ip_address'] !== (string) $router->ip_address) {
+                continue;
+            }
+            if ($isOnline) {
+                $router->last_seen = date('Y-m-d H:i:s');
+                $router->status = 'Online';
+            } else {
+                $router->status = 'Offline';
+                $offlineRouters[] = $router;
+            }
+            $router->save();
+        } finally {
+            if ($locked) {
+                try {
+                    ORM::getDb()->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+                } catch (Throwable $e) {
+                }
+            }
+        }
     }
 
     if (!empty($offlineRouters)) {

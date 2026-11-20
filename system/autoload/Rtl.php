@@ -73,16 +73,27 @@ class Rtl
                 if ($i % 2 === 1) {
                     continue;
                 }
+                // a step that fails (a regular expression that gives up on very large input returns null) keeps the page as it was
                 $part = self::htmlTag($part);
-                $part = preg_replace_callback('/<link\b[^>]*>/i', function ($m) {
+                $part = $part === null ? null : preg_replace_callback('/<link\b[^>]*>/i', function ($m) {
                     return self::link($m[0]);
                 }, $part);
-                $part = preg_replace_callback('/(<style\b[^>]*>)(.*?)(<\/style\s*>)/is', function ($m) {
-                    return strpos($m[2], self::MARK) !== false ? $m[0] : $m[1] . self::MARK . self::flip($m[2]) . $m[3];
+                $part = $part === null ? null : preg_replace_callback('/(<style\b[^>]*>)(.*?)(<\/style\s*>)/is', function ($m) {
+                    if (strpos($m[2], self::MARK) !== false) {
+                        return $m[0];
+                    }
+                    $flipped = self::flip($m[2]);
+                    return $flipped === null ? $m[0] : $m[1] . self::MARK . $flipped . $m[3];
                 }, $part);
-                $part = self::styleAttributes($part);
+                $part = $part === null ? null : self::styleAttributes($part);
+                if ($part === null) {
+                    return $html;
+                }
                 if (!$extra && stripos($part, '</head>') !== false && stripos($part, '/ui/ui/styles/rtl.css') === false) {
                     $part = preg_replace('/<\/head>/i', self::extraLink() . '</head>', $part, 1);
+                    if ($part === null) {
+                        return $html;
+                    }
                     $extra = true;
                 }
                 $parts[$i] = $part;
@@ -245,9 +256,13 @@ class Rtl
                 }, $css);
                 $stamp = self::stamp($mtime, $urls);
                 // the copy lives in ui/cache/rtl/: links to fonts and images are pointed back to the stylesheet's own folder
-                $css = self::rebase($css, self::relative($cache, dirname($rel)));
+                $css = $css === null ? null : self::rebase($css, self::relative($cache, dirname($rel)));
+                $flipped = $css === null ? null : self::flip($css);
+                if ($flipped === null) {
+                    return null; // a step failed: the page keeps the original stylesheet, and no copy is written
+                }
                 $tmp = $out . '.' . getmypid() . '.tmp';
-                if (@file_put_contents($tmp, self::stampLine($stamp, $deps) . self::flip($css)) === false || !@rename($tmp, $out)) {
+                if (@file_put_contents($tmp, self::stampLine($stamp, $deps) . $flipped) === false || !@rename($tmp, $out)) {
                     @unlink($tmp);
                     return null;
                 }
@@ -370,7 +385,7 @@ class Rtl
 
     /* ---------- mirroring CSS ---------- */
 
-    /** A stylesheet (or the inside of a <style> block), mirrored */
+    /** A stylesheet (or the inside of a <style> block), mirrored; null when a regular expression failed on it */
     public static function flip($css)
     {
         // comments and strings are kept aside while the rules are read, in one pass from left to right, so "/*" inside a string
@@ -386,6 +401,9 @@ class Rtl
             $strings[] = $m[0];
             return "\x02" . (count($strings) - 1) . "\x02";
         }, $css);
+        if ($css === null) {
+            return null;
+        }
         // a grouping rule marked @noflip (@media, @supports, ...) keeps every rule inside it as it is: the whole block is put
         // aside, its braces counted, before the innermost rules are read
         $kept = [];
@@ -400,6 +418,9 @@ class Rtl
             $kept[] = substr($css, $start, $i - $start);
             $out .= substr($css, $pos, $start - $pos) . "\x04" . (count($kept) - 1) . "\x04";
             $pos = $i;
+        }
+        if (preg_last_error() !== PREG_NO_ERROR) {
+            return null;
         }
         $css = $out . substr($css, $pos);
         // the innermost blocks hold the declarations; what comes before the brace is the selector
@@ -418,13 +439,13 @@ class Rtl
             }
             return $selector . '{' . self::declarations($m[2]) . '}';
         }, $css);
-        $css = preg_replace_callback('/\x04(\d+)\x04/', function ($m) use ($kept) {
+        $css = $css === null ? null : preg_replace_callback('/\x04(\d+)\x04/', function ($m) use ($kept) {
             return $kept[(int) $m[1]];
         }, $css);
-        $css = preg_replace_callback('/\x02(\d+)\x02/', function ($m) use ($strings) {
+        $css = $css === null ? null : preg_replace_callback('/\x02(\d+)\x02/', function ($m) use ($strings) {
             return $strings[(int) $m[1]];
         }, $css);
-        return preg_replace_callback('/\x01(\d+)[nc]\x01/', function ($m) use ($comments) {
+        return $css === null ? null : preg_replace_callback('/\x01(\d+)[nc]\x01/', function ($m) use ($comments) {
             return $comments[(int) $m[1]];
         }, $css);
     }

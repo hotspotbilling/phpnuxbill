@@ -6,7 +6,9 @@
 {function name=rt_switch key='' def='0' icon='' title='' hint=''}
     <label class="mc-row mc-row--switch">
         <input type="hidden" name="{$key}" value="0">
-        <input type="checkbox" name="{$key}" value="1" {if ($_c[$key]|default:$def) == '1'}checked{/if}>
+        {* on is "1", or "yes" as an older version saved it (the cron reads either as on): shown on, and saved as "1" *}
+        {$rt_on = (string) ($_c[$key]|default:$def)}
+        <input type="checkbox" name="{$key}" value="1" {if $rt_on === '1' || strtolower($rt_on) === 'yes'}checked{/if}>
         <span class="mc-row__icon"><i class="fa {$icon}" aria-hidden="true"></i></span>
         <span class="mc-row__text"><b>{$title}</b><small>{$hint}</small></span>
         <span class="mc-switch__track" aria-hidden="true"></span>

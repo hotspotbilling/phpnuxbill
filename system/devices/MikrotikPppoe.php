@@ -15,6 +15,9 @@ class MikrotikPppoe
     // set while sync_customer() runs: a change the router refuses is thrown, so the sync counts that customer as not sent
     private $strict = false;
 
+    /** The code of an exception for a partial update: the secret was saved, a later step was refused */
+    const PARTIAL = 207;
+
     // show Description
     function description()
     {
@@ -71,7 +74,7 @@ class MikrotikPppoe
                     $this->checked($client->sendSync($unsetRequest));
                 } catch (Exception $e) {
                     // the secret itself was saved just above: said as a partial update, with the router's reason
-                    throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $e->getMessage(), 0, $e);
+                    throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $e->getMessage(), self::PARTIAL, $e);
                 }
             }
 

@@ -193,6 +193,14 @@
                 pen = true;
             });
             if (d) svg += '<path class="rt-chart__line ' + s.cls + '" d="' + d + '"></path>';
+            // a reading with no reading next to it on either side (a failed reading before and after) has no line to be part of:
+            // a dot shows it, as on the History charts; the gaps stay gaps
+            s.points.forEach(function (p, i) {
+                var before = s.points[i - 1], after = s.points[i + 1];
+                if (p[1] != null && !(before && before[1] != null) && !(after && after[1] != null)) {
+                    svg += '<circle class="rt-chart__pt ' + s.cls + '" r="2.5" cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '"></circle>';
+                }
+            });
         });
         svg += '<line class="rt-chart__cross" x1="0" x2="0" y1="' + padT + '" y2="' + (H - padB) + '" hidden></line>';
         series.forEach(function (s) {
@@ -223,11 +231,20 @@
         var dots = el.querySelectorAll('.rt-chart__dot');
         var tip = plot.querySelector('.rt-chart__tip');
         var said = box.parentNode && box.parentNode.querySelector('[data-rt-said]');
-        // the times to snap to: from the series with the most readings (one may be empty, CPU or memory alone)
-        var times = series.reduce(function (a, s) { return s.points.length > a.points.length ? s : a; }).points.map(function (p) { return p[0]; });
+        // the times to snap to: every reading of every series, in order (one series may have readings the other has not), and
+        // each series' readings by their time, so a reading is found without searching the series
+        var times = [], seen = Object.create(null);
+        series.forEach(function (s) {
+            s.byAt = Object.create(null);
+            s.points.forEach(function (p) {
+                s.byAt[p[0]] = p;
+                if (!seen[p[0]]) { seen[p[0]] = true; times.push(p[0]); }
+            });
+        });
+        times.sort(function (a, b) { return a - b; });
         // the readings that have a value in some series: the keys step through these only
         var withValue = times.filter(function (tm) {
-            return series.some(function (s) { return s.points.some(function (p) { return p[0] === tm && p[1] != null; }); });
+            return series.some(function (s) { var p = s.byAt[tm]; return p && p[1] != null; });
         });
         function nearest(list, at) {
             var best = 0;
@@ -241,7 +258,7 @@
             cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.removeAttribute('hidden');
             var rows = '', words = [];
             series.forEach(function (s, i) {
-                var p = s.points.filter(function (q) { return q[0] === tm; })[0];
+                var p = s.byAt[tm];
                 if (!p || p[1] == null) { dots[i].setAttribute('hidden', ''); return; }
                 dots[i].setAttribute('cx', x); dots[i].setAttribute('cy', Y(p[1])); dots[i].removeAttribute('hidden');
                 rows += '<span><i class="rt-key ' + s.cls + '"></i>' + esc(s.label) + ' <b>' + esc(fmt(p[1])) + '</b></span>';
@@ -410,6 +427,8 @@
         if (opts.live) q.push('live=1');
         var u = cfg.url + id + (q.length ? (cfg.url.indexOf('?') < 0 ? '?' : '&') + q.join('&') : '');
         var kind = opts.live ? 'live' : 'list';
+        // (a Live reading asked before the page was hidden, or shown again, is not used: see visibilitychange below)
+        var vis = opts.live && live[id] ? live[id].vis || 0 : 0;
         var seq = asked[kind][id] = (asked[kind][id] || 0) + 1;
         var order = sentAll[id] = (sentAll[id] || 0) + 1;
         // a deadline for the whole request, reading the answer included: a stuck one fails, so its queue place is freed and the
@@ -430,6 +449,9 @@
                 d = d || { ok: false, error: t.fail };
                 if (opts.gen !== undefined && (!live[id] || live[id].gen !== opts.gen || live[id].paused)) {
                     return data[id] || d;
+                }
+                if (opts.live && live[id] && (live[id].vis || 0) !== vis) {
+                    return d; // its counters span the time the page was hidden: no speed from them (the next reading starts again)
                 }
                 var cur = data[id];
                 // answers of one kind can come back out of order: one from a request older than the answer already shown is
@@ -516,6 +538,15 @@
             live[id].paused = true;
         }
     }
+
+    // the page hidden (or shown again): the counters read before are no baseline for the next reading, whenever between two
+    // readings it happens, so the first reading after it starts the speeds again and only the second gives one
+    document.addEventListener('visibilitychange', function () {
+        Object.keys(live).forEach(function (id) {
+            live[id].vis = (live[id].vis || 0) + 1;
+            live[id].prev = Object.create(null);
+        });
+    });
 
     document.querySelectorAll('tr[data-rt-id]').forEach(function (tr) {
         queue.push({ id: tr.getAttribute('data-rt-id'), fresh: false });

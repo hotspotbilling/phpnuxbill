@@ -783,7 +783,7 @@ switch ($action) {
         $n = 1;
         foreach ($v as $vs) {
             $temp = $template;
-            $temp = str_replace('[[qrcode]]', '<img src="qrcode/?data=' . $vs['code'] . '">', $temp);
+            $temp = str_replace('[[qrcode]]', '<img src="' . htmlspecialchars(APP_URL . '/qrcode/?data=' . rawurlencode($vs['code']), ENT_QUOTES) . '" alt="">', $temp);
             $temp = str_replace('[[price]]', Lang::moneyFormat($vs['price']), $temp);
             $temp = str_replace('[[voucher_code]]', $vs['code'], $temp);
             $temp = str_replace('[[plan]]', $vs['name_plan'], $temp);
@@ -889,6 +889,14 @@ switch ($action) {
             $madeBatch = is_array($made) ? (string) ($made['batch'] ?? '') : '';
             r2(getUrl('plan/voucher') . ($madeBatch !== '' ? '&batch_name=' . urlencode($madeBatch) : ''), 'w',
                 Lang::T('These vouchers were created already, the form was sent twice. They are in this list.'));
+        }
+        // the form's token must have been given out by this session, and recently: the record of a finished form is kept a day
+        // only, so a much older form sent again (its record removed) would otherwise make its batch a second time
+        if ($svoucher !== '') {
+            $issued = $_SESSION['app_tokens'][$svoucher] ?? null;
+            if ($issued === null || time() - (int) $issued > 86400) {
+                r2(getUrl('plan/add-voucher/'), 'e', Lang::T('This form has expired. Open it again to create the vouchers.'));
+            }
         }
 
         $msg = '';
@@ -1060,7 +1068,7 @@ switch ($action) {
 
                 foreach ($vouchersToPrint as $vs) {
                     $temp = $template;
-                    $temp = str_replace('[[qrcode]]', '<img src="qrcode/?data=' . $vs['code'] . '">', $temp);
+                    $temp = str_replace('[[qrcode]]', '<img src="' . htmlspecialchars(APP_URL . '/qrcode/?data=' . rawurlencode($vs['code']), ENT_QUOTES) . '" alt="">', $temp);
                     $temp = str_replace('[[price]]', Lang::moneyFormat($vs['price']), $temp);
                     $temp = str_replace('[[voucher_code]]', $vs['code'], $temp);
                     $temp = str_replace('[[plan]]', $vs['name_plan'], $temp);

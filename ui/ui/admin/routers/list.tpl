@@ -234,7 +234,17 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.13"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.14"></script>
+<script>
+    // routers-tools.js did not load: its tabs cannot work. They are switched off and each details row says so; the Live tab is
+    // left to routers-health.js, which works without it
+    if (!window.rtToolsReady) {
+        document.querySelectorAll('.rt-tab:not([data-rt-tab="live"])').forEach(function (b) { b.disabled = true; });
+        document.querySelectorAll('.rt-detail > td').forEach(function (td) {
+            td.insertAdjacentHTML('afterbegin', '<p class="rt-err rt-err--block rt-unavail"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {Lang::T('The details could not be loaded. Reload the page and try again.')|escape:'javascript'}</p>');
+        });
+    }
+</script>
 
 {if $health_on}
 <script>
@@ -279,7 +289,7 @@
         });
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.8" onerror="window.rtHealthFailed()"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.9" onerror="window.rtHealthFailed()"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

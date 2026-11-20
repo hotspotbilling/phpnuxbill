@@ -109,6 +109,16 @@ class RouterClient extends PEAR2\Net\RouterOS\Client
         }
     }
 
+    /** Whether the last read under a deadline ran out of time (false when the connection closed before the reply was complete) */
+    public function readTimedOut()
+    {
+        try {
+            return $this->com->getTransmitter()->timedOut();
+        } catch (Throwable $e) {
+            return true;
+        }
+    }
+
     public function close()
     {
         return $this->aborted ? true : parent::close();

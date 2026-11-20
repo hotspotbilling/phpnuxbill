@@ -55,7 +55,7 @@ class Message
                 return $ok;
             }
             try {
-                self::MikrotikSendSMS($config['sms_url'], $phone, $txt);
+                self::MikrotikSendSMS($config['sms_url'], $phone, $txt, $timeout);
                 self::logMessage('MikroTikSMS', $phone, $txt, 'Success');
                 return true;
             } catch (Throwable $e) {
@@ -75,7 +75,8 @@ class Message
         }
     }
 
-    public static function MikrotikSendSMS($router_name, $to, $message)
+    /** $timeout: seconds the router may take to connect and to answer the command (at most 60) */
+    public static function MikrotikSendSMS($router_name, $to, $message, $timeout = 30)
     {
         global $_app_stage, $client_m, $config;
         if ($_app_stage == 'demo') {
@@ -83,8 +84,10 @@ class Message
         }
         if (!isset($client_m)) {
             $mikrotik = ORM::for_table('tbl_routers')->where('name', $router_name)->find_one();
-            $iport = explode(":", $mikrotik['ip_address']);
-            $client_m = new RouterOS\Client($iport[0], $mikrotik['username'], $mikrotik['password'], ($iport[1]) ? $iport[1] : null);
+            // every read time-limited, so a router that takes the login but never answers the command cannot hold the caller
+            [$host, $port] = RouterAddress::split($mikrotik['ip_address']);
+            $limit = max(1, min(60, (int) $timeout));
+            $client_m = RouterApi::deviceClient($host, $mikrotik['username'], $mikrotik['password'], $port, $limit, $limit);
         }
         if (empty($config['mikrotik_sms_command'])) {
             $config['mikrotik_sms_command'] = "/tool sms send";
@@ -93,7 +96,12 @@ class Message
         $smsRequest
             ->setArgument('phone-number', $to)
             ->setArgument('message', $message);
-        $client_m->sendSync($smsRequest);
+        try {
+            $client_m->sendSync($smsRequest);
+        } catch (Throwable $e) {
+            $client_m = null; // the connection was dropped: the next message connects again
+            throw $e;
+        }
     }
 
     /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. $timeout: seconds for the gateway */

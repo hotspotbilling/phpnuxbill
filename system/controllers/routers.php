@@ -63,8 +63,10 @@ $joinAddress = function ($host, $port) {
     if ($port === '' || $host === '') {
         return $host;
     }
-    if (preg_match('/^\[(.+)\](?::\d+)?$/', $host, $m)) {
+    if (preg_match('/^\[([^\[\]]+)\](?::\d+)?$/', $host, $m)) {
         $host = $m[1]; // "[v6]" or "[v6]:port" typed into the address: the port field wins
+    } elseif ($host[0] === '[') {
+        return $host; // brackets around something else ("[v6]:abc"): kept as typed, and refused by the address checks
     } elseif (substr_count($host, ':') === 1) {
         $host = explode(':', $host)[0]; // a port typed into the address too: the port field wins
     }
@@ -556,7 +558,13 @@ switch ($action) {
             $done = 0;
             $failed = [];
             $unsure = []; // sent by a device that cannot say whether the router took it (no sync_customer of its own)
+            $partial = []; // saved, but a later step (clearing a fixed IP address) was refused
             foreach (ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $d['name'])->find_many() as $tur) {
+                // the list was read at the start: a recharge that has expired since (the cron) is not sent back to the router
+                $now = ORM::for_table('tbl_user_recharges')->select('status')->find_one($tur['id']);
+                if (!$now || $now['status'] !== 'on') {
+                    continue;
+                }
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 $c = ORM::for_table('tbl_customers')->find_one($tur['customer_id']);
                 // the device sends a customer to its plan's router: a plan now on another router is not this router's to sync
@@ -579,12 +587,17 @@ switch ($action) {
                         $unsure[] = $tur['username'];
                     }
                 } catch (Throwable $e) {
-                    $failed[] = $tur['username'];
+                    if (class_exists('MikrotikPppoe', false) && $e->getCode() === MikrotikPppoe::PARTIAL) {
+                        $partial[] = $tur['username'];
+                    } else {
+                        $failed[] = $tur['username'];
+                    }
                 }
             }
             @session_start();
-            _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($failed) . ' failed, ' . count($unsure) . ' not confirmed', $admin['user_type'], $admin['id']);
-            r2($back, $failed || $unsure ? 'w' : 's', Lang::T('Customers sent to the router') . ': ' . $done
+            _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($partial) . ' partly done, ' . count($failed) . ' failed, ' . count($unsure) . ' not confirmed', $admin['user_type'], $admin['id']);
+            r2($back, $failed || $unsure || $partial ? 'w' : 's', Lang::T('Customers sent to the router') . ': ' . $done
+                . ($partial ? '. ' . Lang::T('Saved, but the fixed IP address still needs to be cleared') . ': ' . htmlspecialchars(implode(', ', array_slice($partial, 0, 20))) . (count($partial) > 20 ? ' …' : '') : '')
                 . ($failed ? '. ' . Lang::T('Not sent') . ': ' . htmlspecialchars(implode(', ', array_slice($failed, 0, 20))) . (count($failed) > 20 ? ' …' : '') : '')
                 . ($unsure ? '. ' . Lang::T('Sent, but the router did not confirm them') . ': ' . htmlspecialchars(implode(', ', array_slice($unsure, 0, 20))) . (count($unsure) > 20 ? ' …' : '') : ''));
         }
@@ -734,7 +747,7 @@ switch ($action) {
                 try {
                     $hs = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime', 'bytes-in', 'bytes-out', 'server'], $until);
                 } catch (Throwable $e) {
-                    if ($e->getCode() === 408) {
+                    if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
@@ -746,7 +759,7 @@ switch ($action) {
                     // PPPoE only: L2TP, SSTP and the other tunnels are not customers
                     $pp = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'caller-id', 'address', 'uptime'], $until, [], ['service' => 'pppoe']);
                 } catch (Throwable $e) {
-                    if ($e->getCode() === 408) {
+                    if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
@@ -887,7 +900,7 @@ switch ($action) {
                             : Lang::T('Group') . ' "' . $g[0]['name'] . '"');
                     }
                 } catch (Throwable $e) {
-                    if ($e->getCode() === 408) {
+                    if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
                     }
                     $add('warn', Lang::T('The API user\'s rights could not be read'), $e->getMessage());
@@ -900,7 +913,7 @@ switch ($action) {
                 try {
                     $hsServers = RouterApi::rows($c, '/ip/hotspot/print', ['name', 'interface', 'disabled', 'profile'], $until);
                 } catch (Throwable $e) {
-                    if ($e->getCode() === 408) {
+                    if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
@@ -911,7 +924,7 @@ switch ($action) {
                 try {
                     $ppServers = RouterApi::rows($c, '/interface/pppoe-server/server/print', ['service-name', 'interface', 'disabled'], $until);
                 } catch (Throwable $e) {
-                    if ($e->getCode() === 408) {
+                    if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
@@ -997,13 +1010,57 @@ switch ($action) {
                                     }
                                 }
                             } catch (Throwable $e) {
-                                if ($e->getCode() === 408) {
+                                if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                                     throw $e;
                                 }
                                 $found = null;
                             }
                         }
-                        if ($found === 'deny') {
+                        $ipRule = '';
+                        $ipUnsure = false;
+                        if ($found === true) {
+                            // the IP walled garden is asked before the web one: a rule there that drops or rejects the traffic blocks
+                            // the site even though a web rule allows it. Its rules are tried in order and the first that matches
+                            // decides; one with conditions this check cannot judge leaves the answer unknown when it would block
+                            try {
+                                foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'dst-address', 'src-address', 'protocol', 'dst-port', 'server', 'disabled', 'action'], $until) as $w) {
+                                    $pat = strtolower((string) $w['dst-host']);
+                                    if ($w['disabled'] === 'true' || ($pat !== '' && $pat !== $host && !fnmatch($pat, $host))) {
+                                        continue;
+                                    }
+                                    $cond = false;
+                                    foreach (['dst-address', 'src-address', 'protocol', 'dst-port', 'server'] as $k) {
+                                        $cond = $cond || trim((string) $w[$k]) !== '';
+                                    }
+                                    if (in_array(strtolower((string) $w['action']), ['', 'accept'], true)) {
+                                        if (!$cond) {
+                                            break; // let through before any later rule is asked
+                                        }
+                                        continue;
+                                    }
+                                    if ($cond) {
+                                        $found = null;
+                                        $ipUnsure = true;
+                                    } else {
+                                        $found = 'ipblock';
+                                        $ipRule = $pat === '' ? '*' : (string) $w['dst-host'];
+                                    }
+                                    break;
+                                }
+                            } catch (Throwable $e) {
+                                if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
+                                    throw $e;
+                                }
+                                $found = null; // not known to be reachable while the IP list could not be read
+                                $ipUnsure = true;
+                            }
+                        }
+                        if ($found === 'ipblock') {
+                            $add('bad', Lang::T('An IP walled garden rule blocks the billing site'), Lang::T('The IP walled garden rule for') . ' ' . $ipRule . ' ' . Lang::T('drops or rejects the traffic, so customers cannot open') . ' ' . $site
+                                . ' ' . Lang::T('before they sign in. Change it in Winbox, IP > Hotspot > Walled Garden.'));
+                        } elseif ($ipUnsure) {
+                            $add('warn', Lang::T('Could not tell whether the billing site is in the walled garden'), Lang::T('A web walled garden rule allows') . ' ' . $site . ', ' . Lang::T('but an IP walled garden rule may block it, or the IP list could not be read. Check both in Winbox, IP > Hotspot > Walled Garden.'));
+                        } elseif ($found === 'deny') {
                             $add('bad', Lang::T('A walled garden rule blocks the billing site'), Lang::T('The rule for') . ' ' . $denyRule . ' ' . Lang::T('has the action deny, so customers cannot open') . ' ' . $site
                                 . ' ' . Lang::T('before they sign in. Change it in Winbox, IP > Hotspot > Walled Garden.'));
                         } elseif ($found === null && $denyRule !== '') {
@@ -1012,12 +1069,12 @@ switch ($action) {
                         } elseif ($found === null) {
                             $add('warn', Lang::T('Could not tell whether the billing site is in the walled garden'), Lang::T('A walled garden rule for') . ' ' . $site . ' ' . Lang::T('has conditions this check cannot judge. Check it in Winbox, IP > Hotspot > Walled Garden.'));
                         } else {
-                            // only the web walled garden is read: an IP walled garden rule may still let the site through
+                            // (when no web rule was found, an IP walled garden rule may still let the site through)
                             $add($found ? 'ok' : 'warn', $found ? Lang::T('The billing site is in the walled garden') : Lang::T('No walled garden rule for the billing site was found'),
                                 $found ? $site : Lang::T('Unless an IP walled garden rule allows it, customers cannot open') . ' ' . $site . ' ' . Lang::T('before they sign in. Add it in Winbox, IP > Hotspot > Walled Garden, as') . ' ' . $host);
                         }
                     } catch (Throwable $e) {
-                        if ($e->getCode() === 408) {
+                        if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                             throw $e;
                         }
                         $add('warn', Lang::T('The walled garden could not be read'), $e->getMessage());
@@ -1029,7 +1086,11 @@ switch ($action) {
                         $rad = array_filter(RouterApi::rows($c, '/radius/print', ['address', 'service', 'disabled'], $until), function ($x) { return $x['disabled'] !== 'true'; });
                         // the services this router bills through (a running hotspot server, a running PPPoE server) must each be in
                         // an enabled RADIUS entry's service list; with neither running, both are expected
-                        $need = array_merge($onHs ? ['hotspot'] : [], $onPp ? ['ppp'] : []) ?: ['hotspot', 'ppp'];
+                        // (a service whose servers could not be read is not required here: it is reported as unknown below)
+                        $need = array_merge($onHs ? ['hotspot'] : [], $onPp ? ['ppp'] : []);
+                        if (!$need && !$unread) {
+                            $need = ['hotspot', 'ppp'];
+                        }
                         $covered = [];
                         foreach ($rad as $x) {
                             $covered = array_merge($covered, array_map('trim', explode(',', strtolower((string) $x['service']))));
@@ -1037,7 +1098,7 @@ switch ($action) {
                         $lacking = array_values(array_diff($need, $covered));
                         $list = implode(', ', array_map(function ($x) { return $x['address'] . ' (' . $x['service'] . ')'; }, $rad));
                         if (!$rad) {
-                            $add('bad', Lang::T('No RADIUS server is set on the router'), Lang::T('PHPNuxBill uses RADIUS: add the RADIUS server in Winbox, RADIUS, for') . ' ' . implode(' ' . Lang::T('and') . ' ', $need) . '.');
+                            $add('bad', Lang::T('No RADIUS server is set on the router'), Lang::T('PHPNuxBill uses RADIUS: add the RADIUS server in Winbox, RADIUS, for') . ' ' . implode(' ' . Lang::T('and') . ' ', $need ?: array_values(array_unique($unread))) . '.');
                         } elseif ($lacking) {
                             $add('bad', Lang::T('RADIUS does not cover every service'), Lang::T('Missing') . ': ' . implode(', ', $lacking) . '. '
                                 . Lang::T('Tick it in the RADIUS server Service list in Winbox, RADIUS.') . ' ' . $list);
@@ -1073,14 +1134,14 @@ switch ($action) {
                                     $add('ok', Lang::T('RADIUS is set up'), $list);
                                 }
                             } catch (Throwable $e) {
-                                if ($e->getCode() === 408) {
+                                if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                                     throw $e;
                                 }
                                 $add('warn', Lang::T('Could not tell whether the profiles use RADIUS'), $e->getMessage());
                             }
                         }
                     } catch (Throwable $e) {
-                        if ($e->getCode() === 408) {
+                        if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                             throw $e;
                         }
                         $add('warn', Lang::T('The RADIUS settings could not be read'), $e->getMessage());
@@ -1112,7 +1173,7 @@ switch ($action) {
                             $diff > 300 ? Lang::T('Times on the router (sessions, expiry) will be wrong. Turn on System > NTP Client, or set System > Clock.') : '');
                     }
                 } catch (Throwable $e) {
-                    if ($e->getCode() === 408) {
+                    if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
                     }
                     $add('warn', Lang::T('The router\'s clock could not be read'), $e->getMessage());
@@ -1126,7 +1187,7 @@ switch ($action) {
                     try {
                         RouterApi::run($c, '/system/package/update/check-for-updates', [], microtime(true) + 20);
                     } catch (Throwable $e) {
-                        if ($e->getCode() === 408) {
+                        if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                             throw $e;
                         }
                         $checkErr = $e->getMessage();
@@ -1138,7 +1199,7 @@ switch ($action) {
                 try {
                     $fw = RouterApi::rows($c, '/system/routerboard/print', ['routerboard', 'model', 'current-firmware', 'upgrade-firmware'], $until);
                 } catch (Throwable $e) {
-                    if ($e->getCode() === 408) {
+                    if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
                     }
                 }
@@ -1466,7 +1527,7 @@ switch ($action) {
                     // one UPDATE per table rather than a read and then a save of each row: inside the transaction a read sees
                     // the database as it was at its first read, so a recharge (or voucher, payment) saved since would keep the
                     // old name. An UPDATE reads the rows as they are now, those included.
-                    foreach (['tbl_plans', 'tbl_payment_gateway', 'tbl_pool', 'tbl_transactions', 'tbl_user_recharges', 'tbl_voucher'] as $tbl) {
+                    foreach (['tbl_plans', 'tbl_payment_gateway', 'tbl_pool', 'tbl_port_pool', 'tbl_transactions', 'tbl_user_recharges', 'tbl_voucher'] as $tbl) {
                         ORM::raw_execute("UPDATE `$tbl` SET `routers` = ? WHERE `routers` = ?", [$name, $oldname]);
                     }
                 }

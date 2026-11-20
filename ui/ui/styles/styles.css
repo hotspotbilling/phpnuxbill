@@ -10735,8 +10735,7 @@ body.dark-mode .rt-check--bad > i {
 .rt-strip > i {
   position: absolute;
   top: 0;
-  bottom: 0;
-  min-width: 2px;
+  bottom: 0; /* as wide as its stretch of time, no wider: the gaps between readings stay visible */
 }
 .rt-strip > i.is-on {
   background: #16a34a;

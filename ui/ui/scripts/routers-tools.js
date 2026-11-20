@@ -35,8 +35,13 @@
         return cfg.url + action + '/' + encodeURIComponent(parts[0]) + q;
     }
     function request(action, id, post) {
+        // a deadline for the whole request, reading the answer included, raced against it: it holds where requests cannot be
+        // cancelled too, and the one that is late is cancelled where it can be. The tab says to try again (Refresh).
         var ctl = window.AbortController ? new AbortController() : null;
-        var timer = ctl ? setTimeout(function () { ctl.abort(); }, LIMIT) : null;
+        var timer;
+        var deadline = new Promise(function (resolve) {
+            timer = setTimeout(function () { if (ctl) ctl.abort(); resolve({ ok: false, error: t.fail }); }, LIMIT);
+        });
         var opts = { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined };
         if (post) {
             var body = new FormData();
@@ -45,8 +50,7 @@
             opts.method = 'POST';
             opts.body = body;
         }
-        return fetch(url(action, id), opts)
-            .then(function (r) { return r.json(); })
+        return Promise.race([fetch(url(action, id), opts).then(function (r) { return r.json(); }), deadline])
             .catch(function () { return { ok: false, error: t.fail }; })
             .then(function (d) { clearTimeout(timer); return d || { ok: false, error: t.fail }; });
     }
@@ -117,7 +121,9 @@
     function loadUsers(id, pane) {
         return request('sessions', id).then(function (d) {
             if (!d.ok) { pane.innerHTML = head(t.user) + fail(d); return; }
-            var rows = d.hotspot.map(function (r) { r.kind = 'hotspot'; return r; }).concat(d.pppoe.map(function (r) { r.kind = 'pppoe'; return r; }));
+            // a list that was not read can come back missing (or null): no rows from it, and d.read says it was not read
+            var hs = Array.isArray(d.hotspot) ? d.hotspot : [], pp = Array.isArray(d.pppoe) ? d.pppoe : [];
+            var rows = hs.map(function (r) { r.kind = 'hotspot'; return r; }).concat(pp.map(function (r) { r.kind = 'pppoe'; return r; }));
             // a disconnect sent from here (still on its way, or done) stays shown on its row, even in a list read from the router
             // before it went through; kept per router settings, as a session ID only means something on the router it came from
             // (a failed one keeps its message until it is tried again; one whose session is no longer listed is said above the list)
@@ -129,6 +135,10 @@
                     if (s === 'gone') r.gone = true; else if (s === 'pending') r.pending = true; else if (s && s.err) r.err = s.err;
                 } else if (s && s.err && k.indexOf((d.cfg || '') + ' ') === 0) {
                     orphans.push(s.user + ': ' + s.err);
+                } else if (s === 'gone' && k.indexOf((d.cfg || '') + ' ') === 0) {
+                    // the disconnected session has left the list: forgotten, so a later session that is given the same ID (the
+                    // router numbers them again after a restart) is not shown as disconnected
+                    delete pane._drops[k];
                 }
             });
             var curl = d.customer_url;
@@ -139,7 +149,7 @@
                 return;
             }
             var partial = !rd.hotspot || !rd.pppoe;
-            var total = (d.total_hotspot || d.hotspot.length) + (d.total_pppoe || d.pppoe.length);
+            var total = (d.total_hotspot || hs.length) + (d.total_pppoe || pp.length);
             listView(pane, total + ' ' + t.online + (partial ? ' (' + t.partial + ')' : ''), {
                 rows: rows,
                 cfg: d.cfg, // which router settings the list was read with: a disconnect is refused once they change
@@ -149,8 +159,8 @@
                 empty: t.none,
                 cols: [t.user, t.type, t.address, t.mac, t.uptime, t.data, ''],
                 filters: [{ key: 'all', label: t.all, test: function () { return true; } },
-                    { key: 'hotspot', label: 'Hotspot ' + d.hotspot.length, test: function (r) { return r.kind === 'hotspot'; } },
-                    { key: 'pppoe', label: 'PPPoE ' + d.pppoe.length, test: function (r) { return r.kind === 'pppoe'; } }],
+                    { key: 'hotspot', label: 'Hotspot ' + hs.length, test: function (r) { return r.kind === 'hotspot'; } },
+                    { key: 'pppoe', label: 'PPPoE ' + pp.length, test: function (r) { return r.kind === 'pppoe'; } }],
                 match: function (r, q) {
                     return has(r.user, q) || has(r.address, q) || has(r.mac, q) || (r.customer && has(r.customer.name, q));
                 },
@@ -612,8 +622,9 @@
                     });
                     if (cur) {
                         listRender(dPane);
-                    } else if (!d.ok && dPane._lv && dPane.querySelector('[data-rt-list]')) {
-                        // the session is not in the list shown now: the failure is said above it
+                    } else if (!d.ok && dPane._lv && (dPane._lv.opts.cfg || '') === dCfg && dPane.querySelector('[data-rt-list]')) {
+                        // the session is not in the list shown now (read with the same router settings): the failure is said above
+                        // it. A list from other settings is about another router, and is left alone
                         dPane.querySelector('[data-rt-list]').insertAdjacentHTML('beforebegin', '<p class="rt-err rt-err--block">' + esc(dUser + ': ' + (d.error || t.fail)) + '</p>');
                     }
                 });

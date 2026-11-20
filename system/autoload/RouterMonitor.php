@@ -164,6 +164,11 @@ class RouterMonitor
     /** Read one router, keep the reading, and turn changes into events (and alerts). */
     private static function check($r)
     {
+        global $_app_stage;
+        // Demo mode never connects to a router: that is no outage, so nothing is kept (no offline reading, no alert)
+        if (strcasecmp(trim((string) $_app_stage), 'demo') === 0) {
+            return Lang::T('skipped in Demo mode');
+        }
         $id = (int) $r['id'];
         // only readings at the router's present address follow on (see moved())
         $since = self::movedAt($id);
@@ -233,7 +238,7 @@ class RouterMonitor
                                 $pick = $i;
                                 break;
                             }
-                            if ($i['running'] === 'true' && is_numeric($i['rx-byte']) && (!$pick || (float) $i['rx-byte'] + (float) $i['tx-byte'] > (float) $pick['rx-byte'] + (float) $pick['tx-byte'])) {
+                            if ($i['running'] === 'true' && is_numeric($i['rx-byte']) && is_numeric($i['tx-byte']) && (!$pick || (float) $i['rx-byte'] + (float) $i['tx-byte'] > (float) $pick['rx-byte'] + (float) $pick['tx-byte'])) {
                                 $pick = $i;
                             }
                         }
@@ -252,11 +257,35 @@ class RouterMonitor
             $why = $err;
         }
         // the router's address was changed while it was being read (routers.php, edit): the reading is the old device's, and is
-        // neither kept nor turned into events for the new one
-        $now = ORM::for_table('tbl_routers')->select('ip_address')->find_one($id);
-        if (!$now || (string) $now['ip_address'] !== (string) $r['ip_address'] || self::movedAt($id) !== $since) {
-            return Lang::T('address changed during the reading, not kept');
+        // neither kept nor turned into events for the new one. The check and the writes below hold the lock routers.php takes
+        // for its edits (until the address and its "moved" event are saved), so an edit cannot come between them.
+        $db = ORM::getDb();
+        try {
+            $locked = (int) $db->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 20)")->fetchColumn() === 1;
+        } catch (Throwable $e) {
+            $locked = false;
         }
+        if (!$locked) {
+            return Lang::T('the router is being edited, reading not kept');
+        }
+        try {
+            $now = ORM::for_table('tbl_routers')->select('ip_address')->find_one($id);
+            if (!$now || (string) $now['ip_address'] !== (string) $r['ip_address'] || self::movedAt($id) !== $since) {
+                return Lang::T('address changed during the reading, not kept');
+            }
+            return self::keep($r, $s, $prev, $why, $since);
+        } finally {
+            try {
+                $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+            } catch (Throwable $e) {
+            }
+        }
+    }
+
+    /** Save a reading and turn it into events (called with the router edit lock held) */
+    private static function keep($r, array $s, $prev, $why, $since)
+    {
+        $id = (int) $r['id'];
         // one time for the reading: kept with the row and used for the restart test against it
         $at = time();
         $row = ORM::for_table('tbl_router_samples')->create();
@@ -427,7 +456,8 @@ class RouterMonitor
             // a restart between the two readings resets the counters: no speed across it (the same test as the restart event)
             $restarted = $prev && self::restarted($prev['t'], $prev['uptime'], $t, $r['uptime']);
             foreach ($moves as $m) {
-                if ($prev && $m >= $prev['t'] && $m < $t) {
+                // (a change in the same second as either reading cannot be placed before or after it: a break either way)
+                if ($prev && $m >= $prev['t'] && $m <= $t) {
                     $restarted = true; // (another device, or the same one reached another way: its counters do not follow on)
                 }
             }

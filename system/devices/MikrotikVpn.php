@@ -74,7 +74,7 @@ class MikrotikVpn
             // added now, and one already there (by its comment) is not added again. Only once the router took the change above:
             // a refused secret gets no forwards
             if ($addr !== '' && RouterApi::error($res) === null
-                && !$this->addNat($client, $plan, $customer, $addr, $this->natComments($client, $addr)) && $this->strict) {
+                && !$this->addNat($client, $plan, $customer, $addr, $this->natRules($client, $addr)) && $this->strict) {
                 throw new Exception(Lang::T('The router refused a port forward for this customer'));
             }
             if (isset($isChangePlan) && $isChangePlan) {
@@ -374,42 +374,78 @@ class MikrotikVpn
         } else {
             $setRequest->setArgument('name', $customer['username']);
         }
+        $lock = null;
         if (!empty($customer['pppoe_ip'])) {
             $ips = $customer['pppoe_ip'];
-            $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
         } else {
+            // one address handed out at a time from this pool (a database lock, so on every PHP worker): two purchases at once
+            // would otherwise both pick the same free address before either is saved. Held until the address is saved below,
+            // and released by the database if the request ends first.
+            $lock = 'phpnuxbill_vpn_ip_' . substr(sha1((string) $plan['pool']), 0, 32);
+            try {
+                $got = (int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($lock) . ', 30)')->fetchColumn() === 1;
+            } catch (Throwable $e) {
+                $got = false;
+            }
+            if (!$got) {
+                throw new Exception(Lang::T('Another customer is being given an address from this pool. Try again in a moment.'));
+            }
             $ips = $this->checkIpAddr($plan['pool'], $customer['id']);
+        }
+        try {
+            // no address left in the pool: no secret is made (it would have no fixed address, and no forwards could point at it)
+            if (!is_string($ips) || !filter_var($ips, FILTER_VALIDATE_IP)) {
+                throw new Exception(Lang::T('No free IP address is left in the pool') . ' ' . $plan['pool']);
+            }
             $setRequest->setArgument('remote-address', $ips);
+            // the secret first: the port forwards (and the ports reserved for them) are made only for a customer the router took,
+            // so a refused secret leaves no rules pointing at an address that was never given out
+            $res = $this->checked($client->sendSync($setRequest));
+            if (RouterApi::error($res) !== null) {
+                return;
+            }
+            // the address is saved as soon as the router has given it to this secret, before the forwards: checkIpAddr() then
+            // never hands it to another customer, even when a forward fails. Forwards are not tracked by it: each later
+            // add_customer() checks them on the router and adds the missing ones.
+            $customer->service_type = 'VPN';
+            $customer->pppoe_ip = $ips;
+            $customer->save();
+        } finally {
+            if ($lock !== null) {
+                try {
+                    ORM::getDb()->query('SELECT RELEASE_LOCK(' . ORM::getDb()->quote($lock) . ')');
+                } catch (Throwable $e) {
+                }
+            }
         }
-        // the secret first: the port forwards (and the ports reserved for them) are made only for a customer the router took,
-        // so a refused secret leaves no rules pointing at an address that was never given out
-        $res = $this->checked($client->sendSync($setRequest));
-        if (RouterApi::error($res) !== null) {
-            return;
-        }
-        // the address is saved as soon as the router has given it to this secret, before the forwards: checkIpAddr() then
-        // never hands it to another customer, even when a forward fails. Forwards are not tracked by it: each later
-        // add_customer() checks them on the router and adds the missing ones.
-        $customer->service_type = 'VPN';
-        $customer->pppoe_ip = $ips;
-        $customer->save();
-        if (!$this->addNat($client, $plan, $customer, $ips, $this->natComments($client, $ips)) && $this->strict) {
+        if (!$this->addNat($client, $plan, $customer, $ips, $this->natRules($client, $ips)) && $this->strict) {
             throw new Exception(Lang::T('The router refused a port forward for this customer'));
         }
     }
 
-    /** The comments of the port forwards on the router that point to this address */
-    private function natComments($client, $addr)
+    /**
+     * The port forwards on the router that point to this address, as arrays of their fields; null when the router refused to
+     * list them (an empty list is no forwards at all)
+     */
+    private function natRules($client, $addr)
     {
         $natRequest = new RouterOS\Request('/ip/firewall/nat/print');
         $natRequest->setQuery(RouterOS\Query::where('to-addresses', $addr));
-        $have = [];
-        foreach ($client->sendSync($natRequest) as $nat) {
+        $res = $client->sendSync($natRequest);
+        if (RouterApi::error($res) !== null) {
+            return null;
+        }
+        $rules = [];
+        foreach ($res as $nat) {
             if ($nat->getType() === RouterOS\Response::TYPE_DATA) {
-                $have[] = (string) $nat->getProperty('comment');
+                $row = [];
+                foreach (['.id', 'comment', 'chain', 'action', 'protocol', 'dst-port', 'dst-address', 'to-ports', 'disabled'] as $k) {
+                    $row[$k] = (string) RouterApi::text($nat->getProperty($k));
+                }
+                $rules[] = $row;
             }
         }
-        return $have;
+        return $rules;
     }
 
     function removeVpnActive($client, $username)
@@ -463,14 +499,23 @@ class MikrotikVpn
     }
 
     /**
-     * $have: the comments of forwards already on the router for this address, which are not added again. Returns whether the
-     * router took every forward it was sent (a refusal comes back as a !trap reply, not as an exception).
+     * $rules: the forwards already on the router for this address (natRules()), or null when they could not be read. A forward
+     * that is there, enabled and as it should be is left alone; one with this customer's comment that differs (an old public
+     * port, disabled) is replaced. Returns whether every forward is in place: false when the rules could not be read (nothing
+     * is added then, so nothing is doubled), when a port could not be reserved, or when the router refused a change (a refusal
+     * comes back as a !trap reply, not as an exception).
      */
-    function addNat($client, $plan, $cust, $ips, $have = [])
+    function addNat($client, $plan, $cust, $ips, $rules = [])
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
             return true;
+        }
+        if ($rules === null) {
+            if ($this->strict) {
+                throw new Exception(Lang::T('The port forwards on the router could not be read'));
+            }
+            return false;
         }
         $ok = true;
         $this->checkPort($cust['id'], 'Winbox', $plan['routers']);
@@ -482,19 +527,44 @@ class MikrotikVpn
         $ip = ORM::for_table('tbl_port_pool')
             ->where('routers', $plan['routers'])
             ->find_one();
+        $toPorts = ['Winbox' => '8291', 'Web' => '80', 'Api' => '8728'];
+        if ($ip) {
+            // with a port pool for this router, all three forwards are needed: one whose port could not be reserved (the range
+            // is full) is missing, and is tried again next time (the ports already reserved are kept)
+            $named = [];
+            foreach ($tcf as $cf) {
+                $named[$cf['field_name']] = true;
+            }
+            if (count(array_intersect_key($toPorts, $named)) < count($toPorts)) {
+                $ok = false;
+            }
+        }
         foreach ($tcf as $cf) {
             $dst = $cf['field_value'];
             $cmnt = $cf['field_name'];
-            if ($cmnt == 'Winbox') {
-                $tp = '8291';
+            if (!isset($toPorts[$cmnt])) {
+                continue;
             }
-            if ($cmnt == 'Web') {
-                $tp = '80';
+            $tp = $toPorts[$cmnt];
+            $want = $cmnt . ' || ' . $cust['username'];
+            $inPlace = false;
+            foreach ($rules as $r) {
+                if ($r['comment'] !== $want) {
+                    continue;
+                }
+                if (!$inPlace && $r['disabled'] !== 'true' && $r['chain'] === 'dstnat' && $r['action'] === 'dst-nat' && $r['protocol'] === 'tcp'
+                    && $r['dst-port'] === (string) $dst && $r['to-ports'] === $tp && $r['dst-address'] === ($ip ? (string) $ip['public_ip'] : '')) {
+                    $inPlace = true;
+                    continue;
+                }
+                // this customer's forward, but not as it should be (or a second copy): removed, and added again below
+                $removeRequest = new RouterOS\Request('/ip/firewall/nat/remove');
+                $removeRequest->setArgument('numbers', $r['.id']);
+                if (RouterApi::error($client->sendSync($removeRequest)) !== null) {
+                    $ok = false;
+                }
             }
-            if ($cmnt == 'Api') {
-                $tp = '8728';
-            }
-            if (($cmnt == 'Winbox' || $cmnt == 'Web' || $cmnt == 'Api') && !in_array($cmnt . ' || ' . $cust['username'], $have, true)) {
+            if (!$inPlace) {
                 $addRequest = new RouterOS\Request('/ip/firewall/nat/add');
                 $res = $client->sendSync(
                     $addRequest

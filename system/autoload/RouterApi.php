@@ -92,15 +92,18 @@ class RouterApi
         $req->setTag($tag);
         $c->sendAsync($req);
         $left = $deadline - microtime(true);
+        $recvErr = null;
         if ($left > 0) {
             // every read inside the reply (not only the wait for it to start) ends by the deadline
             if (method_exists($c, 'readDeadline')) {
                 $c->readDeadline($deadline);
             }
             try {
+                // (each wait inside is capped by the deadline set above, not only the total)
                 $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
-            } catch (\PEAR2\Net\Transmitter\Exception $e) {
-                // a read that ran out of time mid-reply: the reply is incomplete, handled as not answered below
+            } catch (\PEAR2\Net\Transmitter\Exception | \PEAR2\Net\RouterOS\SocketException $e) {
+                // the reply is incomplete: a read that ran out of time, or the connection closed mid-reply (told apart below)
+                $recvErr = $e;
             } finally {
                 if (method_exists($c, 'readDeadline')) {
                     $c->readDeadline(null);
@@ -120,6 +123,11 @@ class RouterApi
         method_exists($c, 'abort') ? $c->abort() : $c->close();
         if ($fatal !== null) {
             throw new Exception(Lang::T('The router closed the connection') . ($fatal !== 'closed' ? ': ' . mb_substr($fatal, 0, 120) : ''), 503);
+        }
+        // the connection ended before the reply was complete, with time still left: not a router that went quiet
+        if ($recvErr !== null && method_exists($c, 'readTimedOut') && !$c->readTimedOut()) {
+            $why = trim(preg_replace('/\s+/', ' ', strip_tags($recvErr->getMessage())));
+            throw new Exception(Lang::T('The router closed the connection') . ($why !== '' ? ': ' . mb_substr($why, 0, 120) : ''), 503);
         }
         throw new Exception(Lang::T('The router did not answer in time'), 408);
     }

@@ -98,12 +98,22 @@ class Stream
     protected $deadline = null;
 
     /**
-     * PHPNuxBill: the stream's ordinary read timeout as [seconds, microseconds], or NULL for PHP's default_socket_timeout
-     * (what a stream starts with). A deadline narrows the timeout for each read; this is put back when it is cleared.
+     * PHPNuxBill: the stream's ordinary read timeout as [seconds, microseconds]: the default_socket_timeout in force when the
+     * stream was opened (callers change that setting around opening a connection and put it back afterwards), or the one
+     * setTimeout() gave since. A negative value is no time limit. A deadline narrows the timeout for each read; this is put
+     * back when it is cleared.
      *
-     * @var array<int,int>|null
+     * @var array<int,int>
      */
-    protected $ordinaryTimeout = null;
+    protected $ordinaryTimeout = array(60, 0);
+
+    /**
+     * PHPNuxBill: whether a read under the deadline stopped because time ran out (rather than because the other end closed
+     * the connection). Cleared when a new deadline is set.
+     *
+     * @var bool
+     */
+    protected $timedOut = false;
 
     /**
      * An associative array with the chunk size of each direction.
@@ -141,6 +151,8 @@ class Stream
         );
         $meta = stream_get_meta_data($stream);
         $this->isBlocking = isset($meta['blocked']) ? $meta['blocked'] : true;
+        // the stream has just been opened with this as its read timeout
+        $this->ordinaryTimeout = array((int) ini_get('default_socket_timeout'), 0);
     }
 
     /**
@@ -252,11 +264,23 @@ class Stream
     {
         $had = null !== $this->deadline;
         $this->deadline = null === $deadline ? null : (float) $deadline;
+        if (null !== $this->deadline) {
+            $this->timedOut = false;
+        }
         if ($had && null === $this->deadline && self::isStream($this->stream)) {
             // the reads under the deadline narrowed the timeout: back to the ordinary one
-            $t = $this->ordinaryTimeout ?: array((int) ini_get('default_socket_timeout'), 0);
-            stream_set_timeout($this->stream, $t[0], $t[1]);
+            stream_set_timeout($this->stream, $this->ordinaryTimeout[0], $this->ordinaryTimeout[1]);
         }
+    }
+
+    /**
+     * PHPNuxBill: whether the last read under a deadline ran out of time (false when it failed because the connection closed).
+     *
+     * @return bool
+     */
+    public function timedOut()
+    {
+        return $this->timedOut;
     }
 
     /**
@@ -272,13 +296,15 @@ class Stream
         }
         $left = $this->deadline - microtime(true);
         if ($left <= 0) {
+            $this->timedOut = true;
             $this->close();
             return false;
         }
-        // the shorter of the time left and the stream's ordinary timeout: a deadline never makes one read wait longer than usual
-        $t = $this->ordinaryTimeout ?: array((int) ini_get('default_socket_timeout'), 0);
+        // the shorter of the time left and the stream's ordinary timeout: a deadline never makes one read wait longer than usual.
+        // A negative ordinary timeout is no limit (the deadline decides); zero is a poll, and stays one
+        $t = $this->ordinaryTimeout;
         $ordinary = $t[0] + $t[1] / 1000000;
-        if ($ordinary > 0 && $ordinary < $left) {
+        if ($ordinary >= 0 && $ordinary < $left) {
             $left = $ordinary;
         }
         stream_set_timeout($this->stream, (int) floor($left), (int) (($left - floor($left)) * 1000000));
@@ -296,6 +322,7 @@ class Stream
         if (empty($meta['timed_out'])) {
             return false;
         }
+        $this->timedOut = true;
         $this->close();
         return true;
     }
@@ -617,6 +644,15 @@ class Stream
             if (null === $sTimeout && !$this->isBlocking) {
                 $meta = stream_get_meta_data($this->stream);
                 return !$meta['eof'];
+            }
+            // PHPNuxBill: under a deadline, no wait for data goes past it (the library asks for the full time again for each
+            // reply, so a login challenge or a reply that is not the last would otherwise start the wait over)
+            if (null !== $this->deadline) {
+                $left = max(0, $this->deadline - microtime(true));
+                if (null === $sTimeout || $sTimeout + $usTimeout / 1000000 > $left) {
+                    $sTimeout = (int) floor($left);
+                    $usTimeout = (int) (($left - floor($left)) * 1000000);
+                }
             }
 
             $w = $e = null;
