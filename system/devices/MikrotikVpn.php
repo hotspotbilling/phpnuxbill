@@ -375,9 +375,8 @@ class MikrotikVpn
             $setRequest->setArgument('name', $customer['username']);
         }
         $lock = null;
-        if (!empty($customer['pppoe_ip'])) {
-            $ips = $customer['pppoe_ip'];
-        } else {
+        $ips = $customer['pppoe_ip'];
+        if (empty($ips)) {
             // one address handed out at a time from this pool (a database lock, so on every PHP worker): two purchases at once
             // would otherwise both pick the same free address before either is saved. Held until the address is saved below,
             // and released by the database if the request ends first.
@@ -390,9 +389,12 @@ class MikrotikVpn
             if (!$got) {
                 throw new Exception(Lang::T('Another customer is being given an address from this pool. Try again in a moment.'));
             }
-            $ips = $this->checkIpAddr($plan['pool'], $customer['id']);
         }
+        // from the moment the lock is held: the finally below releases it whatever happens, the address lookup included
         try {
+            if ($lock !== null) {
+                $ips = $this->checkIpAddr($plan['pool'], $customer['id']);
+            }
             // no address left in the pool: no secret is made (it would have no fixed address, and no forwards could point at it)
             if (!is_string($ips) || !filter_var($ips, FILTER_VALIDATE_IP)) {
                 throw new Exception(Lang::T('No free IP address is left in the pool') . ' ' . $plan['pool']);

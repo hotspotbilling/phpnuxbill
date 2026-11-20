@@ -78,16 +78,22 @@ class Message
     /** $timeout: seconds the router may take to connect and to answer the command (at most 60) */
     public static function MikrotikSendSMS($router_name, $to, $message, $timeout = 30)
     {
-        global $_app_stage, $client_m, $config;
+        global $_app_stage, $client_m, $client_m_limit, $config;
         if ($_app_stage == 'demo') {
             return null;
+        }
+        $limit = max(1, min(60, (int) $timeout));
+        // the connection is kept for the next message, but only with the same time limit: a call with another limit connects again
+        if (isset($client_m) && $client_m_limit !== $limit) {
+            method_exists($client_m, 'abort') ? $client_m->abort() : null;
+            $client_m = null;
         }
         if (!isset($client_m)) {
             $mikrotik = ORM::for_table('tbl_routers')->where('name', $router_name)->find_one();
             // every read time-limited, so a router that takes the login but never answers the command cannot hold the caller
             [$host, $port] = RouterAddress::split($mikrotik['ip_address']);
-            $limit = max(1, min(60, (int) $timeout));
             $client_m = RouterApi::deviceClient($host, $mikrotik['username'], $mikrotik['password'], $port, $limit, $limit);
+            $client_m_limit = $limit;
         }
         if (empty($config['mikrotik_sms_command'])) {
             $config['mikrotik_sms_command'] = "/tool sms send";

@@ -22,8 +22,9 @@ class RouterMonitor
     const KEEP_SAMPLES = 30;    // days
     const KEEP_EVENTS = 90;     // days
     // seconds: a reading further apart than this from the last one does not follow on from it. The cron may run every 5 to 15
-    // minutes (Routers > Settings says so); this allows a 15-minute cron and a minute of lateness. A longer gap is a break.
-    const GAP = 960;
+    // minutes (Routers > Settings says so); this allows a 15-minute cron and 5 minutes of lateness (a cron started late, or slow
+    // routers read before this one in a run and not in the last). A longer gap is a break.
+    const GAP = 1200;
     const BOOT_SLACK = 120;     // seconds a router's start time can seem to move between readings without it having restarted
 
     /** Two readings follow on from each other (no gap in the collection between them, a late cron allowed for) */
