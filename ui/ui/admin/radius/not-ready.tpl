@@ -31,9 +31,26 @@
                     <i class="fa {if $why == 'database' || $why == 'tables'}fa-times-circle{else}fa-exclamation-circle{/if}" aria-hidden="true"></i>
                     <div>
                         <b>1. {Lang::T('Create the RADIUS database and its tables')}</b>
-                        <small>{Lang::T('In your hosting panel (cPanel: MySQL Databases) create a database and a user for it, then import install/radius.sql from the PHPNuxBill folder into it (phpMyAdmin: Import). From a terminal:')}</small>
+                        <small>{Lang::T('In your hosting panel (cPanel: MySQL Databases) create a database and a user for it. Then, under Add User To Database, add that user to the database and tick ALL PRIVILEGES. Then import install/radius.sql from the PHPNuxBill folder into it (phpMyAdmin: Import). From a terminal:')}</small>
                         <pre class="nf__code">mysql -u RADIUS_USER -p RADIUS_DATABASE &lt; install/radius.sql</pre>
-                        {if $why == 'tables'}<small>{Lang::T('The database exists, but the tables are missing: import install/radius.sql into it.')}</small>{/if}
+                        <small>{Lang::T('Import the whole file only into a new, empty database: it replaces the RADIUS tables it creates, with the logins and accounting in them.')}</small>
+                        {if $why == 'tables'}
+                        <small>{Lang::T('The database exists, but its nas table is missing. If the database is new and empty, import install/radius.sql as above. If FreeRADIUS already uses it (it has tables such as radcheck and radacct), do not import the file: run only this in phpMyAdmin (SQL tab), which adds the nas table and changes nothing else:')}</small>
+<pre class="nf__code">CREATE TABLE IF NOT EXISTS `nas` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `nasname` varchar(128) NOT NULL,
+  `shortname` varchar(32) DEFAULT NULL,
+  `type` varchar(30) DEFAULT 'other',
+  `ports` int(5) DEFAULT NULL,
+  `secret` varchar(60) NOT NULL DEFAULT 'secret',
+  `server` varchar(64) DEFAULT NULL,
+  `community` varchar(50) DEFAULT NULL,
+  `description` varchar(200) DEFAULT 'RADIUS Client',
+  `routers` varchar(32) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  KEY `nasname` (`nasname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;</pre>
+                        {/if}
                     </div>
                 </li>
                 <li class="rt-check rt-check--{if $problem['config']}ok{else}bad{/if}">

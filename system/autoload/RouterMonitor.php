@@ -62,6 +62,34 @@ class RouterMonitor
         return ($config['router_monitor'] ?? '1') === '1' && self::ready();
     }
 
+    /**
+     * The router's address was changed (routers.php, edit): the device there may be another one. Its readings before now are no
+     * baseline for the next (traffic speed, restart) and its alert states (offline, high load) are not the new device's, so a
+     * "moved" event marks where they stop counting. Kept like the newest state, so it is never pruned away before what it hides.
+     */
+    public static function moved($id)
+    {
+        if (!self::ready()) {
+            return;
+        }
+        try {
+            $e = ORM::for_table('tbl_router_events')->create();
+            $e->router_id = (int) $id;
+            $e->at = date('Y-m-d H:i:s');
+            $e->type = 'moved';
+            $e->detail = '';
+            $e->save();
+        } catch (Throwable $e) {
+        }
+    }
+
+    /** When the router's address was last changed ('Y-m-d H:i:s'), or null: readings and states from before then do not count */
+    private static function movedAt($id)
+    {
+        $m = ORM::for_table('tbl_router_events')->where('router_id', (int) $id)->where('type', 'moved')->order_by_desc('id')->find_one();
+        return $m ? $m['at'] : null;
+    }
+
     /** From the cron. Returns lines for its output. */
     public static function run()
     {
@@ -135,9 +163,15 @@ class RouterMonitor
     private static function check($r)
     {
         $id = (int) $r['id'];
-        $prev = ORM::for_table('tbl_router_samples')->where('router_id', $id)->order_by_desc('at')->find_one();
+        // only readings at the router's present address follow on (see moved())
+        $since = self::movedAt($id);
+        $q = function () use ($id, $since) {
+            $q = ORM::for_table('tbl_router_samples')->where('router_id', $id);
+            return $since ? $q->where_gt('at', $since) : $q;
+        };
+        $prev = $q()->order_by_desc('at')->find_one();
         // the uplink chosen before: from the last reading that had one (a failed reading has none, and must not switch it)
-        $lastIf = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where_not_null('iface')->order_by_desc('at')->find_one();
+        $lastIf = $q()->where_not_null('iface')->order_by_desc('at')->find_one();
         $s = ['online' => 0, 'cpu' => null, 'mem' => null, 'disk' => null, 'users' => null, 'uptime' => null, 'iface' => null, 'rx' => null, 'tx' => null];
         $why = '';
         [$c, $err] = RouterApi::connect($r['ip_address'], $r['username'], $r['password'], 5);
@@ -224,7 +258,7 @@ class RouterMonitor
             $row->$k = $v;
         }
         $row->save();
-        self::events($r, $s, $prev, $why, (int) $row->id(), $at);
+        self::events($r, $s, $prev, $why, (int) $row->id(), $at, $since);
         return $s['online'] ? 'online' . ($s['cpu'] !== null ? ', CPU ' . $s['cpu'] . '%' : '') : 'offline (' . $why . ')';
     }
 
@@ -247,10 +281,11 @@ class RouterMonitor
         }
     }
 
-    private static function events($r, array $s, $prev, $why, $sampleId, $now)
+    private static function events($r, array $s, $prev, $why, $sampleId, $now, $since = null)
     {
         $id = (int) $r['id'];
-        $state = self::lastOf($id, ['offline', 'online']);
+        // a "moved" event newer than a state ends it: the device at the new address starts with none
+        $state = self::lastOf($id, ['offline', 'online', 'moved']);
         $isDown = $state && $state['type'] === 'offline';
         if (!$s['online']) {
             // offline only after the second failed reading in a row (two readings far apart, the cron having stopped meanwhile,
@@ -268,7 +303,8 @@ class RouterMonitor
         }
         // a restart: the router's start time moved on since the last reading that had an uptime (failed readings in between have none)
         $lastUp = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where('online', 1)->where_not_null('uptime')
-            ->where_lt('id', $sampleId)->order_by_desc('id')->find_one();
+            ->where_lt('id', $sampleId);
+        $lastUp = ($since ? $lastUp->where_gt('at', $since) : $lastUp)->order_by_desc('id')->find_one();
         if ($lastUp && self::restarted(strtotime($lastUp['at']), $lastUp['uptime'], $now, $s['uptime'])) {
             self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')');
         }
@@ -277,7 +313,7 @@ class RouterMonitor
             if ($s[$k] === null) {
                 continue;
             }
-            $last = self::lastOf($id, [$hi, $ok]);
+            $last = self::lastOf($id, [$hi, $ok, 'moved']);
             $high = $last && $last['type'] === $hi;
             $twice = $k === 'disk' || (self::follows($prev, $now) && $prev[$k] !== null && (int) $prev[$k] >= $over);
             if (!$high && $s[$k] >= $over && $twice) {
@@ -323,10 +359,11 @@ class RouterMonitor
         $phone = preg_replace('/[^0-9+]/', '', (string) ($config['router_alert_phone'] ?? ''));
         if ($phone !== '' && strlen($phone) >= 7) {
             try {
+                // the same short time limit as Telegram (the event is saved before any alert is sent)
                 if (($config['router_alert_via'] ?? 'wa') === 'sms') {
-                    Message::sendSMS($phone, $text);
+                    Message::sendSMS($phone, $text, 15);
                 } else {
-                    Message::sendWhatsapp($phone, $text);
+                    Message::sendWhatsapp($phone, $text, 15);
                 }
             } catch (Throwable $e) {
             }
@@ -349,7 +386,7 @@ class RouterMonitor
             // deleted router age out like the rest.
             $db->prepare("DELETE FROM tbl_router_events WHERE at < ? AND id NOT IN (SELECT id FROM (SELECT MAX(e.id) AS id FROM tbl_router_events e
                 JOIN tbl_routers r ON r.id = e.router_id
-                WHERE e.type IN ('offline', 'online', 'cpu_high', 'cpu_ok', 'mem_high', 'mem_ok', 'disk_high', 'disk_ok')
+                WHERE e.type IN ('offline', 'online', 'cpu_high', 'cpu_ok', 'mem_high', 'mem_ok', 'disk_high', 'disk_ok', 'moved')
                 GROUP BY e.router_id, CASE WHEN e.type IN ('offline', 'online') THEN 'state' ELSE SUBSTRING_INDEX(e.type, '_', 1) END) AS keep_newest)")
                 ->execute([date('Y-m-d H:i:s', time() - self::KEEP_EVENTS * 86400)]);
             @touch($mark); // only once both are done: a failure is tried again on the next run
@@ -369,6 +406,9 @@ class RouterMonitor
         $rows = ORM::for_table('tbl_router_samples')->where('router_id', (int) $id)->where_gte('at', date('Y-m-d H:i:s', $from))
             ->order_by_asc('at')->find_array();
         $bucket = max(300, (int) ceil($span / 300));
+        // address changes in the period: no speed between a reading from before one and a reading from after it
+        $moves = array_map('strtotime', array_column(ORM::for_table('tbl_router_events')->select('at')->where('router_id', (int) $id)
+            ->where('type', 'moved')->where_gte('at', date('Y-m-d H:i:s', $from))->find_array(), 'at'));
         $points = [];
         $online = 0;
         $prev = null;
@@ -378,6 +418,11 @@ class RouterMonitor
             $down = $up = null;
             // a restart between the two readings resets the counters: no speed across it (the same test as the restart event)
             $restarted = $prev && self::restarted($prev['t'], $prev['uptime'], $t, $r['uptime']);
+            foreach ($moves as $m) {
+                if ($prev && $m >= $prev['t'] && $m < $t) {
+                    $restarted = true; // (another device, or the same one reached another way: its counters do not follow on)
+                }
+            }
             if ($prev && !$restarted && $prev['iface'] === $r['iface'] && $r['rx'] !== null && $prev['rx'] !== null && $t > $prev['t']) {
                 $sec = $t - $prev['t'];
                 $dRx = (float) $r['rx'] - (float) $prev['rx'];

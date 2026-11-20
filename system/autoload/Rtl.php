@@ -29,7 +29,7 @@ class Rtl
     const OWN_RTL = ['sweetalert2', 'select2'];
 
     /** Bumped when the mirroring changes, so the copies already made are made again */
-    const VERSION = 5;
+    const VERSION = 6;
 
     /**
      * Put on what has been mirrored already. Smarty runs the filter on fetch() as well as display(), so a part fetched and then
@@ -62,8 +62,9 @@ class Rtl
             return $html;
         }
         try {
-            // script blocks are left alone: positions worked out by code are not CSS
-            $parts = preg_split('/(<script\b[^>]*>.*?<\/script\s*>)/is', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+            // script blocks are left alone: positions worked out by code are not CSS. So is what a textarea holds: it is text
+            // being edited (a voucher template's HTML), saved back as it is, and must not come back mirrored
+            $parts = preg_split('/(<script\b[^>]*>.*?<\/script\s*>|<textarea\b[^>]*>.*?<\/textarea\s*>)/is', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
             if ($parts === false) {
                 return $html;
             }
@@ -440,8 +441,10 @@ class Rtl
 
     private static function swapWords($value)
     {
-        return preg_replace_callback('/\b(left|right)\b/i', function ($m) {
-            return self::swapWord($m[1]);
+        // a custom property's name (--menu-left, also inside var()) is an identifier, not a side: kept as it is. Other words
+        // are swapped, "left" alone and inside a property name ("transition: margin-left") alike.
+        return preg_replace_callback('/(--[\w-]+)|\b(left|right)\b/i', function ($m) {
+            return $m[1] !== '' ? $m[1] : self::swapWord($m[2]);
         }, $value);
     }
 

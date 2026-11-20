@@ -96,7 +96,7 @@
                         <input type="password" class="form-control" id="router_backup_password" name="router_backup_password" autocomplete="new-password"
                             minlength="8" maxlength="128" spellcheck="false"
                             placeholder="{if $_c['router_backup_password']|default:'' != ''}{Lang::T('Saved. Type a new one to change it.')}{else}{Lang::T('At least 8 characters')}{/if}">
-                        <p class="nf__hint">{Lang::T('Backups are encrypted with this password, nightly and Save a backup alike, and none is made without it: a backup without a password holds every login on the router in readable form. You need it to restore a backup, so keep it somewhere safe.')}</p>
+                        <p class="nf__hint">{Lang::T('Backups are encrypted with this password, nightly and Save a backup alike, and none is made without it: a backup without a password holds every login on the router in readable form. You need it to restore a backup, so keep it somewhere safe.')} {Lang::T('Changing it does not change the backups already made: each one still opens only with the password it was made with, so keep that password for as long as you keep those backups. New backups use the new one.')}</p>
                     </div>
                 </div>
             </section>

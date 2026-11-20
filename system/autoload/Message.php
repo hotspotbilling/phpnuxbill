@@ -34,8 +34,8 @@ class Message
     }
 
 
-    /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. */
-    public static function sendSMS($phone, $txt)
+    /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. $timeout: seconds for an HTTP gateway */
+    public static function sendSMS($phone, $txt, $timeout = 3000)
     {
         global $config;
         if (empty($txt)) {
@@ -50,7 +50,7 @@ class Message
             if (strlen($txt) > 160) {
                 $ok = true;
                 foreach (str_split($txt, 160) as $part) {
-                    $ok = (bool) self::sendSMS($phone, $part) && $ok;
+                    $ok = (bool) self::sendSMS($phone, $part, $timeout) && $ok;
                 }
                 return $ok;
             }
@@ -66,7 +66,7 @@ class Message
         $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         try {
-            $response = Http::getData($smsurl);
+            $response = Http::getData($smsurl, [], $timeout, $timeout);
             self::logMessage('SMS HTTP Response', $phone, $txt, 'Success', $response);
             return ($response !== '' && $response !== false && $response !== null) ? $response : true;
         } catch (Throwable $e) {
@@ -96,8 +96,8 @@ class Message
         $client_m->sendSync($smsRequest);
     }
 
-    /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. */
-    public static function sendWhatsapp($phone, $txt)
+    /** Returns the gateway's answer (or true) when the message was handed over, false when it was not. $timeout: seconds for the gateway */
+    public static function sendWhatsapp($phone, $txt, $timeout = 3000)
     {
         global $config;
         if (empty($txt)) {
@@ -113,7 +113,7 @@ class Message
         $waurl = str_replace('[text]', urlencode($txt), $waurl);
 
         try {
-            $response = Http::getData($waurl);
+            $response = Http::getData($waurl, [], $timeout, $timeout);
             self::logMessage('WhatsApp HTTP Response', $phone, $txt, 'Success', $response);
             return ($response !== '' && $response !== false && $response !== null) ? $response : true;
         } catch (Throwable $e) {

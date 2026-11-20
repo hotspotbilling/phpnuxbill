@@ -50,19 +50,20 @@ switch ($action) {
                 $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
                 if ($c) {
                     $dvc = Package::getDevice($p);
-                    if ($_app_stage != 'Demo') {
-                        if (file_exists($dvc)) {
-                            require_once $dvc;
-                            if (method_exists($dvc, 'sync_customer')) {
-                                (new $p['device'])->sync_customer($c, $p);
-                            } else {
-                                (new $p['device'])->add_customer($c, $p);
+                    // each customer on its own: one the router refuses (or that cannot be reached) is listed, and the rest go on
+                    try {
+                        if ($_app_stage != 'Demo') {
+                            if (!file_exists($dvc)) {
+                                throw new Exception(Lang::T("Devices Not Found"));
                             }
-                        } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                            require_once $dvc;
+                            $dev = new $p['device'];
+                            method_exists($dev, 'sync_customer') ? $dev->sync_customer($c, $p) : $dev->add_customer($c, $p);
                         }
+                        $log .= "DONE : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
+                    } catch (Throwable $e) {
+                        $log .= "FAILED : $tur[username], $tur[namebp], $tur[type], $tur[routers]: " . htmlspecialchars($e->getMessage()) . "<br>";
                     }
-                    $log .= "DONE : $tur[username], $ptur[namebp], $tur[type], $tur[routers]<br>";
                 } else {
                     $log .= "Customer NOT FOUND : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
                 }
@@ -853,6 +854,15 @@ switch ($action) {
         if (!Csrf::check(_post('csrf_token'))) {
             r2(getUrl('plan/add-voucher/'), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
         }
+        // the form's one-time token: a batch is created once. Sent again (the answer to a large batch was lost, a reload of the
+        // page), it goes to the batch already made instead of making a second one
+        $svoucher = _post('svoucher');
+        $made = App::getTokenValue($svoucher);
+        if (!empty($made)) {
+            $madeBatch = is_array($made) ? (string) ($made['batch'] ?? '') : '';
+            r2(getUrl('plan/voucher') . ($madeBatch !== '' ? '&batch_name=' . urlencode($madeBatch) : ''), 'w',
+                Lang::T('These vouchers were created already, the form was sent twice. They are in this list.'));
+        }
 
         $msg = '';
         if (empty($type) || empty($plan) || empty($server) || empty($numbervoucher) || empty($lengthcode)) {
@@ -895,6 +905,10 @@ switch ($action) {
                 }
             }
 
+            // thousands of codes to draw and check, rows to save (and their print page) can take longer than the usual 30 seconds
+            if ($numbervoucher > 1000) {
+                @set_time_limit(300);
+            }
             run_hook('create_voucher'); // HOOK
             $vouchers = [];
             $newVoucherIds = [];
@@ -940,10 +954,6 @@ switch ($action) {
                 r2(getUrl('plan/add-voucher/'), 'e', Lang::T('Not enough unused codes at this length, use a longer Length Code'));
             }
             $inBatch = array_flip(array_map($key, $vouchers));
-            // thousands of rows (and their print page) can take longer than the usual 30 seconds
-            if ($numbervoucher > 1000) {
-                @set_time_limit(300);
-            }
 
             ORM::raw_execute('START TRANSACTION');
             try {
@@ -977,6 +987,9 @@ switch ($action) {
                     }
                 }
                 ORM::raw_execute('COMMIT');
+                if ($svoucher !== '') {
+                    App::setToken($svoucher, ['batch' => $batch_name, 'n' => count($newVoucherIds)]);
+                }
             } catch (Throwable $e) {
                 ORM::raw_execute('ROLLBACK');
                 throw $e;

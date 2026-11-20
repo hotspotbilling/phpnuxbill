@@ -132,8 +132,15 @@
                 }
             });
             var curl = d.customer_url;
+            // which lists were read: neither is no list at all (not "nobody online"), one of them is a count of that one only
+            var rd = d.read || { hotspot: true, pppoe: true };
+            if (!rd.hotspot && !rd.pppoe) {
+                pane.innerHTML = head(t.user) + fail({ error: t.readErr + ': ' + (d.read_errors || []).join('; ') });
+                return;
+            }
+            var partial = !rd.hotspot || !rd.pppoe;
             var total = (d.total_hotspot || d.hotspot.length) + (d.total_pppoe || d.pppoe.length);
-            listView(pane, total + ' ' + t.online, {
+            listView(pane, total + ' ' + t.online + (partial ? ' (' + t.partial + ')' : ''), {
                 rows: rows,
                 cfg: d.cfg, // which router settings the list was read with: a disconnect is refused once they change
                 capped: rows.length < total ? t.capped.replace('%s', rows.length) : '',
@@ -405,10 +412,17 @@
         var seq = pane._hseq = (pane._hseq || 0) + 1; // only the latest range asked for is drawn
         return request('history', id + '?range=' + encodeURIComponent(range)).then(function (d) {
             if (seq !== pane._hseq) return;
+            // the range buttons are drawn again below: one that has the keyboard focus when the answer comes keeps it
+            var fe = document.activeElement;
+            var focused = fe && pane.contains(fe) && fe.getAttribute('data-rt-range');
+            var refocus = function () {
+                var b = focused && pane.querySelector('[data-rt-range="' + focused + '"]');
+                if (b) b.focus();
+            };
             var picker = '<span class="rt-ranges" role="group">' + ['24h', '7d', '30d'].map(function (r) {
                 return '<button type="button" class="ls-btn ls-btn--sm' + (r === range ? ' is-on' : '') + '" data-rt-range="' + r + '" aria-pressed="' + (r === range) + '">' + r + '</button>';
             }).join('') + '</span>';
-            if (!d.ok) { pane.innerHTML = head(t.history, picker) + fail(d); return; }
+            if (!d.ok) { pane.innerHTML = head(t.history, picker) + fail(d); refocus(); return; }
             var long = true; // the ends of even a 24-hour axis are on different days
             var pts = d.points;
             var charts = [
@@ -452,6 +466,7 @@
                 html += '</ul>';
             }
             pane.innerHTML = html;
+            refocus();
             pane.querySelectorAll('[data-rt-hchart]').forEach(function (fig) {
                 wires[+fig.getAttribute('data-rt-hchart')](fig.querySelector('.rt-chart__plot'));
             });
@@ -604,4 +619,6 @@
             return;
         }
     });
+    // routers-health.js and the list check this: without it (it failed to load), the details row opens on its Live tab only
+    window.rtToolsReady = true;
 })();

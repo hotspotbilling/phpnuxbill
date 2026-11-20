@@ -14,6 +14,26 @@
 
 class Http
 {
+    private static $notifying = false;
+
+    /**
+     * Tells the admins on Telegram that a request failed. The message is itself a request: one that fails while telling is not
+     * told again (no endless loop when Telegram is the one failing), and it waits 15 seconds at most.
+     */
+    private static function notify($label, $url, $error)
+    {
+        if (self::$notifying) {
+            return;
+        }
+        self::$notifying = true;
+        try {
+            Message::sendTelegram($label . "\n" . _get('_route') . "\n\n" . $url . "\n" . $error, null, '', 15);
+        } catch (Throwable $e) {
+        } finally {
+            self::$notifying = false;
+        }
+    }
+
     public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 3000)
     {
         global $http_proxy, $http_proxyauth, $admin;
@@ -38,12 +58,7 @@ class Http
         }
         curl_close($ch);
         if ($admin && $error_msg) {
-            Message::sendTelegram(
-                "Http::getData Error:\n" .
-                    _get('_route') . "\n" .
-                    "\n$url" .
-                    "\n$error_msg"
-            );
+            self::notify("Http::getData Error:", $url, $error_msg);
             return $error_msg;
         }
         return (!empty($server_output)) ? $server_output : $error_msg;
@@ -80,12 +95,7 @@ class Http
         }
         curl_close($ch);
         if ($admin && $error_msg) {
-            Message::sendTelegram(
-                "Http::postJsonData:\n" .
-                    _get('_route') . "\n" .
-                    "\n$url" .
-                    "\n$error_msg"
-            );
+            self::notify("Http::postJsonData:", $url, $error_msg);
             return $error_msg;
         }
         return (!empty($server_output)) ? $server_output : $error_msg;
@@ -123,12 +133,7 @@ class Http
         }
         curl_close($ch);
         if ($admin && $error_msg) {
-            Message::sendTelegram(
-                "Http::postData Error:\n" .
-                    _get('_route') . "\n" .
-                    "\n$url" .
-                    "\n$error_msg"
-            );
+            self::notify("Http::postData Error:", $url, $error_msg);
             return $error_msg;
         }
         return (!empty($server_output)) ? $server_output : $error_msg;

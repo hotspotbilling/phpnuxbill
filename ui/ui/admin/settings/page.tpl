@@ -65,6 +65,8 @@
                         <div class="panel mb20 panel-primary panel-hovered" style="cursor: pointer;" onclick="selectTemplate(this)">
                             <div class="panel-heading">{str_replace(".html", '', $v)}</div>
                             <div class="panel-body">{include file="$PAGES_PATH/vouchers/$v"}</div>
+                            {* the file as written, for the editor: the preview above is the rendered page, which right-to-left languages mirror *}
+                            <textarea class="hidden" data-template-source hidden>{fetch file="$PAGES_PATH/vouchers/$v" assign=vsrc}{$vsrc|escape}</textarea>
                         </div>
                     {/if}
                 {/foreach}
@@ -98,7 +100,8 @@
         function selectTemplate(f) {
             let children = f.children;
             $('#template_name').val(children[0].innerHTML)
-            $('#summernote').summernote('code', children[1].innerHTML);
+            var src = f.querySelector('[data-template-source]');
+            $('#summernote').summernote('code', src ? src.value : children[1].innerHTML);
             window.scrollTo(0, 0);
         }
     </script>

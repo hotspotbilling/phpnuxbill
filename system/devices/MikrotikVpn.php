@@ -4,6 +4,8 @@ use PEAR2\Net\RouterOS;
 
 class MikrotikVpn
 {
+    // set while sync_customer() runs: a change the router refuses is thrown, so the sync counts that customer as not sent
+    private $strict = false;
 
     function description()
     {
@@ -48,7 +50,7 @@ class MikrotikVpn
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-            $client->sendSync($setRequest);
+            $this->checked($client->sendSync($setRequest));
             if (isset($isChangePlan) && $isChangePlan) {
                 $this->removeVpnActive($client, $customer['username']);
                 if (!empty($customer['pppoe_username'])) {
@@ -59,8 +61,22 @@ class MikrotikVpn
     }
 	
 	function sync_customer($customer, $plan)
-    {	
-        $this->add_customer($customer, $plan);
+    {
+        $this->strict = true;
+        try {
+            $this->add_customer($customer, $plan);
+        } finally {
+            $this->strict = false;
+        }
+    }
+
+    /** A command's replies; during a sync, the router's refusal (a !trap) is thrown instead of passing unnoticed */
+    private function checked($res)
+    {
+        if ($this->strict && ($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        return $res;
     }
 
     function remove_customer($customer, $plan)
@@ -340,7 +356,7 @@ class MikrotikVpn
             $setRequest->setArgument('remote-address', $ips);
         }
         $this->addNat($client, $plan, $customer, $ips);
-        $client->sendSync($setRequest);
+        $this->checked($client->sendSync($setRequest));
         $customer->service_type = 'VPN';
         $customer->pppoe_ip = $ips;
         $customer->save();

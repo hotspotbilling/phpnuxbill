@@ -8791,6 +8791,27 @@ body.dark-mode .st {
 .ls-bulk[hidden] {
   display: none;
 }
+/* Select all for phones, where the table's header (with its own) is hidden */
+.ls-selall {
+  display: none;
+}
+@media (max-width: 767px) {
+  .ls-selall {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--ls-line);
+    color: var(--ls-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .ls-selall input {
+    margin: 0;
+  }
+}
 
 .ls-scroll {
   overflow-x: auto;
@@ -10837,7 +10858,8 @@ body.dark-mode .rt-detail {
 }
 .rt-charts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* 300px columns where they fit, and never wider than the panel itself */
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 14px;
   margin-top: 16px;
 }

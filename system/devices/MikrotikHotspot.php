@@ -12,6 +12,8 @@ use PEAR2\Net\RouterOS;
 
 class MikrotikHotspot
 {
+    // set while sync_customer() runs: a change the router refuses is thrown, so the sync counts that customer as not sent
+    private $strict = false;
 
     // show Description
     function description()
@@ -43,6 +45,25 @@ class MikrotikHotspot
 	
 	function sync_customer($customer, $plan)
 	{
+		$this->strict = true;
+		try {
+			$this->syncCustomer($customer, $plan);
+		} finally {
+			$this->strict = false;
+		}
+	}
+
+	/** A command's replies; during a sync, the router's refusal (a !trap) is thrown instead of passing unnoticed */
+	private function checked($res)
+	{
+		if ($this->strict && ($err = RouterApi::error($res)) !== null) {
+			throw new Exception($err);
+		}
+		return $res;
+	}
+
+	private function syncCustomer($customer, $plan)
+	{
 		$mikrotik = $this->info($plan['routers']);
 		$client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->find_one();
@@ -58,7 +79,7 @@ class MikrotikHotspot
 				$setRequest = new RouterOS\Request('/ip/hotspot/user/set');
 				$setRequest->setArgument('numbers', $id);
 				$setRequest->setArgument('profile', $t['namebp']);
-				$client->sendSync($setRequest);
+				$this->checked($client->sendSync($setRequest));
 			} else {
 				$this->add_customer($customer, $plan);
 			}
@@ -284,7 +305,7 @@ class MikrotikHotspot
                     $timelimit = $plan['time_limit'] . ":00:00";
                 else
                     $timelimit = "00:" . $plan['time_limit'] . ":00";
-                $client->sendSync(
+                $this->checked($client->sendSync(
                     $addRequest
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
@@ -292,13 +313,13 @@ class MikrotikHotspot
                         ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                         ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
-                );
+                ));
             } else if ($plan['limit_type'] == "Data_Limit") {
                 if ($plan['data_unit'] == 'GB')
                     $datalimit = $plan['data_limit'] . "000000000";
                 else
                     $datalimit = $plan['data_limit'] . "000000";
-                $client->sendSync(
+                $this->checked($client->sendSync(
                     $addRequest
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
@@ -306,7 +327,7 @@ class MikrotikHotspot
                         ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                         ->setArgument('email', $customer['email'])
                         ->setArgument('limit-bytes-total', $datalimit)
-                );
+                ));
             } else if ($plan['limit_type'] == "Both_Limit") {
                 if ($plan['time_unit'] == 'Hrs')
                     $timelimit = $plan['time_limit'] . ":00:00";
@@ -316,7 +337,7 @@ class MikrotikHotspot
                     $datalimit = $plan['data_limit'] . "000000000";
                 else
                     $datalimit = $plan['data_limit'] . "000000";
-                $client->sendSync(
+                $this->checked($client->sendSync(
                     $addRequest
                         ->setArgument('name', $customer['username'])
                         ->setArgument('profile', $plan['name_plan'])
@@ -325,17 +346,17 @@ class MikrotikHotspot
                         ->setArgument('email', $customer['email'])
                         ->setArgument('limit-uptime', $timelimit)
                         ->setArgument('limit-bytes-total', $datalimit)
-                );
+                ));
             }
         } else {
-            $client->sendSync(
+            $this->checked($client->sendSync(
                 $addRequest
                     ->setArgument('name', $customer['username'])
                     ->setArgument('profile', $plan['name_plan'])
                     ->setArgument('comment', $customer['fullname'] . ' | ' . implode(', ', User::getBillNames($customer['id'])))
                     ->setArgument('email', $customer['email'])
                     ->setArgument('password', $customer['password'])
-            );
+            ));
         }
     }
 

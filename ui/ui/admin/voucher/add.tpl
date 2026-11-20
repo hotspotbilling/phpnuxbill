@@ -2,12 +2,14 @@
 <!-- voucher-add -->
 {*
     Add Vouchers. plan.php (voucher-post) reads type, server, plan, batch_name, numbervoucher, voucher_format, prefix,
-    lengthcode, print_now (yes) and voucher_per_page, with csrf_token. custom.js loads the routers into #server when #Hot or
+    lengthcode, print_now (yes) and voucher_per_page, with csrf_token and svoucher. custom.js loads the routers into #server when #Hot or
     #POE is chosen, and that router's packages into #plan. $voucher_max: the most vouchers in one go.
 *}
 <form class="ls st mc nf nf-vg" method="post" role="form" autocomplete="off" action="{Text::url('plan/voucher-post')}" id="voucherForm"
     data-max="{$voucher_max}" data-t-vouchers="{Lang::T('vouchers')|escape}" data-t-voucher="{Lang::T('voucher')|escape}">
     <input type="hidden" name="csrf_token" value="{$csrf_token}">
+    {* one-time: the same form sent twice makes one batch *}
+    <input type="hidden" name="svoucher" value="{App::getToken()}">
     <div class="nf__grid">
         <div class="nf__main">
             <section class="ls-card">

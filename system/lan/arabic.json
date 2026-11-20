@@ -1478,5 +1478,16 @@
     "Could_not_tell_whether_these_need_it_too": "تعذّر معرفة ما إذا كانت هذه تحتاجه أيضًا",
     "Use_the_left_and_right_arrow_keys_to_read_each_value__Home_and_End_for_the_first_and_last_": "استخدم مفتاحي السهمين الأيسر والأيمن لقراءة كل قيمة، ومفتاحي Home وEnd للأولى والأخيرة.",
     "You_can_create_at_most": "يمكنك إنشاء ما يصل إلى",
-    "vouchers_at_a_time": "قسيمة في المرة الواحدة"
+    "vouchers_at_a_time": "قسيمة في المرة الواحدة",
+    "These_vouchers_were_created_already__the_form_was_sent_twice__They_are_in_this_list_": "تم إنشاء هذه القسائم من قبل، فقد أُرسل النموذج مرتين. ستجدها في هذه القائمة.",
+    "hotspot_users_disconnected__confirmed_by_the_router": "مستخدمو الهوتسبوت الذين فُصلوا بتأكيد من الراوتر",
+    "The_router_did_not_answer_for_the_last": "لم يرد الراوتر على آخر",
+    "so_they_may_or_may_not_have_been_disconnected": "لذلك قد يكونون فُصلوا وقد لا يكونون",
+    "In_your_hosting_panel__cPanel__MySQL_Databases__create_a_database_and_a_user_for_it__Then__under_Add_User_To_Database__add_that_user_to_the_database_and_tick_ALL_PRIVILEGES__Then_import_install_radius_sql_from_the_PHPNuxBill_folder_into_it__phpMyAdmin__Import___From_a_terminal_": "في لوحة الاستضافة (cPanel: MySQL Databases) أنشئ قاعدة بيانات ومستخدمًا لها. ثم من Add User To Database أضف ذلك المستخدم إلى قاعدة البيانات وحدد ALL PRIVILEGES. ثم استورد الملف install/radius.sql من مجلد PHPNuxBill إليها (phpMyAdmin: Import). أو من الطرفية:",
+    "Import_the_whole_file_only_into_a_new__empty_database__it_replaces_the_RADIUS_tables_it_creates__with_the_logins_and_accounting_in_them_": "استورد الملف كاملًا في قاعدة بيانات جديدة فارغة فقط: فهو يستبدل جداول RADIUS التي ينشئها، بما فيها من بيانات الدخول والمحاسبة.",
+    "The_database_exists__but_its_nas_table_is_missing__If_the_database_is_new_and_empty__import_install_radius_sql_as_above__If_FreeRADIUS_already_uses_it__it_has_tables_such_as_radcheck_and_radacct___do_not_import_the_file__run_only_this_in_phpMyAdmin__SQL_tab___which_adds_the_nas_table_and_changes_nothing_else_": "قاعدة البيانات موجودة، لكن جدول nas غير موجود فيها. إذا كانت قاعدة البيانات جديدة وفارغة، فاستورد install/radius.sql كما سبق. وإذا كان FreeRADIUS يستخدمها بالفعل (فيها جداول مثل radcheck و radacct) فلا تستورد الملف: نفّذ هذا فقط في phpMyAdmin (تبويب SQL)، فهو يضيف جدول nas ولا يغيّر شيئًا آخر:",
+    "The_details_could_not_be_loaded__Reload_the_page_and_try_again_": "تعذر تحميل التفاصيل. أعد تحميل الصفحة وحاول مرة أخرى.",
+    "partial_list": "قائمة جزئية",
+    "Address_changed": "تغيّر العنوان",
+    "Changing_it_does_not_change_the_backups_already_made__each_one_still_opens_only_with_the_password_it_was_made_with__so_keep_that_password_for_as_long_as_you_keep_those_backups__New_backups_use_the_new_one_": "تغييرها لا يغيّر النسخ الاحتياطية الموجودة: كل نسخة تُفتح فقط بكلمة المرور التي صُنعت بها، فاحتفظ بتلك الكلمة ما دمت تحتفظ بتلك النسخ. النسخ الجديدة تستخدم الكلمة الجديدة."
 }

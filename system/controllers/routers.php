@@ -91,11 +91,12 @@ $splitAddress = function ($addr) {
 // whether another router already uses this API endpoint: the same host (letter case aside) and the same port, an address
 // without a port being on 8728, so "10.0.0.1" and "10.0.0.1:8728" are one router while "10.0.0.1:8729" is another.
 // $enabledOnly: only an enabled router counts (enabling one: a disabled draft with the same address is no conflict)
-$endpointTaken = function ($address, $exceptId = 0, $enabledOnly = false) {
-    $key = function ($a) {
-        [$h, $p] = RouterAddress::split($a);
-        return strtolower((string) $h) . '|' . ((int) $p ?: 8728);
-    };
+$endpointKey = function ($a) {
+    [$h, $p] = RouterAddress::split($a);
+    return strtolower((string) $h) . '|' . ((int) $p ?: 8728);
+};
+$endpointTaken = function ($address, $exceptId = 0, $enabledOnly = false) use ($endpointKey) {
+    $key = $endpointKey;
     $want = $key($address);
     foreach (ORM::for_table('tbl_routers')->select_many('id', 'ip_address', 'enabled')->find_array() as $r) {
         if ((int) $r['id'] !== (int) $exceptId && trim((string) $r['ip_address']) !== '' && (!$enabledOnly || (int) $r['enabled'] === 1)
@@ -104,6 +105,14 @@ $endpointTaken = function ($address, $exceptId = 0, $enabledOnly = false) {
         }
     }
     return false;
+};
+// Add, edit and bulk enable each check that an address is free and then save: one at a time (a database lock, so on every PHP
+// worker), or two requests could each find the address free and both save it. Released when the request ends at the latest.
+$endpointLock = function ($on = true) {
+    try {
+        ORM::getDb()->query($on ? "SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)" : "SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+    } catch (Throwable $e) {
+    }
 };
 $validPort = function ($port) {
     $port = trim((string) $port);
@@ -392,7 +401,15 @@ switch ($action) {
                 . $use['active'] . ' ' . Lang::T('active customers') . '). ' . Lang::T('Move them to another router first, or disable this router instead.'));
         }
         run_hook('router_delete'); #HOOK
-        $d->delete();
+        // checked again in the statement that deletes, so a plan or recharge saved since the check above keeps the router
+        $st = ORM::getDb()->prepare("DELETE FROM tbl_routers WHERE id = ?
+            AND NOT EXISTS (SELECT 1 FROM tbl_plans p WHERE p.routers = tbl_routers.name)
+            AND NOT EXISTS (SELECT 1 FROM tbl_user_recharges u WHERE u.routers = tbl_routers.name AND u.status = 'on')");
+        $st->execute([(int) $d['id']]);
+        if ($st->rowCount() === 0) {
+            r2(getUrl('routers/list'), 'e', Lang::T('This router is still in use') . ': ' . htmlspecialchars($d['name']) . '. '
+                . Lang::T('Move them to another router first, or disable this router instead.'));
+        }
         _log('[' . $admin['username'] . ']: ' . Lang::T('Router deleted') . ' ' . $d['name'], $admin['user_type'], $admin['id']);
         r2(getUrl('routers/list'), 's', Lang::T('Data Deleted Successfully'));
         break;
@@ -451,6 +468,9 @@ switch ($action) {
         $n = 0;
         $skipped = [];
         $taken = [];
+        if ($op === 'enable') {
+            $endpointLock();
+        }
         foreach (ORM::for_table('tbl_routers')->where_in('id', $ids)->find_many() as $r) {
             // as on the form: an enabled router needs its address and username
             if ($op === 'enable' && (trim((string) $r['ip_address']) === '' || trim((string) $r['username']) === '')) {
@@ -467,6 +487,7 @@ switch ($action) {
             $r->save();
             $n++;
         }
+        $endpointLock(false);
         _log('[' . $admin['username'] . ']: ' . ($op === 'enable' ? 'Routers enabled' : 'Routers disabled') . ': ' . $n, $admin['user_type'], $admin['id']);
         r2(getUrl('routers/list'), $skipped || $taken ? 'w' : 's', ($op === 'enable' ? Lang::T('Routers enabled') : Lang::T('Routers disabled')) . ': ' . $n
             . ($skipped ? '. ' . Lang::T('Not enabled, the IP address or username is missing') . ': ' . htmlspecialchars(implode(', ', $skipped)) : '')
@@ -575,6 +596,7 @@ switch ($action) {
                 // removed in batches; a batch the router refuses (or does not answer) stops there, and only what was removed is counted
                 $removed = 0;
                 $stopped = null;
+                $unsure = 0; // a batch sent without an answer: the router may have removed it, or not
                 foreach (array_chunk($ids, 50) as $chunk) {
                     $rm = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/active/remove');
                     $rm->setArgument('numbers', implode(',', $chunk));
@@ -582,13 +604,18 @@ switch ($action) {
                         $stopped = $rosError($rosSend($c, $rm, microtime(true) + 15));
                     } catch (Throwable $e) {
                         $stopped = $e->getMessage();
+                        $unsure = count($chunk);
                     }
                     if ($stopped !== null) {
                         break;
                     }
                     $removed += count($chunk);
                 }
-                _log($who . 'Hotspot users disconnected on ' . $d['name'] . ': ' . $removed . ' of ' . count($ids), $admin['user_type'], $admin['id']);
+                _log($who . 'Hotspot users disconnected on ' . $d['name'] . ': ' . $removed . ' of ' . count($ids) . ($unsure ? ', ' . $unsure . ' not confirmed' : ''), $admin['user_type'], $admin['id']);
+                if ($stopped !== null && $unsure) {
+                    r2($back, 'e', htmlspecialchars($d['name'] . ': ' . Lang::T('hotspot users disconnected, confirmed by the router') . ': ' . $removed . ' ' . Lang::T('of') . ' ' . count($ids) . '. '
+                        . Lang::T('The router did not answer for the last') . ' ' . $unsure . ', ' . Lang::T('so they may or may not have been disconnected') . '. ' . $stopped));
+                }
                 if ($stopped !== null) {
                     r2($back, 'e', htmlspecialchars($d['name'] . ': ' . Lang::T('hotspot users disconnected') . ': ' . $removed . ' ' . Lang::T('of') . ' ' . count($ids) . '. ' . $stopped));
                 }
@@ -661,6 +688,7 @@ switch ($action) {
                 $hs = [];
                 $pp = [];
                 $readErrors = [];
+                $read = ['hotspot' => true, 'pppoe' => true]; // whether each list was read (a missing package counts: nobody there)
                 try {
                     $hs = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime', 'bytes-in', 'bytes-out', 'server'], $until);
                 } catch (Throwable $e) {
@@ -669,6 +697,7 @@ switch ($action) {
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
                         $readErrors[] = 'Hotspot: ' . $e->getMessage();
+                        $read['hotspot'] = false;
                     }
                 }
                 try {
@@ -680,6 +709,7 @@ switch ($action) {
                     }
                     if (stripos($e->getMessage(), 'no such command') === false) {
                         $readErrors[] = 'PPPoE: ' . $e->getMessage();
+                        $read['pppoe'] = false;
                     }
                 }
                 // up to 5,000 of each, searched and paged in the page; the totals say when a list was cut
@@ -690,26 +720,44 @@ switch ($action) {
                 $names = array_values(array_unique(array_filter(array_merge(array_column($hs, 'user'), array_column($pp, 'name')), 'strlen')));
                 // each session is matched by the name it signs in with: a hotspot user by the customer's username, a PPPoE one by
                 // the PPPoE username when the customer has one and by the username otherwise (as the PPPoE device sets it up), so a
-                // PPPoE name that equals another customer's username cannot pick the wrong customer
+                // PPPoE name that equals another customer's username cannot pick the wrong customer. PPPoE names are not kept
+                // unique (an alias can equal another customer's username): of several customers with one name, the one with an
+                // active plan on this router is meant; when that still leaves more than one, the session is not matched to any
                 $whoHs = [];
                 $whoPp = [];
                 if ($names) {
                     $in = implode(',', array_fill(0, count($names), '?'));
                     $st = ORM::getDb()->prepare("SELECT id, username, pppoe_username, fullname FROM tbl_customers WHERE username IN ($in) OR pppoe_username IN ($in) ORDER BY id");
                     $st->execute(array_merge($names, $names));
-                    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $cu) {
+                    $found = $st->fetchAll(PDO::FETCH_ASSOC);
+                    $here = [];
+                    if ($found) {
+                        $ids = array_map('intval', array_column($found, 'id'));
+                        $st = ORM::getDb()->prepare("SELECT DISTINCT customer_id FROM tbl_user_recharges WHERE status = 'on' AND routers = ? AND customer_id IN ("
+                            . implode(',', array_fill(0, count($ids), '?')) . ")");
+                        $st->execute(array_merge([$d['name']], $ids));
+                        $here = array_flip(array_map('intval', $st->fetchAll(PDO::FETCH_COLUMN)));
+                    }
+                    $ppCand = [];
+                    foreach ($found as $cu) {
                         $one = ['id' => (int) $cu['id'], 'name' => $cu['fullname']];
                         if ((string) $cu['username'] !== '' && !isset($whoHs[$cu['username']])) {
                             $whoHs[$cu['username']] = $one;
                         }
-                        $ppName = (string) $cu['pppoe_username'] !== '' ? $cu['pppoe_username'] : (string) $cu['username'];
-                        if ($ppName !== '' && !isset($whoPp[$ppName])) {
-                            $whoPp[$ppName] = $one;
+                        // the name the PPPoE device signs it in with (an empty alias, "0" too, falls back to the username)
+                        $ppName = !empty($cu['pppoe_username']) ? (string) $cu['pppoe_username'] : (string) $cu['username'];
+                        if ($ppName !== '') {
+                            $ppCand[$ppName][isset($here[(int) $cu['id']]) ? 0 : 1][] = $one;
                         }
+                    }
+                    foreach ($ppCand as $ppName => $tiers) {
+                        ksort($tiers);
+                        $best = reset($tiers);
+                        $whoPp[$ppName] = count($best) === 1 ? $best[0] : null;
                     }
                 }
                 $out = ['ok' => true, 'hotspot' => [], 'pppoe' => [], 'total_hotspot' => $totalHs, 'total_pppoe' => $totalPp, 'customer_url' => getUrl('customers/view/'),
-                    'read_errors' => $readErrors, 'cfg' => $listedFrom];
+                    'read_errors' => $readErrors, 'read' => $read, 'cfg' => $listedFrom];
                 foreach ($hs as $h) {
                     $out['hotspot'][] = ['sid' => $h['.id'], 'user' => $h['user'], 'address' => $h['address'], 'mac' => $h['mac-address'], 'uptime' => $rosUptime($h['uptime']),
                         'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $whoHs[$h['user']] ?? null];
@@ -728,13 +776,17 @@ switch ($action) {
                 if (!in_array($kind, ['hotspot', 'pppoe'], true) || !preg_match('/^\*[0-9A-Fa-f]+$/', $sid)) {
                     $say(['ok' => false, 'error' => Lang::T('Data Not Found')]);
                 }
+                // a session ID can be reused once that session ends (and they start again after a restart): the live session must
+                // still be the one listed (the same user; for PPPoE, a PPPoE one), or it is not removed
                 if ($kind === 'pppoe') {
-                    // a session ID can be reused once that session ends: the live session must still be the one listed (same
-                    // name, and a PPPoE one), or it is not removed
                     $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service'], $until, [], ['.id' => $sid]);
-                    if (!$live || (string) $live[0]['name'] !== (string) _post('user') || (string) $live[0]['service'] !== 'pppoe') {
-                        $say(['ok' => false, 'stale' => true, 'error' => Lang::T('That session has ended or changed. Refresh the list and try again.')]);
-                    }
+                    $same = $live && (string) $live[0]['name'] === (string) _post('user') && (string) $live[0]['service'] === 'pppoe';
+                } else {
+                    $live = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user'], $until, [], ['.id' => $sid]);
+                    $same = $live && (string) $live[0]['user'] === (string) _post('user');
+                }
+                if (!$same) {
+                    $say(['ok' => false, 'stale' => true, 'error' => Lang::T('That session has ended or changed. Refresh the list and try again.')]);
                 }
                 RouterApi::run($c, $kind === 'hotspot' ? '/ip/hotspot/active/remove' : '/ppp/active/remove', ['numbers' => $sid], $until);
                 _log('[' . $admin['username'] . ']: ' . 'Disconnected ' . $kind . ' session ' . mb_substr(_post('user'), 0, 64) . ' on ' . $d['name'], $admin['user_type'], $admin['id']);
@@ -932,8 +984,9 @@ switch ($action) {
                                         $off[] = 'PPP > AAA';
                                     }
                                 }
-                                // a service whose servers could not be read, and that no entry covers, may still need RADIUS
-                                $unknown = array_values(array_diff($unread, $need, $covered));
+                                // a service whose servers could not be read is not known to be set up, even when a RADIUS entry
+                                // lists it: whether its servers (and their profiles) use RADIUS was never seen
+                                $unknown = array_values(array_diff($unread, $need));
                                 if ($off) {
                                     $add('bad', Lang::T('RADIUS is set but not used'), Lang::T('Turn on Use RADIUS in') . ': ' . implode(', ', array_unique($off)) . '. ' . $list);
                                 } elseif ($unknown) {
@@ -1193,6 +1246,7 @@ switch ($action) {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
 
+            $endpointLock(); // held until the router is saved (or the request ends with the error)
             if ($endpointTaken($ip_address)) {
                 $msg .= Lang::T('IP Router Already Exist') . '<br>';
             }
@@ -1217,6 +1271,7 @@ switch ($action) {
                 $d->site = $site;
             }
             $d->save();
+            $endpointLock(false);
 
             r2(getUrl('routers/edit/') . $d->id(), 's', Lang::T('Data Created Successfully'));
         } else {
@@ -1267,8 +1322,10 @@ switch ($action) {
         $oldname = $d['name'];
 
         if($enabled || _post("testIt")){
-            // a new address must be free; enabling (even with the address unchanged) needs no other enabled router on it
-            if (($d['ip_address'] != $ip_address && $endpointTaken($ip_address, $id)) || ($enabled && $endpointTaken($ip_address, $id, true))) {
+            // a new address must be free; enabling (even with the address unchanged) needs no other enabled router on it. "New"
+            // as an endpoint: the same host and port written another way (":8728" added or dropped, letter case) is not new
+            $endpointLock(); // held until the router is saved (or the request ends with the error)
+            if (($endpointKey($d['ip_address']) !== $endpointKey($ip_address) && $endpointTaken($ip_address, $id)) || ($enabled && $endpointTaken($ip_address, $id, true))) {
                 $msg .= 'IP Already Exists<br>';
             }
         }
@@ -1282,12 +1339,10 @@ switch ($action) {
             if (_post("testIt")) {
                 (new MikrotikHotspot())->getClient($ip_address, $username, $password);
             }
-            // another router answers at a new address: what the last check said (Online, last seen) was about the old one
-            $endpoint = function ($a) {
-                [$h, $p] = RouterAddress::split($a);
-                return strtolower((string) $h) . '|' . ((int) $p ?: 8728);
-            };
-            if ($endpoint($d['ip_address']) !== $endpoint($ip_address)) {
+            // another router answers at a new address: what the last check said (Online, last seen) was about the old one, and
+            // the history's readings and alert states are too (RouterMonitor starts again from the change)
+            $moved = $endpointKey($d['ip_address']) !== $endpointKey($ip_address);
+            if ($moved) {
                 $d->status = null;
                 $d->last_seen = null;
             }
@@ -1303,6 +1358,10 @@ switch ($action) {
                 $d->site = $site;
             }
             $d->save();
+            $endpointLock(false);
+            if ($moved) {
+                RouterMonitor::moved($d['id']);
+            }
             if ($name != $oldname) {
                 $p = ORM::for_table('tbl_plans')->where('routers', $oldname)->find_result_set();
                 $p->set('routers', $name);
