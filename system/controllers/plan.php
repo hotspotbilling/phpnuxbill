@@ -859,20 +859,9 @@ switch ($action) {
         $svoucher = _post('svoucher');
         $made = App::getTokenValue($svoucher);
         $claim = null;
-        // the session as stored now, with this request's own values laid over it: with a session store that does not lock
-        // (the default file store does), what other requests recorded since this one started (another form's "batch saved") is
-        // kept rather than replaced by this request's older copy. Without a way to read it back, this request's copy stays.
-        $sessionMerge = function () {
-            if (session_status() !== PHP_SESSION_ACTIVE) {
-                return;
-            }
-            $local = $_SESSION;
-            if (@session_reset()) {
-                $_SESSION = array_replace($_SESSION, $local);
-            } else {
-                $_SESSION = $local;
-            }
-        };
+        // a form whose batch was saved is recorded in the database, in the same transaction as its vouchers: the record cannot
+        // be lost the way a session value can (a session store that does not lock lets another request's older copy replace it)
+        $formKey = 'voucher_form_' . substr(hash('sha256', $svoucher), 0, 40);
         if (empty($made) && $svoucher !== '') {
             // claimed for this request with a database lock, so it holds whatever stores the sessions: the same form sent again
             // while this one is still creating its batch is answered as a repeat, not given a second batch. Released once the
@@ -890,11 +879,11 @@ switch ($action) {
                 r2(getUrl('plan/voucher') . ($batch_name !== '' ? '&batch_name=' . urlencode($batch_name) : ''), 'w',
                     Lang::T('These vouchers are still being created. Wait a minute and look for them in this list before sending the form again.'));
             }
-            // the session as stored now: this request read it when it started, and a request that finished the same form since
-            // then (with a session store that does not lock) has recorded its batch there before letting the claim go. Read
-            // back without writing this request's older copy over it (it has no value for this form: $made was empty).
-            $sessionMerge();
-            $made = App::getTokenValue($svoucher);
+            // with the claim held, the record is the answer: a request that finished this form wrote it before letting go
+            $rec = ORM::for_table('tbl_appconfig')->where('setting', $formKey)->find_one();
+            if ($rec) {
+                $made = json_decode((string) $rec['value'], true) ?: ['batch' => ''];
+            }
         }
         if (!empty($made)) {
             $madeBatch = is_array($made) ? (string) ($made['batch'] ?? '') : '';
@@ -1024,13 +1013,17 @@ switch ($action) {
                         }
                     }
                 }
+                $done = ['batch' => $batch_name, 'n' => count($newVoucherIds), 'at' => time()];
+                if ($svoucher !== '') {
+                    // committed together with the vouchers: both are saved, or neither
+                    $rec = ORM::for_table('tbl_appconfig')->create();
+                    $rec->setting = $formKey;
+                    $rec->value = json_encode($done);
+                    $rec->save();
+                }
                 ORM::raw_execute('COMMIT');
                 if ($svoucher !== '') {
-                    $sessionMerge();
-                    App::setToken($svoucher, ['batch' => $batch_name, 'n' => count($newVoucherIds)]);
-                    // saved now rather than when the request ends, so a repeat that gets the claim next finds the token used
-                    session_write_close();
-                    @session_start();
+                    App::setToken($svoucher, $done); // (the quick answer for a repeat from this browser)
                 }
                 if ($claim !== null) {
                     try {
@@ -1041,6 +1034,16 @@ switch ($action) {
             } catch (Throwable $e) {
                 ORM::raw_execute('ROLLBACK');
                 throw $e;
+            }
+            // records of forms older than a day are not needed: a form's page is not sent again that long after
+            try {
+                foreach (ORM::for_table('tbl_appconfig')->where_like('setting', 'voucher\_form\_%')->find_many() as $old) {
+                    $v = json_decode((string) $old['value'], true);
+                    if (!is_array($v) || (int) ($v['at'] ?? 0) < time() - 86400) {
+                        $old->delete();
+                    }
+                }
+            } catch (Throwable $e) {
             }
 
             if ($printNow == 'yes' && count($newVoucherIds) > 0) {

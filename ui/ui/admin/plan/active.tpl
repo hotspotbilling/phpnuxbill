@@ -2,7 +2,7 @@
 
 <div class="ls">
     <div class="ls-top">
-        <p class="ls-sub">{($counts['on'] + $counts['off'])|number_format} {Lang::T('Active Customers')}{if $counts['off'] > 0}, {$counts['off']|number_format} {Lang::T('Expired')}{/if}</p>
+        <p class="ls-sub">{$counts['on']|number_format} {Lang::T('Active Customers')}{if $counts['off'] > 0}, {$counts['off']|number_format} {Lang::T('Expired')}{/if}</p>
         <div class="ls-actions">
             {if in_array($_admin['user_type'],['SuperAdmin','Admin'])}
             <a class="ls-btn" title="{Lang::T('Sync')}" href="{Text::url('')}plan/sync"

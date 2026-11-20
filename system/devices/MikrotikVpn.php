@@ -61,17 +61,20 @@ class MikrotikVpn
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-            $this->checked($client->sendSync($setRequest));
+            $res = $this->checked($client->sendSync($setRequest));
             $addr = !empty($customer['pppoe_ip']) ? (string) $customer['pppoe_ip'] : $resume;
             if ($resume !== '') {
-                // the address the router gave this secret is kept for this customer, so it is not handed to another one
+                // the address the router gave this secret (it has it, whether or not this change is taken) is kept for this
+                // customer, so it is not handed to another one
                 $customer->service_type = 'VPN';
                 $customer->pppoe_ip = $resume;
                 $customer->save();
             }
             // the forwards are checked against the router each time, not inferred from the saved address: one refused before is
-            // added now, and one already there (by its comment) is not added again
-            if ($addr !== '' && !$this->addNat($client, $plan, $customer, $addr, $this->natComments($client, $addr)) && $this->strict) {
+            // added now, and one already there (by its comment) is not added again. Only once the router took the change above:
+            // a refused secret gets no forwards
+            if ($addr !== '' && RouterApi::error($res) === null
+                && !$this->addNat($client, $plan, $customer, $addr, $this->natComments($client, $addr)) && $this->strict) {
                 throw new Exception(Lang::T('The router refused a port forward for this customer'));
             }
             if (isset($isChangePlan) && $isChangePlan) {
