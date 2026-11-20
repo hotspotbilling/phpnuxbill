@@ -43,14 +43,40 @@ class MikrotikVpn
             } else {
                 $setRequest->setArgument('name', $customer['username']);
             }
+            // a secret the router has but whose address was never saved here (its port forwards failed after it was added):
+            // the address it was given is kept, and the forwards are finished below
+            $resume = '';
+            if (empty($customer['pppoe_ip'])) {
+                $readRequest = new RouterOS\Request('/ppp/secret/print');
+                $readRequest->setQuery(RouterOS\Query::where('.id', $cid));
+                $given = (string) $client->sendSync($readRequest)->getProperty('remote-address');
+                if (filter_var($given, FILTER_VALIDATE_IP) && $given !== '0.0.0.0') {
+                    $resume = $given;
+                }
+            }
             if (!empty($customer['pppoe_ip'])) {
                 $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
             } else {
-                $setRequest->setArgument('remote-address', '0.0.0.0');
+                $setRequest->setArgument('remote-address', $resume !== '' ? $resume : '0.0.0.0');
             }
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
             $this->checked($client->sendSync($setRequest));
+            if ($resume !== '') {
+                // only the forwards not on the router yet (by their comment), then the address is saved as addVpnUser() does
+                $natRequest = new RouterOS\Request('/ip/firewall/nat/print');
+                $natRequest->setQuery(RouterOS\Query::where('to-addresses', $resume));
+                $have = [];
+                foreach ($client->sendSync($natRequest) as $nat) {
+                    if ($nat->getType() === RouterOS\Response::TYPE_DATA) {
+                        $have[] = (string) $nat->getProperty('comment');
+                    }
+                }
+                $this->addNat($client, $plan, $customer, $resume, $have);
+                $customer->service_type = 'VPN';
+                $customer->pppoe_ip = $resume;
+                $customer->save();
+            }
             if (isset($isChangePlan) && $isChangePlan) {
                 $this->removeVpnActive($client, $customer['username']);
                 if (!empty($customer['pppoe_username'])) {
@@ -414,7 +440,8 @@ class MikrotikVpn
         );
     }
 
-    function addNat($client, $plan, $cust, $ips)
+    /** $have: the comments of forwards already on the router for this address, which are not added again */
+    function addNat($client, $plan, $cust, $ips, $have = [])
     {
         global $_app_stage;
         if ($_app_stage == 'demo') {
@@ -441,7 +468,7 @@ class MikrotikVpn
             if ($cmnt == 'Api') {
                 $tp = '8728';
             }
-            if ($cmnt == 'Winbox' || $cmnt == 'Web' || $cmnt == 'Api') {
+            if (($cmnt == 'Winbox' || $cmnt == 'Web' || $cmnt == 'Api') && !in_array($cmnt . ' || ' . $cust['username'], $have, true)) {
                 $addRequest = new RouterOS\Request('/ip/firewall/nat/add');
                 $client->sendSync(
                     $addRequest

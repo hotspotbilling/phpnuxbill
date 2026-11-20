@@ -865,11 +865,22 @@ switch ($action) {
             // batch is saved, and by the database when the request ends in any other way.
             $claim = 'phpnuxbill_voucher_' . substr(hash('sha256', $svoucher), 0, 40);
             try {
-                if ((int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($claim) . ', 0)')->fetchColumn() !== 1) {
-                    $made = ['batch' => $batch_name];
-                }
+                $got = (int) ORM::getDb()->query('SELECT GET_LOCK(' . ORM::getDb()->quote($claim) . ', 0)')->fetchColumn() === 1;
             } catch (Throwable $e) {
+                $got = true;
                 $claim = null; // no lock to be had: the session's own lock still keeps one form from running twice at once
+            }
+            if (!$got) {
+                // the same form is being handled right now: its batch is not made yet, and may still fail
+                r2(getUrl('plan/voucher') . ($batch_name !== '' ? '&batch_name=' . urlencode($batch_name) : ''), 'w',
+                    Lang::T('These vouchers are still being created. Wait a minute and look for them in this list before sending the form again.'));
+            }
+            // the session as stored now: this request read it when it started, and a request that finished the same form since
+            // then (with a session store that does not lock) has recorded its batch there before letting the claim go
+            if ($claim !== null && session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+                @session_start();
+                $made = App::getTokenValue($svoucher);
             }
         }
         if (!empty($made)) {

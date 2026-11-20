@@ -1500,5 +1500,8 @@
     "has_the_action_deny__so_customers_cannot_open": "إجراؤها deny، لذلك لا يستطيع العملاء فتح",
     "before_they_sign_in__Change_it_in_Winbox__IP___Hotspot___Walled_Garden_": "قبل تسجيل الدخول. غيّرها في Winbox، IP > Hotspot > Walled Garden.",
     "Enter_the_router_s_IP_address_or_host_name": "أدخل عنوان IP الخاص بالراوتر أو اسم المضيف",
-    "Saved__but_the_fixed_IP_address_could_not_be_cleared": "تم الحفظ، لكن تعذر مسح عنوان IP الثابت"
+    "Saved__but_the_fixed_IP_address_could_not_be_cleared": "تم الحفظ، لكن تعذر مسح عنوان IP الثابت",
+    "These_vouchers_are_still_being_created__Wait_a_minute_and_look_for_them_in_this_list_before_sending_the_form_again_": "لا يزال إنشاء هذه القسائم جارياً. انتظر دقيقة وابحث عنها في هذه القائمة قبل إرسال النموذج مرة أخرى.",
+    "has_the_action_deny__but_an_IP_walled_garden_rule_may_still_let_customers_open": "إجراؤها deny، لكن قاعدة IP في Walled Garden قد تسمح للعملاء مع ذلك بفتح",
+    "Check_both_in_Winbox__IP___Hotspot___Walled_Garden_": "تحقق من كليهما في Winbox، IP > Hotspot > Walled Garden."
 }

@@ -29,7 +29,7 @@ class Rtl
     const OWN_RTL = ['sweetalert2', 'select2'];
 
     /** Bumped when the mirroring changes, so the copies already made are made again */
-    const VERSION = 7;
+    const VERSION = 8;
 
     /**
      * Put on what has been mirrored already. Smarty runs the filter on fetch() as well as display(), so a part fetched and then
@@ -567,12 +567,19 @@ class Rtl
         foreach ($layers as $i => $layer) {
             $t = self::tokens($layer);
             foreach ($t as $k => $tok) {
-                if (strtolower($tok) === 'inset' || $tok[0] === '#' || preg_match('/^[a-z][a-z-]*$/i', $tok)
-                    || preg_match('/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|light-dark)\(/i', $tok)) {
+                // a comment (kept aside by flip() as a placeholder) is not a value: one on its own is skipped, one attached to a
+                // value is kept around it, and the value alone decides
+                preg_match('/^((?:\x01\d+c\x01)*)(.*?)((?:\x01\d+c\x01)*)$/s', $tok, $cm);
+                $bare = $cm[2];
+                if ($bare === '') {
+                    continue;
+                }
+                if (strtolower($bare) === 'inset' || $bare[0] === '#' || preg_match('/^[a-z][a-z-]*$/i', $bare)
+                    || preg_match('/^(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|light-dark)\(/i', $bare)) {
                     continue; // a keyword or a colour, which can come before the offsets
                 }
-                if (preg_match('/^-?(\d*\.)?\d+([a-z%]*)$/i', $tok) || preg_match('/^calc\(/i', $tok)) {
-                    $t[$k] = self::negate($tok);
+                if (preg_match('/^-?(\d*\.)?\d+([a-z%]*)$/i', $bare) || preg_match('/^calc\(/i', $bare)) {
+                    $t[$k] = $cm[1] . self::negate($bare) . $cm[3];
                     $layers[$i] = self::lead($layer) . implode(' ', $t) . self::trail($layer);
                 }
                 break;

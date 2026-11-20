@@ -822,8 +822,9 @@ switch ($action) {
                 // still be the one listed (the same user; for PPPoE, a PPPoE one), or it is not removed
                 // the same user can sign in again under a reused ID (another device, after a restart): the address and the
                 // MAC / caller ID listed must match too, when the list had them
+                // (exactly as listed: an address or caller ID that was empty then must still be empty, not match anything)
                 $match = function ($got, $listed) {
-                    return (string) $listed === '' || strcasecmp((string) $got, (string) $listed) === 0;
+                    return strcasecmp((string) $got, (string) $listed) === 0;
                 };
                 if ($kind === 'pppoe') {
                     $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'address', 'caller-id'], $until, [], ['.id' => $sid]);
@@ -984,8 +985,30 @@ switch ($action) {
                         }
                         $site = $host . ':' . $port;
                         if ($found === 'deny') {
+                            // an IP walled garden rule that accepts the traffic lets it past the hotspot before the web walled
+                            // garden is asked: the deny is a definite block only when no such rule can apply (or they cannot be read)
+                            try {
+                                foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'disabled', 'action'], $until) as $w) {
+                                    $pat = strtolower((string) $w['dst-host']);
+                                    if ($w['disabled'] !== 'true' && in_array(strtolower((string) $w['action']), ['', 'accept'], true)
+                                        && ($pat === '' || $pat === $host || fnmatch($pat, $host))) {
+                                        $found = null;
+                                        break;
+                                    }
+                                }
+                            } catch (Throwable $e) {
+                                if ($e->getCode() === 408) {
+                                    throw $e;
+                                }
+                                $found = null;
+                            }
+                        }
+                        if ($found === 'deny') {
                             $add('bad', Lang::T('A walled garden rule blocks the billing site'), Lang::T('The rule for') . ' ' . $denyRule . ' ' . Lang::T('has the action deny, so customers cannot open') . ' ' . $site
                                 . ' ' . Lang::T('before they sign in. Change it in Winbox, IP > Hotspot > Walled Garden.'));
+                        } elseif ($found === null && $denyRule !== '') {
+                            $add('warn', Lang::T('Could not tell whether the billing site is in the walled garden'), Lang::T('The rule for') . ' ' . $denyRule . ' ' . Lang::T('has the action deny, but an IP walled garden rule may still let customers open') . ' ' . $site
+                                . '. ' . Lang::T('Check both in Winbox, IP > Hotspot > Walled Garden.'));
                         } elseif ($found === null) {
                             $add('warn', Lang::T('Could not tell whether the billing site is in the walled garden'), Lang::T('A walled garden rule for') . ' ' . $site . ' ' . Lang::T('has conditions this check cannot judge. Check it in Winbox, IP > Hotspot > Walled Garden.'));
                         } else {
@@ -1440,24 +1463,12 @@ switch ($action) {
             try {
                 $d->save();
                 if ($name != $oldname) {
-                    $p = ORM::for_table('tbl_plans')->where('routers', $oldname)->find_result_set();
-                    $p->set('routers', $name);
-                    $p->save();
-                    $p = ORM::for_table('tbl_payment_gateway')->where('routers', $oldname)->find_result_set();
-                    $p->set('routers', $name);
-                    $p->save();
-                    $p = ORM::for_table('tbl_pool')->where('routers', $oldname)->find_result_set();
-                    $p->set('routers', $name);
-                    $p->save();
-                    $p = ORM::for_table('tbl_transactions')->where('routers', $oldname)->find_result_set();
-                    $p->set('routers', $name);
-                    $p->save();
-                    $p = ORM::for_table('tbl_user_recharges')->where('routers', $oldname)->find_result_set();
-                    $p->set('routers', $name);
-                    $p->save();
-                    $p = ORM::for_table('tbl_voucher')->where('routers', $oldname)->find_result_set();
-                    $p->set('routers', $name);
-                    $p->save();
+                    // one UPDATE per table rather than a read and then a save of each row: inside the transaction a read sees
+                    // the database as it was at its first read, so a recharge (or voucher, payment) saved since would keep the
+                    // old name. An UPDATE reads the rows as they are now, those included.
+                    foreach (['tbl_plans', 'tbl_payment_gateway', 'tbl_pool', 'tbl_transactions', 'tbl_user_recharges', 'tbl_voucher'] as $tbl) {
+                        ORM::raw_execute("UPDATE `$tbl` SET `routers` = ? WHERE `routers` = ?", [$name, $oldname]);
+                    }
                 }
                 $db->commit();
             } catch (Throwable $e) {
