@@ -15,7 +15,8 @@ class Paginator
         $adjacents = "2";
         $page = _get('p', 1);
         $page = (empty($page) ? 1 : $page);
-        $url = getUrl(implode('/', $routes));
+        // a plugin that rewrites $routes before its page runs names the address the visitor is on in $GLOBALS['paginatorRoute']
+        $url = getUrl(!empty($GLOBALS['paginatorRoute']) ? $GLOBALS['paginatorRoute'] : implode('/', $routes));
         if (count($search) > 0) {
             $url .= '&' . http_build_query($search);
         }

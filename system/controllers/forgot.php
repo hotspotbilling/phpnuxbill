@@ -128,6 +128,21 @@ if ($step == 1) {
     if ($user) {
         $user->password = $npass;
         $user->save();
+        // the routers sign the customer in with their own copy of the password (a Mikrotik hotspot or PPPoE user): every
+        // active plan's device gets the new one, like a password changed from the customer's account page
+        foreach (ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->where('status', 'on')->find_many() as $tur) {
+            $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+            $dvc = $p ? Package::getDevice($p) : '';
+            if ($dvc === '' || !file_exists($dvc)) {
+                continue;
+            }
+            try {
+                require_once $dvc;
+                (new $p['device'])->add_customer($user, $p);
+            } catch (Throwable $e) {
+                _log('[' . $username . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
+            }
+        }
         if (class_exists('RedisCache')) {
             RedisCache::forgetRadiusCustomer($username);
         }

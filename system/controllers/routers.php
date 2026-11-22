@@ -386,6 +386,14 @@ switch ($action) {
         $ui->assign('sites', $siteNames());
         $ui->assign('nf_host', '');
         $ui->assign('nf_port', '');
+        // Routely's VPN page opens this form for a port forward (?address=host:port&name=...): start with them filled in
+        $pre = trim((string) _get('address'));
+        if (preg_match('/^[A-Za-z0-9.-]{1,120}:\d{1,5}$/', $pre)) {
+            [$preHost, $prePort] = $splitAddress($pre);
+            $ui->assign('d', ['ip_address' => $pre, 'name' => mb_substr(trim((string) _get('name')), 0, 32)]);
+            $ui->assign('nf_host', $preHost);
+            $ui->assign('nf_port', $prePort);
+        }
         $ui->display('admin/routers/add.tpl');
         break;
 

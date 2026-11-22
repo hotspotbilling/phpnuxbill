@@ -20,10 +20,11 @@
 
         <form class="ls-bar" method="post" action="{Text::url('logs/message/')}">
             <label class="ls-field"><span>{Lang::T('Keep Logs')}</span>
+                <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <input type="text" name="keep" value="90" inputmode="numeric" size="4" aria-label="{Lang::T('Keep Logs')}">
                 <span>{Lang::T('Days')}</span>
             </label>
-            <button type="submit" class="ls-btn ls-btn--danger" onclick="return ask(this, '{Lang::T('Clear old logs?')}')"><i class="fa fa-trash" aria-hidden="true"></i> {Lang::T('Clean up Logs')}</button>
+            <button type="button" class="ls-btn ls-btn--danger" onclick="return ask(this, '{Lang::T('Clear old logs?')}')"><i class="fa fa-trash" aria-hidden="true"></i> {Lang::T('Clean up Logs')}</button>
         </form>
 
         <div class="ls-scroll">
@@ -32,6 +33,7 @@
                     <tr>
                         <th>{Lang::T('ID')}</th>
                         <th>{Lang::T('Date Sent')}</th>
+                        <th>{Lang::T('Recipient')}</th>
                         <th>{Lang::T('Type')}</th>
                         <th>{Lang::T('Status')}</th>
                     </tr>
@@ -41,13 +43,14 @@
                     <tr>
                         <td data-label="{Lang::T('ID')}" class="ls-dim">{$ds['id']}</td>
                         <td data-label="{Lang::T('Date Sent')}" class="ls-dim ls-when">{Lang::dateTimeFormat($ds['sent_at'])}</td>
+                        <td data-label="{Lang::T('Recipient')}">{if $ds['recipient']}{$ds['recipient']|escape}{else}<span class="ls-dim">&ndash;</span>{/if}</td>
                         <td data-label="{Lang::T('Type')}"><em class="ls-chip">{$ds['message_type']|escape}</em></td>
                         <td data-label="{Lang::T('Status')}"><span class="ls-pill {if $ds['status'] == 'Success'}ls-pill--active{else}ls-pill--banned{/if}">{$ds['status']|escape}</span></td>
                     </tr>
-                    {if $ds['message_content']}<tr class="ls-subrow"><td colspan="4">{$ds['message_content']|escape|nl2br}</td></tr>{/if}
-                    {if $ds['error_message']}<tr class="ls-subrow ls-subrow--error"><td colspan="4">{$ds['error_message']|escape|nl2br}</td></tr>{/if}
+                    {if $ds['message_content']}<tr class="ls-subrow"><td colspan="5">{$ds['message_content']|escape|nl2br}</td></tr>{/if}
+                    {if $ds['error_message']}<tr class="ls-subrow ls-subrow--error"><td colspan="5">{$ds['error_message']|escape|nl2br}</td></tr>{/if}
                     {foreachelse}
-                    <tr class="ls-none"><td colspan="4">
+                    <tr class="ls-none"><td colspan="5">
                         <div class="ls-empty"><b>{Lang::T('No logs found.')}</b>
                         </div>
                     </td></tr>

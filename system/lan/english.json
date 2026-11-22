@@ -5776,5 +5776,19 @@
     "Changing_it_does_not_change_the_backups_already_made__each_one_still_opens_only_with_the_password_it_was_made_with__so_keep_that_password_for_as_long_as_you_keep_those_backups__New_backups_use_the_new_one_": "Changing it does not change the backups already made: each one still opens only with the password it was made with, so keep that password for as long as you keep those backups. New backups use the new one.",
     "Run_it_at_least_every_15_minutes__readings_further_apart_are_not_compared__so_alerts_and_traffic_speeds_need_it_": "Run it at least every 15 minutes: readings further apart are not compared, so alerts and traffic speeds need it.",
     "Not_checked_yet": "Not checked yet",
-    "No_backup_password_is_set_in_Network___Routers___Settings__so_no_backup_was_made_": "No backup password is set in Network > Routers > Settings, so no backup was made."
+    "No_backup_password_is_set_in_Network___Routers___Settings__so_no_backup_was_made_": "No backup password is set in Network > Routers > Settings, so no backup was made.",
+    "Use_as_a_router_in_PHPNuxBill": "Use as a router in PHPNuxBill",
+    "The_router": "The router",
+    "in_PHPNuxBill_already_uses_this_address_": "in PHPNuxBill already uses this address.",
+    "Or_move_a_router_that_is_already_in_PHPNuxBill_to_this_address": "Or move a router that is already in PHPNuxBill to this address",
+    "Its_current_address_is_replaced_by_this_one__Its_username_and_password_stay_as_they_are_": "Its current address is replaced by this one. Its username and password stay as they are.",
+    "Replace_this_router_s_address_with_the_Routely_one__PHPNuxBill_stops_using_its_current_address_": "Replace this router's address with the Routely one? PHPNuxBill stops using its current address.",
+    "Router_deleted": "Router deleted",
+    "Add_a_router_to_PHPNuxBill_that_is_reached_through_Routely__The_form_opens_with_this_address_and_the_name_filled_in__enter_the_router_s_API_username_and_password_there_": "Add a router to PHPNuxBill that is reached through Routely. The form opens with this address and the name filled in; enter the router's API username and password there.",
+    "Add_as_a_new_router": "Add as a new router",
+    "An_SMS_gateway_is_resting_after_failing_three_messages_in_a_row__Messages_use_your_other_gateways_meanwhile_": "An SMS gateway is resting after failing three messages in a row. Messages use your other gateways meanwhile.",
+    "Recipient": "Recipient",
+    "Connect_a_router": "Connect a router",
+    "Set_up_Routely_VPN": "Set up Routely VPN",
+    "If_PHPNuxBill_runs_on_shared_hosting__cPanel___the_host_may_block_outgoing_connections_to_this_port__ask_them_to_open_it__or_reach_the_router_through_a_VPN_": "If PHPNuxBill runs on shared hosting (cPanel), the host may block outgoing connections to this port: ask them to open it, or reach the router through a VPN."
 }

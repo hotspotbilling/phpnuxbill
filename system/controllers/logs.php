@@ -16,6 +16,21 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
+// "Clean up Logs": the days to keep, from a form that carries its CSRF token. 0 when nothing was asked; a bad token or a value
+// that is not a whole number of days goes back to the page. The number is bound to the query, never written into it.
+$keepDays = function ($back) {
+    $raw = trim((string) _post('keep'));
+    if ($raw === '') {
+        return 0;
+    }
+    if (!Csrf::check(_post('csrf_token'))) {
+        r2(getUrl($back), 'e', Lang::T('Invalid or Expired CSRF Token') . '.');
+    }
+    if (!ctype_digit($raw) || (int) $raw < 1 || (int) $raw > 36500) {
+        r2(getUrl($back), 'e', Lang::T('Enter how many days of logs to keep, as a whole number from 1'));
+    }
+    return (int) $raw;
+};
 
 switch ($action) {
     case 'list-csv':
@@ -115,9 +130,9 @@ switch ($action) {
 
     case 'list':
         $q = (_post('q') ? _post('q') : _get('q'));
-        $keep = _post('keep');
-        if (!empty($keep)) {
-            ORM::raw_execute("DELETE FROM tbl_logs WHERE UNIX_TIMESTAMP(date) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))");
+        $keep = $keepDays('logs/list/');
+        if ($keep > 0) {
+            ORM::raw_execute("DELETE FROM tbl_logs WHERE UNIX_TIMESTAMP(date) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))", [$keep]);
             r2(getUrl('logs/list/'), 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
@@ -134,9 +149,9 @@ switch ($action) {
         break;
     case 'radius':
         $q = (_post('q') ? _post('q') : _get('q'));
-        $keep = _post('keep');
-        if (!empty($keep)) {
-            ORM::raw_execute("DELETE FROM radpostauth WHERE UNIX_TIMESTAMP(authdate) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))", [], 'radius');
+        $keep = $keepDays('logs/radius/');
+        if ($keep > 0) {
+            ORM::raw_execute("DELETE FROM radpostauth WHERE UNIX_TIMESTAMP(authdate) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))", [$keep], 'radius');
             r2(getUrl('logs/radius/'), 's', "Delete logs older than $keep days");
         }
         if ($q != '') {
@@ -154,15 +169,16 @@ switch ($action) {
 
     case 'message':
         $q = _post('q') ?: _get('q');
-        $keep = (int) _post('keep');
-        if (!empty($keep)) {
-            ORM::raw_execute("DELETE FROM tbl_message_logs WHERE UNIX_TIMESTAMP(sent_at) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $keep DAY))");
+        $keep = $keepDays('logs/message/');
+        if ($keep > 0) {
+            ORM::raw_execute("DELETE FROM tbl_message_logs WHERE UNIX_TIMESTAMP(sent_at) < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL ? DAY))", [$keep]);
             r2(getUrl('logs/message/'), 's', "Deleted logs older than $keep days");
         }
 
         if ($q !== null && $q !== '') {
             $query = ORM::for_table('tbl_message_logs')
-            ->whereRaw("message_type LIKE '%$q%' OR recipient LIKE '%$q%' OR message_content LIKE '%$q%' OR status LIKE '%$q%' OR error_message LIKE '%$q%'")
+            // the search words are bound, never written into the SQL; the recipient (phone number or email) is searched too
+            ->where_raw('(message_type LIKE ? OR recipient LIKE ? OR message_content LIKE ? OR status LIKE ? OR error_message LIKE ?)', array_fill(0, 5, '%' . $q . '%'))
                 ->order_by_desc('sent_at');
             $d = Paginator::findMany($query, ['q' => $q]);
         } else {

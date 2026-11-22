@@ -20,10 +20,11 @@
 
         <form class="ls-bar" method="post" action="{Text::url('logs/list/')}">
             <label class="ls-field"><span>{Lang::T('Keep Logs')}</span>
+                <input type="hidden" name="csrf_token" value="{$csrf_token}">
                 <input type="text" name="keep" value="90" inputmode="numeric" size="4" aria-label="{Lang::T('Keep Logs')}">
                 <span>{Lang::T('Days')}</span>
             </label>
-            <button type="submit" class="ls-btn ls-btn--danger" onclick="return ask(this, '{Lang::T('Clear old logs?')}')"><i class="fa fa-trash" aria-hidden="true"></i> {Lang::T('Clean up Logs')}</button>
+            <button type="button" class="ls-btn ls-btn--danger" onclick="return ask(this, '{Lang::T('Clear old logs?')}')"><i class="fa fa-trash" aria-hidden="true"></i> {Lang::T('Clean up Logs')}</button>
         </form>
 
         <div class="ls-scroll">
