@@ -30,6 +30,7 @@ class Voucher
 						$router_name = $plan['routers'];
 						}
             if ($p) {
+                $router_id = Package::routerId($router_name); // the router by its id, before the code is written (see Package::followRename)
                 repeat:
                 if ($config['voucher_format'] == 'numbers') {
                     $code = generateUniqueNumericVouchers(1, 10)[0];
@@ -56,7 +57,7 @@ class Voucher
                 $d->generated_by = $customer['id'];
                 if ($d->save()) {
                     // a router renamed while this was written: the code follows the plan to the new name (see Package)
-                    Package::followRename('tbl_voucher', $d->id(), $router_name, $p['id']);
+                    Package::followRename('tbl_voucher', $d->id(), $router_name, $p['id'], $router_id);
                     $v = ORM::for_table('tbl_customers_inbox')->create();
                     $v->from = "System";
                     $v->customer_id = $customer['id'];

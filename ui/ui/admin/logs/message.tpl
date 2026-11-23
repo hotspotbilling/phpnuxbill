@@ -45,10 +45,10 @@
                         <td data-label="{Lang::T('Date Sent')}" class="ls-dim ls-when">{Lang::dateTimeFormat($ds['sent_at'])}</td>
                         <td data-label="{Lang::T('Recipient')}">{if $ds['recipient']}{$ds['recipient']|escape}{else}<span class="ls-dim">&ndash;</span>{/if}</td>
                         <td data-label="{Lang::T('Type')}"><em class="ls-chip">{$ds['message_type']|escape}</em></td>
-                        <td data-label="{Lang::T('Status')}"><span class="ls-pill {if $ds['status'] == 'Success'}ls-pill--active{else}ls-pill--banned{/if}">{$ds['status']|escape}</span></td>
+                        <td data-label="{Lang::T('Status')}"><span class="ls-pill{if in_array($ds['status'], ['Success', 'Delivered'])} ls-pill--active{elseif $ds['status'] != 'Sent'} ls-pill--banned{/if}">{$ds['status']|escape}</span></td>
                     </tr>
                     {if $ds['message_content']}<tr class="ls-subrow"><td colspan="5">{$ds['message_content']|escape|nl2br}</td></tr>{/if}
-                    {if $ds['error_message']}<tr class="ls-subrow ls-subrow--error"><td colspan="5">{$ds['error_message']|escape|nl2br}</td></tr>{/if}
+                    {if $ds['error_message']}<tr class="ls-subrow{if !in_array($ds['status'], ['Success', 'Sent', 'Delivered'])} ls-subrow--error{/if}"><td colspan="5">{$ds['error_message']|escape|nl2br}</td></tr>{/if}
                     {foreachelse}
                     <tr class="ls-none"><td colspan="5">
                         <div class="ls-empty"><b>{Lang::T('No logs found.')}</b>

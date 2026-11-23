@@ -34,9 +34,12 @@ class Http
         }
     }
 
-    public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 3000)
+    /** $error: set to cURL's error text when the request did not reach the server or timed out, '' otherwise */
+    public static function getData($url, $headers = [], $connect_timeout = 3000, $wait_timeout = 3000, &$error = null)
     {
         global $http_proxy, $http_proxyauth, $admin;
+        $error = '';
+        $error_msg = '';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 0);
@@ -55,6 +58,7 @@ class Http
         $server_output = curl_exec($ch);
         if (curl_errno($ch)) {
             $error_msg = curl_error($ch);
+            $error = $error_msg !== '' ? $error_msg : 'cURL error ' . curl_errno($ch);
         }
         curl_close($ch);
         if ($admin && $error_msg) {

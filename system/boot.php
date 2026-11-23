@@ -370,7 +370,8 @@ try {
         // (see _menu_publish). Pages that call neither get the admin menus when an admin is signed in, else the customer ones.
         $GLOBALS['_menus_by_audience'] = $menus;
         _menu_publish(Admin::getID() ? 'admin' : 'customer');
-        unset($menus, $menu_registered, $topLevel, $children);
+        // $menu_registered stays: controllers/plugin.php reads it to know a menu function is a declared route
+        unset($menus, $topLevel, $children);
         include($sys_render);
     } else {
         if( empty($_SERVER["HTTP_SEC_FETCH_DEST"]) || $_SERVER["HTTP_SEC_FETCH_DEST"] != 'document' ){

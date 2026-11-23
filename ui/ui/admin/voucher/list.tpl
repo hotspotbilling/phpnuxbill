@@ -14,6 +14,12 @@
     </div>
 
     <div class="ls-card">
+        {if $made neq ''}
+        <div class="ls-bar">
+            <span><i class="fa fa-filter" aria-hidden="true"></i> {Lang::T('Showing only the vouchers that form created.')}</span>
+            <a href="{Text::url('')}plan/voucher/" class="ls-btn"><i class="fa fa-times" aria-hidden="true"></i> {Lang::T('Show all')}</a>
+        </div>
+        {/if}
         <form id="voucher-search-form" class="ls-bar" method="post" action="{Text::url('')}plan/voucher/">
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
@@ -125,7 +131,7 @@
                     {foreachelse}
                     <tr class="ls-none"><td colspan="13">
                         <div class="ls-empty"><b>{Lang::T('No vouchers found')}</b>
-                            {if $search neq '' || $router neq '' || $batch_name neq '' || $plan neq '' || $status neq '' || $customer neq ''}{Lang::T('Nothing matches your filters.')} <a href="{Text::url('')}plan/voucher/">{Lang::T('Reset Search')}</a>
+                            {if $made neq '' || $search neq '' || $router neq '' || $batch_name neq '' || $plan neq '' || $status neq '' || $customer neq ''}{Lang::T('Nothing matches your filters.')} <a href="{Text::url('')}plan/voucher/">{Lang::T('Reset Search')}</a>
                             {else}<a href="{Text::url('')}plan/add-voucher">{Lang::T('Vouchers')}</a>{/if}
                         </div>
                     </td></tr>

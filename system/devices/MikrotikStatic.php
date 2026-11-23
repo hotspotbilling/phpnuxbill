@@ -305,15 +305,16 @@ class MikrotikStatic
         );
     }
 
-    public function removeIpFromAddressList($client, $ip)
+    public function removeIpFromAddressList($client, $ip, $listName = 'Expired')
     {
         global $_app_stage;
         if ($_app_stage == 'Demo') {
             return null;
         }
+        // only the entry for this address on this list: the same address on another list is left alone
         $printRequest = new RouterOS\Request(
             '/ip firewall address-list print .proplist=.id',
-            RouterOS\Query::where('address', $ip)
+            RouterOS\Query::where('address', $ip)->andWhere('list', $listName)
         );
         $res = $client->sendSync($printRequest);
         if (($err = RouterApi::error($res)) !== null) {

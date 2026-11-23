@@ -15,6 +15,33 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
     _alert(Lang::T('You do not have permission to access this page'), 'danger', "dashboard");
 }
 
+// A plan saved with a router: the router is checked to still be there under the same lock the router page takes to delete one
+// (routers.php $endpointLock), so a plan cannot be saved pointing at a router that a delete running at the same time removes.
+// $planRouterLock(name, back) takes the lock and checks; $planRouterLock(null) releases it after the save.
+$planRouterLock = function ($name, $back = null) {
+    $db = ORM::getDb();
+    if ($name === null) {
+        try { $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')"); } catch (Throwable $e) { /* released when the request ends */ }
+        return;
+    }
+    $name = (string) $name;
+    if ($name === '' || in_array($name, ['radius', 'balance'], true)) {
+        return; // a RADIUS or balance plan names no router
+    }
+    try {
+        $got = (int) $db->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 15)")->fetchColumn() === 1;
+    } catch (Throwable $e) {
+        $got = false;
+    }
+    if (!$got) {
+        r2($back, 'e', Lang::T('The routers are being changed right now. Try again in a moment.'));
+    }
+    if (!ORM::for_table('tbl_routers')->where('name', $name)->find_one()) {
+        $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
+        r2($back, 'e', Lang::T('Router not found'));
+    }
+};
+
 switch ($action) {
     case 'sync':
         set_time_limit(-1);
@@ -283,7 +310,9 @@ switch ($action) {
             } else {
                 $d->expired_date = 20;
             }
+            $planRouterLock($d['routers'], getUrl('services/add'));
             $d->save();
+            $planRouterLock(null);
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -399,7 +428,9 @@ switch ($action) {
             } else {
                 $d->expired_date = 20;
             }
+            $planRouterLock($d['routers'], getUrl('services/edit/') . (int) _post('id'));
             $d->save();
+            $planRouterLock(null);
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
@@ -667,7 +698,9 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
+            $planRouterLock($d['routers'], getUrl('services/pppoe-add'));
             $d->save();
+            $planRouterLock(null);
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -771,7 +804,9 @@ switch ($action) {
             } else {
                 $d->expired_date = 0;
             }
+            $planRouterLock($d['routers'], getUrl('services/pppoe-edit/') . (int) _post('id'));
             $d->save();
+            $planRouterLock(null);
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);
@@ -1159,7 +1194,9 @@ switch ($action) {
             $d->enabled = $enabled;
             $d->prepaid = $prepaid;
             $d->device = $device;
+            $planRouterLock($d['routers'], getUrl('services/vpn-add'));
             $d->save();
+            $planRouterLock(null);
 
             $dvc = Package::getDevice($d);
             if ($_app_stage != 'demo') {
@@ -1263,7 +1300,9 @@ switch ($action) {
             } else {
                 $d->expired_date = 0;
             }
+            $planRouterLock($d['routers'], getUrl('services/vpn-edit/') . (int) _post('id'));
             $d->save();
+            $planRouterLock(null);
             if (class_exists('RedisCache')) { RedisCache::del('rad:plan:' . (int) $d['id']); }
 
             $dvc = Package::getDevice($d);

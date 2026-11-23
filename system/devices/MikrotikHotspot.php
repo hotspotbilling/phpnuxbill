@@ -66,19 +66,23 @@ class MikrotikHotspot
 	{
 		$mikrotik = $this->info($plan['routers']);
 		$client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->find_one();
+		// the active recharge of this plan (not any recharge of the username, which may be a PPPoE one)
+		$t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('status', 'on')->find_one();
 		if ($t) {
 			$printRequest = new RouterOS\Request('/ip/hotspot/user/print');
 			$printRequest->setArgument('.proplist', '.id,limit-uptime,limit-bytes-total');
 			$printRequest->setQuery(RouterOS\Query::where('name', $customer['username']));
-			$userInfo = $client->sendSync($printRequest);
+			// a refused lookup (!trap) is thrown here, before anything is removed or added; an empty answer means no such user
+			$userInfo = $this->checked($client->sendSync($printRequest));
 			$id = $userInfo->getProperty('.id');
 			$uptime = $userInfo->getProperty('limit-uptime');
 			$data = $userInfo->getProperty('limit-bytes-total');
 			if (!empty($id) && (!empty($uptime) || !empty($data))) {
+				// changed in place, so the user's usage counters are kept
 				$setRequest = new RouterOS\Request('/ip/hotspot/user/set');
 				$setRequest->setArgument('numbers', $id);
-				$setRequest->setArgument('profile', $t['namebp']);
+				$setRequest->setArgument('profile', $plan['name_plan']);
+				$setRequest->setArgument('password', $customer['password']);
 				$this->checked($client->sendSync($setRequest));
 			} else {
 				$this->add_customer($customer, $plan);

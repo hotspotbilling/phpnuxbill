@@ -392,13 +392,14 @@ class Rtl
         // brackets (url(), type()) and strings whole
         $imageSet = '((?:-webkit-)?image-set\((?:[^()"\']|' . $str . '|\((?:[^()"\']|' . $str . ')*\))*\))';
         // one pass, left to right: comments and quoted strings are skipped whole, so text such as content: "url(a.png)" is
-        // left as it is, while url(...), image-set(...) and @import "..." outside them are rebased
-        return preg_replace_callback('/(\/\*.*?\*\/)|url\(\s*(["\']?)([^"\')]*)\2\s*\)|@import\s+(["\'])([^"\']+)\4|' . $imageSet . '|(' . $str . ')/is', function ($m) use ($fix, $str) {
+        // left as it is, while url(...), image-set(...) and @import "..." outside them are rebased. A quoted url("...") is read
+        // to its closing quote, so a bracket inside it (url("a(1).png")) is part of the path
+        return preg_replace_callback('/(\/\*.*?\*\/)|url\(\s*(["\'])?((?(2)(?:(?!\2)[^\\\\\n]|\\\\.)*|[^"\')]*))(?(2)\2)\s*\)|@import\s+(["\'])([^"\']+)\4|' . $imageSet . '|(' . $str . ')/is', function ($m) use ($fix, $str) {
             if ($m[1] !== null || $m[7] !== null) {
                 return $m[0];
             }
             if ($m[6] !== null) {
-                return preg_replace_callback('/\btype\(\s*(?:' . $str . ')\s*\)|url\(\s*(["\']?)([^"\')]*)\1\s*\)|(' . $str . ')/is', function ($n) use ($fix) {
+                return preg_replace_callback('/\btype\(\s*(?:' . $str . ')\s*\)|url\(\s*(["\'])?((?(1)(?:(?!\1)[^\\\\\n]|\\\\.)*|[^"\')]*))(?(1)\1)\s*\)|(' . $str . ')/is', function ($n) use ($fix) {
                     if ($n[3] !== null) {
                         $q = $n[3][0];
                         return $q . $fix(substr($n[3], 1, -1)) . $q;

@@ -20,9 +20,10 @@ class Mikrotik
         if ($_app_stage == 'demo') {
             return null;
         }
-        $iport = explode(":", $ip);
-        $p = ($port) ? $port : (($iport[1] ?? null) ? $iport[1] : null);
-        return new RouterOS\Client($iport[0], $user, $pass, $p, false, $timeout);
+        // host and port the way the router form saves them: host, host:port, [IPv6]:port or a bare IPv6 address
+        [$host, $saved] = RouterAddress::split($ip);
+        $p = ($port) ? $port : (($saved ?? null) ? $saved : null);
+        return new RouterOS\Client($host, $user, $pass, $p, false, $timeout);
     }
 
     public static function isUserLogin($client, $username)

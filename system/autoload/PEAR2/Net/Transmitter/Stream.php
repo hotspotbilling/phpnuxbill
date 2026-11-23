@@ -364,8 +364,17 @@ class Stream
             return $this->isAcceptingData(null);
         }
         $left = $this->deadline - microtime(true);
-        if ($left > 0 && $this->isAcceptingData((int) floor($left), (int) (($left - floor($left)) * 1000000))) {
-            return true;
+        if ($left > 0) {
+            $sTimeout = (int) floor($left);
+            $usTimeout = min(999999, max(0, (int) (($left - $sTimeout) * 1000000)));
+            // a non-blocking stream (TLS) is never asked to wait by isAcceptingData(), so a write that took nothing would be
+            // tried again at once until the deadline: wait here until it can take more, for the time left at most
+            if ($this->isBlocking
+                ? $this->isAcceptingData($sTimeout, $usTimeout)
+                : $this->isAcceptingData() && $this->waitWritable($sTimeout, $usTimeout)
+            ) {
+                return true;
+            }
         }
         if (microtime(true) >= $this->deadline) {
             $this->timedOut = true;
@@ -374,6 +383,24 @@ class Stream
         }
         // not accepting data for another reason (the other end closed): as before, the next write reports it
         return false;
+    }
+
+    /**
+     * PHPNuxBill: waits until the stream can be written to, for the given time at most.
+     *
+     * @param int $sTimeout  Seconds.
+     * @param int $usTimeout Microseconds to add.
+     *
+     * @return bool Whether it can be written to.
+     */
+    protected function waitWritable($sTimeout, $usTimeout)
+    {
+        if (!self::isStream($this->stream)) {
+            return false;
+        }
+        $r = $e = null;
+        $w = array($this->stream);
+        return 1 === @stream_select($r, $w, $e, $sTimeout, $usTimeout);
     }
 
     /**
@@ -492,36 +519,48 @@ class Stream
         $lengthIsNotNull = null !== $length;
         $offsetIsNotNull = null !== $offset;
         if (self::isStream($contents)) {
-            if ($offsetIsNotNull) {
-                $oldPos = ftell($contents);
-                fseek($contents, $offset, SEEK_SET);
-            }
-            while (!feof($contents)) {
-                if ($lengthIsNotNull
-                    && 0 === $chunkSize = min($chunkSize, $length - $bytes)
-                ) {
-                    break;
+            // PHPNuxBill: a seekable stream goes back to where it was however the send ends (also when it fails or runs out
+            // of time); a stream that cannot seek is left as before
+            $contentsMeta = stream_get_meta_data($contents);
+            $seekable = !empty($contentsMeta['seekable']);
+            $oldPos = ftell($contents);
+            try {
+                if ($offsetIsNotNull) {
+                    fseek($contents, $offset, SEEK_SET);
                 }
-                $contentsToSend = fread($contents, $chunkSize);
-                if ('' != $contentsToSend) {
-                    $bytesNow = $this->writeChunk($contentsToSend, $bytes);
-                    if (0 != $bytesNow) {
-                        $bytes += $bytesNow;
-                    } elseif ($this->isBlocking || false === $bytesNow) {
-                        throw $this->createException(
-                            'Failed while sending stream.',
-                            2,
-                            null,
-                            $bytes
-                        );
+                while (!feof($contents)) {
+                    if ($lengthIsNotNull
+                        && 0 === $chunkSize = min($chunkSize, $length - $bytes)
+                    ) {
+                        break;
+                    }
+                    $contentsToSend = fread($contents, $chunkSize);
+                    if ('' != $contentsToSend) {
+                        $bytesNow = $this->writeChunk($contentsToSend, $bytes);
+                        if (0 != $bytesNow) {
+                            $bytes += $bytesNow;
+                        } elseif ($this->isBlocking || false === $bytesNow) {
+                            throw $this->createException(
+                                'Failed while sending stream.',
+                                2,
+                                null,
+                                $bytes
+                            );
+                        }
+                    }
+                    $this->waitToSend($bytes);
+                }
+                if (!$seekable) {
+                    if ($offsetIsNotNull) {
+                        fseek($contents, $oldPos, SEEK_SET);
+                    } else {
+                        fseek($contents, -$bytes, SEEK_CUR);
                     }
                 }
-                $this->waitToSend($bytes);
-            }
-            if ($offsetIsNotNull) {
-                fseek($contents, $oldPos, SEEK_SET);
-            } else {
-                fseek($contents, -$bytes, SEEK_CUR);
+            } finally {
+                if ($seekable && false !== $oldPos) {
+                    fseek($contents, $oldPos, SEEK_SET);
+                }
             }
         } else {
             $contents = (string) $contents;
@@ -707,10 +746,19 @@ class Stream
             // PHPNuxBill: under a deadline, no wait for data goes past it (the library asks for the full time again for each
             // reply, so a login challenge or a reply that is not the last would otherwise start the wait over)
             if (null !== $this->deadline) {
-                $left = max(0, $this->deadline - microtime(true));
+                $left = $this->deadline - microtime(true);
+                if ($left <= 0) {
+                    return false;
+                }
+                if (null !== $sTimeout) {
+                    // seconds and microseconds as stream_select() takes them: nonnegative, microseconds under a second
+                    $wait = max(0, (int) $sTimeout + (int) $usTimeout / 1000000);
+                    $sTimeout = (int) floor($wait);
+                    $usTimeout = min(999999, max(0, (int) round(($wait - $sTimeout) * 1000000)));
+                }
                 if (null === $sTimeout || $sTimeout + $usTimeout / 1000000 > $left) {
                     $sTimeout = (int) floor($left);
-                    $usTimeout = (int) (($left - floor($left)) * 1000000);
+                    $usTimeout = min(999999, max(0, (int) (($left - $sTimeout) * 1000000)));
                 }
             }
 

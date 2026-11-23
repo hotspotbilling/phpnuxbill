@@ -62,6 +62,11 @@ if (!$isCli && (!isset($_SESSION['aid']) || empty($_SESSION['aid'])) && (!isset(
     exit(1);
 }
 
+// the session is closed first when the run ends, before the alert emails queued for then (cron.php's router check and
+// RouterMonitor's, run in the order registered): a stalled mail server must not keep the session locked for the next run
+// opened in the same browser. The run's own lock is released before the router history (below), so nothing else waits on SMTP.
+register_shutdown_function('session_write_close');
+
 $lockFile = "$CACHE_PATH/router_monitor.lock";
 
 if (!is_dir($CACHE_PATH)) {

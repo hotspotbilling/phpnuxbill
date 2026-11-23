@@ -40,6 +40,12 @@ class RouterApi
             $old = ini_get('default_socket_timeout');
             ini_set('default_socket_timeout', (string) max(1, (int) ceil($timeout)));
             try {
+                // the api-ssl port is spoken over TLS, with the certificate checked. A context of our own is always passed: given
+                // none, the library switches PHP's default context to unverified anonymous ciphers for everything in this request
+                if ((string) $port === '8729') {
+                    $tls = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true]]);
+                    return [new RouterClient($host, $user, $pass, $port, false, $timeout, \PEAR2\Net\Transmitter\NetworkStream::CRYPTO_TLS, $tls), null];
+                }
                 return [new RouterClient($host, $user, $pass, $port, false, $timeout), null];
             } finally {
                 ini_set('default_socket_timeout', (string) $old);
@@ -278,11 +284,59 @@ class RouterApi
     }
 
     /**
+     * Whether the backup password may be sent over this connection: null when it may, otherwise the reason it may not. The
+     * /system/backup/save command carries the password as typed, so it goes only over a connection that is encrypted (API-SSL)
+     * or one whose far end is a private address (the same network, or a VPN tunnel), checked on the open connection itself (the
+     * address it really reached, not the saved name). Encrypting the backup file protects the file, not the way there.
+     */
+    public static function backupTransportError($c)
+    {
+        $t = self::transmitter($c);
+        if ($t === null) {
+            return Lang::T('The connection to the router could not be checked, so the backup password was not sent.');
+        }
+        try {
+            if ($t instanceof \PEAR2\Net\Transmitter\NetworkStream && $t->getCrypto() !== \PEAR2\Net\Transmitter\NetworkStream::CRYPTO_OFF) {
+                return null;
+            }
+            $stream = \Closure::bind(function () {
+                return $this->stream;
+            }, $t, \PEAR2\Net\Transmitter\Stream::class)();
+            $peer = is_resource($stream) ? (string) @stream_socket_get_name($stream, true) : '';
+        } catch (Throwable $e) {
+            $peer = '';
+        }
+        // "1.2.3.4:8728", "[::1]:8728" or "::1:8728": the port is after the last colon
+        $ip = trim(($p = strrpos($peer, ':')) !== false ? substr($peer, 0, $p) : $peer, '[]');
+        if (stripos($ip, '::ffff:') === 0 && filter_var(substr($ip, 7), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $ip = substr($ip, 7); // an IPv4 address written as IPv6: judged as the IPv4 address it is
+        }
+        $flags = defined('FILTER_FLAG_GLOBAL_RANGE') ? FILTER_FLAG_GLOBAL_RANGE : (FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP) !== false && filter_var($ip, FILTER_VALIDATE_IP, $flags) === false) {
+            return null; // a private, loopback, link-local or carrier (100.64/10) address: not across the internet
+        }
+        return Lang::T('The backup was not made: the connection to this router is not encrypted and crosses the internet, so the backup password would be readable on the way. Use API-SSL (port 8729) or reach the router over a VPN or private address.');
+    }
+
+    /** The router's row and saved address as one key ("id@host:port"), so progress kept for it ends when it is moved elsewhere */
+    private static function backupKey($r)
+    {
+        [$host, $port] = RouterAddress::split((string) $r['ip_address']);
+        $host = strtolower(trim($host));
+        if (($bin = @inet_pton($host)) !== false) {
+            $host = inet_ntop($bin); // one spelling for each IP address (IPv6 can be written many ways)
+        }
+        return (string) $r['id'] . '@' . (strpos($host, ':') !== false ? '[' . $host . ']' : $host) . ':' . ($port !== null ? (int) $port : 8728);
+    }
+
+    /**
      * Nightly backups, from the cron: once a day, each enabled router saves "phpnuxbill-auto-<date>.backup" on itself, and only
      * the newest few of those are kept (older ones are removed from the router). Backups made by hand are never removed.
-     * A router that fails is tried again on the next runs that day (up to 3 times); one that is done is not touched again. A
-     * retry first looks for today's file, so a save that worked but answered late is not made twice, and the clean-up still runs
-     * (a file that is empty or still growing is saved again). Older backups are removed only once today's is there.
+     * A router that fails is tried again on the next runs that day (up to 3 times); one that is done is not touched again.
+     * Progress is kept per router row and address, so a router moved to another address starts again. A save counts as made
+     * only once the router confirmed it and the file has something in it; that is recorded before older backups are removed,
+     * so a retry after a failed clean-up only cleans up. A file left by a save that never answered is saved again (the same
+     * name, so it is replaced). The password is sent only over a protected connection (see backupTransportError()).
      * Never throws; returns lines for the cron's output.
      */
     public static function nightlyBackups()
@@ -313,14 +367,24 @@ class RouterApi
             if (!is_array($state) || ($state['date'] ?? '') !== $today || !is_array($state['routers'] ?? null)) {
                 $state = ['date' => $today, 'routers' => []];
             }
-            $pending = function ($id) use (&$state) {
-                $s = $state['routers'][$id] ?? 0;
-                return $s !== 'ok' && (int) $s < 3;
+            // each router's progress, under backupKey(): ['tries' => failures, 'saved' => today's save confirmed, 'ok' => done,
+            // 'blocked' => not sent over an unprotected connection]
+            $entry = function ($key) use (&$state) {
+                $s = $state['routers'][$key] ?? null;
+                return is_array($s) ? $s + ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false]
+                    : ['tries' => 0, 'saved' => false, 'ok' => false, 'blocked' => false];
+            };
+            $pending = function ($key) use ($entry) {
+                $s = $entry($key);
+                return !$s['ok'] && !$s['blocked'] && (int) $s['tries'] < 3;
+            };
+            $usable = function ($r) {
+                return $r && (int) $r['enabled'] === 1 && trim((string) $r['ip_address']) !== '' && strcasecmp((string) $r['name'], 'radius') !== 0;
             };
             $routers = [];
             foreach (ORM::for_table('tbl_routers')->where('enabled', 1)->find_many() as $r) {
-                if (trim((string) $r['ip_address']) !== '' && strcasecmp($r['name'], 'radius') !== 0 && $pending((string) $r['id'])) {
-                    $routers[] = $r;
+                if ($usable($r) && $pending(self::backupKey($r))) {
+                    $routers[] = (int) $r['id'];
                 }
             }
             if (!$routers) {
@@ -342,12 +406,23 @@ class RouterApi
                 });
                 return $auto;
             };
-            foreach ($routers as $r) {
-                $id = (string) $r['id'];
+            foreach ($routers as $rid) {
                 @set_time_limit(120); // each router gets its own time, so a slow one does not stop the rest
+                // the row read again right before its turn: an earlier router can take minutes, and meanwhile this one may have been
+                // removed, disabled or given another address or login. A router no longer to be backed up is skipped (no try used)
+                $r = ORM::for_table('tbl_routers')->find_one($rid);
+                if (!$usable($r)) {
+                    continue;
+                }
+                $key = self::backupKey($r);
+                if (!$pending($key)) {
+                    continue; // moved to an address already done (or out of tries) today
+                }
+                $s = $entry($key);
                 [$c, $err] = self::connect($r['ip_address'], $r['username'], $r['password'], 8);
                 if (!$c) {
-                    $state['routers'][$id] = (int) ($state['routers'][$id] ?? 0) + 1;
+                    $s['tries']++;
+                    $state['routers'][$key] = $s;
                     $log[] = $r['name'] . ': ' . $err;
                     self::saveBackupState($state);
                     continue;
@@ -355,32 +430,39 @@ class RouterApi
                 try {
                     $folder = '';
                     $auto = $autoFiles($c, $folder);
-                    // today's file left by an earlier run whose save did not answer: the router gives no sign that a save is
-                    // complete, and the file can be one still being written or one left empty (a full disk). It counts as saved
-                    // only when it has something in it and its size has stopped changing; otherwise it is saved again
-                    $size = $first = self::todaysSize($auto, $name);
-                    if ($first !== null) {
-                        sleep(3);
-                        $auto = $autoFiles($c);
-                        $size = self::todaysSize($auto, $name);
-                    }
-                    $made = $first !== null && $size === $first && self::hasData($size);
+                    $made = (bool) $s['saved']; // confirmed by an earlier run today, whose clean-up then failed
                     if (!$made) {
-                        // encrypted with the backup password (never written to the log or the output)
+                        if (($why = self::backupTransportError($c)) !== null) {
+                            // not a failure to try again: the connection stays what it is until the router's address changes
+                            $s['blocked'] = true;
+                            $state['routers'][$key] = $s;
+                            $log[] = $r['name'] . ': ' . $why;
+                            self::saveBackupState($state);
+                            continue; // (the connection is dropped in finally)
+                        }
+                        // encrypted with the backup password (never written to the log or the output). A file of today's name
+                        // left by a save that never answered is not trusted (its size says nothing about it being complete): this
+                        // save replaces it
                         self::run($c, '/system/backup/save', ['name' => $folder . $name, 'password' => $password], microtime(true) + 60);
                         $auto = $autoFiles($c);
                         // the router said the save is done: the file must be there, with something in it, before older ones go
                         if (!self::hasData(self::todaysSize($auto, $name))) {
                             throw new Exception(Lang::T('The backup file was not saved on the router'));
                         }
+                        // recorded before the clean-up, so a retry after a failed clean-up does not save again
+                        $s['saved'] = true;
+                        $state['routers'][$key] = $s;
+                        self::saveBackupState($state);
                     }
                     foreach (array_slice($auto, $keep) as $old) {
                         self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
                     }
-                    $state['routers'][$id] = 'ok';
+                    $s['ok'] = true;
+                    $state['routers'][$key] = $s;
                     $log[] = $r['name'] . ': ' . $folder . $name . '.backup' . ($made ? ' (' . Lang::T('already saved') . ')' : '');
                 } catch (Throwable $e) {
-                    $state['routers'][$id] = (int) ($state['routers'][$id] ?? 0) + 1;
+                    $s['tries']++; // 'saved' is kept: the next try resumes with the clean-up
+                    $state['routers'][$key] = $s;
                     $log[] = $r['name'] . ': ' . $e->getMessage();
                 } finally {
                     // done with this router either way: drop the connection without the library's goodbye, which can wait for ever

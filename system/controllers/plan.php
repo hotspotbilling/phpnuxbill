@@ -49,10 +49,15 @@ switch ($action) {
             if ($p) {
                 $c = ORM::for_table('tbl_customers')->findOne($tur['customer_id']);
                 if ($c) {
-                    $dvc = Package::getDevice($p);
                     // each customer on its own: one the router refuses (or that cannot be reached) is listed, and the rest go on
+                    // a switched-off router is not sent anything; its customers stay active and are synced once it is on again
+                    if (Package::routerOff($p)) {
+                        $log .= "SKIPPED (router is disabled) : $tur[username], $tur[namebp], $tur[type], $tur[routers]<br>";
+                        continue;
+                    }
                     try {
                         if ($_app_stage != 'Demo') {
+                            $dvc = Package::getDevice($p);
                             if (!file_exists($dvc)) {
                                 throw new Exception(Lang::T("Devices Not Found"));
                             }
@@ -533,6 +538,18 @@ switch ($action) {
         $plan = _req('plan');
         $status = _req('status');
         $batch_name = _req('batch_name');
+        // made: the vouchers one Add Vouchers form created (voucher-post records their ids for a day under the form's hash)
+        $made = _req('made');
+        $madeIds = [];
+        if (preg_match('/^[0-9a-f]{40}$/', $made)) {
+            $rec = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_form_' . $made)->find_one();
+            $v = $rec ? json_decode((string) $rec['value'], true) : null;
+            $madeIds = is_array($v) && is_array($v['ids'] ?? null) ? array_values(array_filter(array_map('intval', $v['ids']))) : [];
+        }
+        if (empty($madeIds)) {
+            $made = '';
+        }
+        $ui->assign('made', $made);
 
         $ui->assign('batch_name', $batch_name);
         $ui->assign('router', $router);
@@ -564,6 +581,10 @@ switch ($action) {
             $query->where('tbl_voucher.batch_name', $batch_name);
         }
 
+        if (!empty($madeIds)) {
+            $query->where_in('tbl_voucher.id', $madeIds);
+        }
+
         if (!empty($_COOKIE['voucher_per_page']) && $_COOKIE['voucher_per_page'] != $config['voucher_per_page']) {
             $d = ORM::for_table('tbl_appconfig')->where('setting', 'voucher_per_page')->find_one();
             if ($d) {
@@ -585,7 +606,7 @@ switch ($action) {
 
         $per_page = !empty($_COOKIE['voucher_per_page']) ? $_COOKIE['voucher_per_page'] : (!empty($config['voucher_per_page']) ? $config['voucher_per_page'] : '10');
 
-        $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status) . "&batch_name=" . urlencode($batch_name);
+        $append_url = "&search=" . urlencode($search) . "&router=" . urlencode($router) . "&customer=" . urlencode($customer) . "&plan=" . urlencode($plan) . "&status=" . urlencode($status) . "&batch_name=" . urlencode($batch_name) . ($made !== '' ? "&made=$made" : '');
 
         // option customers
         $ui->assign('customers', ORM::for_table('tbl_voucher')->distinct()->select("user")->whereNotEqual("user", '0')->findArray());
@@ -867,7 +888,9 @@ switch ($action) {
         $claim = null;
         // a form whose batch was saved is recorded in the database, in the same transaction as its vouchers: the record cannot
         // be lost the way a session value can (a session store that does not lock lets another request's older copy replace it)
-        $formKey = 'voucher_form_' . substr(hash('sha256', $svoucher), 0, 40);
+        // (the hash also names the form in the list's address, so a repeat shows exactly the vouchers this form made)
+        $formHash = substr(hash('sha256', $svoucher), 0, 40);
+        $formKey = 'voucher_form_' . $formHash;
         if (empty($made) && $svoucher !== '') {
             // claimed for this request with a database lock, so it holds whatever stores the sessions: the same form sent again
             // while this one is still creating its batch is answered as a repeat, not given a second batch. Released once the
@@ -892,8 +915,7 @@ switch ($action) {
             }
         }
         if (!empty($made)) {
-            $madeBatch = is_array($made) ? (string) ($made['batch'] ?? '') : '';
-            r2(getUrl('plan/voucher') . ($madeBatch !== '' ? '&batch_name=' . urlencode($madeBatch) : ''), 'w',
+            r2(getUrl('plan/voucher') . '&made=' . $formHash, 'w',
                 Lang::T('These vouchers were created already, the form was sent twice. They are in this list.'));
         }
         // the form's token must have been given out by this session, and recently: the record of a finished form is kept a day
@@ -996,6 +1018,8 @@ switch ($action) {
             }
             $inBatch = array_flip(array_map($key, $vouchers));
 
+            // the router's own id, read before the codes are written: a rename is followed only to that same router (see Package)
+            $serverId = Package::routerId($server);
             ORM::raw_execute('START TRANSACTION');
             try {
                 foreach ($vouchers as $code) {
@@ -1029,15 +1053,15 @@ switch ($action) {
                 }
                 $done = ['batch' => $batch_name, 'n' => count($newVoucherIds), 'at' => time()];
                 if ($svoucher !== '') {
-                    // committed together with the vouchers: both are saved, or neither
+                    // committed together with the vouchers: both are saved, or neither. The ids let the list show exactly these.
                     $rec = ORM::for_table('tbl_appconfig')->create();
                     $rec->setting = $formKey;
-                    $rec->value = json_encode($done);
+                    $rec->value = json_encode($done + ['ids' => array_map('intval', $newVoucherIds)]);
                     $rec->save();
                 }
                 ORM::raw_execute('COMMIT');
                 // a router renamed while the batch was written: its codes follow the plan to the new name (see Package)
-                Package::followRename('tbl_voucher', $newVoucherIds, $server, $plan);
+                Package::followRename('tbl_voucher', $newVoucherIds, $server, $plan, $serverId);
                 if ($svoucher !== '') {
                     App::setToken($svoucher, $done); // (the quick answer for a repeat from this browser)
                 }
@@ -1099,7 +1123,7 @@ switch ($action) {
                 r2(getUrl('plan/voucher-view/') . $d->id(), 's', Lang::T('Create Vouchers Successfully'));
             }
 
-            r2(getUrl('plan/voucher'), 's', Lang::T('Create Vouchers Successfully'));
+            r2(getUrl('plan/voucher') . '&made=' . $formHash, 's', Lang::T('Create Vouchers Successfully'));
         } else {
             r2(getUrl('plan/add-voucher/'), 'e', $msg);
         }

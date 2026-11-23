@@ -78,11 +78,15 @@ class RouterMonitor
             return;
         }
         try {
+            // the newest reading so far: the readings after the change are the ones with a higher ID. A time cannot tell them
+            // apart from the old device's readings in the same second. (Called with the router edit lock held, which keep()
+            // holds too, so no reading is saved between this and the event.)
+            $cut = (int) ORM::for_table('tbl_router_samples')->where('router_id', (int) $id)->max('id');
             $e = ORM::for_table('tbl_router_events')->create();
             $e->router_id = (int) $id;
             $e->at = date('Y-m-d H:i:s');
             $e->type = 'moved';
-            $e->detail = '';
+            $e->detail = 'sample:' . $cut;
             $e->save();
         } catch (Throwable $e) {
             if ($strict) {
@@ -91,11 +95,26 @@ class RouterMonitor
         }
     }
 
-    /** When the router's address was last changed ('Y-m-d H:i:s'), or null: readings and states from before then do not count */
+    /**
+     * The router's last address change, or null: readings and states from before it do not count. ['id' => the event's ID,
+     * 'at' => 'Y-m-d H:i:s', 'sample' => the ID of the last reading before it, or null for a change saved before that was kept]
+     */
     private static function movedAt($id)
     {
         $m = ORM::for_table('tbl_router_events')->where('router_id', (int) $id)->where('type', 'moved')->order_by_desc('id')->find_one();
-        return $m ? $m['at'] : null;
+        if (!$m) {
+            return null;
+        }
+        return ['id' => (int) $m['id'], 'at' => $m['at'], 'sample' => preg_match('/^sample:(\d+)$/', (string) $m['detail'], $x) ? (int) $x[1] : null];
+    }
+
+    /** Only the readings after the address change $since (see movedAt()) */
+    private static function sinceMove($q, $since)
+    {
+        if (!$since) {
+            return $q;
+        }
+        return $since['sample'] !== null ? $q->where_gt('id', $since['sample']) : $q->where_gt('at', $since['at']);
     }
 
     /** From the cron. Returns lines for its output. */
@@ -126,7 +145,15 @@ class RouterMonitor
         fwrite($lock, (string) time());
         fflush($lock);
         $log = [];
-        foreach (ORM::for_table('tbl_routers')->where('enabled', 1)->find_many() as $r) {
+        try {
+            $routers = ORM::for_table('tbl_routers')->where('enabled', 1)->find_many();
+        } catch (Throwable $e) {
+            // the routers could not be read: no reading this time (the time is kept, so the next try waits as usual), and the
+            // rest of the cron run carries on
+            $routers = [];
+            $log[] = $e->getMessage();
+        }
+        foreach ($routers as $r) {
             if (trim((string) $r['ip_address']) === '' || strcasecmp((string) $r['name'], 'radius') === 0) {
                 continue;
             }
@@ -179,8 +206,7 @@ class RouterMonitor
         // only readings at the router's present address follow on (see moved())
         $since = self::movedAt($id);
         $q = function () use ($id, $since) {
-            $q = ORM::for_table('tbl_router_samples')->where('router_id', $id);
-            return $since ? $q->where_gt('at', $since) : $q;
+            return self::sinceMove(ORM::for_table('tbl_router_samples')->where('router_id', $id), $since);
         };
         $prev = $q()->order_by_desc('at')->find_one();
         // the uplink chosen before: from the last reading that had one (a failed reading has none, and must not switch it)
@@ -240,11 +266,15 @@ class RouterMonitor
                         $ifs = RouterApi::rows($c, '/interface/print', ['name', 'rx-byte', 'tx-byte', 'running'], $until);
                         $pick = null;
                         foreach ($ifs as $i) {
+                            // (only an interface that is running and has both counters: one that is down or unread is no uplink)
+                            if ($i['running'] !== 'true' || !is_numeric($i['rx-byte']) || !is_numeric($i['tx-byte'])) {
+                                continue;
+                            }
                             if ($lastIf && $i['name'] === $lastIf['iface']) {
                                 $pick = $i;
                                 break;
                             }
-                            if ($i['running'] === 'true' && is_numeric($i['rx-byte']) && is_numeric($i['tx-byte']) && (!$pick || (float) $i['rx-byte'] + (float) $i['tx-byte'] > (float) $pick['rx-byte'] + (float) $pick['tx-byte'])) {
+                            if (!$pick || (float) $i['rx-byte'] + (float) $i['tx-byte'] > (float) $pick['rx-byte'] + (float) $pick['tx-byte']) {
                                 $pick = $i;
                             }
                         }
@@ -276,9 +306,14 @@ class RouterMonitor
         }
         self::$pending = [];
         try {
-            $now = ORM::for_table('tbl_routers')->select_many('ip_address', 'enabled')->find_one($id);
-            if (!$now || (string) $now['ip_address'] !== (string) $r['ip_address'] || self::movedAt($id) !== $since) {
+            $now = ORM::for_table('tbl_routers')->select_many('ip_address', 'username', 'password', 'enabled')->find_one($id);
+            $then = self::movedAt($id);
+            if (!$now || (string) $now['ip_address'] !== (string) $r['ip_address'] || ($then ? $then['id'] : null) !== ($since ? $since['id'] : null)) {
                 return Lang::T('address changed during the reading, not kept');
+            }
+            // the login was changed while it was being read: the reading (a failed sign-in above all) was made with the old one
+            if ((string) $now['username'] !== (string) $r['username'] || (string) $now['password'] !== (string) $r['password']) {
+                return Lang::T('login changed during the reading, not kept');
             }
             // disabled while it was being read: no longer watched, so neither the reading nor an alert for it
             if ((int) $now['enabled'] !== 1) {
@@ -365,7 +400,7 @@ class RouterMonitor
         // a restart: the router's start time moved on since the last reading that had an uptime (failed readings in between have none)
         $lastUp = ORM::for_table('tbl_router_samples')->where('router_id', $id)->where('online', 1)->where_not_null('uptime')
             ->where_lt('id', $sampleId);
-        $lastUp = ($since ? $lastUp->where_gt('at', $since) : $lastUp)->order_by_desc('id')->find_one();
+        $lastUp = self::sinceMove($lastUp, $since)->order_by_desc('id')->find_one();
         if ($lastUp && self::restarted(strtotime($lastUp['at']), $lastUp['uptime'], $now, $s['uptime'])) {
             self::event($r, 'reboot', '', Lang::T('router restarted') . ' (' . Lang::T('up for') . ' ' . self::duration((int) round($s['uptime'] / 60)) . ')');
         }
@@ -545,7 +580,8 @@ class RouterMonitor
         return ['from' => $from, 'to' => time(), 'points' => $out, 'samples' => count($rows),
             'uptime' => $rows ? round($online / count($rows) * 100, 2) : null,
             'events' => array_map(function ($e) {
-                return ['at' => strtotime($e['at']), 'type' => $e['type'], 'detail' => $e['detail']];
+                // (a change of address keeps where its readings stop in its detail: nothing to show)
+                return ['at' => strtotime($e['at']), 'type' => $e['type'], 'detail' => $e['type'] === 'moved' ? '' : $e['detail']];
             }, $events)];
     }
 }

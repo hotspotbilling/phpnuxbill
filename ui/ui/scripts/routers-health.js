@@ -110,8 +110,17 @@
         if (!L || !d.at) return;
         if (d.at <= (L.lastAt || 0)) return; // the same (cached) reading again, whether or not it had a CPU figure
         L.lastAt = d.at;
-        // the router's address was changed since the last reading: its counters are another router's, so no speed across them
-        if (d.rev && L.rev && d.rev !== L.rev) L.prev = Object.create(null);
+        // the router's address was changed since the last reading: its readings are another router's, so its graphs start
+        // again (CPU, memory, traffic, the reading picked on them and the interface chosen) and no speed across the change
+        if (d.rev && L.rev && d.rev !== L.rev) {
+            L.prev = Object.create(null);
+            L.cpu = [];
+            L.mem = [];
+            L.rate = Object.create(null);
+            L.iface = null;
+            L.gap = false;
+            ['load', 'traffic'].forEach(function (k) { L.hover[k].f = null; L.hover[k].at = null; });
+        }
         if (d.rev) L.rev = d.rev;
         var cut = d.at - WINDOW;
         function push(arr, row) {
@@ -359,10 +368,23 @@
         state.innerHTML = on ? '<i aria-hidden="true"></i> ' + esc(t.live) : esc(t.paused);
         btn.innerHTML = on ? '<i class="fa fa-pause" aria-hidden="true"></i> ' + esc(t.pause) : '<i class="fa fa-play" aria-hidden="true"></i> ' + esc(t.resume);
         var body = box.querySelector('.rt-panel__body');
+        var failEl = body.querySelector('[data-rt-fail]');
         if (!d.ok) {
-            body.innerHTML = '<p class="rt-err rt-err--block">' + failText(d) + '</p>';
+            // the graphs so far stay where they are (and keep the keyboard focus); the failure is said above them
+            if (!body.querySelector('.rt-charts')) {
+                body.innerHTML = '<p class="rt-err rt-err--block">' + failText(d) + '</p>';
+                return;
+            }
+            if (!failEl) {
+                failEl = document.createElement('p');
+                failEl.className = 'rt-err rt-err--block';
+                failEl.setAttribute('data-rt-fail', '');
+                body.insertBefore(failEl, body.firstChild);
+            }
+            failEl.innerHTML = failText(d);
             return;
         }
+        if (failEl) failEl.parentNode.removeChild(failEl);
         if (!body.querySelector('.rt-facts')) {
             body.innerHTML = '<dl class="rt-facts"></dl><div class="rt-meters"></div>'
                 + '<div class="rt-charts">'
@@ -529,6 +551,7 @@
         var L = live[id] || (live[id] = { cpu: [], mem: [], prev: Object.create(null), rate: Object.create(null), iface: null, gen: 0, hover: { load: { f: null, at: null }, traffic: { f: null, at: null } } });
         clearTimeout(L.timer);
         L.gen++;
+        L.suspended = false;
         // the counters read before the pause are no baseline for the next reading (the speed would average over the pause);
         // the graphs so far stay, with a gap after them
         L.prev = Object.create(null);
@@ -538,16 +561,21 @@
         if (data[id]) panel(id, data[id]);
         tick(id, L.gen);
     }
-    function pause(id) {
+    // suspended: paused by leaving the Live tab or closing the row, so showing it again carries on; any other pause (the Pause
+    // button, the 10-minute limit) stays until Resume is pressed
+    function pause(id, suspended) {
         var L = live[id];
         if (!L) return;
         clearTimeout(L.timer);
         L.paused = true; // (the baseline is cleared when it starts again: start())
+        L.suspended = !!suspended;
         if (data[id]) panel(id, data[id]);
     }
     function stop(id) {
         if (live[id]) {
             clearTimeout(live[id].timer);
+            // (a panel paused by hand stays so: see rt:tab)
+            if (!live[id].paused) live[id].suspended = true;
             live[id].paused = true;
         }
     }
@@ -590,9 +618,10 @@
         var row = document.getElementById('rt-detail-' + id);
         if (!row || row.hidden || !document.querySelector('[data-rt-panel="' + id + '"]')) return;
         if (e.detail.tab === 'live') {
-            if (!live[id] || live[id].paused) start(id);
+            // back on the Live tab: reading again only if leaving it paused the readings, not after a Pause
+            if (!live[id] || (live[id].paused && live[id].suspended)) start(id);
         } else if (live[id] && !live[id].paused) {
-            pause(id);
+            pause(id, true);
         }
     });
 
@@ -621,7 +650,8 @@
                 // to be shown, which says so through rt:tab
                 var sel = row.querySelector('.rt-tab.is-on');
                 // without routers-tools.js (it failed to load) no tab is ever chosen: the Live panel, the only one shown, starts now
-                if (box && (sel ? sel.getAttribute('data-rt-tab') === 'live' : !window.rtToolsReady)) start(id);
+                // (a panel paused by hand before the row was closed stays paused until Resume)
+                if (box && (sel ? sel.getAttribute('data-rt-tab') === 'live' : !window.rtToolsReady) && (!live[id] || live[id].suspended)) start(id);
             } else {
                 stop(id);
             }

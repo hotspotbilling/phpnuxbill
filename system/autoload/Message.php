@@ -66,7 +66,12 @@ class Message
         $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         try {
-            $response = Http::getData($smsurl, [], $timeout, $timeout);
+            $response = Http::getData($smsurl, [], $timeout, $timeout, $httpError);
+            if ($httpError !== '') {
+                // the gateway was not reached or did not answer in time: the text is cURL's error, not the gateway's answer
+                self::logMessage('SMS HTTP Request', $phone, $txt, 'Error', $httpError);
+                return false;
+            }
             self::logMessage('SMS HTTP Response', $phone, $txt, 'Success', $response);
             return ($response !== '' && $response !== false && $response !== null) ? $response : true;
         } catch (Throwable $e) {
@@ -127,7 +132,12 @@ class Message
         $waurl = str_replace('[text]', urlencode($txt), $waurl);
 
         try {
-            $response = Http::getData($waurl, [], $timeout, $timeout);
+            $response = Http::getData($waurl, [], $timeout, $timeout, $httpError);
+            if ($httpError !== '') {
+                // the gateway was not reached or did not answer in time: the text is cURL's error, not the gateway's answer
+                self::logMessage('WhatsApp HTTP Request', $phone, $txt, 'Error', $httpError);
+                return false;
+            }
             self::logMessage('WhatsApp HTTP Response', $phone, $txt, 'Success', $response);
             return ($response !== '' && $response !== false && $response !== null) ? $response : true;
         } catch (Throwable $e) {

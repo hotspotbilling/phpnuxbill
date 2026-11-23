@@ -242,7 +242,7 @@
         }
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.19.14"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-tools.js?2026.11.23.1"></script>
 <script>
     // routers-tools.js did not load: its tabs cannot work. They are switched off and each details row says so; the Live tab is
     // left to routers-health.js, which works without it
@@ -297,7 +297,7 @@
         });
     };
 </script>
-<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.19.9" onerror="window.rtHealthFailed()"></script>
+<script src="{$app_url}/ui/ui/scripts/routers-health.js?2026.11.23.1" onerror="window.rtHealthFailed()"></script>
 {/if}
 
     <div class="bs-callout bs-callout-info" id="callout-navbar-role">

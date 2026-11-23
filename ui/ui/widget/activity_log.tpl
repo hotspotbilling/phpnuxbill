@@ -6,7 +6,7 @@
                 <li class="primary">
                     <span class="point"></span>
                     <span class="time small text-muted">{Lang::timeElapsed($dl['date'],true)}</span>
-                    <p>{$dl['description']}</p>
+                    <p>{$dl['description']|escape}</p>
                 </li>
             {/foreach}
         </ul>

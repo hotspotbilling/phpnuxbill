@@ -110,34 +110,45 @@ class Package
          * 1 Customer only can have 1 PPPOE and 1 Hotspot Plan, 1 prepaid and 1 postpaid
          */
 
-        $query = ORM::for_table('tbl_user_recharges')
-            ->select('tbl_user_recharges.id', 'id')
-            ->select('customer_id')
-            ->select('username')
-            ->select('plan_id')
-            ->select('namebp')
-            ->select('recharged_on')
-            ->select('recharged_time')
-            ->select('expiration')
-            ->select('time')
-            ->select('status')
-            ->select('method')
-            ->select('tbl_user_recharges.routers', 'routers')
-            ->select('tbl_user_recharges.type', 'type')
-            ->select('admin_id')
-            ->select('prepaid')
-            ->where('tbl_user_recharges.routers', $router_name)
-            ->where('tbl_user_recharges.Type', $p['type'])
-            # PPPOE or Hotspot only can have 1 per customer prepaid or postpaid
-            # because 1 customer can have 1 PPPOE and 1 Hotspot Plan in mikrotik
-            //->where('prepaid', $p['prepaid'])
-            ->left_outer_join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'));
-        if ($isVoucher) {
-            $query->where('username', $c['username']);
-        } else {
-            $query->where('customer_id', $id_customer);
+        // the router this recharge is for, by its id: a rename keeps it, so a rename made while this runs can be told from a
+        // plan moved to another router (see followRename)
+        $router_id = self::routerId($router_name);
+        $findActive = function ($routers) use ($p, $isVoucher, $c, $id_customer) {
+            $query = ORM::for_table('tbl_user_recharges')
+                ->select('tbl_user_recharges.id', 'id')
+                ->select('customer_id')
+                ->select('username')
+                ->select('plan_id')
+                ->select('namebp')
+                ->select('recharged_on')
+                ->select('recharged_time')
+                ->select('expiration')
+                ->select('time')
+                ->select('status')
+                ->select('method')
+                ->select('tbl_user_recharges.routers', 'routers')
+                ->select('tbl_user_recharges.type', 'type')
+                ->select('admin_id')
+                ->select('prepaid')
+                ->where('tbl_user_recharges.routers', $routers)
+                ->where('tbl_user_recharges.Type', $p['type'])
+                # PPPOE or Hotspot only can have 1 per customer prepaid or postpaid
+                # because 1 customer can have 1 PPPOE and 1 Hotspot Plan in mikrotik
+                //->where('prepaid', $p['prepaid'])
+                ->left_outer_join('tbl_plans', array('tbl_plans.id', '=', 'tbl_user_recharges.plan_id'));
+            if ($isVoucher) {
+                $query->where('username', $c['username']);
+            } else {
+                $query->where('customer_id', $id_customer);
+            }
+            return $query->find_one();
+        };
+        $b = $findActive($router_name);
+        if (!$b && ($renamed = self::renamedTo($router_name, $router_id, $plan_id)) !== null) {
+            // the router was renamed after the caller read its name: the active recharge was moved to the new name with it, so
+            // it is found there and extended (followRename then moves this save to the new name too) rather than a second one
+            $b = $findActive($renamed);
         }
-        $b = $query->find_one();
 
         run_hook("recharge_user");
 
@@ -280,7 +291,7 @@ class Package
                     $b->admin_id = '0';
                 }
                 $b->save();
-                self::followRename('tbl_user_recharges', $b->id(), $router_name, $plan_id);
+                self::followRename('tbl_user_recharges', $b->id(), $router_name, $plan_id, $router_id);
             }
 
             // insert table transactions
@@ -319,7 +330,7 @@ class Package
                 $t->admin_id = '0';
             }
             $t->save();
-            self::followRename('tbl_transactions', $t->id(), $router_name, $plan_id);
+            self::followRename('tbl_transactions', $t->id(), $router_name, $plan_id, $router_id);
 
             if ($p['validity_unit'] == 'Period') {
                 // insert price to fields for invoice next month
@@ -401,7 +412,7 @@ class Package
                     $d->admin_id = '0';
                 }
                 $d->save();
-                self::followRename('tbl_user_recharges', $d->id(), $router_name, $plan_id);
+                self::followRename('tbl_user_recharges', $d->id(), $router_name, $plan_id, $router_id);
             }
 
             // insert table transactions
@@ -437,7 +448,7 @@ class Package
             }
             $t->type = $p['type'];
             $t->save();
-            self::followRename('tbl_transactions', $t->id(), $router_name, $plan_id);
+            self::followRename('tbl_transactions', $t->id(), $router_name, $plan_id, $router_id);
 
             if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                 // insert price to fields for invoice next month
@@ -799,7 +810,7 @@ class Package
      * A plan on a Mikrotik router that is disabled (Network > Routers): PHPNuxBill does not use that router until it is enabled
      * again, so no command is sent to it. The recharge is still saved; Sync customers on the router sends it later.
      */
-    private static function routerOff($plan)
+    public static function routerOff($plan)
     {
         $name = (string) ($plan['routers'] ?? '');
         if ($name === '' || stripos((string) ($plan['device'] ?? ''), 'Mikrotik') !== 0) {
@@ -809,24 +820,77 @@ class Package
         return $r && (int) $r['enabled'] !== 1;
     }
 
+    /** The id of the router with this name, or null (no such router: "radius", a balance, or a name no longer in use) */
+    public static function routerId($router_name)
+    {
+        $name = (string) $router_name;
+        if ($name === '' || in_array($name, ['radius', 'balance', 'Custom Balance'], true)) {
+            return null;
+        }
+        try {
+            $r = ORM::for_table('tbl_routers')->select('id')->where('name', $name)->find_one();
+            return $r ? (int) $r['id'] : null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * The name a router has now when it no longer has $router_name (renamed since the caller read it), else null. Followed by the
+     * router's id when it was known by that name here; otherwise by the plan, as long as no router still has the old name.
+     */
+    private static function renamedTo($router_name, $router_id, $plan_id)
+    {
+        $name = (string) $router_name;
+        if ($name === '' || in_array($name, ['radius', 'balance', 'Custom Balance'], true)) {
+            return null;
+        }
+        try {
+            if ($router_id) {
+                $r = ORM::for_table('tbl_routers')->select('name')->find_one($router_id);
+                $now = $r ? (string) $r['name'] : '';
+            } else {
+                if (ORM::for_table('tbl_routers')->where('name', $name)->count() > 0) {
+                    return null;
+                }
+                $plan = ORM::for_table('tbl_plans')->select('routers')->find_one($plan_id);
+                $now = $plan ? (string) $plan['routers'] : '';
+                if ($now !== '' && ORM::for_table('tbl_routers')->where('name', $now)->count() === 0) {
+                    $now = '';
+                }
+            }
+        } catch (Throwable $e) {
+            return null;
+        }
+        return ($now !== '' && $now !== $name) ? $now : null;
+    }
+
     /**
      * A router renamed while this recharge was being saved: the rename moves every row saved before it to the new name, but a
      * row written after it with the name read earlier would keep the old one. Checked once the row is saved, so one or the
      * other catches it: a row whose router name no longer exists follows its plan to the router the plan names now.
      * Rows on a router that still has the name are left as they are. $id is one row's id or a list of them (a voucher batch).
+     * $router_id is the id the router had under $router_name when the caller read it: given, the row follows only that router
+     * (renamed), never a plan moved to another router while the old one was deleted.
      */
-    public static function followRename($table, $id, $router_name, $plan_id)
+    public static function followRename($table, $id, $router_name, $plan_id, $router_id = null)
     {
         $ids = array_values(array_filter(array_map('intval', (array) $id)));
         if (!$ids || !in_array($table, ['tbl_user_recharges', 'tbl_transactions', 'tbl_voucher'], true)
             || in_array($router_name, ['radius', 'balance', 'Custom Balance'], true)) {
             return;
         }
+        $same = '';
+        $args = [$plan_id, $router_name];
+        if ($router_id) {
+            $same = ' AND r2.id = ?';
+            $args[] = (int) $router_id;
+        }
         try {
             ORM::raw_execute("UPDATE `$table` t JOIN `tbl_plans` p ON p.id = ? SET t.routers = p.routers
                 WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND p.routers <> t.routers
                 AND NOT EXISTS (SELECT 1 FROM `tbl_routers` r WHERE r.name = t.routers)
-                AND EXISTS (SELECT 1 FROM `tbl_routers` r2 WHERE r2.name = p.routers)", [$plan_id, $router_name]);
+                AND EXISTS (SELECT 1 FROM `tbl_routers` r2 WHERE r2.name = p.routers$same)", $args);
         } catch (Throwable $e) {
             // the recharge itself is saved: a failed check leaves it as it was
         }
@@ -837,39 +901,51 @@ class Package
      * dialled by the customer's own router or ONU with the password saved in it; without a separate PPPoE password that is the
      * portal password, so changing it would lock the connection out at its next reconnect. The current password is kept as the
      * PPPoE password first, so the connection goes on working and only the portal password changes (an admin can change the
-     * PPPoE one on the customer's page). Not done when the customer also has an active hotspot plan on a RADIUS device that
-     * reads the PPPoE password first, as that sign-in needs the new one. Does not save: the caller saves with the new password.
+     * PPPoE one on the customer's page). Each device then keeps its own credential: a Mikrotik secret takes the PPPoE password,
+     * a Mikrotik or RADIUS hotspot user the new one. Not done only when a PPPoE plan and a hotspot plan both sign in through
+     * the RADIUS database, as they share one password entry there (the PPPoE plan writes the PPPoE password into it, which
+     * would take the new one away from the hotspot sign-in). Does not save: the caller saves with the new password.
      */
     public static function keepDialPassword($customer)
     {
         if (!empty($customer['pppoe_password']) || (string) $customer['password'] === '') {
             return;
         }
-        $dial = false;
+        $dial = $radiusDial = $radiusOther = false;
         foreach (ORM::for_table('tbl_user_recharges')->where('customer_id', $customer['id'])->where('status', 'on')->find_many() as $tur) {
             $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
             if (!$p) {
                 continue;
             }
             $type = strtoupper((string) $p['type']);
+            $device = (string) $p['device'] !== '' ? (string) $p['device'] : (!empty($p['is_radius']) ? 'Radius' : '');
             if ($type === 'PPPOE' || $type === 'VPN') {
                 $dial = true;
-            } elseif (in_array((string) $p['device'] !== '' ? (string) $p['device'] : (!empty($p['is_radius']) ? 'Radius' : ''), ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
-                return; // a RADIUS hotspot sign-in would keep the old password too
+            }
+            if ($type === 'PPPOE' && in_array($device, ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
+                $radiusDial = true; // writes the PPPoE password (when there is one) as the account's Cleartext-Password
+            } elseif ($type !== 'PPPOE' && in_array($device, ['Radius', 'RadiusALE'], true)) {
+                $radiusOther = true; // writes the portal password as that same Cleartext-Password
             }
         }
-        if ($dial) {
+        if ($dial && !($radiusDial && $radiusOther)) {
             $customer->pppoe_password = $customer['password'];
         }
     }
 
     /**
      * Sends a customer's new password to the device of each active plan, after a password change or reset. Returns the errors
-     * (empty when every device took it). Each kind of device is told in the way that changes only the credentials:
+     * (empty when every device took it), one per plan, so a plan that fails does not stop the others. Each kind of device is
+     * told in the way that changes only the credentials, with the customer as given (the new password, even before it is saved):
      * - Voucher keeps no account (its add_customer would issue the customer a new voucher): skipped;
+     * - a plan on a disabled router: nothing is sent, said as an error (Sync customers sends it once the router is enabled);
      * - a RADIUS device's add_customer starts a new period from today: sync_customer re-adds the account with the expiry it
      *   has, or, without one, customerUpsert writes the credentials (created when missing);
-     * - a Mikrotik device's add_customer gives an existing user or secret the new password and creates a missing one.
+     * - a Mikrotik hotspot user is looked up and given the new password in place (its usage counters kept); a missing one
+     *   is created with add_customer;
+     * - a Mikrotik PPPoE secret is given its dial password in place, the router's refusal said as an error; a missing one is
+     *   created by sync_customer;
+     * - any other device: add_customer.
      */
     public static function sendPassword($customer)
     {
@@ -880,14 +956,24 @@ class Package
         }
         foreach (ORM::for_table('tbl_user_recharges')->where('customer_id', $customer['id'])->where('status', 'on')->find_many() as $tur) {
             $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
-            $dvc = $p ? self::getDevice($p) : '';
-            if ($dvc === '' || !file_exists($dvc) || $p['device'] === 'Voucher') {
+            if (!$p || $p['device'] === 'Voucher') {
                 continue;
             }
             try {
+                $dvc = self::getDevice($p);
+                if ($dvc === '' || $dvc === 'none' || !file_exists($dvc)) {
+                    throw new Exception(Lang::T('Devices Not Found'));
+                }
+                if (self::routerOff($p)) {
+                    throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
+                }
                 require_once $dvc;
                 $dev = new $p['device'];
-                if (method_exists($dev, 'customerUpsert')) {
+                if ($p['device'] === 'MikrotikHotspot') {
+                    self::hotspotPassword($dev, $customer, $p);
+                } elseif ($p['device'] === 'MikrotikPppoe') {
+                    self::pppoePassword($dev, $customer, $p);
+                } elseif (method_exists($dev, 'customerUpsert')) {
                     method_exists($dev, 'sync_customer') ? $dev->sync_customer($customer, $p) : $dev->customerUpsert($customer, $p);
                 } else {
                     $dev->add_customer($customer, $p);
@@ -897,6 +983,67 @@ class Package
             }
         }
         return $errors;
+    }
+
+    /** The client for a Mikrotik plan's router, through the device's own info() and getClient() */
+    private static function deviceClient($dev, $plan)
+    {
+        $router = $dev->info($plan['routers']);
+        if (!$router) {
+            throw new Exception(Lang::T('Router not found') . ': ' . $plan['routers']);
+        }
+        return $dev->getClient($router['ip_address'], $router['username'], $router['password']);
+    }
+
+    /** The .id of the hotspot user with this name ('' when there is none); a refused lookup is thrown */
+    private static function hotspotUserId($client, $username)
+    {
+        $print = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/user/print');
+        $print->setArgument('.proplist', '.id');
+        $print->setQuery(\PEAR2\Net\RouterOS\Query::where('name', $username));
+        $res = $client->sendSync($print);
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception($err);
+        }
+        return (string) $res->getProperty('.id');
+    }
+
+    /** A Mikrotik hotspot user's password changed in place; the user is created only when the lookup says it is missing */
+    private static function hotspotPassword($dev, $customer, $plan)
+    {
+        $client = self::deviceClient($dev, $plan);
+        $id = self::hotspotUserId($client, $customer['username']);
+        if ($id === '') {
+            $dev->add_customer($customer, $plan);
+            // add_customer does not say when the router refuses: the user is looked for again
+            if (self::hotspotUserId($client, $customer['username']) === '') {
+                throw new Exception(Lang::T('The router refused the command'));
+            }
+            return;
+        }
+        $set = new \PEAR2\Net\RouterOS\Request('/ip/hotspot/user/set');
+        $set->setArgument('numbers', $id);
+        $set->setArgument('password', $customer['password']);
+        if (($err = RouterApi::error($client->sendSync($set))) !== null) {
+            throw new Exception($err); // the user is left as it was, with its old password
+        }
+    }
+
+    /** A Mikrotik PPPoE secret given its dial password in place (the PPPoE password, else the portal one), the reply checked */
+    private static function pppoePassword($dev, $customer, $plan)
+    {
+        $client = self::deviceClient($dev, $plan);
+        $id = $dev->getIdByCustomer($customer, $client);
+        if (empty($id)) {
+            $dev->sync_customer($customer, $plan); // creates the secret, the router's refusal thrown
+            return;
+        }
+        $set = new \PEAR2\Net\RouterOS\Request('/ppp/secret/set');
+        $set->setArgument('numbers', $id);
+        $set->setArgument('password', !empty($customer['pppoe_password']) ? $customer['pppoe_password'] : $customer['password']);
+        if (($err = RouterApi::error($client->sendSync($set))) !== null) {
+            throw new Exception($err);
+        }
     }
 
     public static function getDevice($plan)

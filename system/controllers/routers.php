@@ -58,7 +58,7 @@ $routerUsage = function (array $ids) {
 // The address and the API port are separate fields on the form, but one value in the database ("host" or "host:port"), which is
 // what every part of PHPNuxBill reads. An empty port keeps the address as typed; 8728 (the default) is left off.
 $joinAddress = function ($host, $port) {
-    $host = trim((string) $host);
+    $host = RouterAddress::normalize($host); // "[v6] : 8877" or "host : 99" saved as one spelling, as it is connected to
     $port = trim((string) $port);
     if ($port === '' || $host === '') {
         return $host;
@@ -78,7 +78,7 @@ $joinAddress = function ($host, $port) {
 };
 // "host:port" as the two form fields (an IPv6 address or a plain host keeps everything in the address field)
 $splitAddress = function ($addr) {
-    $addr = (string) $addr;
+    $addr = RouterAddress::normalize($addr);
     if (preg_match('/^\[(.+)\]:(\d+)$/', $addr, $m)) {
         return [$m[1], (int) $m[2] > 0 ? $m[2] : '']; // [IPv6]:port
     }
@@ -147,7 +147,7 @@ $validPort = function ($port) {
 // the port that will be used, after the port field has replaced any typed into the address: one written into the address
 // ("host:99999", "host:abc", "[v6]:0") must be valid too. A host name or IPv6 address without a port is fine.
 $validAddressPort = function ($address) use ($validPort) {
-    $address = trim((string) $address);
+    $address = RouterAddress::normalize($address); // checked in the spelling that is saved and connected to
     if (preg_match('/^\[[^\]]+\](?::(.*))?$/', $address, $m)) {
         return !isset($m[1]) || ($m[1] !== '' && $validPort($m[1]));
     }
@@ -202,6 +202,35 @@ $rosConnect = function ($ip, $user, $pass, $timeout = 5) {
 
 $rosSend = Closure::fromCallable([RouterApi::class, 'send']);
 $rosError = Closure::fromCallable([RouterApi::class, 'error']);
+
+// RouterApi::rows() for a list that can be long (sessions, interfaces): only the first $cap items are made into rows, the rest
+// are only counted, so the page keeps no second full copy of the reply. Returns [rows, how many the router listed]; a refusal is
+// thrown (code 403), as rows() does.
+$rowsCapped = function ($c, $command, array $props, $deadline, $cap, array $where = []) use ($rosSend, $rosError, $rosText) {
+    $q = null;
+    foreach ($where as $k => $v) {
+        $q = $q ? $q->andWhere($k, $v) : \PEAR2\Net\RouterOS\Query::where($k, $v);
+    }
+    $req = new \PEAR2\Net\RouterOS\Request($command, $q);
+    $req->setArgument('.proplist', implode(',', $props));
+    $res = $rosSend($c, $req, $deadline);
+    if (($err = $rosError($res)) !== null) {
+        throw new Exception($err, 403);
+    }
+    $out = [];
+    $total = 0;
+    foreach ($res as $r) {
+        if ($r->getType() !== \PEAR2\Net\RouterOS\Response::TYPE_DATA || ++$total > $cap) {
+            continue;
+        }
+        $row = [];
+        foreach ($props as $p) {
+            $row[$p] = $rosText($r->getProperty($p));
+        }
+        $out[] = $row;
+    }
+    return [$out, $total];
+};
 
 // What a router says about itself: identity, board, RouterOS version, uptime, load, memory, disk, temperature and users online.
 // Each part is asked for separately, so a router without one (no hotspot, no health sensor) still answers the rest.
@@ -516,8 +545,10 @@ switch ($action) {
                 $skipped[] = $r['name'];
                 continue;
             }
-            // and an address the form would accept: a host, and a valid API port when one is written into it
-            if ($op === 'enable' && ($hostMissing($r['ip_address']) || !$validAddressPort($r['ip_address']))) {
+            // and an address the form would accept: a host, and a valid API port when one is written into it. A legacy ":0"
+            // ("router.example:0", "[v6]:0") is the default port, as Edit and the connection read it, so it is checked without it
+            $addr = preg_replace('/^(\[[^\[\]]*\]|[^:]*):0+$/', '$1', RouterAddress::normalize($r['ip_address']));
+            if ($op === 'enable' && ($hostMissing($addr) || !$validAddressPort($addr))) {
                 $badAddr[] = $r['name'];
                 continue;
             }
@@ -568,6 +599,12 @@ switch ($action) {
             $failed = [];
             $unsure = []; // sent by a device that cannot say whether the router took it (no sync_customer of its own)
             $partial = []; // saved, but a later step was refused (clearing a fixed IP address, or an address off the Expired list)
+                // the device finds its router by the plan's router name: with another router of the same name (saved before names
+            // were checked) it could be sent to that one instead, so the sync is refused until one of them is renamed
+            if (ORM::for_table('tbl_routers')->where('name', $d['name'])->where_not_equal('id', $d['id'])->count() > 0) {
+                @session_start();
+                r2($back, 'e', htmlspecialchars($d['name']) . ': ' . Lang::T('Another router has the same name, so its customers cannot be told apart. Rename one of them first.'));
+            }
             foreach (ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $d['name'])->find_many() as $tur) {
                 // the list was read at the start: a recharge that has expired since (the cron) is not sent back to the router
                 // read again in full: its plan or router may have changed since too (a renewal, a move), and the current ones are used
@@ -625,19 +662,39 @@ switch ($action) {
                 // or it was sent and the connection went quiet, which is what a restarting router does but cannot be confirmed
                 $req = new \PEAR2\Net\RouterOS\Request('/system/reboot');
                 $req->setTag('reboot');
-                $c->sendAsync($req); // a failure here is thrown to the error below: nothing was sent
+                // one limit of five seconds for the whole of it: writing the command, waiting for the reply and every read
+                // inside a reply that arrives in parts (as RouterApi::send does)
+                $deadline = microtime(true) + 5;
+                $limited = method_exists($c, 'readDeadline');
                 $confirmed = false;
+                if ($limited) {
+                    $c->readDeadline($deadline);
+                }
                 try {
-                    $c->loop(5);
-                    $res = $c->extractNewResponses('reboot');
+                    $c->sendAsync($req); // a failure here is thrown to the error below: the command did not go out whole
+                    $res = [];
+                    try {
+                        $left = $deadline - microtime(true);
+                        if ($left > 0) {
+                            $c->loop((int) floor($left), (int) (($left - floor($left)) * 1000000));
+                        }
+                    } catch (\PEAR2\Net\Transmitter\Exception | \PEAR2\Net\RouterOS\SocketException $e) {
+                        // the connection dropped (or the time ran out) after the command went out: the usual sign of a restart
+                    }
+                    try {
+                        $res = $c->extractNewResponses('reboot'); // what arrived before any drop still counts
+                    } catch (Throwable $e) {
+                    }
                     if (($refused = $rosError($res)) !== null) {
                         throw new Exception($refused);
                     }
                     foreach ($res as $r) {
                         $confirmed = $confirmed || $r->getType() === \PEAR2\Net\RouterOS\Response::TYPE_FINAL;
                     }
-                } catch (\PEAR2\Net\Transmitter\SocketException $e) {
-                    // the connection dropped after the command went out: the usual sign of a restart
+                } finally {
+                    if ($limited) {
+                        $c->readDeadline(null);
+                    }
                 }
                 // confirmed or not, the router is going down: drop the connection now, so the client's goodbye (sent when it is
                 // destroyed, waiting for a reply) does not hang on it. A refusal was thrown above and keeps the normal close.
@@ -698,6 +755,11 @@ switch ($action) {
                     method_exists($c, 'abort') ? $c->abort() : null;
                     r2(getUrl('routers/settings'), 'e', Lang::T('Set a backup password in Router Settings first: backups are encrypted with it.'));
                 }
+                // the password goes in the save command: not over a plain connection that crosses the internet (see RouterApi)
+                if (($why = RouterApi::backupTransportError($c)) !== null) {
+                    method_exists($c, 'abort') ? $c->abort() : null;
+                    r2($back, 'e', htmlspecialchars($d['name'] . ': ' . $why));
+                }
                 // on boards whose root folder is emptied by a restart, saved in flash/ so it survives one
                 $file = RouterApi::backupFolder(RouterApi::rows($c, '/file/print', ['name', 'type'], microtime(true) + 15)) . 'phpnuxbill-' . date('Ymd-His');
                 $b = new \PEAR2\Net\RouterOS\Request('/system/backup/save');
@@ -754,12 +816,18 @@ switch ($action) {
                 // who is connected now, hotspot and PPPoE, each matched to a customer when the name is one
                 // a router without the hotspot (or PPP) package has nobody there; any other refusal (no permission) is said, so
                 // it is not mistaken for nobody being online
+                // up to 5,000 of each, searched and paged in the page; the totals say when a list was cut
                 $hs = [];
                 $pp = [];
+                $totalHs = 0;
+                $totalPp = 0;
+                // when each list was read: a session's start is that moment less the uptime the router gave then
+                $hsAt = $ppAt = time();
                 $readErrors = [];
                 $read = ['hotspot' => true, 'pppoe' => true]; // whether each list was read (a missing package counts: nobody there)
                 try {
-                    $hs = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime', 'bytes-in', 'bytes-out', 'server'], $until);
+                    [$hs, $totalHs] = $rowsCapped($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime', 'bytes-in', 'bytes-out', 'server'], $until, 5000);
+                    $hsAt = time();
                 } catch (Throwable $e) {
                     if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
@@ -771,7 +839,8 @@ switch ($action) {
                 }
                 try {
                     // PPPoE only: L2TP, SSTP and the other tunnels are not customers
-                    $pp = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'caller-id', 'address', 'uptime'], $until, [], ['service' => 'pppoe']);
+                    [$pp, $totalPp] = $rowsCapped($c, '/ppp/active/print', ['.id', 'name', 'service', 'caller-id', 'address', 'uptime'], $until, 5000, ['service' => 'pppoe']);
+                    $ppAt = time();
                 } catch (Throwable $e) {
                     if (in_array($e->getCode(), [408, 503], true)) { // the connection is gone (no answer, or closed)
                         throw $e;
@@ -781,11 +850,6 @@ switch ($action) {
                         $read['pppoe'] = false;
                     }
                 }
-                // up to 5,000 of each, searched and paged in the page; the totals say when a list was cut
-                $totalHs = count($hs);
-                $totalPp = count($pp);
-                $hs = array_slice($hs, 0, 5000);
-                $pp = array_slice($pp, 0, 5000);
                 $names = array_values(array_unique(array_filter(array_merge(array_column($hs, 'user'), array_column($pp, 'name')), 'strlen')));
                 // each session is matched by the name it signs in with: a hotspot user by the customer's username, a PPPoE one by
                 // the PPPoE username when the customer has one and by the username otherwise (as the PPPoE device sets it up), so a
@@ -825,22 +889,22 @@ switch ($action) {
                         $whoPp[$ppName] = count($best) === 1 ? $best[0] : null;
                     }
                 }
-                // when each session began (now less its uptime, to the second): the user, address and MAC can all be the same for a
-                // new session that the router gives an ended one's ID, its start cannot
-                $startedAt = function ($uptime) {
+                // when each session began (the moment its list was read less its uptime, to the second): the user, address and MAC
+                // can all be the same for a new session that the router gives an ended one's ID, its start cannot
+                $startedAt = function ($uptime, $readAt) {
                     $secs = RouterMonitor::seconds($uptime);
-                    return $secs === null ? null : time() - $secs;
+                    return $secs === null ? null : $readAt - $secs;
                 };
                 $out = ['ok' => true, 'hotspot' => [], 'pppoe' => [], 'total_hotspot' => $totalHs, 'total_pppoe' => $totalPp, 'customer_url' => getUrl('customers/view/'),
                     'read_errors' => $readErrors, 'read' => $read, 'cfg' => $listedFrom];
                 foreach ($hs as $h) {
                     $out['hotspot'][] = ['sid' => $h['.id'], 'user' => $h['user'], 'address' => $h['address'], 'mac' => $h['mac-address'], 'uptime' => $rosUptime($h['uptime']),
-                        'started' => $startedAt($h['uptime']),
+                        'started' => $startedAt($h['uptime'], $hsAt),
                         'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $whoHs[$h['user']] ?? null];
                 }
                 foreach ($pp as $h) {
                     $out['pppoe'][] = ['sid' => $h['.id'], 'user' => $h['name'], 'address' => $h['address'], 'mac' => $h['caller-id'], 'uptime' => $rosUptime($h['uptime']),
-                        'started' => $startedAt($h['uptime']),
+                        'started' => $startedAt($h['uptime'], $ppAt),
                         'service' => $h['service'], 'customer' => $whoPp[$h['name']] ?? null];
                 }
                 $say($out);
@@ -886,20 +950,20 @@ switch ($action) {
             }
 
             if ($action === 'interfaces') {
-                $rows = RouterApi::rows($c, '/interface/print', ['name', 'type', 'running', 'disabled', 'dynamic', 'comment', 'mac-address', 'mtu', 'rx-byte', 'tx-byte',
-                    'rx-error', 'tx-error', 'rx-drop', 'tx-drop', 'link-downs', 'last-link-up-time', 'last-link-down-time'], $until);
                 // every PPPoE customer adds a dynamic interface: up to 2,000, searched and paged in the page
+                [$rows, $total] = $rowsCapped($c, '/interface/print', ['name', 'type', 'running', 'disabled', 'dynamic', 'comment', 'mac-address', 'mtu', 'rx-byte', 'tx-byte',
+                    'rx-error', 'tx-error', 'rx-drop', 'tx-drop', 'link-downs', 'last-link-up-time', 'last-link-down-time'], $until, 2000);
                 $num = function ($v) {
                     return is_numeric($v) ? (float) $v : null;
                 };
                 $items = [];
-                foreach (array_slice($rows, 0, 2000) as $r) {
+                foreach ($rows as $r) {
                     $items[] = ['name' => $r['name'], 'type' => $r['type'], 'running' => $r['running'] === 'true', 'disabled' => $r['disabled'] === 'true', 'dynamic' => $r['dynamic'] === 'true',
                         'comment' => $r['comment'], 'mac' => $r['mac-address'], 'mtu' => $r['mtu'], 'rx' => $num($r['rx-byte']), 'tx' => $num($r['tx-byte']),
                         'rx_error' => $num($r['rx-error']), 'tx_error' => $num($r['tx-error']), 'rx_drop' => $num($r['rx-drop']), 'tx_drop' => $num($r['tx-drop']),
                         'link_downs' => $num($r['link-downs']), 'last_up' => $r['last-link-up-time'], 'last_down' => $r['last-link-down-time']];
                 }
-                $say(['ok' => true, 'items' => $items, 'total' => count($rows)]);
+                $say(['ok' => true, 'items' => $items, 'total' => $total]);
             }
 
             if ($action === 'check') {
@@ -990,6 +1054,24 @@ switch ($action) {
                         }
                         return $neg ? !$hit : $hit;
                     };
+                    // whether a rule's dst-host covers the billing host: empty is any host, "*" a wildcard, and a leading "!" (how
+                    // RouterOS prints a negated value, in the same property) turns it round, so "!other.example" covers every host but
+                    // that one; null for one this check cannot judge (a ":" regular expression)
+                    $hostIn = function ($pat) use ($host) {
+                        $pat = strtolower(trim((string) $pat));
+                        if ($pat === '') {
+                            return true;
+                        }
+                        $neg = $pat[0] === '!';
+                        $pat = $neg ? ltrim(substr($pat, 1)) : $pat;
+                        if ($pat === '' || $pat[0] === ':') {
+                            return null;
+                        }
+                        $hit = $pat === $host || fnmatch($pat, $host) || ($pat[0] === '*' && substr($host, -strlen(ltrim($pat, '*'))) === ltrim($pat, '*'));
+                        return $neg ? !$hit : $hit;
+                    };
+                    // HTTPS is encrypted: the hotspot sees no path or method in it, so a rule that needs one never matches it
+                    $https = strtolower((string) parse_url(APP_URL, PHP_URL_SCHEME)) === 'https';
                     $found = false; // true allowed, false not, null cannot tell, 'deny' a rule that blocks it
                     $denyRule = '';
                     try {
@@ -1000,13 +1082,17 @@ switch ($action) {
                             if ($w['disabled'] === 'true') {
                                 continue;
                             }
-                            $pat = strtolower((string) $w['dst-host']);
-                            if ($pat !== '' && $pat[0] === ':') {
+                            // (a negated deny that covers the host is applied here in its turn, before any later allow)
+                            $inHost = $hostIn($w['dst-host']);
+                            if ($inHost === null) {
                                 $found = null;
                                 break;
                             }
-                            if ($pat !== '' && !($pat === $host || fnmatch($pat, $host) || ($pat[0] === '*' && substr($host, -strlen(ltrim($pat, '*'))) === ltrim($pat, '*')))) {
+                            if (!$inHost) {
                                 continue;
+                            }
+                            if ($https && (trim((string) $w['path']) !== '' || trim((string) $w['method']) !== '')) {
+                                continue; // not matched for an HTTPS request: the next rule is asked
                             }
                             $inPort = $portIn($w['dst-port']);
                             if ($inPort === false) {
@@ -1031,9 +1117,8 @@ switch ($action) {
                             // garden is asked: the deny is a definite block only when no such rule can apply (or they cannot be read)
                             try {
                                 foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'disabled', 'action'], $until) as $w) {
-                                    $pat = strtolower((string) $w['dst-host']);
                                     if ($w['disabled'] !== 'true' && in_array(strtolower((string) $w['action']), ['', 'accept'], true)
-                                        && ($pat === '' || $pat === $host || fnmatch($pat, $host))) {
+                                        && $hostIn($w['dst-host']) !== false) { // (one that may cover it leaves the deny uncertain too)
                                         $found = null;
                                         break;
                                     }
@@ -1071,13 +1156,16 @@ switch ($action) {
                             $mayAccept = false; // an earlier accept rule that may apply: a later drop is then not certain
                             try {
                                 foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'dst-address', 'src-address', 'src-address-list', 'dst-address-list', 'protocol', 'dst-port', 'server', 'disabled', 'action'], $until) as $w) {
-                                    $pat = strtolower((string) $w['dst-host']);
-                                    if ($w['disabled'] === 'true' || ($pat !== '' && $pat !== $host && !fnmatch($pat, $host))) {
+                                    $inHost = $hostIn($w['dst-host']);
+                                    if ($w['disabled'] === 'true' || $inHost === false) {
                                         continue;
                                     }
                                     $applies = $ipApplies($w);
                                     if ($applies === false) {
                                         continue;
+                                    }
+                                    if ($inHost === null) {
+                                        $applies = null; // a host this check cannot judge: the rule may apply
                                     }
                                     if (in_array(strtolower((string) $w['action']), ['', 'accept'], true)) {
                                         if ($applies === true) {
@@ -1091,7 +1179,7 @@ switch ($action) {
                                         $ipUnsure = true;
                                     } else {
                                         $found = 'ipblock';
-                                        $ipRule = $pat === '' ? '*' : (string) $w['dst-host'];
+                                        $ipRule = trim((string) $w['dst-host']) === '' ? '*' : (string) $w['dst-host'];
                                     }
                                     break;
                                 }
@@ -1526,13 +1614,15 @@ switch ($action) {
             $msg .= Lang::T('Data Not Found') . '<br>';
         }
 
-        if ($d['name'] != $name) {
+        $oldname = $d ? (string) $d['name'] : '';
+        // compared as text, strictly: "1000" and "01000" (equal as numbers to PHP's ==) are two names, and so a rename
+        $renamed = $d && $oldname !== (string) $name;
+        if ($renamed) {
             $c = ORM::for_table('tbl_routers')->where('name', $name)->where_not_equal('id', $id)->find_one();
             if ($c) {
                 $msg .= 'Name Already Exists<br>';
             }
         }
-        $oldname = $d['name'];
 
         if($enabled || _post("testIt")){
             // a new address must be free; enabling (even with the address unchanged) needs no other enabled router on it. "New"
@@ -1577,8 +1667,8 @@ switch ($action) {
                 $d->save();
                 // routers saved before names were checked may share one: then the rows naming it cannot be told apart, and
                 // they stay with the name (the other router) rather than perhaps moving that router's customers to this one
-                $shared = $name != $oldname && ORM::for_table('tbl_routers')->where('name', $oldname)->where_not_equal('id', $d['id'])->count() > 0;
-                if ($name != $oldname && !$shared) {
+                $shared = $renamed && ORM::for_table('tbl_routers')->where('name', $oldname)->where_not_equal('id', $d['id'])->count() > 0;
+                if ($renamed && !$shared) {
                     // one UPDATE per table rather than a read and then a save of each row: inside the transaction a read sees
                     // the database as it was at its first read, so a recharge (or voucher, payment) saved since would keep the
                     // old name. An UPDATE reads the rows as they are now, those included.

@@ -618,7 +618,8 @@
             var dRow = find(dModel);
             var busy = function () { // waiting for an answer, or done; a failed one can be tried again
                 var s = dPane._drops && dPane._drops[dKey];
-                return s === 'pending' || s === 'gone';
+                // only for this session: a new one with the same ID, user, address and MAC (it began later) can be disconnected
+                return (s === 'pending' || s === 'gone') && sameStart((dPane._dropStart || {})[dKey], dStarted);
             };
             if (!dRow || dRow.pending || dRow.gone || busy()) return;
             ask(drop, dUser + ': ' + t.dropAsk, function () {
@@ -627,12 +628,18 @@
                 dPane._drops[dKey] = 'pending'; // (replaces an earlier failure: trying again clears it)
                 dPane._dropStart = dPane._dropStart || {};
                 dPane._dropStart[dKey] = dStarted;
+                // this request's mark: a disconnect sent since for a new session with the same key replaces it, and this one's
+                // answer, if it comes later, no longer sets the state kept for that key
+                var dReq = {};
+                dPane._dropReq = dPane._dropReq || {};
+                dPane._dropReq[dKey] = dReq;
                 dRow.pending = true;
                 dRow.err = null;
                 if (dPane._lv === dModel) listRender(dPane);
                 request('drop', rid, { kind: dKind, sid: dSid, user: dUser, address: dAddr, mac: dMac, started: dStarted, cfg: dCfg }).then(function (d) {
                     // kept on the pane, not only on the row: a Refresh meanwhile replaces the rows, and the result must survive it
-                    dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
+                    // (unless a disconnect of a newer session with the same key has been sent since: the state is that one's)
+                    if (dPane._dropReq[dKey] === dReq) dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
                     // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may
                     // have replaced it); a list from other router settings is left alone
                     var cur = find(dPane._lv);
