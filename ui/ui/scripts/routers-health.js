@@ -101,8 +101,10 @@
         var L = live[id];
         if (L && !d.ok) {
             // a failed reading: the counters before it are no baseline for the next (the speed would average over the gap);
-            // the graphs so far stay, and a speed shows again after two good readings in a row
+            // the graphs so far stay, and a speed shows again after two good readings in a row. The CPU and memory lines are
+            // not joined across it either (see L.gap below).
             L.prev = Object.create(null);
+            L.gap = true;
             return;
         }
         if (!L || !d.at) return;
@@ -115,6 +117,13 @@
         function push(arr, row) {
             arr.push(row);
             while (arr.length && arr[0][0] < cut) arr.shift();
+        }
+        if (L.gap) {
+            // the first reading after a failed one, a pause or a hidden page: a gap in the CPU and memory graphs, so the line is
+            // not drawn across the time nothing was measured (this reading is kept, as a new start)
+            if (L.cpu.length) push(L.cpu, [d.at, null]);
+            if (L.mem.length) push(L.mem, [d.at, null]);
+            L.gap = false;
         }
         if (d.cpu != null) push(L.cpu, [d.at, d.cpu]);
         var m = pct(d.mem_used, d.mem_total);
@@ -213,7 +222,9 @@
             + '<span class="rt-chart__y" style="top:' + (Y(0) / H * 100) + '%">' + esc(fmt(0)) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--start" style="left:' + (padL / W * 100) + '%">' + esc(t.minutes5) + '</span>'
             + '<span class="rt-chart__x rt-chart__x--end">' + esc(t.now) + '</span>';
-        var empty = series.every(function (s) { return s.points.filter(function (p) { return p[1] != null; }).length < 2; });
+        // empty only when no series has a value yet (a single reading is drawn as a dot and can be looked at); a traffic chart
+        // with only its first baseline has no speed in it, so it stays "measuring"
+        var empty = series.every(function (s) { return !s.points.some(function (p) { return p[1] != null; }); });
         // the chart had the keyboard focus: the new one gets it back (the old one being replaced is no blur)
         var hadFocus = box.contains(document.activeElement);
         hover.redraw = true;
@@ -503,6 +514,7 @@
             // as after a pause (start()): the counters from before are no baseline, so the first reading back starts the speeds
             // again and only the one after it gives a speed
             L.prev = Object.create(null);
+            L.gap = true;
             L.timer = setTimeout(function () { tick(id, gen); }, EVERY);
             return;
         }
@@ -518,8 +530,9 @@
         clearTimeout(L.timer);
         L.gen++;
         // the counters read before the pause are no baseline for the next reading (the speed would average over the pause);
-        // the graphs so far stay
+        // the graphs so far stay, with a gap after them
         L.prev = Object.create(null);
+        L.gap = true;
         L.paused = false;
         L.started = Date.now();
         if (data[id]) panel(id, data[id]);
@@ -545,6 +558,7 @@
         Object.keys(live).forEach(function (id) {
             live[id].vis = (live[id].vis || 0) + 1;
             live[id].prev = Object.create(null);
+            live[id].gap = true;
         });
     });
 

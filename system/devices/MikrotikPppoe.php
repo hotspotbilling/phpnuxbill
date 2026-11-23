@@ -64,16 +64,18 @@ class MikrotikPppoe
 			}
             $setRequest->setArgument('profile', $plan['name_plan']);
             $setRequest->setArgument('comment', $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-            $this->checked($client->sendSync($setRequest));
+            $setRes = $this->checked($client->sendSync($setRequest));
+            $setTaken = RouterApi::error($setRes) === null;
 
-            if($unsetIP){
+            // the fixed IP is cleared only on a secret the router has just taken: after a refused change, nothing was saved
+            if ($unsetIP && $setTaken) {
                 $unsetRequest = new RouterOS\Request('/ppp/secret/unset');
                 $unsetRequest->setArgument('.id', $cid);
                 $unsetRequest->setArgument('value-name','remote-address');
                 try {
                     $this->checked($client->sendSync($unsetRequest));
                 } catch (Exception $e) {
-                    // the secret itself was saved just above: said as a partial update, with the router's reason
+                    // the router confirmed the secret change above: said as a partial update, with the router's reason
                     throw new Exception(Lang::T('Saved, but the fixed IP address could not be cleared') . ': ' . $e->getMessage(), self::PARTIAL, $e);
                 }
             }

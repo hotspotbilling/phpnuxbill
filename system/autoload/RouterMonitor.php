@@ -69,8 +69,10 @@ class RouterMonitor
      * The router's address was changed (routers.php, edit): the device there may be another one. Its readings before now are no
      * baseline for the next (traffic speed, restart) and its alert states (offline, high load) are not the new device's, so a
      * "moved" event marks where they stop counting. Kept like the newest state, so it is never pruned away before what it hides.
+     * $strict: a failed save throws instead of being ignored, so the caller can save it in the same transaction as the address
+     * and roll both back (an address changed with no "moved" event would let the old device's readings and states count).
      */
-    public static function moved($id)
+    public static function moved($id, $strict = false)
     {
         if (!self::ready()) {
             return;
@@ -83,6 +85,9 @@ class RouterMonitor
             $e->detail = '';
             $e->save();
         } catch (Throwable $e) {
+            if ($strict) {
+                throw $e;
+            }
         }
     }
 
@@ -269,10 +274,15 @@ class RouterMonitor
         if (!$locked) {
             return Lang::T('the router is being edited, reading not kept');
         }
+        self::$pending = [];
         try {
-            $now = ORM::for_table('tbl_routers')->select('ip_address')->find_one($id);
+            $now = ORM::for_table('tbl_routers')->select_many('ip_address', 'enabled')->find_one($id);
             if (!$now || (string) $now['ip_address'] !== (string) $r['ip_address'] || self::movedAt($id) !== $since) {
                 return Lang::T('address changed during the reading, not kept');
+            }
+            // disabled while it was being read: no longer watched, so neither the reading nor an alert for it
+            if ((int) $now['enabled'] !== 1) {
+                return Lang::T('router disabled during the reading, not kept');
             }
             return self::keep($r, $s, $prev, $why, $since);
         } finally {
@@ -280,8 +290,20 @@ class RouterMonitor
                 $db->query("SELECT RELEASE_LOCK('phpnuxbill_router_endpoint')");
             } catch (Throwable $e) {
             }
+            // the alerts of the events just saved go out only now: a slow channel must not keep router edits waiting on the lock
+            $pending = self::$pending;
+            self::$pending = [];
+            foreach ($pending as $text) {
+                self::alert($text);
+            }
         }
     }
+
+    /** Alerts of the events saved under the router edit lock, sent once it is released (see check()) */
+    private static $pending = [];
+
+    /** Emails of alerts, sent when the cron run ends (see alert()) */
+    private static $mails = [];
 
     /** Save a reading and turn it into events (called with the router edit lock held) */
     private static function keep($r, array $s, $prev, $why, $since)
@@ -315,7 +337,8 @@ class RouterMonitor
         $e->detail = mb_substr($detail, 0, 255);
         $e->save();
         if ($alert) {
-            self::alert($r['name'] . ': ' . $alert);
+            // sent by check() once the router edit lock is released
+            self::$pending[] = $r['name'] . ': ' . $alert;
         }
     }
 
@@ -390,7 +413,12 @@ class RouterMonitor
         }
         try {
             if (($config['router_alert_email'] ?? '0') === '1' && !empty($config['mail_from'])) {
-                Message::sendEmail($config['mail_from'], Lang::T('Router alert'), $text);
+                // SMTP has no overall time limit (minutes for each step) and sendEmail() takes none: the emails wait for the end
+                // of the run, so a stalled mail server cannot hold up the other routers or the backups
+                if (!self::$mails) {
+                    register_shutdown_function([self::class, 'sendMails']);
+                }
+                self::$mails[] = $text;
             }
         } catch (Throwable $e) {
         }
@@ -403,6 +431,20 @@ class RouterMonitor
                 } else {
                     Message::sendWhatsapp($phone, $text, 15);
                 }
+            } catch (Throwable $e) {
+            }
+        }
+    }
+
+    /** The alert emails kept by alert(), when the run ends. Never throws. */
+    public static function sendMails()
+    {
+        global $config;
+        $mails = self::$mails;
+        self::$mails = [];
+        foreach ($mails as $text) {
+            try {
+                Message::sendEmail($config['mail_from'], Lang::T('Router alert'), $text);
             } catch (Throwable $e) {
             }
         }

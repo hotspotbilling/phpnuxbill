@@ -4,8 +4,10 @@
     settings and checks each value. A switch posts 0 from its hidden field, or 1 when it is on.
 *}
 {function name=rt_switch key='' def='0' icon='' title='' hint=''}
+    {* outside the label: inside, the "off" style for the switch (input:not(:checked) ~ ...) would match this field too.
+       Still before the checkbox, so a switch that is on posts 0 then 1, and the 1 is kept *}
+    <input type="hidden" name="{$key}" value="0">
     <label class="mc-row mc-row--switch">
-        <input type="hidden" name="{$key}" value="0">
         {* on is "1", or "yes" as an older version saved it (the cron reads either as on): shown on, and saved as "1" *}
         {$rt_on = (string) ($_c[$key]|default:$def)}
         <input type="checkbox" name="{$key}" value="1" {if $rt_on === '1' || strtolower($rt_on) === 'yes'}checked{/if}>

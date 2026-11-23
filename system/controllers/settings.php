@@ -1210,7 +1210,18 @@ switch ($action) {
             if (!Csrf::check($csrf_token)) {
                 r2(getUrl('settings/miscellaneous'), 'e', Lang::T('Invalid or Expired CSRF Token') . ".");
             }
-            foreach ($_POST as $key => $value) {
+            // only this page's settings, and only those sent: any other posted name (or the token and the button) is not
+            // saved as a setting, and one the form no longer has (Router Check, now in Routers > Settings) keeps its value
+            $miscKeys = ['new_version_notify', 'allow_phone_otp', 'phone_otp_type', 'allow_email_otp', 'show_bandwidth_plan',
+                'hs_auth_method', 'check_customer_online', 'extend_expiry', 'router_check'];
+            foreach ($miscKeys as $key) {
+                if (!isset($_POST[$key]) || !is_string($_POST[$key])) {
+                    continue;
+                }
+                $value = $_POST[$key];
+                if ($key === 'router_check' && !in_array($value, ['0', '1'], true)) {
+                    continue;
+                }
                 $d = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
                 if ($d) {
                     $d->value = $value;

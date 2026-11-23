@@ -10626,7 +10626,8 @@ body.dark-mode .rt-err {
 .rt-mini tr.is-gone td {
   opacity: 0.5;
 }
-.rt-warn {
+.rt-warn,
+.rt-mini td.rt-warn { /* (over the table's own text colour) */
   color: #b45309;
   font-weight: 600;
 }
@@ -10745,6 +10746,7 @@ body.dark-mode .rt-check--bad > i {
   background: #16a34a;
 }
 .rt-strip > i.is-off {
+  top: 50%; /* lower than an online stretch: told apart without the colour */
   background: #dc2626;
 }
 body.dark-mode .rt-strip > i.is-on {

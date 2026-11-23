@@ -69,10 +69,22 @@ class MikrotikStatic
             $setRequest->setArgument('target', $customer['pppoe_ip']);
             $setRequest->setArgument('max-limit', $rate);
             $setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-            $this->checked($client->sendSync($setRequest));
-            if (!$isExp) {
-                $this->removeIpFromAddressList($client, $customer['pppoe_ip']);
+            // the expired entry is cleared only once the router has taken the queue change: a refused change keeps it blocked
+            if (RouterApi::error($this->checked($client->sendSync($setRequest))) === null && !$isExp) {
+                $this->clearExpired($client, $customer['pppoe_ip']);
             }
+        }
+    }
+
+    /**
+     * Take the customer's address off the Expired list, after the queue for it is in place. During a sync, a cleanup the router
+     * refuses is thrown as a partial update (MikrotikPppoe::PARTIAL): the queue was saved, the address may still be blocked.
+     */
+    private function clearExpired($client, $ip)
+    {
+        $err = $this->removeIpFromAddressList($client, $ip);
+        if ($err !== null && $this->strict) {
+            throw new Exception(Lang::T('Saved, but the address could not be taken off the Expired list') . ': ' . $err, 207);
         }
     }
 
@@ -255,9 +267,6 @@ class MikrotikStatic
         if (!empty(trim($bw['burst']))) {
             $rate .= ' ' . $bw['burst'];
         }
-        if (!$isExp) {
-            $this->removeIpFromAddressList($client, $customer['pppoe_ip']);
-        }
         $setRequest = new RouterOS\Request('/queue/simple/add');
         if (!empty($customer['pppoe_username'])) {
             $setRequest->setArgument('name', $customer['pppoe_username']);
@@ -267,7 +276,10 @@ class MikrotikStatic
         $setRequest->setArgument('target', $customer['pppoe_ip']);
         $setRequest->setArgument('max-limit', $rate);
         $setRequest->setArgument('comment', $plan['name_plan'] . ' | ' . $customer['fullname'] . ' | ' . $customer['email'] . ' | ' . implode(', ', User::getBillNames($customer['id'])));
-        $this->checked($client->sendSync($setRequest));
+        // the queue first: the customer leaves the Expired list only once the router has confirmed the queue that limits them
+        if (RouterApi::error($this->checked($client->sendSync($setRequest))) === null && !$isExp) {
+            $this->clearExpired($client, $customer['pppoe_ip']);
+        }
     }
 
     public function removeStaticActive($client, $username)
@@ -303,11 +315,18 @@ class MikrotikStatic
             '/ip firewall address-list print .proplist=.id',
             RouterOS\Query::where('address', $ip)
         );
-        $id = $client->sendSync($printRequest)->getProperty('.id');
+        $res = $client->sendSync($printRequest);
+        if (($err = RouterApi::error($res)) !== null) {
+            return $err;
+        }
+        $id = $res->getProperty('.id');
+        if (empty($id)) {
+            return null; // not on the list: nothing to take off
+        }
         $removeRequest = new RouterOS\Request('/ip/firewall/address-list/remove');
-        $client->sendSync(
+        return RouterApi::error($client->sendSync(
             $removeRequest
                 ->setArgument('numbers', $id)
-        );
+        ));
     }
 }

@@ -115,8 +115,17 @@
     }
 
     /* ---------- users online ---------- */
-    function dropKey(cfg, kind, sid) {
-        return (cfg || '') + ' ' + kind + ' ' + sid;
+    // a session as listed: its ID with the user, address and MAC / caller ID, as the router can give an ended session's ID to
+    // another one (the server checks the same before it disconnects), so an answer about one never marks its replacement
+    function dropKey(cfg, kind, sid, user, address, mac) {
+        var v = function (x) { return x == null ? '' : String(x); };
+        return (cfg || '') + ' ' + JSON.stringify([v(kind), v(sid), v(user), v(address), v(mac)]);
+    }
+    // and the same session, not a new one the router gave the same ID, user, address and MAC: it began when the listed one did
+    // (to a few seconds: each list works the start out from an uptime read at its own moment). Unknown on either side matches
+    function sameStart(a, b) {
+        if (a == null || b == null || a === '' || b === '') return true;
+        return Math.abs(Number(a) - Number(b)) <= 5;
     }
     function loadUsers(id, pane) {
         return request('sessions', id).then(function (d) {
@@ -130,7 +139,9 @@
             var orphans = [];
             Object.keys(pane._drops || {}).forEach(function (k) {
                 var s = pane._drops[k];
-                var r = rows.filter(function (x) { return dropKey(d.cfg, x.kind, x.sid) === k; })[0];
+                var r = rows.filter(function (x) {
+                    return dropKey(d.cfg, x.kind, x.sid, x.user, x.address, x.mac) === k && sameStart(x.started, (pane._dropStart || {})[k]);
+                })[0];
                 if (r) {
                     if (s === 'gone') r.gone = true; else if (s === 'pending') r.pending = true; else if (s && s.err) r.err = s.err;
                 } else if (s && s.err && k.indexOf((d.cfg || '') + ' ') === 0) {
@@ -139,6 +150,7 @@
                     // the disconnected session has left the list: forgotten, so a later session that is given the same ID (the
                     // router numbers them again after a restart) is not shown as disconnected
                     delete pane._drops[k];
+                    if (pane._dropStart) delete pane._dropStart[k];
                 }
             });
             var curl = d.customer_url;
@@ -172,7 +184,7 @@
                         + '<td class="ls-dim">' + (r.kind === 'hotspot' ? '&darr; ' + esc(size(r.out)) + ' &middot; &uarr; ' + esc(size(r['in'])) : '') + '</td>'
                         + '<td class="rt-mini__end">' + (r.gone ? '<span class="ls-dim">' + esc(t.dropped) + '</span>'
                             : '<button type="button" class="ls-btn ls-btn--sm ls-btn--danger" data-rt-drop="' + esc(r.kind) + '" data-sid="' + esc(r.sid) + '" data-user="' + esc(r.user)
-                            + '" data-address="' + esc(r.address) + '" data-mac="' + esc(r.mac) + '"' + (r.pending ? ' disabled' : '') + '><i class="fa ' + (r.pending ? 'fa-spinner fa-spin' : 'fa-sign-out') + '" aria-hidden="true"></i> ' + esc(t.drop) + '</button>'
+                            + '" data-address="' + esc(r.address) + '" data-mac="' + esc(r.mac) + '" data-started="' + esc(r.started == null ? '' : r.started) + '"' + (r.pending ? ' disabled' : '') + '><i class="fa ' + (r.pending ? 'fa-spinner fa-spin' : 'fa-sign-out') + '" aria-hidden="true"></i> ' + esc(t.drop) + '</button>'
                             + (r.err ? '<small class="rt-err">' + esc(r.err) + '</small>' : '')) + '</td></tr>';
                 }
             });
@@ -443,17 +455,21 @@
                     { label: t.ul, cls: 'rt-s2', points: pts.map(function (p) { return [p.at, p.up]; }) }], fmt: bps, max: null }
             ];
             // online and offline along the period: green or red only where there are readings, neutral where there are none.
-            // Each point stands for one stretch of time, as wide as the server's averaging step.
+            // Each point stands for one stretch of time, as wide as the server's averaging step. An offline stretch is also lower
+            // (not told apart by colour alone), and each one says its time and state, on hover and to screen readers.
             var span = d.to - d.from, strip = '';
             var step = Math.max(300, Math.ceil(span / 300)), w = Math.max(0.15, step / span * 100);
+            var onText = t.stripOn || t.up, offText = t.stripOff || t.down;
             pts.forEach(function (p) {
-                strip += '<i class="' + (p.online ? 'is-on' : 'is-off') + '" style="left:' + ((p.at - step / 2 - d.from) / span * 100).toFixed(3) + '%;width:' + w.toFixed(3) + '%"></i>';
+                var said = stamp(p.at - step / 2, true) + ' – ' + stamp(p.at + step / 2) + ': ' + (p.online ? onText : offText);
+                strip += '<i role="listitem" class="' + (p.online ? 'is-on' : 'is-off') + '" title="' + esc(said) + '" style="left:' + ((p.at - step / 2 - d.from) / span * 100).toFixed(3) + '%;width:' + w.toFixed(3) + '%">'
+                    + '<span class="sr-only">' + esc(said) + '</span></i>';
             });
             var html = head(t.history, picker)
                 + (d.collecting ? '' : '<p class="rt-err rt-err--block">' + esc(t.notCollecting) + '</p>')
                 + '<dl class="rt-facts"><div><dt>' + esc(t.uptimePct) + '</dt><dd>' + (d.uptime == null ? '&mdash;' : esc(d.uptime) + '%') + '</dd></div>'
                 + '<div><dt>' + esc(t.samples) + '</dt><dd>' + esc(d.samples) + '</dd></div></dl>'
-                + '<div class="rt-strip" title="' + esc(t.uptimePct) + '">' + strip + '</div><div class="rt-charts">';
+                + '<div class="rt-strip" role="list" title="' + esc(t.uptimePct) + '" aria-label="' + esc(t.uptimePct) + '">' + strip + '</div><div class="rt-charts">';
             var wires = [];
             charts.forEach(function (c, i) {
                 // with readings but none for this graph (no uplink found, users not countable) it says so, rather than asking
@@ -592,9 +608,12 @@
             var dKind = drop.getAttribute('data-rt-drop'), dSid = drop.getAttribute('data-sid'), dUser = drop.getAttribute('data-user');
             // the session as listed: the server disconnects it only while its address and MAC / caller ID are still these
             var dAddr = drop.getAttribute('data-address') || '', dMac = drop.getAttribute('data-mac') || '';
-            var dCfg = dModel ? dModel.opts.cfg || '' : '', dKey = dropKey(dCfg, dKind, dSid);
-            var find = function (model) { // the row for this session in a list read with the same router settings
-                return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) { return r.sid === dSid && r.kind === dKind; })[0] : null;
+            var dStarted = drop.getAttribute('data-started') || '';
+            var dCfg = dModel ? dModel.opts.cfg || '' : '', dKey = dropKey(dCfg, dKind, dSid, dUser, dAddr, dMac);
+            var find = function (model) { // the row for this session (as listed: see dropKey()) in a list read with the same router settings
+                return model && (model.opts.cfg || '') === dCfg ? model.opts.rows.filter(function (r) {
+                    return dropKey(dCfg, r.kind, r.sid, r.user, r.address, r.mac) === dKey && sameStart(r.started, dStarted);
+                })[0] : null;
             };
             var dRow = find(dModel);
             var busy = function () { // waiting for an answer, or done; a failed one can be tried again
@@ -606,10 +625,12 @@
                 dPane._drops = dPane._drops || {};
                 if (busy()) return;
                 dPane._drops[dKey] = 'pending'; // (replaces an earlier failure: trying again clears it)
+                dPane._dropStart = dPane._dropStart || {};
+                dPane._dropStart[dKey] = dStarted;
                 dRow.pending = true;
                 dRow.err = null;
                 if (dPane._lv === dModel) listRender(dPane);
-                request('drop', rid, { kind: dKind, sid: dSid, user: dUser, address: dAddr, mac: dMac, cfg: dCfg }).then(function (d) {
+                request('drop', rid, { kind: dKind, sid: dSid, user: dUser, address: dAddr, mac: dMac, started: dStarted, cfg: dCfg }).then(function (d) {
                     // kept on the pane, not only on the row: a Refresh meanwhile replaces the rows, and the result must survive it
                     dPane._drops[dKey] = d.ok ? 'gone' : { err: d.error || t.fail, user: dUser };
                     // the answer goes to the row it was sent from and to the same session in the list shown now (a Refresh may

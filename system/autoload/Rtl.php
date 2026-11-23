@@ -29,7 +29,7 @@ class Rtl
     const OWN_RTL = ['sweetalert2', 'select2'];
 
     /** Bumped when the mirroring changes, so the copies already made are made again */
-    const VERSION = 8;
+    const VERSION = 9;
 
     /**
      * Put on what has been mirrored already. Smarty runs the filter on fetch() as well as display(), so a part fetched and then
@@ -125,7 +125,15 @@ class Rtl
                 if (trim($v) === '' || strpos($v, self::MARK) !== false) {
                     return $a[0];
                 }
-                $v = self::declarations($v);
+                // comments and strings are put aside first, as flip() does for a stylesheet: a @noflip comment keeps the
+                // declaration after it as it is, and a quoted file name (in image-set(), or content: "left") is not mirrored
+                $comments = [];
+                $strings = [];
+                $p = self::protect($v, $comments, $strings);
+                $v = $p === null ? null : self::restore(self::declarations($p), $comments, $strings);
+                if ($v === null) {
+                    return $a[0];
+                }
                 return $a[1] . $a[2] . $a[3] . $q . $v . (substr(rtrim($v), -1) === ';' ? '' : ';') . self::MARK . $q;
             }, $t[2]);
             return '<' . $t[1] . $attrs . $t[3];
@@ -230,10 +238,19 @@ class Rtl
                 $urls = [];
                 $css = preg_replace_callback('/@import\s+(?:url\(\s*(["\']?)([^"\')]+)\1\s*\)|(["\'])([^"\']+)\3)/i', function ($m) use ($rel, &$deps, &$urls) {
                     $target = trim(isset($m[4]) && $m[4] !== '' ? $m[4] : $m[2]);
-                    if ($target === '' || preg_match('#^([a-z][a-z0-9+.-]*:|//)#i', $target)) {
-                        return $m[0]; // another site (or data:): left as it is
+                    if ($target === '') {
+                        return $m[0];
                     }
-                    $site = $target[0] === '/' ? $target : APP_URL . '/' . (dirname($rel) === '.' ? '' : dirname($rel) . '/') . $target;
+                    if (preg_match('#^([a-z][a-z0-9+.-]*:|//)#i', $target)) {
+                        // a full address: one of this site's stylesheets is mirrored like a link to it; another site (or data:)
+                        // is left as it is
+                        if (self::localPath($target) === null) {
+                            return $m[0];
+                        }
+                        $site = $target;
+                    } else {
+                        $site = $target[0] === '/' ? $target : APP_URL . '/' . (dirname($rel) === '.' ? '' : dirname($rel) . '/') . $target;
+                    }
                     $url = self::mirrored($site);
                     $file = self::localPath($site);
                     $dep = $file === null ? '' : str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen(rtrim(realpath($GLOBALS['root_path']), DIRECTORY_SEPARATOR)) + 1));
@@ -364,17 +381,33 @@ class Rtl
         return str_repeat('../', count($a)) . ($b ? implode('/', $b) . '/' : '');
     }
 
-    /** Relative url(...) and @import paths, prefixed so they still point to the same files from the copy's folder */
+    /** Relative url(...), image-set() and @import paths, prefixed so they still point to the same files from the copy's folder */
     private static function rebase($css, $prefix)
     {
         $fix = function ($u) use ($prefix) {
             return preg_match('#^([a-z][a-z0-9+.-]*:|/|\#)#i', $u) || $u === '' ? $u : $prefix . $u;
         };
+        $str = '"(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\'';
+        // inside image-set() a quoted string is a file, as url() is (only the one in type("image/avif") is not): read with its
+        // brackets (url(), type()) and strings whole
+        $imageSet = '((?:-webkit-)?image-set\((?:[^()"\']|' . $str . '|\((?:[^()"\']|' . $str . ')*\))*\))';
         // one pass, left to right: comments and quoted strings are skipped whole, so text such as content: "url(a.png)" is
-        // left as it is, while url(...) and @import "..." outside them are rebased
-        return preg_replace_callback('/(\/\*.*?\*\/)|url\(\s*(["\']?)([^"\')]*)\2\s*\)|@import\s+(["\'])([^"\']+)\4|("(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\')/is', function ($m) use ($fix) {
-            if ($m[1] !== null || $m[6] !== null) {
+        // left as it is, while url(...), image-set(...) and @import "..." outside them are rebased
+        return preg_replace_callback('/(\/\*.*?\*\/)|url\(\s*(["\']?)([^"\')]*)\2\s*\)|@import\s+(["\'])([^"\']+)\4|' . $imageSet . '|(' . $str . ')/is', function ($m) use ($fix, $str) {
+            if ($m[1] !== null || $m[7] !== null) {
                 return $m[0];
+            }
+            if ($m[6] !== null) {
+                return preg_replace_callback('/\btype\(\s*(?:' . $str . ')\s*\)|url\(\s*(["\']?)([^"\')]*)\1\s*\)|(' . $str . ')/is', function ($n) use ($fix) {
+                    if ($n[3] !== null) {
+                        $q = $n[3][0];
+                        return $q . $fix(substr($n[3], 1, -1)) . $q;
+                    }
+                    if ($n[2] !== null) {
+                        return 'url(' . $n[1] . $fix(trim((string) $n[2])) . $n[1] . ')';
+                    }
+                    return $n[0];
+                }, $m[6], -1, $count, PREG_UNMATCHED_AS_NULL) ?? $m[0];
             }
             if ($m[5] !== null) {
                 return '@import ' . $m[4] . $fix($m[5]) . $m[4];
@@ -393,14 +426,7 @@ class Rtl
         // declaration as it is; a brace or a semicolon inside a string is not taken for the end of a rule
         $comments = [];
         $strings = [];
-        $css = preg_replace_callback('/\/\*.*?\*\/|"(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\'/s', function ($m) use (&$comments, &$strings) {
-            if ($m[0][0] === '/') {
-                $comments[] = $m[0];
-                return "\x01" . (count($comments) - 1) . (stripos($m[0], '@noflip') !== false ? 'n' : 'c') . "\x01";
-            }
-            $strings[] = $m[0];
-            return "\x02" . (count($strings) - 1) . "\x02";
-        }, $css);
+        $css = self::protect($css, $comments, $strings);
         if ($css === null) {
             return null;
         }
@@ -442,7 +468,29 @@ class Rtl
         $css = $css === null ? null : preg_replace_callback('/\x04(\d+)\x04/', function ($m) use ($kept) {
             return $kept[(int) $m[1]];
         }, $css);
-        $css = $css === null ? null : preg_replace_callback('/\x02(\d+)\x02/', function ($m) use ($strings) {
+        return $css === null ? null : self::restore($css, $comments, $strings);
+    }
+
+    /**
+     * Comments and quoted strings put aside as placeholders (\x01 for a comment, with "n" when it says @noflip, \x02 for a
+     * string), in one pass from left to right; null when the regular expression failed. restore() puts them back.
+     */
+    private static function protect($css, &$comments, &$strings)
+    {
+        return preg_replace_callback('/\/\*.*?\*\/|"(?:[^"\\\\\n]|\\\\.)*"|\'(?:[^\'\\\\\n]|\\\\.)*\'/s', function ($m) use (&$comments, &$strings) {
+            if ($m[0][0] === '/') {
+                $comments[] = $m[0];
+                return "\x01" . (count($comments) - 1) . (stripos($m[0], '@noflip') !== false ? 'n' : 'c') . "\x01";
+            }
+            $strings[] = $m[0];
+            return "\x02" . (count($strings) - 1) . "\x02";
+        }, $css);
+    }
+
+    /** The comments and strings protect() put aside, back in their places; null when a regular expression failed */
+    private static function restore($css, array $comments, array $strings)
+    {
+        $css = preg_replace_callback('/\x02(\d+)\x02/', function ($m) use ($strings) {
             return $strings[(int) $m[1]];
         }, $css);
         return $css === null ? null : preg_replace_callback('/\x01(\d+)[nc]\x01/', function ($m) use ($comments) {

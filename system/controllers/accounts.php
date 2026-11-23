@@ -42,22 +42,11 @@ switch ($action) {
                 if ($npass != $cnpass) {
                     r2(getUrl('accounts/change-password'), 'e', 'Both Password should be same');
                 }
+                Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with
                 $user->password = $npass;
-                $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $user['id'])->find_many();
-                foreach ($turs as $tur) {
-                    // if has active plan, change the password to devices
-                    if ($tur['status'] == 'on') {
-                        $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
-                        $dvc = Package::getDevice($p);
-                        if ($_app_stage != 'demo') {
-                            if (file_exists($dvc)) {
-                                require_once $dvc;
-                                (new $p['device'])->add_customer($user, $p);
-                            } else {
-                                new Exception(Lang::T("Devices Not Found"));
-                            }
-                        }
-                    }
+                // every active plan's device gets the new password (see Package::sendPassword for how each kind is told)
+                foreach (Package::sendPassword($user) as $err) {
+                    _log('[' . $user['username'] . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
                 }
                 $user->save();
                 if (class_exists('RedisCache')) {

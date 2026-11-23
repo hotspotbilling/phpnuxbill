@@ -549,7 +549,8 @@ switch ($action) {
         }
         $op = _post('op');
         $d = ORM::for_table('tbl_routers')->find_one((int) ($routes['2'] ?? 0));
-        if (!$d || !in_array($op, ['reboot', 'kick', 'backup', 'sync'], true)) {
+        // as the detail tabs: a disabled router (or one without an address) is not connected to or sent anything
+        if (!$d || !in_array($op, ['reboot', 'kick', 'backup', 'sync'], true) || (int) $d['enabled'] !== 1 || trim((string) $d['ip_address']) === '') {
             r2(getUrl('routers/list'), 'e', Lang::T('Data Not Found'));
         }
         if ($_app_stage == 'Demo') {
@@ -566,12 +567,17 @@ switch ($action) {
             $done = 0;
             $failed = [];
             $unsure = []; // sent by a device that cannot say whether the router took it (no sync_customer of its own)
-            $partial = []; // saved, but a later step (clearing a fixed IP address) was refused
+            $partial = []; // saved, but a later step was refused (clearing a fixed IP address, or an address off the Expired list)
             foreach (ORM::for_table('tbl_user_recharges')->where('status', 'on')->where('routers', $d['name'])->find_many() as $tur) {
                 // the list was read at the start: a recharge that has expired since (the cron) is not sent back to the router
-                $now = ORM::for_table('tbl_user_recharges')->select('status')->find_one($tur['id']);
+                // read again in full: its plan or router may have changed since too (a renewal, a move), and the current ones are used
+                $now = ORM::for_table('tbl_user_recharges')->find_one($tur['id']);
                 if (!$now || $now['status'] !== 'on') {
                     continue;
+                }
+                $tur = $now;
+                if (strcasecmp(rtrim((string) $tur['routers']), rtrim((string) $d['name'])) !== 0) {
+                    continue; // moved to another router since the list was read: not this router's to sync
                 }
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                 $c = ORM::for_table('tbl_customers')->find_one($tur['customer_id']);
@@ -595,7 +601,7 @@ switch ($action) {
                         $unsure[] = $tur['username'];
                     }
                 } catch (Throwable $e) {
-                    if (class_exists('MikrotikPppoe', false) && $e->getCode() === MikrotikPppoe::PARTIAL) {
+                    if ($e->getCode() === 207) { // the Mikrotik drivers' "saved, but a follow-up step failed" (MikrotikPppoe::PARTIAL)
                         $partial[] = $tur['username'];
                     } else {
                         $failed[] = $tur['username'];
@@ -605,7 +611,7 @@ switch ($action) {
             @session_start();
             _log($who . 'Router sync ' . $d['name'] . ': ' . $done . ' done, ' . count($partial) . ' partly done, ' . count($failed) . ' failed, ' . count($unsure) . ' not confirmed', $admin['user_type'], $admin['id']);
             r2($back, $failed || $unsure || $partial ? 'w' : 's', Lang::T('Customers sent to the router') . ': ' . $done
-                . ($partial ? '. ' . Lang::T('Saved, but the fixed IP address still needs to be cleared') . ': ' . htmlspecialchars(implode(', ', array_slice($partial, 0, 20))) . (count($partial) > 20 ? ' …' : '') : '')
+                . ($partial ? '. ' . Lang::T('Saved, but a follow-up step failed') . ': ' . htmlspecialchars(implode(', ', array_slice($partial, 0, 20))) . (count($partial) > 20 ? ' …' : '') : '')
                 . ($failed ? '. ' . Lang::T('Not sent') . ': ' . htmlspecialchars(implode(', ', array_slice($failed, 0, 20))) . (count($failed) > 20 ? ' …' : '') : '')
                 . ($unsure ? '. ' . Lang::T('Sent, but the router did not confirm them') . ': ' . htmlspecialchars(implode(', ', array_slice($unsure, 0, 20))) . (count($unsure) > 20 ? ' …' : '') : ''));
         }
@@ -819,14 +825,22 @@ switch ($action) {
                         $whoPp[$ppName] = count($best) === 1 ? $best[0] : null;
                     }
                 }
+                // when each session began (now less its uptime, to the second): the user, address and MAC can all be the same for a
+                // new session that the router gives an ended one's ID, its start cannot
+                $startedAt = function ($uptime) {
+                    $secs = RouterMonitor::seconds($uptime);
+                    return $secs === null ? null : time() - $secs;
+                };
                 $out = ['ok' => true, 'hotspot' => [], 'pppoe' => [], 'total_hotspot' => $totalHs, 'total_pppoe' => $totalPp, 'customer_url' => getUrl('customers/view/'),
                     'read_errors' => $readErrors, 'read' => $read, 'cfg' => $listedFrom];
                 foreach ($hs as $h) {
                     $out['hotspot'][] = ['sid' => $h['.id'], 'user' => $h['user'], 'address' => $h['address'], 'mac' => $h['mac-address'], 'uptime' => $rosUptime($h['uptime']),
+                        'started' => $startedAt($h['uptime']),
                         'in' => (float) $h['bytes-in'], 'out' => (float) $h['bytes-out'], 'server' => $h['server'], 'customer' => $whoHs[$h['user']] ?? null];
                 }
                 foreach ($pp as $h) {
                     $out['pppoe'][] = ['sid' => $h['.id'], 'user' => $h['name'], 'address' => $h['address'], 'mac' => $h['caller-id'], 'uptime' => $rosUptime($h['uptime']),
+                        'started' => $startedAt($h['uptime']),
                         'service' => $h['service'], 'customer' => $whoPp[$h['name']] ?? null];
                 }
                 $say($out);
@@ -848,13 +862,20 @@ switch ($action) {
                     return strcasecmp((string) $got, (string) $listed) === 0;
                 };
                 if ($kind === 'pppoe') {
-                    $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'address', 'caller-id'], $until, [], ['.id' => $sid]);
+                    $live = RouterApi::rows($c, '/ppp/active/print', ['.id', 'name', 'service', 'address', 'caller-id', 'uptime'], $until, [], ['.id' => $sid]);
                     $same = $live && (string) $live[0]['name'] === (string) _post('user') && (string) $live[0]['service'] === 'pppoe'
                         && $match($live[0]['address'], _post('address')) && $match($live[0]['caller-id'], _post('mac'));
                 } else {
-                    $live = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address'], $until, [], ['.id' => $sid]);
+                    $live = RouterApi::rows($c, '/ip/hotspot/active/print', ['.id', 'user', 'address', 'mac-address', 'uptime'], $until, [], ['.id' => $sid]);
                     $same = $live && (string) $live[0]['user'] === (string) _post('user')
                         && $match($live[0]['address'], _post('address')) && $match($live[0]['mac-address'], _post('mac'));
+                }
+                // and it began when the listed one did (a few seconds apart at most: both are worked out from an uptime read at
+                // a different moment). A list without a start, or a live session without one, is not held to it
+                $listedStart = _post('started');
+                if ($same && is_numeric($listedStart)) {
+                    $liveSecs = RouterMonitor::seconds($live[0]['uptime']);
+                    $same = $liveSecs === null || abs((time() - $liveSecs) - (int) $listedStart) <= 5;
                 }
                 if (!$same) {
                     $say(['ok' => false, 'stale' => true, 'error' => Lang::T('That session has ended or changed. Refresh the list and try again.')]);
@@ -1030,23 +1051,42 @@ switch ($action) {
                             // the IP walled garden is asked before the web one: a rule there that drops or rejects the traffic blocks
                             // the site even though a web rule allows it. Its rules are tried in order and the first that matches
                             // decides; one with conditions this check cannot judge leaves the answer unknown when it would block
+                            // whether a rule applies to the billing site: false when a condition this check can judge (the protocol,
+                            // the port) rules it out, null when one it cannot judge (addresses, address lists, a server) is set
+                            $ipApplies = function ($w) use ($portIn) {
+                                $proto = strtolower(trim((string) $w['protocol']));
+                                if ($proto !== '' && ($proto[0] === '!') === in_array(ltrim($proto, '!'), ['tcp', '6'], true)) {
+                                    return false; // the site is reached over TCP
+                                }
+                                $inPort = $portIn($w['dst-port']);
+                                if ($inPort === false) {
+                                    return false;
+                                }
+                                $unsure = $inPort === null;
+                                foreach (['dst-address', 'src-address', 'src-address-list', 'dst-address-list', 'server'] as $k) {
+                                    $unsure = $unsure || trim((string) $w[$k]) !== '';
+                                }
+                                return $unsure ? null : true;
+                            };
+                            $mayAccept = false; // an earlier accept rule that may apply: a later drop is then not certain
                             try {
-                                foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'dst-address', 'src-address', 'protocol', 'dst-port', 'server', 'disabled', 'action'], $until) as $w) {
+                                foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'dst-address', 'src-address', 'src-address-list', 'dst-address-list', 'protocol', 'dst-port', 'server', 'disabled', 'action'], $until) as $w) {
                                     $pat = strtolower((string) $w['dst-host']);
                                     if ($w['disabled'] === 'true' || ($pat !== '' && $pat !== $host && !fnmatch($pat, $host))) {
                                         continue;
                                     }
-                                    $cond = false;
-                                    foreach (['dst-address', 'src-address', 'protocol', 'dst-port', 'server'] as $k) {
-                                        $cond = $cond || trim((string) $w[$k]) !== '';
-                                    }
-                                    if (in_array(strtolower((string) $w['action']), ['', 'accept'], true)) {
-                                        if (!$cond) {
-                                            break; // let through before any later rule is asked
-                                        }
+                                    $applies = $ipApplies($w);
+                                    if ($applies === false) {
                                         continue;
                                     }
-                                    if ($cond) {
+                                    if (in_array(strtolower((string) $w['action']), ['', 'accept'], true)) {
+                                        if ($applies === true) {
+                                            break; // let through before any later rule is asked
+                                        }
+                                        $mayAccept = true;
+                                        continue;
+                                    }
+                                    if ($applies === null || $mayAccept) {
                                         $found = null;
                                         $ipUnsure = true;
                                     } else {
@@ -1401,17 +1441,21 @@ switch ($action) {
         if (Validator::Length($name, 30, 1) == false) {
             $msg .= 'Name should be between 1 to 30 characters' . '<br>';
         }
+        if (!$endpointLock()) { // held until the router is saved (or the request ends with the error)
+            r2(getUrl('routers/add'), 'e', $busyText());
+        }
         if($enabled || _post("testIt")){
             if ($ip_address == '' or $username == '') {
                 $msg .= Lang::T('All field is required') . '<br>';
             }
 
-            if (!$endpointLock()) { // held until the router is saved (or the request ends with the error)
-                r2(getUrl('routers/add'), 'e', $busyText());
-            }
             if ($endpointTaken($ip_address)) {
                 $msg .= Lang::T('IP Router Already Exist') . '<br>';
             }
+        }
+        // plans, recharges and the rest name their router: two routers with one name could not be told apart
+        if ($name !== '' && ORM::for_table('tbl_routers')->where('name', $name)->find_one()) {
+            $msg .= 'Name Already Exists<br>';
         }
         if (strtolower($name) == 'radius') {
             $msg .= '<b>Radius</b> name is reserved<br>';
@@ -1531,7 +1575,10 @@ switch ($action) {
             $db->beginTransaction();
             try {
                 $d->save();
-                if ($name != $oldname) {
+                // routers saved before names were checked may share one: then the rows naming it cannot be told apart, and
+                // they stay with the name (the other router) rather than perhaps moving that router's customers to this one
+                $shared = $name != $oldname && ORM::for_table('tbl_routers')->where('name', $oldname)->where_not_equal('id', $d['id'])->count() > 0;
+                if ($name != $oldname && !$shared) {
                     // one UPDATE per table rather than a read and then a save of each row: inside the transaction a read sees
                     // the database as it was at its first read, so a recharge (or voucher, payment) saved since would keep the
                     // old name. An UPDATE reads the rows as they are now, those included.
@@ -1539,15 +1586,20 @@ switch ($action) {
                         ORM::raw_execute("UPDATE `$tbl` SET `routers` = ? WHERE `routers` = ?", [$name, $oldname]);
                     }
                 }
+                // a new address starts a new history: the marker is saved with the address or neither is (a failed marker
+                // undoes the edit, so readings of the old address are never shown as the new one's)
+                if ($moved) {
+                    RouterMonitor::moved($d['id'], true);
+                }
                 $db->commit();
             } catch (Throwable $e) {
                 $db->rollBack();
                 throw $e;
             }
-            if ($moved) {
-                RouterMonitor::moved($d['id']);
-            }
             $endpointLock(false);
+            if ($shared) {
+                r2(getUrl('routers/list'), 'w', Lang::T('Data Updated Successfully') . '. ' . Lang::T('Another router has the old name too, so its plans and customers were not moved to the new name. Move them on the plans that belong to this router.'));
+            }
             r2(getUrl('routers/list'), 's', Lang::T('Data Updated Successfully'));
         } else {
             r2(getUrl('routers/edit/') . $id, 'e', $msg);
@@ -1576,6 +1628,8 @@ switch ($action) {
         }
         $ui->assign('usage', $routerUsage($ids));
         $ui->assign('health_on', $healthOn);
+        // a disabled router keeps its History tab: the saved readings are read from the database, not from the router
+        $ui->assign('history_ready', RouterMonitor::ready());
         $ui->assign('routely_vpn', $routelyVpn());
         run_hook('view_list_routers'); #HOOK
         $ui->display('admin/routers/list.tpl');

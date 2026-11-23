@@ -90,7 +90,7 @@ class RouterApi
         }
         $tag = 'nb' . (++$n);
         $req->setTag($tag);
-        $c->sendAsync($req);
+        self::transmit($c, $req, $deadline);
         $left = $deadline - microtime(true);
         $recvErr = null;
         if ($left > 0) {
@@ -130,6 +130,69 @@ class RouterApi
             throw new Exception(Lang::T('The router closed the connection') . ($why !== '' ? ': ' . mb_substr($why, 0, 120) : ''), 503);
         }
         throw new Exception(Lang::T('The router did not answer in time'), 408);
+    }
+
+    /**
+     * Send a request by the deadline. The library writes with no limit of its own (a router that stops taking data would hold the
+     * request for ever), so the wait for the router to take data and each write are held to the time left: a request that cannot
+     * go out in time is not sent, and one cut off part way drops the connection (code 408, or 503 when the connection closed).
+     */
+    private static function transmit($c, $req, $deadline)
+    {
+        $t = self::transmitter($c);
+        if ($t === null) {
+            $c->sendAsync($req); // (a client without the deadline support: sent as the library does)
+            return;
+        }
+        $fail = function ($e = null) use ($c, $t, $deadline) {
+            // out of time: the deadline passed, or a write ran past the socket's own time limit (which the deadline narrowed)
+            $timedOut = microtime(true) >= $deadline || $t->timedOut() || \Closure::bind(function () {
+                return $this->readTimedOut();
+            }, $t, \PEAR2\Net\Transmitter\Stream::class)();
+            $c->readDeadline(null);
+            method_exists($c, 'abort') ? $c->abort() : $c->close();
+            if ($timedOut) {
+                return new Exception(Lang::T('The router did not answer in time'), 408);
+            }
+            $why = $e ? trim(preg_replace('/\s+/', ' ', strip_tags($e->getMessage()))) : '';
+            return new Exception(Lang::T('The router closed the connection') . ($why !== '' ? ': ' . mb_substr($why, 0, 120) : ''), 503);
+        };
+        // the deadline set before anything is written: the socket's time limit is narrowed to the time left (and put back when
+        // the deadline is cleared), so a write that stalls ends by it too
+        $c->readDeadline($deadline);
+        try {
+            $left = $deadline - microtime(true);
+            $narrowed = $left > 0 && \Closure::bind(function () {
+                return $this->limitToDeadline();
+            }, $t, \PEAR2\Net\Transmitter\Stream::class)();
+            if (!$narrowed || !$t->isAcceptingData((int) floor($left), (int) (($left - floor($left)) * 1000000))) {
+                throw $fail();
+            }
+            try {
+                $c->sendAsync($req);
+            } catch (\PEAR2\Net\Transmitter\Exception | \PEAR2\Net\RouterOS\SocketException $e) {
+                throw $fail($e);
+            }
+        } finally {
+            $c->readDeadline(null);
+        }
+    }
+
+    /** The connection's transmitter (the library keeps it out of reach), or null for a client that is not a RouterClient */
+    private static function transmitter($c)
+    {
+        if (!($c instanceof RouterClient)) {
+            return null;
+        }
+        try {
+            $com = \Closure::bind(function () {
+                return $this->com;
+            }, $c, \PEAR2\Net\RouterOS\Client::class)();
+            $t = $com ? $com->getTransmitter() : null;
+            return $t instanceof \PEAR2\Net\Transmitter\Stream ? $t : null;
+        } catch (Throwable $e) {
+            return null;
+        }
     }
 
     /** The first error the router sent back for a request (no permission, unknown command), or null. */
@@ -218,7 +281,8 @@ class RouterApi
      * Nightly backups, from the cron: once a day, each enabled router saves "phpnuxbill-auto-<date>.backup" on itself, and only
      * the newest few of those are kept (older ones are removed from the router). Backups made by hand are never removed.
      * A router that fails is tried again on the next runs that day (up to 3 times); one that is done is not touched again. A
-     * retry first looks for today's file, so a save that worked but answered late is not made twice, and the clean-up still runs.
+     * retry first looks for today's file, so a save that worked but answered late is not made twice, and the clean-up still runs
+     * (a file that is empty or still growing is saved again). Older backups are removed only once today's is there.
      * Never throws; returns lines for the cron's output.
      */
     public static function nightlyBackups()
@@ -265,7 +329,7 @@ class RouterApi
             $keep = max(1, min(30, (int) ($config['router_backup_keep'] ?? 7)));
             $name = 'phpnuxbill-auto-' . str_replace('-', '', $today); // the same day as the progress kept above, across midnight too
             $autoFiles = function ($c, &$folder = null) {
-                $files = self::rows($c, '/file/print', ['.id', 'name', 'type'], microtime(true) + 15);
+                $files = self::rows($c, '/file/print', ['.id', 'name', 'type', 'size'], microtime(true) + 15);
                 $folder = self::backupFolder($files);
                 // only in the folder nightly backups are saved to on this router (flash/ or the root folder): a file of the same
                 // name anywhere else (a USB disk, a folder of copies) was not made here and is never removed
@@ -291,14 +355,24 @@ class RouterApi
                 try {
                     $folder = '';
                     $auto = $autoFiles($c, $folder);
-                    $made = false;
-                    foreach ($auto as $f) {
-                        $made = $made || basename($f['name']) === $name . '.backup';
+                    // today's file left by an earlier run whose save did not answer: the router gives no sign that a save is
+                    // complete, and the file can be one still being written or one left empty (a full disk). It counts as saved
+                    // only when it has something in it and its size has stopped changing; otherwise it is saved again
+                    $size = $first = self::todaysSize($auto, $name);
+                    if ($first !== null) {
+                        sleep(3);
+                        $auto = $autoFiles($c);
+                        $size = self::todaysSize($auto, $name);
                     }
+                    $made = $first !== null && $size === $first && self::hasData($size);
                     if (!$made) {
                         // encrypted with the backup password (never written to the log or the output)
                         self::run($c, '/system/backup/save', ['name' => $folder . $name, 'password' => $password], microtime(true) + 60);
                         $auto = $autoFiles($c);
+                        // the router said the save is done: the file must be there, with something in it, before older ones go
+                        if (!self::hasData(self::todaysSize($auto, $name))) {
+                            throw new Exception(Lang::T('The backup file was not saved on the router'));
+                        }
                     }
                     foreach (array_slice($auto, $keep) as $old) {
                         self::run($c, '/file/remove', ['numbers' => $old['.id']], microtime(true) + 15);
@@ -323,6 +397,23 @@ class RouterApi
             }
         }
         return $log;
+    }
+
+    /** The size the router lists for today's nightly backup (as it gives it), or null when there is no such file */
+    private static function todaysSize(array $auto, $name)
+    {
+        foreach ($auto as $f) {
+            if (basename((string) $f['name']) === $name . '.backup') {
+                return (string) ($f['size'] ?? '');
+            }
+        }
+        return null;
+    }
+
+    /** Whether a listed size is more than nothing ("0", "0 B" and a missing size are not) */
+    private static function hasData($size)
+    {
+        return $size !== null && preg_match('/^\s*0*[1-9]|^\s*0*\.\d*[1-9]/', (string) $size) === 1;
     }
 
     /** Remember which routers are done today (or how many times each has failed), saved after every router. */

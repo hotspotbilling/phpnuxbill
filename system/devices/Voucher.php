@@ -55,6 +55,8 @@ class Voucher
                 $d->status = '0';
                 $d->generated_by = $customer['id'];
                 if ($d->save()) {
+                    // a router renamed while this was written: the code follows the plan to the new name (see Package)
+                    Package::followRename('tbl_voucher', $d->id(), $router_name, $p['id']);
                     $v = ORM::for_table('tbl_customers_inbox')->create();
                     $v->from = "System";
                     $v->customer_id = $customer['id'];

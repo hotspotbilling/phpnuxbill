@@ -264,7 +264,7 @@
                     <strong id="disk-used-val">{$system_status.disk.used_formatted}</strong>
                 </div>
                 <div class="isp-flex isp-justify-between" style="margin-bottom: 2px;">
-                    <span style="opacity: 0.7;">{Lang::T('Free')}:</span>
+                    <span style="opacity: 0.7;">{Lang::T('Available')}:</span>
                     <span id="disk-free-val"
                         style="color: #48bb78; font-weight: 500;">{$system_status.disk.free_formatted}</span>
                 </div>
@@ -300,7 +300,7 @@
                     <strong id="ram-used-val">{$system_status.ram.used_formatted}</strong>
                 </div>
                 <div class="isp-flex isp-justify-between" style="margin-bottom: 2px;">
-                    <span style="opacity: 0.7;">{Lang::T('Free')}:</span>
+                    <span style="opacity: 0.7;">{Lang::T('Available')}:</span>
                     <span id="ram-free-val"
                         style="color: #48bb78; font-weight: 500;">{$system_status.ram.free_formatted}</span>
                 </div>
@@ -1241,7 +1241,7 @@
         'Activity': '{Lang::T('Activity')|escape:'javascript'}',
         'Sold Count': '{Lang::T('Sold Count')|escape:'javascript'}',
         'Used': '{Lang::T('Used')|escape:'javascript'}',
-        'Free': '{Lang::T('Free')|escape:'javascript'}',
+        'Free': '{Lang::T('Available')|escape:'javascript'}',
         'Load': '{Lang::T('Load')|escape:'javascript'}',
         'Idle': '{Lang::T('Idle')|escape:'javascript'}',
         'Count': '{Lang::T('Count')|escape:'javascript'}',

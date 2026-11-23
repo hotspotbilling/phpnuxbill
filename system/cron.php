@@ -209,6 +209,16 @@ if ($config['frrest_interim_update'] != 0) {
 }
 
 if ($config['router_check']) {
+    // the alert emails are sent when the run ends: SMTP has no overall time limit (minutes for each step), so a stalled mail
+    // server must not hold up the router history and the nightly backups that run after this. Never throws.
+    $routerCheckMail = function ($to, $subject, $message) {
+        register_shutdown_function(function () use ($to, $subject, $message) {
+            try {
+                Message::SendEmail($to, $subject, $message);
+            } catch (Throwable $e) {
+            }
+        });
+    };
     echo "Checking router status...\n";
     $routers = ORM::for_table('tbl_routers')->where('enabled', '1')->find_many();
     if (!$routers) {
@@ -256,15 +266,16 @@ if ($config['router_check']) {
         }
 
         // the result is kept only for the address that was checked: under the lock routers.php holds while it saves an edit, the
-        // router is read again, and a result for an address changed meanwhile is dropped (the edit has cleared the status)
+        // router is read again, and a result for an address changed meanwhile is dropped (the edit has cleared the status), as is
+        // one for a router disabled meanwhile (no longer checked, so no status and no offline alert)
         $locked = false;
         try {
             $locked = (int) ORM::getDb()->query("SELECT GET_LOCK('phpnuxbill_router_endpoint', 20)")->fetchColumn() === 1;
         } catch (Throwable $e) {
         }
         try {
-            $cur = $locked ? ORM::for_table('tbl_routers')->select('ip_address')->find_one($router->id) : null;
-            if (!$cur || (string) $cur['ip_address'] !== (string) $router->ip_address) {
+            $cur = $locked ? ORM::for_table('tbl_routers')->select_many('ip_address', 'enabled')->find_one($router->id) : null;
+            if (!$cur || (string) $cur['ip_address'] !== (string) $router->ip_address || (int) $cur['enabled'] !== 1) {
                 continue;
             }
             if ($isOnline) {
@@ -295,8 +306,9 @@ if ($config['router_check']) {
 
         $adminEmail = $config['mail_from'];
         $subject = "Router Offline Alert";
-        Message::SendEmail($adminEmail, $subject, $message);
-        sendTelegram($message);
+        $routerCheckMail($adminEmail, $subject, $message);
+        // a short time limit (the default is minutes): a stalled Telegram must not hold up the monitor and the backups below
+        Message::sendTelegram($message, null, '', 15);
     }
 
     if (!empty($errors)) {
@@ -307,8 +319,9 @@ if ($config['router_check']) {
 
         $adminEmail = $config['mail_from'];
         $subject = "Router Monitoring Error Alert";
-        Message::SendEmail($adminEmail, $subject, $message);
-        sendTelegram($message);
+        $routerCheckMail($adminEmail, $subject, $message);
+        // a short time limit (the default is minutes): a stalled Telegram must not hold up the monitor and the backups below
+        Message::sendTelegram($message, null, '', 15);
     }
     echo "Router monitoring finished checking.\n";
 }

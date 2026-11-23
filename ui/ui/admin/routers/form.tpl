@@ -40,8 +40,9 @@
                             </div>
                             <div>
                                 <label class="nf__label" for="api_port">{Lang::T('API Port')}</label>
-                                <input type="number" class="form-control" id="api_port" name="api_port" min="1" max="65535" step="1"
-                                    value="{$nf_port|default:''|escape}" placeholder="8728">
+                                {* digits only (a number field would also take "1e3" or "-1"); empty is the default port. Its range is checked by routers.php *}
+                                <input type="text" class="form-control" id="api_port" name="api_port" inputmode="numeric" pattern="[0-9]*" maxlength="5"
+                                    value="{$nf_port|default:''|escape}" placeholder="8728" spellcheck="false">
                             </div>
                         </div>
                         {if $routely_vpn['addresses']}
@@ -204,7 +205,7 @@
         });
         btn.addEventListener('click', function () {
             var form = btn.form;
-            // the browser's own checks first (a port that is not a number reads as empty, and would test the default port);
+            // the browser's own checks first (a port that is not all digits is refused here, rather than testing something else);
             // an empty port is fine
             var bad = ['ip_address', 'api_port'].map(function (n) { return form.elements[n]; })
                 .filter(function (f) { return f && f.checkValidity && !f.checkValidity(); })[0];

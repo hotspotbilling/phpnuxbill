@@ -312,6 +312,71 @@ class Stream
     }
 
     /**
+     * PHPNuxBill: writes one chunk. Without a deadline as the library always did (one blocking fwrite). Under one, a blocking
+     * write would wait inside the system call however long the other end takes to read (the socket's time limit does not
+     * apply to writes), so the chunk is written without blocking, waiting between tries only for the time left. When the time
+     * runs out the connection is closed and the send stops.
+     *
+     * @param string $data  The chunk.
+     * @param double $bytes What was sent before it.
+     *
+     * @return int|false What was written (all of it, unless the other end closed the connection), or FALSE.
+     */
+    protected function writeChunk($data, $bytes)
+    {
+        if (null === $this->deadline) {
+            return @fwrite($this->stream, $data);
+        }
+        $done = 0;
+        $len = strlen($data);
+        while ($done < $len) {
+            if ($this->deadline - microtime(true) <= 0) {
+                $this->timedOut = true;
+                $this->close();
+                throw $this->createException('Ran out of time while sending.', 6, null, $bytes + $done);
+            }
+            stream_set_blocking($this->stream, false);
+            $n = @fwrite($this->stream, substr($data, $done));
+            stream_set_blocking($this->stream, $this->isBlocking);
+            if (false === $n) {
+                return $done > 0 ? $done : false;
+            }
+            $done += $n;
+            if ($done < $len && !$this->waitToSend($bytes + $done)) {
+                return $done > 0 ? $done : false; // the other end closed the connection
+            }
+        }
+        return $done;
+    }
+
+    /**
+     * PHPNuxBill: after a chunk, wait until the stream can take more. Without a deadline as before (as long as it takes); under
+     * one only for the time left: a peer that stops reading cannot hold the send past it. The connection is closed when the
+     * time runs out.
+     *
+     * @param double $bytes What was sent so far.
+     *
+     * @return bool Whether the stream can take more.
+     */
+    protected function waitToSend($bytes)
+    {
+        if (null === $this->deadline) {
+            return $this->isAcceptingData(null);
+        }
+        $left = $this->deadline - microtime(true);
+        if ($left > 0 && $this->isAcceptingData((int) floor($left), (int) (($left - floor($left)) * 1000000))) {
+            return true;
+        }
+        if (microtime(true) >= $this->deadline) {
+            $this->timedOut = true;
+            $this->close();
+            throw $this->createException('Ran out of time while sending.', 6, null, $bytes);
+        }
+        // not accepting data for another reason (the other end closed): as before, the next write reports it
+        return false;
+    }
+
+    /**
      * PHPNuxBill: whether the last read ran out of time; the connection is closed when it did.
      *
      * @return bool
@@ -439,10 +504,7 @@ class Stream
                 }
                 $contentsToSend = fread($contents, $chunkSize);
                 if ('' != $contentsToSend) {
-                    $bytesNow = @fwrite(
-                        $this->stream,
-                        $contentsToSend
-                    );
+                    $bytesNow = $this->writeChunk($contentsToSend, $bytes);
                     if (0 != $bytesNow) {
                         $bytes += $bytesNow;
                     } elseif ($this->isBlocking || false === $bytesNow) {
@@ -454,7 +516,7 @@ class Stream
                         );
                     }
                 }
-                $this->isAcceptingData(null);
+                $this->waitToSend($bytes);
             }
             if ($offsetIsNotNull) {
                 fseek($contents, $oldPos, SEEK_SET);
@@ -471,10 +533,7 @@ class Stream
             }
             $bytesToSend = (double) sprintf('%u', strlen($contents));
             while ($bytes < $bytesToSend) {
-                $bytesNow = @fwrite(
-                    $this->stream,
-                    substr($contents, $bytes, $chunkSize)
-                );
+                $bytesNow = $this->writeChunk(substr($contents, $bytes, $chunkSize), $bytes);
                 if (0 != $bytesNow) {
                     $bytes += $bytesNow;
                 } elseif ($this->isBlocking || false === $bytesNow) {
@@ -485,7 +544,7 @@ class Stream
                         $bytes
                     );
                 }
-                $this->isAcceptingData(null);
+                $this->waitToSend($bytes);
             }
         }
         return $bytes;

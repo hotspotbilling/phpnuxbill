@@ -5790,5 +5790,6 @@
     "Recipient": "Recipient",
     "Connect_a_router": "Connect a router",
     "Set_up_Routely_VPN": "Set up Routely VPN",
-    "If_PHPNuxBill_runs_on_shared_hosting__cPanel___the_host_may_block_outgoing_connections_to_this_port__ask_them_to_open_it__or_reach_the_router_through_a_VPN_": "If PHPNuxBill runs on shared hosting (cPanel), the host may block outgoing connections to this port: ask them to open it, or reach the router through a VPN."
+    "If_PHPNuxBill_runs_on_shared_hosting__cPanel___the_host_may_block_outgoing_connections_to_this_port__ask_them_to_open_it__or_reach_the_router_through_a_VPN_": "If PHPNuxBill runs on shared hosting (cPanel), the host may block outgoing connections to this port: ask them to open it, or reach the router through a VPN.",
+    "Add_a_router_that_has_no_public_IP": "Add a router that has no public IP"
 }

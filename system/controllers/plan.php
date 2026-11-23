@@ -856,7 +856,13 @@ switch ($action) {
         }
         // the form's one-time token: a batch is created once. Sent again (the answer to a large batch was lost, a reload of the
         // page), it goes to the batch already made instead of making a second one
-        $svoucher = _post('svoucher');
+        $svoucher = (string) _post('svoucher');
+        // a form without its token is refused before anything else: it would skip the claim below, the check that the token was
+        // given out by this session, and the record of the finished form. (A token this session never gave out is refused below,
+        // once a batch already made for it has been looked for.)
+        if ($svoucher === '') {
+            r2(getUrl('plan/add-voucher/'), 'e', Lang::T('This form has expired. Open it again to create the vouchers.'));
+        }
         $made = App::getTokenValue($svoucher);
         $claim = null;
         // a form whose batch was saved is recorded in the database, in the same transaction as its vouchers: the record cannot
@@ -1030,6 +1036,8 @@ switch ($action) {
                     $rec->save();
                 }
                 ORM::raw_execute('COMMIT');
+                // a router renamed while the batch was written: its codes follow the plan to the new name (see Package)
+                Package::followRename('tbl_voucher', $newVoucherIds, $server, $plan);
                 if ($svoucher !== '') {
                     App::setToken($svoucher, $done); // (the quick answer for a repeat from this browser)
                 }

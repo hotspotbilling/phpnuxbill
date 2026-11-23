@@ -823,6 +823,7 @@
     "Disk_Storage": "مساحة التخزين",
     "Used": "المستخدم",
     "Free": "مجاني",
+    "Available": "المتاح",
     "Memory__RAM_": "الذاكرة (RAM)",
     "Limit": "الحد",
     "CPU_Utilization": "استخدام المعالج",

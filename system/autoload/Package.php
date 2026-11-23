@@ -230,6 +230,9 @@ class Package
             if ($_app_stage != 'Demo') {
                 try {
                     if (file_exists($dvc)) {
+                        if (self::routerOff($p)) {
+                            throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
+                        }
                         require_once $dvc;
                         (new $p['device'])->add_customer($c, $p);
                     } else {
@@ -277,6 +280,7 @@ class Package
                     $b->admin_id = '0';
                 }
                 $b->save();
+                self::followRename('tbl_user_recharges', $b->id(), $router_name, $plan_id);
             }
 
             // insert table transactions
@@ -315,6 +319,7 @@ class Package
                 $t->admin_id = '0';
             }
             $t->save();
+            self::followRename('tbl_transactions', $t->id(), $router_name, $plan_id);
 
             if ($p['validity_unit'] == 'Period') {
                 // insert price to fields for invoice next month
@@ -346,6 +351,9 @@ class Package
             if ($_app_stage != 'Demo') {
                 try {
                     if (file_exists($dvc)) {
+                        if (self::routerOff($p)) {
+                            throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
+                        }
                         require_once $dvc;
                         (new $p['device'])->add_customer($c, $p);
                     } else {
@@ -393,6 +401,7 @@ class Package
                     $d->admin_id = '0';
                 }
                 $d->save();
+                self::followRename('tbl_user_recharges', $d->id(), $router_name, $plan_id);
             }
 
             // insert table transactions
@@ -428,6 +437,7 @@ class Package
             }
             $t->type = $p['type'];
             $t->save();
+            self::followRename('tbl_transactions', $t->id(), $router_name, $plan_id);
 
             if ($p['validity_unit'] == 'Period' && $p['price'] != 0) {
                 // insert price to fields for invoice next month
@@ -783,6 +793,110 @@ class Package
         $tax_rate_decimal = $tax_rate / 100;
         $tax = $price * $tax_rate_decimal;
         return $tax;
+    }
+
+    /**
+     * A plan on a Mikrotik router that is disabled (Network > Routers): PHPNuxBill does not use that router until it is enabled
+     * again, so no command is sent to it. The recharge is still saved; Sync customers on the router sends it later.
+     */
+    private static function routerOff($plan)
+    {
+        $name = (string) ($plan['routers'] ?? '');
+        if ($name === '' || stripos((string) ($plan['device'] ?? ''), 'Mikrotik') !== 0) {
+            return false;
+        }
+        $r = ORM::for_table('tbl_routers')->select('enabled')->where('name', $name)->find_one();
+        return $r && (int) $r['enabled'] !== 1;
+    }
+
+    /**
+     * A router renamed while this recharge was being saved: the rename moves every row saved before it to the new name, but a
+     * row written after it with the name read earlier would keep the old one. Checked once the row is saved, so one or the
+     * other catches it: a row whose router name no longer exists follows its plan to the router the plan names now.
+     * Rows on a router that still has the name are left as they are. $id is one row's id or a list of them (a voucher batch).
+     */
+    public static function followRename($table, $id, $router_name, $plan_id)
+    {
+        $ids = array_values(array_filter(array_map('intval', (array) $id)));
+        if (!$ids || !in_array($table, ['tbl_user_recharges', 'tbl_transactions', 'tbl_voucher'], true)
+            || in_array($router_name, ['radius', 'balance', 'Custom Balance'], true)) {
+            return;
+        }
+        try {
+            ORM::raw_execute("UPDATE `$table` t JOIN `tbl_plans` p ON p.id = ? SET t.routers = p.routers
+                WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND p.routers <> t.routers
+                AND NOT EXISTS (SELECT 1 FROM `tbl_routers` r WHERE r.name = t.routers)
+                AND EXISTS (SELECT 1 FROM `tbl_routers` r2 WHERE r2.name = p.routers)", [$plan_id, $router_name]);
+        } catch (Throwable $e) {
+            // the recharge itself is saved: a failed check leaves it as it was
+        }
+    }
+
+    /**
+     * Call before a customer's portal password is changed (Change password, Forgot password). A PPPoE or VPN connection is
+     * dialled by the customer's own router or ONU with the password saved in it; without a separate PPPoE password that is the
+     * portal password, so changing it would lock the connection out at its next reconnect. The current password is kept as the
+     * PPPoE password first, so the connection goes on working and only the portal password changes (an admin can change the
+     * PPPoE one on the customer's page). Not done when the customer also has an active hotspot plan on a RADIUS device that
+     * reads the PPPoE password first, as that sign-in needs the new one. Does not save: the caller saves with the new password.
+     */
+    public static function keepDialPassword($customer)
+    {
+        if (!empty($customer['pppoe_password']) || (string) $customer['password'] === '') {
+            return;
+        }
+        $dial = false;
+        foreach (ORM::for_table('tbl_user_recharges')->where('customer_id', $customer['id'])->where('status', 'on')->find_many() as $tur) {
+            $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+            if (!$p) {
+                continue;
+            }
+            $type = strtoupper((string) $p['type']);
+            if ($type === 'PPPOE' || $type === 'VPN') {
+                $dial = true;
+            } elseif (in_array((string) $p['device'] !== '' ? (string) $p['device'] : (!empty($p['is_radius']) ? 'Radius' : ''), ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
+                return; // a RADIUS hotspot sign-in would keep the old password too
+            }
+        }
+        if ($dial) {
+            $customer->pppoe_password = $customer['password'];
+        }
+    }
+
+    /**
+     * Sends a customer's new password to the device of each active plan, after a password change or reset. Returns the errors
+     * (empty when every device took it). Each kind of device is told in the way that changes only the credentials:
+     * - Voucher keeps no account (its add_customer would issue the customer a new voucher): skipped;
+     * - a RADIUS device's add_customer starts a new period from today: sync_customer re-adds the account with the expiry it
+     *   has, or, without one, customerUpsert writes the credentials (created when missing);
+     * - a Mikrotik device's add_customer gives an existing user or secret the new password and creates a missing one.
+     */
+    public static function sendPassword($customer)
+    {
+        global $_app_stage;
+        $errors = [];
+        if (strtolower((string) $_app_stage) === 'demo') {
+            return $errors;
+        }
+        foreach (ORM::for_table('tbl_user_recharges')->where('customer_id', $customer['id'])->where('status', 'on')->find_many() as $tur) {
+            $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+            $dvc = $p ? self::getDevice($p) : '';
+            if ($dvc === '' || !file_exists($dvc) || $p['device'] === 'Voucher') {
+                continue;
+            }
+            try {
+                require_once $dvc;
+                $dev = new $p['device'];
+                if (method_exists($dev, 'customerUpsert')) {
+                    method_exists($dev, 'sync_customer') ? $dev->sync_customer($customer, $p) : $dev->customerUpsert($customer, $p);
+                } else {
+                    $dev->add_customer($customer, $p);
+                }
+            } catch (Throwable $e) {
+                $errors[] = $p['name_plan'] . ': ' . $e->getMessage();
+            }
+        }
+        return $errors;
     }
 
     public static function getDevice($plan)
