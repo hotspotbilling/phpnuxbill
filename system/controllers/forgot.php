@@ -87,7 +87,9 @@ if ($step == 1) {
         r2(getUrl('forgot&step=1'), 'e', Lang::T('Too many requests. Please try again later.') . ' (' . AuthThrottle::waitText(max($waitIp, $waitUser)) . ')');
     }
     if (Otp::check('forgot', $username, $otp_code) === 'ok') {
-        $_SESSION['forgot_ok'] = ['u' => $username, 't' => time()];
+        // bound to the account's id as well, so a username reassigned before the reset cannot move the ticket to another account
+        $owner = ORM::for_table('tbl_customers')->selects(['id'])->where('username', $username)->find_one();
+        $_SESSION['forgot_ok'] = ['u' => $username, 't' => time(), 'id' => $owner ? (int) $owner['id'] : 0];
         $ui->assign('username', $username);
         $ui->assign('csrf_token', Csrf::generateAndStoreToken());
         $ui->assign('notify_t', 's');
@@ -125,6 +127,9 @@ if ($step == 1) {
         exit;
     }
     $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+    if ($user && (int) ($ticket['id'] ?? 0) !== (int) $user['id']) {
+        $user = null; // the username no longer belongs to the account the code was issued for
+    }
     $routerFailed = false;
     if ($user) {
         // one password change at a time for this customer (the account page takes the same lock), read again under it
@@ -139,6 +144,9 @@ if ($step == 1) {
             exit;
         }
         $user = ORM::for_table('tbl_customers')->find_one($user['id']);
+        if ($user && (string) $user['username'] !== $username) {
+            $user = null; // renamed while waiting for the lock
+        }
     }
     if ($user) {
         Package::keepDialPassword($user); // a PPPoE / VPN connection keeps the password its router dials with (in memory: saved below)

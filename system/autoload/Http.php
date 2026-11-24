@@ -41,6 +41,11 @@ class Http
      */
     public static function timeoutMs($value): int
     {
+        // ['ms' => N]: milliseconds said outright, never read as seconds (a caller that already has milliseconds passes this)
+        if (is_array($value)) {
+            $ms = (float) ($value['ms'] ?? 0);
+            return $ms > 0 ? max(1, (int) ceil($ms)) : 3000;
+        }
         $v = (float) $value;
         if ($v <= 0) {
             return 3000;

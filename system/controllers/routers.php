@@ -604,7 +604,7 @@ switch ($action) {
             // and an address the form would accept: a host, and a valid API port when one is written into it. A legacy ":0"
             // ("router.example:0", "[v6]:0") is the default port, as Edit and the connection read it, so it is checked without it
             $addr = preg_replace('/^(\[[^\[\]]*\]|[^:]*):0+$/', '$1', RouterAddress::normalize($r['ip_address']));
-            if ($op === 'enable' && ($hostMissing($addr) || !$validAddressPort($addr))) {
+            if ($op === 'enable' && (trim((string) $addr) === '' || $hostMissing($addr) || !$validAddressPort($addr))) {
                 $badAddr[] = $r['name'];
                 continue;
             }
@@ -1283,7 +1283,18 @@ switch ($action) {
                             // condition this check cannot judge) is what lets customers open it; with none, the warning stays
                             try {
                                 foreach (RouterApi::rows($c, '/ip/hotspot/walled-garden/ip/print', ['dst-host', 'dst-address', 'src-address', 'src-address-list', 'dst-address-list', 'protocol', 'dst-port', 'server', 'disabled', 'action'], $until) as $w) {
-                                    if ($w['disabled'] === 'true' || !in_array(strtolower((string) $w['action']), ['', 'accept'], true) || $hostIn($w['dst-host']) !== true) {
+                                    if ($w['disabled'] === 'true') {
+                                        continue;
+                                    }
+                                    // rules are tried in order: a drop or reject that may cover the site, met before an accept, means a later
+                                    // accept does not let it through, so the warning stays
+                                    if (!in_array(strtolower((string) $w['action']), ['', 'accept'], true)) {
+                                        if ($hostIn($w['dst-host']) !== false && $portIn($w['dst-port']) !== false) {
+                                            break;
+                                        }
+                                        continue;
+                                    }
+                                    if ($hostIn($w['dst-host']) !== true) {
                                         continue;
                                     }
                                     $proto = strtolower(trim((string) $w['protocol']));
@@ -1532,7 +1543,7 @@ switch ($action) {
                     if (substr((string) $f['name'], -7) === '.backup' || $f['type'] === 'backup') {
                         $stamp = (string) ($f['last-modified'] ?? '') !== '' ? $f['last-modified'] : $f['creation-time'];
                         $items[] = ['name' => $f['name'], 'size' => is_numeric($f['size']) ? (float) $f['size'] : null, 'created' => $stamp,
-                            'auto' => (bool) preg_match('/^(flash\/)?phpnuxbill-auto-\d{8}\.backup$/', (string) $f['name'])]; // where the cron keeps them
+                            'auto' => (bool) preg_match('/^(flash\/)?phpnuxbill-auto-\d{8}(?:-\d{1,2}|-r[0-9a-f]{8})?\.backup$/i', (string) $f['name'])]; // where the cron keeps them
                     }
                 }
                 // newest first by creation time ("2026-11-19 03:00:01" on RouterOS 7, "nov/19/2026 03:00:01" on 6), then by name

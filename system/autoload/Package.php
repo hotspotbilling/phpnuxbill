@@ -1050,15 +1050,16 @@ class Package
     public static function followRename($table, $id, $router_name, $plan_id, $router_id = null)
     {
         $ids = array_values(array_filter(array_map('intval', (array) $id)));
-        if (!$ids || !$router_id || !in_array($table, ['tbl_user_recharges', 'tbl_transactions', 'tbl_voucher'], true)
+        if (!$ids || !$router_id || !in_array($table, ['tbl_user_recharges', 'tbl_transactions', 'tbl_voucher', 'tbl_payment_gateway'], true)
             || in_array($router_name, ['radius', 'balance', 'Custom Balance'], true)) {
             return;
         }
         $args = [$plan_id, $router_name, (int) $router_id];
         try {
-            ORM::raw_execute("UPDATE `$table` t JOIN `tbl_plans` p ON p.id = ? SET t.routers = p.routers
-                WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND p.routers <> t.routers
-                AND EXISTS (SELECT 1 FROM `tbl_routers` r2 WHERE r2.name = p.routers AND r2.id = ?)", $args);
+            // the row follows the router it was made for, by its id, to the name that router has now: not to wherever the plan
+            // points today (the plan may have moved to another router since)
+            ORM::raw_execute("UPDATE `$table` t JOIN `tbl_routers` r2 ON r2.id = ? SET t.routers = r2.name
+                WHERE t.id IN (" . implode(',', $ids) . ") AND t.routers = ? AND r2.name <> t.routers", [(int) $router_id, $router_name]);
         } catch (Throwable $e) {
             // the recharge itself is saved: a failed check leaves it as it was
         }
@@ -1190,7 +1191,9 @@ class Package
                     self::vpnPassword($dev, $customer, $p, $mayAdd);
                 } elseif (method_exists($dev, 'customerUpsert') || method_exists($dev, 'customerPassword')) {
                     self::radiusPassword($dev, ($hsCustomer !== null && self::radiusShare($p) === 'other') ? $hsCustomer : $customer, $p, $tur);
-                } else {
+                } elseif ($mayAdd) {
+                    // any other driver has no in-place password change: add_customer() would create the account or renew its access,
+                    // which a recharge past its expiry must not get back
                     $dev->add_customer($customer, $p);
                 }
             } catch (Throwable $e) {
@@ -1393,10 +1396,11 @@ class Package
         }
         $type = strtoupper((string) $p['type']);
         $device = (string) $p['device'] !== '' ? (string) $p['device'] : (!empty($p['is_radius']) ? 'Radius' : '');
-        if ($type === 'PPPOE' && in_array($device, ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
+        // a dialled connection (PPPoE, VPN) writes the dial password, as Radius::customerUpsert() and customerPassword() do
+        if (($type === 'PPPOE' || $type === 'VPN') && in_array($device, ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
             return 'dial';
         }
-        if ($type !== 'PPPOE' && in_array($device, ['Radius', 'RadiusALE'], true)) {
+        if ($type !== 'PPPOE' && $type !== 'VPN' && in_array($device, ['Radius', 'RadiusALE'], true)) {
             return 'other';
         }
         return null;

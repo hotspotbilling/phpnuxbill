@@ -169,6 +169,8 @@
             ifaces.forEach(function (i) { now[i.name] = { type: i.type, total: i.rx + i.tx }; });
             Object.keys(L.prev).forEach(function (n) { if (!now[n]) delete L.prev[n]; });
             L.ifs = now;
+        } else {
+            L.prev = Object.create(null); // no reading this time: never diff against a stale baseline
         }
         (ifaces || []).forEach(function (i) {
             var p = L.prev[i.name];
@@ -186,6 +188,12 @@
                 push(L.rate[i.name], down >= 0 && up >= 0 ? [d.at, down, up] : [d.at, null, null]);
             }
             L.prev[i.name] = { rx: i.rx, tx: i.tx, at: d.at, type: i.type, total: i.rx + i.tx };
+        });
+        // every interface's speeds older than the window go, those of one that is not listed now included; a series left with
+        // nothing is dropped, and what is still inside the window stays for an interface that comes back
+        Object.keys(L.rate).forEach(function (n) {
+            while (L.rate[n].length && L.rate[n][0][0] < cut) L.rate[n].shift();
+            if (!L.rate[n].length) delete L.rate[n];
         });
         if (!L.iface || !L.ifs[L.iface]) {
             // the busiest interface since the router started is usually the uplink

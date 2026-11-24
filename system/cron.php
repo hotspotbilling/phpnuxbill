@@ -216,6 +216,9 @@ foreach ($d as $ds) {
                 // Send notification and update user status
                 try {
                     if (!$pendingRow) {
+                        // [[expired_date]] is read from the global $ds: the expiry re-read under the lock, not the one listed earlier
+                        $dsListed = $ds;
+                        $ds = $u;
                         print_r(sendReminderNotifications(
                             $config,
                             $c,
@@ -224,6 +227,7 @@ foreach ($d as $ds) {
                             Message::getMessageType($p['type'], $textExpired),
                             $config['user_notification_expired']
                         )) . "\n";
+                        $ds = $dsListed;
                     }
                     if ($partial !== null) {
                         if (!$pendingRow) {

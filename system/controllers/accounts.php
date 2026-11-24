@@ -61,11 +61,18 @@ switch ($action) {
                 try {
                     foreach (Package::sendPassword($user) as $err) {
                         $deviceFailed = true;
-                        _log('[' . $user['username'] . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
+                        try {
+                            _log('[' . $user['username'] . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
+                        } catch (Throwable $logErr) {
+                            // a log that cannot be written must not skip the unlock and the sign-out below
+                        }
                     }
                 } catch (Throwable $e) {
                     $deviceFailed = true;
-                    _log('[' . $user['username'] . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
+                    try {
+                        _log('[' . $user['username'] . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
+                    } catch (Throwable $logErr) {
+                    }
                 }
                 Package::passwordLock($user['id'], false);
                 if (class_exists('RedisCache')) {

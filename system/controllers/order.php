@@ -353,6 +353,7 @@ switch ($action) {
                 $d->status = 2;
                 $d->save();
                 $trx_id = $d->id();
+                Package::followRename('tbl_payment_gateway', $trx_id, $router_name, $plan['id'], (int) $routes['2']); // a router renamed meanwhile
                 //receiver
                 $d = ORM::for_table('tbl_payment_gateway')->create();
                 $d->username = $target['username'];
@@ -372,6 +373,7 @@ switch ($action) {
                 $d->trx_invoice = $result;
                 $d->status = 2;
                 $d->save();
+                Package::followRename('tbl_payment_gateway', $d->id(), $router_name, $plan['id'], (int) $routes['2']);
                 r2(getUrl("order/view/$trx_id"), 's', Lang::T("Success to send package"));
             } else {
                 $errorMessage = "Send Package with Balance Failed\n\n#u$user[username] #send \n" . $plan['name_plan'] .
@@ -674,6 +676,7 @@ switch ($action) {
                     $d->status = 1;
                     $d->save();
                     $id = $d->id();
+                    Package::followRename('tbl_payment_gateway', $id, $router['name'], $plan['id'], (int) $router['id']);
                 } else {
                     $d->username = $user['username'];
                     $d->user_id = $user['id'];
@@ -697,6 +700,7 @@ switch ($action) {
                     $d->created_date = date('Y-m-d H:i:s');
                     $d->status = 1;
                     $d->save();
+                    Package::followRename('tbl_payment_gateway', $d->id(), $router['name'], $plan['id'], (int) $router['id']);
                 }
                 break;
         }

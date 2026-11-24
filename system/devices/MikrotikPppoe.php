@@ -180,13 +180,28 @@ class MikrotikPppoe
                 return $pending; // null when everything was done, else the partial result
             }
         }
-        $this->removePpoeUser($client, $customer['username']);
-        if (!empty($customer['pppoe_username'])) {
-            $this->removePpoeUser($client, $customer['pppoe_username']);
+        // each name's secret and each name's session is tried whatever another one did; the first failure is thrown after all
+        // were attempted, so the caller keeps the recharge and a retry finishes what was refused
+        $first = null;
+        foreach (array_unique(array_filter([(string) $customer['username'], (string) ($customer['pppoe_username'] ?? '')])) as $name) {
+            try {
+                $this->removePpoeUser($client, $name);
+            } catch (Exception $e) {
+                $first = $first ?? $e;
+                if (in_array($e->getCode(), [408, 503], true)) {
+                    try {
+                        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                    } catch (Exception $e2) {
+                        $client = null;
+                        break;
+                    }
+                }
+            }
         }
-        $this->removePpoeActive($client, $customer['username']);
-        if (!empty($customer['pppoe_username'])) {
-            $this->removePpoeActive($client, $customer['pppoe_username']);
+        $dropErr = $client === null ? null : $this->dropSessions($client, $customer, $mikrotik);
+        $first = $first ?? $dropErr;
+        if ($first !== null) {
+            throw $first;
         }
     }
 
@@ -286,11 +301,14 @@ class MikrotikPppoe
      */
     function getIdByCustomer($customer, $client, $checked = null){
         $checked = $checked ?? $this->strict;
-        $id = $this->secretId($client, $customer['username'], $checked);
-        if(empty($id)){
-            if (!empty($customer['pppoe_username'])) {
-                $id = $this->secretId($client, $customer['pppoe_username'], $checked);
-            }
+        // the dial login first when there is an explicit one (it is the name the secret is made under), so a portal-named secret
+        // of someone else is not mistaken for it; the portal username when there is none, and as the legacy fallback
+        $id = '';
+        if (!empty($customer['pppoe_username'])) {
+            $id = $this->secretId($client, $customer['pppoe_username'], $checked);
+        }
+        if (empty($id)) {
+            $id = $this->secretId($client, $customer['username'], $checked);
         }
         return $id;
     }

@@ -58,6 +58,20 @@ class Lang
             && is_file($root_path . File::pathFixer('system/lan/' . $name . '.json'));
     }
 
+    /** The languages that have a file in system/lan, sorted (for a language switcher) */
+    public static function available()
+    {
+        global $root_path;
+        $out = [];
+        foreach (@scandir($root_path . File::pathFixer('system/lan/')) ?: [] as $f) {
+            if (substr($f, -5) === '.json' && self::valid(substr($f, 0, -5))) {
+                $out[] = substr($f, 0, -5);
+            }
+        }
+        sort($out);
+        return $out;
+    }
+
     /** The one rule for a language name that may become a file name: letters, digits, "_" and "-" (portuguese-brazil), no path characters */
     public static function validName($name)
     {

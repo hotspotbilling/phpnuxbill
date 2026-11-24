@@ -65,6 +65,38 @@ $planRouterLock = function ($plan, $back = null) use ($routerLock, $planRouterCh
     $planRouterCheck($plan, $back);
 };
 
+// The router's profile follows the plan's name. When the device call fails after the plan was saved, the name the router still
+// has (X) is kept in tbl_appconfig, so the next save (X changed to Y, then Y saved again) tells the device to change X to Y
+// instead of Y to Y; the note goes when a device call succeeds.
+$planUpdateDevice = function ($d, $old) {
+    $key = 'plan_rename_pending_' . (int) $d['id'];
+    $note = ORM::for_table('tbl_appconfig')->where('setting', $key)->find_one();
+    $from = $old;
+    if ($note) {
+        $saved = json_decode((string) $note['value'], true);
+        if (is_array($saved) && isset($saved['name_plan'])) {
+            $from = ORM::for_table('tbl_plans')->create();
+            foreach ($saved as $k => $v) {
+                $from->$k = $v;
+            }
+        }
+    }
+    try {
+        (new $d['device'])->update_plan($from, $d);
+    } catch (Throwable $e) {
+        if (!$note) {
+            $note = ORM::for_table('tbl_appconfig')->create();
+            $note->setting = $key;
+            $note->value = json_encode($old->as_array());
+            $note->save();
+        }
+        throw $e;
+    }
+    if ($note) {
+        $note->delete();
+    }
+};
+
 switch ($action) {
     case 'sync':
         set_time_limit(-1);
@@ -467,7 +499,7 @@ switch ($action) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $d['device'])->update_plan($old, $d);
+                    $planUpdateDevice($d, $old);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -798,7 +830,7 @@ switch ($action) {
         // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a
         // rename is followed). The form sends it back as shown; a value left out keeps it, and a different one is refused
         if ($d && $routers !== '' && (string) $routers !== (string) $d['routers']) {
-            $msg .= Lang::T('The router cannot be changed after the package is saved.') . '<br>';
+            $msg .= Lang::T('The router assignment changed while this form was open. Reload the page and try again.') . '<br>';
         }
         if ($d) {
         } else {
@@ -856,7 +888,7 @@ switch ($action) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $d['device'])->update_plan($old, $d);
+                    $planUpdateDevice($d, $old);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }
@@ -1307,7 +1339,7 @@ switch ($action) {
         // the router cannot be changed after the package is saved: it stays as the database has it (read under the lock, so a
         // rename is followed). The form sends it back as shown; a value left out keeps it, and a different one is refused
         if ($d && $routers !== '' && (string) $routers !== (string) $d['routers']) {
-            $msg .= Lang::T('The router cannot be changed after the package is saved.') . '<br>';
+            $msg .= Lang::T('The router assignment changed while this form was open. Reload the page and try again.') . '<br>';
         }
         if ($d) {
         } else {
@@ -1365,7 +1397,7 @@ switch ($action) {
             if ($_app_stage != 'demo') {
                 if (file_exists($dvc)) {
                     require_once $dvc;
-                    (new $d['device'])->update_plan($old, $d);
+                    $planUpdateDevice($d, $old);
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
                 }

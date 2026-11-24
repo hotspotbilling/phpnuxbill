@@ -387,11 +387,11 @@
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;",
-    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='unique_session_nas')=0 AND (SELECT COUNT(*) FROM (SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2) u)=0, 'DELETE r1 FROM `rad_acct` r1 INNER JOIN `rad_acct` r2 ON r1.username = r2.username AND r1.acctsessionid = r2.acctsessionid AND r1.id < r2.id', 'SELECT 1'));",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='unique_session_nas')=0 AND (SELECT COUNT(*) FROM (SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2) u)=0, 'DELETE r1 FROM `rad_acct` r1 INNER JOIN `rad_acct` r2 ON r1.username = r2.username AND r1.acctsessionid = r2.acctsessionid AND r1.nasipaddress = r2.nasipaddress AND r1.id < r2.id', 'SELECT 1'));",
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;",
-    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='unique_session_nas')=0 AND (SELECT COUNT(*) FROM (SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2) u)=0, 'ALTER TABLE `rad_acct` ADD UNIQUE KEY `unique_session` (`username`, `acctsessionid`)', 'SELECT 1'));",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='unique_session_nas')=0 AND (SELECT COUNT(*) FROM (SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2) u)=0, 'SELECT 1', 'SELECT 1'));",
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;"
@@ -409,13 +409,19 @@
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;",
-    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='unique_session_nas')>0 AND (SELECT COUNT(*) FROM ((SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2)) u)>0, CONCAT('ALTER TABLE `rad_acct` DROP INDEX `', (SELECT INDEX_NAME FROM ((SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2)) v LIMIT 1), '`'), 'SELECT 1'));",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct')=1 AND (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND INDEX_NAME='unique_session_nas')>0 AND (SELECT COUNT(*) FROM ((SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2)) u)>0, CONCAT('ALTER TABLE `rad_acct` ', (SELECT GROUP_CONCAT(CONCAT('DROP INDEX `', INDEX_NAME, '`') SEPARATOR ', ') FROM ((SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND NON_UNIQUE=0 GROUP BY INDEX_NAME HAVING COUNT(*)=2 AND SUM(COLUMN_NAME IN ('username','acctsessionid'))=2)) v)), 'SELECT 1'));",
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;"
   ],
   "2026.11.27": [
     "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_router_samples')=1 AND (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tbl_router_samples' AND COLUMN_NAME='ifat')=0, 'ALTER TABLE `tbl_router_samples` ADD COLUMN `ifat` datetime DEFAULT NULL', 'SELECT 1'));",
+    "PREPARE stmt FROM @s;",
+    "EXECUTE stmt;",
+    "DEALLOCATE PREPARE stmt;"
+  ],
+  "2026.11.28": [
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND COLUMN_NAME='nasipaddress' AND CHARACTER_MAXIMUM_LENGTH<45)=1, 'ALTER TABLE `rad_acct` MODIFY `nasipaddress` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT \\'\\'', 'SELECT 1'));",
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;"

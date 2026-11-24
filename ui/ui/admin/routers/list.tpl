@@ -209,7 +209,7 @@
             uptime: '{Lang::T('Uptime')|escape:'javascript'}', data: '{Lang::T('Data')|escape:'javascript'}', none: '{Lang::T('Nobody is connected')|escape:'javascript'}', noneRead: '{Lang::T('No sessions were found in the lists that could be read')|escape:'javascript'}',
             waitReadings: '{Lang::T('Waiting for the first readings: the cron reads each router about every 5 minutes.')|escape:'javascript'}',
             notCustomer: '{Lang::T('not a customer')|escape:'javascript'}', drop: '{Lang::T('Disconnect')|escape:'javascript'}',
-            dropAsk: '{Lang::T('Disconnect this user? They can sign in again at once.')|escape:'javascript'}', dropped: '{Lang::T('Disconnected')|escape:'javascript'}', dropRefresh: '{Lang::T('Refresh the list first: this session cannot be told apart from a new one.')|escape:'javascript'}',
+            dropAsk: '{Lang::T('Disconnect this user? They can sign in again at once.')|escape:'javascript'}', dropped: '{Lang::T('Disconnected')|escape:'javascript'}', dropRefresh: '{Lang::T('Refresh the list first: it lets you try again only if it shows when this session started. If it does not, check the current session on the router before disconnecting it there.')|escape:'javascript'}',
             name: '{Lang::T('Name')|escape:'javascript'}', type: '{Lang::T('Type')|escape:'javascript'}', state: '{Lang::T('State')|escape:'javascript'}',
             up: '{Lang::T('Up')|escape:'javascript'}', down: '{Lang::T('Down')|escape:'javascript'}', disabled: '{Lang::T('Disabled')|escape:'javascript'}',
             stripOn: '{Lang::T('Online')|escape:'javascript'}', stripOff: '{Lang::T('Offline')|escape:'javascript'}',

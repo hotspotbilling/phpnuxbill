@@ -147,10 +147,14 @@ class MikrotikVpn
         // was read): only the address is taken from the database, the caller's other changes are kept
         $fresh = ORM::for_table('tbl_customers')->find_one($customer['id']);
         if ($fresh) {
-            if (is_object($customer)) {
-                $customer->pppoe_ip = (string) $fresh['pppoe_ip'];
-            } else {
-                $customer['pppoe_ip'] = (string) $fresh['pppoe_ip'];
+            // and the credentials as saved now: a password reset that finished while this waited for the lock is not overwritten on
+            // the router with the value the caller read earlier
+            foreach (['pppoe_ip', 'password', 'pppoe_password'] as $col) {
+                if (is_object($customer)) {
+                    $customer->$col = (string) $fresh[$col];
+                } else {
+                    $customer[$col] = (string) $fresh[$col];
+                }
             }
         }
         // the lookup must have been accepted in every mode: a refused one is thrown, never taken for "no secret" (and one made on it)
@@ -248,7 +252,7 @@ class MikrotikVpn
                     // refused change was not applied); when it has the reserved one, or that cannot be read, it is kept
                     $now = $this->secretAddress($client, $cid);
                     if ($now === '' || $now === '0.0.0.0') {
-                        $this->dropReservation($customer, $auto, $oldType);
+                        $this->dropReservation($customer, $auto, $oldType, (string) $plan['routers']);
                     }
                 }
                 throw new Exception(Lang::T('The router refused the VPN secret') . ': ' . $err);
@@ -324,9 +328,11 @@ class MikrotikVpn
                 } finally {
                     $this->expiring = false;
                 }
-                $this->removeVpnActive($client, $customer['username']);
-                if (!empty($customer['pppoe_username'])) {
-                    $this->removeVpnActive($client, $customer['pppoe_username']);
+                // the expired profile is on the secret: a session that cannot be ended now is a partial result (207), not a failed
+                // update, as the refused case below; both names are tried
+                $dropErr = $this->dropActive($client, $customer);
+                if ($dropErr !== null) {
+                    throw new Exception(Lang::T('the active session could not be disconnected') . ': ' . $dropErr->getMessage(), self::PARTIAL, $dropErr);
                 }
                 return;
             }
@@ -343,13 +349,28 @@ class MikrotikVpn
             if (!empty($customer['pppoe_username'])) {
                 $this->removeVpnUser($client, $customer['pppoe_username'], $customer['id']);
             }
-            $this->removeVpnActive($client, $customer['username']);
-            if (!empty($customer['pppoe_username'])) {
-                $this->removeVpnActive($client, $customer['pppoe_username']);
+            // each name's session is tried whatever the other did; the first failure is thrown after both
+            $dropErr = $this->dropActive($client, $customer);
+            if ($dropErr !== null) {
+                throw $dropErr;
             }
         } finally {
             $this->dbUnlock($lock);
         }
+    }
+
+    /** Ends the sessions of the customer's distinct names, each tried whatever the other did; the first failure (or null) */
+    private function dropActive($client, $customer)
+    {
+        $first = null;
+        foreach (array_unique(array_filter([(string) $customer['username'], (string) ($customer['pppoe_username'] ?? '')])) as $name) {
+            try {
+                $this->removeVpnActive($client, $name);
+            } catch (Exception $e) {
+                $first = $first ?? $e;
+            }
+        }
+        return $first;
     }
 
     public function change_username($plan, $from, $to)
@@ -689,7 +710,7 @@ class MikrotikVpn
         $res = $client->sendSync($setRequest);
         if (($err = RouterApi::error($res)) !== null) {
             if ($autoRes && $ips !== '') {
-                $this->releaseIp($client, $customer, $ips, $oldType);
+                $this->releaseIp($client, $customer, $ips, $oldType, (string) $plan['routers']);
             }
             // thrown (not only during a sync), so a recharge records it and sends its alert instead of passing as done
             throw new Exception(Lang::T('The router refused the VPN secret') . ': ' . $err);
@@ -733,7 +754,7 @@ class MikrotikVpn
      * An address reserved automatically (reserveIp()) is marked in tbl_appconfig (vpn_auto_<customer id> = address|expiry) until
      * the router has taken the secret, so a later request can tell it from an address an admin assigned. The mark is short-lived.
      */
-    private static function autoSet($customer, $ip)
+    private static function autoSet($customer, $ip, $type = '', $router = '')
     {
         try {
             $key = 'vpn_auto_' . (int) $customer['id'];
@@ -742,7 +763,9 @@ class MikrotikVpn
                 $row = ORM::for_table('tbl_appconfig')->create();
                 $row->setting = $key;
             }
-            $row->value = $ip . '|' . (time() + 21600);
+            // address|expiry|the service type before the reservation|the router asked: a retry gives back the original type, and
+            // only on the router the reservation was made for (another one cannot tell whether this router took the secret)
+            $row->value = $ip . '|' . (time() + 21600) . '|' . str_replace('|', '', (string) $type) . '|' . str_replace('|', '', (string) $router);
             $row->save();
         } catch (Throwable $e) {
         }
@@ -756,7 +779,7 @@ class MikrotikVpn
             if (!$row) {
                 return false;
             }
-            [$addr, $until] = array_pad(explode('|', (string) $row['value'], 2), 2, '0');
+            [$addr, $until] = array_pad(explode('|', (string) $row['value'], 3), 2, '0');
             if ((int) $until < time()) {
                 $row->delete();
                 return false;
@@ -765,6 +788,22 @@ class MikrotikVpn
         } catch (Throwable $e) {
             return false;
         }
+    }
+
+    /** [type, router] a reservation was made with, or ['', ''] when none was recorded (an older one) */
+    private static function autoMeta($customer, $ip)
+    {
+        try {
+            $row = ORM::for_table('tbl_appconfig')->where('setting', 'vpn_auto_' . (int) $customer['id'])->find_one();
+            if ($row) {
+                $f = array_pad(explode('|', (string) $row['value']), 4, '');
+                if ($f[0] === (string) $ip) {
+                    return [$f[2], $f[3]];
+                }
+            }
+        } catch (Throwable $e) {
+        }
+        return ['', ''];
     }
 
     private static function autoClear($customer)
@@ -805,10 +844,11 @@ class MikrotikVpn
             if (!is_string($ips) || !filter_var($ips, FILTER_VALIDATE_IP)) {
                 throw new Exception(Lang::T('No free IP address is left in the pool') . ' ' . $plan['pool']);
             }
+            $before = (string) $customer->service_type;
             $customer->service_type = 'VPN';
             $customer->pppoe_ip = $ips;
             $customer->save();
-            self::autoSet($customer, $ips);
+            self::autoSet($customer, $ips, $before, (string) $plan['routers']);
             return $ips;
         } finally {
             $this->unlockIn($lock);
@@ -868,7 +908,7 @@ class MikrotikVpn
      * use: it is still this customer's saved address, and the router has no secret for the customer (when that cannot be read,
      * the address is kept).
      */
-    private function releaseIp($client, $customer, $ips, $oldType)
+    private function releaseIp($client, $customer, $ips, $oldType, $router = null)
     {
         $fresh = ORM::for_table('tbl_customers')->find_one($customer['id']);
         if (!$fresh || (string) $fresh['pppoe_ip'] !== (string) $ips) {
@@ -899,12 +939,19 @@ class MikrotikVpn
         if (RouterApi::error($res) !== null || !empty(self::prop($res, '.id'))) {
             return;
         }
-        $this->dropReservation($customer, $ips, $oldType);
+        $this->dropReservation($customer, $ips, $oldType, $router);
     }
 
     /** Give the reserved address back (and the old type), while it is still this customer's saved address */
-    private function dropReservation($customer, $ips, $oldType)
+    private function dropReservation($customer, $ips, $oldType, $router = null)
     {
+        [$savedType, $savedRouter] = self::autoMeta($customer, $ips);
+        if ($router !== null && $savedRouter !== '' && $savedRouter !== (string) $router) {
+            return; // reserved for another router, which may have taken the secret: kept until that one is reconciled
+        }
+        if ($savedType !== '') {
+            $oldType = $savedType; // the type before the first attempt, not the one a retry found
+        }
         $fresh = ORM::for_table('tbl_customers')->find_one($customer['id']);
         if (!$fresh || (string) $fresh['pppoe_ip'] !== (string) $ips) {
             return;
@@ -1387,6 +1434,34 @@ class MikrotikVpn
      * A free address from the pool for a customer who has none (null when they have one, or none is left). Called while the
      * address lock is held (reserveIp()). Every address in the range is considered, not only a few drawn at random.
      */
+    /**
+     * Whether any router of a VPN plan still has a secret on $ip, or cannot be asked (then it counts as used): an expired hold
+     * is let go only once every router has been read and none uses the address.
+     */
+    private function holdStillUsed($ip)
+    {
+        $names = [];
+        foreach (ORM::for_table('tbl_plans')->select('routers')->where('type', 'VPN')->where_not_equal('routers', '')->find_array() as $row) {
+            $names[(string) $row['routers']] = true;
+        }
+        foreach (array_keys($names) as $name) {
+            try {
+                $m = $this->info($name);
+                $client = $this->getClient($m['ip_address'], $m['username'], $m['password']);
+                $req = new RouterOS\Request('/ppp/secret/print');
+                $req->setArgument('.proplist', '.id');
+                $req->setQuery(RouterOS\Query::where('remote-address', $ip));
+                $res = $client->sendSync($req);
+                if (RouterApi::error($res) !== null || !empty(self::prop($res, '.id'))) {
+                    return true;
+                }
+            } catch (Throwable $e) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function checkIpAddr($pname, $id)
     {
         $c = ORM::for_table('tbl_customers')->find_one($id);
@@ -1414,8 +1489,14 @@ class MikrotikVpn
         }
         // an address an admin has just moved a customer off stays taken until the router's secret has let go of it
         foreach (ORM::for_table('tbl_appconfig')->where_like('setting', 'vpn_held\\_%')->find_many() as $held) {
+            $heldIp = substr((string) $held['setting'], 9);
             if ((int) $held['value'] > time()) {
-                $taken[substr((string) $held['setting'], 9)] = true;
+                $taken[$heldIp] = true;
+            } elseif ($this->holdStillUsed($heldIp)) {
+                // the time is up, but a router still has a secret on the address (or cannot be asked): kept, and looked at again later
+                $taken[$heldIp] = true;
+                $held->value = (string) (time() + 600);
+                $held->save();
             } else {
                 $held->delete();
             }

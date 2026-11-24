@@ -148,6 +148,7 @@
                             </a>
                         </li>
                         {/if}
+                        {include file="admin/lang-switch.tpl" ls_size=22 ls_wrap=true}
                         <li class="dropdown user user-menu">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <img src="{$app_url}/{$UPLOAD_PATH}{$_admin['photo']}.thumb.jpg"

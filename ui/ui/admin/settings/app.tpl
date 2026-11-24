@@ -1375,8 +1375,8 @@
                         <br>
                         <h4><b>{Lang::T('Cron Settings to clear freeradius stale sessions')}</b></h4>
                         <p>
-                            <span class="st-cmd-note">{Lang::T('The main cron job (system/cron.php) already clears stale FreeRADIUS sessions on every run, so no separate job is needed when it runs every 5 minutes or less.')}</span>
-                            <span class="st-cmd-note">{Lang::T('Optional: only if the main cron job runs less often than every 5 minutes, add this to clear stale sessions sooner')}</span>
+                            <span class="st-cmd-note">{Lang::T('The main cron job (system/cron.php) clears stale FreeRADIUS sessions on every run, but only while Clear Stale Sessions is on with a timeout above 0; running it every 5 minutes or less does not clean up by itself.')}</span>
+                            <span class="st-cmd-note">{Lang::T('Optional: if cleanup is on and the main cron job runs less often than every 5 minutes, add this to clear stale sessions sooner. Updates still waiting in the accounting queue delay it until they are written.')}</span>
                             <span class="st-cmd"><code>*/5 * * * * cd {$dir}cron && {$php} cleanup_stale_sessions.php</code></span>
                         </p>
                         <br>
@@ -1574,6 +1574,12 @@
             if (timeoutGroup) timeoutGroup.style.display = clearOn ? '' : 'none';
         }
 
+        // an out-of-range retention value sits on the FreeRadius tab: open it before the browser tries to focus the field
+        var keepDays = document.getElementById('frrest_keep_days');
+        if (keepDays) keepDays.addEventListener('invalid', function () {
+            var tabLink = document.querySelector('a[href="#radius"][data-toggle="tab"]');
+            if (tabLink && window.jQuery) window.jQuery(tabLink).tab('show');
+        });
         if (radiusEnable) radiusEnable.addEventListener('change', toggleRadiusFields);
         if (clearSelect) clearSelect.addEventListener('change', toggleRadiusFields);
         toggleRadiusFields();

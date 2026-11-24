@@ -402,7 +402,9 @@ class Radius
 
     public function customerUpsert($customer, $plan) //Update or Insert customer plan
     {
-        if (in_array($plan['type'], ['PPPOE', 'VPN'], true)) { // a dialled connection: the dial password
+        if ($plan['type'] === 'VPN' && $this->getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->find_one()) {
+            // renewing a VPN keeps the password it already dials with: the account's password is changed through customerPassword()
+        } elseif (in_array($plan['type'], ['PPPOE', 'VPN'], true)) { // a dialled connection: the dial password
             $this->upsertCustomer($customer['username'], 'Cleartext-Password', (empty($customer['pppoe_password'])) ? $customer['password'] : $customer['pppoe_password']);
         } else {
             $this->upsertCustomer($customer['username'], 'Cleartext-Password',  $customer['password']);

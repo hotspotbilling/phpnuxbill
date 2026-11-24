@@ -21,7 +21,9 @@ class Message
     public static function sendTelegram($txt, $chat_id = null, $topik = '', $timeout = 3000)
     {
         global $config;
+        $hookStart = microtime(true);
         run_hook('send_telegram', [$txt, $chat_id, $topik]); #HOOK
+        $hookMs = (int) ((microtime(true) - $hookStart) * 1000);
         // while answering FreeRADIUS (radius.php) the router is waiting: 3 seconds at most, whatever the caller asked for
         // (a voucher login's purchase alert comes from Package::rechargeUser, in the middle of the login)
         if (!empty($GLOBALS['radius_request'])) {
@@ -29,7 +31,8 @@ class Message
             // alert) it is what is left of the 3.5 s FreeRADIUS waits, counted from the start of the request: the send_telegram
             // hook above has already used part of it, so one deadline covers both
             if (isset($GLOBALS['radius_alert_budget_ms'])) {
-                $budget = (int) $GLOBALS['radius_alert_budget_ms'];
+                // the budget was worked out before the hook ran: what the hook used is taken off it
+                $budget = (int) $GLOBALS['radius_alert_budget_ms'] - $hookMs;
             } else {
                 $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
                 $budget = (int) floor((3.5 - $elapsed) * 1000);
@@ -48,7 +51,7 @@ class Message
                 $topik = "message_thread_id=$topik&";
             }
             // one conversion to milliseconds, here (a caller's seconds, or the milliseconds of the RADIUS budget above)
-            $ms = Http::timeoutMs($timeout);
+            $ms = ['ms' => Http::timeoutMs($timeout)]; // converted once; passed on as milliseconds
             return Http::getData('https://api.telegram.org/bot' . $config['telegram_bot'] . '/sendMessage?' . $topik . 'chat_id=' . $chat_id . '&text=' . urlencode($txt), [], $ms, $ms);
         }
     }
@@ -86,7 +89,7 @@ class Message
         $smsurl = str_replace('[number]', urlencode($phone), $config['sms_url']);
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         try {
-            $ms = Http::timeoutMs($timeout);
+            $ms = ['ms' => Http::timeoutMs($timeout)]; // converted once; passed on as milliseconds
             $response = Http::getData($smsurl, [], $ms, $ms, $httpError, $httpStatus);
             if ($httpError === '' && ($httpStatus < 200 || $httpStatus > 299)) {
                 $httpError = 'HTTP ' . $httpStatus; // the gateway did not accept the message: any status but 2xx (an empty 204 is fine)
@@ -161,7 +164,7 @@ class Message
         $waurl = str_replace('[text]', urlencode($txt), $waurl);
 
         try {
-            $ms = Http::timeoutMs($timeout);
+            $ms = ['ms' => Http::timeoutMs($timeout)]; // converted once; passed on as milliseconds
             $response = Http::getData($waurl, [], $ms, $ms, $httpError, $httpStatus);
             if ($httpError === '' && ($httpStatus < 200 || $httpStatus > 299)) {
                 $httpError = 'HTTP ' . $httpStatus; // the gateway did not accept the message: any status but 2xx (an empty 204 is fine)

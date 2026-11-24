@@ -34,9 +34,10 @@
                     <div>
                         <b>{Lang::T('Install the PHP MySQL driver')}</b>
                         <small>{Lang::T('PHP has no pdo_mysql extension, so it cannot connect to any MySQL database. Install it, for example on Docker or Debian:')}</small>
-<pre class="nf__code">docker-php-ext-install pdo_mysql mysqli
-# or: apt-get install php-mysql</pre>
-                        <small>{Lang::T('Then restart PHP (or the web server) and open this page again.')}</small>
+<pre class="nf__code"># Docker: add this line to the PHP Dockerfile
+RUN docker-php-ext-install pdo_mysql mysqli
+# Debian: apt-get install php-mysql</pre>
+                        <small>{Lang::T('Docker: rebuild the image and recreate the container. Debian: restart PHP (or the web server). Then open this page again.')}</small>
                     </div>
                 </li>
                 {/if}

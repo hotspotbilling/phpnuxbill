@@ -367,7 +367,29 @@ class MikrotikStatic
         ));
         // an address already on the list is what was asked for
         if ($err !== null && stripos($err, 'already have') !== false) {
-            return null;
+            // ... but only an enabled entry blocks anything: one left disabled is switched on, and a refusal of that is returned
+            $find = new RouterOS\Request('/ip/firewall/address-list/print');
+            $find->setArgument('.proplist', '.id,disabled');
+            $find->setQuery(RouterOS\Query::where('address', $ip)->andWhere('list', $listName));
+            $res = $client->sendSync($find);
+            if (($e2 = RouterApi::error($res)) !== null) {
+                return $e2;
+            }
+            $disabledId = null;
+            foreach ($res as $r) {
+                if ($r->getType() !== RouterOS\Response::TYPE_DATA) {
+                    continue;
+                }
+                if (strtolower((string) RouterApi::text($r->getProperty('disabled'))) !== 'true') {
+                    return null; // an enabled entry is there
+                }
+                $disabledId = $disabledId ?? $r->getProperty('.id');
+            }
+            if ($disabledId === null) {
+                return $err; // told it exists, yet none is listed: not established
+            }
+            $enable = new RouterOS\Request('/ip/firewall/address-list/enable');
+            return RouterApi::error($client->sendSync($enable->setArgument('numbers', $disabledId)));
         }
         return $err; // the router's refusal, or null when added
     }

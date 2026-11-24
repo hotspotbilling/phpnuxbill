@@ -167,7 +167,8 @@ class RouterApi
                         break; // done, or nothing is pending any more (the connection ended): no reply can still come
                     }
                 }
-            } catch (\PEAR2\Net\Transmitter\Exception | \PEAR2\Net\RouterOS\SocketException $e) {
+            } catch (\PEAR2\Net\Transmitter\Exception | \PEAR2\Net\RouterOS\SocketException | \UnexpectedValueException $e) {
+                // (a reply the library could not parse is the same: the connection is dropped below, no more is read from it)
                 // the reply is incomplete: a read that ran out of time, or the connection closed mid-reply (told apart below)
                 $recvErr = $e;
                 // told now: putting an outer deadline back below starts the time-out record again
@@ -612,13 +613,14 @@ class RouterApi
                         // recorded before the clean-up, so a retry after a failed clean-up does not save again; and the file
                         // goes on this router's list of files nightly backups made (with what identifies it), the only ones
                         // ever removed
-                        $s['saved'] = $savedPath;
-                        $s['pending'] = '';
-                        $state['routers'][$key] = $s;
+                        // identity first: without one the file is not recorded as saved (pending stays), so it never justifies pruning
                         $ident = self::fileIdentity($f);
                         if ($ident === null) {
                             throw new Exception(Lang::T('The backup file was not saved on the router')); // (no file ID: it could not be told apart later)
                         }
+                        $s['saved'] = $savedPath;
+                        $s['pending'] = '';
+                        $state['routers'][$key] = $s;
                         $records[$savedPath] = ['name' => $savedPath, 'id' => $ident];
                         $state['made'][$key] = array_values($records);
                         self::saveBackupState($state);
@@ -635,11 +637,18 @@ class RouterApi
                         // listed again right before the removal: a file written over the listed one since (same name, other times,
                         // size or ID) is not ours any more and is left alone; an unchanged one is removed by its current ID
                         $current = null;
+                        $todays = null;
                         foreach ($autoFiles($c) as $f) {
                             if ((string) $f['name'] === (string) $old['name']) {
                                 $current = $f;
-                                break;
                             }
+                            if ((string) $f['name'] === $savedPath) {
+                                $todays = $f;
+                            }
+                        }
+                        // nothing older goes unless today's backup is still, in this fresh listing, the very file recorded and not empty
+                        if ($todays === null || !$isOurs($todays) || !self::hasData($todays['size'] ?? null)) {
+                            throw new Exception(Lang::T('The backup file was not saved on the router'));
                         }
                         if ($current === null) {
                             unset($records[(string) $old['name']]); // already gone

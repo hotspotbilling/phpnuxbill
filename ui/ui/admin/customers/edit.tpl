@@ -138,6 +138,7 @@
                     <div class="form-group">
                         <label class="control-label">{Lang::T('Password')}</label>
                         <div class="input-group">
+                            <input type="hidden" name="password_seen" value="{$password_seen}">
                             <input type="password" autocomplete="off" class="form-control" id="password" name="password"
                                 value="{$d['password']}">
                             <span class="input-group-btn">

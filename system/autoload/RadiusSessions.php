@@ -52,7 +52,13 @@ class RadiusSessions
         // dateAdded, so the router's interim interval must be shorter than the timeout. radius.php writes these dates with
         // PHP date() in the app timezone, so the cutoff is made the same way (MySQL NOW() could be in another timezone).
         $cutoff = date('Y-m-d H:i:s', time() - $seconds);
-        self::close(
+        // updates still queued (the database was busy and a replay has not written them): an older row does not show that a
+        // session is gone, so the REST sessions are left as they are until the queue is written
+        $queued = self::hasQueued();
+        if ($queued) {
+            $out['lines'][] = 'REST: accounting updates are still queued; stale sessions are not closed until they are written';
+        }
+        $queued || self::close(
             $out,
             'REST',
             'rad_acct',
@@ -110,6 +116,10 @@ class RadiusSessions
             'dateUpdated' => 'VALUES(dateUpdated)', // after the others: MySQL applies the assignments in order, the test reads the old values
         ];
         if ($replay) {
+            // the final counters of a session the NAS has stopped are not replaced by a delayed Interim-Update (only by a Stop)
+            foreach (['acctinputoctets', 'acctoutputoctets', 'acctsessiontime'] as $cnt) {
+                $set[$cnt] = "IF(acctstatustype = 'Stop' AND COALESCE(VALUES(acctstatustype), '') <> 'Stop', {$cnt}, {$set[$cnt]})";
+            }
             // a session already closed (by its Stop or the stale cleanup) is not made live again by an older queued update
             $set['acctstatustype'] = "IF(acctstatustype = 'Stop', acctstatustype, {$set['acctstatustype']})";
         }
@@ -134,6 +144,14 @@ class RadiusSessions
         if (!$stmt || !$stmt->execute($values)) {
             throw new RuntimeException('rad_acct write failed: ' . implode(' ', $stmt ? $stmt->errorInfo() : ORM::get_db()->errorInfo()));
         }
+    }
+
+    /** True while accounting packets wait in the retry queue (or its snapshots) */
+    public static function hasQueued(): bool
+    {
+        clearstatcache(true);
+        $file = self::queueFile();
+        return (int) @filesize($file) > 0 || self::snapshots($file) !== [];
     }
 
     /**
@@ -169,7 +187,12 @@ class RadiusSessions
                 return false;
             }
             clearstatcache(true, $file);
-            if (($p['acctstatustype'] ?? null) !== 'Stop' && (int) @filesize($file) > 50 * 1024 * 1024) {
+            // the size of the spool as a whole: the file being appended to and the snapshots still waiting for the replay
+            $spool = (int) @filesize($file);
+            foreach (self::snapshots($file) as $snap) {
+                $spool += (int) @filesize($snap);
+            }
+            if (($p['acctstatustype'] ?? null) !== 'Stop' && $spool > 50 * 1024 * 1024) {
                 return false;
             }
             $fh = @fopen($file, 'ab');
@@ -303,7 +326,8 @@ class RadiusSessions
                 if (!is_array($p) || !isset($p['username'], $p['acctsessionid']) || (string) $p['username'] === '' || (string) $p['acctsessionid'] === '') {
                     continue;
                 }
-                $key = ($p['nasipaddress'] ?? '') . '|' . $p['username'] . '|' . $p['acctsessionid'];
+                // lower case: the unique index compares with a case-insensitive collation, so these differ only in case = one session
+                $key = mb_strtolower(($p['nasipaddress'] ?? '') . '|' . $p['username'] . '|' . $p['acctsessionid']);
                 // held back behind an earlier packet of its session that is waiting
                 if (isset($state['blocked'][$key])) {
                     $keep($line);

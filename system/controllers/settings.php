@@ -259,7 +259,12 @@ switch ($action) {
             // RADIUS REST interim-update window (minutes, 0 = off), read by cron.php
             // the former REST-only stale minutes are now Clear Stale Sessions (the form shows them there, so they are carried
             // over): once that is saved, the old setting is retired so the two can never disagree
-            if (in_array(($_POST['clear_stale_sessions'] ?? ''), ['0', '1'], true)) $_POST['frrest_interim_update'] = '0'; // either choice replaces the legacy REST-only minutes
+            // only an explicit choice retires it: Yes, or No after it was Yes. A site still on the legacy minutes that saves an
+            // unrelated setting (the form posts No for it) keeps its 20-minute REST-only behaviour
+            $csPosted = (string) ($_POST['clear_stale_sessions'] ?? '');
+            if ($csPosted === '1' || ($csPosted === '0' && (string) ($config['clear_stale_sessions'] ?? '') === '1')) {
+                $_POST['frrest_interim_update'] = '0';
+            }
             // an empty, zero or negative timeout falls back to 10 minutes, as RadiusSessions::staleMinutes() reads it
             if (isset($_POST['stale_session_timeout'])) {
                 $staleMinutes = is_string($_POST['stale_session_timeout']) ? (int) trim($_POST['stale_session_timeout']) : 0;

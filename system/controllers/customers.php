@@ -297,6 +297,7 @@ switch ($action) {
         $bs = ORM::for_table('tbl_user_recharges')->where('customer_id', $id_customer)->where('status', 'on')->findMany();
         if ($bs) {
             $routers = [];
+            $failedSync = [];
             foreach ($bs as $b) {
                 if (strtotime($b['expiration'] . ' ' . $b['time']) <= time()) {
                     continue; // expired (the cron may still be retrying a clean-up): access is not sent back
@@ -304,7 +305,6 @@ switch ($action) {
                 $c = ORM::for_table('tbl_customers')->find_one($id_customer);
                 $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
                 if ($p) {
-                    $routers[] = $b['routers'];
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'Demo') {
                         if (file_exists($dvc)) {
@@ -315,10 +315,16 @@ switch ($action) {
                                 (new $p['device'])->add_customer($c, $p);
                             }
                         } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                            $failedSync[] = $b['routers']; // no driver file: not synced, and not reported as done
+                            continue;
                         }
                     }
+                    $routers[] = $b['routers']; // only once the driver has finished
                 }
+            }
+            if ($failedSync) {
+                r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars(implode(', ', array_unique($failedSync)), ENT_QUOTES)
+                    . ($routers ? '. ' . Lang::T('Synced') . ': ' . htmlspecialchars(implode(', ', $routers), ENT_QUOTES) : ''));
             }
             if ($routers) { // nothing applied (every recharge expired or without a plan) is no success
                 r2(getUrl('customers/view/') . $id_customer, 's', 'Sync success to ' . implode(", ", $routers));
@@ -432,6 +438,7 @@ switch ($action) {
             $ui->assign('customFields', $customFields);
             $ui->assign('xheader', $leafletpickerHeader);
             $ui->assign('pppoe_password_seen', hash('sha256', (string) $d['pppoe_password']));
+            $ui->assign('password_seen', hash('sha256', (string) $d['password']));
             $ui->assign('csrf_token',  Csrf::generateAndStoreToken());
             $ui->display('admin/customers/edit.tpl');
         } else {
@@ -451,9 +458,7 @@ switch ($action) {
         run_hook('delete_customer'); #HOOK
         $c = ORM::for_table('tbl_customers')->find_one($id);
         if ($c) {
-            // Delete the associated Customers Attributes records from tbl_customer_custom_fields table
-            ORM::for_table('tbl_customers_fields')->where('customer_id', $id)->delete_many();
-            //Delete active package
+            //Delete active package (the customer's attributes, the router port numbers among them, go only after every router is cleaned up)
             $turs = ORM::for_table('tbl_user_recharges')->where('username', $c['username'])->find_many();
             foreach ($turs as $tur) {
                 $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
@@ -490,6 +495,8 @@ switch ($action) {
                 } catch (Exception $e) {
                 }
             }
+            // Delete the associated Customers Attributes records from tbl_customer_custom_fields table
+            ORM::for_table('tbl_customers_fields')->where('customer_id', $id)->delete_many();
             try {
                 $c->delete();
             } catch (Exception $e) {
@@ -646,6 +653,12 @@ switch ($action) {
         $fullname = _post('fullname');
         $account_type = _post('account_type');
         $password = trim(_post('password'));
+        // a form that still holds the portal password it was opened with did not change it (it may have been changed since, by
+        // the customer): only a different value is a replacement
+        $pwSeen = (string) _post('password_seen');
+        if ($pwSeen !== '' && $password !== '' && hash_equals($pwSeen, hash('sha256', $password))) {
+            $password = '';
+        }
         $pppoe_username = trim(_post('pppoe_username'));
         $pppoe_password = trim(_post('pppoe_password'));
         $pppoe_ip = trim(_post('pppoe_ip'));
@@ -903,6 +916,7 @@ switch ($action) {
             }
 
             $keepHeld = false;
+            $deviceSkipped = false;
             $partialPlans = []; // plans whose router update was only partly done (code 207)
             $renamed = []; // [plan, from, to] of the router renames that went through, to be undone if a later one is refused
             $doneTurs = []; // recharges already moved to the new username
@@ -912,8 +926,8 @@ switch ($action) {
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'Demo') {
-                        // if has active package
-                        if ($tur['status'] == 'on') {
+                        // if has active package (a Voucher plan has no account on a device: its add_customer() would issue a new voucher)
+                        if ($tur['status'] == 'on' && $p['device'] !== 'Voucher') {
                             if (file_exists($dvc)) {
                                 require_once $dvc;
                                 try {
@@ -961,6 +975,7 @@ switch ($action) {
                                         $cb = $lockTaken ? ORM::for_table('tbl_customers')->find_one($id) : null;
                                         if (!$lockTaken) {
                                             _log('[' . $oldusername . '] edit rollback skipped, customer locked by another request', 'Router');
+                                            $undoFailed[] = Lang::T('the customer record (it was not restored)');
                                         }
                                         if ($cb) {
                                             // each field is put back only while it still holds what this edit saved (not a newer change)
@@ -1024,6 +1039,7 @@ switch ($action) {
                                 }
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
+                                $deviceSkipped = true; // no driver file: no secret was changed, so no address is let go
                             }
                         }
                     }
@@ -1032,7 +1048,7 @@ switch ($action) {
                     $doneTurs[] = $tur;
                 }
             }
-            if ($heldOld && !$keepHeld) {
+            if ($heldOld && !$keepHeld && !$deviceSkipped) {
                 MikrotikVpn::releaseHeld($oldPppoeIp); // every device update finished: no secret uses the old address any more
             }
             if ($partialPlans) {

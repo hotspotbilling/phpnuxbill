@@ -231,7 +231,7 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 "\nNew Expired: " . Lang::dateAndTimeFormat($expiration, $tur['time']));
             if ($extendPartial) {
                 // not reported as complete: the extension is saved, the router step is still pending until the next sync
-                r2(getUrl('home'), 'w', "Extend until $expiration. " . Lang::T('The router update is not complete yet; it will be finished shortly. Contact support if the connection does not work.'));
+                r2(getUrl('home'), 'w', "Extend until $expiration. " . Lang::T('The router update is not complete yet. Contact support if the connection does not work.'));
             }
             r2(getUrl('home'), 's', "Extend until $expiration");
         } else {
@@ -256,7 +256,8 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                 } catch (Exception $e) {
                     // code 207: the plan was taken off but a later step was refused (a fixed IP not cleared, a port forward left): the
                     // deactivation stands, and the admins are told in the log; any other error stops as before
-                    if ($e->getCode() !== 207) {
+                    // (MikrotikStatic raises it when the Expired-list block failed: access is not stopped there, so it stops as well)
+                    if ($e->getCode() !== 207 || $p['device'] === 'MikrotikStatic') {
                         throw $e;
                     }
                     _log('[' . $user['username'] . '] deactivate: ' . $e->getMessage(), 'Router');

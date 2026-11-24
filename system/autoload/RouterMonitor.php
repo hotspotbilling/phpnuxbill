@@ -83,6 +83,12 @@ class RouterMonitor
             }
             return self::$cutValue = ['s' => $s, 'e' => $e];
         } catch (Throwable $x) {
+            // a lookup that failed is not "no boundary": not remembered, and a write (create) stops here, so the reading is not saved
+            // with local time over a boundary that exists; the next reading tries again. A strict edit rolls back on it (moved()).
+            self::$cutLooked = false;
+            if ($create) {
+                throw $x;
+            }
             return null;
         }
     }

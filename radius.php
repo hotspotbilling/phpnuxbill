@@ -112,17 +112,11 @@ try {
             $framedIPAddress = _req('framedIPAddress', _req('framedipaddress'));
             $nasIpAddress = _req('nasIpAddress', _req('nasipaddress'));
             if ((string) $nasIpAddress === '') {
-                // A NAS that sends no NAS-IP-Address still needs its own key: (username, session id, NAS) is the unique key, and the
-                // session id is only unique per NAS. Its NAS-Identifier is stable and its own; failing that, the address the
-                // request came from (FreeRADIUS or the NAS itself). Never empty, so two NASes cannot share one row.
-                $nasIpAddress = trim((string) _req('nasid'));
-                if ($nasIpAddress === '') {
-                    $nasIpAddress = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-                }
-                if (strlen($nasIpAddress) > 15) {
-                    // the column is varchar(15): a longer identity becomes a short stable one of its own
-                    $nasIpAddress = 'h' . substr(md5($nasIpAddress), 0, 14);
-                }
+                // A NAS that sends no NAS-IP-Address is keyed by its own NAS-Identifier (stable, one per NAS; the column holds it,
+                // see the 2026.11.28 update). Never the address the request came from: that is FreeRADIUS's, the same for every NAS
+                // behind it. With neither, the packet has no NAS identity (kept as before, an empty one): the REST mapping must send
+                // NAS-IP-Address or NAS-Identifier for sessions of several NASes to be told apart.
+                $nasIpAddress = mb_substr(trim((string) _req('nasid')), 0, 45);
             }
             $nasPortId = _req('nasPortId', _req('nasportid'));
             $nasPortType = _req('nasPortType', _req('nasporttype'));
@@ -217,7 +211,11 @@ function radius_alert($text)
         $send = false;
         if (flock($fh, LOCK_EX | LOCK_NB)) {
             $last = (int) stream_get_contents($fh);
-            if (time() - $last >= 300) {
+            // without FastCGI the alert is sent while the router still waits: with under 0.5 s of the 3.5 s window left it cannot
+            // start, so the slot is not reserved (the lock is held across this check and the write: at most one reservation)
+            $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+            $canStart = function_exists('fastcgi_finish_request') || $elapsed <= 3.0;
+            if ($canStart && time() - $last >= 300) {
                 ftruncate($fh, 0);
                 rewind($fh);
                 fwrite($fh, (string) time());
