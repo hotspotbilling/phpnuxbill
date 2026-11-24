@@ -240,17 +240,24 @@ class MikrotikPppoe
             if ($client === null) {
                 break; // no connection to use any more: the first error says it
             }
-            try {
-                $this->removePpoeActive($client, $name);
-            } catch (Exception $e) {
-                $first = $first ?? $e;
-                // the connection was dropped (no answer, or closed: 408 and 503 from RouterApi): the next name gets a new one. A
-                // refusal (a trap, 403) leaves the connection as it was.
-                if ($mikrotik && in_array($e->getCode(), [408, 503], true)) {
-                    try {
-                        $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
-                    } catch (Exception $e2) {
-                        $client = null;
+            // after a lost connection the same login is listed again on a new one, once (a removal whose reply was lost then shows
+            // as done); a refusal, or a second failure, is the result for this name
+            for ($attempt = 0; $attempt < 2 && $client !== null; $attempt++) {
+                try {
+                    $this->removePpoeActive($client, $name);
+                    break;
+                } catch (Exception $e) {
+                    $lost = $mikrotik && in_array($e->getCode(), [408, 503], true); // dropped: no answer, or closed (RouterApi)
+                    if ($lost) {
+                        try {
+                            $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
+                        } catch (Exception $e2) {
+                            $client = null;
+                        }
+                    }
+                    if (!$lost || $attempt === 1 || $client === null) {
+                        $first = $first ?? $e;
+                        break;
                     }
                 }
             }
@@ -336,6 +343,11 @@ class MikrotikPppoe
             RouterOS\Query::where('name', $old_name['name_plan'])
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($profileID) && $old_name['name_plan'] !== $new_plan['name_plan']) {
+            // a retry after the profile was renamed already (or created under the new name): the existing one is updated
+            $printNew = new RouterOS\Request('/ppp profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
+            $profileID = $client->sendSync($printNew)->getProperty('.id');
+        }
         if (empty($profileID)) {
             $this->add_plan($new_plan);
         } else {
@@ -516,7 +528,11 @@ class MikrotikPppoe
         if (!empty($customer['pppoe_ip']) && !$isExp) {
             $setRequest->setArgument('remote-address', $customer['pppoe_ip']);
         }
-        $this->checked($client->sendSync($setRequest));
+        // a refused add is thrown in every mode (not only during a sync): the secret is not there, so nothing is done
+        $res = $client->sendSync($setRequest);
+        if (($err = RouterApi::error($res)) !== null) {
+            throw new Exception(Lang::T('The router refused the command') . ': ' . $err);
+        }
     }
 
     /**

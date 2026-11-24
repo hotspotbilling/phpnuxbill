@@ -17,8 +17,9 @@ body.as-chrome.modern-skin-dark {
   --as-accent: #4f46e5;
   --as-active-bg: #eef2ff;
   --as-active-text: #4338ca;
-  --as-pill-bg: #4f46e5;
-  --as-pill-text: #ffffff;
+  /* the active item is a soft tint with accent text, not a solid block */
+  --as-pill-bg: #eef2ff;
+  --as-pill-text: #4338ca;
   --as-flyout-shadow: 0 10px 28px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(15, 23, 42, 0.06);
   --as-btn-hover: rgba(0, 0, 0, 0.05);
   --as-btn-hover-text: #4f46e5;
@@ -34,8 +35,8 @@ body.as-chrome.modern-skin-dark.dark-mode {
   --as-accent: #818cf8;
   --as-active-bg: rgba(129, 140, 248, 0.18);
   --as-active-text: #a5b4fc;
-  --as-pill-bg: #5d5fef; /* white text on it is 4.8:1; the lighter #818cf8 was only 3:1 */
-  --as-pill-text: #ffffff;
+  --as-pill-bg: rgba(129, 140, 248, 0.18); /* #a5b4fc text on it is well above 4.5:1 */
+  --as-pill-text: #a5b4fc;
   --as-flyout-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
   --as-btn-hover: rgba(255, 255, 255, 0.08);
   --as-btn-hover-text: #818cf8;
@@ -144,6 +145,16 @@ body.as-chrome.modern-skin-dark .main-sidebar .sidebar .sidebar-menu > li.active
   background-color: var(--as-pill-bg) !important;
   color: var(--as-pill-text) !important;
   font-weight: 600;
+}
+
+/* tighter rows when the sidebar is open (the collapsed icon rail keeps its own sizes) */
+body.as-chrome.modern-skin-dark:not(.sidebar-collapse) .main-sidebar .sidebar .sidebar-menu > li > a {
+  padding: 8px 14px !important;
+  margin: 1px 10px;
+}
+body.as-chrome.modern-skin-dark:not(.sidebar-collapse) .main-sidebar .sidebar .sidebar-menu .treeview-menu > li > a {
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
 }
 
 /* an open group: the parent row stays plain, only the active child is filled */

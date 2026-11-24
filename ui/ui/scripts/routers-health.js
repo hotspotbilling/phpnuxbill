@@ -487,7 +487,7 @@
         chart(traffic.querySelector('.rt-chart__box'), sNet, bps, null, now, L.hover.traffic, t.traffic);
         var lastRow = rows[rows.length - 1];
         // the current speed only from the newest reading: after a pause or a failed reading there is none until a new pair
-        var current = lastRow && lastRow[1] != null && lastRow[0] === L.lastAt && L.prev[L.iface];
+        var current = !L.paused && lastRow && lastRow[1] != null && lastRow[0] === L.lastAt && L.prev[L.iface];
         traffic.querySelector('.rt-legend').innerHTML = legend(sNet, current ? [bps(lastRow[1]), bps(lastRow[2])] : [null, null]);
     }
 
@@ -538,6 +538,9 @@
                 }
                 applied[kind][id] = seq;
                 var newest = order >= (shownAll[id] || 0);
+                // a queued first check does not replace what Live has shown in the cell (a cached success over a Live failure);
+                // Check now and the Live readings themselves always do
+                if (newest && !opts.live && !opts.fresh && live[id]) newest = false;
                 if (newest) {
                     shownAll[id] = order;
                     cell(id, d);

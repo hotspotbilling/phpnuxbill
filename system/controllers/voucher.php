@@ -62,10 +62,8 @@ switch ($action) {
         run_hook('customer_activate_voucher'); #HOOK
         if ($v1) {
             if (Package::redeemVoucher($v1, $user['id'], $user['username'], $code)) {
-                $v1->status = "1";
-                $v1->used_date = date('Y-m-d H:i:s');
-                $v1->user = $user['username'];
-                $v1->save();
+                // redeemVoucher() has already marked the voucher used (status, date, owner): writing the stale row again could
+                // undo a rename made since
                 r2(getUrl('voucher/list-activated'), 's', Lang::T('Activation Vouchers Successfully'));
             } else {
                 r2(getUrl('voucher/activation'), 'e', "Failed to refill account");

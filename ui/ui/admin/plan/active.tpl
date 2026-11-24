@@ -126,7 +126,7 @@
         var res = prompt("Extend for many days?", "3");
         if (res) {
             if (confirm("Extend for " + res + " days?")) {
-                window.location.href = "{Text::url('plan/extend/')}" + idP + "/" + res + "{Text::isQA('? or &')}stoken={App::getToken()}";
+                window.location.href = "{Text::url('plan/extend/')}" + idP + "/" + res + "{Text::isQA('? or &')}svoucher={App::getVoucher()}"; // one value per page load: a retry of the same link reaches the recovery marker
             }
         }
     }

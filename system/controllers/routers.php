@@ -729,6 +729,11 @@ switch ($action) {
                             throw new Exception(Lang::T('Devices Not Found'));
                         }
                         require_once $dvc;
+                        // MikrotikVpn takes named locks of its own: where the database frees the lock held when it takes another
+                        // (before MySQL 5.7.5 / MariaDB 10.0.2) the endpoint lock would be let go mid-sync, so VPN is not synced there
+                        if ($p['device'] === 'MikrotikVpn' && !MikrotikVpn::nestedLocks()) {
+                            throw new Exception(Lang::T('VPN customers cannot be synced on this database version while the router is protected from changes'));
+                        }
                         $dev = new $p['device'];
                         if (method_exists($dev, 'sync_customer')) {
                             $dev->sync_customer($c, $p); // a change the router refuses is thrown (caught below)

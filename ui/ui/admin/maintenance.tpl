@@ -1,247 +1,397 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>{Lang::T('Site is down for maintenance')}</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>{Lang::T('Site is down for maintenance')} - {$companyName|escape}</title>
+    <link rel="shortcut icon" href="{$app_url}/ui/ui/images/logo.png" type="image/x-icon">
+    {*
+        Shown (HTTP 503) to everyone while Maintenance Mode is on, by displayMaintenanceMessage() in init.php. Uses the colour
+        tokens and theme switch of the public pages (styles.public.css, the "theme" setting in localStorage), so it follows the
+        login page: light, dark, or the device's. $date (optional): when the site is back, as the countdown target.
+    *}
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.public.css?2026.11.06.6">
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/fontawesome.css">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'light' || t === 'dark') document.documentElement.classList.add('theme-' + t);
+            } catch (e) { }
+        })();
+    </script>
     <style>
-        body {
-            font-family: 'Noto Sans', sans-serif;
-            color: #616161;
-            background-color: #eeeeee;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-
-        .container {
-            max-width: 1024px;
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        .box {
-            width: 100%;
-            background: #fff;
-            margin: auto;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 6px 18px 18px rgba(0, 0, 0, 0.08), -6px 18px 18px rgba(0, 0, 0, 0.08);
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .animation {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-        }
-
-        h1 {
-            font-size: 32px;
-            font-weight: 400;
-            text-transform: uppercase;
-            margin: 0;
-        }
-
-        p {
-            font-size: 16px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        a {
-            color: #f6921e;
-            font-weight: bold;
-            text-decoration: none;
-            margin-left: 5px;
-        }
-
-        .one,
-        .two,
-        .three {
-            display: block;
-            float: left;
-        }
-
-        .one {
-            background: url('data:image/svg+xml,%3Csvg%20version%3D%221.1%22%0A%09%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20xmlns%3Aa%3D%22http%3A%2F%2Fns.adobe.com%2FAdobeSVGViewerExtensions%2F3.0%2F%22%0A%09%20x%3D%220px%22%20y%3D%220px%22%20width%3D%2281px%22%20height%3D%2280.5px%22%20viewBox%3D%220%200%2081%2080.5%22%20style%3D%22overflow%3Ascroll%3Benable-background%3Anew%200%200%2081%2080.5%3B%22%0A%09%20xml%3Aspace%3D%22preserve%22%3E%0A%3Cstyle%20type%3D%22text%2Fcss%22%3E%0A%09.st0%7Bfill%3A%23383838%3B%7D%0A%3C%2Fstyle%3E%0A%3Cdefs%3E%0A%3C%2Fdefs%3E%0A%3Cpath%20class%3D%22st0%22%20d%3D%22M30.3%2C68.2c1.2%2C0.2%2C2.3%2C0.9%2C3.8%2C1.2c1.6%2C0.3%2C2.7%2C0.6%2C4%2C0.4l4.9%2C9.6c0.6%2C0.9%2C1.4%2C1.1%2C2.3%2C0.9l15.3-4.9%0A%09c0.5-0.3%2C1-1%2C0.9-2.3l-1.8-10.6c2-1.6%2C3.6-3.7%2C5.3-5.8l10.5%2C0.6c1.1%2C0.6%2C2.1-0.4%2C2.3-1.1L81%2C40.7c0.2-0.8-0.4-2.1-1.1-2.3l-10.2-3.8%0A%09c-0.3-2.5-1.4-4.8-2.5-7.5l5.9-8.5c0.6-1.1%2C0.4-1.9-0.2-2.9l-12-10.7c-0.3-0.5-1.6-0.3-2.5%2C0.3l-8%2C6.9c-1.2-0.2-2.3-0.9-3.8-1.2%0A%09c-1.6-0.3-2.7-0.6-4-0.4L37.7%2C1c-0.6-0.9-1.4-1.1-2.3-0.9L20.1%2C5c-0.5%2C0.3-1%2C1-0.9%2C2.3l1.8%2C10.6c-2%2C1.6-3.6%2C3.7-5.3%2C5.8L5.3%2C23%0A%09c-0.8-0.2-1.7%2C0.4-2%2C1.6L0%2C40.2c-0.2%2C0.8%2C0.4%2C2.1%2C1.1%2C2.3l9.8%2C3.7c0.7%2C2.6%2C1.4%2C5.2%2C2.5%2C7.5l-6%2C8.9c-0.6%2C0.7-0.4%2C2%2C0.3%2C2.5l12%2C10.7%0A%09c0.7%2C0.5%2C1.9%2C0.8%2C2.4%2C0.1L30.3%2C68.2z%20M26.7%2C37.3c1.6-7.4%2C9.1-12.3%2C16.5-10.8S55.6%2C35.7%2C54%2C43.1c-1.6%2C7.4-9.1%2C12.3-16.5%2C10.7%0A%09C30.1%2C52.3%2C25.1%2C44.7%2C26.7%2C37.3L26.7%2C37.3z%22%2F%3E%0A%3C%2Fsvg%3E');
-            width: 80px;
-            height: 80px;
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            margin-top: -10px;
-            margin-right: 8px;
-        }
-
-        .two {
-            background: url('data:image/svg+xml,%3Csvg%20version%3D%221.1%22%0A%09%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20xmlns%3Aa%3D%22http%3A%2F%2Fns.adobe.com%2FAdobeSVGViewerExtensions%2F3.0%2F%22%0A%09%20x%3D%220px%22%20y%3D%220px%22%20width%3D%22103px%22%20height%3D%22103.7px%22%20viewBox%3D%220%200%20103%20103.7%22%0A%09%20style%3D%22overflow%3Ascroll%3Benable-background%3Anew%200%200%20103%20103.7%3B%22%20xml%3Aspace%3D%22preserve%22%3E%0A%3Cstyle%20type%3D%22text%2Fcss%22%3E%0A%09.st0%7Bfill%3A%23F6921E%3B%7D%0A%3C%2Fstyle%3E%0A%3Cdefs%3E%0A%3C%2Fdefs%3E%0A%3Cpath%20class%3D%22st0%22%20d%3D%22M87.3%2C64.8c0.3-1.5%2C1.1-2.9%2C1.6-4.9c0.4-2%2C0.7-3.5%2C0.5-5.1l12.3-6.3c1.2-0.8%2C1.4-1.8%2C1.1-2.9l-6.3-19.6%0A%09c-0.4-0.6-1.3-1.3-2.9-1.1l-13.5%2C2.3c-2.1-2.5-4.7-4.7-7.4-6.8l0.8-13.4C74.3%2C5.8%2C73%2C4.5%2C72%2C4.3L52.1%2C0c-1-0.2-2.7%2C0.5-2.9%2C1.5%0A%09l-4.8%2C13c-3.2%2C0.4-6.1%2C1.8-9.5%2C3.2l-10.9-7.5c-1.4-0.8-2.5-0.5-3.7%2C0.3L6.5%2C25.8c-0.6%2C0.4-0.4%2C2%2C0.4%2C3.2l8.8%2C10.2%0A%09c-0.3%2C1.5-1.1%2C2.9-1.5%2C4.9c-0.4%2C2-0.7%2C3.5-0.6%2C5.1L1.2%2C55.4c-1.2%2C0.8-1.4%2C1.8-1.1%2C2.9l6.3%2C19.6c0.4%2C0.6%2C1.3%2C1.3%2C2.9%2C1.1l13.5-2.3%0A%09c2.1%2C2.5%2C4.7%2C4.7%2C7.4%2C6.8l-0.8%2C13.4c-0.2%2C1%2C0.6%2C2.2%2C2.1%2C2.5l20%2C4.2c1%2C0.2%2C2.7-0.5%2C2.9-1.5l4.7-12.6c3.3-0.9%2C6.6-1.7%2C9.5-3.2L80.1%2C94%0A%09c0.9%2C0.7%2C2.5%2C0.5%2C3.2-0.4L97%2C78.3c0.7-0.9%2C1-2.4%2C0.1-3.1L87.3%2C64.8z%20M47.8%2C69.5C38.3%2C67.5%2C32%2C57.8%2C34%2C48.3%0A%09c2-9.5%2C11.7-15.8%2C21.2-13.8c9.5%2C2%2C15.7%2C11.7%2C13.7%2C21.2C66.9%2C65.2%2C57.3%2C71.5%2C47.8%2C69.5L47.8%2C69.5z%22%2F%3E%0A%3C%2Fsvg%3E');
-            width: 100px;
-            height: 100px;
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-        }
-        
-        .three {
-            background: url('data:image/svg+xml,%3Csvg%20version%3D%221.1%22%0A%09%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20xmlns%3Aa%3D%22http%3A%2F%2Fns.adobe.com%2FAdobeSVGViewerExtensions%2F3.0%2F%22%0A%09%20x%3D%220px%22%20y%3D%220px%22%20width%3D%2281px%22%20height%3D%2280.5px%22%20viewBox%3D%220%200%2081%2080.5%22%20style%3D%22overflow%3Ascroll%3Benable-background%3Anew%200%200%2081%2080.5%3B%22%0A%09%20xml%3Aspace%3D%22preserve%22%3E%0A%3Cstyle%20type%3D%22text%2Fcss%22%3E%0A%09.st0%7Bfill%3A%23383838%3B%7D%0A%3C%2Fstyle%3E%0A%3Cdefs%3E%0A%3C%2Fdefs%3E%0A%3Cpath%20class%3D%22st0%22%20d%3D%22M30.3%2C68.2c1.2%2C0.2%2C2.3%2C0.9%2C3.8%2C1.2c1.6%2C0.3%2C2.7%2C0.6%2C4%2C0.4l4.9%2C9.6c0.6%2C0.9%2C1.4%2C1.1%2C2.3%2C0.9l15.3-4.9%0A%09c0.5-0.3%2C1-1%2C0.9-2.3l-1.8-10.6c2-1.6%2C3.6-3.7%2C5.3-5.8l10.5%2C0.6c1.1%2C0.6%2C2.1-0.4%2C2.3-1.1L81%2C40.7c0.2-0.8-0.4-2.1-1.1-2.3l-10.2-3.8%0A%09c-0.3-2.5-1.4-4.8-2.5-7.5l5.9-8.5c0.6-1.1%2C0.4-1.9-0.2-2.9l-12-10.7c-0.3-0.5-1.6-0.3-2.5%2C0.3l-8%2C6.9c-1.2-0.2-2.3-0.9-3.8-1.2%0A%09c-1.6-0.3-2.7-0.6-4-0.4L37.7%2C1c-0.6-0.9-1.4-1.1-2.3-0.9L20.1%2C5c-0.5%2C0.3-1%2C1-0.9%2C2.3l1.8%2C10.6c-2%2C1.6-3.6%2C3.7-5.3%2C5.8L5.3%2C23%0A%09c-0.8-0.2-1.7%2C0.4-2%2C1.6L0%2C40.2c-0.2%2C0.8%2C0.4%2C2.1%2C1.1%2C2.3l9.8%2C3.7c0.7%2C2.6%2C1.4%2C5.2%2C2.5%2C7.5l-6%2C8.9c-0.6%2C0.7-0.4%2C2%2C0.3%2C2.5l12%2C10.7%0A%09c0.7%2C0.5%2C1.9%2C0.8%2C2.4%2C0.1L30.3%2C68.2z%20M26.7%2C37.3c1.6-7.4%2C9.1-12.3%2C16.5-10.8S55.6%2C35.7%2C54%2C43.1c-1.6%2C7.4-9.1%2C12.3-16.5%2C10.7%0A%09C30.1%2C52.3%2C25.1%2C44.7%2C26.7%2C37.3L26.7%2C37.3z%22%2F%3E%0A%3C%2Fsvg%3E');
-            width: 80px;
-            height: 80px;
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            margin-top: -50px;
-            margin-left: -10px;
-        }
-
-        @keyframes spin-one {
-            0% {
-                -webkit-transform: rotate(0deg);
-                transform: rotate(0deg);
-            }
-
-            100% {
-                -webkit-transform: rotate(-359deg);
-                transform: rotate(-359deg);
-            }
-        }
-
-        .spin-one {
-            -webkit-animation: spin-one 1.5s infinite linear;
-            animation: spin-one 1.5s infinite linear;
-        }
-
-        @keyframes spin-two {
-            0% {
-                -webkit-transform: rotate(0deg);
-                transform: rotate(0deg);
-            }
-
-            100% {
-                -webkit-transform: rotate(-359deg);
-                transform: rotate(359deg);
-            }
-        }
-
-        .spin-two {
-            -webkit-animation: spin-two 2s infinite linear;
-            animation: spin-two 2s infinite linear;
-        }
-
-        .day,
-        .hour,
-        .minute,
-        .second {
-            font-size: 18px;
-            background: #333;
-            color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 5px;
+        .mt-wrap {
             flex: 1;
-            text-align: center;
-        }
-
-        .day {
-            background-color: #1abc9c;
-        }
-
-        .hour {
-            background-color: #3498db;
-        }
-
-        .minute {
-            background-color: #f1c40f;
-        }
-
-        .second {
-            background-color: #e74c3c;
-        }
-
-        .countdown {
             display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
         }
 
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 24px;
+        .mt-card {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            padding: 40px 32px 32px;
+            text-align: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
+        }
+
+        .mt-toggle {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: border-color .2s, color .2s;
+        }
+
+        .mt-toggle:hover,
+        .mt-toggle:focus-visible {
+            border-color: #2563eb;
+            color: #2563eb;
+            outline: none;
+        }
+
+        .mt-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.9rem;
+            color: #fff;
+            background: #2563eb;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, .3);
+        }
+
+        .mt-icon i {
+            animation: mt-spin 6s linear infinite;
+        }
+
+        @keyframes mt-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .mt-brand {
+            margin: 0 0 6px;
+            font-size: .85rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .mt-title {
+            margin: 0 0 12px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.25;
+            color: var(--text-primary);
+        }
+
+        .mt-text {
+            margin: 0 0 8px;
+            font-size: .95rem;
+            line-height: 1.55;
+            color: var(--text-secondary);
+        }
+
+        .mt-sign {
+            margin: 16px 0 0;
+            font-size: .85rem;
+            color: var(--text-tertiary);
+        }
+
+        .mt-count {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 24px 0 4px;
+        }
+
+        .mt-count[hidden] {
+            display: none;
+        }
+
+        .mt-unit {
+            padding: 12px 4px;
+            background: var(--stat-item-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+        }
+
+        .mt-unit b {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-primary);
+        }
+
+        .mt-unit span {
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .mt-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 16px;
+            padding: 5px 12px;
+            font-size: .78rem;
+            font-weight: 600;
+            color: #b45309;
+            background: rgba(245, 158, 11, .12);
+            border: 1px solid rgba(245, 158, 11, .35);
+            border-radius: 999px;
+        }
+
+        .mt-dot {
+            width: 8px;
+            height: 8px;
+            background: #f59e0b;
+            border-radius: 50%;
+            animation: mt-pulse 1.6s ease-in-out infinite;
+        }
+
+        @keyframes mt-pulse {
+            50% {
+                opacity: .35;
+                transform: scale(.8);
+            }
+        }
+
+        .mt-back {
+            margin: 16px 0 0;
+            font-size: .9rem;
+            color: var(--text-secondary);
+        }
+
+        .mt-back b {
+            color: var(--text-primary);
+        }
+
+        .mt-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--divider-bg);
+        }
+
+        .mt-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            font: inherit;
+            font-size: .9rem;
+            font-weight: 600;
+            color: #fff;
+            background: #2563eb;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .mt-btn:hover,
+        .mt-btn:focus-visible {
+            opacity: .9;
+            outline: none;
+        }
+
+        .mt-btn[disabled] {
+            opacity: .6;
+            cursor: default;
+        }
+
+        .mt-btn.is-busy i {
+            animation: mt-spin 1s linear infinite;
+        }
+
+        .mt-note {
+            margin: 0;
+            font-size: .78rem;
+            color: var(--text-tertiary);
+        }
+
+        .mt-contact {
+            margin: 14px 0 0;
+            font-size: .85rem;
+            color: var(--text-secondary);
+        }
+
+        .mt-contact a {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        html.theme-dark .mt-status {
+            color: #fbbf24;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html:not(.theme-light) .mt-status {
+                color: #fbbf24;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mt-card {
+                padding: 36px 20px 24px;
             }
 
-            p {
-                font-size: 14px;
+            .mt-title {
+                font-size: 1.3rem;
             }
 
-            .one,
-            .two,
-            .three {
-                width: 40px;
-                height: 40px;
+            .mt-unit b {
+                font-size: 1.2rem;
             }
 
-            .day,
-            .hour,
-            .minute,
-            .second {
-                font-size: 14px;
-                padding: 8px;
-                margin: 2px;
+            .mt-unit span {
+                font-size: .62rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .mt-icon i,
+            .mt-dot,
+            .mt-btn.is-busy i {
+                animation: none;
             }
         }
     </style>
-
 </head>
 
 <body>
-    <!-- partial:index.partial.html -->
-    <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700" rel="stylesheet">
-
-    <div class="container">
-        <div class="box">
-            <div class="animation">
-                <div class="one spin-one"></div>
-                <div class="two spin-two"></div>
-                <div class="three spin-one"></div>
-            </div>
-            <h1>{Lang::T('Site is temporarily unavailable.')}</h1>
-            <p>{Lang::T('Scheduled maintenance is currently in progress. Please check back soon.')}</p>
-            <p>{Lang::T('We apologize for any inconvenience.')} <br> &mdash; {Lang::T('The ')} {$companyName} {Lang::T('
-                Team.')}</p>
-            <br>
-            {if $date} <div style="display: flex; flex-direction: row; justify-content: space-between;">
-                <p class="day"></p>
-                <p class="hour"></p>
-                <p class="minute"></p>
-                <p class="second"></p>
+    <div class="background"></div>
+    <main class="mt-wrap">
+        <section class="mt-card" role="status" aria-live="polite">
+            <button type="button" class="mt-toggle" id="mtToggle" aria-label="{Lang::T('Toggle theme')}">
+                <i class="fas fa-adjust" aria-hidden="true"></i>
+            </button>
+            <div class="mt-icon" aria-hidden="true"><i class="fas fa-cog"></i></div>
+            <p class="mt-status"><span class="mt-dot" aria-hidden="true"></span>{Lang::T('Maintenance in progress')}</p>
+            <p class="mt-brand">{$companyName|escape}</p>
+            <h1 class="mt-title">{Lang::T('Site is temporarily unavailable.')}</h1>
+            <p class="mt-text">{Lang::T('Scheduled maintenance is currently in progress. Please check back soon.')}</p>
+            {if $date}
+            <div class="mt-count" id="mtCount" hidden>
+                <div class="mt-unit"><b id="mtD">0</b><span>{Lang::T('Days')}</span></div>
+                <div class="mt-unit"><b id="mtH">0</b><span>{Lang::T('Hours')}</span></div>
+                <div class="mt-unit"><b id="mtM">0</b><span>{Lang::T('Minutes')}</span></div>
+                <div class="mt-unit"><b id="mtS">0</b><span>{Lang::T('Seconds')}</span></div>
             </div>
             {/if}
-        </div>
-    </div>
+            {if $date}<p class="mt-back" id="mtBack" hidden>{Lang::T('Expected back')}: <b id="mtBackAt"></b></p>{/if}
+            <div class="mt-actions">
+                <button type="button" class="mt-btn" id="mtCheck"><i class="fas fa-sync-alt" aria-hidden="true"></i> <span>{Lang::T('Check again')}</span></button>
+                <p class="mt-note" id="mtNote">{Lang::T('This page checks by itself and opens the site as soon as it is back.')}</p>
+            </div>
+            {if $_c['phone'] neq '' or $_c['address'] neq ''}
+            <p class="mt-contact">
+                {if $_c['phone'] neq ''}<i class="fas fa-phone-alt" aria-hidden="true"></i> <a href="tel:{$_c['phone']|escape}">{$_c['phone']|escape}</a>{/if}
+                {if $_c['phone'] neq '' and $_c['address'] neq ''} &middot; {/if}
+                {if $_c['address'] neq ''}{$_c['address']|escape}{/if}
+            </p>
+            {/if}
+            <p class="mt-sign">{Lang::T('We apologize for any inconvenience.')}</p>
+        </section>
+    </main>
+    <script>
+        (function () {
+            // the site is asked again every 30 seconds (and on the button): the page opens it once it no longer answers 503
+            var btn = document.getElementById('mtCheck'), note = document.getElementById('mtNote');
+            var busy = false, wait = 30, idle = note.textContent;
+            function check() {
+                if (busy) return;
+                busy = true;
+                btn.disabled = true;
+                btn.classList.add('is-busy');
+                fetch(location.pathname + location.search, { cache: 'no-store', credentials: 'same-origin', headers: { 'X-Requested-With': 'maintenance-check' } })
+                    .then(function (r) { if (r.status !== 503) location.reload(); })
+                    .catch(function () { })
+                    .then(function () {
+                        busy = false;
+                        wait = 30;
+                        btn.disabled = false;
+                        btn.classList.remove('is-busy');
+                        note.textContent = idle;
+                    });
+            }
+            btn.addEventListener('click', check);
+            setInterval(function () { if (!document.hidden && --wait <= 0) check(); }, 1000);
+        })();
+    </script>
+    <script>
+        (function () {
+            // light / dark / device, kept in the same "theme" setting as the login page
+            var root = document.documentElement;
+            document.getElementById('mtToggle').addEventListener('click', function () {
+                var now = root.classList.contains('theme-dark') ? 'dark' : root.classList.contains('theme-light') ? 'light' : 'system';
+                var next = now === 'system' ? 'light' : now === 'light' ? 'dark' : 'system';
+                root.classList.remove('theme-light', 'theme-dark');
+                root.style.colorScheme = next === 'system' ? '' : next;
+                if (next !== 'system') root.classList.add('theme-' + next);
+                try { localStorage.setItem('theme', next); } catch (e) { }
+            });
+        })();
+    </script>
     {if $date}
     <script>
-        const countDown = () => {
-            const countDay = new Date('{$date}');
-            const now = new Date();
-            const counter = countDay - now;
-            const second = 1000;
-            const minute = second * 60;
-            const hour = minute * 60;
-            const day = hour * 24;
-            const textDay = Math.floor(counter / day);
-            const textHour = Math.floor((counter % day) / hour);
-            const textMinute = Math.floor((counter % hour) / minute);
-            const textSecond = Math.floor((counter % minute) / second)
-            document.querySelector(".day").innerText = textDay + ' Days';
-            document.querySelector(".hour").innerText = textHour + ' Hours';
-            document.querySelector(".minute").innerText = textMinute + ' Minutes';
-            document.querySelector(".second").innerText = textSecond + ' Seconds';
-        }
-        setInterval(countDown, 1000);
+        (function () {
+            var end = new Date('{if $date|strlen == 10}{$date|escape:"javascript"}T00:00{else}{$date|replace:" ":"T"|escape:"javascript"}{/if}').getTime();
+            var box = document.getElementById('mtCount');
+            if (isNaN(end)) return;
+            var at = document.getElementById('mtBackAt');
+            if (at && end > Date.now()) {
+                try { at.textContent = new Date(end).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' }); }
+                catch (e) { at.textContent = new Date(end).toLocaleString(); }
+                document.getElementById('mtBack').hidden = false;
+            }
+            function tick() {
+                var left = end - Date.now();
+                if (left <= 0) { box.hidden = true; return false; }
+                box.hidden = false;
+                var s = Math.floor(left / 1000);
+                document.getElementById('mtD').textContent = Math.floor(s / 86400);
+                document.getElementById('mtH').textContent = Math.floor(s % 86400 / 3600);
+                document.getElementById('mtM').textContent = Math.floor(s % 3600 / 60);
+                document.getElementById('mtS').textContent = s % 60;
+                return true;
+            }
+            if (tick()) {
+                var timer = setInterval(function () { if (!tick()) clearInterval(timer); }, 1000);
+            }
+        })();
     </script>
     {/if}
 </body>

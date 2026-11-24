@@ -288,7 +288,8 @@ class MikrotikVpn
                 throw $natErr;
             }
             if ($discErr !== null) {
-                throw $discErr;
+                // the secret is saved: a session that could not be ended is a partial result, with the cause kept
+                throw new Exception($discErr->getMessage(), self::PARTIAL, $discErr);
             }
         }
     }
@@ -847,7 +848,10 @@ class MikrotikVpn
             $before = (string) $customer->service_type;
             $customer->service_type = 'VPN';
             $customer->pppoe_ip = $ips;
-            $customer->save();
+            if ($customer->save() === false) {
+                // a save that reports failure without throwing: the address is not reserved, so nothing is sent to the router
+                throw new Exception(Lang::T('The address could not be reserved for this customer. Try again in a moment.'));
+            }
             self::autoSet($customer, $ips, $before, (string) $plan['routers']);
             return $ips;
         } finally {
@@ -980,7 +984,7 @@ class MikrotikVpn
         foreach ($res as $nat) {
             if ($nat->getType() === RouterOS\Response::TYPE_DATA) {
                 $row = [];
-                foreach (array_merge(['.id', 'comment', 'chain', 'action', 'protocol', 'dst-port', 'dst-address', 'to-addresses', 'to-ports', 'disabled'], self::NAT_MATCH) as $k) {
+                foreach (array_merge(['.id', 'comment', 'chain', 'action', 'protocol', 'dst-port', 'dst-address', 'to-addresses', 'to-ports', 'disabled', 'log', 'log-prefix'], self::NAT_MATCH) as $k) {
                     $row[$k] = (string) RouterApi::text($nat->getProperty($k));
                 }
                 // RouterOS says a flag "true"/"false" over the API, some versions "yes"/"no": one form here
@@ -1220,6 +1224,12 @@ class MikrotikVpn
                             $keep[$k] = $stale[0][$k];
                         }
                     }
+                    // the old rule's logging goes on the replacement too (a refusal of either keeps the old rule, below)
+                    foreach (['log', 'log-prefix'] as $k) {
+                        if (isset($stale[0][$k]) && $stale[0][$k] !== '') {
+                            $addRequest->setArgument($k, $stale[0][$k]);
+                        }
+                    }
                     // the replacement takes the original's place in the chain (rule order decides which rule matches first)
                     $addRequest->setArgument('place-before', $stale[0]['.id']);
                 }
@@ -1444,6 +1454,10 @@ class MikrotikVpn
         foreach (ORM::for_table('tbl_plans')->select('routers')->where('type', 'VPN')->where_not_equal('routers', '')->find_array() as $row) {
             $names[(string) $row['routers']] = true;
         }
+        // a router whose last VPN plan was moved or deleted may still hold secrets: its recharges keep it asked
+        foreach (ORM::for_table('tbl_user_recharges')->distinct()->select('routers')->where('type', 'VPN')->where_not_equal('routers', '')->find_array() as $row) {
+            $names[(string) $row['routers']] = true;
+        }
         foreach (array_keys($names) as $name) {
             try {
                 $m = $this->info($name);
@@ -1491,6 +1505,9 @@ class MikrotikVpn
         foreach (ORM::for_table('tbl_appconfig')->where_like('setting', 'vpn_held\\_%')->find_many() as $held) {
             $heldIp = substr((string) $held['setting'], 9);
             if ((int) $held['value'] > time()) {
+                $taken[$heldIp] = true;
+            } elseif (($hu = self::ipUnsigned($heldIp)) < $from || $hu > $to) {
+                // another pool's address: not asked of a router while allocating here, and kept reserved until it is looked at
                 $taken[$heldIp] = true;
             } elseif ($this->holdStillUsed($heldIp)) {
                 // the time is up, but a router still has a secret on the address (or cannot be asked): kept, and looked at again later

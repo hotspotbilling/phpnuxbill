@@ -31,8 +31,17 @@ class MikrotikHotspot
     }
 
 
+    /** A Limited plan must name a known limit type: otherwise it would be sent as unlimited (checked before the router is touched) */
+    private function assertLimitType($plan)
+    {
+        if ($plan['typebp'] == 'Limited' && !in_array($plan['limit_type'], ['Time_Limit', 'Data_Limit', 'Both_Limit'], true)) {
+            throw new Exception(Lang::T('The plan is Limited but has no valid limit type: nothing was sent to the router.'));
+        }
+    }
+
     function add_customer($customer, $plan)
     {
+        $this->assertLimitType($plan);
         $mikrotik = $this->info($plan['routers']);
         $client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 		$isExp = ORM::for_table('tbl_plans')->select("id")->where('plan_expired', $plan['id'])->find_one();
@@ -91,6 +100,7 @@ class MikrotikHotspot
 
 	private function syncCustomer($customer, $plan)
 	{
+		$this->assertLimitType($plan);
 		$mikrotik = $this->info($plan['routers']);
 		$client = $this->getClient($mikrotik['ip_address'], $mikrotik['username'], $mikrotik['password']);
 		// the active recharge of this plan (not any recharge of the username, which may be a PPPoE one)
@@ -169,7 +179,10 @@ class MikrotikHotspot
             try {
                 $this->removeHotspotActiveUser($client, $from, true);
             } catch (Exception $e) {
-                _log('Hotspot ' . $from . ': ' . $e->getMessage(), 'Router');
+                try {
+                    _log('Hotspot ' . $from . ': ' . $e->getMessage(), 'Router');
+                } catch (Throwable $ignored) { // diagnostic only: the rename is done
+                }
             }
         }
     }
@@ -258,6 +271,11 @@ class MikrotikHotspot
             RouterOS\Query::where('name', $old_plan['name_plan'])
         );
         $profileID = $client->sendSync($printRequest)->getProperty('.id');
+        if (empty($profileID) && $old_plan['name_plan'] !== $new_plan['name_plan']) {
+            // a retry after the profile was renamed already (or created under the new name): the existing one is updated
+            $printNew = new RouterOS\Request('/ip hotspot user profile print .proplist=.id', RouterOS\Query::where('name', $new_plan['name_plan']));
+            $profileID = $client->sendSync($printNew)->getProperty('.id');
+        }
         if (empty($profileID)) {
             $this->add_plan($new_plan);
         } else {

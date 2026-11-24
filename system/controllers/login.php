@@ -326,7 +326,9 @@ switch ($do) {
             if ($v1) {
                 // voucher exists, check customer exists or not
                 $user = ORM::for_table('tbl_customers')->where('username', $username)->find_one();
+                $createdHere = false; // an account made by this request has the voucher code as its password: undone if it is not redeemed
                 if (!$user) {
+                    $createdHere = true;
                     $d = ORM::for_table('tbl_customers')->create();
                     $d->username = alphanumeric($username, "+_.@-");
                     $d->password = $voucher;
@@ -349,7 +351,19 @@ switch ($do) {
                     // An existing customer's password is never replaced here: typing someone's username with a voucher of your own must
                     // not let you sign in as them. The voucher only adds its plan; the owner keeps their own password.
                     // voucher activation
-                    if (Package::redeemVoucher($v1, $user['id'], $user['username'], $voucher)) {
+                    try {
+                        $redeemed = Package::redeemVoucher($v1, $user['id'], $user['username'], $voucher);
+                    } catch (Throwable $e) {
+                        // refused before anything was written: the new account is not left holding an unused voucher as its password
+                        if ($createdHere && !Package::rechargeWrote()) {
+                            ORM::for_table('tbl_customers')->where('id', $user['id'])->delete_many();
+                        }
+                        throw $e;
+                    }
+                    if (!$redeemed && $createdHere) {
+                        ORM::for_table('tbl_customers')->where('id', $user['id'])->delete_many();
+                    }
+                    if ($redeemed) {
                         $v1->status = "1";
                         $v1->used_date = date('Y-m-d H:i:s');
                         $v1->user = $user['username'];

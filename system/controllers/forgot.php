@@ -160,13 +160,20 @@ if ($step == 1) {
         try {
             foreach (Package::sendPassword($user) as $err) {
                 $routerFailed = true;
-                _log('[' . $username . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
+                try {
+                    _log('[' . $username . ']: new password not sent to the router: ' . $err, 'User', $user['id']);
+                } catch (Throwable $ignored) { // (a log that cannot be written must not stop the reset)
+                }
             }
         } catch (Throwable $e) {
             $routerFailed = true;
-            _log('[' . $username . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
+            try {
+                _log('[' . $username . ']: new password not sent to the router: ' . $e->getMessage(), 'User', $user['id']);
+            } catch (Throwable $ignored) {
+            }
+        } finally {
+            Package::passwordLock($user['id'], false);
         }
-        Package::passwordLock($user['id'], false);
         if (class_exists('RedisCache')) {
             RedisCache::forgetRadiusCustomer($username);
         }

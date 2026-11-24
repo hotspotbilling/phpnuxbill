@@ -584,56 +584,90 @@ table.loading::after,
 }
 
 /*
-* maintenance top-bar
+* maintenance notice: a floating bar at the bottom of the admin pages (it no longer covers the top bar and its menu)
 */
 
 .notification-top-bar {
   position: fixed;
-  top: 0;
-  left: 0;
-  height: 40px;
-  line-height: 40px;
-  width: 100%;
-  background: #ec2106;
-  text-align: center;
-  color: #ffffff;
-  font-family: serif;
-  font-weight: bolder;
-  font-size: 14px;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 720px;
   z-index: 9999;
   box-sizing: border-box;
-  padding: 0 10px;
+  padding: 10px 12px 10px 14px;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius, 12px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .notification-top-bar p {
-  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
+  padding: 0;
+}
+
+.notification-top-bar .nt-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  background: #f59e0b;
+  border-radius: 50%;
+  font-size: 13px;
+}
+
+.notification-top-bar .nt-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .notification-top-bar p a {
-  padding: 5px 10px;
-  border-radius: 3px;
-  background: #fff;
-  color: #1abc9c;
-  font-weight: bold;
+  flex: none;
+  display: inline-block;
+  padding: 6px 12px;
+  color: #fff;
+  background: #d97706;
+  border-radius: calc(var(--radius, 12px) - 2px);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
   text-decoration: none;
-  display: inline;
-  font-size: inherit;
+}
+
+.notification-top-bar p a:hover,
+.notification-top-bar p a:focus {
+  background: #b45309;
+  color: #fff;
+}
+
+.dark-mode .notification-top-bar,
+html.dark .notification-top-bar {
+  color: #fde68a;
+  background: #2a2111;
+  border-color: #78561a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 600px) {
   .notification-top-bar {
+    bottom: 8px;
+    width: calc(100% - 16px);
     font-size: 12px;
-    height: auto;
-    line-height: normal;
-    padding: 10px;
   }
 
-  .notification-top-bar p a {
-    padding: 5px 10px;
-    margin: 5px 0;
-    font-size: 10px;
-    display: inline-block;
+  .notification-top-bar .nt-icon {
+    display: none;
   }
 }
 
@@ -817,10 +851,6 @@ input:checked + .slider:before {
 
 .dark-mode .cancelButton {
   background-color: #e53e3e;
-}
-
-.dark-mode .notification-top-bar {
-  background-color: #742a2a;
 }
 
 .dark-mode .bs-callout {
@@ -8833,7 +8863,7 @@ body.dark-mode .st {
   background: var(--ls-card);
 }
 .ls-table td {
-  padding: 11px 12px;
+  padding: 8px 12px;
   vertical-align: middle;
   border-bottom: 1px solid var(--ls-line);
 }
@@ -8886,11 +8916,11 @@ body .ls-table td:first-child {
   min-width: 190px;
 }
 .ls-who img {
-  flex: 0 0 38px;
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important;
-  max-width: 38px !important;
+  flex: 0 0 34px;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
 }
 .ls-who b {
   display: block;

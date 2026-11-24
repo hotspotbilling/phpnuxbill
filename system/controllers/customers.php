@@ -274,7 +274,8 @@ switch ($action) {
                             r2(getUrl('customers/view/') . $id_customer, 'w', Lang::T('The router did not finish taking the access off, so the plan was not marked as expired') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
                         }
                     } else {
-                        new Exception(Lang::T("Devices Not Found"));
+                        // live mode: the access cannot be taken off without the driver, so the recharge is not marked off
+                        r2(getUrl('customers/view/') . $id_customer, 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $p['device'], ENT_QUOTES));
                     }
                 }
                 $b->status = 'off';
@@ -304,6 +305,9 @@ switch ($action) {
                 }
                 $c = ORM::for_table('tbl_customers')->find_one($id_customer);
                 $p = ORM::for_table('tbl_plans')->where('id', $b['plan_id'])->find_one();
+                if ($p && $p['device'] === 'Voucher') {
+                    continue; // a voucher plan has no account on a device: add_customer() would issue a new voucher
+                }
                 if ($p) {
                     $dvc = Package::getDevice($p);
                     if ($_app_stage != 'Demo') {
@@ -486,7 +490,8 @@ switch ($action) {
                                 r2(getUrl('customers/view/') . $id, 'e', Lang::T('The router did not finish taking the access off, so the customer was not deleted') . ': ' . htmlspecialchars($partial, ENT_QUOTES));
                             }
                         } else {
-                            new Exception(Lang::T("Devices Not Found"));
+                            // nothing is deleted: the access could not be taken off the router, and the cleanup can be tried again
+                            r2(getUrl('customers/view/') . $id, 'e', Lang::T('Devices Not Found') . ': ' . htmlspecialchars((string) $p['device'], ENT_QUOTES) . '. ' . Lang::T('The customer was not deleted'));
                         }
                     }
                 }
@@ -654,9 +659,10 @@ switch ($action) {
         $account_type = _post('account_type');
         $password = trim(_post('password'));
         // a form that still holds the portal password it was opened with did not change it (it may have been changed since, by
-        // the customer): only a different value is a replacement
+        // the customer): only a different value is a replacement. Compared as posted (untrimmed): the hash was made of the saved value
         $pwSeen = (string) _post('password_seen');
-        if ($pwSeen !== '' && $password !== '' && hash_equals($pwSeen, hash('sha256', $password))) {
+        $passwordRaw = (string) ($_POST['password'] ?? '');
+        if ($pwSeen !== '' && $password !== '' && (hash_equals($pwSeen, hash('sha256', $passwordRaw)) || hash_equals($pwSeen, hash('sha256', $password)))) {
             $password = '';
         }
         $pppoe_username = trim(_post('pppoe_username'));
@@ -731,7 +737,7 @@ switch ($action) {
         // the form carries a hash of the PPPoE password it was shown with: a form that still has it did not change the field, so
         // the saved value (possibly kept or changed since by a password change) stays
         $pppoeSeen = (string) _post('pppoe_password_seen');
-        if ($pppoeSeen !== '' && hash_equals($pppoeSeen, hash('sha256', $pppoe_password))) {
+        if ($pppoeSeen !== '' && (hash_equals($pppoeSeen, hash('sha256', $pppoe_password)) || hash_equals($pppoeSeen, hash('sha256', (string) ($_POST['pppoe_password'] ?? ''))))) {
             $pppoe_password = (string) $oldPppoePassword;
         }
         $pppoePassDiff = (string) $oldPppoePassword !== $pppoe_password;
@@ -920,7 +926,22 @@ switch ($action) {
             $partialPlans = []; // plans whose router update was only partly done (code 207)
             $renamed = []; // [plan, from, to] of the router renames that went through, to be undone if a later one is refused
             $doneTurs = []; // recharges already moved to the new username
-            if ($userDiff || $pppoeDiff || $pppoeIpDiff || $passDiff || $pppoePassDiff) {
+            $skippedPlans = []; // plans with no driver file: nothing was sent to their device
+            $passwordOnly = ($passDiff || $pppoePassDiff) && !$userDiff && !$pppoeDiff && !$pppoeIpDiff;
+            if ($passwordOnly) {
+                // only a password changed: just the password goes to the devices (Package::sendPassword), not a full re-provisioning
+                try {
+                    foreach (Package::sendPassword($c) as $err) {
+                        $partialPlans[] = $err;
+                        try {
+                            _log('[' . $c['username'] . '] edit: new password not sent to the router: ' . $err, 'Router');
+                        } catch (Throwable $ignored) {
+                        }
+                    }
+                } catch (Throwable $e) {
+                    $partialPlans[] = $e->getMessage();
+                }
+            } elseif ($userDiff || $pppoeDiff || $pppoeIpDiff || $passDiff || $pppoePassDiff) {
                 $turs = ORM::for_table('tbl_user_recharges')->where('customer_id', $c['id'])->findMany();
                 foreach ($turs as $tur) {
                     $p = ORM::for_table('tbl_plans')->find_one($tur['plan_id']);
@@ -935,7 +956,7 @@ switch ($action) {
                                         (new $p['device'])->change_username($p, $oldusername, $username);
                                         $renamed[] = [$p, $oldusername, $username];
                                     }
-                                    if ($pppoeDiff && $tur['type'] == 'PPPOE') {
+                                    if ($pppoeDiff && in_array($tur['type'], ['PPPOE', 'VPN'], true)) {
                                         if (empty($oldPppoeUsername) && !empty($pppoe_username)) {
                                             // admin just add pppoe username
                                             $from = $username;
@@ -1040,6 +1061,7 @@ switch ($action) {
                             } else {
                                 new Exception(Lang::T("Devices Not Found"));
                                 $deviceSkipped = true; // no driver file: no secret was changed, so no address is let go
+                                $skippedPlans[] = $p['name_plan'] . ' (' . Lang::T('Devices Not Found') . ')';
                             }
                         }
                     }
@@ -1051,9 +1073,9 @@ switch ($action) {
             if ($heldOld && !$keepHeld && !$deviceSkipped) {
                 MikrotikVpn::releaseHeld($oldPppoeIp); // every device update finished: no secret uses the old address any more
             }
-            if ($partialPlans) {
+            if ($partialPlans || $skippedPlans) {
                 r2(getUrl('customers/view/') . $id, 'w', Lang::T('User Updated, but the router update is incomplete for') . ': '
-                    . implode(', ', array_unique($partialPlans)) . '. ' . Lang::T('See the Router logs.'));
+                    . htmlspecialchars(implode(', ', array_unique(array_merge($partialPlans, $skippedPlans))), ENT_QUOTES) . '. ' . Lang::T('See the Router logs.') . ' ' . Lang::T('Use Sync to send it again.'));
             }
             r2(getUrl('customers/view/') . $id, 's', 'User Updated Successfully');
         } else {

@@ -30,8 +30,8 @@
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/loading.css?2026.11.11.1" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/styles/plugins/pace.css" />
     <link rel="stylesheet" href="{$app_url}/ui/ui/summernote/summernote.min.css" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.24.5" />
-    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.11.7.10" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/styles.css?2026.11.24.7" />
+    <link rel="stylesheet" href="{$app_url}/ui/ui/styles/admin-chrome.css?2026.11.24.2" />
     <script src="{$app_url}/ui/ui/scripts/sweetalert2.all.min.js"></script>
     <script src="{$app_url}/ui/ui/scripts/chart.min.js"></script>
      {if isset($xheader)}
@@ -658,10 +658,12 @@
         </aside>
 
         {if $_c['maintenance_mode'] == 1}
-        <div class="notification-top-bar">
-            <p>{Lang::T('The website is currently in maintenance mode, this means that some or all functionality may be
-                unavailable to regular users during this time.')}<small> &nbsp;&nbsp;<a
-                        href="{Text::url('settings/maintenance')}">{Lang::T('Turn Off')}</a></small></p>
+        <div class="notification-top-bar" role="status">
+            <p>
+                <span class="nt-icon" aria-hidden="true"><i class="fa fa-wrench"></i></span>
+                <span class="nt-text">{Lang::T('The website is currently in maintenance mode, this means that some or all functionality may be unavailable to regular users during this time.')}</span>
+                <a href="{Text::url('settings/maintenance')}">{Lang::T('Turn Off')}</a>
+            </p>
         </div>
         {/if}
 

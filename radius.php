@@ -102,7 +102,9 @@ try {
             header("HTTP/1.1 200 OK");
 
             $acctSessionId = _req('acctSessionId', _req('acctsessionid'));
-            $acctStatusType = _req('acctStatusType', _req('acctstatustype'));
+            $acctStatusType = (string) _req('acctStatusType', _req('acctstatustype'));
+            // a REST mapping may send the type in another case ("stop"): the canonical spelling is kept, so a Stop is never dropped
+            $acctStatusType = ['start' => 'Start', 'stop' => 'Stop', 'interim-update' => 'Interim-Update'][strtolower(trim($acctStatusType))] ?? $acctStatusType;
             // 32-bit octet counters wrap every 4 GiB; the NAS reports the number of wraps in the Gigawords attributes
             $acctInputOctets = intval(_req('acctInputOctets', _req('acctinputoctets', 0)))
                 + intval(_req('acctInputGigawords', _req('acctinputgigawords', 0))) * 4294967296;
@@ -117,6 +119,20 @@ try {
                 // behind it. With neither, the packet has no NAS identity (kept as before, an empty one): the REST mapping must send
                 // NAS-IP-Address or NAS-Identifier for sessions of several NASes to be told apart.
                 $nasIpAddress = mb_substr(trim((string) _req('nasid')), 0, 45);
+                if ($nasIpAddress !== '') {
+                    // a session whose Start was stored before the upgrade has a blank address and this nasid: its Stop closes that
+                    // row instead of adding a second one (a row already under the nasid wins)
+                    try {
+                        $known = ORM::for_table('rad_acct')->select('nasipaddress')
+                            ->where('username', $username)->where('acctsessionid', $acctSessionId)
+                            ->where('nasid', _req('nasid'))->where_in('nasipaddress', ['', $nasIpAddress])
+                            ->order_by_desc('nasipaddress')->find_one();
+                        if ($known && (string) $known['nasipaddress'] === '') {
+                            $nasIpAddress = '';
+                        }
+                    } catch (Throwable $e) {
+                    }
+                }
             }
             $nasPortId = _req('nasPortId', _req('nasportid'));
             $nasPortType = _req('nasPortType', _req('nasporttype'));
@@ -190,32 +206,37 @@ try {
  */
 function radius_alert($text)
 {
-    global $CACHE_PATH;
-    // the database write comes after the answer is out (radius_alert_deliver): a database that is slow or down is the very
-    // reason most of these alerts happen, and a write waiting on it would hold the router. The error log is immediate.
+    // Nothing is written or sent now: the answer goes out first (radius_alert_deliver). The error log is immediate; the database
+    // write and the Telegram message come after the answer is out, because a slow or down database is the very reason most of these
+    // alerts happen. The five-minute slot is taken at delivery, once there is time to send (radius_alert_reserve).
     try {
         $GLOBALS['radius_alert_log'][] = mb_substr((string) $text, 0, 1000);
         @error_log('[RADIUS] ' . mb_substr(str_replace("\n", ' | ', (string) $text), 0, 500));
+        if (empty($GLOBALS['radius_alert_text'])) {
+            $GLOBALS['radius_alert_text'] = mb_substr((string) $text, 0, 3000);
+        }
         if (empty($GLOBALS['radius_alert_registered'])) {
             $GLOBALS['radius_alert_registered'] = true;
             register_shutdown_function('radius_alert_deliver');
         }
     } catch (Throwable $e) {
     }
+}
+
+/** Takes the 5-minute Telegram slot (true: this request may send). The lock is held across the check and the write: at most one reservation. */
+function radius_alert_reserve()
+{
+    global $CACHE_PATH;
     try {
         $mark = rtrim((string) $CACHE_PATH, '/\\') . DIRECTORY_SEPARATOR . 'radius_alert.last';
         $fh = @fopen($mark, 'c+');
         if (!$fh) {
-            return;
+            return false;
         }
         $send = false;
         if (flock($fh, LOCK_EX | LOCK_NB)) {
             $last = (int) stream_get_contents($fh);
-            // without FastCGI the alert is sent while the router still waits: with under 0.5 s of the 3.5 s window left it cannot
-            // start, so the slot is not reserved (the lock is held across this check and the write: at most one reservation)
-            $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
-            $canStart = function_exists('fastcgi_finish_request') || $elapsed <= 3.0;
-            if ($canStart && time() - $last >= 300) {
+            if (time() - $last >= 300) {
                 ftruncate($fh, 0);
                 rewind($fh);
                 fwrite($fh, (string) time());
@@ -225,17 +246,15 @@ function radius_alert($text)
             flock($fh, LOCK_UN);
         }
         fclose($fh);
-        if ($send) {
-            // Not now: the answer goes out first (see radius_alert_deliver)
-            $GLOBALS['radius_alert_text'] = mb_substr((string) $text, 0, 3000);
-        }
+        return $send;
     } catch (Throwable $e) {
+        return false;
     }
 }
 
 /**
- * Shutdown step of radius_alert(): once the RADIUS answer is out, writes the log lines and sends the pending Telegram alert.
- * Never throws.
+ * Shutdown step of radius_alert(): once the RADIUS answer is out, sends the pending Telegram alert (first: it must not wait behind the
+ * database) and then writes the log lines. Never throws.
  */
 function radius_alert_deliver()
 {
@@ -249,32 +268,30 @@ function radius_alert_deliver()
         }
         $lines = (array) ($GLOBALS['radius_alert_log'] ?? []);
         $GLOBALS['radius_alert_log'] = [];
-        // Database logging only once the answer is released: a slow or down database is the usual reason for an alert, and a
-        // write made while the router still waits would hold it. Unreleased, the lines are in the error log already (radius_alert).
+        $text = (string) ($GLOBALS['radius_alert_text'] ?? '');
+        $GLOBALS['radius_alert_text'] = '';
+        if ($text !== '') {
+            // the time left of the window FreeRADIUS waits (it gives up after 4 s); a released response has the full budget.
+            // Unreleased with under 0.5 s left nothing can start without holding the answer: no slot is taken, it is in the log
+            $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+            $left = (int) floor((3.5 - $elapsed) * 1000);
+            $budget = $released ? 3000 : ($left >= 500 ? $left : 0);
+            if ($budget > 0 && radius_alert_reserve()) {
+                $GLOBALS['radius_alert_budget_ms'] = $budget;
+                Message::sendTelegram($text);
+            }
+        }
+        // Database logging only once the answer is released (unreleased, the lines are in the error log already), after Telegram, and
+        // given up at the first failure: a database that is down must not hold the worker for every line
         if ($released) {
-            foreach ($lines as $line) {
+            foreach (array_slice($lines, 0, 5) as $line) {
                 try {
                     _log($line, 'RADIUS');
                 } catch (Throwable $e) {
+                    break;
                 }
             }
         }
-        $text = (string) ($GLOBALS['radius_alert_text'] ?? '');
-        if ($text === '') {
-            return;
-        }
-        $GLOBALS['radius_alert_text'] = '';
-        // the time left of the window FreeRADIUS waits (it gives up after 4 s); a released response has the full budget
-        $elapsed = microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
-        $left = (int) floor((3.5 - $elapsed) * 1000);
-        if ($released) {
-            $GLOBALS['radius_alert_budget_ms'] = 3000;
-        } elseif ($left >= 500) {
-            $GLOBALS['radius_alert_budget_ms'] = $left;
-        } else {
-            return; // no time left to send without holding the answer: it is in the log
-        }
-        Message::sendTelegram($text);
     } catch (Throwable $e) {
     }
 }
@@ -416,7 +433,7 @@ function process_radiust_rest($tur)
         $bw = $plan ? ORM::for_table("tbl_bandwidth")->find_one($plan['id_bw']) : null;
     }
     if (!$plan || !$bw) {
-        _log("User {$tur['username']} has no valid internet plan or bandwidth. Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}", 'RADIUS');
+        // no database write here (the router is waiting): the detail goes through the deferred alert, which also logs it
         radius_alert(
             "User {$tur['username']} has no valid internet plan. Please check immediately.\n" .
             "Plan ID: {$tur['plan_id']}, Expiration: {$tur['expiration']} {$tur['time']}, \n" .

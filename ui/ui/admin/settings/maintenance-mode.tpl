@@ -86,10 +86,13 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-2 control-label">{Lang::T('End Date:')}</label>
+                        <label class="col-md-2 control-label" for="start_date">{Lang::T('End Date and Time:')}</label>
                         <div class="col-md-6">
-                            <input class="form-control" value="{$_c['maintenance_date']}" type="date" id="start_date"
+                            {* a date saved before the time was added (2026-12-01) shows as midnight *}
+                            {$md = $_c['maintenance_date']|default:''|replace:' ':'T'}
+                            <input class="form-control" value="{if strlen($md) == 10}{$md}T00:00{else}{$md}{/if}" type="datetime-local" id="start_date"
                                 name="maintenance_date">
+                            <span class="help-block">{Lang::T('Shown on the maintenance page as the time the site is back. Leave empty for none.')}</span>
                         </div>
                     </div>
                     <div class="form-group">

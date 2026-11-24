@@ -421,7 +421,7 @@
     "DEALLOCATE PREPARE stmt;"
   ],
   "2026.11.28": [
-    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND COLUMN_NAME='nasipaddress' AND CHARACTER_MAXIMUM_LENGTH<45)=1, 'ALTER TABLE `rad_acct` MODIFY `nasipaddress` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT \\'\\'', 'SELECT 1'));",
+    "SET @s = (SELECT IF((SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='rad_acct' AND COLUMN_NAME='nasipaddress' AND CHARACTER_MAXIMUM_LENGTH<45)=1, 'ALTER TABLE `rad_acct` MODIFY `nasipaddress` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''''', 'SELECT 1'));",
     "PREPARE stmt FROM @s;",
     "EXECUTE stmt;",
     "DEALLOCATE PREPARE stmt;"

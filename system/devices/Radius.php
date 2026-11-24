@@ -111,7 +111,8 @@ class Radius
         // of the username when this plan has none
         $t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('plan_id', $plan['id'])->where('status', 'on')->findOne();
         if (!$t) {
-            $t = ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->findOne();
+            // only an active recharge of the requested plan is sent: another plan's expiry must not be provisioned under this one
+            throw new Exception(Lang::T('The customer has no active recharge of this plan: nothing was sent.'));
         }
         $date_exp = $t['expiration'];
         $time = $t['time'];
@@ -402,8 +403,12 @@ class Radius
 
     public function customerUpsert($customer, $plan) //Update or Insert customer plan
     {
-        if ($plan['type'] === 'VPN' && $this->getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->find_one()) {
-            // renewing a VPN keeps the password it already dials with: the account's password is changed through customerPassword()
+        // renewing a VPN keeps the password it already dials with (changed through customerPassword()), but only while the account
+        // is live: with no active recharge the row holds what customerDeactivate() overwrote, and the configured credential is restored
+        $vpnLive = $plan['type'] === 'VPN' && $this->getTableCustomer()->where_equal('username', $customer['username'])->whereEqual('attribute', 'Cleartext-Password')->find_one()
+            && ORM::for_table('tbl_user_recharges')->where('username', $customer['username'])->where('status', 'on')->find_one();
+        if ($vpnLive) {
+            // kept
         } elseif (in_array($plan['type'], ['PPPOE', 'VPN'], true)) { // a dialled connection: the dial password
             $this->upsertCustomer($customer['username'], 'Cleartext-Password', (empty($customer['pppoe_password'])) ? $customer['password'] : $customer['pppoe_password']);
         } else {

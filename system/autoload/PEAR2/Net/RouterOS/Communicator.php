@@ -470,7 +470,23 @@ class Communicator
             );
         }
 
-        flock($stream, LOCK_SH);
+        // PHPNuxBill: under a deadline the lock is waited for only as long as there is time (a blocking flock() could hold the
+        // request past it); the connection is closed when it runs out, as earlier words of the request may already be sent
+        $left = $this->trans->timeLeft();
+        if (null === $left) {
+            flock($stream, LOCK_SH);
+        } else {
+            while (!flock($stream, LOCK_SH | LOCK_NB)) {
+                if (($this->trans->timeLeft() ?? 0) <= 0) {
+                    $this->trans->close();
+                    throw new SocketException(
+                        'Ran out of time waiting for the stream to send.',
+                        SocketException::CODE_REQUEST_SEND_FAIL
+                    );
+                }
+                usleep(2000);
+            }
+        }
         // PHPNuxBill: the lock is let go however the send ends (also when it fails or runs out of time); the stream's position
         // is put back by send() itself
         try {

@@ -120,7 +120,10 @@ class RouterApi
                 throw new Exception(Lang::T('The router did not answer in time'), 408);
             }
         }
-        $tag = 'nb' . (++$n);
+        // a tag already in use on this client (a /listen of the caller's own, say) is skipped: its replies stay with its callback
+        do {
+            $tag = 'nb' . (++$n);
+        } while (method_exists($c, 'isRequestActive') && $c->isRequestActive($tag));
         $req->setTag($tag);
         self::transmit($c, $req, $deadline);
         $recvErr = null;

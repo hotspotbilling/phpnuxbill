@@ -147,9 +147,13 @@ class Stream
      *     while setting it to TRUE might be useful if you're doing some
      *     "on offs".
      *
+     * @param array|int|null $timeout PHPNuxBill: the read timeout the wrapped socket really has, as seconds or [seconds,
+     *     microseconds] (a negative value is no limit): for a socket the caller opened and configured itself. NULL (sockets
+     *     this library opens) takes the default_socket_timeout in force now. A cleared deadline puts this back.
+     *
      * @see static::isFresh()
      */
-    public function __construct($stream, $autoClose = false)
+    public function __construct($stream, $autoClose = false, $timeout = null)
     {
         if (!self::isStream($stream)) {
             throw $this->createException('Invalid stream supplied.', 1);
@@ -162,8 +166,14 @@ class Stream
         );
         $meta = stream_get_meta_data($stream);
         $this->isBlocking = isset($meta['blocked']) ? $meta['blocked'] : true;
-        // the stream has just been opened with this as its read timeout
-        $this->ordinaryTimeout = array((int) ini_get('default_socket_timeout'), 0);
+        if (null !== $timeout) {
+            $this->ordinaryTimeout = is_array($timeout)
+                ? array((int) ($timeout[0] ?? 0), (int) ($timeout[1] ?? 0))
+                : array((int) floor($timeout), (int) round(($timeout - floor($timeout)) * 1000000));
+        } else {
+            // the stream has just been opened with this as its read timeout
+            $this->ordinaryTimeout = array((int) ini_get('default_socket_timeout'), 0);
+        }
     }
 
     /**
@@ -282,6 +292,16 @@ class Stream
             // the reads under the deadline narrowed the timeout: back to the ordinary one
             stream_set_timeout($this->stream, $this->ordinaryTimeout[0], $this->ordinaryTimeout[1]);
         }
+    }
+
+    /**
+     * PHPNuxBill: seconds left before the deadline (may be 0 or negative), or NULL when there is none.
+     *
+     * @return float|null
+     */
+    public function timeLeft()
+    {
+        return null === $this->deadline ? null : $this->deadline - self::now();
     }
 
     /**
@@ -548,6 +568,11 @@ class Stream
             // of time); a stream that cannot seek is left as before
             $contentsMeta = stream_get_meta_data($contents);
             $seekable = !empty($contentsMeta['seekable']);
+            // under a deadline the source must be one whose reads cannot block (a local, seekable file or memory stream): a
+            // socket or pipe could hold fread() past it, so it is refused before anything is written
+            if (null !== $this->deadline && !($seekable && stream_is_local($contents))) {
+                throw $this->createException('A deadline needs a local, seekable source stream.', 8, null, 0);
+            }
             $oldPos = ftell($contents);
             try {
                 if ($offsetIsNotNull) {

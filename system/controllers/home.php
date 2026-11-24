@@ -208,7 +208,10 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                         if ($e->getCode() !== 207) {
                             throw $e;
                         }
-                        _log('[' . $user['username'] . '] extend' . ': ' . $e->getMessage() . ' (pending: a Sync customers run repairs it)', 'Router');
+                        try {
+                            _log('[' . $user['username'] . '] extend' . ': ' . $e->getMessage() . ' (pending: a Sync customers run repairs it)', 'Router');
+                        } catch (Throwable $ignored) { // diagnostic only: the extension goes on
+                        }
                         $extendPartial = true;
                     }
                 } else {
@@ -260,7 +263,10 @@ if (isset($_GET['recharge']) && !empty($_GET['recharge'])) {
                     if ($e->getCode() !== 207 || $p['device'] === 'MikrotikStatic') {
                         throw $e;
                     }
-                    _log('[' . $user['username'] . '] deactivate: ' . $e->getMessage(), 'Router');
+                    try {
+                        _log('[' . $user['username'] . '] deactivate: ' . $e->getMessage(), 'Router');
+                    } catch (Throwable $ignored) { // diagnostic only: the deactivation goes on
+                    }
                 }
             } else {
                 r2(getUrl('home'), 'e', Lang::T("Devices Not Found"));

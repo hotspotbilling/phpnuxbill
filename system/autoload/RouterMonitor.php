@@ -139,7 +139,11 @@ class RouterMonitor
     /** Two readings follow on from each other (no gap in the collection between them, a late cron allowed for) */
     private static function follows($prev, $at)
     {
-        return $prev && $at - self::ts('s', $prev) <= self::GAP;
+        if (!$prev) {
+            return false;
+        }
+        $d = $at - self::ts('s', $prev);
+        return $d >= 0 && $d <= self::GAP; // (a reading dated before the last one, a clock set back, does not follow on)
     }
 
     /**

@@ -28,7 +28,7 @@
         {/if}
         <form id="voucher-search-form" class="ls-bar" method="post" action="{Text::url('')}plan/voucher/">
             {* a search while one batch is shown stays inside that batch; "Show all" above clears it *}
-            {if $made neq ''}<input type="hidden" name="made" value="{$made|escape}">{/if}
+            {if $made neq ''}<input type="hidden" name="made" value="{$made|escape}">{elseif $made_req neq ''}<input type="hidden" name="made" value="{$made_req|escape}">{/if}
             <div class="ls-search">
                 <i class="fa fa-search" aria-hidden="true"></i>
                 <input type="search" autocomplete="off" name="search" placeholder="{Lang::T('Code Voucher')}" value="{$search|escape}" aria-label="{Lang::T('Search by voucher code')}">

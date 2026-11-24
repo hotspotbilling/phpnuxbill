@@ -775,7 +775,8 @@
                     <div class="form-group" id="clear_stale_sessions_group">
                         <label class="col-md-3 control-label">{Lang::T('Clear Stale Sessions')}</label>
                         <div class="col-md-5">
-                            <select name="clear_stale_sessions" id="clear_stale_sessions" class="form-control text-muted">
+                            <input type="hidden" name="clear_stale_touched" value="0">
+                            <select name="clear_stale_sessions" id="clear_stale_sessions" class="form-control text-muted" onchange="this.form.clear_stale_touched.value='1'">
                                 <option value="0">{Lang::T('No')}</option>
                                 <option value="1" {if $_c['clear_stale_sessions'] == '1'}selected="selected" {/if}>{Lang::T('Yes')}
                                 </option>

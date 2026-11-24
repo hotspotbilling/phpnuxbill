@@ -127,6 +127,10 @@
         if (a == null || b == null || a === '' || b === '') return true;
         return Math.abs(Number(a) - Number(b)) <= 5;
     }
+    // both starts known and equal: only then is a disconnect result carried over to a session listed later
+    function knownSame(a, b) {
+        return a != null && b != null && a !== '' && b !== '' && sameStart(a, b);
+    }
     function loadUsers(id, pane) {
         return request('sessions', id).then(function (d) {
             if (!d.ok) { pane.innerHTML = head(t.user) + fail(d); return; }
@@ -137,16 +141,18 @@
             // before it went through; kept per router settings, as a session ID only means something on the router it came from
             // (a failed one keeps its message until it is tried again; one whose session is no longer listed is said above the list)
             var orphans = [];
+            // a read of both lists that listed every session: a session missing from it is confirmed gone
+            var complete = !!(d.read ? d.read.hotspot && d.read.pppoe : true) && hs.length + pp.length >= (d.total_hotspot || hs.length) + (d.total_pppoe || pp.length);
             Object.keys(pane._drops || {}).forEach(function (k) {
                 var s = pane._drops[k];
                 var r = rows.filter(function (x) {
-                    return dropKey(d.cfg, x.kind, x.sid, x.user, x.address, x.mac) === k && sameStart(x.started, (pane._dropStart || {})[k]);
+                    return dropKey(d.cfg, x.kind, x.sid, x.user, x.address, x.mac) === k && knownSame(x.started, (pane._dropStart || {})[k]);
                 })[0];
                 if (r) {
                     if (s === 'gone') r.gone = true; else if (s === 'pending') r.pending = true; else if (s && s.err) r.err = s.err;
                 } else if (s && s.err && k.indexOf((d.cfg || '') + ' ') === 0) {
                     orphans.push(s.user + ': ' + s.err);
-                } else if (s === 'gone' && k.indexOf((d.cfg || '') + ' ') === 0) {
+                } else if (s === 'gone' && complete && k.indexOf((d.cfg || '') + ' ') === 0) {
                     // the disconnected session has left the list: forgotten, so a later session that is given the same ID (the
                     // router numbers them again after a restart) is not shown as disconnected
                     delete pane._drops[k];

@@ -373,7 +373,10 @@ switch ($action) {
                         if ($e->getCode() !== 207) {
                             throw $e;
                         }
-                        _log('[' . $c['username'] . '] remove: ' . $e->getMessage(), 'Router');
+                        // the access may still be usable (a static address not blocked, a fixed IP not cleared) and nothing else retries
+                        // a deleted recharge: it is kept, so the removal can be tried again
+                        _log('[' . $c['username'] . '] remove incomplete, recharge kept: ' . $e->getMessage(), 'Router');
+                        r2(getUrl('plan/list'), 'w', Lang::T('The router did not finish taking the access off, so the plan was not deleted') . ': ' . htmlspecialchars($e->getMessage(), ENT_QUOTES));
                     }
                 } else {
                     new Exception(Lang::T("Devices Not Found"));
@@ -476,6 +479,13 @@ switch ($action) {
                 }
             }
 
+            if ($routerMoved && empty($newRouterId)) {
+                // no router had the plan's name when it was read (renamed meanwhile): the plan as it is now says which router it is on
+                $freshPlan = ORM::for_table('tbl_plans')->where('id', $id_plan)->find_one();
+                if ($freshPlan && Package::routerId($freshPlan['routers'])) {
+                    $d->routers = $freshPlan['routers'];
+                }
+            }
             $planName = $d['namebp'];
             $d->save();
             if ($routerMoved) {
@@ -592,11 +602,13 @@ switch ($action) {
         // a batch link whose record is gone (kept a day) or never existed: say so, rather than showing every voucher as if it
         // were that batch. Only a request without made= shows the whole list.
         $madeGone = $made !== '' && empty($madeIds);
+        $madeReq = $madeGone ? $made : ''; // the batch asked for, kept for the search form while it is unavailable
         if (empty($madeIds)) {
             $made = '';
         }
         $ui->assign('made', $made);
         $ui->assign('made_gone', $madeGone);
+        $ui->assign('made_req', $madeReq);
 
         $ui->assign('batch_name', $batch_name);
         $ui->assign('router', $router);
@@ -972,7 +984,7 @@ switch ($action) {
             }
             if (!$got) {
                 // the same form is being handled right now: its batch is not made yet, and may still fail
-                r2(getUrl('plan/voucher') . ($batch_name !== '' ? '&batch_name=' . urlencode($batch_name) : ''), 'w',
+                r2(getUrl('plan/voucher') . ($batch_name !== '' ? '&batch_name=' . urlencode($batch_name) : '&made=' . $formHash), 'w',
                     Lang::T('These vouchers are still being created. Wait a minute and look for them in this list before sending the form again.'));
             }
             // with the claim held, the record is the answer: a request that finished this form wrote it before letting go
@@ -988,6 +1000,11 @@ switch ($action) {
             $saved = $rec ? json_decode((string) $rec['value'], true) : null;
             if (is_array($saved) && !empty($saved['ids']) && !empty($saved['rid'])) {
                 Package::followRename('tbl_voucher', $saved['ids'], (string) ($saved['server'] ?? ''), (int) ($saved['plan'] ?? 0), (int) $saved['rid']);
+            }
+            if (!is_array($saved) || empty($saved['ids'])) {
+                // marked finished but no usable record of the batch: never made again for this token, and not reported as shown
+                r2(getUrl('plan/voucher') . '&made=' . $formHash, 'w',
+                    Lang::T('The link to that batch of vouchers is no longer available. Look for them in the full list.'));
             }
             r2(getUrl('plan/voucher') . '&made=' . $formHash, 'w',
                 Lang::T('These vouchers were created already, the form was sent twice. They are in this list.'));
@@ -1190,8 +1207,12 @@ switch ($action) {
                 throw $e;
             }
             // records of forms older than a day are not needed: a form's page is not sent again that long after
+            // a bounded sample of the records, on about one submission in ten: the payloads are not all loaded each time
             try {
-                foreach (ORM::for_table('tbl_appconfig')->where_like('setting', 'voucher\_form\_%')->find_many() as $old) {
+                if (random_int(1, 10) !== 1) {
+                    throw new Exception('skipped');
+                }
+                foreach (ORM::for_table('tbl_appconfig')->where_like('setting', 'voucher\_form\_%')->order_by_asc('id')->limit(200)->find_many() as $old) {
                     $v = json_decode((string) $old['value'], true);
                     if (!is_array($v) || (int) ($v['at'] ?? 0) < time() - 86400) {
                         $old->delete();
@@ -1373,9 +1394,7 @@ switch ($action) {
         run_hook('refill_customer'); #HOOK
         if ($v1) {
             if (Package::redeemVoucher($v1, $user['id'], $user['username'], $code)) {
-                $v1->status = "1";
-                $v1->user = $user['username'];
-                $v1->save();
+                // redeemVoucher() has already marked the voucher used: the stale row is not written again
                 $in = ORM::for_table('tbl_transactions')->where('username', $user['username'])->order_by_desc('id')->find_one();
                 Package::createInvoice($in);
                 $ui->display('admin/plan/invoice.tpl');
@@ -1483,6 +1502,7 @@ switch ($action) {
                     $mark = $provKey !== '' ? ($_SESSION[$provKey] ?? null) : null;
                     $alreadyProvisioned = is_array($mark) && (string) $mark['id'] === (string) $id
                         && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $p['routers']
+                        && (string) ($mark['prev'] ?? '') === (string) $tur['expiration'] // the recharge is as it was (not renewed and expired again since)
                         && strtotime($mark['expiration'] . ' ' . $tur['time']) > time(); // a mark whose expiry has passed is not reused
                     if (!$alreadyProvisioned && $provKey !== '') {
                         unset($_SESSION[$provKey]);
@@ -1512,12 +1532,15 @@ switch ($action) {
                             _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
                         }
                         if ($provKey !== '') {
-                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $p['routers'], 'expiration' => $expiration];
+                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $p['routers'], 'expiration' => $expiration, 'prev' => $tur['expiration']];
                         }
                     }
                     $tur->expiration = $expiration;
                     $tur->status = "on";
-                    $tur->save();
+                    if ($tur->save() === false) {
+                        // not saved: the link is not done and the marker stays, so a retry reconciles instead of provisioning again
+                        throw new Exception(Lang::T('The extension could not be saved. Try again.'));
+                    }
                     // saved: now the link is done
                     if ($svoucher !== '') {
                         App::setVoucher($svoucher, $id);

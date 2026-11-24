@@ -262,7 +262,10 @@ switch ($action) {
             // only an explicit choice retires it: Yes, or No after it was Yes. A site still on the legacy minutes that saves an
             // unrelated setting (the form posts No for it) keeps its 20-minute REST-only behaviour
             $csPosted = (string) ($_POST['clear_stale_sessions'] ?? '');
-            if ($csPosted === '1' || ($csPosted === '0' && (string) ($config['clear_stale_sessions'] ?? '') === '1')) {
+            // "touched": the administrator changed this field in the form, so a No over the legacy minutes retires them too
+            $csTouched = (string) ($_POST['clear_stale_touched'] ?? '') === '1';
+            unset($_POST['clear_stale_touched']);
+            if ($csPosted === '1' || ($csPosted === '0' && ((string) ($config['clear_stale_sessions'] ?? '') === '1' || $csTouched))) {
                 $_POST['frrest_interim_update'] = '0';
             }
             // an empty, zero or negative timeout falls back to 10 minutes, as RadiusSessions::staleMinutes() reads it
@@ -1188,7 +1191,12 @@ switch ($action) {
             }
             $status = isset($_POST['maintenance_mode']) ? 1 : 0; // Checkbox returns 1 if checked, otherwise 0
             $force_logout = isset($_POST['maintenance_mode_logout']) ? 1 : 0; // Checkbox returns 1 if checked, otherwise 0
-            $date = isset($_POST['maintenance_date']) ? $_POST['maintenance_date'] : null;
+            // the end date and time ("2026-12-01T09:30" from the form), kept as "2026-12-01 09:30"; anything else is dropped
+            $date = '';
+            $posted = is_string($_POST['maintenance_date'] ?? null) ? trim($_POST['maintenance_date']) : '';
+            if (preg_match('/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?$/', $posted, $dm) && strtotime($dm[1]) !== false) {
+                $date = $dm[1] . ' ' . ($dm[2] ?? '00:00');
+            }
 
             $settings = [
                 'maintenance_mode' => $status,

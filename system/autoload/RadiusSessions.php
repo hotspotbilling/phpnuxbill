@@ -65,8 +65,9 @@ class RadiusSessions
             null,
             'acctstatustype = ?',
             ['Stop'],
-            "(acctstatustype IN (?, ?) OR acctstatustype IS NULL) AND COALESCE(dateUpdated, dateAdded) > ? AND COALESCE(dateUpdated, dateAdded) < ?",
-            ['Start', 'Interim-Update', '2000-01-01 00:00:00', $cutoff]
+            // a row with receivedAt (epoch microseconds, set by radius.php) is judged by it, not by the date text; an older row by its dates
+            "(acctstatustype IN (?, ?) OR acctstatustype IS NULL) AND IF(receivedAt IS NOT NULL AND receivedAt > ?, receivedAt < ?, COALESCE(dateUpdated, dateAdded) > ? AND COALESCE(dateUpdated, dateAdded) < ?)",
+            ['Start', 'Interim-Update', 946684800000000, (time() - $seconds) * 1000000, '2000-01-01 00:00:00', $cutoff]
         );
 
         // MySQL RADIUS sessions, in the separate "radius" database when one is configured. FreeRADIUS fills these dates
@@ -269,6 +270,30 @@ class RadiusSessions
         return $out;
     }
 
+    /** A database error that repeating cannot fix: the data itself is refused (SQLSTATE class 22, out of range / too long / bad value) */
+    private static function permanentFailure(Throwable $e): bool
+    {
+        if (!($e instanceof PDOException)) {
+            return false;
+        }
+        $state = (string) ($e->errorInfo[0] ?? $e->getCode());
+        $code = (int) ($e->errorInfo[1] ?? 0);
+        return strpos($state, '22') === 0 || in_array($code, [1264, 1265, 1292, 1366, 1406], true);
+    }
+
+    /** Appends a packet line to the quarantine file (system/cache, web-denied) for review; true when written and flushed */
+    private static function quarantine(string $line): bool
+    {
+        $fh = @fopen(self::queueFile() . '.quarantine', 'ab');
+        if (!$fh) {
+            return false;
+        }
+        $line = rtrim($line, "\r\n") . "\n";
+        $ok = @fwrite($fh, $line) === strlen($line) && fflush($fh);
+        fclose($fh);
+        return $ok;
+    }
+
     /** The snapshot files of the queue, oldest first (a snapshot of the former single-file format first) */
     private static function snapshots(string $file): array
     {
@@ -326,8 +351,12 @@ class RadiusSessions
                 if (!is_array($p) || !isset($p['username'], $p['acctsessionid']) || (string) $p['username'] === '' || (string) $p['acctsessionid'] === '') {
                     continue;
                 }
-                // lower case: the unique index compares with a case-insensitive collation, so these differ only in case = one session
-                $key = mb_strtolower(($p['nasipaddress'] ?? '') . '|' . $p['username'] . '|' . $p['acctsessionid']);
+                // the unique index compares with a case-insensitive collation that ignores trailing spaces (utf8mb4_general_ci): the
+                // parts are folded alike and kept as a tuple, so no delimiter inside one can make two sessions look like one
+                $fold = function ($v) {
+                    return mb_strtolower(rtrim((string) $v, ' '));
+                };
+                $key = json_encode([$fold($p['nasipaddress'] ?? ''), $fold($p['username']), $fold($p['acctsessionid'])], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
                 // held back behind an earlier packet of its session that is waiting
                 if (isset($state['blocked'][$key])) {
                     $keep($line);
@@ -350,6 +379,13 @@ class RadiusSessions
                     $out['replayed']++;
                     $state['streak'] = 0;
                 } catch (Throwable $e) {
+                    if (self::permanentFailure($e)) {
+                        // a packet the database will never take (bad data): set aside for the operator, so it neither retries for
+                        // ever nor holds back stale cleanup. Dropped from the queue only once it is safely in the quarantine file.
+                        if (self::quarantine($line)) {
+                            continue;
+                        }
+                    }
                     $out['failed']++;
                     $state['streak']++;
                     $state['blocked'][$key] = true;

@@ -677,6 +677,7 @@ switch ($action) {
                     $d->save();
                     $id = $d->id();
                     Package::followRename('tbl_payment_gateway', $id, $router['name'], $plan['id'], (int) $router['id']);
+                    $d = ORM::for_table('tbl_payment_gateway')->find_one($id) ?: $d; // the row as the rename left it
                 } else {
                     $d->username = $user['username'];
                     $d->user_id = $user['id'];
@@ -701,6 +702,7 @@ switch ($action) {
                     $d->status = 1;
                     $d->save();
                     Package::followRename('tbl_payment_gateway', $d->id(), $router['name'], $plan['id'], (int) $router['id']);
+                    $d = ORM::for_table('tbl_payment_gateway')->find_one($d->id()) ?: $d; // the row as the rename left it
                 }
                 break;
         }

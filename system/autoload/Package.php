@@ -15,6 +15,9 @@ class Package
     /** Whether the recharge running has gone past its checks to where it changes anything (a device, the recharge or the transaction) */
     private static $wrote = false;
 
+    /** Progress markers of the voucher claims being redeemed, innermost last (see redeemVoucher): each claim has its own */
+    private static $claims = [];
+
     /** How many rechargeUser() calls are running inside each other (a hook of the finished recharge can start another) */
     private static $depth = 0;
 
@@ -76,37 +79,62 @@ class Package
     public static function redeemVoucher($v, $customerId, $username, $code)
     {
         $db = ORM::get_db();
+        $claimedAt = date('Y-m-d H:i:s');
         $st = $db->prepare("UPDATE `tbl_voucher` SET `status` = '1', `used_date` = ?" . ($username !== null ? ', `user` = ?' : '') . " WHERE `id` = ? AND `status` = '0'");
-        $st->execute(array_merge([date('Y-m-d H:i:s')], $username !== null ? [$username] : [], [(int) $v['id']]));
+        $st->execute(array_merge([$claimedAt], $username !== null ? [$username] : [], [(int) $v['id']]));
         if ($st->rowCount() !== 1) {
             return false;
         }
         $id = (int) $v['id'];
         $finished = false;
-        $release = function () use (&$finished, $db, $id) {
+        $mark = new stdClass();
+        $mark->wrote = false;
+        $claimAt = (string) $claimedAt;
+        // Gives the voucher back, only while this operation's own claim still holds it (same used date). True when it is unused
+        // again; false when that could not be confirmed (an admin must reconcile it).
+        $release = function () use (&$finished, $db, $id, $mark, $claimAt) {
             // only a refusal before anything was changed gives the voucher back; once the recharge began to write it stays used
-            if (!$finished && !self::rechargeWrote()) {
-                try {
-                    $db->prepare("UPDATE `tbl_voucher` SET `status` = '0', `used_date` = NULL, `user` = '0' WHERE `id` = ? AND `status` = '1'")->execute([$id]);
-                    $finished = true; // only once it is given back: a failed reset is tried again by the next call
-                } catch (Throwable $e) {
-                    $finished = true; // not tried again at shutdown after an error, but never silent
-                    try {
-                        _log("Voucher #{$id} could not be given back after a refused recharge: " . $e->getMessage(), 'Voucher');
-                    } catch (Throwable $ignored) {
-                    }
-                }
+            if ($finished || $mark->wrote) {
+                return true;
             }
+            try {
+                $st = $db->prepare("UPDATE `tbl_voucher` SET `status` = '0', `used_date` = NULL, `user` = '0' WHERE `id` = ? AND `status` = '1' AND `used_date` = ?");
+                $st->execute([$id, $claimAt]);
+                if ($st->rowCount() === 1) {
+                    $finished = true; // only once it is given back: a failed reset is tried again by the next call
+                    return true;
+                }
+                $finished = true; // no longer this claim's to reset
+                $why = 'the claim is no longer held by this request';
+            } catch (Throwable $e) {
+                $finished = true; // not tried again at shutdown after an error, but never silent
+                $why = $e->getMessage();
+            }
+            try {
+                _log("Voucher #{$id} could not be given back after a refused recharge, check it: " . $why, 'Voucher');
+            } catch (Throwable $ignored) {
+            }
+            return false;
         };
         register_shutdown_function($release);
+        self::$claims[] = $mark;
         try {
             $ok = self::rechargeUser($customerId, $v['routers'], $v['id_plan'], 'Voucher', $code);
         } catch (Throwable $e) {
-            $finished = true; // kept used (see above)
+            // refused before anything was written: given back, so a retry is not turned away by a claim that is kept
+            if (!$release() && !$mark->wrote) {
+                $finished = true;
+                throw new RuntimeException(Lang::T('The voucher could not be restored after an error. Please contact support.'), 0, $e);
+            }
+            $finished = true; // once it began to write it is kept used (part of the recharge may have happened)
             throw $e;
+        } finally {
+            array_pop(self::$claims);
         }
         if (!$ok) {
-            $release();
+            if (!$release()) {
+                throw new RuntimeException(Lang::T('The voucher could not be restored after an error. Please contact support.'));
+            }
             return false;
         }
         $finished = true;
@@ -208,6 +236,9 @@ class Package
 
         // every refusal that leaves things as they were (an inactive customer, a disabled plan) is above this line
         self::$wrote = true;
+        if (self::$claims) {
+            end(self::$claims)->wrote = true; // only the claim whose recharge this is
+        }
 
         if ($router_name == 'balance') {
             return self::rechargeBalance($c, $p, $gateway, $channel);
@@ -264,6 +295,8 @@ class Package
         $snapOwn = !$snapDb->inTransaction();
         if ($snapOwn) {
             try {
+                // the snapshot is taken by the first read: both reads see the same state
+                $snapDb->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
                 $snapDb->beginTransaction();
             } catch (Throwable $e) {
                 $snapOwn = false;
@@ -1024,6 +1057,10 @@ class Package
     private static function dispatchCustomer($dvc, $plan, $customer, $router_id, $customer_id)
     {
         $dp = self::onRouterNow($plan, $router_id);
+        // the device finds the router by name: it must still be the router read by id (a name reused meanwhile is refused)
+        if ($router_id && stripos((string) ($dp['device'] ?? ''), 'Mikrotik') === 0 && self::routerId($dp['routers']) !== (int) $router_id) {
+            throw new Exception(Lang::T('Router not found') . ': ' . $dp['routers']);
+        }
         if (self::routerOff($dp)) {
             throw new Exception(Lang::T('The router is disabled: nothing was sent to it. Use Sync customers once it is enabled again.'));
         }
@@ -1089,10 +1126,10 @@ class Package
             }
             $type = strtoupper((string) $p['type']);
             $device = (string) $p['device'] !== '' ? (string) $p['device'] : (!empty($p['is_radius']) ? 'Radius' : '');
-            if ($type === 'PPPOE' && in_array($device, ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
+            if (($type === 'PPPOE' || $type === 'VPN') && in_array($device, ['Radius', 'RadiusALE', 'RadiusChillispot'], true)) {
                 $radiusDial = true; // writes the PPPoE password (when there is one) as the account's Cleartext-Password
             } else {
-                if ($type !== 'PPPOE' && in_array($device, ['Radius', 'RadiusALE'], true)) {
+                if ($type !== 'PPPOE' && $type !== 'VPN' && in_array($device, ['Radius', 'RadiusALE'], true)) {
                     $radiusOther = true; // writes the portal password as that same Cleartext-Password
                 }
                 if ($type === 'PPPOE' || $type === 'VPN') {
@@ -1137,13 +1174,25 @@ class Package
         // a RADIUS PPPoE plan and a RADIUS hotspot plan of one username share one Cleartext-Password row: the PPPoE plan writes
         // the PPPoE password into it, the hotspot plan the portal one. When they differ, the PPPoE password is written for both
         // (the connection its router dials keeps working; a hotspot sign-in is typed, and can be told), and said as an error
+        // each plan is read once, for the check below and for the sending after it; one that cannot be read keeps its exception,
+        // said as that plan's own error while the others are still sent
+        $plans = [];
+        foreach ($turs as $tur) {
+            try {
+                $plans[$tur['id']] = [ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one(), null];
+            } catch (Throwable $e) {
+                $plans[$tur['id']] = [null, $e];
+            }
+        }
         $hsCustomer = null;
         $pppoePass = (string) $customer['pppoe_password'];
         if ($pppoePass !== '' && $pppoePass !== (string) $customer['password']) {
             $share = [];
             foreach ($turs as $tur) {
                 try {
-                    $share[(string) self::radiusShare(ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one())] = true;
+                    if ($plans[$tur['id']][1] === null) {
+                        $share[(string) self::radiusShare($plans[$tur['id']][0])] = true;
+                    }
                 } catch (Throwable $e) {
                     // a plan that cannot be read is said as its own error below
                 }
@@ -1162,14 +1211,24 @@ class Package
         foreach ($turs as $tur) {
             $p = null;
             try {
-                // looked up here, so a plan that cannot be read is said as that plan's error and the others are still sent
-                $p = ORM::for_table('tbl_plans')->where('id', $tur['plan_id'])->find_one();
+                // read above, so a plan that cannot be read is said as that plan's error and the others are still sent
+                if ($plans[$tur['id']][1] !== null) {
+                    throw $plans[$tur['id']][1];
+                }
+                $p = $plans[$tur['id']][0];
                 if (!$p) {
                     // an active recharge whose plan is gone is a failure to say (it may hold a device account), not to skip
                     throw new Exception(Lang::T('The plan of this recharge no longer exists') . ' (' . Lang::T('Plan') . ' #' . $tur['plan_id'] . ')');
                 }
                 if ($p['device'] === 'Voucher') {
                     continue;
+                }
+                // a Mikrotik account is on the router its recharge was made for: a plan moved to another router meanwhile does not
+                // make that one the account's destination until the recharge itself is migrated
+                if (is_object($p) && stripos((string) $p['device'], 'Mikrotik') === 0 && (string) $tur['routers'] !== ''
+                    && (string) $tur['routers'] !== (string) $p['routers'] && !in_array((string) $tur['routers'], ['radius', 'balance', 'Custom Balance'], true)) {
+                    $p = clone $p;
+                    $p->routers = (string) $tur['routers'];
                 }
                 $dvc = self::getDevice($p);
                 if ($dvc === '' || $dvc === 'none' || !file_exists($dvc)) {
@@ -1190,7 +1249,10 @@ class Package
                 } elseif ($p['device'] === 'MikrotikVpn') {
                     self::vpnPassword($dev, $customer, $p, $mayAdd);
                 } elseif (method_exists($dev, 'customerUpsert') || method_exists($dev, 'customerPassword')) {
-                    self::radiusPassword($dev, ($hsCustomer !== null && self::radiusShare($p) === 'other') ? $hsCustomer : $customer, $p, $tur);
+                    // past its expiry the account was switched off: writing the password would bring its credential back
+                    if ($mayAdd) {
+                        self::radiusPassword($dev, ($hsCustomer !== null && self::radiusShare($p) === 'other') ? $hsCustomer : $customer, $p, $tur);
+                    }
                 } elseif ($mayAdd) {
                     // any other driver has no in-place password change: add_customer() would create the account or renew its access,
                     // which a recharge past its expiry must not get back

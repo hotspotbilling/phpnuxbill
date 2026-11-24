@@ -257,6 +257,11 @@ foreach ($d as $ds) {
                 }
             }
 
+            // an expiry still incomplete (retried next run) is not renewed from here again on every retry
+            if ($partial !== null) {
+                continue;
+            }
+
             // Auto-renewal from deposit
             if ($config['enable_balance'] == 'yes' && $c['auto_renewal']) {
                 [$bills, $add_cost] = User::getBills($ds['customer_id']);
