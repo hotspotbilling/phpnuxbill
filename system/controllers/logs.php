@@ -148,6 +148,14 @@ switch ($action) {
         $ui->display('admin/logs/system.tpl');
         break;
     case 'radius':
+        // the RADIUS database is separate: when it cannot be used, say what is missing instead of the database error
+        if (($problem = SystemInfo::radiusProblem('radpostauth')) !== null) {
+            $ui->assign('_title', Lang::T('RADIUS database'));
+            $ui->assign('problem', $problem);
+            $ui->assign('retry_url', getUrl('logs/radius/'));
+            $ui->display('admin/radius/not-ready.tpl');
+            break;
+        }
         $q = (_post('q') ? _post('q') : _get('q'));
         $keep = $keepDays('logs/radius/');
         if ($keep > 0) {

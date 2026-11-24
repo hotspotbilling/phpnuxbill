@@ -21,41 +21,7 @@ if (!in_array($admin['user_type'], ['SuperAdmin', 'Admin'])) {
 // up, instead of the database error. The connection is only made when config.php has the login and RADIUS is on (init.php);
 // without it the database library falls back to a default that is not a real database.
 $radiusProblem = function ($needRouters = true) {
-    global $config, $radius_user, $radius_host, $radius_name;
-    $state = [
-        'config' => !empty($radius_user) && !empty($radius_name),
-        'enabled' => !empty($config['radius_enable']),
-        'host' => (string) ($radius_host ?? ''),
-        'name' => (string) ($radius_name ?? ''),
-    ];
-    if (!$state['config']) {
-        return ['why' => 'config'] + $state;
-    }
-    if (!$state['enabled'] || !SystemInfo::radiusConnectionConfigured()) {
-        return ['why' => 'enabled'] + $state;
-    }
-    try {
-        ORM::for_table('nas', 'radius')->limit(1)->find_array();
-        // adding or changing a NAS writes its routers column (Radius::nasAdd / nasUpdate): a FreeRADIUS nas table made without it
-        // would fail on every save, so it is reported here with the one statement that adds it
-        if ($needRouters && !ORM::get_db('radius')->query("SHOW COLUMNS FROM `nas` LIKE 'routers'")->fetch()) {
-            return ['why' => 'columns', 'detail' => ''] + $state;
-        }
-        return null;
-    } catch (Throwable $e) {
-        $msg = $e->getMessage();
-        if (stripos($msg, 'Unknown database') !== false) {
-            $why = 'database';
-        } elseif (stripos($msg, "doesn't exist") !== false || stripos($msg, '42S02') !== false) {
-            $why = 'tables';
-        } elseif (stripos($msg, 'Access denied') !== false) {
-            $why = 'login';
-        } else {
-            $why = 'connect';
-        }
-        // the database's own words for the admin (they never hold the password), shortened
-        return ['why' => $why, 'detail' => mb_substr(trim(preg_replace('/\s+/', ' ', $msg)), 0, 300)] + $state;
-    }
+    return SystemInfo::radiusProblem('nas', $needRouters);
 };
 // deleting a NAS does not use the routers column: a table without it does not block that
 if (($problem = $radiusProblem($action !== 'nas-delete')) !== null) {

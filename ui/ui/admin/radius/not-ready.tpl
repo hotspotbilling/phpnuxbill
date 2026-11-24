@@ -13,12 +13,13 @@
                     {if $why == 'config'}{Lang::T('The RADIUS database is not set up yet')}
                     {elseif $why == 'enabled'}{Lang::T('RADIUS is turned off')}
                     {elseif $why == 'database'}{Lang::T('The RADIUS database does not exist')}
-                    {elseif $why == 'tables'}{Lang::T('The RADIUS database is missing the NAS table')}
+                    {elseif $why == 'driver'}{Lang::T('PHP cannot use MySQL here')}
+                    {elseif $why == 'tables'}{if $problem['table']|default:'nas' == 'nas'}{Lang::T('The RADIUS database is missing the NAS table')}{else}{Lang::T('The RADIUS database is missing the log table')}{/if}
                     {elseif $why == 'columns'}{Lang::T('The RADIUS NAS table needs an upgrade')}
                     {elseif $why == 'login'}{Lang::T('PHPNuxBill cannot sign in to the RADIUS database')}
                     {else}{Lang::T('The RADIUS database cannot be reached')}{/if}
                 </h3>
-                <small>{Lang::T('Network Access Servers (NAS) are kept in the FreeRADIUS database, separate from the PHPNuxBill one. Set it up once with the steps below, then open this page again.')}</small>
+                <small>{if $problem['table']|default:'nas' == 'nas'}{Lang::T('Network Access Servers (NAS) are kept in the FreeRADIUS database, separate from the PHPNuxBill one. Set it up once with the steps below, then open this page again.')}{else}{Lang::T('The RADIUS logs are kept in the FreeRADIUS database, separate from the PHPNuxBill one. Set it up once with the steps below, then open this page again.')}{/if}</small>
             </div>
         </header>
         <div class="st-card-body">
@@ -27,6 +28,18 @@
             {/if}
 
             <ul class="rt-checks">
+                {if $why == 'driver'}
+                <li class="rt-check rt-check--bad">
+                    <i class="fa fa-times-circle" aria-hidden="true"></i>
+                    <div>
+                        <b>{Lang::T('Install the PHP MySQL driver')}</b>
+                        <small>{Lang::T('PHP has no pdo_mysql extension, so it cannot connect to any MySQL database. Install it, for example on Docker or Debian:')}</small>
+<pre class="nf__code">docker-php-ext-install pdo_mysql mysqli
+# or: apt-get install php-mysql</pre>
+                        <small>{Lang::T('Then restart PHP (or the web server) and open this page again.')}</small>
+                    </div>
+                </li>
+                {/if}
                 {if $why == 'columns'}
                 <li class="rt-check rt-check--bad">
                     <i class="fa fa-times-circle" aria-hidden="true"></i>
@@ -47,7 +60,7 @@
                         <pre class="nf__code">mysql -h RADIUS_HOST -u RADIUS_USER -p RADIUS_DATABASE &lt; install/radius.sql</pre>
                         <small>{Lang::T('Use the same host as $radius_host in config.php (step 2 below).')}</small>
                         <small>{Lang::T('Import the whole file only into a new, empty database: it replaces the RADIUS tables it creates, with the logins and accounting in them.')}</small>
-                        {if $why == 'tables'}
+                        {if $why == 'tables' && $problem['table']|default:'nas' == 'nas'}
                         <small>{Lang::T('The database exists, but its nas table is missing. If the database is new and empty, import install/radius.sql as above. If FreeRADIUS already uses it (it has tables such as radcheck and radacct), do not import the file: run only this in phpMyAdmin (SQL tab), which adds the nas table and changes nothing else:')}</small>
 <pre class="nf__code">CREATE TABLE IF NOT EXISTS `nas` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
@@ -89,7 +102,7 @@ $radius_name = 'RADIUS_DATABASE';</pre>
         </div>
         <footer class="st-card-foot">
             <a class="ls-btn" href="{Text::url('settings/app')}"><i class="fa fa-cog" aria-hidden="true"></i> {Lang::T('General Settings')}</a>
-            <a class="ls-btn ls-btn--primary" href="{Text::url('radius/nas-list')}"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Check again')}</a>
+            <a class="ls-btn ls-btn--primary" href="{$retry_url|default:Text::url('radius/nas-list')}"><i class="fa fa-refresh" aria-hidden="true"></i> {Lang::T('Check again')}</a>
         </footer>
     </section>
 </div>

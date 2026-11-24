@@ -641,6 +641,55 @@ class SystemInfo
     }
 
     /**
+     * Why a page that reads the separate FreeRADIUS database cannot use it, or null when it can: no RADIUS login in config.php,
+     * RADIUS turned off, no pdo_mysql driver, an unknown database, a missing table, a refused login or a host that cannot be
+     * reached. The connection is only made when config.php has the login and RADIUS is on (without it the database library falls
+     * back to a default that is not a real database). $table: the table the page reads; $needRouters: also the nas.routers column.
+     * Returns ['why' => ..., 'detail' => the database's own message (shortened), 'config', 'enabled', 'host', 'name', 'table'].
+     */
+    public static function radiusProblem(string $table = 'nas', bool $needRouters = false): ?array
+    {
+        global $config, $radius_user, $radius_host, $radius_name;
+        $state = [
+            'config' => !empty($radius_user) && !empty($radius_name),
+            'enabled' => !empty($config['radius_enable']),
+            'host' => (string) ($radius_host ?? ''),
+            'name' => (string) ($radius_name ?? ''),
+            'table' => $table,
+        ];
+        if (!$state['config']) {
+            return ['why' => 'config'] + $state;
+        }
+        if (!$state['enabled'] || !self::radiusConnectionConfigured()) {
+            return ['why' => 'enabled'] + $state;
+        }
+        try {
+            ORM::for_table($table, 'radius')->limit(1)->find_array();
+            // adding or changing a NAS writes its routers column (Radius::nasAdd / nasUpdate): a FreeRADIUS nas table made without
+            // it would fail on every save, so it is reported with the one statement that adds it
+            if ($needRouters && !ORM::get_db('radius')->query("SHOW COLUMNS FROM `nas` LIKE 'routers'")->fetch()) {
+                return ['why' => 'columns', 'detail' => ''] + $state;
+            }
+            return null;
+        } catch (Throwable $e) {
+            $msg = $e->getMessage();
+            if (stripos($msg, 'could not find driver') !== false) {
+                $why = 'driver';
+            } elseif (stripos($msg, 'Unknown database') !== false) {
+                $why = 'database';
+            } elseif (stripos($msg, "doesn't exist") !== false || stripos($msg, '42S02') !== false) {
+                $why = 'tables';
+            } elseif (stripos($msg, 'Access denied') !== false) {
+                $why = 'login';
+            } else {
+                $why = 'connect';
+            }
+            // the database's own words for the admin (they never hold the password), shortened
+            return ['why' => $why, 'detail' => mb_substr(trim(preg_replace('/\s+/', ' ', $msg)), 0, 300)] + $state;
+        }
+    }
+
+    /**
      * Is RADIUS working? Three signals, because PHP cannot always see the FreeRADIUS service:
      *  - SQL mode (a radius database is configured): it answers (nas table), otherwise RADIUS is reported down;
      *  - REST mode (freeradius-rest, no radius database): the FreeRADIUS process is running here, or FreeRADIUS has

@@ -78,7 +78,7 @@ class Message
         $smsurl = str_replace('[text]', urlencode($txt), $smsurl);
         try {
             $response = Http::getData($smsurl, [], $timeout, $timeout, $httpError, $httpStatus);
-            if ($httpError === '' && $httpStatus >= 500) {
+            if ($httpError === '' && $httpStatus >= 400) {
                 $httpError = 'HTTP ' . $httpStatus; // the gateway refused the message (an empty body is no answer)
             }
             if ($httpError !== '') {
@@ -152,7 +152,7 @@ class Message
 
         try {
             $response = Http::getData($waurl, [], $timeout, $timeout, $httpError, $httpStatus);
-            if ($httpError === '' && $httpStatus >= 500) {
+            if ($httpError === '' && $httpStatus >= 400) {
                 $httpError = 'HTTP ' . $httpStatus; // the gateway refused the message (an empty body is no answer)
             }
             if ($httpError !== '') {

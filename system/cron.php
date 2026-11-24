@@ -154,7 +154,13 @@ foreach ($d as $ds) {
                 // Fetch plan details
                 $p = ORM::for_table('tbl_plans')->where('id', $u['plan_id'])->find_one();
                 if (!$p) {
-                    throw new Exception("Plan not found for ID: " . $u['plan_id']);
+                    // the plan was deleted: there is no device to take the customer off, and the error would come back on every run.
+                    // The recharge is marked off, and a note says the router may still hold the user, to be removed by hand
+                    $u->status = 'off';
+                    $u->save();
+                    _log("Plan #{$u['plan_id']} no longer exists: recharge of {$u['username']} ({$u['namebp']}) was marked off. Remove the user from router '{$u['routers']}' by hand if it is still there.", 'Router');
+                    echo "Plan not found for ID {$u['plan_id']}: recharge marked off\n";
+                    continue;
                 }
 
                 // A fixed-IP clear (or an address-list entry) the router refused leaves the recharge on, so the next run tries

@@ -1482,7 +1482,7 @@ switch ($action) {
                     // same three, and then the expiry is the one first worked out (not worked out again on the retry)
                     $mark = $provKey !== '' ? ($_SESSION[$provKey] ?? null) : null;
                     $alreadyProvisioned = is_array($mark) && (string) $mark['id'] === (string) $id
-                        && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $tur['routers'];
+                        && (string) $mark['plan'] === (string) $tur['plan_id'] && (string) $mark['router'] === (string) $p['routers'];
                     if ($alreadyProvisioned) {
                         $expiration = $mark['expiration'];
                     }
@@ -1508,7 +1508,7 @@ switch ($action) {
                             _log('[' . $c['username'] . '] extend' . ': ' . $e->getMessage(), 'Router');
                         }
                         if ($provKey !== '') {
-                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $tur['routers'], 'expiration' => $expiration];
+                            $_SESSION[$provKey] = ['id' => $id, 'plan' => $tur['plan_id'], 'router' => $p['routers'], 'expiration' => $expiration];
                         }
                     }
                     $tur->expiration = $expiration;
